@@ -349,11 +349,7 @@ const Index = () => {
                   })}
                 </div>
 
-                <div className="mt-2 rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
-                  <div className="flex items-center gap-3 text-sm text-slate-300">
-                    <LayoutDashboard className="h-4 w-4 text-cyan-300" />
-                    Modo apresentação
-                  </div>
+                
                   <p className="mt-3 text-sm leading-6 text-slate-400">
                     Pressione <span className="font-semibold text-white">F</span> para entrar em tela cheia e <span className="font-semibold text-white">Esc</span> para sair.
                   </p>
