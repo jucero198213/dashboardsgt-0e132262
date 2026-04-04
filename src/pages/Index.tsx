@@ -184,11 +184,7 @@ const Index = () => {
                 </p>
               </div>
 
-              {!presentationMode && (
-                <div className="rounded-[28px] border border-white/10 bg-black/20 p-3 backdrop-blur-md">
-                  <FileUploadSection />
-                </div>
-              )}
+              
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {highlightCards.map((card) => {
@@ -197,9 +193,10 @@ const Index = () => {
                   return (
                     <div
                       key={card.title}
-                      className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/15 hover:bg-white/[0.06]"
+                      className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.82)_0%,rgba(9,14,33,0.96)_100%)] p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/15"
                     >
-                      <div className="mb-5 flex items-start justify-between gap-3">
+                      <div className="pointer-events-none absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.10),transparent_32%)]" />
+                      <div className="relative mb-5 flex items-start justify-between gap-3">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                             {card.title}
@@ -212,7 +209,7 @@ const Index = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="relative space-y-2">
                         <p className="text-3xl font-bold tracking-tight text-white">
                           {card.value}
                         </p>
@@ -326,23 +323,50 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
-              <FinancialCard
-                title="Valor a Receber"
-                value={contasReceber.valorAReceber}
-                variant="receita"
-              />
-              <FinancialCard
-                title="Valor Recebido"
-                value={contasReceber.valorRecebido}
-                variant="receita"
-              />
-              <FinancialCard
-                title="Saldo a Receber"
-                value={contasReceber.saldoAReceber}
-                variant="saldo-receita"
-                linkTo="/contas-a-receber"
-              />
+            <div className="grid gap-4 xl:grid-cols-[1.15fr_1.15fr_1.4fr]">
+              <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-5 backdrop-blur-md">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Valor a receber</p>
+                    <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">{contasReceber.valorAReceber}</h3>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+                    <TrendingUp className="h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-slate-400">Total previsto para entrada de caixa na operação consolidada.</p>
+              </div>
+
+              <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-5 backdrop-blur-md">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Valor recebido</p>
+                    <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">{contasReceber.valorRecebido}</h3>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
+                    <CircleDollarSign className="h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-slate-400">Montante efetivamente realizado dentro do período processado.</p>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/20 bg-[linear-gradient(135deg,rgba(7,20,26,0.95)_0%,rgba(8,33,30,0.88)_100%)] p-6 backdrop-blur-md">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.14),transparent_35%)]" />
+                <div className="relative flex h-full flex-col justify-between gap-5">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300">Saldo a receber</p>
+                    <h3 className="mt-4 text-5xl font-bold tracking-tight text-white">{contasReceber.saldoAReceber}</h3>
+                    <p className="mt-3 max-w-md text-sm leading-6 text-slate-300">Valor ainda pendente de recebimento, com acesso direto ao detalhamento operacional.</p>
+                  </div>
+                  <a
+                    href="/contas-a-receber"
+                    className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-all hover:bg-emerald-400/15"
+                  >
+                    Ver detalhamento
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -355,23 +379,50 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
-              <FinancialCard
-                title="Valor a Pagar"
-                value={contasPagar.valorAPagar}
-                variant="despesa"
-              />
-              <FinancialCard
-                title="Valor Pago"
-                value={contasPagar.valorPago}
-                variant="despesa"
-              />
-              <FinancialCard
-                title="Saldo a Pagar"
-                value={contasPagar.saldoAPagar}
-                variant="saldo-despesa"
-                linkTo="/contas-a-pagar"
-              />
+            <div className="grid gap-4 xl:grid-cols-[1.15fr_1.15fr_1.4fr]">
+              <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-5 backdrop-blur-md">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Valor a pagar</p>
+                    <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">{contasPagar.valorAPagar}</h3>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-300">
+                    <TrendingDown className="h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-slate-400">Total previsto de desembolso dentro da visão consolidada.</p>
+              </div>
+
+              <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-5 backdrop-blur-md">
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Valor pago</p>
+                    <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">{contasPagar.valorPago}</h3>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-500/20 bg-orange-500/10 text-orange-300">
+                    <CircleDollarSign className="h-5 w-5" />
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-slate-400">Montante quitado até agora no recorte dos dados processados.</p>
+              </div>
+
+              <div className="group relative overflow-hidden rounded-[28px] border border-amber-500/20 bg-[linear-gradient(135deg,rgba(34,20,7,0.95)_0%,rgba(52,31,9,0.88)_100%)] p-6 backdrop-blur-md">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.14),transparent_35%)]" />
+                <div className="relative flex h-full flex-col justify-between gap-5">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">Saldo a pagar</p>
+                    <h3 className="mt-4 text-5xl font-bold tracking-tight text-white">{contasPagar.saldoAPagar}</h3>
+                    <p className="mt-3 max-w-md text-sm leading-6 text-slate-300">Compromissos ainda em aberto, com navegação direta para análise detalhada.</p>
+                  </div>
+                  <a
+                    href="/contas-a-pagar"
+                    className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-300 transition-all hover:bg-amber-400/15"
+                  >
+                    Ver detalhamento
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
             </div>
           </section>
 
