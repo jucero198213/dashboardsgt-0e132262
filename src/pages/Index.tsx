@@ -330,6 +330,36 @@ const Index = () => {
                   </div>
                 ))}
 
+                <div className="mt-2 space-y-4">
+                  {indicadores.map((ind, index) => {
+                    const positive = ind.percentualReal >= ind.percentualEsperado;
+                    const progress = Math.min((ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100, 100);
+
+                    return (
+                      <div
+                        key={ind.id}
+                        className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-4"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                            {ind.nome}
+                          </p>
+                          <span className={`text-xs font-semibold ${positive ? "text-emerald-300" : "text-amber-300"}`}>
+                            {ind.percentualReal}%
+                          </span>
+                        </div>
+
+                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className={`h-full rounded-full ${positive ? "bg-emerald-400" : "bg-amber-400"}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <div className="mt-2 rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
                   <div className="flex items-center gap-3 text-sm text-slate-300">
                     <LayoutDashboard className="h-4 w-4 text-cyan-300" />
@@ -344,60 +374,7 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.86)_0%,rgba(2,8,23,0.95)_100%)] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] lg:p-7">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <SectionHeader title="Indicadores Estratégicos" icon={BarChart3} />
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-              <Activity className="h-3.5 w-3.5" />
-              Leitura de performance
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {indicadores.map((ind, index) => {
-              const positive = ind.percentualReal >= ind.percentualEsperado;
-              const progress = Math.min((ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100, 100);
-
-              return (
-                <div
-                  key={ind.id}
-                  className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/15"
-                >
-                  <div className={`absolute inset-x-0 top-0 h-px ${positive ? "bg-emerald-400/60" : "bg-amber-400/60"}`} />
-                  <div className="mb-5 flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Indicador {index + 1}</p>
-                      <h3 className="mt-2 text-lg font-semibold tracking-tight text-white">{ind.nome}</h3>
-                    </div>
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${positive ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300" : "border-amber-500/20 bg-amber-500/10 text-amber-300"}`}>
-                      {positive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">Real</p>
-                      <p className="mt-2 text-4xl font-bold tracking-tight text-white">{ind.percentualReal}%</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        <span>Meta</span>
-                        <span>{ind.percentualEsperado}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/8">
-                        <div
-                          className={`h-full rounded-full ${positive ? "bg-emerald-400" : "bg-amber-400"}`}
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        
       </div>
     </div>
   );
