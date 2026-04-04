@@ -317,18 +317,7 @@ const Index = () => {
                   </button>
                 </div>
 
-                {summaryCards.map((card) => (
-                  <div
-                    key={card.label}
-                    className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,38,0.78)_0%,rgba(9,14,30,0.95)_100%)] p-5"
-                  >
-                    <p className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] ${toneStyles[card.tone]}`}>
-                      {card.label}
-                    </p>
-                    <p className="mt-5 text-[42px] font-bold leading-none tracking-tight text-white">{card.value}</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">{card.helper}</p>
-                  </div>
-                ))}
+                
 
                 <div className="mt-2 space-y-4">
                   {indicadores.map((ind, index) => {
