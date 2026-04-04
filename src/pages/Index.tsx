@@ -172,7 +172,7 @@ const Index = () => {
 
               <div className="max-w-4xl space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
-                  Visão consolidada de contas a pagar e contas a receber
+                  Detalhamento - Fevereiro 
                 </h1>
                 <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-lg">
                   Uma leitura direta da operação, com foco nas métricas principais.
