@@ -164,12 +164,6 @@ const Index = () => {
                   Painel financeiro
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-slate-300">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
-                  Estrutura inspirada na referência
-                </div>
-              </div>
-
               <div className="max-w-4xl space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
                   Análise Consolidada
@@ -344,32 +338,38 @@ const Index = () => {
                     );
 
                     return (
-                      <div
+                      <a
                         key={ind.id}
-                        className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-4"
+                        href={`/indicadores/${ind.id}`}
+                        className="group relative block overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)]"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                             {ind.nome}
                           </p>
-                          <span
-                            className={`text-xs font-semibold ${
-                              positive ? "text-emerald-300" : "text-amber-300"
-                            }`}
-                          >
-                            {ind.percentualReal}%
-                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-xs font-semibold ${
+                                positive ? "text-emerald-300" : "text-amber-300"
+                              }`}
+                            >
+                              {ind.percentualReal}%
+                            </span>
+
+                            <ArrowRight className="h-4 w-4 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
+                          </div>
                         </div>
 
                         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
                           <div
-                            className={`h-full rounded-full ${
+                            className={`h-full rounded-full transition-all duration-300 ${
                               positive ? "bg-emerald-400" : "bg-amber-400"
                             }`}
                             style={{ width: `${progress}%` }}
                           />
                         </div>
-                      </div>
+                      </a>
                     );
                   })}
                 </div>
