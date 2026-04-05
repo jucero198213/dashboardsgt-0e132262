@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface IndicatorCardProps {
   nome: string;
@@ -14,6 +15,7 @@ function getDeltaInfo(real: number, esperado: number) {
 }
 
 export function IndicatorCard({ nome, percentualReal, percentualEsperado }: IndicatorCardProps) {
+  const navigate = useNavigate();
   const { label, icon: Icon, color, bg } = getDeltaInfo(percentualReal, percentualEsperado);
   const circumference = 2 * Math.PI * 36;
   const offsetReal = circumference - (Math.min(percentualReal, 100) / 100) * circumference;
@@ -64,6 +66,14 @@ export function IndicatorCard({ nome, percentualReal, percentualEsperado }: Indi
         <Icon className="h-3 w-3" />
         {label}
       </div>
+
+      {/* Detail button */}
+      <button
+        onClick={() => navigate(`/contas-a-pagar?indicador=${encodeURIComponent(nome)}`)}
+        className="mt-1 text-[10px] font-medium text-muted-foreground/50 transition-colors hover:text-primary"
+      >
+        Ver detalhamento
+      </button>
     </div>
   );
 }
