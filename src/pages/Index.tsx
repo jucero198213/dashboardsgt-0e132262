@@ -151,7 +151,7 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div className="relative mx-auto flex max-w-[1780px] flex-col gap-6">
-        <DashboardHeader />
+        {!presentationMode && <DashboardHeader />}
 
         <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(24,34,84,0.90)_0%,rgba(6,13,36,0.98)_55%,rgba(1,7,20,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(99,102,241,0.18),transparent_18%),radial-gradient(circle_at_85%_12%,rgba(14,165,233,0.08),transparent_18%)]" />
