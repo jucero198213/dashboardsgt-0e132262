@@ -186,16 +186,16 @@ const Index = () => {
                   return (
                     <div
                       key={item.label}
-                      className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5"
+                      className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)] hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.82)_0%,rgba(12,18,40,0.98)_100%)]"
                     >
                       <div className="mb-5 flex items-start justify-between gap-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                           {item.label}
                         </p>
                         <div
-                          className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${toneStyles[item.tone]}`}
+                          className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]}`}
                         >
-                          <Icon className="h-4.5 w-4.5" />
+                          <Icon className="h-4.5 w-4.5 transition-transform duration-300 group-hover:scale-110" />
                         </div>
                       </div>
 
@@ -211,7 +211,7 @@ const Index = () => {
               </div>
 
               <div className="grid gap-5 xl:grid-cols-2">
-                <div className="relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6">
+                <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -227,13 +227,13 @@ const Index = () => {
                       </p>
                     </div>
 
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
-                      <TrendingUp className="h-5 w-5" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15">
+                      <TrendingUp className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
 
                   <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Previsto
                       </p>
@@ -242,7 +242,7 @@ const Index = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Recebido
                       </p>
@@ -254,14 +254,14 @@ const Index = () => {
 
                   <a
                     href="/contas-a-receber"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-all hover:bg-emerald-400/15"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:translate-x-1 hover:bg-emerald-400/15 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
                   >
                     Ver detalhamento
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
 
-                <div className="relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6">
+                <div className="group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -277,13 +277,13 @@ const Index = () => {
                       </p>
                     </div>
 
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-300">
-                      <TrendingDown className="h-5 w-5" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-300 transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400/30 group-hover:bg-amber-400/15">
+                      <TrendingDown className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
                     </div>
                   </div>
 
                   <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Previsto
                       </p>
@@ -292,7 +292,7 @@ const Index = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Pago
                       </p>
@@ -304,7 +304,7 @@ const Index = () => {
 
                   <a
                     href="/contas-a-pagar"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-300 transition-all hover:bg-amber-400/15"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-300 transition-all duration-300 hover:translate-x-1 hover:bg-amber-400/15 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                   >
                     Ver detalhamento
                     <ArrowRight className="h-4 w-4" />
