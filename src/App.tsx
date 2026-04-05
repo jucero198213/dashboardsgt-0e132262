@@ -23,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/contas-a-receber" element={<ContasAReceber />} />
             <Route path="/contas-a-pagar" element={<ContasAPagar />} />
+            <Route path="/indicadores/:id" element={<IndicadorDetalhe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </FinancialDataProvider>
