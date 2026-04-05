@@ -158,26 +158,30 @@ const Index = () => {
 
           <div className="relative grid gap-6 p-5 lg:p-7 xl:grid-cols-[1.75fr_0.78fr] xl:gap-7 xl:p-8">
             <div className="space-y-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Painel financeiro
-                </div>
+              {!presentationMode && (
+                <>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Painel financeiro
+                    </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-slate-300">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
-                  Estrutura inspirada na referência
-                </div>
-              </div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-slate-300">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
+                      Estrutura inspirada na referência
+                    </div>
+                  </div>
 
-              <div className="max-w-4xl space-y-4">
-                <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
-                  Detalhamento - Fevereiro 
-                </h1>
-                <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-lg">
-                  Uma leitura direta da operação, com foco nas métricas principais.
-                </p>
-              </div>
+                  <div className="max-w-4xl space-y-4">
+                    <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
+                      Detalhamento - Fevereiro 
+                    </h1>
+                    <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-lg">
+                      Uma leitura direta da operação, com foco nas métricas principais.
+                    </p>
+                  </div>
+                </>
+              )}
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {topMetrics.map((item) => {
