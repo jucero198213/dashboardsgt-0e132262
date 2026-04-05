@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
+import IndicadorDetalhe from "./pages/IndicadorDetalhe";
 
 const queryClient = new QueryClient();
 
