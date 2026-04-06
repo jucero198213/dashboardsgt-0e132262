@@ -12,9 +12,17 @@ const SUPABASE_ANON_KEY =
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0amFhamhyanNha21tenZiZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTA4NzQsImV4cCI6MjA5MTA2Njg3NH0." +
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
-// Se VITE_DW_API_URL estiver definida, usa a API local via Cloudflare Tunnel
-// Caso contrário, cai na Supabase Edge Function
-const LOCAL_API_URL = (import.meta as any).env?.VITE_DW_API_URL as string | undefined;
+// ─── URL da API ───────────────────────────────────────────────────────────────
+// Prioridade:
+//   1. VITE_DW_API_URL  (variável de ambiente — recomendado em produção)
+//   2. TUNNEL_URL       (Cloudflare Tunnel atual — atualizar quando reiniciar)
+//   3. Supabase Edge    (fallback)
+
+const TUNNEL_URL = "https://classics-lawyers-yards-lite.trycloudflare.com";
+
+const LOCAL_API_URL =
+  ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ||
+  TUNNEL_URL;
 
 const ENDPOINT = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-financeiro`
