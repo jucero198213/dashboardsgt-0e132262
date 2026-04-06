@@ -3,7 +3,6 @@ import {
   TrendingUp,
   TrendingDown,
   Presentation,
-  Sparkles,
   ArrowRight,
   CalendarDays,
 } from "lucide-react";
@@ -18,8 +17,18 @@ import {
 } from "@/components/ui/select";
 
 const MESES = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 const ANOS = ["2023", "2024", "2025", "2026"];
 
@@ -158,48 +167,61 @@ const Index = () => {
     <div
       className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${
         presentationMode
-          ? "px-4 py-4 lg:px-6 lg:py-5"
+          ? "h-screen w-screen p-0"
           : "px-4 py-5 lg:px-8 lg:py-8 xl:px-10"
       }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
-      <div className="relative mx-auto flex max-w-[1780px] flex-col gap-6">
-        <DashboardHeader />
+      <div
+        className={`relative flex flex-col ${
+          presentationMode
+            ? "h-full w-full max-w-none gap-0"
+            : "mx-auto max-w-[1780px] gap-6"
+        }`}
+      >
+        {!presentationMode && <DashboardHeader />}
 
-        <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(24,34,84,0.90)_0%,rgba(6,13,36,0.98)_55%,rgba(1,7,20,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)]">
+        <section
+          className={`relative overflow-hidden border border-white/10 bg-[linear-gradient(135deg,rgba(24,34,84,0.90)_0%,rgba(6,13,36,0.98)_55%,rgba(1,7,20,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${
+            presentationMode ? "h-full w-full rounded-none" : "rounded-[34px]"
+          }`}
+        >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(99,102,241,0.18),transparent_18%),radial-gradient(circle_at_85%_12%,rgba(14,165,233,0.08),transparent_18%)]" />
 
-          <div className="relative grid gap-6 p-5 lg:p-7 xl:grid-cols-[1.75fr_0.78fr] xl:gap-7 xl:p-8">
+          <div
+            className={`relative grid xl:grid-cols-[1.75fr_0.78fr] ${
+              presentationMode
+                ? "h-full gap-6 p-6 lg:p-8"
+                : "gap-6 p-5 lg:p-7 xl:gap-7 xl:p-8"
+            }`}
+          >
             <div className="space-y-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Painel financeiro
-                </div>
-              </div>
-
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={mes} onValueChange={setMes}>
-                  <SelectTrigger className="h-8 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 hover:border-white/20 hover:bg-white/10 transition-all">
+                  <SelectTrigger className="h-8 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
                     <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-slate-500" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {MESES.map((m) => (
-                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
 
                 <Select value={ano} onValueChange={setAno}>
-                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 hover:border-white/20 hover:bg-white/10 transition-all">
+                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {ANOS.map((a) => (
-                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                      <SelectItem key={a} value={a}>
+                        {a}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -218,7 +240,7 @@ const Index = () => {
                   return (
                     <div
                       key={item.label}
-                      className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)] hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.82)_0%,rgba(12,18,40,0.98)_100%)]"
+                      className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.82)_0%,rgba(12,18,40,0.98)_100%)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
                     >
                       <div className="mb-5 flex items-start justify-between gap-3">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
@@ -243,7 +265,7 @@ const Index = () => {
               </div>
 
               <div className="grid gap-5 xl:grid-cols-2">
-                <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)]">
+                <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -293,7 +315,7 @@ const Index = () => {
                   </a>
                 </div>
 
-                <div className="group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)]">
+                <div className="group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -369,9 +391,12 @@ const Index = () => {
 
                 <div className="mt-2 space-y-4">
                   {indicadores.map((ind) => {
-                    const positive = ind.percentualReal >= ind.percentualEsperado;
+                    const positive =
+                      ind.percentualReal >= ind.percentualEsperado;
                     const progress = Math.min(
-                      (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
+                      (ind.percentualReal /
+                        Math.max(ind.percentualEsperado, 1)) *
+                        100,
                       100
                     );
 
@@ -389,7 +414,9 @@ const Index = () => {
                           <div className="flex items-center gap-2">
                             <span
                               className={`text-xs font-semibold ${
-                                positive ? "text-emerald-300" : "text-amber-300"
+                                positive
+                                  ? "text-emerald-300"
+                                  : "text-amber-300"
                               }`}
                             >
                               {ind.percentualReal}%
