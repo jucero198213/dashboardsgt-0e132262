@@ -211,23 +211,12 @@ const Index = () => {
                     ))}
                   </SelectContent>
                 </Select>
-
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                  <Building2 className="h-3.5 w-3.5" />
-                  Todas as Empresas
-                </div>
-                <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                  <Filter className="h-3.5 w-3.5" />
-                  Todos os Centros de Custo
-                </div>
               </div>
 
-              <div className="max-w-4xl space-y-4">
+              <div className="max-w-4xl">
                 <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
                   Análise Consolidada
                 </h1>
-                <p className="max-w-3xl text-sm leading-7 text-slate-300 md:text-lg">
-                  Uma leitura direta da operação, com foco nas métricas principais.
                 </p>
               </div>
 
