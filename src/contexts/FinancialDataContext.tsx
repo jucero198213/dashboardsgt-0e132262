@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import type {
   ContaPagar,
@@ -6,6 +6,12 @@ import type {
   ResumoFinanceiro,
 } from "@/data/mockData";
 import FinancialProcessorWorker from "@/workers/financialProcessor.worker?worker";
+import {
+  loadDwFilters,
+  fetchDwData,
+  type FilterOption,
+  type DwRow,
+} from "@/lib/dwApi";
 
 export interface IndicadorComparativo {
   id: string;
@@ -13,6 +19,25 @@ export interface IndicadorComparativo {
   percentualReal: number;
   percentualEsperado: number;
 }
+
+// ─── DW Filter state ──────────────────────────────────────────────────────────
+export interface DwFilter {
+  dataInicio: string;
+  dataFim:    string;
+  filial:     string | null;
+  empresa:    string | null;
+}
+
+const hoje = new Date();
+const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+const toIsoDate = (d: Date) => d.toISOString().split("T")[0];
+
+const defaultDwFilter: DwFilter = {
+  dataInicio: toIsoDate(primeiroDiaMes),
+  dataFim:    toIsoDate(hoje),
+  filial:     null,
+  empresa:    null,
+};
 
 interface UploadState {
   file: File | null;
@@ -29,6 +54,12 @@ interface FinancialDataState {
   contasReceber: ContaReceber[];
   contasPagar: ContaPagar[];
   indicadores: IndicadorComparativo[];
+  // ── DW ──
+  dwFilter:          DwFilter;
+  filiais:           FilterOption[];
+  empresas:          FilterOption[];
+  isFetchingDw:      boolean;
+  dwError:           string | null;
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -37,6 +68,9 @@ interface FinancialDataContextType extends FinancialDataState {
   clearFileReceber: () => void;
   clearFilePagar: () => void;
   processData: () => Promise<void>;
+  // ── DW ──
+  setDwFilter:   (key: keyof DwFilter, value: string | null) => void;
+  fetchFromDW:   () => Promise<void>;
 }
 
 type RowData = Record<string, string | number | null | undefined>;
@@ -413,6 +447,12 @@ export function FinancialDataProvider({
     contasReceber: [],
     contasPagar: [],
     indicadores: defaultIndicadores,
+    // ── DW ──
+    dwFilter:     defaultDwFilter,
+    filiais:      [],
+    empresas:     [],
+    isFetchingDw: false,
+    dwError:      null,
   });
 
   const setFileReceber = useCallback((file: File) => {
@@ -675,6 +715,120 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
     }
   }, [state.uploadReceber.file, state.uploadPagar.file]);
 
+  // ─── DW: atualiza um campo do filtro ───────────────────────────────────────
+  const setDwFilter = useCallback(
+    (key: keyof DwFilter, value: string | null) => {
+      setState((prev) => ({
+        ...prev,
+        dwFilter: { ...prev.dwFilter, [key]: value },
+      }));
+    },
+    []
+  );
+
+  // ─── DW: helper para correspondência de indicadores ────────────────────────
+  const matchesIndicadorDw = (indicatorName: string, row: DwRow): boolean => {
+    const text = [
+      row.NOME_PARCEIRO, row.CENTRO_GASTO, row.CENTRO_CUSTO,
+      row.SINTETICA, row.ANALITICA, row.TIPO_DOCUMENTO,
+    ]
+      .map((v) => (v ?? "").toLowerCase())
+      .join(" ");
+
+    const rules: Record<string, string[]> = {
+      "Compra de Ativo": ["ativo", "invest", "imobil"],
+      "Óleo Diesel":     ["diesel", "oleo diesel", "combustivel"],
+      Folha:             ["folha", "pagto", "salarial", "rh"],
+      Imposto:           ["imposto", "tribut", "fiscal", "taxa"],
+      Pedágio:           ["pedagio", "pedágio"],
+      Administrativo:    ["administrativo", "adm"],
+      Manutenção:        ["manut", "oficina", "peca", "peça", "reparo"],
+    };
+    const keywords = rules[indicatorName] ?? [indicatorName.toLowerCase()];
+    return keywords.some((k) => text.includes(k));
+  };
+
+  // ─── DW: executa a query principal e atualiza o estado ─────────────────────
+  const fetchFromDW = useCallback(async () => {
+    setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
+    try {
+      const { data } = await fetchDwData({
+        dataInicio: state.dwFilter.dataInicio,
+        dataFim:    state.dwFilter.dataFim,
+        filial:     state.dwFilter.filial,
+        empresa:    state.dwFilter.empresa,
+      });
+
+      const n = (v: number | null | undefined) => v ?? 0;
+      const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
+
+      const cpRows  = data.filter((r) => r.ORIGEM === "CP");
+      const crRows  = data.filter((r) => r.ORIGEM === "CR");
+      const lbDRows = data.filter((r) => r.ORIGEM === "LB_D");
+      const lbCRows = data.filter((r) => r.ORIGEM === "LB_C");
+
+      const contasPagar: ContaPagar[] = cpRows.map((r, i) => {
+        const valor     = n(r.VLR_LIQUIDO ?? r.VLR_PARCELA ?? r.VLRDOC);
+        const valorPago = n(r.VLR_PAGO);
+        return {
+          id: String(i + 1), documento: r.DOCUMENTO ?? `CP-${i + 1}`,
+          fornecedor: r.NOME_PARCEIRO ?? "N/A",
+          vencimento: isoDate(r.DATA_VENCIMENTO), valor,
+          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorPago, r.SITUACAO ?? ""),
+        };
+      });
+
+      const contasReceber: ContaReceber[] = crRows.map((r, i) => {
+        const valor         = n(r.VLR_LIQUIDO ?? r.VLR_PARCELA ?? r.VLRDOC);
+        const valorRecebido = n(r.VLR_PAGO);
+        return {
+          id: String(i + 1), documento: r.DOCUMENTO ?? `CR-${i + 1}`,
+          cliente: r.NOME_PARCEIRO ?? "N/A",
+          vencimento: isoDate(r.DATA_VENCIMENTO), valor,
+          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorRecebido, r.SITUACAO ?? ""),
+        };
+      });
+
+      const sumF = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
+        rows.reduce((s, r) => s + n(r[f]), 0);
+
+      const totalPagar    = sumF([...cpRows,  ...lbDRows], "VLR_PARCELA");
+      const valorPago     = sumF([...cpRows,  ...lbDRows], "VLR_PAGO");
+      const totalReceber  = sumF([...crRows,  ...lbCRows], "VLR_PARCELA");
+      const valorRecebido = sumF([...crRows,  ...lbCRows], "VLR_PAGO");
+
+      const resumo: ResumoFinanceiro = {
+        contasPagar:  { valorAPagar: totalPagar, valorPago, saldoAPagar: Math.max(totalPagar - valorPago, 0) },
+        contasReceber:{ valorAReceber: totalReceber, valorRecebido, saldoAReceber: Math.max(totalReceber - valorRecebido, 0) },
+      };
+
+      const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
+        ([nome, percentualEsperado], index) => {
+          const matched = cpRows.filter((r) => matchesIndicadorDw(nome, r));
+          const matchedTotal = matched.reduce((s, r) => s + n(r.VLR_LIQUIDO ?? r.VLR_PARCELA), 0);
+          const percentualReal = totalPagar > 0 ? (matchedTotal / totalPagar) * 100 : 0;
+          return { id: String(index + 1), nome, percentualReal: Math.round(percentualReal * 10) / 10, percentualEsperado };
+        }
+      );
+
+      setState((prev) => ({ ...prev, isFetchingDw: false, isProcessed: true, resumo, contasReceber, contasPagar, indicadores }));
+    } catch (err) {
+      setState((prev) => ({
+        ...prev, isFetchingDw: false,
+        dwError: err instanceof Error ? err.message : "Erro ao buscar dados do DW",
+      }));
+    }
+  }, [state.dwFilter]);
+
+  // ─── DW: carrega filtros ao montar o provider ───────────────────────────────
+  useEffect(() => {
+    loadDwFilters()
+      .then(({ empresas, filiais }) =>
+        setState((prev) => ({ ...prev, empresas, filiais }))
+      )
+      .catch((err) => console.warn("[DW] Falha ao carregar filtros:", err));
+  }, []);
+
   return (
     <FinancialDataContext.Provider
       value={{
@@ -684,6 +838,8 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
         clearFileReceber,
         clearFilePagar,
         processData,
+        setDwFilter,
+        fetchFromDW,
       }}
     >
       {children}

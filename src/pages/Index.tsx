@@ -4,8 +4,8 @@ import {
   TrendingDown,
   Presentation,
   ArrowRight,
-  CalendarDays,
-  Upload,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -17,68 +17,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const MESES = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
-
-const ANOS = ["2023", "2024", "2025", "2026"];
-
 const Index = () => {
   const {
     resumo,
     indicadores,
-    setFileReceber,
-    setFilePagar,
-    processData,
-    isProcessing,
-    uploadReceber,
+    fetchFromDW,
+    isFetchingDw,
+    dwError,
+    dwFilter,
+    setDwFilter,
+    filiais,
+    empresas,
     isProcessed,
   } = useFinancialData();
 
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
-  const [mes, setMes] = useState("Fevereiro");
-  const [ano, setAno] = useState("2024");
 
-  const handleUpload = useCallback(
-    async (file: File) => {
-      const fileName = file.name.toLowerCase();
-
-      if (
-        !fileName.endsWith(".csv") &&
-        !fileName.endsWith(".xlsx") &&
-        !fileName.endsWith(".xls")
-      ) {
-        alert("Envie um arquivo CSV ou Excel.");
-        return;
-      }
-
-      setFileReceber(file);
-      setFilePagar(file);
-    },
-    [setFileReceber, setFilePagar]
+  // Filiais filtradas pela empresa selecionada
+  const filiaisFiltradas = useMemo(
+    () =>
+      dwFilter.empresa
+        ? filiais.filter((f) => f.empresa === dwFilter.empresa)
+        : filiais,
+    [filiais, dwFilter.empresa]
   );
-
-  useEffect(() => {
-    const shouldProcess = !!uploadReceber.file;
-    if (!shouldProcess) return;
-
-    processData().catch((error) => {
-      console.error("Erro ao processar arquivo:", error);
-    });
-  }, [uploadReceber.file, processData]);
 
   const enterFullscreen = useCallback(async () => {
     try {
@@ -256,55 +220,104 @@ const Index = () => {
                 }`}
               >
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Select value={mes} onValueChange={setMes}>
-                      <SelectTrigger className="h-9 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                        <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-slate-500" />
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MESES.map((m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={ano} onValueChange={setAno}>
-                      <SelectTrigger className="h-9 w-[92px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ANOS.map((a) => (
-                          <SelectItem key={a} value={a}>
-                            {a}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15">
-                      <Upload className="h-3.5 w-3.5" />
-                      {isProcessing
-                        ? "Processando..."
-                        : isProcessed
-                        ? "Arquivo importado"
-                        : "Importar CSV"}
+                  {/* ── Filtros DW ─────────────────────────────────────── */}
+                  <div className="flex flex-wrap items-end gap-2">
+                    {/* Data Início */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        De
+                      </span>
                       <input
-                        type="file"
-                        accept=".csv,.xlsx,.xls"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            void handleUpload(file);
-                            e.currentTarget.value = "";
-                          }
-                        }}
+                        type="date"
+                        value={dwFilter.dataInicio}
+                        onChange={(e) => setDwFilter("dataInicio", e.target.value)}
+                        className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
                       />
-                    </label>
+                    </div>
+
+                    {/* Data Fim */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Até
+                      </span>
+                      <input
+                        type="date"
+                        value={dwFilter.dataFim}
+                        onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                        className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                      />
+                    </div>
+
+                    {/* Empresa */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Empresa
+                      </span>
+                      <Select
+                        value={dwFilter.empresa ?? "__all__"}
+                        onValueChange={(v) =>
+                          setDwFilter("empresa", v === "__all__" ? null : v)
+                        }
+                      >
+                        <SelectTrigger className="h-9 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__all__">Todas</SelectItem>
+                          {empresas.map((e) => (
+                            <SelectItem key={e.id} value={e.id}>
+                              {e.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Filial */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Filial
+                      </span>
+                      <Select
+                        value={dwFilter.filial ?? "__all__"}
+                        onValueChange={(v) =>
+                          setDwFilter("filial", v === "__all__" ? null : v)
+                        }
+                      >
+                        <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__all__">Todas</SelectItem>
+                          {filiaisFiltradas.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Botão Atualizar */}
+                    <button
+                      onClick={() => void fetchFromDW()}
+                      disabled={isFetchingDw}
+                      className="inline-flex h-9 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <RefreshCw
+                        className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`}
+                      />
+                      {isFetchingDw ? "Buscando..." : "Atualizar"}
+                    </button>
                   </div>
+
+                  {/* Erro DW */}
+                  {dwError && (
+                    <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {dwError}
+                    </div>
+                  )}
 
                   <div className="max-w-4xl">
                     <h1
@@ -325,11 +338,11 @@ const Index = () => {
                       </p>
                     )}
 
-                    {!presentationMode && uploadReceber.fileName && (
+                    {!presentationMode && isProcessed && (
                       <p className="mt-3 text-sm text-slate-400">
-                        Arquivo carregado:{" "}
+                        Dados atualizados ·{" "}
                         <span className="font-medium text-slate-200">
-                          {uploadReceber.fileName}
+                          {dwFilter.dataInicio} → {dwFilter.dataFim}
                         </span>
                       </p>
                     )}
