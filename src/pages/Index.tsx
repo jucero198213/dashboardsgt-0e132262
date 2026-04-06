@@ -197,7 +197,7 @@ const Index = () => {
                 : "gap-6 p-5 lg:p-7 xl:gap-7 xl:p-8"
             }`}
           >
-            <div className="space-y-6">
+            <div className={`space-y-6 ${presentationMode ? "flex h-full flex-col" : ""}`}>
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={mes} onValueChange={setMes}>
                   <SelectTrigger className="h-8 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
@@ -264,7 +264,11 @@ const Index = () => {
                 })}
               </div>
 
-              <div className="grid gap-5 xl:grid-cols-2">
+              <div
+                className={`grid gap-5 xl:grid-cols-2 ${
+                  presentationMode ? "flex-1 content-stretch" : ""
+                }`}
+              >
                 <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)]">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]" />
 
@@ -367,7 +371,11 @@ const Index = () => {
               </div>
             </div>
 
-            <aside className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92)_0%,rgba(15,23,42,0.76)_100%)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl lg:p-6">
+            <aside
+              className={`rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92)_0%,rgba(15,23,42,0.76)_100%)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl lg:p-6 ${
+                presentationMode ? "h-full" : ""
+              }`}
+            >
               <div className="flex h-full flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -389,7 +397,7 @@ const Index = () => {
                   </button>
                 </div>
 
-                <div className="mt-2 space-y-4">
+                <div className={`mt-2 space-y-4 ${presentationMode ? "flex-1" : ""}`}>
                   {indicadores.map((ind) => {
                     const positive =
                       ind.percentualReal >= ind.percentualEsperado;
