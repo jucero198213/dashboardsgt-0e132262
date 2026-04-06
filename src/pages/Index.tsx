@@ -5,10 +5,7 @@ import {
   Presentation,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   CalendarDays,
-  Building2,
-  Filter,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
