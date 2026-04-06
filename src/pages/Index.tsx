@@ -6,9 +6,25 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
+  CalendarDays,
+  Building2,
+  Filter,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+const ANOS = ["2023", "2024", "2025", "2026"];
 
 const Index = () => {
   const { resumo, indicadores } = useFinancialData();
