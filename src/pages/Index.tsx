@@ -177,6 +177,7 @@ const Index = () => {
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
                   <Sparkles className="h-3.5 w-3.5" />
                   Painel financeiro
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
