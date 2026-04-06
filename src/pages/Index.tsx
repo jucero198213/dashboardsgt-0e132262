@@ -30,6 +30,7 @@ const MESES = [
   "Novembro",
   "Dezembro",
 ];
+
 const ANOS = ["2023", "2024", "2025", "2026"];
 
 const Index = () => {
@@ -197,7 +198,11 @@ const Index = () => {
                 : "gap-6 p-5 lg:p-7 xl:gap-7 xl:p-8"
             }`}
           >
-            <div className={`space-y-6 ${presentationMode ? "flex h-full flex-col" : ""}`}>
+            <div
+              className={`${
+                presentationMode ? "flex h-full flex-col justify-between gap-5" : "space-y-6"
+              }`}
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={mes} onValueChange={setMes}>
                   <SelectTrigger className="h-8 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
@@ -228,19 +233,31 @@ const Index = () => {
               </div>
 
               <div className="max-w-4xl">
-                <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
+                <h1
+                  className={`font-semibold tracking-tight text-white ${
+                    presentationMode
+                      ? "text-4xl md:text-5xl xl:text-[52px] xl:leading-none"
+                      : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
+                  }`}
+                >
                   Análise Consolidada
                 </h1>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div
+                className={`grid md:grid-cols-2 xl:grid-cols-4 ${
+                  presentationMode ? "gap-5" : "gap-4"
+                }`}
+              >
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
                   return (
                     <div
                       key={item.label}
-                      className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.82)_0%,rgba(12,18,40,0.98)_100%)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)]"
+                      className={`group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.82)_0%,rgba(12,18,40,0.98)_100%)] hover:shadow-[0_18px_40px_rgba(0,0,0,0.28)] ${
+                        presentationMode ? "min-h-[180px] p-6" : "p-5"
+                      }`}
                     >
                       <div className="mb-5 flex items-start justify-between gap-3">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
@@ -265,11 +282,15 @@ const Index = () => {
               </div>
 
               <div
-                className={`grid gap-5 xl:grid-cols-2 ${
-                  presentationMode ? "flex-1 content-stretch" : ""
+                className={`grid xl:grid-cols-2 ${
+                  presentationMode ? "flex-1 items-stretch gap-5" : "gap-5"
                 }`}
               >
-                <div className="group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)]">
+                <div
+                  className={`group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] ${
+                    presentationMode ? "flex h-full flex-col p-7" : "p-6"
+                  }`}
+                >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -290,7 +311,11 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-4">
+                  <div
+                    className={`grid grid-cols-2 gap-4 ${
+                      presentationMode ? "mt-8" : "mt-6"
+                    }`}
+                  >
                     <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Previsto
@@ -312,14 +337,20 @@ const Index = () => {
 
                   <a
                     href="/contas-a-receber"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:translate-x-1 hover:bg-emerald-400/15 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
+                    className={`inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:translate-x-1 hover:bg-emerald-400/15 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)] ${
+                      presentationMode ? "mt-auto pt-8" : "mt-6"
+                    }`}
                   >
                     Ver detalhamento
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
 
-                <div className="group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)]">
+                <div
+                  className={`group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.76)_0%,rgba(7,12,29,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.88)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_22px_45px_rgba(0,0,0,0.30)] ${
+                    presentationMode ? "flex h-full flex-col p-7" : "p-6"
+                  }`}
+                >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_32%)]" />
 
                   <div className="relative flex items-start justify-between gap-4">
@@ -340,7 +371,11 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-4">
+                  <div
+                    className={`grid grid-cols-2 gap-4 ${
+                      presentationMode ? "mt-8" : "mt-6"
+                    }`}
+                  >
                     <div className="rounded-[22px] border border-white/8 bg-white/[0.03] p-4 transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.05]">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                         Previsto
@@ -362,7 +397,9 @@ const Index = () => {
 
                   <a
                     href="/contas-a-pagar"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-300 transition-all duration-300 hover:translate-x-1 hover:bg-amber-400/15 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+                    className={`inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-2 text-sm font-semibold text-amber-300 transition-all duration-300 hover:translate-x-1 hover:bg-amber-400/15 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)] ${
+                      presentationMode ? "mt-auto pt-8" : "mt-6"
+                    }`}
                   >
                     Ver detalhamento
                     <ArrowRight className="h-4 w-4" />
@@ -422,9 +459,7 @@ const Index = () => {
                           <div className="flex items-center gap-2">
                             <span
                               className={`text-xs font-semibold ${
-                                positive
-                                  ? "text-emerald-300"
-                                  : "text-amber-300"
+                                positive ? "text-emerald-300" : "text-amber-300"
                               }`}
                             >
                               {ind.percentualReal}%
