@@ -31,6 +31,8 @@ const Index = () => {
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [mes, setMes] = useState("Fevereiro");
+  const [ano, setAno] = useState("2024");
 
   const enterFullscreen = useCallback(async () => {
     try {
