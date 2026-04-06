@@ -1,15 +1,26 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// dwApi.ts  –  Client para a Edge Function dw-financeiro
-// Usa fetch nativo — sem necessidade de @supabase/supabase-js
+// dwApi.ts  –  Client para a API de dados financeiros
+//
+// Prioridade de URL:
+//   1. VITE_DW_API_URL  (variável de ambiente definida no .env do Lovable)
+//   2. Supabase Edge Function (fallback)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SUPABASE_URL     = "https://wtjaajhrjsakmmzvbdim.supabase.co";
+const SUPABASE_URL      = "https://wtjaajhrjsakmmzvbdim.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0amFhamhyanNha21tenZiZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTA4NzQsImV4cCI6MjA5MTA2Njg3NH0." +
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
-const EDGE_URL = `${SUPABASE_URL}/functions/v1/dw-financeiro`;
+// Se VITE_DW_API_URL estiver definida, usa a API local via Cloudflare Tunnel
+// Caso contrário, cai na Supabase Edge Function
+const LOCAL_API_URL = (import.meta as any).env?.VITE_DW_API_URL as string | undefined;
+
+const ENDPOINT = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-financeiro`
+  : `${SUPABASE_URL}/functions/v1/dw-financeiro`;
+
+const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -54,13 +65,19 @@ export interface DwFetchResponse {
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 async function callEdge<T>(body: Record<string, unknown>): Promise<T> {
-  const res = await fetch(EDGE_URL, {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  // Só envia auth header quando for Supabase (não necessário na API local)
+  if (!IS_LOCAL) {
+    headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
+    headers["apikey"]        = SUPABASE_ANON_KEY;
+  }
+
+  const res = await fetch(ENDPOINT, {
     method: "POST",
-    headers: {
-      "Content-Type":  "application/json",
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "apikey":        SUPABASE_ANON_KEY,
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
