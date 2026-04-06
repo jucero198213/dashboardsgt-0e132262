@@ -217,7 +217,6 @@ const Index = () => {
                 <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl xl:text-[56px] xl:leading-[1.02]">
                   Análise Consolidada
                 </h1>
-                </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
