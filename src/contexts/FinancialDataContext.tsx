@@ -5,6 +5,7 @@ import type {
   ContaReceber,
   ResumoFinanceiro,
 } from "@/data/mockData";
+import FinancialProcessorWorker from "@/workers/financialProcessor.worker?worker";
 
 export interface IndicadorComparativo {
   id: string;
@@ -355,6 +356,38 @@ const parseTabularFile = async (file: File): Promise<RowData[]> => {
   throw new Error("Formato de arquivo não suportado. Use CSV ou Excel.");
 };
 
+const processCsvWithWorker = (
+  file: File
+): Promise<any> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const text = await parseTextFile(file);
+      const worker = new FinancialProcessorWorker();
+
+      worker.onmessage = (event: MessageEvent<any>) => {
+        const { ok, data, error } = event.data ?? {};
+
+        worker.terminate();
+
+        if (ok) {
+          resolve(data);
+          return;
+        }
+
+        reject(new Error(error || "Erro ao processar CSV no worker."));
+      };
+
+      worker.onerror = () => {
+        worker.terminate();
+        reject(new Error("Erro ao executar o worker do CSV."));
+      };
+
+      worker.postMessage({ text });
+    } catch (error) {
+      reject(error instanceof Error ? error : new Error("Erro ao ler CSV."));
+    }
+  }); 
+
 export function FinancialDataProvider({
   children,
 }: {
@@ -423,29 +456,59 @@ export function FinancialDataProvider({
     }));
 
     try {
-      const rawReceberBase = receberFile
-        ? await parseTabularFile(receberFile)
-        : [];
-      const rawPagarBase = pagarFile ? await parseTabularFile(pagarFile) : [];
+  const csvFile =
+    receberFile && receberFile.name.toLowerCase().endsWith(".csv")
+      ? receberFile
+      : pagarFile && pagarFile.name.toLowerCase().endsWith(".csv")
+      ? pagarFile
+      : null;
 
-      const mergedSource =
-        rawReceberBase.length > 0 && rawPagarBase.length === 0
-          ? rawReceberBase
-          : rawPagarBase.length > 0 && rawReceberBase.length === 0
-          ? rawPagarBase
-          : [];
+  if (csvFile) {
+    const { resumo, contasReceber, contasPagar, indicadores } =
+      await processCsvWithWorker(csvFile);
 
-      const sourceReceber = rawReceberBase.length ? rawReceberBase : mergedSource;
-      const sourcePagar = rawPagarBase.length ? rawPagarBase : mergedSource;
+    setState((current) => ({
+      ...current,
+      isProcessing: false,
+      isProcessed: true,
+      resumo,
+      contasReceber,
+      contasPagar,
+      indicadores,
+      uploadReceber: current.uploadReceber.file
+        ? { ...current.uploadReceber, status: "loaded" }
+        : current.uploadReceber,
+      uploadPagar: current.uploadPagar.file
+        ? { ...current.uploadPagar, status: "loaded" }
+        : current.uploadPagar,
+    }));
 
-      const allRows = [...rawReceberBase, ...rawPagarBase, ...mergedSource];
-      const sampleRows = allRows.length ? allRows : sourceReceber.length ? sourceReceber : sourcePagar;
+    return;
+  }
+  const rawReceberBase = receberFile ? await parseTabularFile(receberFile) : [];
+const rawPagarBase = pagarFile ? await parseTabularFile(pagarFile) : [];
 
-      if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
-        throw new Error("O arquivo não possui as colunas esperadas.");
-      }
+const mergedSource =
+  rawReceberBase.length > 0 && rawPagarBase.length === 0
+    ? rawReceberBase
+    : rawPagarBase.length > 0 && rawReceberBase.length === 0
+    ? rawPagarBase
+    : [];
 
-      const receberRows = sourceReceber.filter((row) => {
+const sourceReceber = rawReceberBase.length ? rawReceberBase : mergedSource;
+const sourcePagar = rawPagarBase.length ? rawPagarBase : mergedSource;
+
+const allRows = [...rawReceberBase, ...rawPagarBase, ...mergedSource];
+const sampleRows = allRows.length
+  ? allRows
+  : sourceReceber.length
+  ? sourceReceber
+  : sourcePagar;
+
+if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
+  throw new Error("O arquivo não possui as colunas esperadas.");
+}    
+  const receberRows = sourceReceber.filter((row) => {
         const origem = getOrigem(row);
         return !origem || origem === "CR";
       });
