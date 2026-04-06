@@ -6,15 +6,33 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
+  CalendarDays,
+  Building2,
+  Filter,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+const ANOS = ["2023", "2024", "2025", "2026"];
 
 const Index = () => {
   const { resumo, indicadores } = useFinancialData();
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [mes, setMes] = useState("Fevereiro");
+  const [ano, setAno] = useState("2024");
 
   const enterFullscreen = useCallback(async () => {
     try {
@@ -167,6 +185,40 @@ const Index = () => {
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-slate-300">
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
                   Estrutura inspirada na referência
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={mes} onValueChange={setMes}>
+                  <SelectTrigger className="h-8 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 hover:border-white/20 hover:bg-white/10 transition-all">
+                    <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-slate-500" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MESES.map((m) => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={ano} onValueChange={setAno}>
+                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 hover:border-white/20 hover:bg-white/10 transition-all">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ANOS.map((a) => (
+                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                  <Building2 className="h-3.5 w-3.5" />
+                  Todas as Empresas
+                </div>
+                <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                  <Filter className="h-3.5 w-3.5" />
+                  Todos os Centros de Custo
                 </div>
               </div>
 
