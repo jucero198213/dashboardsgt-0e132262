@@ -268,7 +268,9 @@ const matchesIndicator = (indicatorName: string, row: RowData): boolean => {
 
 self.onmessage = (event: MessageEvent<{ text: string }>) => {
   try {
+    console.log("[WORKER] recebeu mensagem");
     const rows = parseCSV(event.data.text);
+    console.log("[WORKER] linhas parseadas:", rows.length);
 
     if (!rows.length || !getRequiredColumnsPresent(rows)) {
       throw new Error("O arquivo não possui as colunas esperadas.");
@@ -397,6 +399,8 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
       };
     });
 
+    console.log("[WORKER] processamento concluído, enviando resposta");
+
     self.postMessage({
       ok: true,
       data: {
@@ -406,7 +410,9 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
         indicadores,
       },
     });
-  } catch (error) {
+    } catch (error) {
+    console.error("[WORKER] erro:", error);
+
     self.postMessage({
       ok: false,
       error:

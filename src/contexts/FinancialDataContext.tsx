@@ -360,14 +360,21 @@ const processCsvWithWorker = (
   file: File
 ): Promise<any> =>
   new Promise(async (resolve, reject) => {
+    let worker: Worker | null = null;
+
     try {
+      console.log("[CSV] lendo arquivo...");
       const text = await parseTextFile(file);
-      const worker = new FinancialProcessorWorker();
+      console.log("[CSV] arquivo lido, tamanho:", text.length);
+
+      worker = new FinancialProcessorWorker();
+      console.log("[CSV] worker criado");
 
       worker.onmessage = (event: MessageEvent<any>) => {
-        const { ok, data, error } = event.data ?? {};
+        console.log("[CSV] resposta do worker:", event.data);
 
-        worker.terminate();
+        const { ok, data, error } = event.data ?? {};
+        worker?.terminate();
 
         if (ok) {
           resolve(data);
@@ -377,16 +384,20 @@ const processCsvWithWorker = (
         reject(new Error(error || "Erro ao processar CSV no worker."));
       };
 
-      worker.onerror = () => {
-        worker.terminate();
+      worker.onerror = (error) => {
+        console.error("[CSV] erro no worker:", error);
+        worker?.terminate();
         reject(new Error("Erro ao executar o worker do CSV."));
       };
 
       worker.postMessage({ text });
+      console.log("[CSV] mensagem enviada para o worker");
     } catch (error) {
+      console.error("[CSV] erro antes de enviar ao worker:", error);
+      worker?.terminate();
       reject(error instanceof Error ? error : new Error("Erro ao ler CSV."));
     }
-  }); 
+  });
 
 export function FinancialDataProvider({
   children,
