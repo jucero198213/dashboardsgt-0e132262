@@ -298,5 +298,16 @@ app.listen(PORT, () => {
   console.log("⏳ Conectando ao SQL Server...");
   getPool().catch((err) => {
     console.error("❌ Falha na conexão inicial:", err.message);
+    console.log("⚠️  Servidor continua rodando. Tentará reconectar na próxima requisição.");
   });
+});
+
+// ── Captura erros não tratados para não fechar a janela ───────────────────────
+process.on("uncaughtException", (err) => {
+  console.error("❌ Erro não tratado:", err.message);
+  console.error(err.stack);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Promise rejeitada:", reason);
 });
