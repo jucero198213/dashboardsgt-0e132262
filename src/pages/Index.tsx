@@ -5,6 +5,7 @@ import {
   Presentation,
   ArrowRight,
   CalendarDays,
+  Upload,
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -34,12 +35,50 @@ const MESES = [
 const ANOS = ["2023", "2024", "2025", "2026"];
 
 const Index = () => {
-  const { resumo, indicadores } = useFinancialData();
+  const {
+    resumo,
+    indicadores,
+    setFileReceber,
+    setFilePagar,
+    processData,
+    isProcessing,
+    uploadReceber,
+    isProcessed,
+  } = useFinancialData();
+
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [mes, setMes] = useState("Fevereiro");
   const [ano, setAno] = useState("2024");
+
+  const handleUpload = useCallback(
+    async (file: File) => {
+      const fileName = file.name.toLowerCase();
+
+      if (
+        !fileName.endsWith(".csv") &&
+        !fileName.endsWith(".xlsx") &&
+        !fileName.endsWith(".xls")
+      ) {
+        alert("Envie um arquivo CSV ou Excel.");
+        return;
+      }
+
+      setFileReceber(file);
+      setFilePagar(file);
+    },
+    [setFileReceber, setFilePagar]
+  );
+
+  useEffect(() => {
+    const shouldProcess = !!uploadReceber.file;
+    if (!shouldProcess) return;
+
+    processData().catch((error) => {
+      console.error("Erro ao processar arquivo:", error);
+    });
+  }, [uploadReceber.file, processData]);
 
   const enterFullscreen = useCallback(async () => {
     try {
@@ -244,6 +283,27 @@ const Index = () => {
                         ))}
                       </SelectContent>
                     </Select>
+
+                    <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15">
+                      <Upload className="h-3.5 w-3.5" />
+                      {isProcessing
+                        ? "Processando..."
+                        : isProcessed
+                        ? "Arquivo importado"
+                        : "Importar CSV"}
+                      <input
+                        type="file"
+                        accept=".csv,.xlsx,.xls"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            void handleUpload(file);
+                            e.currentTarget.value = "";
+                          }
+                        }}
+                      />
+                    </label>
                   </div>
 
                   <div className="max-w-4xl">
@@ -262,6 +322,15 @@ const Index = () => {
                         Panorama executivo do período, com leitura rápida das
                         entradas, saídas e distribuição dos principais
                         indicadores.
+                      </p>
+                    )}
+
+                    {!presentationMode && uploadReceber.fileName && (
+                      <p className="mt-3 text-sm text-slate-400">
+                        Arquivo carregado:{" "}
+                        <span className="font-medium text-slate-200">
+                          {uploadReceber.fileName}
+                        </span>
                       </p>
                     )}
                   </div>
