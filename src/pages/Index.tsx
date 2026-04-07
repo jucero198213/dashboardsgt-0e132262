@@ -564,7 +564,7 @@ const Index = () => {
               <div className="flex h-full min-h-0 flex-col">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[32px] font-semibold tracking-tight text-white">
+                    <p className={`font-semibold tracking-tight text-white ${presentationMode ? "text-2xl" : "text-[32px]"}`}>
                       Indicadores
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-400">
