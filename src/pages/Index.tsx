@@ -442,7 +442,7 @@ const Index = () => {
                     </div>
 
                     <div className={`grid grid-cols-2 gap-4 ${presentationMode ? "mt-4" : "mt-8"}`}>
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+                      <div className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-5"}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
