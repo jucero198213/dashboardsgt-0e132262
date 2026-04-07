@@ -542,13 +542,13 @@ const Index = () => {
                           </p>
                         </div>
 
-                        <a
-                          href="/contas-a-pagar"
+                        <Link
+                          to="/contas-a-pagar"
                           className="inline-flex items-center gap-2 rounded-full border border-amber-400/22 bg-amber-400/12 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                         >
                           Ver detalhamento
                           <ArrowRight className="h-4 w-4" />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
