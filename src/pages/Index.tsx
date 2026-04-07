@@ -558,7 +558,7 @@ const Index = () => {
 
             <aside
               className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
-                presentationMode ? "h-full p-6" : "p-5 lg:p-6"
+                presentationMode ? "h-full overflow-y-auto p-4" : "p-5 lg:p-6"
               }`}
             >
               <div className="flex h-full min-h-0 flex-col">
