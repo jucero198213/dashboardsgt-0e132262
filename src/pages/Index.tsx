@@ -741,8 +741,8 @@ const Index = () => {
 
                 <div className="mt-3 grid min-h-0 gap-1.5 flex-1" style={{ gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }}>
                   {indicadores.map((ind) => {
-                    const positive =
-                      ind.percentualReal >= ind.percentualEsperado;
+                    const abaixoDaMeta =
+                      ind.percentualReal < ind.percentualEsperado;
                     const progress = Math.min(
                       (ind.percentualReal /
                         Math.max(ind.percentualEsperado, 1)) *
@@ -764,9 +764,9 @@ const Index = () => {
 
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-xs font-semibold ${positive
+                              className={`text-xs font-semibold ${abaixoDaMeta
                                   ? "text-emerald-300"
-                                  : "text-amber-300"
+                                  : "text-red-400"
                                 }`}
                             >
                               {ind.percentualReal}%
@@ -778,7 +778,7 @@ const Index = () => {
 
                         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
                           <div
-                            className={`h-full rounded-full transition-all duration-300 ${positive ? "bg-emerald-400" : "bg-amber-400"
+                            className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
                               }`}
                             style={{ width: `${progress}%` }}
                           />
