@@ -6,7 +6,7 @@
 //   2. Supabase Edge Function (fallback)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SUPABASE_URL      = "https://wtjaajhrjsakmmzvbdim.supabase.co";
+const SUPABASE_URL = "https://wtjaajhrjsakmmzvbdim.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
   "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0amFhamhyanNha21tenZiZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTA4NzQsImV4cCI6MjA5MTA2Njg3NH0." +
@@ -18,7 +18,7 @@ const SUPABASE_ANON_KEY =
 //   2. TUNNEL_URL       (Cloudflare Tunnel atual — atualizar quando reiniciar)
 //   3. Supabase Edge    (fallback)
 
-const TUNNEL_URL = "https://classics-lawyers-yards-lite.trycloudflare.com";
+const TUNNEL_URL = "https://cingular-hart-aug-instructors.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ||
@@ -44,26 +44,26 @@ export interface DwFiltersResponse {
 }
 
 export interface DwRow {
-  DATA_EMISSAO:    string | null;
+  DATA_EMISSAO: string | null;
   DATA_VENCIMENTO: string | null;
-  DATA_PAGAMENTO:  string | null;
-  COD_PARCEIRO:    string | null;
-  NOME_PARCEIRO:   string | null;
-  DOCUMENTO:       string | null;
-  PARCELA:         string | null;
-  TIPO_DOCUMENTO:  string | null;
-  ORIGEM:          "CP" | "CR" | "LB_D" | "LB_C";
-  SITUACAO:        string | null;
-  VLRDOC:          number | null;
-  VLR_LIQUIDO:     number | null;
-  VLR_PAGO:        number | null;
-  VLR_PARCELA:     number | null;
-  FILIAL:          string | null;
-  EMPRESA:         string | null;
-  CENTRO_GASTO:    string | null;
-  CENTRO_CUSTO:    string | null;
-  SINTETICA:       string | null;
-  ANALITICA:       string | null;
+  DATA_PAGAMENTO: string | null;
+  COD_PARCEIRO: string | null;
+  NOME_PARCEIRO: string | null;
+  DOCUMENTO: string | null;
+  PARCELA: string | null;
+  TIPO_DOCUMENTO: string | null;
+  ORIGEM: "CP" | "CR" | "LB_D" | "LB_C";
+  SITUACAO: string | null;
+  VLRDOC: number | null;
+  VLR_LIQUIDO: number | null;
+  VLR_PAGO: number | null;
+  VLR_PARCELA: number | null;
+  FILIAL: string | null;
+  EMPRESA: string | null;
+  CENTRO_GASTO: string | null;
+  CENTRO_CUSTO: string | null;
+  SINTETICA: string | null;
+  ANALITICA: string | null;
 }
 
 export interface DwFetchResponse {
@@ -80,7 +80,7 @@ async function callEdge<T>(body: Record<string, unknown>): Promise<T> {
   // Só envia auth header quando for Supabase (não necessário na API local)
   if (!IS_LOCAL) {
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
-    headers["apikey"]        = SUPABASE_ANON_KEY;
+    headers["apikey"] = SUPABASE_ANON_KEY;
   }
 
   const res = await fetch(ENDPOINT, {
@@ -108,9 +108,9 @@ export async function loadDwFilters(): Promise<DwFiltersResponse> {
 /** Executa a query principal dos 4 UNIONs com filtros */
 export async function fetchDwData(params: {
   dataInicio: string;
-  dataFim:    string;
-  filial?:    string | null;
-  empresa?:   string | null;
+  dataFim: string;
+  filial?: string | null;
+  empresa?: string | null;
 }): Promise<DwFetchResponse> {
   return callEdge<DwFetchResponse>({ action: "fetch", ...params });
 }
