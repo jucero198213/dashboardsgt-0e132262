@@ -428,7 +428,7 @@ const Index = () => {
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300">
                           Contas a receber
                         </p>
-                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
+                        <h2 className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-2xl xl:text-3xl" : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"}`}>
                           {formatCurrency(contasReceber.saldoAReceber)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
