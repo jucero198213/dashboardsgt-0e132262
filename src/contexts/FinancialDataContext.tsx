@@ -790,7 +790,7 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
       });
 
       const sumF = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
-        rows.reduce((s, r) => s + n(r[f]), 0);
+        Math.round(rows.reduce((s, r) => s + n(r[f]), 0) * 100) / 100;
 
       const totalPagar    = sumF([...cpRows,  ...lbDRows], "VLR_PARCELA");
       const valorPago     = sumF([...cpRows,  ...lbDRows], "VLR_PAGO");

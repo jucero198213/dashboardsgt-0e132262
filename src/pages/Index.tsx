@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { formatCurrency } from "@/data/mockData";
 import {
   Select,
   SelectContent,
@@ -395,7 +396,7 @@ const Index = () => {
 
                         <div className="mt-6">
                           <p className="text-[42px] font-bold leading-none tracking-[-0.03em] text-white">
-                            {item.value}
+                            {formatCurrency(item.value)}
                           </p>
                           <p className="mt-3 text-sm text-slate-400">
                             {item.helper}
@@ -427,7 +428,7 @@ const Index = () => {
                           Contas a receber
                         </p>
                         <h2 className="mt-4 text-[46px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasReceber.saldoAReceber}
+                          {formatCurrency(contasReceber.saldoAReceber)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
                           Saldo principal em aberto
@@ -445,7 +446,7 @@ const Index = () => {
                           Previsto
                         </p>
                         <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasReceber.valorAReceber}
+                          {formatCurrency(contasReceber.valorAReceber)}
                         </p>
                       </div>
 
@@ -454,7 +455,7 @@ const Index = () => {
                           Recebido
                         </p>
                         <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasReceber.valorRecebido}
+                          {formatCurrency(contasReceber.valorRecebido)}
                         </p>
                       </div>
                     </div>
@@ -497,7 +498,7 @@ const Index = () => {
                           Contas a pagar
                         </p>
                         <h2 className="mt-4 text-[46px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasPagar.saldoAPagar}
+                          {formatCurrency(contasPagar.saldoAPagar)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
                           Saldo principal em aberto
@@ -515,7 +516,7 @@ const Index = () => {
                           Previsto
                         </p>
                         <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasPagar.valorAPagar}
+                          {formatCurrency(contasPagar.valorAPagar)}
                         </p>
                       </div>
 
@@ -524,7 +525,7 @@ const Index = () => {
                           Pago
                         </p>
                         <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
-                          {contasPagar.valorPago}
+                          {formatCurrency(contasPagar.valorPago)}
                         </p>
                       </div>
                     </div>
