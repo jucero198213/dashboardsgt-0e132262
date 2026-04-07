@@ -486,7 +486,7 @@ const Index = () => {
 
                 <div
                   className={`group relative overflow-hidden rounded-[30px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${
-                    presentationMode ? "flex h-full min-h-0 flex-col p-7" : "p-6"
+                    presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-6"
                   }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]" />
