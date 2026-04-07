@@ -455,7 +455,7 @@ const Index = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Recebido
                         </p>
-                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
+                        <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-lg xl:text-xl" : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"}`}>
                           {formatCurrency(contasReceber.valorRecebido)}
                         </p>
                       </div>
