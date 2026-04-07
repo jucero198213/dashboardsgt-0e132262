@@ -174,19 +174,17 @@ const Index = () => {
   return (
     <div
       className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${presentationMode
-        ? "h-screen w-screen p-0"
-        : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4 xl:px-5"
+          ? "h-screen w-screen p-0"
+          : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4 xl:px-5"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex w-full flex-col ${presentationMode ? "h-full max-w-none" : "gap-4"
+        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full gap-4"
           }`}
       >
-        {!presentationMode && <DashboardHeader />}
-
         <section
           className={`relative overflow-hidden border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none" : "rounded-[28px]"
             }`}
@@ -195,20 +193,20 @@ const Index = () => {
 
           <div
             className={`relative grid ${presentationMode
-              ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[2fr_0.78fr]"
-              : "gap-4 p-4 lg:p-5 xl:grid-cols-[2.05fr_0.75fr] xl:gap-5 xl:p-5"
+                ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[2fr_0.78fr]"
+                : "gap-4 p-4 lg:p-5 xl:grid-cols-[2.05fr_0.75fr] xl:gap-4 xl:p-5"
               }`}
           >
             <div
               className={`${presentationMode
-                ? "flex h-full min-h-0 flex-col gap-3"
-                : "space-y-4"
+                  ? "flex h-full min-h-0 flex-col gap-3"
+                  : "space-y-4"
                 }`}
             >
               <div
                 className={`${presentationMode
-                  ? "flex items-start justify-between gap-6"
-                  : "space-y-4"
+                    ? "flex items-start justify-between gap-6"
+                    : "space-y-4"
                   }`}
               >
                 <div className="space-y-4">
@@ -305,11 +303,11 @@ const Index = () => {
                     </div>
                   )}
 
-                  <div className="max-w-5xl">
+                  <div className="max-w-4xl">
                     <h1
                       className={`font-semibold tracking-tight text-white ${presentationMode
-                        ? "text-[56px] leading-[0.96] 2xl:text-[64px]"
-                        : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
+                          ? "text-[56px] leading-[0.96] 2xl:text-[64px]"
+                          : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
                         }`}
                     >
                       Análise Consolidada
@@ -348,14 +346,17 @@ const Index = () => {
                 )}
               </div>
 
-              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
+              <div
+                className={`grid md:grid-cols-2 xl:grid-cols-4 ${presentationMode ? "gap-3" : "gap-3"
+                  }`}
+              >
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
                   return (
                     <div
                       key={item.label}
-                      className={`group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-4" : "p-5"
+                      className={`group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-4" : "p-5"
                         }`}
                     >
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
@@ -367,7 +368,7 @@ const Index = () => {
                           </p>
 
                           <div
-                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]}`}
+                            className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]}`}
                           >
                             <Icon className="h-[18px] w-[18px] transition-transform duration-300 group-hover:scale-110" />
                           </div>
@@ -375,9 +376,9 @@ const Index = () => {
 
                         <div className={presentationMode ? "mt-3" : "mt-5"}>
                           <p
-                            className={`max-w-full min-w-0 font-bold leading-[0.95] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "text-[clamp(1.35rem,2vw,1.8rem)]"
-                              : "text-[clamp(1.6rem,2.3vw,2.6rem)]"
+                            className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                                ? "text-2xl xl:text-[28px]"
+                                : "text-2xl md:text-3xl xl:text-[36px] 2xl:text-[42px]"
                               }`}
                           >
                             {formatCurrency(item.value)}
@@ -397,9 +398,7 @@ const Index = () => {
                   }`}
               >
                 <div
-                  className={`group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode
-                    ? "flex h-full min-h-0 flex-col p-5"
-                    : "p-5"
+                  className={`group relative overflow-hidden rounded-[30px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-5"
                     }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]" />
@@ -412,9 +411,9 @@ const Index = () => {
                           Contas a receber
                         </p>
                         <h2
-                          className={`max-w-full min-w-0 font-bold leading-[0.94] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
-                            : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-2xl xl:text-3xl"
+                              : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"
                             }`}
                         >
                           {formatCurrency(contasReceber.saldoAReceber)}
@@ -429,21 +428,18 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div
-                      className={`grid grid-cols-2 gap-3 ${presentationMode ? "mt-0" : "mt-0"
-                        }`}
-                    >
+                    <div className="grid grid-cols-2 gap-3">
                       <div
-                        className={`rounded-[22px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
+                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
                           }`}
                       >
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
                         <p
-                          className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-lg xl:text-xl"
+                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
                             }`}
                         >
                           {formatCurrency(contasReceber.valorAReceber)}
@@ -451,16 +447,16 @@ const Index = () => {
                       </div>
 
                       <div
-                        className={`rounded-[22px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
+                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
                           }`}
                       >
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Recebido
                         </p>
                         <p
-                          className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-lg xl:text-xl"
+                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
                             }`}
                         >
                           {formatCurrency(contasReceber.valorRecebido)}
@@ -470,10 +466,10 @@ const Index = () => {
 
                     <div className="mt-1">
                       <div
-                        className={`flex items-center justify-between gap-4 rounded-[22px] border border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
+                        className={`flex items-center justify-between rounded-[24px] border border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
                           }`}
                       >
-                        <div className="min-w-0">
+                        <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200/75">
                             Ação rápida
                           </p>
@@ -484,7 +480,7 @@ const Index = () => {
 
                         <Link
                           to="/contas-a-receber"
-                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-emerald-400/22 bg-emerald-400/12 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
+                          className="inline-flex items-center gap-2 rounded-full border border-emerald-400/22 bg-emerald-400/12 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
                         >
                           Ver detalhamento
                           <ArrowRight className="h-4 w-4" />
@@ -495,9 +491,7 @@ const Index = () => {
                 </div>
 
                 <div
-                  className={`group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode
-                    ? "flex h-full min-h-0 flex-col p-5"
-                    : "p-5"
+                  className={`group relative overflow-hidden rounded-[30px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-5"
                     }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]" />
@@ -510,9 +504,9 @@ const Index = () => {
                           Contas a pagar
                         </p>
                         <h2
-                          className={`max-w-full min-w-0 font-bold leading-[0.94] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
-                            : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-2xl xl:text-3xl"
+                              : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"
                             }`}
                         >
                           {formatCurrency(contasPagar.saldoAPagar)}
@@ -527,21 +521,18 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div
-                      className={`grid grid-cols-2 gap-3 ${presentationMode ? "mt-0" : "mt-0"
-                        }`}
-                    >
+                    <div className="grid grid-cols-2 gap-3">
                       <div
-                        className={`rounded-[22px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
+                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
                           }`}
                       >
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
                         <p
-                          className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-lg xl:text-xl"
+                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
                             }`}
                         >
                           {formatCurrency(contasPagar.valorAPagar)}
@@ -549,16 +540,16 @@ const Index = () => {
                       </div>
 
                       <div
-                        className={`rounded-[22px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
+                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
                           }`}
                       >
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Pago
                         </p>
                         <p
-                          className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                              ? "mt-2 text-lg xl:text-xl"
+                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
                             }`}
                         >
                           {formatCurrency(contasPagar.valorPago)}
@@ -568,10 +559,10 @@ const Index = () => {
 
                     <div className="mt-1">
                       <div
-                        className={`flex items-center justify-between gap-4 rounded-[22px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
+                        className={`flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
                           }`}
                       >
-                        <div className="min-w-0">
+                        <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
                             Ação rápida
                           </p>
@@ -582,7 +573,7 @@ const Index = () => {
 
                         <Link
                           to="/contas-a-pagar"
-                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-amber-400/22 bg-amber-400/12 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+                          className="inline-flex items-center gap-2 rounded-full border border-amber-400/22 bg-amber-400/12 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                         >
                           Ver detalhamento
                           <ArrowRight className="h-4 w-4" />
@@ -595,7 +586,7 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-4" : "p-4 lg:p-5"
+              className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-4" : "p-4 lg:p-5"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
