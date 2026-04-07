@@ -203,14 +203,14 @@ const Index = () => {
           <div
             className={`relative grid ${
               presentationMode
-                ? "h-full xl:grid-cols-[1.92fr_0.78fr] gap-5 p-6 lg:p-8"
+                ? "h-full xl:grid-cols-[1.92fr_0.78fr] gap-4 p-5 lg:p-6"
                 : "gap-6 p-5 lg:p-7 xl:grid-cols-[1.75fr_0.78fr] xl:gap-7 xl:p-8"
             }`}
           >
             <div
               className={`${
                 presentationMode
-                  ? "flex h-full min-h-0 flex-col gap-5"
+                  ? "flex h-full min-h-0 flex-col gap-3"
                   : "space-y-6"
               }`}
             >
@@ -367,7 +367,7 @@ const Index = () => {
 
               <div
                 className={`grid md:grid-cols-2 xl:grid-cols-4 ${
-                  presentationMode ? "gap-4" : "gap-4"
+                  presentationMode ? "gap-3" : "gap-4"
                 }`}
               >
                 {topMetrics.map((item) => {
@@ -377,7 +377,7 @@ const Index = () => {
                     <div
                       key={item.label}
                       className={`group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${
-                        presentationMode ? "min-h-[178px] p-6" : "p-5"
+                        presentationMode ? "p-4" : "p-5"
                       }`}
                     >
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
@@ -395,8 +395,8 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="mt-6">
-                          <p className="text-2xl font-bold leading-none tracking-[-0.03em] text-white md:text-3xl xl:text-[36px] 2xl:text-[42px] truncate min-w-0">
+                        <div className={presentationMode ? "mt-3" : "mt-6"}>
+                          <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "text-2xl xl:text-[28px]" : "text-2xl md:text-3xl xl:text-[36px] 2xl:text-[42px]"}`}>
                             {formatCurrency(item.value)}
                           </p>
                           <p className="mt-3 text-sm text-slate-400">
@@ -411,12 +411,12 @@ const Index = () => {
 
               <div
                 className={`grid min-h-0 xl:grid-cols-2 ${
-                  presentationMode ? "flex-1 gap-4" : "gap-5"
+                  presentationMode ? "flex-1 gap-3" : "gap-5"
                 }`}
               >
                 <div
                   className={`group relative overflow-hidden rounded-[30px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${
-                    presentationMode ? "flex h-full min-h-0 flex-col p-7" : "p-6"
+                    presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-6"
                   }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]" />
@@ -428,7 +428,7 @@ const Index = () => {
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300">
                           Contas a receber
                         </p>
-                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
+                        <h2 className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-2xl xl:text-3xl" : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"}`}>
                           {formatCurrency(contasReceber.saldoAReceber)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
@@ -441,28 +441,28 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="mt-8 grid grid-cols-2 gap-4">
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+                    <div className={`grid grid-cols-2 gap-4 ${presentationMode ? "mt-4" : "mt-8"}`}>
+                      <div className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-5"}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
-                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
+                        <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-lg xl:text-xl" : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"}`}>
                           {formatCurrency(contasReceber.valorAReceber)}
                         </p>
                       </div>
 
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+                      <div className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-5"}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Recebido
                         </p>
-                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
+                        <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-lg xl:text-xl" : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"}`}>
                           {formatCurrency(contasReceber.valorRecebido)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-8">
-                      <div className="flex items-center justify-between rounded-[24px] border border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                    <div className={`mt-auto ${presentationMode ? "pt-3" : "pt-8"}`}>
+                      <div className={`flex items-center justify-between rounded-[24px] border border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"}`}>
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200/75">
                             Ação rápida
@@ -486,7 +486,7 @@ const Index = () => {
 
                 <div
                   className={`group relative overflow-hidden rounded-[30px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${
-                    presentationMode ? "flex h-full min-h-0 flex-col p-7" : "p-6"
+                    presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-6"
                   }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]" />
@@ -498,7 +498,7 @@ const Index = () => {
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">
                           Contas a pagar
                         </p>
-                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
+                        <h2 className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-2xl xl:text-3xl" : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"}`}>
                           {formatCurrency(contasPagar.saldoAPagar)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
@@ -511,28 +511,28 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="mt-8 grid grid-cols-2 gap-4">
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+                    <div className={`grid grid-cols-2 gap-4 ${presentationMode ? "mt-4" : "mt-8"}`}>
+                      <div className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-5"}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
-                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
+                        <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-lg xl:text-xl" : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"}`}>
                           {formatCurrency(contasPagar.valorAPagar)}
                         </p>
                       </div>
 
-                      <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+                      <div className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-5"}`}>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Pago
                         </p>
-                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
+                        <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "mt-2 text-lg xl:text-xl" : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"}`}>
                           {formatCurrency(contasPagar.valorPago)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-8">
-                      <div className="flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                    <div className={`mt-auto ${presentationMode ? "pt-3" : "pt-8"}`}>
+                      <div className={`flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"}`}>
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
                             Ação rápida
@@ -558,13 +558,13 @@ const Index = () => {
 
             <aside
               className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
-                presentationMode ? "h-full p-6" : "p-5 lg:p-6"
+                presentationMode ? "h-full overflow-y-auto p-4" : "p-5 lg:p-6"
               }`}
             >
               <div className="flex h-full min-h-0 flex-col">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[32px] font-semibold tracking-tight text-white">
+                    <p className={`font-semibold tracking-tight text-white ${presentationMode ? "text-2xl" : "text-[32px]"}`}>
                       Indicadores
                     </p>
                     <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -585,8 +585,8 @@ const Index = () => {
                 </div>
 
                 <div
-                  className={`mt-6 grid min-h-0 gap-3 ${
-                    presentationMode ? "content-start" : ""
+                  className={`mt-4 grid min-h-0 gap-2 ${
+                    presentationMode ? "content-start" : "mt-6 gap-3"
                   }`}
                 >
                   {indicadores.map((ind) => {
@@ -603,7 +603,7 @@ const Index = () => {
                       <Link
                         key={ind.id}
                         to={`/indicadores/${ind.id}`}
-                        className="group relative overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)]"
+                        className={`group relative overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-3" : "p-4"}`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
