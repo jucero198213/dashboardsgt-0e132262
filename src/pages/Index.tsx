@@ -494,7 +494,7 @@ const Index = () => {
 
                   <div className="relative flex h-full min-h-0 flex-col">
                     <div className="flex items-start justify-between gap-4">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">
                           Contas a pagar
                         </p>
