@@ -585,8 +585,8 @@ const Index = () => {
                 </div>
 
                 <div
-                  className={`mt-6 grid min-h-0 gap-3 ${
-                    presentationMode ? "content-start" : ""
+                  className={`mt-4 grid min-h-0 gap-2 ${
+                    presentationMode ? "content-start" : "mt-6 gap-3"
                   }`}
                 >
                   {indicadores.map((ind) => {
