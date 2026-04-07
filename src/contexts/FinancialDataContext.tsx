@@ -253,10 +253,18 @@ export function FinancialDataProvider({
       const sumF = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         Math.round(rows.reduce((s, r) => s + n(r[f]), 0) * 100) / 100;
 
+      // PAGO: soma VLR_PAGO apenas onde DATA_PAGAMENTO não é null
+      const sumPago = (rows: DwRow[]) =>
+        Math.round(
+          rows
+            .filter((r) => r.DATA_PAGAMENTO !== null && r.DATA_PAGAMENTO !== undefined && r.DATA_PAGAMENTO !== "")
+            .reduce((s, r) => s + n(r.VLR_PAGO), 0) * 100
+        ) / 100;
+
       const totalPagar    = sumF([...cpRows,  ...lbDRows], "VLR_PARCELA");
-      const valorPago     = sumF([...cpRows,  ...lbDRows], "VLR_PAGO");
+      const valorPago     = sumPago([...cpRows,  ...lbDRows]);
       const totalReceber  = sumF([...crRows,  ...lbCRows], "VLR_PARCELA");
-      const valorRecebido = sumF([...crRows,  ...lbCRows], "VLR_PAGO");
+      const valorRecebido = sumPago([...crRows,  ...lbCRows]);
 
       const resumo: ResumoFinanceiro = {
         contasPagar:  { valorAPagar: totalPagar, valorPago, saldoAPagar: Math.max(totalPagar - valorPago, 0) },
