@@ -367,7 +367,7 @@ const Index = () => {
 
               <div
                 className={`grid md:grid-cols-2 xl:grid-cols-4 ${
-                  presentationMode ? "gap-4" : "gap-4"
+                  presentationMode ? "gap-3" : "gap-4"
                 }`}
               >
                 {topMetrics.map((item) => {
