@@ -7,6 +7,7 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { formatCurrency } from "@/data/mockData";
@@ -395,7 +396,7 @@ const Index = () => {
                         </div>
 
                         <div className="mt-6">
-                          <p className="text-[42px] font-bold leading-none tracking-[-0.03em] text-white">
+                          <p className="text-2xl font-bold leading-none tracking-[-0.03em] text-white md:text-3xl xl:text-[36px] 2xl:text-[42px] truncate min-w-0">
                             {formatCurrency(item.value)}
                           </p>
                           <p className="mt-3 text-sm text-slate-400">
@@ -423,11 +424,11 @@ const Index = () => {
 
                   <div className="relative flex h-full min-h-0 flex-col">
                     <div className="flex items-start justify-between gap-4">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300">
                           Contas a receber
                         </p>
-                        <h2 className="mt-4 text-[46px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
                           {formatCurrency(contasReceber.saldoAReceber)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
@@ -445,7 +446,7 @@ const Index = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
-                        <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
                           {formatCurrency(contasReceber.valorAReceber)}
                         </p>
                       </div>
@@ -454,7 +455,7 @@ const Index = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Recebido
                         </p>
-                        <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
                           {formatCurrency(contasReceber.valorRecebido)}
                         </p>
                       </div>
@@ -471,13 +472,13 @@ const Index = () => {
                           </p>
                         </div>
 
-                        <a
-                          href="/contas-a-receber"
+                        <Link
+                          to="/contas-a-receber"
                           className="inline-flex items-center gap-2 rounded-full border border-emerald-400/22 bg-emerald-400/12 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
                         >
                           Ver detalhamento
                           <ArrowRight className="h-4 w-4" />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -493,11 +494,11 @@ const Index = () => {
 
                   <div className="relative flex h-full min-h-0 flex-col">
                     <div className="flex items-start justify-between gap-4">
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">
                           Contas a pagar
                         </p>
-                        <h2 className="mt-4 text-[46px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
                           {formatCurrency(contasPagar.saldoAPagar)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
@@ -515,7 +516,7 @@ const Index = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Previsto
                         </p>
-                        <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
                           {formatCurrency(contasPagar.valorAPagar)}
                         </p>
                       </div>
@@ -524,7 +525,7 @@ const Index = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                           Pago
                         </p>
-                        <p className="mt-3 text-[34px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <p className="mt-3 text-xl font-bold leading-none tracking-[-0.03em] text-white md:text-2xl xl:text-[30px] 2xl:text-[34px] truncate min-w-0">
                           {formatCurrency(contasPagar.valorPago)}
                         </p>
                       </div>
@@ -541,13 +542,13 @@ const Index = () => {
                           </p>
                         </div>
 
-                        <a
-                          href="/contas-a-pagar"
+                        <Link
+                          to="/contas-a-pagar"
                           className="inline-flex items-center gap-2 rounded-full border border-amber-400/22 bg-amber-400/12 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                         >
                           Ver detalhamento
                           <ArrowRight className="h-4 w-4" />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -599,9 +600,9 @@ const Index = () => {
                     );
 
                     return (
-                      <a
+                      <Link
                         key={ind.id}
-                        href={`/indicadores/${ind.id}`}
+                        to={`/indicadores/${ind.id}`}
                         className="group relative overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)]"
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -632,7 +633,7 @@ const Index = () => {
                             style={{ width: `${progress}%` }}
                           />
                         </div>
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
