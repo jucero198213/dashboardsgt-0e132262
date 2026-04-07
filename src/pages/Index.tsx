@@ -48,11 +48,11 @@ const MiniLineChart = ({
   const allValues = [...previstoPoints, ...realizadoPoints];
   const maxVal = Math.max(...allValues, 1);
 
-  const svgW = 320;
-  const svgH = 90;
-  const padX = 4;
-  const padTop = 4;
-  const padBot = 4;
+  const svgW = 480;
+  const svgH = 200;
+  const padX = 8;
+  const padTop = 10;
+  const padBot = 10;
   const chartH = svgH - padTop - padBot;
 
   const toX = (i: number) => padX + (i / (months.length - 1)) * (svgW - padX * 2);
@@ -118,7 +118,7 @@ const MiniLineChart = ({
       <div className="flex-1 min-h-0">
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid meet"
           className="h-full w-full"
         >
           <defs>
@@ -739,7 +739,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid min-h-0 gap-1.5 content-start flex-1">
+                <div className="mt-3 grid min-h-0 gap-1.5 flex-1" style={{ gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }}>
                   {indicadores.map((ind) => {
                     const positive =
                       ind.percentualReal >= ind.percentualEsperado;
