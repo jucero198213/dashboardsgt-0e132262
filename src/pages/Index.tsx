@@ -210,7 +210,7 @@ const Index = () => {
             <div
               className={`${
                 presentationMode
-                  ? "flex h-full min-h-0 flex-col gap-5"
+                  ? "flex h-full min-h-0 flex-col gap-3"
                   : "space-y-6"
               }`}
             >
