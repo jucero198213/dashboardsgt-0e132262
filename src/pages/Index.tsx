@@ -203,7 +203,7 @@ const Index = () => {
           <div
             className={`relative grid ${
               presentationMode
-                ? "h-full xl:grid-cols-[1.92fr_0.78fr] gap-5 p-6 lg:p-8"
+                ? "h-full xl:grid-cols-[1.92fr_0.78fr] gap-4 p-5 lg:p-6"
                 : "gap-6 p-5 lg:p-7 xl:grid-cols-[1.75fr_0.78fr] xl:gap-7 xl:p-8"
             }`}
           >
