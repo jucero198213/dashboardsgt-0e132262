@@ -531,8 +531,8 @@ const Index = () => {
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-8">
-                      <div className="flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                    <div className={`mt-auto ${presentationMode ? "pt-3" : "pt-8"}`}>
+                      <div className={`flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"}`}>
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
                             Ação rápida
