@@ -566,7 +566,12 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
 
       const pagarRows = sourcePagar.filter((row) => {
         const origem = getOrigem(row);
-        return !origem || origem === "CP";
+        if (origem && origem !== "CP") return false;
+        const situacao = getSituacao(row);
+        if (situacao && situacao !== "D" && situacao !== "P") return false;
+        const dataPagamento = String(getColumnValue(row, ["DATA_PAGAMENTO"]) ?? "").trim();
+        if (dataPagamento && dataPagamento.toLowerCase() !== "null") return false;
+        return true;
       });
 
       const contasReceber: ContaReceber[] = receberRows.map((row, index) => {
@@ -598,9 +603,9 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
       });
 
       const contasPagar: ContaPagar[] = pagarRows.map((row, index) => {
-        const valor = toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"]));
+        const valor = toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"]));
         const valorPago = toNumber(
-          getColumnValue(row, ["VLR_PAGO", "VLR_PARCELA"])
+          getColumnValue(row, ["VLR_PAGO"])
         );
         const status = calculateStatus(
           getColumnValue(row, ["DATA_VENCIMENTO"]),
@@ -639,12 +644,12 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
 
       const totalPagar = pagarRows.reduce(
         (sum, row) =>
-          sum + toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"])),
+          sum + toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"])),
         0
       );
       const pago = pagarRows.reduce(
         (sum, row) =>
-          sum + toNumber(getColumnValue(row, ["VLR_PAGO", "VLR_PARCELA"])),
+          sum + toNumber(getColumnValue(row, ["VLR_PAGO"])),
         0
       );
 
@@ -668,7 +673,7 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
           .filter((row) => matchesIndicator(nome, row))
           .reduce(
             (sum, row) =>
-              sum + toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"])),
+              sum + toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"])),
             0
           );
 
@@ -762,13 +767,31 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
 
-      const cpRows  = data.filter((r) => r.ORIGEM === "CP");
+      const cpRowsRaw  = data.filter((r) => r.ORIGEM === "CP");
       const crRows  = data.filter((r) => r.ORIGEM === "CR");
-      const lbDRows = data.filter((r) => r.ORIGEM === "LB_D");
+      const lbDRowsRaw = data.filter((r) => r.ORIGEM === "LB_D");
       const lbCRows = data.filter((r) => r.ORIGEM === "LB_C");
 
+      // LB_D (débitos livro): mesmas regras de contas a pagar
+      const lbDRows = lbDRowsRaw.filter((r) => {
+        const sit = (r.SITUACAO ?? "").trim().toUpperCase();
+        if (sit && sit !== "D" && sit !== "P") return false;
+        const dtPag = (r.DATA_PAGAMENTO ?? "").trim();
+        if (dtPag && dtPag.toLowerCase() !== "null") return false;
+        return true;
+      });
+
+      // Contas a Pagar: apenas SITUACAO D ou P e sem DATA_PAGAMENTO
+      const cpRows = cpRowsRaw.filter((r) => {
+        const sit = (r.SITUACAO ?? "").trim().toUpperCase();
+        if (sit && sit !== "D" && sit !== "P") return false;
+        const dtPag = (r.DATA_PAGAMENTO ?? "").trim();
+        if (dtPag && dtPag.toLowerCase() !== "null") return false;
+        return true;
+      });
+
       const contasPagar: ContaPagar[] = cpRows.map((r, i) => {
-        const valor     = n(r.VLR_LIQUIDO ?? r.VLR_PARCELA ?? r.VLRDOC);
+        const valor     = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
         const valorPago = n(r.VLR_PAGO);
         return {
           id: String(i + 1), documento: r.DOCUMENTO ?? `CP-${i + 1}`,
@@ -805,7 +828,7 @@ if (!sampleRows.length || !getRequiredColumnsPresent(sampleRows)) {
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
         ([nome, percentualEsperado], index) => {
           const matched = cpRows.filter((r) => matchesIndicadorDw(nome, r));
-          const matchedTotal = matched.reduce((s, r) => s + n(r.VLR_LIQUIDO ?? r.VLR_PARCELA), 0);
+          const matchedTotal = matched.reduce((s, r) => s + n(r.VLR_PARCELA ?? r.VLR_LIQUIDO), 0);
           const percentualReal = totalPagar > 0 ? (matchedTotal / totalPagar) * 100 : 0;
           return { id: String(index + 1), nome, percentualReal: Math.round(percentualReal * 10) / 10, percentualEsperado };
         }

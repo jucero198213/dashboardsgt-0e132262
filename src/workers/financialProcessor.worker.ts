@@ -283,7 +283,12 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
 
     const pagarRows = rows.filter((row) => {
       const origem = getOrigem(row);
-      return !origem || origem === "CP";
+      if (origem && origem !== "CP") return false;
+      const situacao = getSituacao(row);
+      if (situacao && situacao !== "D" && situacao !== "P") return false;
+      const dataPagamento = String(getColumnValue(row, ["DATA_PAGAMENTO"]) ?? "").trim();
+      if (dataPagamento && dataPagamento.toLowerCase() !== "null") return false;
+      return true;
     });
 
     const contasReceber: ContaReceber[] = receberRows.map((row, index) => {
@@ -314,9 +319,9 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
     });
 
     const contasPagar: ContaPagar[] = pagarRows.map((row, index) => {
-      const valor = toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"]));
+      const valor = toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"]));
       const valorPago = toNumber(
-        getColumnValue(row, ["VLR_PAGO", "VLR_PARCELA"])
+        getColumnValue(row, ["VLR_PAGO"])
       );
 
       return {
@@ -354,13 +359,13 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
 
     const totalPagar = pagarRows.reduce(
       (sum, row) =>
-        sum + toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"])),
+        sum + toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"])),
       0
     );
 
     const pago = pagarRows.reduce(
       (sum, row) =>
-        sum + toNumber(getColumnValue(row, ["VLR_PAGO", "VLR_PARCELA"])),
+        sum + toNumber(getColumnValue(row, ["VLR_PAGO"])),
       0
     );
 
@@ -384,7 +389,7 @@ self.onmessage = (event: MessageEvent<{ text: string }>) => {
         .filter((row) => matchesIndicator(nome, row))
         .reduce(
           (sum, row) =>
-            sum + toNumber(getColumnValue(row, ["VLR_LIQUIDO", "VLRDOC"])),
+            sum + toNumber(getColumnValue(row, ["VLR_PARCELA", "VLR_LIQUIDO", "VLRDOC"])),
           0
         );
 
