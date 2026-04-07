@@ -411,7 +411,7 @@ const Index = () => {
 
               <div
                 className={`grid min-h-0 xl:grid-cols-2 ${
-                  presentationMode ? "flex-1 gap-4" : "gap-5"
+                  presentationMode ? "flex-1 gap-3" : "gap-5"
                 }`}
               >
                 <div
