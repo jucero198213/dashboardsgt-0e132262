@@ -8,7 +8,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { formatCurrency } from "@/data/mockData";
 import {
@@ -175,8 +174,8 @@ const Index = () => {
   return (
     <div
       className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen p-0"
-          : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4 xl:px-5"
+        ? "h-screen w-screen p-0"
+        : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4 xl:px-5"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
@@ -196,20 +195,20 @@ const Index = () => {
 
           <div
             className={`relative grid ${presentationMode
-                ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[2fr_0.78fr]"
-                : "gap-4 p-4 lg:p-5 xl:grid-cols-[2.05fr_0.75fr] xl:gap-5 xl:p-5"
+              ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[2fr_0.78fr]"
+              : "gap-4 p-4 lg:p-5 xl:grid-cols-[2.05fr_0.75fr] xl:gap-5 xl:p-5"
               }`}
           >
             <div
               className={`${presentationMode
-                  ? "flex h-full min-h-0 flex-col gap-3"
-                  : "space-y-4"
+                ? "flex h-full min-h-0 flex-col gap-3"
+                : "space-y-4"
                 }`}
             >
               <div
                 className={`${presentationMode
-                    ? "flex items-start justify-between gap-6"
-                    : "space-y-4"
+                  ? "flex items-start justify-between gap-6"
+                  : "space-y-4"
                   }`}
               >
                 <div className="space-y-4">
@@ -309,8 +308,8 @@ const Index = () => {
                   <div className="max-w-5xl">
                     <h1
                       className={`font-semibold tracking-tight text-white ${presentationMode
-                          ? "text-[56px] leading-[0.96] 2xl:text-[64px]"
-                          : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
+                        ? "text-[56px] leading-[0.96] 2xl:text-[64px]"
+                        : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
                         }`}
                     >
                       Análise Consolidada
@@ -380,8 +379,8 @@ const Index = () => {
                         <div className={presentationMode ? "mt-3" : "mt-5"}>
                           <p
                             className={`max-w-full min-w-0 font-bold leading-[0.95] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                                ? "text-[clamp(1.35rem,2vw,1.8rem)]"
-                                : "text-[clamp(1.6rem,2.3vw,2.6rem)]"
+                              ? "text-[clamp(1.35rem,2vw,1.8rem)]"
+                              : "text-[clamp(1.6rem,2.3vw,2.6rem)]"
                               }`}
                           >
                             {formatCurrency(item.value)}
@@ -402,8 +401,8 @@ const Index = () => {
               >
                 <div
                   className={`group relative overflow-hidden rounded-[28px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode
-                      ? "flex h-full min-h-0 flex-col p-5"
-                      : "p-5 lg:p-6"
+                    ? "flex h-full min-h-0 flex-col p-5"
+                    : "p-5 lg:p-6"
                     }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]" />
@@ -417,8 +416,8 @@ const Index = () => {
                         </p>
                         <h2
                           className={`max-w-full min-w-0 font-bold leading-[0.94] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
-                              : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
+                            ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
+                            : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
                             }`}
                         >
                           {formatCurrency(contasReceber.saldoAReceber)}
@@ -446,8 +445,8 @@ const Index = () => {
                         </p>
                         <p
                           className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                              : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
+                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
                             }`}
                         >
                           {formatCurrency(contasReceber.valorAReceber)}
@@ -463,8 +462,8 @@ const Index = () => {
                         </p>
                         <p
                           className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                              : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
+                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
                             }`}
                         >
                           {formatCurrency(contasReceber.valorRecebido)}
@@ -500,8 +499,8 @@ const Index = () => {
 
                 <div
                   className={`group relative overflow-hidden rounded-[28px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode
-                      ? "flex h-full min-h-0 flex-col p-5"
-                      : "p-5 lg:p-6"
+                    ? "flex h-full min-h-0 flex-col p-5"
+                    : "p-5 lg:p-6"
                     }`}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]" />
@@ -515,8 +514,8 @@ const Index = () => {
                         </p>
                         <h2
                           className={`max-w-full min-w-0 font-bold leading-[0.94] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
-                              : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
+                            ? "mt-2 text-[clamp(1.75rem,2.6vw,2.3rem)]"
+                            : "mt-4 text-[clamp(2rem,3vw,3.2rem)]"
                             }`}
                         >
                           {formatCurrency(contasPagar.saldoAPagar)}
@@ -544,8 +543,8 @@ const Index = () => {
                         </p>
                         <p
                           className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                              : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
+                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
                             }`}
                         >
                           {formatCurrency(contasPagar.valorAPagar)}
@@ -561,8 +560,8 @@ const Index = () => {
                         </p>
                         <p
                           className={`max-w-full min-w-0 font-bold leading-[0.96] tracking-[-0.03em] text-white whitespace-normal [overflow-wrap:anywhere] ${presentationMode
-                              ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
-                              : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
+                            ? "mt-2 text-[clamp(1rem,1.6vw,1.25rem)]"
+                            : "mt-3 text-[clamp(1.2rem,1.9vw,2rem)]"
                             }`}
                         >
                           {formatCurrency(contasPagar.valorPago)}
