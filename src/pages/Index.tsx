@@ -498,7 +498,7 @@ const Index = () => {
                         <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">
                           Contas a pagar
                         </p>
-                        <h2 className="mt-4 text-[46px] font-bold leading-none tracking-[-0.03em] text-white">
+                        <h2 className="mt-4 text-3xl font-bold leading-none tracking-[-0.03em] text-white md:text-4xl xl:text-[42px] 2xl:text-[46px] truncate min-w-0">
                           {formatCurrency(contasPagar.saldoAPagar)}
                         </h2>
                         <p className="mt-3 text-sm text-slate-400">
