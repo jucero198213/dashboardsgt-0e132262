@@ -171,192 +171,320 @@ const Index = () => {
       "border-violet-500/20 bg-violet-500/10 text-violet-300 shadow-[0_0_0_1px_rgba(167,139,250,0.05)]",
   };
 
+  const cardHeightClass = presentationMode
+    ? "min-h-[132px]"
+    : "min-h-[164px] xl:min-h-[170px]";
+
+  const renderLargeCard = ({
+    title,
+    tone,
+    total,
+    subtitle,
+    primaryLabel,
+    primaryValue,
+    secondaryLabel,
+    secondaryValue,
+    to,
+    icon: Icon,
+  }: {
+    title: string;
+    tone: "emerald" | "amber";
+    total: number;
+    subtitle: string;
+    primaryLabel: string;
+    primaryValue: number;
+    secondaryLabel: string;
+    secondaryValue: number;
+    to: string;
+    icon: typeof TrendingUp;
+  }) => {
+    const isPositive = tone === "emerald";
+
+    return (
+      <div
+        className={`group relative overflow-hidden rounded-[30px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
+            ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+            : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+          } ${presentationMode ? "p-5" : "p-5 xl:p-6"}`}
+      >
+        <div
+          className={`absolute inset-0 ${isPositive
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
+              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
+            }`}
+        />
+        <div
+          className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
+              ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
+              : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
+            }`}
+        />
+
+        <div className="relative grid h-full gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.9fr)]">
+          <div className="flex min-h-[220px] flex-col">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                    }`}
+                >
+                  {title}
+                </p>
+
+                <h2
+                  className={`mt-4 font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                      ? "text-3xl xl:text-[40px]"
+                      : "text-3xl md:text-4xl xl:text-[46px]"
+                    }`}
+                >
+                  {formatCurrency(total)}
+                </h2>
+
+                <p className="mt-3 text-sm text-slate-400">{subtitle}</p>
+              </div>
+
+              <div
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-105 ${isPositive
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
+                    : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
+                  }`}
+              >
+                <Icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+              </div>
+            </div>
+
+            <div className="mt-auto pt-5">
+              <div
+                className={`flex items-center justify-between gap-4 rounded-[24px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
+                    ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
+                    : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
+                  } ${presentationMode ? "px-4 py-3" : "px-5 py-4"}`}
+              >
+                <div className="min-w-0">
+                  <p
+                    className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                      }`}
+                  >
+                    Ação rápida
+                  </p>
+                  <p className="mt-1 text-sm text-slate-300">
+                    Abrir detalhamento completo
+                  </p>
+                </div>
+
+                <Link
+                  to={to}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
+                      ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
+                      : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+                    }`}
+                >
+                  Ver detalhamento
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 xl:grid-rows-2">
+            <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+                {primaryLabel}
+              </p>
+              <p
+                className={`mt-3 font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                    ? "text-xl xl:text-2xl"
+                    : "text-2xl xl:text-[34px]"
+                  }`}
+              >
+                {formatCurrency(primaryValue)}
+              </p>
+            </div>
+
+            <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+                {secondaryLabel}
+              </p>
+              <p
+                className={`mt-3 font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
+                    ? "text-xl xl:text-2xl"
+                    : "text-2xl xl:text-[34px]"
+                  }`}
+              >
+                {formatCurrency(secondaryValue)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${presentationMode
           ? "h-screen w-screen p-0"
-          : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4 xl:px-5"
+          : "px-2 py-2 sm:px-3 sm:py-3 lg:px-4 lg:py-4"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full gap-4"
+        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full"
           }`}
       >
         <section
           className={`relative overflow-hidden border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none" : "rounded-[28px]"
             }`}
+          style={
+            presentationMode ? undefined : { minHeight: "calc(100vh - 24px)" }
+          }
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
             className={`relative grid ${presentationMode
-                ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[2fr_0.78fr]"
-                : "gap-4 p-4 lg:p-5 xl:grid-cols-[2.05fr_0.75fr] xl:gap-4 xl:p-5"
+                ? "h-full gap-3 p-4 lg:p-5 xl:grid-cols-[minmax(0,1.8fr)_380px]"
+                : "h-full gap-4 p-4 lg:p-5 xl:grid-cols-[minmax(0,1.85fr)_420px]"
               }`}
           >
             <div
               className={`${presentationMode
                   ? "flex h-full min-h-0 flex-col gap-3"
-                  : "space-y-4"
+                  : "flex h-full min-h-0 flex-col gap-4"
                 }`}
             >
-              <div
-                className={`${presentationMode
-                    ? "flex items-start justify-between gap-6"
-                    : "space-y-4"
-                  }`}
-              >
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-end gap-2">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                        De
-                      </span>
-                      <input
-                        type="date"
-                        value={dwFilter.dataInicio}
-                        onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                        className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                        Até
-                      </span>
-                      <input
-                        type="date"
-                        value={dwFilter.dataFim}
-                        onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                        className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                        Empresa
-                      </span>
-                      <Select
-                        value={dwFilter.empresa ?? "__all__"}
-                        onValueChange={(v) =>
-                          setDwFilter("empresa", v === "__all__" ? null : v)
-                        }
-                      >
-                        <SelectTrigger className="h-9 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                          <SelectValue placeholder="Todas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__all__">Todas</SelectItem>
-                          {empresas.map((e) => (
-                            <SelectItem key={e.id} value={e.id}>
-                              {e.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                        Filial
-                      </span>
-                      <Select
-                        value={dwFilter.filial ?? "__all__"}
-                        onValueChange={(v) =>
-                          setDwFilter("filial", v === "__all__" ? null : v)
-                        }
-                      >
-                        <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                          <SelectValue placeholder="Todas" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="__all__">Todas</SelectItem>
-                          {filiaisFiltradas.map((f) => (
-                            <SelectItem key={f.id} value={f.id}>
-                              {f.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <button
-                      onClick={() => void fetchFromDW()}
-                      disabled={isFetchingDw}
-                      className="inline-flex h-9 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <RefreshCw
-                        className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
-                          }`}
-                      />
-                      {isFetchingDw ? "Buscando..." : "Atualizar"}
-                    </button>
+              <div className={presentationMode ? "space-y-3" : "space-y-3"}>
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      De
+                    </span>
+                    <input
+                      type="date"
+                      value={dwFilter.dataInicio}
+                      onChange={(e) => setDwFilter("dataInicio", e.target.value)}
+                      className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                    />
                   </div>
 
-                  {dwError && (
-                    <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                      {dwError}
-                    </div>
-                  )}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Até
+                    </span>
+                    <input
+                      type="date"
+                      value={dwFilter.dataFim}
+                      onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                      className="h-9 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                    />
+                  </div>
 
-                  <div className="max-w-4xl">
-                    <h1
-                      className={`font-semibold tracking-tight text-white ${presentationMode
-                          ? "text-[56px] leading-[0.96] 2xl:text-[64px]"
-                          : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1.02]"
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Empresa
+                    </span>
+                    <Select
+                      value={dwFilter.empresa ?? "__all__"}
+                      onValueChange={(v) =>
+                        setDwFilter("empresa", v === "__all__" ? null : v)
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                        <SelectValue placeholder="Todas" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">Todas</SelectItem>
+                        {empresas.map((e) => (
+                          <SelectItem key={e.id} value={e.id}>
+                            {e.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Filial
+                    </span>
+                    <Select
+                      value={dwFilter.filial ?? "__all__"}
+                      onValueChange={(v) =>
+                        setDwFilter("filial", v === "__all__" ? null : v)
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-[150px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                        <SelectValue placeholder="Todas" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">Todas</SelectItem>
+                        {filiaisFiltradas.map((f) => (
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <button
+                    onClick={() => void fetchFromDW()}
+                    disabled={isFetchingDw}
+                    className="inline-flex h-9 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-4 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
                         }`}
-                    >
-                      Análise Consolidada
-                    </h1>
-
-                    {presentationMode && (
-                      <p className="mt-3 max-w-2xl text-[15px] text-slate-400">
-                        Panorama executivo do período, com leitura rápida das
-                        entradas, saídas e distribuição dos principais
-                        indicadores.
-                      </p>
-                    )}
-
-                    {!presentationMode && isProcessed && (
-                      <p className="mt-3 text-sm text-slate-400">
-                        Dados atualizados ·{" "}
-                        <span className="font-medium text-slate-200">
-                          {dwFilter.dataInicio} → {dwFilter.dataFim}
-                        </span>
-                      </p>
-                    )}
-                  </div>
+                    />
+                    {isFetchingDw ? "Buscando..." : "Atualizar"}
+                  </button>
                 </div>
 
-                {presentationMode && (
-                  <div className="hidden xl:flex xl:shrink-0 xl:items-center">
-                    <button
-                      onClick={togglePresentationMode}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-                      title="Sair do modo apresentação"
-                      aria-label="Sair do modo apresentação"
-                    >
-                      <Presentation className="h-4 w-4" />
-                    </button>
+                {dwError && (
+                  <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {dwError}
                   </div>
                 )}
+
+                <div className="max-w-4xl">
+                  <h1
+                    className={`font-semibold tracking-tight text-white ${presentationMode
+                        ? "text-[52px] leading-[0.95] 2xl:text-[60px]"
+                        : "text-4xl md:text-5xl xl:text-[56px] xl:leading-[1]"
+                      }`}
+                  >
+                    Análise Consolidada
+                  </h1>
+
+                  {presentationMode && (
+                    <p className="mt-2 max-w-2xl text-[14px] text-slate-400">
+                      Panorama executivo do período, com leitura rápida das
+                      entradas, saídas e distribuição dos principais indicadores.
+                    </p>
+                  )}
+
+                  {!presentationMode && isProcessed && (
+                    <p className="mt-2 text-sm text-slate-400">
+                      Dados atualizados ·{" "}
+                      <span className="font-medium text-slate-200">
+                        {dwFilter.dataInicio} → {dwFilter.dataFim}
+                      </span>
+                    </p>
+                  )}
+                </div>
               </div>
 
-              <div
-                className={`grid md:grid-cols-2 xl:grid-cols-4 ${presentationMode ? "gap-3" : "gap-3"
-                  }`}
-              >
+              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
                   return (
                     <div
                       key={item.label}
-                      className={`group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-4" : "p-5"
+                      className={`group relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${cardHeightClass} ${presentationMode ? "p-4" : "p-5"
                         }`}
                     >
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
@@ -374,11 +502,11 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className={presentationMode ? "mt-3" : "mt-5"}>
+                        <div className="mt-auto pt-4">
                           <p
                             className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
                                 ? "text-2xl xl:text-[28px]"
-                                : "text-2xl md:text-3xl xl:text-[36px] 2xl:text-[42px]"
+                                : "text-2xl md:text-3xl xl:text-[38px]"
                               }`}
                           >
                             {formatCurrency(item.value)}
@@ -393,200 +521,37 @@ const Index = () => {
                 })}
               </div>
 
-              <div
-                className={`grid xl:grid-cols-2 ${presentationMode ? "flex-1 gap-3" : "gap-4"
-                  }`}
-              >
-                <div
-                  className={`group relative overflow-hidden rounded-[30px] border border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-5"
-                    }`}
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]" />
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]" />
+              <div className="grid flex-1 xl:grid-cols-2 gap-3 xl:min-h-0">
+                {renderLargeCard({
+                  title: "Contas a receber",
+                  tone: "emerald",
+                  total: contasReceber.saldoAReceber,
+                  subtitle: "Saldo principal em aberto",
+                  primaryLabel: "Previsto",
+                  primaryValue: contasReceber.valorAReceber,
+                  secondaryLabel: "Recebido",
+                  secondaryValue: contasReceber.valorRecebido,
+                  to: "/contas-a-receber",
+                  icon: TrendingUp,
+                })}
 
-                  <div className="relative flex flex-col gap-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-300">
-                          Contas a receber
-                        </p>
-                        <h2
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-2xl xl:text-3xl"
-                              : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"
-                            }`}
-                        >
-                          {formatCurrency(contasReceber.saldoAReceber)}
-                        </h2>
-                        <p className="mt-3 text-sm text-slate-400">
-                          Saldo principal em aberto
-                        </p>
-                      </div>
-
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15">
-                        <TrendingUp className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div
-                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
-                          }`}
-                      >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
-                          Previsto
-                        </p>
-                        <p
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-lg xl:text-xl"
-                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
-                            }`}
-                        >
-                          {formatCurrency(contasReceber.valorAReceber)}
-                        </p>
-                      </div>
-
-                      <div
-                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
-                          }`}
-                      >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
-                          Recebido
-                        </p>
-                        <p
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-lg xl:text-xl"
-                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
-                            }`}
-                        >
-                          {formatCurrency(contasReceber.valorRecebido)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-1">
-                      <div
-                        className={`flex items-center justify-between rounded-[24px] border border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
-                          }`}
-                      >
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200/75">
-                            Ação rápida
-                          </p>
-                          <p className="mt-1 text-sm text-slate-300">
-                            Abrir detalhamento completo
-                          </p>
-                        </div>
-
-                        <Link
-                          to="/contas-a-receber"
-                          className="inline-flex items-center gap-2 rounded-full border border-emerald-400/22 bg-emerald-400/12 px-4 py-2.5 text-sm font-semibold text-emerald-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
-                        >
-                          Ver detalhamento
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className={`group relative overflow-hidden rounded-[30px] border border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)] hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${presentationMode ? "flex h-full min-h-0 flex-col p-5" : "p-5"
-                    }`}
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]" />
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]" />
-
-                  <div className="relative flex flex-col gap-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-300">
-                          Contas a pagar
-                        </p>
-                        <h2
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-2xl xl:text-3xl"
-                              : "mt-4 text-3xl md:text-4xl xl:text-[42px] 2xl:text-[46px]"
-                            }`}
-                        >
-                          {formatCurrency(contasPagar.saldoAPagar)}
-                        </h2>
-                        <p className="mt-3 text-sm text-slate-400">
-                          Saldo principal em aberto
-                        </p>
-                      </div>
-
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-300 transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400/30 group-hover:bg-amber-400/15">
-                        <TrendingDown className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div
-                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
-                          }`}
-                      >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
-                          Previsto
-                        </p>
-                        <p
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-lg xl:text-xl"
-                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
-                            }`}
-                        >
-                          {formatCurrency(contasPagar.valorAPagar)}
-                        </p>
-                      </div>
-
-                      <div
-                        className={`rounded-[24px] border border-white/8 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055] ${presentationMode ? "p-3" : "p-4"
-                          }`}
-                      >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
-                          Pago
-                        </p>
-                        <p
-                          className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode
-                              ? "mt-2 text-lg xl:text-xl"
-                              : "mt-3 text-xl md:text-2xl xl:text-[30px] 2xl:text-[34px]"
-                            }`}
-                        >
-                          {formatCurrency(contasPagar.valorPago)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-1">
-                      <div
-                        className={`flex items-center justify-between rounded-[24px] border border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${presentationMode ? "px-4 py-3" : "px-5 py-4"
-                          }`}
-                      >
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/75">
-                            Ação rápida
-                          </p>
-                          <p className="mt-1 text-sm text-slate-300">
-                            Abrir detalhamento completo
-                          </p>
-                        </div>
-
-                        <Link
-                          to="/contas-a-pagar"
-                          className="inline-flex items-center gap-2 rounded-full border border-amber-400/22 bg-amber-400/12 px-4 py-2.5 text-sm font-semibold text-amber-300 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
-                        >
-                          Ver detalhamento
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {renderLargeCard({
+                  title: "Contas a pagar",
+                  tone: "amber",
+                  total: contasPagar.saldoAPagar,
+                  subtitle: "Saldo principal em aberto",
+                  primaryLabel: "Previsto",
+                  primaryValue: contasPagar.valorAPagar,
+                  secondaryLabel: "Pago",
+                  secondaryValue: contasPagar.valorPago,
+                  to: "/contas-a-pagar",
+                  icon: TrendingDown,
+                })}
               </div>
             </div>
 
             <aside
-              className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-4" : "p-4 lg:p-5"
+              className={`rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-4" : "h-full p-5"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
@@ -615,10 +580,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div
-                  className={`mt-4 grid min-h-0 gap-2 ${presentationMode ? "content-start" : "mt-5 gap-3"
-                    }`}
-                >
+                <div className="mt-5 grid min-h-0 gap-3 content-start">
                   {indicadores.map((ind) => {
                     const positive =
                       ind.percentualReal >= ind.percentualEsperado;
