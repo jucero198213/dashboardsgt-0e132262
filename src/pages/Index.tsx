@@ -7,6 +7,7 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { formatCurrency } from "@/data/mockData";
