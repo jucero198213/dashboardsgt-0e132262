@@ -395,8 +395,8 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="mt-6">
-                          <p className="text-2xl font-bold leading-none tracking-[-0.03em] text-white md:text-3xl xl:text-[36px] 2xl:text-[42px] truncate min-w-0">
+                        <div className={presentationMode ? "mt-3" : "mt-6"}>
+                          <p className={`font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 ${presentationMode ? "text-2xl xl:text-[28px]" : "text-2xl md:text-3xl xl:text-[36px] 2xl:text-[42px]"}`}>
                             {formatCurrency(item.value)}
                           </p>
                           <p className="mt-3 text-sm text-slate-400">
