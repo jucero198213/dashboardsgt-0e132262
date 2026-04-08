@@ -25,10 +25,12 @@ const MiniLineChart = ({
   previstoMonthly,
   realizadoMonthly,
   tone,
+  ano,
 }: {
   previstoMonthly: number[];
   realizadoMonthly: number[];
   tone: "emerald" | "amber";
+  ano?: string;
 }) => {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
@@ -109,7 +111,7 @@ const MiniLineChart = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-          Evolução mensal
+          Evolução mensal{ano ? ` · ${ano}` : ""}
         </span>
         <div className="flex gap-3">
           <div className="flex items-center gap-1.5">
@@ -487,6 +489,7 @@ const Index = () => {
     secondaryValue,
     monthlyPrevisto,
     monthlyRealizado,
+    chartAno,
     to,
     icon: Icon,
   }: {
@@ -500,6 +503,7 @@ const Index = () => {
     secondaryValue: number;
     monthlyPrevisto: number[];
     monthlyRealizado: number[];
+    chartAno?: string;
     to: string;
     icon: typeof TrendingUp;
   }) => {
@@ -579,6 +583,7 @@ const Index = () => {
             previstoMonthly={monthlyPrevisto}
             realizadoMonthly={monthlyRealizado}
             tone={tone}
+            ano={chartAno}
           />
 
           {/* Action bar */}
@@ -825,6 +830,7 @@ const Index = () => {
                   secondaryValue: contasReceber.valorRecebido,
                   monthlyPrevisto: chartReceber.previsto,
                   monthlyRealizado: chartReceber.realizado,
+                  chartAno: chartReceber.ano,
                   to: "/contas-a-receber",
                   icon: TrendingUp,
                 })}
@@ -840,6 +846,7 @@ const Index = () => {
                   secondaryValue: contasPagar.valorPago,
                   monthlyPrevisto: chartPagar.previsto,
                   monthlyRealizado: chartPagar.realizado,
+                  chartAno: chartPagar.ano,
                   to: "/contas-a-pagar",
                   icon: TrendingDown,
                 })}

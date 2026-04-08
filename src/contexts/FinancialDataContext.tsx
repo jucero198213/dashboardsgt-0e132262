@@ -69,6 +69,8 @@ export interface DadosMensais {
   previsto: number[];
   /** Valor realizado (VLR_PAGO de registros liquidados) por mês index 0-11 */
   realizado: number[];
+  /** Ano de referência do gráfico */
+  ano: string;
 }
 
 // ─── State & Context types ───────────────────────────────────────────────────
@@ -161,8 +163,8 @@ export function FinancialDataProvider({
     contasReceber: [],
     contasPagar: [],
     indicadores: defaultIndicadores,
-    chartPagar:   { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0) },
-    chartReceber: { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0) },
+    chartPagar:   { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartReceber: { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     dwFilter:     defaultDwFilter,
     filiais:      [],
     empresas:     [],
@@ -332,17 +334,31 @@ export function FinancialDataProvider({
         }
       );
 
-      // ── Dados mensais para gráficos (agrupa por mês) ──────────────────────
+      // ── Dados mensais para gráficos — busca o ANO INTEIRO ─────────────────
+      // Extrai o ano do filtro e faz uma segunda query cobrindo jan-dez
+      const anoFiltro = state.dwFilter.dataInicio.substring(0, 4);
+      const { data: chartData } = await fetchDwData({
+        dataInicio: `${anoFiltro}-01-01`,
+        dataFim:    `${anoFiltro}-12-31`,
+        filial:     state.dwFilter.filial,
+        empresa:    state.dwFilter.empresa,
+      });
+
+      const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
+      const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
+
+      const chartCpPrevisto  = chartAllCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      const chartCpPago      = chartAllCP.filter((r) => sit(r) === "L" && hasPag(r));
+      const chartCrPrevisto  = chartAllCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      const chartCrRecebido  = chartAllCR.filter((r) => sit(r) === "L" && hasPag(r));
+
       const extractMonth = (dateVal: unknown): number => {
         if (dateVal == null) return -1;
-        // Se for Date object (driver mssql pode retornar assim)
-        if (dateVal instanceof Date) return dateVal.getMonth(); // 0-11
+        if (dateVal instanceof Date) return dateVal.getMonth();
         const s = String(dateVal).trim();
         if (!s || s.toLowerCase() === "null") return -1;
-        // ISO: "2026-02-15" ou "2026-02-15T00:00:00.000Z"
         const isoMatch = s.match(/^(\d{4})-(\d{2})/);
         if (isoMatch) return parseInt(isoMatch[2], 10) - 1;
-        // BR: "15/02/2026"
         const brMatch = s.match(/^\d{2}\/(\d{2})\/\d{4}/);
         if (brMatch) return parseInt(brMatch[1], 10) - 1;
         return -1;
@@ -360,13 +376,15 @@ export function FinancialDataProvider({
       };
 
       const chartPagar: DadosMensais = {
-        previsto:  groupByMonth(cpPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
-        realizado: groupByMonth(cpPago,     "VLR_PAGO",    "DATA_PAGAMENTO"),
+        previsto:  groupByMonth(chartCpPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
+        realizado: groupByMonth(chartCpPago,     "VLR_PAGO",    "DATA_PAGAMENTO"),
+        ano: anoFiltro,
       };
 
       const chartReceber: DadosMensais = {
-        previsto:  groupByMonth(crPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
-        realizado: groupByMonth(crRecebido, "VLR_PAGO",    "DATA_PAGAMENTO"),
+        previsto:  groupByMonth(chartCrPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
+        realizado: groupByMonth(chartCrRecebido, "VLR_PAGO",    "DATA_PAGAMENTO"),
+        ano: anoFiltro,
       };
 
       setState((prev) => ({ ...prev, isFetchingDw: false, isProcessed: true, resumo, contasReceber, contasPagar, indicadores, chartPagar, chartReceber }));
