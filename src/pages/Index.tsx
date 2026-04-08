@@ -624,9 +624,9 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen p-0"
-          : "px-1.5 py-1.5 sm:px-2 sm:py-2"
+      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
+          ? "h-screen w-screen overflow-hidden p-0"
+          : "overflow-y-auto px-1.5 py-1.5 sm:px-2 sm:py-2 xl:overflow-hidden"
         }`}
     >
       {/* Background effects */}
@@ -634,7 +634,7 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full h-[calc(100vh-12px)] sm:h-[calc(100vh-16px)]"
+        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
           }`}
       >
         {/* No header — content goes directly */}
