@@ -9,6 +9,7 @@ import { InsightsBlock } from "@/components/indicators/InsightsBlock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useMemo } from "react";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const INDICATOR_KEYWORDS: Record<string, string[]> = {
   "Compra de Ativo": ["ativo", "compra", "aquisição", "equipamento"],
