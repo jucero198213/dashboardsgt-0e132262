@@ -593,12 +593,27 @@ const Index = () => {
             </div>
           </div>
 
-          <MiniLineChart
-            previstoMonthly={monthlyPrevisto}
-            realizadoMonthly={monthlyRealizado}
-            tone={tone}
-            ano={chartAno}
-          />
+          {/* Overlay de carga incremental — mantém gráfico visível enquanto atualiza */}
+          <div className="relative">
+            <MiniLineChart
+              previstoMonthly={monthlyPrevisto}
+              realizadoMonthly={monthlyRealizado}
+              tone={tone}
+              ano={chartAno}
+            />
+            {isFetchingDw && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/30 backdrop-blur-[1px]">
+                <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${
+                  isPositive
+                    ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
+                    : "border-amber-400/30 bg-amber-500/20 text-amber-300"
+                }`}>
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Atualizando...
+                </div>
+              </div>
+            )}
+          </div>
 
           <div
             className={`rounded-[16px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive

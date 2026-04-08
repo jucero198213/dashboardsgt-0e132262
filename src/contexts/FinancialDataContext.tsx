@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type {
   ContaPagar,
   ContaReceber,
@@ -150,6 +150,39 @@ const calculateStatus = (
   return "Em Aberto";
 };
 
+// ─── Cache sessionStorage ─────────────────────────────────────────────────────
+const CACHE_KEY = "dw_financial_cache_v1";
+
+interface CachedState {
+  resumo: ResumoFinanceiro;
+  contasReceber: ContaReceber[];
+  contasPagar: ContaPagar[];
+  indicadores: IndicadorComparativo[];
+  chartPagar: DadosMensais;
+  chartReceber: DadosMensais;
+  dwFilter: DwFilter;
+  timestamp: number;
+}
+
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
+
+function saveCache(data: CachedState) {
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* ignora */ }
+}
+
+function loadCache(): CachedState | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed: CachedState = JSON.parse(raw);
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
+      sessionStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch { return null; }
+}
+
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 export function FinancialDataProvider({
@@ -157,20 +190,26 @@ export function FinancialDataProvider({
 }: {
   children: React.ReactNode;
 }) {
+  // ── Recupera cache ao montar (persiste dados entre navegações) ────────────
+  const cached = loadCache();
+
   const [state, setState] = useState<FinancialDataState>({
-    isProcessed: false,
-    resumo: defaultResumo,
-    contasReceber: [],
-    contasPagar: [],
-    indicadores: defaultIndicadores,
-    chartPagar:   { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
-    chartReceber: { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
-    dwFilter:     defaultDwFilter,
+    isProcessed:  cached ? true : false,
+    resumo:       cached?.resumo       ?? defaultResumo,
+    contasReceber:cached?.contasReceber ?? [],
+    contasPagar:  cached?.contasPagar   ?? [],
+    indicadores:  cached?.indicadores   ?? defaultIndicadores,
+    chartPagar:   cached?.chartPagar    ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartReceber: cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    dwFilter:     cached?.dwFilter      ?? defaultDwFilter,
     filiais:      [],
     empresas:     [],
     isFetchingDw: false,
     dwError:      null,
   });
+
+  // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
+  const abortRef = useRef<AbortController | null>(null);
 
   // ─── DW: atualiza um campo do filtro ───────────────────────────────────────
   const setDwFilter = useCallback(
@@ -207,6 +246,11 @@ export function FinancialDataProvider({
 
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async () => {
+    // Cancela requisição anterior se ainda estiver em andamento
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+
+    // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
     setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
     try {
       const { data } = await fetchDwData({
@@ -387,7 +431,22 @@ export function FinancialDataProvider({
         ano: anoFiltro,
       };
 
-      setState((prev) => ({ ...prev, isFetchingDw: false, isProcessed: true, resumo, contasReceber, contasPagar, indicadores, chartPagar, chartReceber }));
+      // ── Salva no cache (persiste entre navegações por 30 min) ────────────────
+      saveCache({
+        resumo, contasReceber, contasPagar, indicadores,
+        chartPagar, chartReceber,
+        dwFilter: state.dwFilter,
+        timestamp: Date.now(),
+      });
+
+      // INCREMENTAL: substitui dados antigos pelos novos com transição suave
+      setState((prev) => ({
+        ...prev,
+        isFetchingDw: false,
+        isProcessed:  true,
+        resumo, contasReceber, contasPagar, indicadores,
+        chartPagar, chartReceber,
+      }));
     } catch (err) {
       setState((prev) => ({
         ...prev, isFetchingDw: false,
