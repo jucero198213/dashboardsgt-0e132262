@@ -66,26 +66,26 @@ const MiniLineChart = ({
   const colors =
     tone === "emerald"
       ? {
-        prevStroke: "rgba(16,185,129,0.35)",
+        prevStroke: "rgba(16,185,129,0.32)",
         realStroke: "#34d399",
         gradFrom: "#34d399",
         dot: "#34d399",
-        dotGlow: "rgba(16,185,129,0.4)",
+        dotGlow: "rgba(16,185,129,0.35)",
         legendPrev: "rgba(16,185,129,0.4)",
         legendReal: "#34d399",
         tooltipBg: "rgba(6,78,59,0.92)",
-        tooltipBorder: "rgba(52,211,153,0.3)",
+        tooltipBorder: "rgba(52,211,153,0.28)",
       }
       : {
-        prevStroke: "rgba(245,158,11,0.35)",
+        prevStroke: "rgba(245,158,11,0.32)",
         realStroke: "#fbbf24",
         gradFrom: "#fbbf24",
         dot: "#fbbf24",
-        dotGlow: "rgba(245,158,11,0.4)",
+        dotGlow: "rgba(245,158,11,0.35)",
         legendPrev: "rgba(245,158,11,0.4)",
         legendReal: "#fbbf24",
         tooltipBg: "rgba(78,53,6,0.92)",
-        tooltipBorder: "rgba(251,191,36,0.3)",
+        tooltipBorder: "rgba(251,191,36,0.28)",
       };
 
   const gradId = `line-grad-${tone}`;
@@ -106,9 +106,9 @@ const MiniLineChart = ({
   };
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+    <div className="flex flex-1 min-h-0 flex-col rounded-[20px] border border-white/7 bg-white/[0.03] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
           Evolução mensal{ano ? ` · ${ano}` : ""}
         </span>
         <div className="flex gap-3">
@@ -132,7 +132,7 @@ const MiniLineChart = ({
         >
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors.gradFrom} stopOpacity={0.25} />
+              <stop offset="0%" stopColor={colors.gradFrom} stopOpacity={0.22} />
               <stop offset="60%" stopColor={colors.gradFrom} stopOpacity={0.08} />
               <stop offset="100%" stopColor={colors.gradFrom} stopOpacity={0} />
             </linearGradient>
@@ -152,7 +152,7 @@ const MiniLineChart = ({
               y1={padTop + chartH * (1 - frac)}
               x2={svgW - padR}
               y2={padTop + chartH * (1 - frac)}
-              stroke="rgba(255,255,255,0.05)"
+              stroke="rgba(255,255,255,0.045)"
               strokeWidth={0.5}
             />
           ))}
@@ -172,7 +172,7 @@ const MiniLineChart = ({
             d={buildPath(realizadoPoints)}
             fill="none"
             stroke={colors.realStroke}
-            strokeWidth={2.5}
+            strokeWidth={2.6}
             strokeLinecap="round"
             strokeLinejoin="round"
             filter={`url(#glow-${tone})`}
@@ -280,7 +280,7 @@ const MiniLineChart = ({
               x={toX(i)}
               y={svgH - 4}
               textAnchor="middle"
-              fill={hoverIndex === i ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.25)"}
+              fill={hoverIndex === i ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.26)"}
               fontSize={9.5}
               fontWeight={hoverIndex === i ? 600 : 400}
               fontFamily="system-ui, sans-serif"
@@ -458,18 +458,18 @@ const Index = () => {
         tone: "emerald",
       },
       {
-        label: "A PAGAR",
-        value: contasPagar.saldoAPagar,
-        helper: "Saldo pendente",
-        icon: TrendingDown,
-        tone: "amber",
-      },
-      {
         label: "RECEBIDO",
         value: contasReceber.valorRecebido,
         helper: "Entrada consolidada",
         icon: TrendingUp,
         tone: "cyan",
+      },
+      {
+        label: "A PAGAR",
+        value: contasPagar.saldoAPagar,
+        helper: "Saldo pendente",
+        icon: TrendingDown,
+        tone: "amber",
       },
       {
         label: "PAGO",
@@ -481,21 +481,21 @@ const Index = () => {
     ],
     [
       contasReceber.saldoAReceber,
-      contasPagar.saldoAPagar,
       contasReceber.valorRecebido,
+      contasPagar.saldoAPagar,
       contasPagar.valorPago,
     ]
   );
 
   const toneStyles: Record<string, string> = {
     emerald:
-      "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.05)]",
+      "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.04)]",
     amber:
-      "border-amber-500/20 bg-amber-500/10 text-amber-300 shadow-[0_0_0_1px_rgba(245,158,11,0.05)]",
+      "border-amber-500/20 bg-amber-500/10 text-amber-300 shadow-[0_0_0_1px_rgba(245,158,11,0.04)]",
     cyan:
-      "border-cyan-500/20 bg-cyan-500/10 text-cyan-300 shadow-[0_0_0_1px_rgba(34,211,238,0.05)]",
+      "border-cyan-500/20 bg-cyan-500/10 text-cyan-300 shadow-[0_0_0_1px_rgba(34,211,238,0.04)]",
     violet:
-      "border-violet-500/20 bg-violet-500/10 text-violet-300 shadow-[0_0_0_1px_rgba(167,139,250,0.05)]",
+      "border-violet-500/20 bg-violet-500/10 text-violet-300 shadow-[0_0_0_1px_rgba(167,139,250,0.04)]",
   };
 
   const renderLargeCard = ({
@@ -531,29 +531,23 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
-          ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-          : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(0,0,0,0.24)] ${isPositive
+          ? "border-emerald-500/12 bg-[linear-gradient(180deg,rgba(11,18,38,0.86)_0%,rgba(6,11,28,0.98)_100%)] hover:border-emerald-400/22"
+          : "border-amber-500/12 bg-[linear-gradient(180deg,rgba(11,18,38,0.86)_0%,rgba(6,11,28,0.98)_100%)] hover:border-amber-400/22"
           } ${presentationMode ? "flex flex-col p-3.5" : "flex flex-col p-3.5 xl:p-4"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
-            : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
-            }`}
-        />
-        <div
-          className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
-            ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
-            : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_34%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_34%)]"
             }`}
         />
 
-        <div className="relative flex min-h-0 flex-1 flex-col gap-2">
+        <div className="relative flex min-h-0 flex-1 flex-col gap-2.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${isPositive ? "text-emerald-300" : "text-amber-300"
                   }`}
               >
                 {title}
@@ -561,13 +555,13 @@ const Index = () => {
               <h2 className="mt-1 min-w-0 truncate text-[22px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[24px]">
                 {formatCurrency(total)}
               </h2>
-              <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+              <p className="mt-1 text-xs text-slate-300/85">{subtitle}</p>
             </div>
 
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
-                : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
+                ? "border-emerald-500/18 bg-emerald-500/8 text-emerald-300 group-hover:border-emerald-400/24 group-hover:bg-emerald-400/12"
+                : "border-amber-500/18 bg-amber-500/8 text-amber-300 group-hover:border-amber-400/24 group-hover:bg-amber-400/12"
                 }`}
             >
               <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
@@ -575,8 +569,8 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-[16px] border border-white/8 bg-white/[0.04] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+            <div className="rounded-[15px] border border-white/7 bg-white/[0.03] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 group-hover:border-white/10 group-hover:bg-white/[0.045]">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 {primaryLabel}
               </p>
               <p className="mt-1.5 min-w-0 truncate text-[15px] font-bold leading-none tracking-[-0.03em] text-white">
@@ -584,8 +578,8 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="rounded-[16px] border border-white/8 bg-white/[0.04] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+            <div className="rounded-[15px] border border-white/7 bg-white/[0.03] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 group-hover:border-white/10 group-hover:bg-white/[0.045]">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 {secondaryLabel}
               </p>
               <p className="mt-1.5 min-w-0 truncate text-[15px] font-bold leading-none tracking-[-0.03em] text-white">
@@ -602,14 +596,14 @@ const Index = () => {
           />
 
           <div
-            className={`flex items-center justify-between gap-3 rounded-[16px] border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
-              ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
-              : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
+            className={`flex items-center justify-between gap-3 rounded-[15px] border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
+              ? "border-emerald-400/10 bg-[linear-gradient(180deg,rgba(16,185,129,0.06)_0%,rgba(16,185,129,0.02)_100%)]"
+              : "border-amber-400/10 bg-[linear-gradient(180deg,rgba(245,158,11,0.06)_0%,rgba(245,158,11,0.02)_100%)]"
               }`}
           >
             <div className="min-w-0">
               <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${isPositive ? "text-emerald-200/80" : "text-amber-200/80"
                   }`}
               >
                 Ação rápida
@@ -622,8 +616,8 @@ const Index = () => {
             <Link
               to={to}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
-                ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
-                : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+                ? "border-emerald-400/18 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/14 hover:shadow-[0_8px_20px_rgba(16,185,129,0.10)]"
+                : "border-amber-400/18 bg-amber-400/10 text-amber-300 hover:bg-amber-400/14 hover:shadow-[0_8px_20px_rgba(245,158,11,0.10)]"
                 }`}
             >
               Ver detalhamento
@@ -642,23 +636,23 @@ const Index = () => {
         : "overflow-y-auto px-1.5 py-1.5 sm:px-2 sm:py-2 xl:overflow-hidden"
         }`}
     >
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.06),transparent_24%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
         className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
           }`}
       >
         <section
-          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full overflow-hidden rounded-none" : "overflow-y-auto rounded-[24px] xl:overflow-hidden"
+          className={`relative flex-1 min-h-0 border border-white/8 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_26px_70px_rgba(0,0,0,0.42)] ${presentationMode ? "h-full w-full overflow-hidden rounded-none" : "overflow-y-auto rounded-[24px] xl:overflow-hidden"
             }`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.18),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.08),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.04),transparent_20%)]" />
 
           <div
             className={`relative xl:h-full ${presentationMode
-              ? "grid h-full gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
-              : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
+              ? "grid h-full gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.15fr)_minmax(320px,0.78fr)] xl:grid-rows-[1fr]"
+              : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.15fr)_minmax(320px,0.78fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5 xl:h-full">
@@ -666,7 +660,7 @@ const Index = () => {
                 <div className="flex flex-wrap items-end justify-between gap-2">
                   <div className="scrollbar-none flex items-end gap-2 overflow-x-auto pb-1">
                     <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                         De
                       </span>
                       <input
@@ -675,24 +669,24 @@ const Index = () => {
                         onChange={(e) =>
                           setDwFilter("dataInicio", e.target.value)
                         }
-                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/18 hover:bg-white/8 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                         Até
                       </span>
                       <input
                         type="date"
                         value={dwFilter.dataFim}
                         onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/18 hover:bg-white/8 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                         Empresa
                       </span>
                       <Select
@@ -701,7 +695,7 @@ const Index = () => {
                           setDwFilter("empresa", v === "__all__" ? null : v)
                         }
                       >
-                        <SelectTrigger className="h-8 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                        <SelectTrigger className="h-8 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/18 hover:bg-white/8">
                           <SelectValue placeholder="Todas" />
                         </SelectTrigger>
                         <SelectContent>
@@ -716,7 +710,7 @@ const Index = () => {
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                         Filial
                       </span>
                       <Select
@@ -725,7 +719,7 @@ const Index = () => {
                           setDwFilter("filial", v === "__all__" ? null : v)
                         }
                       >
-                        <SelectTrigger className="h-8 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                        <SelectTrigger className="h-8 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/18 hover:bg-white/8">
                           <SelectValue placeholder="Todas" />
                         </SelectTrigger>
                         <SelectContent>
@@ -742,7 +736,7 @@ const Index = () => {
                     <button
                       onClick={() => void handleUpdate()}
                       disabled={isFetchingDw}
-                      className="inline-flex h-8 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3.5 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex h-8 items-center gap-2 rounded-xl border border-cyan-400/18 bg-cyan-500/8 px-3.5 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/28 hover:bg-cyan-400/14 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <RefreshCw
                         className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`}
@@ -777,11 +771,11 @@ const Index = () => {
                       : "text-3xl md:text-4xl xl:text-[36px] xl:leading-[1]"
                       }`}
                   >
-                    ANÁLISE CONSOLIDADA
+                    Análise Consolidada
                   </h1>
 
                   {presentationMode && (
-                    <p className="mt-1.5 max-w-2xl text-[13px] text-slate-400">
+                    <p className="mt-1.5 max-w-2xl text-[13px] text-slate-300/90">
                       Panorama executivo do período, com leitura rápida das
                       entradas, saídas e distribuição dos principais
                       indicadores.
@@ -789,9 +783,9 @@ const Index = () => {
                   )}
 
                   {!presentationMode && isProcessed && (
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-300/85">
                       Dados atualizados ·{" "}
-                      <span className="font-medium text-slate-200">
+                      <span className="font-medium text-slate-100">
                         {dwFilter.dataInicio} → {dwFilter.dataFim}
                       </span>
                     </p>
@@ -806,14 +800,14 @@ const Index = () => {
                   return (
                     <div
                       key={item.label}
-                      className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                      className={`group relative overflow-hidden rounded-[18px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.78)_0%,rgba(10,16,36,0.96)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_14px_28px_rgba(0,0,0,0.22)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                         }`}
                     >
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.03),transparent_30%)]" />
 
                       <div className="relative flex h-full flex-col justify-between">
                         <div className="flex items-start justify-between gap-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                             {item.label}
                           </p>
 
@@ -824,11 +818,11 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="mt-2.5">
+                        <div className="mt-2">
                           <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
                             {formatCurrency(item.value)}
                           </p>
-                          <p className="mt-1.5 text-xs text-slate-400">
+                          <p className="mt-1.5 text-xs text-slate-300/80">
                             {item.helper}
                           </p>
                         </div>
@@ -874,7 +868,7 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
+              className={`rounded-[22px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,22,43,0.92)_0%,rgba(10,16,34,0.86)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl ${presentationMode
                 ? "h-full overflow-y-auto p-3.5"
                 : "max-h-[500px] overflow-y-auto p-3.5 lg:p-4 xl:h-full xl:max-h-none"
                 }`}
@@ -888,7 +882,7 @@ const Index = () => {
                     >
                       Indicadores
                     </p>
-                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                    <p className="mt-1 text-xs leading-5 text-slate-300/80">
                       Resumo lateral no padrão da referência.
                     </p>
                   </div>
@@ -896,7 +890,7 @@ const Index = () => {
                   {!presentationMode && (
                     <button
                       onClick={togglePresentationMode}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/18 hover:bg-white/8 hover:text-white"
                       title="Modo apresentação"
                       aria-label="Ativar modo apresentação"
                     >
@@ -905,7 +899,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid min-h-0 flex-1 gap-1">
+                <div className="mt-3 grid min-h-0 flex-1 content-start gap-1.5">
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
@@ -920,17 +914,17 @@ const Index = () => {
                       <Link
                         key={ind.id}
                         to={`/indicadores/${ind.id}`}
-                        className={`group relative overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2" : "p-2.5"
+                        className={`group relative overflow-hidden rounded-[14px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(9,14,33,0.95)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_10px_22px_rgba(0,0,0,0.24)] ${presentationMode ? "p-2.5" : "p-2.5"
                           }`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                          <p className="truncate pr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-300 transition-colors duration-300 group-hover:text-white">
                             {ind.nome}
                           </p>
 
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex shrink-0 items-center gap-1.5">
                             <span
-                              className={`text-[11px] font-semibold ${abaixoDaMeta
+                              className={`text-[12px] font-bold ${abaixoDaMeta
                                 ? "text-emerald-300"
                                 : "text-red-400"
                                 }`}
@@ -942,12 +936,17 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
-                              }`}
-                            style={{ width: `${progress}%` }}
-                          />
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
+                                }`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <span className="shrink-0 text-[10px] text-slate-500">
+                            meta {ind.percentualEsperado}%
+                          </span>
                         </div>
                       </Link>
                     );
