@@ -677,7 +677,6 @@ const Index = () => {
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
-              <div className="space-y-2.5">
                 <div className="flex items-center justify-between gap-4">
                   <h1
                     className={`font-semibold tracking-tight text-white ${presentationMode
@@ -782,8 +781,6 @@ const Index = () => {
                     {dwError}
                   </div>
                 )}
-              </div>
-
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
