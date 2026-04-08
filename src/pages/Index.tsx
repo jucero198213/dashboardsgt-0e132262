@@ -654,8 +654,8 @@ const Index = () => {
 
           <div
             className={`relative xl:h-full ${presentationMode
-                ? "grid gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.85fr)] xl:grid-rows-[1fr] h-full"
-                : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,1.4fr)_minmax(0,0.85fr)] xl:grid-rows-[1fr] xl:gap-3"
+                ? "grid gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
+                : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
