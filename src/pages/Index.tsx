@@ -740,6 +740,9 @@ const Index = () => {
                     />
                     {isFetchingDw ? "Buscando..." : "Atualizar"}
                   </button>
+                  </div>
+
+                  <UserMenu />
                 </div>
 
                 {dwError && (
