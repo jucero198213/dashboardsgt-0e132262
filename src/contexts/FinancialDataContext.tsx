@@ -57,6 +57,7 @@ const defaultKpiExtra: KpiExtra = {
 };
 
 
+const defaultResumo: ResumoFinanceiro = {
   contasReceber: { valorAReceber: 0, valorRecebido: 0, saldoAReceber: 0 },
   contasPagar: { valorAPagar: 0, valorPago: 0, saldoAPagar: 0 },
 };
