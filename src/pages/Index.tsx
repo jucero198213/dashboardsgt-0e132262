@@ -901,52 +901,107 @@ const Index = () => {
 
                 <div className="mt-3 grid min-h-0 flex-1 content-start gap-1.5">
                   {indicadores.map((ind) => {
-                    const abaixoDaMeta =
-                      ind.percentualReal < ind.percentualEsperado;
+                    const atingiuMeta =
+                      ind.percentualReal >= ind.percentualEsperado;
                     const progress = Math.min(
                       (ind.percentualReal /
                         Math.max(ind.percentualEsperado, 1)) *
                       100,
                       100
                     );
+                    const metaMarker = Math.min(ind.percentualEsperado, 100);
 
                     return (
                       <Link
                         key={ind.id}
                         to={`/indicadores/${ind.id}`}
-                        className={`group relative overflow-hidden rounded-[14px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(9,14,33,0.95)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_10px_22px_rgba(0,0,0,0.24)] ${presentationMode ? "p-2.5" : "p-2.5"
+                        className={`group relative overflow-hidden rounded-[16px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.78)_0%,rgba(9,14,33,0.96)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/16 hover:shadow-[0_14px_28px_rgba(0,0,0,0.28)] ${presentationMode ? "p-3" : "p-3"
                           }`}
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate pr-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-300 transition-colors duration-300 group-hover:text-white">
-                            {ind.nome}
-                          </p>
+                        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_left,rgba(255,255,255,0.06),transparent_60%)]" />
 
-                          <div className="flex shrink-0 items-center gap-1.5">
-                            <span
-                              className={`text-[12px] font-bold ${abaixoDaMeta
-                                ? "text-emerald-300"
-                                : "text-red-400"
+                        <div className="relative flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate pr-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300 transition-colors duration-300 group-hover:text-white">
+                              {ind.nome}
+                            </p>
+                            <p className="mt-1 text-[10px] text-slate-500">
+                              Performance atual vs meta definida
+                            </p>
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-2">
+                            <div
+                              className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] ${atingiuMeta
+                                ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+                                : "border-red-400/20 bg-red-400/10 text-red-300"
                                 }`}
                             >
-                              {ind.percentualReal}%
-                            </span>
+                              {atingiuMeta ? (
+                                <TrendingUp className="h-3 w-3" />
+                              ) : (
+                                <TrendingDown className="h-3 w-3" />
+                              )}
+                              {atingiuMeta ? "Meta" : "Abaixo"}
+                            </div>
 
                             <ArrowRight className="h-3.5 w-3.5 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
                           </div>
                         </div>
 
-                        <div className="mt-1.5 flex items-center gap-2">
-                          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
-                                }`}
-                              style={{ width: `${progress}%` }}
-                            />
+                        <div className="relative mt-3 overflow-hidden rounded-[12px] border border-white/8 bg-white/[0.03] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                Resultado
+                              </p>
+                              <div className="mt-1 flex items-end gap-2">
+                                <span
+                                  className={`text-[18px] font-bold leading-none tracking-[-0.03em] ${atingiuMeta
+                                    ? "text-emerald-300"
+                                    : "text-red-400"
+                                    }`}
+                                >
+                                  {ind.percentualReal}%
+                                </span>
+                                <span className="pb-0.5 text-[10px] text-slate-500">
+                                  meta {ind.percentualEsperado}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                Status
+                              </p>
+                              <p className={`mt-1 text-[11px] font-semibold ${atingiuMeta ? "text-emerald-300" : "text-red-300"}`}>
+                                {atingiuMeta ? "Dentro do esperado" : "Atenção ao indicador"}
+                              </p>
+                            </div>
                           </div>
-                          <span className="shrink-0 text-[10px] text-slate-500">
-                            meta {ind.percentualEsperado}%
-                          </span>
+
+                          <div className="mt-2.5 flex items-center gap-2">
+                            <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/5">
+                              <div
+                                className={`relative h-full rounded-full transition-all duration-500 ${atingiuMeta
+                                  ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-300"
+                                  : "bg-gradient-to-r from-red-500 via-red-400 to-orange-300"
+                                  }`}
+                                style={{ width: `${progress}%` }}
+                              >
+                                <div className="absolute inset-0 opacity-40 blur-[6px] bg-white/20" />
+                              </div>
+
+                              <div
+                                className="absolute top-0 bottom-0 z-10 w-[2px] rounded-full bg-white/45 shadow-[0_0_12px_rgba(255,255,255,0.35)]"
+                                style={{ left: `${metaMarker}%` }}
+                              />
+                            </div>
+
+                            <span className="shrink-0 text-[10px] text-slate-500">
+                              alvo
+                            </span>
+                          </div>
                         </div>
                       </Link>
                     );
