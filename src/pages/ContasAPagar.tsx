@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, Sparkles, DollarSign, TrendingDown, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, ChevronRight, Sparkles, DollarSign, TrendingDown, CheckCircle, Clock, LogOut } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { formatCurrency, formatDate } from "@/data/mockData";
 import { KpiCard } from "@/components/indicators/KpiCard";
