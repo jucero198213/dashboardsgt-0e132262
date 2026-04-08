@@ -879,7 +879,6 @@ const Index = () => {
               </div>
 
               {/* ── KPIs Extras ──────────────────────────────────────────── */}
-              {isProcessed && (
                 <div className="grid grid-cols-3 gap-2">
 
                   {/* Saldo Líquido */}
@@ -951,7 +950,6 @@ const Index = () => {
                   </div>
 
                 </div>
-              )}
             </div>
 
             <aside
