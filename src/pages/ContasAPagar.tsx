@@ -61,9 +61,7 @@ const ContasAPagar = () => {
                 <Sparkles className="h-3 w-3" />
                 Contas a Pagar
               </div>
-              <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-medium text-slate-400">
-                Fevereiro
-              </div>
+
             </div>
             <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">Detalhamento — Pagamentos</h1>
             <p className="mt-2 text-sm text-slate-400 max-w-xl">Visão detalhada de todos os documentos a pagar do período</p>
