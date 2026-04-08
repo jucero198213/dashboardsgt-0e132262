@@ -32,7 +32,8 @@ const MiniLineChart = ({
 }) => {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-  // Gera pontos de evolução acumulada mês a mês
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
   const generateCumulativePoints = (total: number): number[] => {
     const weights = [0.06, 0.08, 0.08, 0.09, 0.08, 0.09, 0.09, 0.08, 0.09, 0.08, 0.09, 0.09];
     let cumulative = 0;
@@ -48,141 +49,252 @@ const MiniLineChart = ({
   const allValues = [...previstoPoints, ...realizadoPoints];
   const maxVal = Math.max(...allValues, 1);
 
-  const svgW = 480;
-  const svgH = 200;
-  const padX = 8;
-  const padTop = 10;
-  const padBot = 10;
+  const svgW = 520;
+  const svgH = 220;
+  const padL = 12;
+  const padR = 12;
+  const padTop = 16;
+  const padBot = 28;
+  const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
-  const toX = (i: number) => padX + (i / (months.length - 1)) * (svgW - padX * 2);
+  const toX = (i: number) => padL + (i / (months.length - 1)) * chartW;
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
-  const buildPolyline = (pts: number[]) =>
-    pts.map((v, i) => `${toX(i)},${toY(v)}`).join(" ");
+  const buildPath = (pts: number[]) =>
+    pts.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
 
-  const previstoLine = buildPolyline(previstoPoints);
-  const realizadoLine = buildPolyline(realizadoPoints);
-
-  const areaPath = `${realizadoLine} ${toX(11)},${svgH} ${toX(0)},${svgH}`;
+  const buildAreaPath = (pts: number[]) => {
+    const linePath = pts.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" L");
+    return `M${linePath} L${toX(11).toFixed(1)},${(padTop + chartH).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
+  };
 
   const colors =
     tone === "emerald"
       ? {
-        prevStroke: "rgba(16,185,129,0.3)",
+        prevStroke: "rgba(16,185,129,0.35)",
         realStroke: "#34d399",
         gradFrom: "#34d399",
         dot: "#34d399",
-        legendPrev: "rgba(16,185,129,0.35)",
+        dotGlow: "rgba(16,185,129,0.4)",
+        legendPrev: "rgba(16,185,129,0.4)",
         legendReal: "#34d399",
+        tooltipBg: "rgba(6,78,59,0.92)",
+        tooltipBorder: "rgba(52,211,153,0.3)",
       }
       : {
-        prevStroke: "rgba(245,158,11,0.3)",
+        prevStroke: "rgba(245,158,11,0.35)",
         realStroke: "#fbbf24",
         gradFrom: "#fbbf24",
         dot: "#fbbf24",
-        legendPrev: "rgba(245,158,11,0.35)",
+        dotGlow: "rgba(245,158,11,0.4)",
+        legendPrev: "rgba(245,158,11,0.4)",
         legendReal: "#fbbf24",
+        tooltipBg: "rgba(78,53,6,0.92)",
+        tooltipBorder: "rgba(251,191,36,0.3)",
       };
 
   const gradId = `line-grad-${tone}`;
+  const realizadoLabel = tone === "emerald" ? "Recebido" : "Pago";
+
+  const formatCompact = (v: number) =>
+    v >= 1_000_000
+      ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
+      : v >= 1_000
+        ? `R$ ${(v / 1_000).toFixed(0)}mil`
+        : formatCurrency(v);
+
+  // Calcula a posição do tooltip para não sair da tela
+  const getTooltipX = (i: number) => {
+    const x = toX(i);
+    if (i <= 1) return x;
+    if (i >= 10) return x - 130;
+    return x - 65;
+  };
 
   return (
     <div className="flex flex-1 min-h-0 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal
         </span>
         <div className="flex gap-3">
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: colors.legendPrev }}
-            />
+            <span className="inline-block h-[3px] w-3 rounded-full" style={{ background: colors.legendPrev, opacity: 0.7 }} />
             <span className="text-[9px] text-slate-500">Previsto</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: colors.legendReal }}
-            />
-            <span className="text-[9px] text-slate-500">
-              {tone === "emerald" ? "Recebido" : "Pago"}
-            </span>
+            <span className="inline-block h-[3px] w-3 rounded-full" style={{ background: colors.legendReal }} />
+            <span className="text-[9px] text-slate-500">{realizadoLabel}</span>
           </div>
         </div>
       </div>
 
       {/* SVG chart */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative">
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
           preserveAspectRatio="xMidYMid meet"
           className="h-full w-full"
+          onMouseLeave={() => setHoverIndex(null)}
         >
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors.gradFrom} stopOpacity={0.35} />
+              <stop offset="0%" stopColor={colors.gradFrom} stopOpacity={0.25} />
+              <stop offset="60%" stopColor={colors.gradFrom} stopOpacity={0.08} />
               <stop offset="100%" stopColor={colors.gradFrom} stopOpacity={0} />
             </linearGradient>
+            <filter id={`glow-${tone}`}>
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
 
-          {/* Grid lines */}
-          {[0.25, 0.5, 0.75].map((frac) => (
+          {/* Horizontal grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
             <line
               key={frac}
-              x1={0}
+              x1={padL}
               y1={padTop + chartH * (1 - frac)}
-              x2={svgW}
+              x2={svgW - padR}
               y2={padTop + chartH * (1 - frac)}
-              stroke="rgba(255,255,255,0.04)"
+              stroke="rgba(255,255,255,0.05)"
               strokeWidth={0.5}
             />
           ))}
 
           {/* Area fill */}
-          <polygon points={areaPath} fill={`url(#${gradId})`} opacity={0.3} />
+          <path d={buildAreaPath(realizadoPoints)} fill={`url(#${gradId})`} />
 
           {/* Previsto line (dashed) */}
-          <polyline
-            points={previstoLine}
+          <path
+            d={buildPath(previstoPoints)}
             fill="none"
             stroke={colors.prevStroke}
-            strokeWidth={1.5}
-            strokeDasharray="4,3"
+            strokeWidth={1.8}
+            strokeDasharray="6,4"
+            strokeLinecap="round"
           />
 
-          {/* Realizado line (solid) */}
-          <polyline
-            points={realizadoLine}
+          {/* Realizado line (solid, with glow) */}
+          <path
+            d={buildPath(realizadoPoints)}
             fill="none"
             stroke={colors.realStroke}
-            strokeWidth={2}
+            strokeWidth={2.5}
             strokeLinecap="round"
             strokeLinejoin="round"
+            filter={`url(#glow-${tone})`}
           />
 
-          {/* Dots on realizado */}
-          {[0, 3, 6, 9, 11].map((i) => (
+          {/* Dots on every month */}
+          {realizadoPoints.map((v, i) => (
             <circle
-              key={i}
+              key={`dot-${i}`}
               cx={toX(i)}
-              cy={toY(realizadoPoints[i])}
-              r={2.5}
+              cy={toY(v)}
+              r={hoverIndex === i ? 4.5 : 3}
               fill={colors.dot}
+              stroke={hoverIndex === i ? colors.dotGlow : "transparent"}
+              strokeWidth={hoverIndex === i ? 6 : 0}
+              className="transition-all duration-150"
+            />
+          ))}
+
+          {/* Hover vertical line */}
+          {hoverIndex !== null && (
+            <line
+              x1={toX(hoverIndex)}
+              y1={padTop}
+              x2={toX(hoverIndex)}
+              y2={padTop + chartH}
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth={1}
+              strokeDasharray="3,3"
+            />
+          )}
+
+          {/* Tooltip */}
+          {hoverIndex !== null && (
+            <g>
+              <rect
+                x={getTooltipX(hoverIndex)}
+                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2)}
+                width={130}
+                height={56}
+                rx={10}
+                fill={colors.tooltipBg}
+                stroke={colors.tooltipBorder}
+                strokeWidth={1}
+              />
+              <text
+                x={getTooltipX(hoverIndex) + 10}
+                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 18}
+                fill="rgba(255,255,255,0.5)"
+                fontSize={10}
+                fontWeight={600}
+                fontFamily="system-ui, sans-serif"
+              >
+                {months[hoverIndex]}
+              </text>
+              <text
+                x={getTooltipX(hoverIndex) + 10}
+                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 33}
+                fill={colors.realStroke}
+                fontSize={11}
+                fontWeight={700}
+                fontFamily="system-ui, sans-serif"
+              >
+                {realizadoLabel}: {formatCompact(realizadoPoints[hoverIndex])}
+              </text>
+              <text
+                x={getTooltipX(hoverIndex) + 10}
+                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 48}
+                fill="rgba(255,255,255,0.45)"
+                fontSize={10}
+                fontWeight={500}
+                fontFamily="system-ui, sans-serif"
+              >
+                Prev: {formatCompact(previstoPoints[hoverIndex])}
+              </text>
+            </g>
+          )}
+
+          {/* Month labels — ALL 12 months */}
+          {months.map((m, i) => (
+            <text
+              key={m}
+              x={toX(i)}
+              y={svgH - 4}
+              textAnchor="middle"
+              fill={hoverIndex === i ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.25)"}
+              fontSize={9.5}
+              fontWeight={hoverIndex === i ? 600 : 400}
+              fontFamily="system-ui, sans-serif"
+              className="transition-all duration-150"
+            >
+              {m}
+            </text>
+          ))}
+
+          {/* Invisible hover zones per month */}
+          {months.map((_, i) => (
+            <rect
+              key={`hover-${i}`}
+              x={toX(i) - chartW / months.length / 2}
+              y={padTop}
+              width={chartW / months.length}
+              height={chartH}
+              fill="transparent"
+              onMouseEnter={() => setHoverIndex(i)}
+              style={{ cursor: "crosshair" }}
             />
           ))}
         </svg>
-      </div>
-
-      {/* Month labels */}
-      <div className="flex justify-between mt-1">
-        {["Jan", "Mar", "Mai", "Jul", "Set", "Nov", "Dez"].map((m) => (
-          <span key={m} className="text-[9px] text-slate-600">
-            {m}
-          </span>
-        ))}
       </div>
     </div>
   );
