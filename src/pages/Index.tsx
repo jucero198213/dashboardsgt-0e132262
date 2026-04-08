@@ -574,25 +574,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
-            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                {primaryLabel}
-              </p>
-              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
-                {formatCurrency(primaryValue)}
-              </p>
-            </div>
 
-            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                {secondaryLabel}
-              </p>
-              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
-                {formatCurrency(secondaryValue)}
-              </p>
-            </div>
-          </div>
 
           {/* Overlay de carga incremental — mantém gráfico visível enquanto atualiza */}
           <div className="relative">
