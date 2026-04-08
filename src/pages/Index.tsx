@@ -678,6 +678,25 @@ const Index = () => {
           >
             <div className="flex min-h-0 flex-col gap-2.5">
               <div className="space-y-2.5">
+                <div className="max-w-4xl">
+                  <h1
+                    className={`font-semibold tracking-tight text-white ${presentationMode
+                        ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
+                        : "text-3xl md:text-4xl xl:text-[36px] xl:leading-[1]"
+                      }`}
+                  >
+                    Análise Consolidada
+                  </h1>
+
+                  {presentationMode && (
+                    <p className="mt-1.5 max-w-2xl text-[13px] text-slate-400">
+                      Panorama executivo do período, com leitura rápida das
+                      entradas, saídas e distribuição dos principais
+                      indicadores.
+                    </p>
+                  )}
+                </div>
+
                 <div className="flex flex-wrap items-end justify-between gap-2">
                   <div className="flex items-end gap-2 overflow-x-auto pb-1 scrollbar-none">
                     <div className="flex flex-col gap-1">
@@ -784,27 +803,6 @@ const Index = () => {
                     {dwError}
                   </div>
                 )}
-
-                <div className="max-w-4xl">
-                  <h1
-                    className={`font-semibold tracking-tight text-white ${presentationMode
-                        ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
-                        : "text-3xl md:text-4xl xl:text-[36px] xl:leading-[1]"
-                      }`}
-                  >
-                    Análise Consolidada
-                  </h1>
-
-                  {presentationMode && (
-                    <p className="mt-1.5 max-w-2xl text-[13px] text-slate-400">
-                      Panorama executivo do período, com leitura rápida das
-                      entradas, saídas e distribuição dos principais
-                      indicadores.
-                    </p>
-                  )}
-
-
-                </div>
               </div>
 
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
