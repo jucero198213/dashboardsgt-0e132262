@@ -457,18 +457,18 @@ const Index = () => {
         tone: "emerald",
       },
       {
-        label: "A PAGAR",
-        value: contasPagar.saldoAPagar,
-        helper: "Saldo pendente",
-        icon: TrendingDown,
-        tone: "amber",
-      },
-      {
         label: "RECEBIDO",
         value: contasReceber.valorRecebido,
         helper: "Entrada consolidada",
         icon: TrendingUp,
         tone: "cyan",
+      },
+      {
+        label: "A PAGAR",
+        value: contasPagar.saldoAPagar,
+        helper: "Saldo pendente",
+        icon: TrendingDown,
+        tone: "amber",
       },
       {
         label: "PAGO",
@@ -480,8 +480,8 @@ const Index = () => {
     ],
     [
       contasReceber.saldoAReceber,
-      contasPagar.saldoAPagar,
       contasReceber.valorRecebido,
+      contasPagar.saldoAPagar,
       contasPagar.valorPago,
     ]
   );
