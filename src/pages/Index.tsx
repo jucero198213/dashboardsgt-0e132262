@@ -44,11 +44,11 @@ const MiniLineChart = ({
   const maxVal = Math.max(...allValues, 1);
 
   const svgW = 520;
-  const svgH = 220;
+  const svgH = 155;
   const padL = 12;
   const padR = 12;
-  const padTop = 16;
-  const padBot = 28;
+  const padTop = 12;
+  const padBot = 22;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
@@ -533,7 +533,7 @@ const Index = () => {
         className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
             ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
             : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-          } ${presentationMode ? "flex flex-col p-3.5" : "flex flex-col p-3.5 xl:p-4"}`}
+          } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
@@ -548,46 +548,46 @@ const Index = () => {
             }`}
         />
 
-        <div className="relative flex flex-1 min-h-0 flex-col gap-2">
+        <div className="relative flex flex-1 min-h-0 flex-col gap-1.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
                   }`}
               >
                 {title}
               </p>
-              <h2 className="mt-1 text-[22px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[24px]">
+              <h2 className="mt-0.5 text-[18px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
                 {formatCurrency(total)}
               </h2>
-              <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>
             </div>
 
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
                   ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
                   : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
                 }`}
             >
-              <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+              <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-[16px] border border-white/8 bg-white/[0.04] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 {primaryLabel}
               </p>
-              <p className="mt-1.5 text-[15px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
                 {formatCurrency(primaryValue)}
               </p>
             </div>
 
-            <div className="rounded-[16px] border border-white/8 bg-white/[0.04] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 {secondaryLabel}
               </p>
-              <p className="mt-1.5 text-[15px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
                 {formatCurrency(secondaryValue)}
               </p>
             </div>
@@ -616,32 +616,32 @@ const Index = () => {
           </div>
 
           <div
-            className={`rounded-[16px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
+            className={`rounded-[12px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
                 ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
                 : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
-              } px-3 py-2 flex items-center justify-between gap-3`}
+              } px-2.5 py-1.5 flex items-center justify-between gap-3`}
           >
             <div className="min-w-0">
               <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
                   }`}
               >
                 Ação rápida
               </p>
-              <p className="mt-0.5 text-xs text-slate-300">
+              <p className="mt-0.5 text-[11px] text-slate-300">
                 Abrir detalhamento completo
               </p>
             </div>
 
             <Link
               to={to}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
                   ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
                   : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                 }`}
             >
               Ver detalhamento
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
