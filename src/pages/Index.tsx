@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { formatCurrency } from "@/data/mockData";
 import {
   Select,
@@ -623,9 +624,9 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen overflow-hidden bg-[#020617] text-white transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen p-0"
-          : "px-1.5 py-1.5 sm:px-2 sm:py-2"
+      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
+          ? "h-screen w-screen overflow-hidden p-0"
+          : "overflow-y-auto px-1.5 py-1.5 sm:px-2 sm:py-2 xl:overflow-hidden"
         }`}
     >
       {/* Background effects */}
@@ -633,27 +634,28 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full h-[calc(100vh-12px)] sm:h-[calc(100vh-16px)]"
+        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
           }`}
       >
         {/* No header — content goes directly */}
         <section
-          className={`relative flex-1 min-h-0 overflow-hidden border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none" : "rounded-[24px]"
+          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[24px] overflow-y-auto xl:overflow-hidden"
             }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
-            className={`relative grid h-full ${presentationMode
-                ? "gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
-                : "gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
+            className={`relative xl:h-full ${presentationMode
+                ? "grid gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
+                : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
             {/* Left column */}
-            <div className="flex h-full min-h-0 flex-col gap-2.5">
+            <div className="flex xl:h-full min-h-0 flex-col gap-2.5">
               {/* Filters */}
               <div className="space-y-2.5">
-                <div className="flex flex-wrap items-end gap-2">
+                <div className="flex flex-wrap items-end justify-between gap-2">
+                  <div className="flex items-end gap-2 overflow-x-auto pb-1 scrollbar-none">
                   <div className="flex flex-col gap-1">
                     <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       De
@@ -739,6 +741,9 @@ const Index = () => {
                     />
                     {isFetchingDw ? "Buscando..." : "Atualizar"}
                   </button>
+                  </div>
+
+                  <UserMenu />
                 </div>
 
                 {dwError && (
@@ -778,7 +783,7 @@ const Index = () => {
               </div>
 
               {/* Top 4 metric cards */}
-              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
@@ -818,7 +823,7 @@ const Index = () => {
               </div>
 
               {/* Large cards with charts */}
-              <div className="grid flex-1 xl:grid-cols-2 gap-2 xl:min-h-0">
+              <div className="grid sm:grid-cols-2 gap-2 xl:flex-1 xl:min-h-0">
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
@@ -857,7 +862,7 @@ const Index = () => {
             <aside
               className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
                   ? "h-full overflow-y-auto p-3.5"
-                  : "h-full p-3.5 lg:p-4"
+                  : "xl:h-full p-3.5 lg:p-4 overflow-y-auto max-h-[400px] xl:max-h-none"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
@@ -886,7 +891,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid min-h-0 gap-1.5 flex-1" style={{ gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }}>
+                <div className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]" style={presentationMode || window.innerWidth >= 1280 ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` } : undefined}>
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;

@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, Sparkles, DollarSign, TrendingDown, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, ChevronRight, Sparkles, DollarSign, TrendingDown, CheckCircle, Clock, LogOut } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { formatCurrency, formatDate } from "@/data/mockData";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useMemo, useState } from "react";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const ContasAPagar = () => {
   const navigate = useNavigate();
@@ -37,10 +38,13 @@ const ContasAPagar = () => {
 
       <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-white">Contas a Pagar</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-white">Contas a Pagar</span>
+          </div>
+          <UserMenu />
         </div>
 
         {/* Header */}

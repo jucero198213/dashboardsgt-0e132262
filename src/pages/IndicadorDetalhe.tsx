@@ -9,6 +9,7 @@ import { InsightsBlock } from "@/components/indicators/InsightsBlock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useMemo } from "react";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const INDICATOR_KEYWORDS: Record<string, string[]> = {
   "Compra de Ativo": ["ativo", "compra", "aquisição", "equipamento"],
@@ -124,12 +125,15 @@ export default function IndicadorDetalhe() {
 
       <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-slate-400">Indicadores</span>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-white">{indicador.nome}</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-slate-400">Indicadores</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-white">{indicador.nome}</span>
+          </div>
+          <UserMenu />
         </div>
 
         {/* Header */}

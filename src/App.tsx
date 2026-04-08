@@ -3,8 +3,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Admin from "./pages/Admin";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
@@ -18,15 +22,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <FinancialDataProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/contas-a-receber" element={<ContasAReceber />} />
-            <Route path="/contas-a-pagar" element={<ContasAPagar />} />
-            <Route path="/indicadores/:id" element={<IndicadorDetalhe />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </FinancialDataProvider>
+        <AuthProvider>
+          <FinancialDataProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/contas-a-receber" element={<ProtectedRoute><ContasAReceber /></ProtectedRoute>} />
+              <Route path="/contas-a-pagar" element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
+              <Route path="/indicadores/:id" element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </FinancialDataProvider>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
