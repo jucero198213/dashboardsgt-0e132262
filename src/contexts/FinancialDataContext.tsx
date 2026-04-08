@@ -49,7 +49,14 @@ const EXPECTED_INDICATORS: Record<string, number> = {
   "Manutenção":       15,
 };
 
-const defaultResumo: ResumoFinanceiro = {
+const defaultKpiExtra: KpiExtra = {
+  saldoLiquido:      0,
+  inadimplencia:     0,
+  inadimplenciaDocs: 0,
+  realizacaoCP:      0,
+};
+
+
   contasReceber: { valorAReceber: 0, valorRecebido: 0, saldoAReceber: 0 },
   contasPagar: { valorAPagar: 0, valorPago: 0, saldoAPagar: 0 },
 };
@@ -73,6 +80,14 @@ export interface DadosMensais {
   ano: string;
 }
 
+// ─── KPIs extras ─────────────────────────────────────────────────────────────
+export interface KpiExtra {
+  saldoLiquido:      number;  // RECEBIDO - PAGO
+  inadimplencia:     number;  // CR vencido sem DATA_PAGAMENTO
+  inadimplenciaDocs: number;  // qtd documentos vencidos
+  realizacaoCP:      number;  // PAGO / PREVISTO_CP * 100
+}
+
 // ─── State & Context types ───────────────────────────────────────────────────
 
 interface FinancialDataState {
@@ -83,6 +98,7 @@ interface FinancialDataState {
   indicadores: IndicadorComparativo[];
   chartPagar:        DadosMensais;
   chartReceber:      DadosMensais;
+  kpiExtra:          KpiExtra;
   dwFilter:          DwFilter;
   filiais:           FilterOption[];
   empresas:          FilterOption[];
@@ -201,6 +217,7 @@ export function FinancialDataProvider({
     indicadores:  cached?.indicadores   ?? defaultIndicadores,
     chartPagar:   cached?.chartPagar    ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     chartReceber: cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    kpiExtra:     (cached as any)?.kpiExtra ?? defaultKpiExtra,
     dwFilter:     cached?.dwFilter      ?? defaultDwFilter,
     filiais:      [],
     empresas:     [],
@@ -431,13 +448,35 @@ export function FinancialDataProvider({
         ano: anoFiltro,
       };
 
-      // ── Salva no cache (persiste entre navegações por 30 min) ────────────────
+      // ─────────────────────────────────────────────────────────────────────────
+      // KPIs EXTRAS
+      // ─────────────────────────────────────────────────────────────────────────
+      const hoje2 = new Date();
+      hoje2.setHours(0, 0, 0, 0);
+
+      // 1. Saldo Líquido = RECEBIDO - PAGO
+      const saldoLiquido = round2(valorRecebido - valorPago);
+
+      // 2. Inadimplência = CR vencido (DATA_VENCIMENTO < hoje, DATA_PAGAMENTO NULL)
+      const inadimDocs = allCR.filter((r) => {
+        if (hasPag(r)) return false;
+        const dtVenc = r.DATA_VENCIMENTO ? new Date(r.DATA_VENCIMENTO) : null;
+        return dtVenc !== null && dtVenc < hoje2;
+      });
+      const inadimplencia     = sumCol(inadimDocs, "VLR_PARCELA");
+      const inadimplenciaDocs = inadimDocs.length;
+
+      // 3. % Realização CP = PAGO / PREVISTO_CP * 100
+      const realizacaoCP = totalPagar > 0 ? Math.round((valorPago / totalPagar) * 1000) / 10 : 0;
+
+      const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, realizacaoCP };
       saveCache({
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber,
+        kpiExtra,
         dwFilter: state.dwFilter,
         timestamp: Date.now(),
-      });
+      } as any);
 
       // INCREMENTAL: substitui dados antigos pelos novos com transição suave
       setState((prev) => ({
@@ -445,7 +484,7 @@ export function FinancialDataProvider({
         isFetchingDw: false,
         isProcessed:  true,
         resumo, contasReceber, contasPagar, indicadores,
-        chartPagar, chartReceber,
+        chartPagar, chartReceber, kpiExtra,
       }));
     } catch (err) {
       setState((prev) => ({

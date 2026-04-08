@@ -325,6 +325,7 @@ const Index = () => {
     isProcessed,
     chartPagar,
     chartReceber,
+    kpiExtra,
   } = useFinancialData();
 
   const { contasReceber, contasPagar } = resumo;
@@ -885,6 +886,81 @@ const Index = () => {
                   icon: TrendingDown,
                 })}
               </div>
+
+              {/* ── KPIs Extras ──────────────────────────────────────────── */}
+              {isProcessed && (
+                <div className="grid grid-cols-3 gap-2">
+
+                  {/* Saldo Líquido */}
+                  <div className={`relative overflow-hidden rounded-[16px] border p-3 transition-all duration-300 hover:-translate-y-0.5 ${
+                    kpiExtra.saldoLiquido >= 0
+                      ? "border-emerald-500/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))]"
+                      : "border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))]"
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        Saldo Líquido
+                      </span>
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-lg ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
+                        {kpiExtra.saldoLiquido >= 0
+                          ? <TrendingUp className="h-3 w-3 text-emerald-400" />
+                          : <TrendingDown className="h-3 w-3 text-red-400" />}
+                      </div>
+                    </div>
+                    <p className="text-[15px] font-bold leading-none tracking-tight text-white truncate">
+                      {formatCurrency(kpiExtra.saldoLiquido)}
+                    </p>
+                    <p className="mt-1 text-[10px] text-slate-500">Recebido − Pago</p>
+                    <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                      kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"
+                    }`}>
+                      {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
+                    </span>
+                  </div>
+
+                  {/* Inadimplência */}
+                  <div className="relative overflow-hidden rounded-[16px] border border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))] p-3 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-red-400">
+                        Inadimplência
+                      </span>
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/15">
+                        <AlertCircle className="h-3 w-3 text-red-400" />
+                      </div>
+                    </div>
+                    <p className="text-[15px] font-bold leading-none tracking-tight text-white truncate">
+                      {formatCurrency(kpiExtra.inadimplencia)}
+                    </p>
+                    <p className="mt-1 text-[10px] text-slate-500">CR vencido sem recebimento</p>
+                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[9px] font-semibold text-red-300">
+                      {kpiExtra.inadimplenciaDocs} doc{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""} vencido{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* % Realização CP */}
+                  <div className="relative overflow-hidden rounded-[16px] border border-violet-500/20 bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(139,92,246,0.03))] p-3 transition-all duration-300 hover:-translate-y-0.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-violet-400">
+                        Realização CP
+                      </span>
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-500/15">
+                        <TrendingDown className="h-3 w-3 text-violet-400" />
+                      </div>
+                    </div>
+                    <p className="text-[15px] font-bold leading-none tracking-tight text-white">
+                      {kpiExtra.realizacaoCP.toFixed(1)}%
+                    </p>
+                    <p className="mt-1 text-[10px] text-slate-500">Pago ÷ Previsto CP</p>
+                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-violet-400 transition-all duration-700"
+                        style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                </div>
+              )}
             </div>
 
             <aside
