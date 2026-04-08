@@ -891,7 +891,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid min-h-0 gap-1.5 flex-1" style={{ gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }}>
+                <div className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]" style={presentationMode || window.innerWidth >= 1280 ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` } : undefined}>
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
