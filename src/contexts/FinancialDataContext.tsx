@@ -245,13 +245,23 @@ export function FinancialDataProvider({
       const valorRecebido = sumCol(crRecebido, "VLR_PAGO");
 
       const resumo: ResumoFinanceiro = {
-        contasPagar:  { valorAPagar: totalPagar,   valorPago,      saldoAPagar:   round2(Math.max(totalPagar  - valorPago,     0)) },
-        contasReceber:{ valorAReceber: totalReceber, valorRecebido, saldoAReceber: round2(Math.max(totalReceber - valorRecebido, 0)) },
+        contasPagar: {
+          valorAPagar:  totalPagar,
+          valorPago,
+          // saldo pendente = o próprio previsto (conjuntos independentes)
+          saldoAPagar:  totalPagar,
+        },
+        contasReceber: {
+          valorAReceber:  totalReceber,
+          valorRecebido,
+          // saldo pendente = o próprio previsto (conjuntos independentes)
+          saldoAReceber:  totalReceber,
+        },
       };
 
-      // ── Tabelas de detalhe (usam todos os CP/CR sem filtro de situação) ────
+      // ── Tabelas de detalhe (usam todos os CP/CR sem filtro de situação) ──────
       const contasPagar: ContaPagar[] = allCP.map((r, i) => {
-        const valor     = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
+        const valor        = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
         const valorPagoRow = n(r.VLR_PAGO);
         return {
           id: String(i + 1), documento: r.DOCUMENTO ?? `CP-${i + 1}`,
@@ -273,20 +283,19 @@ export function FinancialDataProvider({
       });
 
       // ─────────────────────────────────────────────────────────────────────────
-      // INDICADORES — VLR_PARCELA agrupado por CODCUS (Centro de Custo)
+      // INDICADORES — VLR_PARCELA agrupado por CODCUS (código centro de custo)
       // Base: todos os CP (sem filtro de situação)
       // ─────────────────────────────────────────────────────────────────────────
       const indicadorRules: Record<string, string[]> = {
-        "Óleo Diesel":        ["21"],
-        "Imposto":            ["23"],
-        "Administrativo":     ["3"],
-        "Pedágio":            ["24"],
-        "Manutenção":         ["4", "5", "6", "7", "25"],
-        "Compra de Ativo":    ["26"],
-        "Folha":              ["3"],
+        "Óleo Diesel":     ["21"],
+        "Imposto":         ["23"],
+        "Administrativo":  ["3"],
+        "Pedágio":         ["24"],
+        "Manutenção":      ["4", "5", "6", "7", "25"],
+        "Compra de Ativo": ["26"],
+        "Folha":           ["3"],
       };
 
-      // Base dos indicadores = todos CP, soma VLR_PARCELA
       const baseIndicadores = allCP;
       const totalBaseInd = sumCol(baseIndicadores, "VLR_PARCELA");
 
@@ -294,7 +303,11 @@ export function FinancialDataProvider({
         ([nome, percentualEsperado], index) => {
           const codcusList = indicadorRules[nome] ?? [];
           const matched = codcusList.length > 0
-            ? baseIndicadores.filter((r) => codcusList.includes((r.CENTRO_CUSTO ?? "").toString().trim()))
+            ? baseIndicadores.filter((r) => {
+                // compara CODCUS (código) — pode vir como string ou número
+                const cod = String(r.CODCUS ?? "").trim();
+                return codcusList.includes(cod);
+              })
             : [];
           const matchedTotal = sumCol(matched, "VLR_PARCELA");
           const percentualReal = totalBaseInd > 0 ? (matchedTotal / totalBaseInd) * 100 : 0;

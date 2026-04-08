@@ -60,8 +60,10 @@ export interface DwRow {
   VLR_PARCELA: number | null;
   FILIAL: string | null;
   EMPRESA: string | null;
+  CODCGA: string | null;
   CENTRO_GASTO: string | null;
-  CENTRO_CUSTO: string | null;
+  CODCUS: string | null;     // código numérico do centro de custo (ex: "21", "3")
+  CENTRO_CUSTO: string | null; // descrição textual do centro de custo
   SINTETICA: string | null;
   ANALITICA: string | null;
 }

@@ -681,8 +681,8 @@ const Index = () => {
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
-                  total: contasReceber.saldoAReceber,
-                  subtitle: "Saldo principal em aberto",
+                  total: contasReceber.valorAReceber,
+                  subtitle: "Saldo pendente a receber",
                   primaryLabel: "Previsto",
                   primaryValue: contasReceber.valorAReceber,
                   secondaryLabel: "Recebido",
@@ -694,8 +694,8 @@ const Index = () => {
                 {renderLargeCard({
                   title: "Contas a pagar",
                   tone: "amber",
-                  total: contasPagar.saldoAPagar,
-                  subtitle: "Saldo principal em aberto",
+                  total: contasPagar.valorAPagar,
+                  subtitle: "Saldo pendente a pagar",
                   primaryLabel: "Previsto",
                   primaryValue: contasPagar.valorAPagar,
                   secondaryLabel: "Pago",
