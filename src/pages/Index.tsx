@@ -823,7 +823,7 @@ const Index = () => {
               </div>
 
               {/* Large cards with charts */}
-              <div className="grid flex-1 xl:grid-cols-2 gap-2 xl:min-h-0">
+              <div className="grid sm:grid-cols-2 gap-2 xl:flex-1 xl:min-h-0">
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
