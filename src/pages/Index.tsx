@@ -803,14 +803,7 @@ const Index = () => {
                     </p>
                   )}
 
-                  {!presentationMode && isProcessed && (
-                    <p className="mt-1 text-sm text-slate-400">
-                      Dados atualizados ·{" "}
-                      <span className="font-medium text-slate-200">
-                        {dwFilter.dataInicio} → {dwFilter.dataFim}
-                      </span>
-                    </p>
-                  )}
+
                 </div>
               </div>
 
