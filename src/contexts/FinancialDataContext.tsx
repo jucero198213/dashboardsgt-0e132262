@@ -332,13 +332,26 @@ export function FinancialDataProvider({
         }
       );
 
-      // ── Dados mensais para gráficos (agrupa por mês da DATA_VENCIMENTO) ──
+      // ── Dados mensais para gráficos (agrupa por mês) ──────────────────────
+      const extractMonth = (dateVal: unknown): number => {
+        if (dateVal == null) return -1;
+        // Se for Date object (driver mssql pode retornar assim)
+        if (dateVal instanceof Date) return dateVal.getMonth(); // 0-11
+        const s = String(dateVal).trim();
+        if (!s || s.toLowerCase() === "null") return -1;
+        // ISO: "2026-02-15" ou "2026-02-15T00:00:00.000Z"
+        const isoMatch = s.match(/^(\d{4})-(\d{2})/);
+        if (isoMatch) return parseInt(isoMatch[2], 10) - 1;
+        // BR: "15/02/2026"
+        const brMatch = s.match(/^\d{2}\/(\d{2})\/\d{4}/);
+        if (brMatch) return parseInt(brMatch[1], 10) - 1;
+        return -1;
+      };
+
       const groupByMonth = (rows: DwRow[], field: "VLR_PARCELA" | "VLR_PAGO", dateField: "DATA_VENCIMENTO" | "DATA_PAGAMENTO" = "DATA_VENCIMENTO"): number[] => {
         const result = new Array(12).fill(0);
         for (const r of rows) {
-          const dateStr = r[dateField];
-          if (!dateStr) continue;
-          const monthIdx = parseInt(dateStr.substring(5, 7), 10) - 1;
+          const monthIdx = extractMonth(r[dateField]);
           if (monthIdx >= 0 && monthIdx < 12) {
             result[monthIdx] += n(r[field]);
           }

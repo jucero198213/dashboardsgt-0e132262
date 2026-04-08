@@ -213,46 +213,72 @@ const MiniLineChart = ({
           {/* Tooltip */}
           {hoverIndex !== null && (
             <g>
-              <rect
-                x={getTooltipX(hoverIndex)}
-                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2)}
-                width={130}
-                height={56}
-                rx={10}
-                fill={colors.tooltipBg}
-                stroke={colors.tooltipBorder}
-                strokeWidth={1}
-              />
-              <text
-                x={getTooltipX(hoverIndex) + 10}
-                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 18}
-                fill="rgba(255,255,255,0.5)"
-                fontSize={10}
-                fontWeight={600}
-                fontFamily="system-ui, sans-serif"
-              >
-                {months[hoverIndex]}
-              </text>
-              <text
-                x={getTooltipX(hoverIndex) + 10}
-                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 33}
-                fill={colors.realStroke}
-                fontSize={11}
-                fontWeight={700}
-                fontFamily="system-ui, sans-serif"
-              >
-                {realizadoLabel}: {formatCompact(realizadoPoints[hoverIndex])}
-              </text>
-              <text
-                x={getTooltipX(hoverIndex) + 10}
-                y={Math.max(toY(Math.max(previstoPoints[hoverIndex], realizadoPoints[hoverIndex])) - 62, 2) + 48}
-                fill="rgba(255,255,255,0.45)"
-                fontSize={10}
-                fontWeight={500}
-                fontFamily="system-ui, sans-serif"
-              >
-                Prev: {formatCompact(previstoPoints[hoverIndex])}
-              </text>
+              {(() => {
+                const prevVal = previstoPoints[hoverIndex];
+                const realVal = realizadoPoints[hoverIndex];
+                const hasData = prevVal > 0 || realVal > 0;
+                const tooltipH = hasData ? 56 : 36;
+                const tooltipY = Math.max(toY(Math.max(prevVal, realVal)) - tooltipH - 8, 2);
+
+                return (
+                  <>
+                    <rect
+                      x={getTooltipX(hoverIndex)}
+                      y={tooltipY}
+                      width={hasData ? 150 : 110}
+                      height={tooltipH}
+                      rx={10}
+                      fill={colors.tooltipBg}
+                      stroke={colors.tooltipBorder}
+                      strokeWidth={1}
+                    />
+                    <text
+                      x={getTooltipX(hoverIndex) + 10}
+                      y={tooltipY + 18}
+                      fill="rgba(255,255,255,0.5)"
+                      fontSize={10}
+                      fontWeight={600}
+                      fontFamily="system-ui, sans-serif"
+                    >
+                      {months[hoverIndex]}
+                    </text>
+                    {hasData ? (
+                      <>
+                        <text
+                          x={getTooltipX(hoverIndex) + 10}
+                          y={tooltipY + 33}
+                          fill={colors.realStroke}
+                          fontSize={11}
+                          fontWeight={700}
+                          fontFamily="system-ui, sans-serif"
+                        >
+                          {realizadoLabel}: {formatCompact(realVal)}
+                        </text>
+                        <text
+                          x={getTooltipX(hoverIndex) + 10}
+                          y={tooltipY + 48}
+                          fill="rgba(255,255,255,0.45)"
+                          fontSize={10}
+                          fontWeight={500}
+                          fontFamily="system-ui, sans-serif"
+                        >
+                          Previsto: {formatCompact(prevVal)}
+                        </text>
+                      </>
+                    ) : (
+                      <text
+                        x={getTooltipX(hoverIndex) + 10}
+                        y={tooltipY + 30}
+                        fill="rgba(255,255,255,0.3)"
+                        fontSize={10}
+                        fontFamily="system-ui, sans-serif"
+                      >
+                        Sem dados no período
+                      </text>
+                    )}
+                  </>
+                );
+              })()}
             </g>
           )}
 
