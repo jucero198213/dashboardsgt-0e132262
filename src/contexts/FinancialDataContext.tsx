@@ -63,6 +63,14 @@ const defaultIndicadores: IndicadorComparativo[] = Object.entries(
   percentualEsperado,
 }));
 
+// ─── Monthly chart data ──────────────────────────────────────────────────────
+export interface DadosMensais {
+  /** Valor previsto (VLR_PARCELA de registros pendentes) por mês index 0-11 */
+  previsto: number[];
+  /** Valor realizado (VLR_PAGO de registros liquidados) por mês index 0-11 */
+  realizado: number[];
+}
+
 // ─── State & Context types ───────────────────────────────────────────────────
 
 interface FinancialDataState {
@@ -71,6 +79,8 @@ interface FinancialDataState {
   contasReceber: ContaReceber[];
   contasPagar: ContaPagar[];
   indicadores: IndicadorComparativo[];
+  chartPagar:        DadosMensais;
+  chartReceber:      DadosMensais;
   dwFilter:          DwFilter;
   filiais:           FilterOption[];
   empresas:          FilterOption[];
@@ -151,6 +161,8 @@ export function FinancialDataProvider({
     contasReceber: [],
     contasPagar: [],
     indicadores: defaultIndicadores,
+    chartPagar:   { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0) },
+    chartReceber: { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0) },
     dwFilter:     defaultDwFilter,
     filiais:      [],
     empresas:     [],
@@ -320,7 +332,31 @@ export function FinancialDataProvider({
         }
       );
 
-      setState((prev) => ({ ...prev, isFetchingDw: false, isProcessed: true, resumo, contasReceber, contasPagar, indicadores }));
+      // ── Dados mensais para gráficos (agrupa por mês da DATA_VENCIMENTO) ──
+      const groupByMonth = (rows: DwRow[], field: "VLR_PARCELA" | "VLR_PAGO", dateField: "DATA_VENCIMENTO" | "DATA_PAGAMENTO" = "DATA_VENCIMENTO"): number[] => {
+        const result = new Array(12).fill(0);
+        for (const r of rows) {
+          const dateStr = r[dateField];
+          if (!dateStr) continue;
+          const monthIdx = parseInt(dateStr.substring(5, 7), 10) - 1;
+          if (monthIdx >= 0 && monthIdx < 12) {
+            result[monthIdx] += n(r[field]);
+          }
+        }
+        return result.map(round2);
+      };
+
+      const chartPagar: DadosMensais = {
+        previsto:  groupByMonth(cpPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
+        realizado: groupByMonth(cpPago,     "VLR_PAGO",    "DATA_PAGAMENTO"),
+      };
+
+      const chartReceber: DadosMensais = {
+        previsto:  groupByMonth(crPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
+        realizado: groupByMonth(crRecebido, "VLR_PAGO",    "DATA_PAGAMENTO"),
+      };
+
+      setState((prev) => ({ ...prev, isFetchingDw: false, isProcessed: true, resumo, contasReceber, contasPagar, indicadores, chartPagar, chartReceber }));
     } catch (err) {
       setState((prev) => ({
         ...prev, isFetchingDw: false,

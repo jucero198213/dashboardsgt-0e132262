@@ -307,28 +307,11 @@ const Index = () => {
     filiais,
     empresas,
     isProcessed,
-    contasPagar: contasPagarList,
-    contasReceber: contasReceberList,
+    chartPagar,
+    chartReceber,
   } = useFinancialData();
 
   const { contasReceber, contasPagar } = resumo;
-
-  // ── Agrupa valores reais por mês (0-11) para os gráficos ──────────────────
-  const groupByMonth = (items: { vencimento: string; valor: number }[]): number[] => {
-    const months = new Array(12).fill(0);
-    for (const item of items) {
-      if (!item.vencimento) continue;
-      const parts = item.vencimento.split("-");
-      const monthIdx = parseInt(parts[1], 10) - 1;
-      if (monthIdx >= 0 && monthIdx < 12) {
-        months[monthIdx] += item.valor;
-      }
-    }
-    return months;
-  };
-
-  const receberMensal = useMemo(() => groupByMonth(contasReceberList), [contasReceberList]);
-  const pagarMensal = useMemo(() => groupByMonth(contasPagarList), [contasPagarList]);
 
   const [presentationMode, setPresentationMode] = useState(false);
 
@@ -476,7 +459,8 @@ const Index = () => {
     primaryValue,
     secondaryLabel,
     secondaryValue,
-    monthlyData,
+    monthlyPrevisto,
+    monthlyRealizado,
     to,
     icon: Icon,
   }: {
@@ -488,7 +472,8 @@ const Index = () => {
     primaryValue: number;
     secondaryLabel: string;
     secondaryValue: number;
-    monthlyData: number[];
+    monthlyPrevisto: number[];
+    monthlyRealizado: number[];
     to: string;
     icon: typeof TrendingUp;
   }) => {
@@ -565,8 +550,8 @@ const Index = () => {
 
           {/* Line chart */}
           <MiniLineChart
-            previstoMonthly={monthlyData.map(() => primaryValue / 12)}
-            realizadoMonthly={monthlyData}
+            previstoMonthly={monthlyPrevisto}
+            realizadoMonthly={monthlyRealizado}
             tone={tone}
           />
 
@@ -812,7 +797,8 @@ const Index = () => {
                   primaryValue: contasReceber.valorAReceber,
                   secondaryLabel: "Recebido",
                   secondaryValue: contasReceber.valorRecebido,
-                  monthlyData: receberMensal,
+                  monthlyPrevisto: chartReceber.previsto,
+                  monthlyRealizado: chartReceber.realizado,
                   to: "/contas-a-receber",
                   icon: TrendingUp,
                 })}
@@ -826,7 +812,8 @@ const Index = () => {
                   primaryValue: contasPagar.valorAPagar,
                   secondaryLabel: "Pago",
                   secondaryValue: contasPagar.valorPago,
-                  monthlyData: pagarMensal,
+                  monthlyPrevisto: chartPagar.previsto,
+                  monthlyRealizado: chartPagar.realizado,
                   to: "/contas-a-pagar",
                   icon: TrendingDown,
                 })}
