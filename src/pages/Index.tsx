@@ -949,13 +949,13 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="relative mt-3 overflow-hidden rounded-[12px] border border-white/8 bg-white/[0.03] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
+                        <div className="relative mt-3 overflow-hidden rounded-[12px] border border-white/8 bg-white/[0.03] px-2.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2">
+                            <div className="min-w-0">
                               <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                                 Resultado
                               </p>
-                              <div className="mt-1 flex items-end gap-2">
+                              <div className="mt-1 flex flex-wrap items-end gap-x-2 gap-y-1">
                                 <span
                                   className={`text-[18px] font-bold leading-none tracking-[-0.03em] ${atingiuMeta
                                     ? "text-emerald-300"
@@ -964,43 +964,46 @@ const Index = () => {
                                 >
                                   {ind.percentualReal}%
                                 </span>
-                                <span className="pb-0.5 text-[10px] text-slate-500">
+                                <span className="text-[10px] text-slate-500">
                                   meta {ind.percentualEsperado}%
                                 </span>
                               </div>
                             </div>
 
-                            <div className="text-right">
-                              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                Status
-                              </p>
-                              <p className={`mt-1 text-[11px] font-semibold ${atingiuMeta ? "text-emerald-300" : "text-red-300"}`}>
-                                {atingiuMeta ? "Dentro do esperado" : "Atenção ao indicador"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="mt-2.5 flex items-center gap-2">
-                            <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/5">
+                            <div className="justify-self-end">
                               <div
-                                className={`relative h-full rounded-full transition-all duration-500 ${atingiuMeta
-                                  ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-300"
-                                  : "bg-gradient-to-r from-red-500 via-red-400 to-orange-300"
+                                className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold ${atingiuMeta
+                                  ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300"
+                                  : "border-red-400/20 bg-red-400/10 text-red-300"
                                   }`}
-                                style={{ width: `${progress}%` }}
                               >
-                                <div className="absolute inset-0 opacity-40 blur-[6px] bg-white/20" />
+                                {atingiuMeta ? "Dentro da meta" : "Atenção"}
+                              </div>
+                            </div>
+
+                            <div className="col-span-2">
+                              <div className="mb-1.5 flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                                <span>Progresso</span>
+                                <span>Alvo {ind.percentualEsperado}%</span>
                               </div>
 
-                              <div
-                                className="absolute top-0 bottom-0 z-10 w-[2px] rounded-full bg-white/45 shadow-[0_0_12px_rgba(255,255,255,0.35)]"
-                                style={{ left: `${metaMarker}%` }}
-                              />
-                            </div>
+                              <div className="relative h-2 overflow-hidden rounded-full bg-white/10 ring-1 ring-inset ring-white/5">
+                                <div
+                                  className={`relative h-full rounded-full transition-all duration-500 ${atingiuMeta
+                                    ? "bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-300"
+                                    : "bg-gradient-to-r from-red-500 via-red-400 to-orange-300"
+                                    }`}
+                                  style={{ width: `${progress}%` }}
+                                >
+                                  <div className="absolute inset-0 opacity-40 blur-[6px] bg-white/20" />
+                                </div>
 
-                            <span className="shrink-0 text-[10px] text-slate-500">
-                              alvo
-                            </span>
+                                <div
+                                  className="absolute top-0 bottom-0 z-10 w-[2px] -translate-x-1/2 rounded-full bg-white/45 shadow-[0_0_12px_rgba(255,255,255,0.35)]"
+                                  style={{ left: `${metaMarker}%` }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </Link>
