@@ -107,7 +107,7 @@ const MiniLineChart = ({
 
   return (
     <div className="flex flex-1 min-h-0 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="flex items-center justify-between mb-1">
+      <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
         </span>
@@ -123,7 +123,7 @@ const MiniLineChart = ({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 relative">
+      <div className="relative flex-1 min-h-0">
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
           preserveAspectRatio="xMidYMid meet"
@@ -549,7 +549,7 @@ const Index = () => {
             }`}
         />
 
-        <div className="relative flex flex-1 min-h-0 flex-col gap-2">
+        <div className="relative flex min-h-0 flex-1 flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
@@ -558,7 +558,7 @@ const Index = () => {
               >
                 {title}
               </p>
-              <h2 className="mt-1 text-[22px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[24px]">
+              <h2 className="mt-1 min-w-0 truncate text-[22px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[24px]">
                 {formatCurrency(total)}
               </h2>
               <p className="mt-1 text-xs text-slate-400">{subtitle}</p>
@@ -579,7 +579,7 @@ const Index = () => {
               <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                 {primaryLabel}
               </p>
-              <p className="mt-1.5 text-[15px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1.5 min-w-0 truncate text-[15px] font-bold leading-none tracking-[-0.03em] text-white">
                 {formatCurrency(primaryValue)}
               </p>
             </div>
@@ -588,7 +588,7 @@ const Index = () => {
               <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
                 {secondaryLabel}
               </p>
-              <p className="mt-1.5 text-[15px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1.5 min-w-0 truncate text-[15px] font-bold leading-none tracking-[-0.03em] text-white">
                 {formatCurrency(secondaryValue)}
               </p>
             </div>
@@ -602,10 +602,10 @@ const Index = () => {
           />
 
           <div
-            className={`rounded-[16px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
+            className={`flex items-center justify-between gap-3 rounded-[16px] border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
               ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
               : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
-              } px-3 py-2 flex items-center justify-between gap-3`}
+              }`}
           >
             <div className="min-w-0">
               <p
@@ -650,21 +650,21 @@ const Index = () => {
           }`}
       >
         <section
-          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[24px] overflow-y-auto xl:overflow-hidden"
+          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full overflow-hidden rounded-none" : "overflow-y-auto rounded-[24px] xl:overflow-hidden"
             }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
             className={`relative xl:h-full ${presentationMode
-              ? "grid gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
+              ? "grid h-full gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
               : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
-            <div className="flex xl:h-full min-h-0 flex-col gap-2.5">
+            <div className="flex min-h-0 flex-col gap-2.5 xl:h-full">
               <div className="space-y-2.5">
                 <div className="flex flex-wrap items-end justify-between gap-2">
-                  <div className="flex items-end gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  <div className="scrollbar-none flex items-end gap-2 overflow-x-auto pb-1">
                     <div className="flex flex-col gap-1">
                       <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                         De
@@ -799,7 +799,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
@@ -825,7 +825,7 @@ const Index = () => {
                         </div>
 
                         <div className="mt-2.5">
-                          <p className="text-[19px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
+                          <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
                             {formatCurrency(item.value)}
                           </p>
                           <p className="mt-1.5 text-xs text-slate-400">
@@ -838,7 +838,7 @@ const Index = () => {
                 })}
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-2 xl:flex-1 xl:min-h-0">
+              <div className="grid gap-2 sm:grid-cols-2 xl:min-h-0 xl:flex-1">
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
@@ -876,7 +876,7 @@ const Index = () => {
             <aside
               className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
                 ? "h-full overflow-y-auto p-3.5"
-                : "xl:h-full p-3.5 lg:p-4 overflow-y-auto max-h-[400px] xl:max-h-none"
+                : "max-h-[500px] overflow-y-auto p-3.5 lg:p-4 xl:h-full xl:max-h-none"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
@@ -905,14 +905,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div
-                  className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
-                  style={
-                    presentationMode || window.innerWidth >= 1280
-                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }
-                      : undefined
-                  }
-                >
+                <div className="mt-3 grid min-h-0 flex-1 gap-1">
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
@@ -927,17 +920,17 @@ const Index = () => {
                       <Link
                         key={ind.id}
                         to={`/indicadores/${ind.id}`}
-                        className={`group relative overflow-hidden rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2.5" : "p-3"
+                        className={`group relative overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2" : "p-2.5"
                           }`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                             {ind.nome}
                           </p>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <span
-                              className={`text-xs font-semibold ${abaixoDaMeta
+                              className={`text-[11px] font-semibold ${abaixoDaMeta
                                 ? "text-emerald-300"
                                 : "text-red-400"
                                 }`}
@@ -945,11 +938,11 @@ const Index = () => {
                               {ind.percentualReal}%
                             </span>
 
-                            <ArrowRight className="h-4 w-4 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
+                            <ArrowRight className="h-3.5 w-3.5 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
                           </div>
                         </div>
 
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
                           <div
                             className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
                               }`}
