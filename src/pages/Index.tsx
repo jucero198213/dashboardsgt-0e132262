@@ -22,29 +22,21 @@ import {
 /*  Mini line-chart (SVG) — Evolução mensal Previsto vs Realizado      */
 /* ------------------------------------------------------------------ */
 const MiniLineChart = ({
-  previstoTotal,
-  realizadoTotal,
+  previstoMonthly,
+  realizadoMonthly,
   tone,
 }: {
-  previstoTotal: number;
-  realizadoTotal: number;
+  previstoMonthly: number[];
+  realizadoMonthly: number[];
   tone: "emerald" | "amber";
 }) => {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const generateCumulativePoints = (total: number): number[] => {
-    const weights = [0.06, 0.08, 0.08, 0.09, 0.08, 0.09, 0.09, 0.08, 0.09, 0.08, 0.09, 0.09];
-    let cumulative = 0;
-    return weights.map((w) => {
-      cumulative += total * w;
-      return cumulative;
-    });
-  };
-
-  const previstoPoints = useMemo(() => generateCumulativePoints(previstoTotal), [previstoTotal]);
-  const realizadoPoints = useMemo(() => generateCumulativePoints(realizadoTotal), [realizadoTotal]);
+  // Usa os dados mensais reais (não acumulados)
+  const previstoPoints = previstoMonthly;
+  const realizadoPoints = realizadoMonthly;
 
   const allValues = [...previstoPoints, ...realizadoPoints];
   const maxVal = Math.max(...allValues, 1);
@@ -315,9 +307,28 @@ const Index = () => {
     filiais,
     empresas,
     isProcessed,
+    contasPagar: contasPagarList,
+    contasReceber: contasReceberList,
   } = useFinancialData();
 
   const { contasReceber, contasPagar } = resumo;
+
+  // ── Agrupa valores reais por mês (0-11) para os gráficos ──────────────────
+  const groupByMonth = (items: { vencimento: string; valor: number }[]): number[] => {
+    const months = new Array(12).fill(0);
+    for (const item of items) {
+      if (!item.vencimento) continue;
+      const parts = item.vencimento.split("-");
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      if (monthIdx >= 0 && monthIdx < 12) {
+        months[monthIdx] += item.valor;
+      }
+    }
+    return months;
+  };
+
+  const receberMensal = useMemo(() => groupByMonth(contasReceberList), [contasReceberList]);
+  const pagarMensal = useMemo(() => groupByMonth(contasPagarList), [contasPagarList]);
 
   const [presentationMode, setPresentationMode] = useState(false);
 
@@ -465,6 +476,7 @@ const Index = () => {
     primaryValue,
     secondaryLabel,
     secondaryValue,
+    monthlyData,
     to,
     icon: Icon,
   }: {
@@ -476,6 +488,7 @@ const Index = () => {
     primaryValue: number;
     secondaryLabel: string;
     secondaryValue: number;
+    monthlyData: number[];
     to: string;
     icon: typeof TrendingUp;
   }) => {
@@ -552,8 +565,8 @@ const Index = () => {
 
           {/* Line chart */}
           <MiniLineChart
-            previstoTotal={primaryValue}
-            realizadoTotal={secondaryValue}
+            previstoMonthly={monthlyData.map(() => primaryValue / 12)}
+            realizadoMonthly={monthlyData}
             tone={tone}
           />
 
@@ -799,6 +812,7 @@ const Index = () => {
                   primaryValue: contasReceber.valorAReceber,
                   secondaryLabel: "Recebido",
                   secondaryValue: contasReceber.valorRecebido,
+                  monthlyData: receberMensal,
                   to: "/contas-a-receber",
                   icon: TrendingUp,
                 })}
@@ -812,6 +826,7 @@ const Index = () => {
                   primaryValue: contasPagar.valorAPagar,
                   secondaryLabel: "Pago",
                   secondaryValue: contasPagar.valorPago,
+                  monthlyData: pagarMensal,
                   to: "/contas-a-pagar",
                   icon: TrendingDown,
                 })}
