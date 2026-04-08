@@ -6,6 +6,7 @@ import { KpiCard } from "@/components/indicators/KpiCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useMemo, useState } from "react";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 const ContasAPagar = () => {
   const navigate = useNavigate();
