@@ -40,13 +40,13 @@ const defaultDwFilter: DwFilter = {
 type FinanceStatus = "Em Aberto" | "Vencido" | "Parcial";
 
 const EXPECTED_INDICATORS: Record<string, number> = {
-  "Compra de Ativo": 33,
-  "Óleo Diesel": 26,
-  Folha: 21,
-  Imposto: 5,
-  Pedágio: 5,
-  Administrativo: 5,
-  Manutenção: 15,
+  "Compra de Ativo":  33,
+  "Óleo Diesel":      26,
+  "Folha":            21,
+  "Imposto":           5,
+  "Pedágio":           5,
+  "Administrativo":    5,
+  "Manutenção":       15,
 };
 
 const defaultResumo: ResumoFinanceiro = {
@@ -204,79 +204,106 @@ export function FinancialDataProvider({
 
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
+      const round2 = (v: number) => Math.round(v * 100) / 100;
 
-      const cpRowsRaw  = data.filter((r) => r.ORIGEM === "CP");
-      const crRows  = data.filter((r) => r.ORIGEM === "CR");
-      const lbDRowsRaw = data.filter((r) => r.ORIGEM === "LB_D");
-      const lbCRows = data.filter((r) => r.ORIGEM === "LB_C");
+      // ── Helpers de filtro ───────────────────────────────────────────────────
+      const sit   = (r: DwRow) => (r.SITUACAO ?? "").trim().toUpperCase();
+      const hasPag = (r: DwRow) => r.DATA_PAGAMENTO !== null && r.DATA_PAGAMENTO !== undefined && r.DATA_PAGAMENTO !== "";
+      const noPag  = (r: DwRow) => !hasPag(r);
 
-      // Contas a Pagar: apenas SITUACAO D ou P e sem DATA_PAGAMENTO
-      const cpRows = cpRowsRaw.filter((r) => {
-        const sit = (r.SITUACAO ?? "").trim().toUpperCase();
-        if (sit && sit !== "D" && sit !== "P") return false;
-        const dtPag = (r.DATA_PAGAMENTO ?? "").trim();
-        if (dtPag && dtPag.toLowerCase() !== "null") return false;
-        return true;
-      });
+      // ── Todos os registros por origem ───────────────────────────────────────
+      const allCP   = data.filter((r) => r.ORIGEM === "CP");
+      const allCR   = data.filter((r) => r.ORIGEM === "CR");
 
-      // LB_D (débitos livro): mesmas regras de contas a pagar
-      const lbDRows = lbDRowsRaw.filter((r) => {
-        const sit = (r.SITUACAO ?? "").trim().toUpperCase();
-        if (sit && sit !== "D" && sit !== "P") return false;
-        const dtPag = (r.DATA_PAGAMENTO ?? "").trim();
-        if (dtPag && dtPag.toLowerCase() !== "null") return false;
-        return true;
-      });
+      // ─────────────────────────────────────────────────────────────────────────
+      // 1. A PAGAR PREVISTO  → CP | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
+      // ─────────────────────────────────────────────────────────────────────────
+      const cpPrevisto = allCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
 
-      const contasPagar: ContaPagar[] = cpRows.map((r, i) => {
+      // ─────────────────────────────────────────────────────────────────────────
+      // 2. A RECEBER PREVISTO → CR | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
+      // ─────────────────────────────────────────────────────────────────────────
+      const crPrevisto = allCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 3. PAGO → CP | SITUACAO L | DATA_PAGAMENTO NOT NULL | VLR_PAGO
+      // ─────────────────────────────────────────────────────────────────────────
+      const cpPago = allCP.filter((r) => sit(r) === "L" && hasPag(r));
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 4. RECEBIDO → CR | SITUACAO L | DATA_PAGAMENTO NOT NULL | VLR_PAGO
+      // ─────────────────────────────────────────────────────────────────────────
+      const crRecebido = allCR.filter((r) => sit(r) === "L" && hasPag(r));
+
+      // ── Somas ───────────────────────────────────────────────────────────────
+      const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
+        round2(rows.reduce((s, r) => s + n(r[f]), 0));
+
+      const totalPagar    = sumCol(cpPrevisto, "VLR_PARCELA");
+      const valorPago     = sumCol(cpPago,     "VLR_PAGO");
+      const totalReceber  = sumCol(crPrevisto, "VLR_PARCELA");
+      const valorRecebido = sumCol(crRecebido, "VLR_PAGO");
+
+      const resumo: ResumoFinanceiro = {
+        contasPagar:  { valorAPagar: totalPagar,   valorPago,      saldoAPagar:   round2(Math.max(totalPagar  - valorPago,     0)) },
+        contasReceber:{ valorAReceber: totalReceber, valorRecebido, saldoAReceber: round2(Math.max(totalReceber - valorRecebido, 0)) },
+      };
+
+      // ── Tabelas de detalhe (usam todos os CP/CR sem filtro de situação) ────
+      const contasPagar: ContaPagar[] = allCP.map((r, i) => {
         const valor     = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
-        const valorPago = n(r.VLR_PAGO);
+        const valorPagoRow = n(r.VLR_PAGO);
         return {
           id: String(i + 1), documento: r.DOCUMENTO ?? `CP-${i + 1}`,
           fornecedor: r.NOME_PARCEIRO ?? "N/A",
           vencimento: isoDate(r.DATA_VENCIMENTO), valor,
-          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorPago, r.SITUACAO ?? ""),
+          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorPagoRow, r.SITUACAO ?? ""),
         };
       });
 
-      const contasReceber: ContaReceber[] = crRows.map((r, i) => {
-        const valor         = n(r.VLR_LIQUIDO ?? r.VLR_PARCELA ?? r.VLRDOC);
-        const valorRecebido = n(r.VLR_PAGO);
+      const contasReceber: ContaReceber[] = allCR.map((r, i) => {
+        const valor            = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
+        const valorRecebidoRow = n(r.VLR_PAGO);
         return {
           id: String(i + 1), documento: r.DOCUMENTO ?? `CR-${i + 1}`,
           cliente: r.NOME_PARCEIRO ?? "N/A",
           vencimento: isoDate(r.DATA_VENCIMENTO), valor,
-          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorRecebido, r.SITUACAO ?? ""),
+          status: calculateStatus(r.DATA_VENCIMENTO, valor, valorRecebidoRow, r.SITUACAO ?? ""),
         };
       });
 
-      const sumF = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
-        Math.round(rows.reduce((s, r) => s + n(r[f]), 0) * 100) / 100;
-
-      // PAGO: soma VLR_PAGO apenas onde DATA_PAGAMENTO não é null
-      const sumPago = (rows: DwRow[]) =>
-        Math.round(
-          rows
-            .filter((r) => r.DATA_PAGAMENTO !== null && r.DATA_PAGAMENTO !== undefined && r.DATA_PAGAMENTO !== "")
-            .reduce((s, r) => s + n(r.VLR_PAGO), 0) * 100
-        ) / 100;
-
-      const totalPagar    = sumF([...cpRows,  ...lbDRows], "VLR_PARCELA");
-      const valorPago     = sumPago([...cpRows,  ...lbDRows]);
-      const totalReceber  = sumF([...crRows,  ...lbCRows], "VLR_PARCELA");
-      const valorRecebido = sumPago([...crRows,  ...lbCRows]);
-
-      const resumo: ResumoFinanceiro = {
-        contasPagar:  { valorAPagar: totalPagar, valorPago, saldoAPagar: Math.max(totalPagar - valorPago, 0) },
-        contasReceber:{ valorAReceber: totalReceber, valorRecebido, saldoAReceber: Math.max(totalReceber - valorRecebido, 0) },
+      // ─────────────────────────────────────────────────────────────────────────
+      // INDICADORES — VLR_PARCELA agrupado por CODCUS (Centro de Custo)
+      // Base: todos os CP (sem filtro de situação)
+      // ─────────────────────────────────────────────────────────────────────────
+      const indicadorRules: Record<string, string[]> = {
+        "Óleo Diesel":        ["21"],
+        "Imposto":            ["23"],
+        "Administrativo":     ["3"],
+        "Pedágio":            ["24"],
+        "Manutenção":         ["4", "5", "6", "7", "25"],
+        "Compra de Ativo":    ["26"],
+        "Folha":              ["3"],
       };
+
+      // Base dos indicadores = todos CP, soma VLR_PARCELA
+      const baseIndicadores = allCP;
+      const totalBaseInd = sumCol(baseIndicadores, "VLR_PARCELA");
 
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
         ([nome, percentualEsperado], index) => {
-          const matched = cpRows.filter((r) => matchesIndicadorDw(nome, r));
-          const matchedTotal = matched.reduce((s, r) => s + n(r.VLR_PARCELA ?? r.VLR_LIQUIDO), 0);
-          const percentualReal = totalPagar > 0 ? (matchedTotal / totalPagar) * 100 : 0;
-          return { id: String(index + 1), nome, percentualReal: Math.round(percentualReal * 10) / 10, percentualEsperado };
+          const codcusList = indicadorRules[nome] ?? [];
+          const matched = codcusList.length > 0
+            ? baseIndicadores.filter((r) => codcusList.includes((r.CENTRO_CUSTO ?? "").toString().trim()))
+            : [];
+          const matchedTotal = sumCol(matched, "VLR_PARCELA");
+          const percentualReal = totalBaseInd > 0 ? (matchedTotal / totalBaseInd) * 100 : 0;
+          return {
+            id: String(index + 1),
+            nome,
+            percentualReal:  Math.round(percentualReal * 10) / 10,
+            percentualEsperado,
+          };
         }
       );
 
