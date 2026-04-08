@@ -37,7 +37,6 @@ const MiniLineChart = ({
 
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Usa os dados mensais reais (não acumulados)
   const previstoPoints = previstoMonthly;
   const realizadoPoints = realizadoMonthly;
 
@@ -99,7 +98,6 @@ const MiniLineChart = ({
         ? `R$ ${(v / 1_000).toFixed(0)}mil`
         : formatCurrency(v);
 
-  // Calcula a posição do tooltip para não sair da tela
   const getTooltipX = (i: number) => {
     const x = toX(i);
     if (i <= 1) return x;
@@ -109,7 +107,6 @@ const MiniLineChart = ({
 
   return (
     <div className="flex flex-1 min-h-0 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
@@ -126,7 +123,6 @@ const MiniLineChart = ({
         </div>
       </div>
 
-      {/* SVG chart */}
       <div className="flex-1 min-h-0 relative">
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
@@ -149,7 +145,6 @@ const MiniLineChart = ({
             </filter>
           </defs>
 
-          {/* Horizontal grid lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
             <line
               key={frac}
@@ -162,10 +157,8 @@ const MiniLineChart = ({
             />
           ))}
 
-          {/* Area fill */}
           <path d={buildAreaPath(realizadoPoints)} fill={`url(#${gradId})`} />
 
-          {/* Previsto line (dashed) */}
           <path
             d={buildPath(previstoPoints)}
             fill="none"
@@ -175,7 +168,6 @@ const MiniLineChart = ({
             strokeLinecap="round"
           />
 
-          {/* Realizado line (solid, with glow) */}
           <path
             d={buildPath(realizadoPoints)}
             fill="none"
@@ -186,7 +178,6 @@ const MiniLineChart = ({
             filter={`url(#glow-${tone})`}
           />
 
-          {/* Dots on every month */}
           {realizadoPoints.map((v, i) => (
             <circle
               key={`dot-${i}`}
@@ -200,7 +191,6 @@ const MiniLineChart = ({
             />
           ))}
 
-          {/* Hover vertical line */}
           {hoverIndex !== null && (
             <line
               x1={toX(hoverIndex)}
@@ -213,7 +203,6 @@ const MiniLineChart = ({
             />
           )}
 
-          {/* Tooltip */}
           {hoverIndex !== null && (
             <g>
               {(() => {
@@ -285,7 +274,6 @@ const MiniLineChart = ({
             </g>
           )}
 
-          {/* Month labels — ALL 12 months */}
           {months.map((m, i) => (
             <text
               key={m}
@@ -302,7 +290,6 @@ const MiniLineChart = ({
             </text>
           ))}
 
-          {/* Invisible hover zones per month */}
           {months.map((_, i) => (
             <rect
               key={`hover-${i}`}
@@ -343,6 +330,7 @@ const Index = () => {
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const filiaisFiltradas = useMemo(
     () =>
@@ -351,6 +339,36 @@ const Index = () => {
         : filiais,
     [filiais, dwFilter.empresa]
   );
+
+  const handleUpdate = useCallback(async () => {
+    setProgress(0);
+
+    let current = 0;
+
+    const interval = window.setInterval(() => {
+      current += Math.random() * 8;
+
+      if (current >= 90) {
+        current = 90;
+        window.clearInterval(interval);
+      }
+
+      setProgress(Math.floor(current));
+    }, 250);
+
+    try {
+      await fetchFromDW();
+      window.clearInterval(interval);
+      setProgress(100);
+    } catch (error) {
+      window.clearInterval(interval);
+      console.error("Erro ao atualizar dados:", error);
+    } finally {
+      window.setTimeout(() => {
+        setProgress(0);
+      }, 600);
+    }
+  }, [fetchFromDW]);
 
   const enterFullscreen = useCallback(async () => {
     try {
@@ -517,7 +535,6 @@ const Index = () => {
             : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
           } ${presentationMode ? "flex flex-col p-3.5" : "flex flex-col p-3.5 xl:p-4"}`}
       >
-        {/* Glow overlays */}
         <div
           className={`absolute inset-0 ${isPositive
               ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
@@ -531,9 +548,7 @@ const Index = () => {
             }`}
         />
 
-        {/* Content */}
         <div className="relative flex flex-1 min-h-0 flex-col gap-2">
-          {/* Header: title + value + icon */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
@@ -558,7 +573,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Sub-cards side by side */}
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-[16px] border border-white/8 bg-white/[0.04] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
               <p className="text-[9px] font-semibold uppercase tracking-[0.26em] text-slate-500">
@@ -579,7 +593,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Line chart */}
           <MiniLineChart
             previstoMonthly={monthlyPrevisto}
             realizadoMonthly={monthlyRealizado}
@@ -587,7 +600,6 @@ const Index = () => {
             ano={chartAno}
           />
 
-          {/* Action bar */}
           <div
             className={`rounded-[16px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
                 ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
@@ -629,7 +641,6 @@ const Index = () => {
           : "overflow-y-auto px-1.5 py-1.5 sm:px-2 sm:py-2 xl:overflow-hidden"
         }`}
     >
-      {/* Background effects */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
@@ -637,7 +648,6 @@ const Index = () => {
         className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
           }`}
       >
-        {/* No header — content goes directly */}
         <section
           className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[24px] overflow-y-auto xl:overflow-hidden"
             }`}
@@ -650,97 +660,103 @@ const Index = () => {
                 : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
-            {/* Left column */}
             <div className="flex xl:h-full min-h-0 flex-col gap-2.5">
-              {/* Filters */}
               <div className="space-y-2.5">
                 <div className="flex flex-wrap items-end justify-between gap-2">
                   <div className="flex items-end gap-2 overflow-x-auto pb-1 scrollbar-none">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      De
-                    </span>
-                    <input
-                      type="date"
-                      value={dwFilter.dataInicio}
-                      onChange={(e) =>
-                        setDwFilter("dataInicio", e.target.value)
-                      }
-                      className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
-                    />
-                  </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        De
+                      </span>
+                      <input
+                        type="date"
+                        value={dwFilter.dataInicio}
+                        onChange={(e) =>
+                          setDwFilter("dataInicio", e.target.value)
+                        }
+                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      Até
-                    </span>
-                    <input
-                      type="date"
-                      value={dwFilter.dataFim}
-                      onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                      className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
-                    />
-                  </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Até
+                      </span>
+                      <input
+                        type="date"
+                        value={dwFilter.dataFim}
+                        onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                        className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      Empresa
-                    </span>
-                    <Select
-                      value={dwFilter.empresa ?? "__all__"}
-                      onValueChange={(v) =>
-                        setDwFilter("empresa", v === "__all__" ? null : v)
-                      }
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Empresa
+                      </span>
+                      <Select
+                        value={dwFilter.empresa ?? "__all__"}
+                        onValueChange={(v) =>
+                          setDwFilter("empresa", v === "__all__" ? null : v)
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__all__">Todas</SelectItem>
+                          {empresas.map((e) => (
+                            <SelectItem key={e.id} value={e.id}>
+                              {e.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                        Filial
+                      </span>
+                      <Select
+                        value={dwFilter.filial ?? "__all__"}
+                        onValueChange={(v) =>
+                          setDwFilter("filial", v === "__all__" ? null : v)
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                          <SelectValue placeholder="Todas" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__all__">Todas</SelectItem>
+                          {filiaisFiltradas.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <button
+                      onClick={() => void handleUpdate()}
+                      disabled={isFetchingDw}
+                      className="inline-flex h-8 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3.5 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <SelectTrigger className="h-8 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                        <SelectValue placeholder="Todas" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__all__">Todas</SelectItem>
-                        {empresas.map((e) => (
-                          <SelectItem key={e.id} value={e.id}>
-                            {e.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                      Filial
-                    </span>
-                    <Select
-                      value={dwFilter.filial ?? "__all__"}
-                      onValueChange={(v) =>
-                        setDwFilter("filial", v === "__all__" ? null : v)
-                      }
-                    >
-                      <SelectTrigger className="h-8 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                        <SelectValue placeholder="Todas" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__all__">Todas</SelectItem>
-                        {filiaisFiltradas.map((f) => (
-                          <SelectItem key={f.id} value={f.id}>
-                            {f.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <button
-                    onClick={() => void fetchFromDW()}
-                    disabled={isFetchingDw}
-                    className="inline-flex h-8 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3.5 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <RefreshCw
-                      className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
-                        }`}
-                    />
-                    {isFetchingDw ? "Buscando..." : "Atualizar"}
-                  </button>
+                      <RefreshCw
+                        className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`}
+                      />
+                      {isFetchingDw ? (
+                        <span className="flex items-center gap-2">
+                          Buscando...
+                          <span className="font-bold text-cyan-200">
+                            {progress}%
+                          </span>
+                        </span>
+                      ) : (
+                        "Atualizar"
+                      )}
+                    </button>
                   </div>
 
                   <UserMenu />
@@ -782,7 +798,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Top 4 metric cards */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
@@ -822,7 +837,6 @@ const Index = () => {
                 })}
               </div>
 
-              {/* Large cards with charts */}
               <div className="grid sm:grid-cols-2 gap-2 xl:flex-1 xl:min-h-0">
                 {renderLargeCard({
                   title: "Contas a receber",
@@ -858,7 +872,6 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Right sidebar — Indicadores */}
             <aside
               className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
                   ? "h-full overflow-y-auto p-3.5"
@@ -891,7 +904,14 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]" style={presentationMode || window.innerWidth >= 1280 ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` } : undefined}>
+                <div
+                  className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
+                  style={
+                    presentationMode || window.innerWidth >= 1280
+                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }
+                      : undefined
+                  }
+                >
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
