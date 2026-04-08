@@ -653,6 +653,7 @@ const Index = () => {
             {/* Left column */}
             <div className="flex h-full min-h-0 flex-col gap-2.5">
               {/* Filters */}
+              <div className="space-y-2.5">
                 <div className="flex flex-wrap items-end justify-between gap-2">
                   <div className="flex flex-wrap items-end gap-2">
                   <div className="flex flex-col gap-1">
