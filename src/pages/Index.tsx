@@ -783,7 +783,7 @@ const Index = () => {
               </div>
 
               {/* Top 4 metric cards */}
-              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
 
