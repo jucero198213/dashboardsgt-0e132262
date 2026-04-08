@@ -38,10 +38,13 @@ const ContasAPagar = () => {
 
       <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-400">
-          <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-white">Contas a Pagar</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-white">Contas a Pagar</span>
+          </div>
+          <UserMenu />
         </div>
 
         {/* Header */}
