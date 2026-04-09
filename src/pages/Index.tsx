@@ -654,34 +654,34 @@ const Index = () => {
     <div
       className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
           ? "h-screen w-screen overflow-hidden p-0"
-          : "overflow-y-auto px-1.5 py-1.5 sm:px-2 sm:py-2 xl:overflow-hidden"
+          : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:overflow-hidden"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
+        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)] xl:h-[calc(100vh-16px)]"
           }`}
       >
         <section
-          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[24px] overflow-y-auto xl:overflow-hidden"
+          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto xl:overflow-hidden"
             }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
             className={`relative xl:h-full ${presentationMode
-                ? "grid gap-3 p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
-                : "flex flex-col gap-4 p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
+                ? "grid gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
+                : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-3">
                   <h1
                     className={`font-semibold tracking-tight text-white ${presentationMode
                         ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
-                        : "text-3xl md:text-4xl xl:text-[36px] xl:leading-[1]"
+                        : "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[36px] xl:leading-[1]"
                       }`}
                   >
                     Análise Consolidada
@@ -699,22 +699,22 @@ const Index = () => {
 
                 <div className="h-px bg-white/6" />
 
-                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <input
                     type="date"
                     value={dwFilter.dataInicio}
                     onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                    className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                    className="h-8 w-[120px] sm:w-auto rounded-xl border border-white/10 bg-white/5 px-2 sm:px-3 text-[11px] sm:text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
                   />
 
                   <input
                     type="date"
                     value={dwFilter.dataFim}
                     onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                    className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+                    className="h-8 w-[120px] sm:w-auto rounded-xl border border-white/10 bg-white/5 px-2 sm:px-3 text-[11px] sm:text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
                   />
 
-                  <div className="h-5 w-px bg-white/10 shrink-0" />
+                  <div className="hidden sm:block h-5 w-px bg-white/10 shrink-0" />
 
                   <Select
                     value={dwFilter.empresa ?? "__all__"}
@@ -722,7 +722,7 @@ const Index = () => {
                       setDwFilter("empresa", v === "__all__" ? null : v)
                     }
                   >
-                    <SelectTrigger className="h-8 w-[130px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                    <SelectTrigger className="h-8 w-[100px] sm:w-[130px] rounded-xl border-white/10 bg-white/5 text-[11px] sm:text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
                       <SelectValue placeholder="Empresa" />
                     </SelectTrigger>
                     <SelectContent>
@@ -741,7 +741,7 @@ const Index = () => {
                       setDwFilter("filial", v === "__all__" ? null : v)
                     }
                   >
-                    <SelectTrigger className="h-8 w-[140px] rounded-xl border-white/10 bg-white/5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
+                    <SelectTrigger className="h-8 w-[100px] sm:w-[140px] rounded-xl border-white/10 bg-white/5 text-[11px] sm:text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
                       <SelectValue placeholder="Filial" />
                     </SelectTrigger>
                     <SelectContent>
@@ -757,14 +757,14 @@ const Index = () => {
                   <button
                     onClick={() => void handleUpdate()}
                     disabled={isFetchingDw}
-                    className="inline-flex h-8 items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-3.5 text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-8 items-center gap-1.5 sm:gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-2.5 sm:px-3.5 text-[11px] sm:text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <RefreshCw
                       className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`}
                     />
                     {isFetchingDw ? (
-                      <span className="flex items-center gap-2">
-                        Buscando...
+                      <span className="flex items-center gap-1.5">
+                        <span className="hidden sm:inline">Buscando...</span>
                         <span className="font-bold text-cyan-200">
                           {progress}%
                         </span>
@@ -820,7 +820,7 @@ const Index = () => {
                 })}
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
@@ -855,7 +855,7 @@ const Index = () => {
               </div>
 
               {/* ── KPIs Extras ──────────────────────────────────────────── */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 
                   {/* Saldo Líquido */}
                   <div className={`relative overflow-hidden rounded-[14px] border px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 ${
@@ -929,9 +929,9 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                  ? "h-full overflow-y-auto p-3.5"
-                  : "xl:h-full p-3.5 lg:p-4 overflow-y-auto max-h-[400px] xl:max-h-none"
+              className={`rounded-[16px] sm:rounded-[20px] md:rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
+                  ? "h-full overflow-y-auto p-3 sm:p-3.5"
+                  : "xl:h-full p-3 sm:p-3.5 lg:p-4 overflow-y-auto max-h-[350px] sm:max-h-[400px] xl:max-h-none"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
@@ -961,10 +961,10 @@ const Index = () => {
                 </div>
 
                 <div
-                  className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
+                  className="mt-3 grid min-h-0 gap-1.5 flex-1 sm:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
                   style={
                     presentationMode || window.innerWidth >= 1280
-                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }
+                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))`, gridTemplateColumns: undefined }
                       : undefined
                   }
                 >

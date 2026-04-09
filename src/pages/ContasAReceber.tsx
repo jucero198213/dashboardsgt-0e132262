@@ -32,7 +32,7 @@ const ContasAReceber = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white px-4 py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen bg-[#020617] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
@@ -63,7 +63,7 @@ const ContasAReceber = () => {
               </div>
 
             </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">Detalhamento — Recebíveis</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-4xl">Detalhamento — Recebíveis</h1>
             <p className="mt-2 text-sm text-slate-400 max-w-xl">Visão detalhada de todos os documentos a receber do período</p>
           </div>
         </div>
@@ -105,7 +105,7 @@ const ContasAReceber = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow className="border-white/5 hover:bg-transparent">
                     <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Data</TableHead>
