@@ -494,6 +494,7 @@ const Index = () => {
 
   const [presentationMode, setPresentationMode] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState<string>("");
 
   const filiaisFiltradas = useMemo(
     () =>
@@ -505,31 +506,45 @@ const Index = () => {
 
   const handleUpdate = useCallback(async () => {
     setProgress(0);
+    setLoadingPhase("Conectando ao DW...");
 
     let current = 0;
+    const phases = [
+      { at: 15, label: "Consultando dados..." },
+      { at: 35, label: "Processando contas a pagar..." },
+      { at: 55, label: "Processando contas a receber..." },
+      { at: 70, label: "Calculando indicadores..." },
+      { at: 85, label: "Gerando gráficos..." },
+    ];
 
     const interval = window.setInterval(() => {
-      current += Math.random() * 8;
+      // Avança mais devagar conforme sobe, nunca trava
+      const speed = current < 30 ? 3 + Math.random() * 4
+        : current < 60 ? 2 + Math.random() * 3
+        : current < 85 ? 1 + Math.random() * 2
+        : 0.3 + Math.random() * 0.5;
 
-      if (current >= 90) {
-        current = 90;
-        window.clearInterval(interval);
-      }
-
+      current = Math.min(current + speed, 95);
       setProgress(Math.floor(current));
-    }, 250);
+
+      const phase = [...phases].reverse().find(p => current >= p.at);
+      if (phase) setLoadingPhase(phase.label);
+    }, 300);
 
     try {
       await fetchFromDW();
       window.clearInterval(interval);
+      setLoadingPhase("Concluído!");
       setProgress(100);
     } catch (error) {
       window.clearInterval(interval);
+      setLoadingPhase("");
       console.error("Erro ao atualizar dados:", error);
     } finally {
       window.setTimeout(() => {
         setProgress(0);
-      }, 600);
+        setLoadingPhase("");
+      }, 800);
     }
   }, [fetchFromDW]);
 
@@ -749,17 +764,13 @@ const Index = () => {
               ano={chartAno}
             />
             {isFetchingDw && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/30 backdrop-blur-[1px]">
-                <div
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${
-                    isPositive
-                      ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
-                      : "border-amber-400/30 bg-amber-500/20 text-amber-300"
-                  }`}
-                >
-                  <RefreshCw className="h-3 w-3 animate-spin" />
-                  Atualizando...
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[22px] bg-black/40 backdrop-blur-[2px]">
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full animate-pulse ${isPositive ? "bg-emerald-400" : "bg-amber-400"}`} />
+                  <div className={`h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] ${isPositive ? "bg-emerald-400/60" : "bg-amber-400/60"}`} />
+                  <div className={`h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] ${isPositive ? "bg-emerald-400/30" : "bg-amber-400/30"}`} />
                 </div>
+                <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
               </div>
             )}
           </div>
@@ -826,6 +837,18 @@ const Index = () => {
               : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
           }`}
         >
+          {/* Global progress bar — top of section */}
+          {isFetchingDw && (
+            <div className="absolute inset-x-0 top-0 z-50">
+              <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 shadow-[0_0_12px_rgba(34,211,238,0.5)] transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div className="relative flex flex-col gap-3 p-3 sm:p-3.5 lg:p-4">
@@ -923,7 +946,11 @@ const Index = () => {
                 <button
                   onClick={() => void handleUpdate()}
                   disabled={isFetchingDw}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-2.5 text-[11px] font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:px-3.5 sm:text-xs"
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${
+                    isFetchingDw
+                      ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
+                      : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
+                  } disabled:cursor-not-allowed`}
                 >
                   <RefreshCw
                     className={`h-3.5 w-3.5 ${
@@ -931,9 +958,9 @@ const Index = () => {
                     }`}
                   />
                   {isFetchingDw ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="hidden sm:inline">Buscando...</span>
-                      <span className="font-bold text-cyan-200">
+                    <span className="flex items-center gap-2">
+                      <span className="hidden sm:inline">{loadingPhase}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">
                         {progress}%
                       </span>
                     </span>
