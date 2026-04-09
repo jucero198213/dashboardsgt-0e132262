@@ -129,8 +129,9 @@ const AnimatedCard = ({
 
   return (
     <div
-      className={`transition-all duration-500 ease-out ${visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-        } ${className}`}
+      className={`transition-all duration-500 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+      } ${className}`}
     >
       {children}
     </div>
@@ -206,27 +207,27 @@ const MiniLineChart = ({
   const colors =
     tone === "emerald"
       ? {
-        prevStroke: "rgba(16,185,129,0.35)",
-        realStroke: "#34d399",
-        gradFrom: "#34d399",
-        dot: "#34d399",
-        dotGlow: "rgba(16,185,129,0.4)",
-        legendPrev: "rgba(16,185,129,0.4)",
-        legendReal: "#34d399",
-        tooltipBg: "rgba(6,78,59,0.92)",
-        tooltipBorder: "rgba(52,211,153,0.3)",
-      }
+          prevStroke: "rgba(16,185,129,0.35)",
+          realStroke: "#34d399",
+          gradFrom: "#34d399",
+          dot: "#34d399",
+          dotGlow: "rgba(16,185,129,0.4)",
+          legendPrev: "rgba(16,185,129,0.4)",
+          legendReal: "#34d399",
+          tooltipBg: "rgba(6,78,59,0.92)",
+          tooltipBorder: "rgba(52,211,153,0.3)",
+        }
       : {
-        prevStroke: "rgba(245,158,11,0.35)",
-        realStroke: "#fbbf24",
-        gradFrom: "#fbbf24",
-        dot: "#fbbf24",
-        dotGlow: "rgba(245,158,11,0.4)",
-        legendPrev: "rgba(245,158,11,0.4)",
-        legendReal: "#fbbf24",
-        tooltipBg: "rgba(78,53,6,0.92)",
-        tooltipBorder: "rgba(251,191,36,0.3)",
-      };
+          prevStroke: "rgba(245,158,11,0.35)",
+          realStroke: "#fbbf24",
+          gradFrom: "#fbbf24",
+          dot: "#fbbf24",
+          dotGlow: "rgba(245,158,11,0.4)",
+          legendPrev: "rgba(245,158,11,0.4)",
+          legendReal: "#fbbf24",
+          tooltipBg: "rgba(78,53,6,0.92)",
+          tooltipBorder: "rgba(251,191,36,0.3)",
+        };
 
   const gradId = `line-grad-${tone}`;
   const realizadoLabel = tone === "emerald" ? "Recebido" : "Pago";
@@ -235,8 +236,8 @@ const MiniLineChart = ({
     v >= 1_000_000
       ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
       : v >= 1_000
-        ? `R$ ${(v / 1_000).toFixed(0)}mil`
-        : formatCurrency(v);
+      ? `R$ ${(v / 1_000).toFixed(0)}mil`
+      : formatCurrency(v);
 
   const getTooltipX = (i: number) => {
     const x = toX(i);
@@ -692,30 +693,34 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
-          ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-          : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-          } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
+        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${
+          isPositive
+            ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+            : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+        } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
-          className={`absolute inset-0 ${isPositive
-            ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
-            : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
-            }`}
+          className={`absolute inset-0 ${
+            isPositive
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
+              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
+          }`}
         />
         <div
-          className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
-            ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
-            : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
-            }`}
+          className={`absolute inset-x-0 bottom-0 h-24 ${
+            isPositive
+              ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
+              : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
+          }`}
         />
 
         <div className="relative flex flex-col gap-1.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
-                  }`}
+                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${
+                  isPositive ? "text-emerald-300" : "text-amber-300"
+                }`}
               >
                 {title}
               </p>
@@ -726,10 +731,11 @@ const Index = () => {
             </div>
 
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
-                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
-                : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
-                }`}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${
+                isPositive
+                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
+                  : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
+              }`}
             >
               <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
             </div>
@@ -745,10 +751,11 @@ const Index = () => {
             {isFetchingDw && (
               <div className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/30 backdrop-blur-[1px]">
                 <div
-                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${isPositive
-                    ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
-                    : "border-amber-400/30 bg-amber-500/20 text-amber-300"
-                    }`}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${
+                    isPositive
+                      ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
+                      : "border-amber-400/30 bg-amber-500/20 text-amber-300"
+                  }`}
                 >
                   <RefreshCw className="h-3 w-3 animate-spin" />
                   Atualizando...
@@ -758,15 +765,17 @@ const Index = () => {
           </div>
 
           <div
-            className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
-              ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
-              : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
-              }`}
+            className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
+              isPositive
+                ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
+                : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
+            }`}
           >
             <div className="min-w-0">
               <p
-                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
-                  }`}
+                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${
+                  isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                }`}
               >
                 Ação rápida
               </p>
@@ -777,10 +786,11 @@ const Index = () => {
 
             <Link
               to={to}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
-                ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
-                : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
-                }`}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
+                isPositive
+                  ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
+                  : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+              }`}
             >
               Ver detalhamento
               <ArrowRight className="h-3 w-3" />
@@ -793,69 +803,67 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
-        ? "h-screen w-screen overflow-hidden p-0"
-        : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
-        }`}
+      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${
+        presentationMode
+          ? "h-screen w-screen overflow-hidden p-0"
+          : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+      }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode
-          ? "h-full w-full max-w-none"
-          : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
-          }`}
+        className={`relative flex flex-col ${
+          presentationMode
+            ? "h-full w-full max-w-none"
+            : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
+        }`}
       >
         <section
-          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode
-            ? "h-full w-full overflow-hidden rounded-none"
-            : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
-            }`}
+          className={`relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${
+            presentationMode
+              ? "h-full w-full overflow-hidden rounded-none"
+              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
+          }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
-          <div
-            className={`relative ${presentationMode
-              ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
-              : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:auto-rows-min xl:gap-3"
-              }`}
-          >
-            <div className="flex min-h-0 flex-col gap-2.5">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2.5">
-                    <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                      </span>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                        Tempo real
-                      </span>
-                    </div>
-                    {isProcessed && (
-                      <span className="text-[10px] font-medium text-slate-600">
-                        {dwFilter.dataInicio} → {dwFilter.dataFim}
-                      </span>
-                    )}
+          <div className="relative flex flex-col gap-3 p-3 sm:p-3.5 lg:p-4">
+            {/* Header — full width */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mb-2 flex items-center gap-2.5">
+                  <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                    </span>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                      Tempo real
+                    </span>
                   </div>
-
-                  <h1
-                    className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
-                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
-                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
-                      }`}
-                  >
-                    Análise Consolidada
-                  </h1>
+                  {isProcessed && (
+                    <span className="text-[10px] font-medium text-slate-600">
+                      {dwFilter.dataInicio} → {dwFilter.dataFim}
+                    </span>
+                  )}
                 </div>
 
-                <UserMenu />
+                <h1
+                  className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${
+                    presentationMode
+                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
+                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
+                  }`}
+                >
+                  Análise Consolidada
+                </h1>
               </div>
 
-              <div className="h-px bg-white/6" />
+              <UserMenu />
+            </div>
+
+            <div className="h-px bg-white/6" />
 
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <input
@@ -918,8 +926,9 @@ const Index = () => {
                   className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-2.5 text-[11px] font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:px-3.5 sm:text-xs"
                 >
                   <RefreshCw
-                    className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
-                      }`}
+                    className={`h-3.5 w-3.5 ${
+                      isFetchingDw ? "animate-spin" : ""
+                    }`}
                   />
                   {isFetchingDw ? (
                     <span className="flex items-center gap-1.5">
@@ -941,6 +950,11 @@ const Index = () => {
                 </div>
               )}
 
+            {/* 2-column grid: cards+charts left, indicators right */}
+            <div className={`grid gap-3 ${presentationMode ? "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]" : "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]"}`}>
+              {/* Left column — cards, charts, KPIs */}
+              <div className="flex flex-col gap-2.5">
+
               {/* Top 4 metric cards */}
               {isFetchingDw && !isProcessed ? (
                 <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
@@ -956,8 +970,9 @@ const Index = () => {
                     return (
                       <AnimatedCard key={item.label} delay={idx * 80}>
                         <div
-                          className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
-                            }`}
+                          className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${
+                            presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                          }`}
                         >
                           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
 
@@ -968,8 +983,9 @@ const Index = () => {
                               </p>
 
                               <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
-                                  }`}
+                                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${
+                                  toneStyles[item.tone]
+                                }`}
                               >
                                 <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
                               </div>
@@ -1043,108 +1059,176 @@ const Index = () => {
 
               {/* KPIs Extras — largura total, abaixo dos dois gráficos */}
               {isProcessed && (
-                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-
-                  {/* ── SALDO LÍQUIDO ── */}
-                  <div className={`relative overflow-hidden rounded-[22px] border p-4 ${kpiExtra.saldoLiquido >= 0 ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"}`}>
-                    <div className="flex items-start justify-between mb-4">
-                      <span className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>SALDO LÍQUIDO</span>
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
-                        {kpiExtra.saldoLiquido >= 0 ? <TrendingUp className="h-4 w-4 text-emerald-400" /> : <TrendingDown className="h-4 w-4 text-red-400" />}
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4">
+                  {/* SALDO LÍQUIDO */}
+                  <div
+                    className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${
+                      kpiExtra.saldoLiquido >= 0
+                        ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
+                        : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                    <div className="relative flex h-full flex-col">
+                      <div className="mb-4 flex items-start justify-between">
+                        <span
+                          className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${
+                            kpiExtra.saldoLiquido >= 0
+                              ? "text-emerald-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          SALDO LÍQUIDO
+                        </span>
+                        <div
+                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                            kpiExtra.saldoLiquido >= 0
+                              ? "bg-emerald-500/15"
+                              : "bg-red-500/15"
+                          }`}
+                        >
+                          {kpiExtra.saldoLiquido >= 0 ? (
+                            <TrendingUp className="h-4 w-4 text-emerald-400" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4 text-red-400" />
+                          )}
+                        </div>
                       </div>
+                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                        <CountUp value={kpiExtra.saldoLiquido} />
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">
+                        Recebido − Pago no período
+                      </p>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className={`h-full ${
+                            kpiExtra.saldoLiquido >= 0
+                              ? "bg-emerald-400"
+                              : "bg-red-400"
+                          }`}
+                          style={{ width: "70%" }}
+                        />
+                      </div>
+                      <span
+                        className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${
+                          kpiExtra.saldoLiquido >= 0
+                            ? "bg-emerald-500/15 text-emerald-300"
+                            : "bg-red-500/15 text-red-300"
+                        }`}
+                      >
+                        {kpiExtra.saldoLiquido >= 0
+                          ? "Fluxo positivo"
+                          : "Fluxo negativo"}
+                      </span>
                     </div>
-                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
-                      <CountUp value={kpiExtra.saldoLiquido} />
-                    </div>
-                    <p className="text-sm text-slate-400 mb-4">Recebido − Pago no período</p>
-                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
-                      <div className={`h-full ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`} style={{ width: "70%" }} />
-                    </div>
-                    <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
-                      {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
-                    </span>
                   </div>
 
-                  {/* ── INADIMPLÊNCIA ── */}
-                  <div className="relative overflow-hidden rounded-[22px] border border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5 p-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">INADIMPLÊNCIA</span>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/15">
-                        <AlertCircle className="h-4 w-4 text-red-400" />
+                  {/* INADIMPLÊNCIA */}
+                  <div className="group relative overflow-hidden rounded-[22px] border border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                    <div className="relative flex h-full flex-col">
+                      <div className="mb-4 flex items-start justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
+                          INADIMPLÊNCIA
+                        </span>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/15">
+                          <AlertCircle className="h-4 w-4 text-red-400" />
+                        </div>
                       </div>
+                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                        <CountUp value={kpiExtra.inadimplencia} />
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">
+                        CR vencido sem recebimento
+                      </p>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full bg-red-400" style={{ width: "60%" }} />
+                      </div>
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
+                        {kpiExtra.inadimplenciaDocs} docs vencidos
+                      </span>
                     </div>
-                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
-                      <CountUp value={kpiExtra.inadimplencia} />
-                    </div>
-                    <p className="text-sm text-slate-400 mb-4">CR vencido sem recebimento</p>
-                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
-                      <div className="h-full bg-red-400" style={{ width: "60%" }} />
-                    </div>
-                    <span className="inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
-                      {kpiExtra.inadimplenciaDocs} docs vencidos
-                    </span>
                   </div>
 
-                  {/* ── % REALIZAÇÃO CP ── */}
-                  <div className="relative overflow-hidden rounded-[22px] border border-violet-500/25 bg-gradient-to-br from-violet-500/10 to-violet-500/5 p-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">% REALIZAÇÃO CP</span>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/15">
-                        <TrendingDown className="h-4 w-4 text-violet-400" />
+                  {/* % REALIZAÇÃO CP */}
+                  <div className="group relative overflow-hidden rounded-[22px] border border-violet-500/25 bg-gradient-to-br from-violet-500/10 to-violet-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                    <div className="relative flex h-full flex-col">
+                      <div className="mb-4 flex items-start justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
+                          % REALIZAÇÃO CP
+                        </span>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/15">
+                          <TrendingDown className="h-4 w-4 text-violet-400" />
+                        </div>
                       </div>
+                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                        {kpiExtra.realizacaoCP.toFixed(0)}%
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">
+                        Pago ÷ Previsto no período
+                      </p>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-violet-400 transition-all duration-700"
+                          style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
+                        />
+                      </div>
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold text-violet-200">
+                        Meta: 100%
+                      </span>
                     </div>
-                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
-                      {kpiExtra.realizacaoCP.toFixed(0)}%
-                    </div>
-                    <p className="text-sm text-slate-400 mb-4">Pago ÷ Previsto no período</p>
-                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
-                      <div className="h-full rounded-full bg-violet-400" style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
-                    </div>
-                    <span className="inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold text-violet-200">
-                      Meta: 100%
-                    </span>
                   </div>
 
-                  {/* ── % REALIZAÇÃO CR ── */}
-                  <div className="relative overflow-hidden rounded-[22px] border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 p-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">% REALIZAÇÃO CR</span>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15">
-                        <TrendingUp className="h-4 w-4 text-cyan-400" />
+                  {/* % REALIZAÇÃO CR */}
+                  <div className="group relative overflow-hidden rounded-[22px] border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                    <div className="relative flex h-full flex-col">
+                      <div className="mb-4 flex items-start justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
+                          % REALIZAÇÃO CR
+                        </span>
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/15">
+                          <TrendingUp className="h-4 w-4 text-cyan-400" />
+                        </div>
                       </div>
+                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                        {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
+                      </div>
+                      <p className="mt-2 text-sm text-slate-400">
+                        Recebido ÷ Previsto no período
+                      </p>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-cyan-400 transition-all duration-700"
+                          style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
+                        />
+                      </div>
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
+                        Meta: 100%
+                      </span>
                     </div>
-                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
-                      {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
-                    </div>
-                    <p className="text-sm text-slate-400 mb-4">Recebido ÷ Previsto no período</p>
-                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
-                      <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
-                    </div>
-                    <span className="inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
-                      Meta: 100%
-                    </span>
                   </div>
-
                 </div>
               )}
-            </div>
+              </div>
+              {/* end left column */}
 
             <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                ? "h-full overflow-y-auto p-3.5"
-                : "self-start h-fit p-3 lg:p-3.5"
-                }`}
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
+                presentationMode
+                  ? "h-full overflow-y-auto p-3.5"
+                  : "self-start h-fit p-3 lg:p-3.5"
+              }`}
             >
               <div className="flex flex-col">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 mb-2.5">
                   <div>
-                    <p
-                      className={`font-semibold tracking-tight text-white ${presentationMode ? "text-xl" : "text-[28px]"
-                        }`}
-                    >
+                    <p className={`font-semibold tracking-tight text-white ${presentationMode ? "text-lg" : "text-xl"}`}>
                       Indicadores
                     </p>
-                    <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                    <p className="mt-0.5 text-[10px] leading-4 text-slate-500">
                       Resumo lateral no padrão da referência.
                     </p>
                   </div>
@@ -1152,16 +1236,16 @@ const Index = () => {
                   {!presentationMode && (
                     <button
                       onClick={togglePresentationMode}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
                       title="Modo apresentação"
                       aria-label="Ativar modo apresentação"
                     >
-                      <Presentation className="h-4 w-4" />
+                      <Presentation className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
 
-                <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="grid grid-cols-1 gap-1">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -1174,9 +1258,8 @@ const Index = () => {
                         ind.percentualReal < ind.percentualEsperado;
 
                       const progress = Math.min(
-                        (ind.percentualReal /
-                          Math.max(ind.percentualEsperado, 1)) *
-                        100,
+                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) *
+                          100,
                         100
                       );
 
@@ -1184,41 +1267,44 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className={`group relative block overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "px-2.5 py-2.5" : "px-3 py-2"
-                              }`}
+                            className={`group relative block overflow-hidden rounded-[10px] border border-white/8 bg-white/[0.03] transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06] ${
+                              presentationMode ? "px-2.5 py-1.5" : "px-2.5 py-[7px]"
+                            }`}
                           >
-                            <div className="flex items-center justify-between gap-2.5">
-                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                                 {ind.nome}
                               </p>
 
-                              <div className="flex shrink-0 min-w-[58px] items-center justify-end gap-1.5">
+                              <div className="flex shrink-0 items-center gap-1">
                                 <span
-                                  className={`text-xs font-semibold ${abaixoDaMeta
-                                    ? "text-emerald-300"
-                                    : "text-red-400"
-                                    }`}
+                                  className={`text-[11px] font-semibold ${
+                                    abaixoDaMeta
+                                      ? "text-emerald-300"
+                                      : "text-red-400"
+                                  }`}
                                 >
                                   {ind.percentualReal}%
                                 </span>
 
-                                <ArrowRight className="h-4 w-4 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
+                                <ArrowRight className="h-3 w-3 text-slate-600 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-white" />
                               </div>
                             </div>
 
-                            <div className="relative mt-2">
-                              <div className="h-[3px] overflow-hidden rounded-full bg-white/10">
+                            <div className="relative mt-1.5">
+                              <div className="h-[2.5px] overflow-hidden rounded-full bg-white/8">
                                 <div
-                                  className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
-                                    ? "bg-emerald-400"
-                                    : "bg-red-500"
-                                    }`}
+                                  className={`h-full rounded-full transition-all duration-700 ease-out ${
+                                    abaixoDaMeta
+                                      ? "bg-emerald-400"
+                                      : "bg-red-500"
+                                  }`}
                                   style={{ width: `${progress}%` }}
                                 />
                               </div>
 
                               <div
-                                className="absolute top-0 h-[3px] w-[2px] rounded-full bg-white/40"
+                                className="absolute top-0 h-[2.5px] w-[1.5px] rounded-full bg-white/40"
                                 style={{
                                   left: `${Math.min(
                                     (ind.percentualEsperado /
@@ -1227,7 +1313,7 @@ const Index = () => {
                                         ind.percentualReal,
                                         1
                                       )) *
-                                    100,
+                                      100,
                                     100
                                   )}%`,
                                 }}
@@ -1242,6 +1328,9 @@ const Index = () => {
                 </div>
               </div>
             </aside>
+            </div>
+            {/* end 2-column grid */}
+
           </div>
         </section>
       </div>
