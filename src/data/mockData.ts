@@ -9,6 +9,10 @@ export interface ContaReceber {
   vencimento: string;
   dataPagamento: string | null;
   valor: number;
+  valorRecebido: number;
+  juros: number;
+  descontos: number;
+  adiantamento: number;
   status: "Em Aberto" | "Vencido" | "Parcial";
 }
 
@@ -21,6 +25,10 @@ export interface ContaPagar {
   vencimento: string;
   dataPagamento: string | null;
   valor: number;
+  valorPago: number;
+  juros: number;
+  descontos: number;
+  adiantamento: number;
   status: "Em Aberto" | "Vencido" | "Parcial";
 }
 

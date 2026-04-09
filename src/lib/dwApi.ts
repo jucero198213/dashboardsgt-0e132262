@@ -56,6 +56,9 @@ export interface DwRow {
   SITUACAO: string | null;
   VLRDOC: number | null;
   VLR_LIQUIDO: number | null;
+  VLRJUR: number | null;    // juros
+  VLRDES: number | null;    // descontos
+  DESADT: number | null;    // adiantamento (DESADT — só em CR)
   VLR_PAGO: number | null;
   VLR_PARCELA: number | null;
   FILIAL: string | null;

@@ -129,6 +129,10 @@ const ContasAPagar = () => {
                     <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Parcela</TableHead>
                     <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Fornecedor</TableHead>
                     <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Valor</TableHead>
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Vl. Pago</TableHead>
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Juros</TableHead>
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Descontos</TableHead>
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Adiantamento</TableHead>
                     <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -142,6 +146,10 @@ const ContasAPagar = () => {
                       <TableCell className="text-sm text-slate-300 text-center">{c.parcela ?? "—"}</TableCell>
                       <TableCell className="text-sm text-slate-300 max-w-[180px] truncate">{c.fornecedor}</TableCell>
                       <TableCell className="text-right text-sm font-semibold text-white whitespace-nowrap">{formatCurrency(c.valor)}</TableCell>
+                      <TableCell className="text-right text-sm font-semibold text-amber-300 whitespace-nowrap">{c.valorPago > 0 ? formatCurrency(c.valorPago) : <span className="text-slate-600">—</span>}</TableCell>
+                      <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.juros > 0 ? formatCurrency(c.juros) : <span className="text-slate-600">—</span>}</TableCell>
+                      <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.descontos > 0 ? formatCurrency(c.descontos) : <span className="text-slate-600">—</span>}</TableCell>
+                      <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.adiantamento > 0 ? formatCurrency(c.adiantamento) : <span className="text-slate-600">—</span>}</TableCell>
                       <TableCell className="text-center"><StatusBadge status={c.status} /></TableCell>
                     </TableRow>
                   ))}

@@ -348,6 +348,10 @@ export function FinancialDataProvider({
           vencimento:    isoDate(r.DATA_VENCIMENTO),
           dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,
           valor,
+          valorPago:     valorPagoRow,
+          juros:         n(r.VLRJUR),
+          descontos:     n(r.VLRDES),
+          adiantamento:  n(r.DESADT),
           status: calculateStatus(r.DATA_VENCIMENTO, valor, valorPagoRow, r.SITUACAO ?? ""),
         };
       });
@@ -364,6 +368,10 @@ export function FinancialDataProvider({
           vencimento:    isoDate(r.DATA_VENCIMENTO),
           dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,
           valor,
+          valorRecebido: valorRecebidoRow,
+          juros:         n(r.VLRJUR),
+          descontos:     n(r.VLRDES),
+          adiantamento:  n(r.DESADT),
           status: calculateStatus(r.DATA_VENCIMENTO, valor, valorRecebidoRow, r.SITUACAO ?? ""),
         };
       });
