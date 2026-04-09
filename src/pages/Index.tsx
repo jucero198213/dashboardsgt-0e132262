@@ -175,7 +175,7 @@ const MiniLineChart = ({
   const maxVal = Math.max(...allValues, 1);
 
   const svgW = 520;
-  const svgH = 155;
+  const svgH = 200;
   const padL = 12;
   const padR = 12;
   const padTop = 12;
@@ -735,26 +735,6 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
-            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                {primaryLabel}
-              </p>
-              <p className="mt-1 min-w-0 truncate text-[13px] font-bold leading-none tracking-[-0.03em] text-white">
-                <CountUp value={primaryValue} />
-              </p>
-            </div>
-
-            <div className="rounded-[12px] border border-white/8 bg-white/[0.04] px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 group-hover:border-white/12 group-hover:bg-white/[0.055]">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                {secondaryLabel}
-              </p>
-              <p className="mt-1 min-w-0 truncate text-[13px] font-bold leading-none tracking-[-0.03em] text-white">
-                <CountUp value={secondaryValue} />
-              </p>
-            </div>
-          </div>
-
           <div className="relative">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
@@ -1019,6 +999,7 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
+                  {/* Coluna esquerda — Contas a Receber */}
                   <AnimatedCard delay={320}>
                     {renderLargeCard({
                       title: "Contas a receber",
@@ -1037,28 +1018,83 @@ const Index = () => {
                     })}
                   </AnimatedCard>
 
-                  <AnimatedCard delay={400}>
-                    {renderLargeCard({
-                      title: "Contas a pagar",
-                      tone: "amber",
-                      total: contasPagar.valorAPagar,
-                      subtitle: "Saldo pendente a pagar",
-                      primaryLabel: "Previsto",
-                      primaryValue: contasPagar.valorAPagar,
-                      secondaryLabel: "Pago",
-                      secondaryValue: contasPagar.valorPago,
-                      monthlyPrevisto: chartPagar.previsto,
-                      monthlyRealizado: chartPagar.realizado,
-                      chartAno: chartPagar.ano,
-                      to: "/contas-a-pagar",
-                      icon: TrendingDown,
-                    })}
-                  </AnimatedCard>
+                  {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
+                  <div className="flex flex-col gap-2">
+                    <AnimatedCard delay={400}>
+                      {renderLargeCard({
+                        title: "Contas a pagar",
+                        tone: "amber",
+                        total: contasPagar.valorAPagar,
+                        subtitle: "Saldo pendente a pagar",
+                        primaryLabel: "Previsto",
+                        primaryValue: contasPagar.valorAPagar,
+                        secondaryLabel: "Pago",
+                        secondaryValue: contasPagar.valorPago,
+                        monthlyPrevisto: chartPagar.previsto,
+                        monthlyRealizado: chartPagar.realizado,
+                        chartAno: chartPagar.ano,
+                        to: "/contas-a-pagar",
+                        icon: TrendingDown,
+                      })}
+                    </AnimatedCard>
+
+                    {/* KPIs Extras — alinhados com CP */}
+                    {isProcessed && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {/* SALDO LÍQUIDO */}
+                        <div
+                          className={`group relative overflow-hidden rounded-[14px] border px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 ${kpiExtra.saldoLiquido >= 0
+                            ? "border-emerald-500/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))]"
+                            : "border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))]"
+                            }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>Saldo Líquido</span>
+                            <div className={`flex h-5 w-5 items-center justify-center rounded-md ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
+                              {kpiExtra.saldoLiquido >= 0 ? <TrendingUp className="h-2.5 w-2.5 text-emerald-400" /> : <TrendingDown className="h-2.5 w-2.5 text-red-400" />}
+                            </div>
+                          </div>
+                          <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate"><CountUp value={kpiExtra.saldoLiquido} /></p>
+                          <p className="mt-1 text-[10px] text-slate-500">Recebido − Pago</p>
+                          <span className={`mt-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
+                            {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
+                          </span>
+                        </div>
+
+                        {/* INADIMPLÊNCIA */}
+                        <div className="relative overflow-hidden rounded-[14px] border border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400">Inadimplência</span>
+                            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-red-500/15">
+                              <AlertCircle className="h-2.5 w-2.5 text-red-400" />
+                            </div>
+                          </div>
+                          <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate"><CountUp value={kpiExtra.inadimplencia} /></p>
+                          <p className="mt-1 text-[10px] text-slate-500">CR vencido sem recebimento</p>
+                          <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-red-300">
+                            {kpiExtra.inadimplenciaDocs} doc{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""} vencido{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+
+                        {/* % REALIZAÇÃO CP */}
+                        <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(139,92,246,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400">Realização CP</span>
+                            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/15">
+                              <TrendingDown className="h-2.5 w-2.5 text-violet-400" />
+                            </div>
+                          </div>
+                          <p className="text-[14px] font-bold leading-none tracking-tight text-white">{kpiExtra.realizacaoCP.toFixed(1)}%</p>
+                          <p className="mt-1 text-[10px] text-slate-500">Pago ÷ Previsto CP</p>
+                          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-full rounded-full bg-violet-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-
-              {/* KPIs Extras */}
-              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                 {/* SALDO LÍQUIDO */}
                 <div
                   className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0
