@@ -1223,7 +1223,7 @@ const Index = () => {
                   : "xl:col-start-2 xl:row-start-1 xl:row-span-2 p-3 lg:p-3.5"
               }`}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between gap-3 mb-2.5">
                   <div>
                     <p className={`font-semibold tracking-tight text-white ${presentationMode ? "text-lg" : "text-xl"}`}>
@@ -1246,7 +1246,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-1">
+                <div className="flex flex-col flex-1 justify-between gap-1">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
