@@ -828,49 +828,42 @@ const Index = () => {
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
-          <div
-            className={`relative ${
-              presentationMode
-                ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
-                : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:gap-3"
-            }`}
-          >
-            <div className="flex min-h-0 flex-col gap-2.5">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2.5">
-                    <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                      </span>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                        Tempo real
-                      </span>
-                    </div>
-                    {isProcessed && (
-                      <span className="text-[10px] font-medium text-slate-600">
-                        {dwFilter.dataInicio} → {dwFilter.dataFim}
-                      </span>
-                    )}
+          <div className="relative flex flex-col gap-3 p-3 sm:p-3.5 lg:p-4">
+            {/* Header — full width */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="mb-2 flex items-center gap-2.5">
+                  <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                    </span>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                      Tempo real
+                    </span>
                   </div>
-
-                  <h1
-                    className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${
-                      presentationMode
-                        ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
-                        : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
-                    }`}
-                  >
-                    Análise Consolidada
-                  </h1>
+                  {isProcessed && (
+                    <span className="text-[10px] font-medium text-slate-600">
+                      {dwFilter.dataInicio} → {dwFilter.dataFim}
+                    </span>
+                  )}
                 </div>
 
-                <UserMenu />
+                <h1
+                  className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${
+                    presentationMode
+                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
+                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
+                  }`}
+                >
+                  Análise Consolidada
+                </h1>
               </div>
 
-              <div className="h-px bg-white/6" />
+              <UserMenu />
+            </div>
+
+            <div className="h-px bg-white/6" />
 
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <input
@@ -956,6 +949,11 @@ const Index = () => {
                   {dwError}
                 </div>
               )}
+
+            {/* 2-column grid: cards+charts left, indicators right */}
+            <div className={`grid gap-3 ${presentationMode ? "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]" : "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]"}`}>
+              {/* Left column — cards, charts, KPIs */}
+              <div className="flex flex-col gap-2.5">
 
               {/* Top 4 metric cards */}
               {isFetchingDw && !isProcessed ? (
@@ -1214,7 +1212,8 @@ const Index = () => {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+              {/* end left column */}
 
             <aside
               className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
@@ -1333,6 +1332,9 @@ const Index = () => {
                 </div>
               </div>
             </aside>
+            </div>
+            {/* end 2-column grid */}
+
           </div>
         </section>
       </div>
