@@ -693,20 +693,20 @@ const Index = () => {
     return (
       <div
         className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
-            ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-            : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+          ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+          : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
           } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
             }`}
         />
         <div
           className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
-              ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
-              : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
+            ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
+            : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
             }`}
         />
 
@@ -727,8 +727,8 @@ const Index = () => {
 
             <div
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
-                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
-                  : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
+                : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
                 }`}
             >
               <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
@@ -746,8 +746,8 @@ const Index = () => {
               <div className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/30 backdrop-blur-[1px]">
                 <div
                   className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${isPositive
-                      ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
-                      : "border-amber-400/30 bg-amber-500/20 text-amber-300"
+                    ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
+                    : "border-amber-400/30 bg-amber-500/20 text-amber-300"
                     }`}
                 >
                   <RefreshCw className="h-3 w-3 animate-spin" />
@@ -759,8 +759,8 @@ const Index = () => {
 
           <div
             className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
-                ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
-                : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
+              ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
+              : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
               }`}
           >
             <div className="min-w-0">
@@ -778,8 +778,8 @@ const Index = () => {
             <Link
               to={to}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
-                  ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
-                  : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
+                ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
+                : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
                 }`}
             >
               Ver detalhamento
@@ -794,8 +794,8 @@ const Index = () => {
   return (
     <div
       className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen overflow-hidden p-0"
-          : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+        ? "h-screen w-screen overflow-hidden p-0"
+        : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
@@ -803,22 +803,22 @@ const Index = () => {
 
       <div
         className={`relative flex flex-col ${presentationMode
-            ? "h-full w-full max-w-none"
-            : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
+          ? "h-full w-full max-w-none"
+          : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
           }`}
       >
         <section
           className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode
-              ? "h-full w-full overflow-hidden rounded-none"
-              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
+            ? "h-full w-full overflow-hidden rounded-none"
+            : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
             }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
             className={`relative ${presentationMode
-                ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:items-start"
-                : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:auto-rows-min xl:gap-3 xl:items-start"
+              ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:items-start"
+              : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:auto-rows-min xl:gap-3 xl:items-start"
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
@@ -844,8 +844,8 @@ const Index = () => {
 
                   <h1
                     className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
-                        ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
-                        : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
+                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
+                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
                       }`}
                   >
                     Análise Consolidada
@@ -1047,8 +1047,8 @@ const Index = () => {
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0
-                        ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
-                        : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
+                      ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
+                      : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
                       }`}
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
@@ -1056,16 +1056,16 @@ const Index = () => {
                       <div className="mb-4 flex items-start justify-between">
                         <span
                           className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
-                              ? "text-emerald-400"
-                              : "text-red-400"
+                            ? "text-emerald-400"
+                            : "text-red-400"
                             }`}
                         >
                           SALDO LÍQUIDO
                         </span>
                         <div
                           className={`flex h-12 w-12 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0
-                              ? "bg-emerald-500/15"
-                              : "bg-red-500/15"
+                            ? "bg-emerald-500/15"
+                            : "bg-red-500/15"
                             }`}
                         >
                           {kpiExtra.saldoLiquido >= 0 ? (
@@ -1084,16 +1084,16 @@ const Index = () => {
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
                         <div
                           className={`h-full ${kpiExtra.saldoLiquido >= 0
-                              ? "bg-emerald-400"
-                              : "bg-red-400"
+                            ? "bg-emerald-400"
+                            : "bg-red-400"
                             }`}
                           style={{ width: "70%" }}
                         />
                       </div>
                       <span
                         className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
-                            ? "bg-emerald-500/15 text-emerald-300"
-                            : "bg-red-500/15 text-red-300"
+                          ? "bg-emerald-500/15 text-emerald-300"
+                          : "bg-red-500/15 text-red-300"
                           }`}
                       >
                         {kpiExtra.saldoLiquido >= 0
@@ -1101,6 +1101,16 @@ const Index = () => {
                           : "Fluxo negativo"}
                       </span>
                     </div>
+                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
+                      <CountUp value={kpiExtra.saldoLiquido} />
+                    </div>
+                    <p className="text-sm text-slate-400 mb-4">Recebido − Pago no período</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
+                      <div className={`h-full ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`} style={{ width: "70%" }} />
+                    </div>
+                    <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
+                      {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
+                    </span>
                   </div>
 
                   {/* INADIMPLÊNCIA */}
@@ -1128,6 +1138,16 @@ const Index = () => {
                         {kpiExtra.inadimplenciaDocs} docs vencidos
                       </span>
                     </div>
+                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
+                      <CountUp value={kpiExtra.inadimplencia} />
+                    </div>
+                    <p className="text-sm text-slate-400 mb-4">CR vencido sem recebimento</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
+                      <div className="h-full bg-red-400" style={{ width: "60%" }} />
+                    </div>
+                    <span className="inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
+                      {kpiExtra.inadimplenciaDocs} docs vencidos
+                    </span>
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
@@ -1158,6 +1178,16 @@ const Index = () => {
                         Meta: 100%
                       </span>
                     </div>
+                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
+                      {kpiExtra.realizacaoCP.toFixed(0)}%
+                    </div>
+                    <p className="text-sm text-slate-400 mb-4">Pago ÷ Previsto no período</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
+                      <div className="h-full rounded-full bg-violet-400" style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
+                    </div>
+                    <span className="inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold text-violet-200">
+                      Meta: 100%
+                    </span>
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
@@ -1188,6 +1218,16 @@ const Index = () => {
                         Meta: 100%
                       </span>
                     </div>
+                    <div className="text-[clamp(1.6rem,2.2vw,2.2rem)] font-extrabold tracking-[-0.04em] text-white mb-2">
+                      {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
+                    </div>
+                    <p className="text-sm text-slate-400 mb-4">Recebido ÷ Previsto no período</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10 mb-4">
+                      <div className="h-full rounded-full bg-cyan-400" style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
+                    </div>
+                    <span className="inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
+                      Meta: 100%
+                    </span>
                   </div>
                 </div>
               )}
@@ -1195,8 +1235,8 @@ const Index = () => {
 
             <aside
               className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                  ? "h-full overflow-y-auto p-3.5"
-                  : "self-start p-3 lg:p-3.5 xl:mt-[180px]"
+                ? "h-full overflow-y-auto p-3.5"
+                : "self-start p-3 lg:p-3.5 xl:mt-[180px]"
                 }`}
             >
               <div className="flex flex-col">
@@ -1258,8 +1298,8 @@ const Index = () => {
                               <div className="flex shrink-0 min-w-[58px] items-center justify-end gap-1.5">
                                 <span
                                   className={`text-xs font-semibold ${abaixoDaMeta
-                                      ? "text-emerald-300"
-                                      : "text-red-400"
+                                    ? "text-emerald-300"
+                                    : "text-red-400"
                                     }`}
                                 >
                                   {ind.percentualReal}%
@@ -1273,8 +1313,8 @@ const Index = () => {
                               <div className="h-[3px] overflow-hidden rounded-full bg-white/10">
                                 <div
                                   className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
-                                      ? "bg-emerald-400"
-                                      : "bg-red-500"
+                                    ? "bg-emerald-400"
+                                    : "bg-red-500"
                                     }`}
                                   style={{ width: `${progress}%` }}
                                 />
