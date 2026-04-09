@@ -1043,7 +1043,7 @@ const Index = () => {
 
               {/* KPIs Extras — largura total, abaixo dos dois gráficos */}
               {isProcessed && (
-                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4">
 
                   {/* SALDO LÍQUIDO */}
                         <div className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0 ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"}`}>
