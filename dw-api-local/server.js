@@ -4,10 +4,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const express = require("express");
-const cors    = require("cors");
-const sql     = require("mssql");
-const fs      = require("fs");
-const path    = require("path");
+const cors = require("cors");
+const sql = require("mssql");
+const fs = require("fs");
+const path = require("path");
 
 // ── Carrega .env manualmente (sem depender do dotenv) ─────────────────────────
 const envPath = path.join(__dirname, ".env");
@@ -24,16 +24,16 @@ if (fs.existsSync(envPath)) {
 
 // ── Configuração MSSQL ────────────────────────────────────────────────────────
 const dbConfig = {
-  server:   process.env.MSSQL_SERVER,
-  port:     parseInt(process.env.MSSQL_PORT || "1433"),
+  server: process.env.MSSQL_SERVER,
+  port: parseInt(process.env.MSSQL_PORT || "1433"),
   database: process.env.MSSQL_DATABASE,
-  user:     process.env.MSSQL_USER,
+  user: process.env.MSSQL_USER,
   password: process.env.MSSQL_PASSWORD,
   options: {
-    encrypt:                 false,
-    trustServerCertificate:  true,
-    connectTimeout:          30000,
-    requestTimeout:          120000,
+    encrypt: false,
+    trustServerCertificate: true,
+    connectTimeout: 30000,
+    requestTimeout: 120000,
   },
   pool: {
     max: 5,
@@ -54,7 +54,7 @@ async function getPool() {
 }
 
 // ── Express ───────────────────────────────────────────────────────────────────
-const app  = express();
+const app = express();
 const PORT = parseInt(process.env.PORT || "3001");
 
 app.use(cors());
@@ -77,15 +77,15 @@ app.post("/dw-financeiro", async (req, res) => {
       const result = await p.request().query(`
         SELECT DISTINCT
           F.CODFIL                   AS filial_id,
-          ISNULL(F.DESFIL, F.CODFIL) AS filial_nome,
+          ISNULL(F.NOMEAB, F.CODFIL) AS filial_nome,
           F.CODEMP                   AS empresa_id
         FROM RODFIL F
         ORDER BY F.CODEMP, F.CODFIL
       `);
 
-      const rows       = result.recordset;
+      const rows = result.recordset;
       const empresaMap = new Map();
-      const filiais    = [];
+      const filiais = [];
 
       for (const r of rows) {
         if (!empresaMap.has(r.empresa_id)) empresaMap.set(r.empresa_id, r.empresa_id);
@@ -103,10 +103,10 @@ app.post("/dw-financeiro", async (req, res) => {
       }
 
       const dbReq = p.request();
-      dbReq.input("dataInicio", sql.Date,        new Date(dataInicio));
-      dbReq.input("dataFim",    sql.Date,        new Date(dataFim));
-      dbReq.input("filial",     sql.VarChar(20), filial  || null);
-      dbReq.input("empresa",    sql.VarChar(20), empresa || null);
+      dbReq.input("dataInicio", sql.Date, new Date(dataInicio));
+      dbReq.input("dataFim", sql.Date, new Date(dataFim));
+      dbReq.input("filial", sql.VarChar(20), filial || null);
+      dbReq.input("empresa", sql.VarChar(20), empresa || null);
 
       const query = `
 -- ═══════════════════════════════════════════════════
@@ -125,6 +125,7 @@ SELECT
   'CP'        AS ORIGEM,
   I.SITUAC    AS SITUACAO,
   P.DESCAN,   I.DESISS,
+  CAST(ROUND(I.DESADT,2) AS DECIMAL(18,2))                            AS DESADT,
   CAST(ROUND(I.VLRCOR,2) AS DECIMAL(18,2))                            AS VLRCOR,
   CAST(ROUND(I.VLRJUR,2) AS DECIMAL(18,2))                            AS VLRJUR,
   CAST(ROUND(I.VLRDES,2) AS DECIMAL(18,2))                            AS VLRDES,
@@ -173,6 +174,7 @@ SELECT
   'CR'        AS ORIGEM,
   I.SITUAC    AS SITUACAO,
   P.DESCAN,   NULL AS DESISS,
+  CAST(ROUND(I.DESADT,2) AS DECIMAL(18,2))                              AS DESADT,
   CAST(ROUND(I.VLRCOR,2) AS DECIMAL(18,2))                              AS VLRCOR,
   CAST(ROUND(I.VLRJUR,2) AS DECIMAL(18,2))                              AS VLRJUR,
   CAST(ROUND(I.VLRDES,2) AS DECIMAL(18,2))                              AS VLRDES,
@@ -213,6 +215,7 @@ SELECT
   B.NUMDOC AS DOCUMENTO, NULL AS PARCELA, B.TIPDOC AS TIPO_DOCUMENTO,
   'LB_D' AS ORIGEM, B.SITUAC AS SITUACAO,
   NULL AS DESCAN, NULL AS DESISS,
+  NULL AS DESADT,
   NULL AS VLRCOR, NULL AS VLRJUR, NULL AS VLRDES,
   CAST(ROUND(B.VLRDOC,2) AS DECIMAL(18,2)) AS VLRDOC,
   NULL AS VLR_LIQUIDO,
@@ -250,6 +253,7 @@ SELECT
   B.NUMDOC AS DOCUMENTO, NULL AS PARCELA, B.TIPDOC AS TIPO_DOCUMENTO,
   'LB_C' AS ORIGEM, B.SITUAC AS SITUACAO,
   NULL AS DESCAN, NULL AS DESISS,
+  NULL AS DESADT,
   NULL AS VLRCOR, NULL AS VLRJUR, NULL AS VLRDES,
   CAST(ROUND(B.VLRDOC,2) AS DECIMAL(18,2)) AS VLRDOC,
   NULL AS VLR_LIQUIDO,
@@ -292,8 +296,8 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");
-  console.log(`🚀 DW API Local rodando em http://localhost:${PORT}`);
-  console.log(`📦 Banco: ${process.env.MSSQL_DATABASE} @ ${process.env.MSSQL_SERVER}:${process.env.MSSQL_PORT}`);
+  console.log(🚀 DW API Local rodando em http://localhost:${PORT});
+    console.log(📦 Banco: ${ process.env.MSSQL_DATABASE } @${ process.env.MSSQL_SERVER }: ${ process.env.MSSQL_PORT });
   console.log("─────────────────────────────────────────");
   console.log("⏳ Conectando ao SQL Server...");
   getPool().catch((err) => {
