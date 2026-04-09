@@ -129,9 +129,8 @@ const AnimatedCard = ({
 
   return (
     <div
-      className={`transition-all duration-500 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-      } ${className}`}
+      className={`transition-all duration-500 ease-out ${visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+        } ${className}`}
     >
       {children}
     </div>
@@ -207,27 +206,27 @@ const MiniLineChart = ({
   const colors =
     tone === "emerald"
       ? {
-          prevStroke: "rgba(16,185,129,0.35)",
-          realStroke: "#34d399",
-          gradFrom: "#34d399",
-          dot: "#34d399",
-          dotGlow: "rgba(16,185,129,0.4)",
-          legendPrev: "rgba(16,185,129,0.4)",
-          legendReal: "#34d399",
-          tooltipBg: "rgba(6,78,59,0.92)",
-          tooltipBorder: "rgba(52,211,153,0.3)",
-        }
+        prevStroke: "rgba(16,185,129,0.35)",
+        realStroke: "#34d399",
+        gradFrom: "#34d399",
+        dot: "#34d399",
+        dotGlow: "rgba(16,185,129,0.4)",
+        legendPrev: "rgba(16,185,129,0.4)",
+        legendReal: "#34d399",
+        tooltipBg: "rgba(6,78,59,0.92)",
+        tooltipBorder: "rgba(52,211,153,0.3)",
+      }
       : {
-          prevStroke: "rgba(245,158,11,0.35)",
-          realStroke: "#fbbf24",
-          gradFrom: "#fbbf24",
-          dot: "#fbbf24",
-          dotGlow: "rgba(245,158,11,0.4)",
-          legendPrev: "rgba(245,158,11,0.4)",
-          legendReal: "#fbbf24",
-          tooltipBg: "rgba(78,53,6,0.92)",
-          tooltipBorder: "rgba(251,191,36,0.3)",
-        };
+        prevStroke: "rgba(245,158,11,0.35)",
+        realStroke: "#fbbf24",
+        gradFrom: "#fbbf24",
+        dot: "#fbbf24",
+        dotGlow: "rgba(245,158,11,0.4)",
+        legendPrev: "rgba(245,158,11,0.4)",
+        legendReal: "#fbbf24",
+        tooltipBg: "rgba(78,53,6,0.92)",
+        tooltipBorder: "rgba(251,191,36,0.3)",
+      };
 
   const gradId = `line-grad-${tone}`;
   const realizadoLabel = tone === "emerald" ? "Recebido" : "Pago";
@@ -236,8 +235,8 @@ const MiniLineChart = ({
     v >= 1_000_000
       ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
       : v >= 1_000
-      ? `R$ ${(v / 1_000).toFixed(0)}mil`
-      : formatCurrency(v);
+        ? `R$ ${(v / 1_000).toFixed(0)}mil`
+        : formatCurrency(v);
 
   const getTooltipX = (i: number) => {
     const x = toX(i);
@@ -521,8 +520,8 @@ const Index = () => {
       // Avança mais devagar conforme sobe, nunca trava
       const speed = current < 30 ? 3 + Math.random() * 4
         : current < 60 ? 2 + Math.random() * 3
-        : current < 85 ? 1 + Math.random() * 2
-        : 0.3 + Math.random() * 0.5;
+          : current < 85 ? 1 + Math.random() * 2
+            : 0.3 + Math.random() * 0.5;
 
       current = Math.min(current + speed, 95);
       setProgress(Math.floor(current));
@@ -708,34 +707,30 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${
-          isPositive
+        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
             ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
             : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-        } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
+          } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
-          className={`absolute inset-0 ${
-            isPositive
+          className={`absolute inset-0 ${isPositive
               ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
               : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
-          }`}
+            }`}
         />
         <div
-          className={`absolute inset-x-0 bottom-0 h-24 ${
-            isPositive
+          className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
               ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.03)_100%)]"
               : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.03)_100%)]"
-          }`}
+            }`}
         />
 
         <div className="relative flex flex-col gap-1.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${
-                  isPositive ? "text-emerald-300" : "text-amber-300"
-                }`}
+                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                  }`}
               >
                 {title}
               </p>
@@ -746,11 +741,10 @@ const Index = () => {
             </div>
 
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${
-                isPositive
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
                   ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
                   : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
-              }`}
+                }`}
             >
               <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
             </div>
@@ -776,17 +770,15 @@ const Index = () => {
           </div>
 
           <div
-            className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${
-              isPositive
+            className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
                 ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
                 : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
-            }`}
+              }`}
           >
             <div className="min-w-0">
               <p
-                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${
-                  isPositive ? "text-emerald-200/75" : "text-amber-200/75"
-                }`}
+                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                  }`}
               >
                 Ação rápida
               </p>
@@ -797,11 +789,10 @@ const Index = () => {
 
             <Link
               to={to}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
-                isPositive
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
                   ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_10px_24px_rgba(16,185,129,0.12)]"
                   : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_10px_24px_rgba(245,158,11,0.12)]"
-              }`}
+                }`}
             >
               Ver detalhamento
               <ArrowRight className="h-3 w-3" />
@@ -814,28 +805,25 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${
-        presentationMode
+      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
           ? "h-screen w-screen overflow-hidden p-0"
           : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
-      }`}
+        }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${
-          presentationMode
+        className={`relative flex flex-col ${presentationMode
             ? "h-full w-full max-w-none"
             : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
-        }`}
+          }`}
       >
         <section
-          className={`relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${
-            presentationMode
+          className={`relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode
               ? "h-full w-full overflow-hidden rounded-none"
               : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
-          }`}
+            }`}
         >
           {/* Global progress bar — top of section */}
           {isFetchingDw && (
@@ -873,13 +861,12 @@ const Index = () => {
                 </div>
 
                 <h1
-                  className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${
-                    presentationMode
+                  className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
                       ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
                       : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
-                  }`}
+                    }`}
                 >
-                  Análise Consolidada
+                  ANÁLISE CONSOLIDADA
                 </h1>
               </div>
 
@@ -888,234 +875,227 @@ const Index = () => {
 
             <div className="h-px bg-white/6" />
 
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <input
-                  type="date"
-                  value={dwFilter.dataInicio}
-                  onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                  className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
-                />
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <input
+                type="date"
+                value={dwFilter.dataInicio}
+                onChange={(e) => setDwFilter("dataInicio", e.target.value)}
+                className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+              />
 
-                <input
-                  type="date"
-                  value={dwFilter.dataFim}
-                  onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                  className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
-                />
+              <input
+                type="date"
+                value={dwFilter.dataFim}
+                onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+              />
 
-                <div className="hidden h-5 w-px shrink-0 bg-white/10 sm:block" />
+              <div className="hidden h-5 w-px shrink-0 bg-white/10 sm:block" />
 
-                <Select
-                  value={dwFilter.empresa ?? "__all__"}
-                  onValueChange={(v) =>
-                    setDwFilter("empresa", v === "__all__" ? null : v)
-                  }
-                >
-                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[130px] sm:text-xs">
-                    <SelectValue placeholder="Empresa" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__all__">Todas</SelectItem>
-                    {empresas.map((e) => (
-                      <SelectItem key={e.id} value={e.id}>
-                        {e.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select
+                value={dwFilter.empresa ?? "__all__"}
+                onValueChange={(v) =>
+                  setDwFilter("empresa", v === "__all__" ? null : v)
+                }
+              >
+                <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[130px] sm:text-xs">
+                  <SelectValue placeholder="Empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  {empresas.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <Select
-                  value={dwFilter.filial ?? "__all__"}
-                  onValueChange={(v) =>
-                    setDwFilter("filial", v === "__all__" ? null : v)
-                  }
-                >
-                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[140px] sm:text-xs">
-                    <SelectValue placeholder="Filial" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__all__">Todas</SelectItem>
-                    {filiaisFiltradas.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select
+                value={dwFilter.filial ?? "__all__"}
+                onValueChange={(v) =>
+                  setDwFilter("filial", v === "__all__" ? null : v)
+                }
+              >
+                <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[140px] sm:text-xs">
+                  <SelectValue placeholder="Filial" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  {filiaisFiltradas.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <button
-                  onClick={() => void handleUpdate()}
-                  disabled={isFetchingDw}
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${
-                    isFetchingDw
-                      ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
-                      : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
+              <button
+                onClick={() => void handleUpdate()}
+                disabled={isFetchingDw}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${isFetchingDw
+                    ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
+                    : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
                   } disabled:cursor-not-allowed`}
-                >
-                  <RefreshCw
-                    className={`h-3.5 w-3.5 ${
-                      isFetchingDw ? "animate-spin" : ""
+              >
+                <RefreshCw
+                  className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
                     }`}
-                  />
-                  {isFetchingDw ? (
-                    <span className="flex items-center gap-2">
-                      <span className="hidden sm:inline">{loadingPhase}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">
-                        {progress}%
-                      </span>
+                />
+                {isFetchingDw ? (
+                  <span className="flex items-center gap-2">
+                    <span className="hidden sm:inline">{loadingPhase}</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">
+                      {progress}%
                     </span>
-                  ) : (
-                    "Atualizar"
-                  )}
-                </button>
-              </div>
+                  </span>
+                ) : (
+                  "Atualizar"
+                )}
+              </button>
+            </div>
 
-              {dwError && (
-                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                  {dwError}
-                </div>
-              )}
+            {dwError && (
+              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {dwError}
+              </div>
+            )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
             <div className={`grid gap-3 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="flex flex-col gap-2.5">
 
-              {/* Top 4 metric cards */}
-              {isFetchingDw && !isProcessed ? (
-                <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
-                  {[0, 1, 2, 3].map((i) => (
-                    <CardSkeleton key={i} />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
-                  {topMetrics.map((item, idx) => {
-                    const Icon = item.icon;
+                {/* Top 4 metric cards */}
+                {isFetchingDw && !isProcessed ? (
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                    {[0, 1, 2, 3].map((i) => (
+                      <CardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                    {topMetrics.map((item, idx) => {
+                      const Icon = item.icon;
 
-                    return (
-                      <AnimatedCard key={item.label} delay={idx * 80}>
-                        <div
-                          className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${
-                            presentationMode ? "p-3" : "p-3 xl:p-3.5"
-                          }`}
-                        >
-                          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
+                      return (
+                        <AnimatedCard key={item.label} delay={idx * 80}>
+                          <div
+                            className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                              }`}
+                          >
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
 
-                          <div className="relative flex h-full flex-col justify-between">
-                            <div className="flex items-start justify-between gap-3">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
-                                {item.label}
-                              </p>
+                            <div className="relative flex h-full flex-col justify-between">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                                  {item.label}
+                                </p>
 
-                              <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${
-                                  toneStyles[item.tone]
-                                }`}
-                              >
-                                <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                                <div
+                                  className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
+                                    }`}
+                                >
+                                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                                </div>
+                              </div>
+
+                              <div className="mt-2.5">
+                                <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
+                                  <CountUp value={item.value} />
+                                </p>
+                                <p className="mt-1.5 text-xs text-slate-400">
+                                  {item.helper}
+                                </p>
                               </div>
                             </div>
-
-                            <div className="mt-2.5">
-                              <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
-                                <CountUp value={item.value} />
-                              </p>
-                              <p className="mt-1.5 text-xs text-slate-400">
-                                {item.helper}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      </AnimatedCard>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Large cards with charts */}
-              {isFetchingDw && !isProcessed ? (
-                <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
-                  <LargeCardSkeleton />
-                  <LargeCardSkeleton />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
-                  {/* Coluna esquerda — Contas a Receber */}
-                  <AnimatedCard delay={320}>
-                    {renderLargeCard({
-                      title: "Contas a receber",
-                      tone: "emerald",
-                      total: contasReceber.valorAReceber,
-                      subtitle: "Saldo pendente a receber",
-                      primaryLabel: "Previsto",
-                      primaryValue: contasReceber.valorAReceber,
-                      secondaryLabel: "Recebido",
-                      secondaryValue: contasReceber.valorRecebido,
-                      monthlyPrevisto: chartReceber.previsto,
-                      monthlyRealizado: chartReceber.realizado,
-                      chartAno: chartReceber.ano,
-                      to: "/contas-a-receber",
-                      icon: TrendingUp,
+                        </AnimatedCard>
+                      );
                     })}
-                  </AnimatedCard>
+                  </div>
+                )}
 
-                  {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
-                  <div className="flex flex-col gap-2">
-                    <AnimatedCard delay={400}>
+                {/* Large cards with charts */}
+                {isFetchingDw && !isProcessed ? (
+                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
+                    <LargeCardSkeleton />
+                    <LargeCardSkeleton />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
+                    {/* Coluna esquerda — Contas a Receber */}
+                    <AnimatedCard delay={320}>
                       {renderLargeCard({
-                        title: "Contas a pagar",
-                        tone: "amber",
-                        total: contasPagar.valorAPagar,
-                        subtitle: "Saldo pendente a pagar",
+                        title: "Contas a receber",
+                        tone: "emerald",
+                        total: contasReceber.valorAReceber,
+                        subtitle: "Saldo pendente a receber",
                         primaryLabel: "Previsto",
-                        primaryValue: contasPagar.valorAPagar,
-                        secondaryLabel: "Pago",
-                        secondaryValue: contasPagar.valorPago,
-                        monthlyPrevisto: chartPagar.previsto,
-                        monthlyRealizado: chartPagar.realizado,
-                        chartAno: chartPagar.ano,
-                        to: "/contas-a-pagar",
-                        icon: TrendingDown,
+                        primaryValue: contasReceber.valorAReceber,
+                        secondaryLabel: "Recebido",
+                        secondaryValue: contasReceber.valorRecebido,
+                        monthlyPrevisto: chartReceber.previsto,
+                        monthlyRealizado: chartReceber.realizado,
+                        chartAno: chartReceber.ano,
+                        to: "/contas-a-receber",
+                        icon: TrendingUp,
                       })}
                     </AnimatedCard>
+
+                    {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
+                    <div className="flex flex-col gap-2">
+                      <AnimatedCard delay={400}>
+                        {renderLargeCard({
+                          title: "Contas a pagar",
+                          tone: "amber",
+                          total: contasPagar.valorAPagar,
+                          subtitle: "Saldo pendente a pagar",
+                          primaryLabel: "Previsto",
+                          primaryValue: contasPagar.valorAPagar,
+                          secondaryLabel: "Pago",
+                          secondaryValue: contasPagar.valorPago,
+                          monthlyPrevisto: chartPagar.previsto,
+                          monthlyRealizado: chartPagar.realizado,
+                          chartAno: chartPagar.ano,
+                          to: "/contas-a-pagar",
+                          icon: TrendingDown,
+                        })}
+                      </AnimatedCard>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               </div>
               {/* end left column — row 1 col 1 */}
 
-            {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
+              {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
               {isProcessed && (
                 <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
-                    className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${
-                      kpiExtra.saldoLiquido >= 0
+                    className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0
                         ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
                         : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
-                    }`}
+                      }`}
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
                         <span
-                          className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${
-                            kpiExtra.saldoLiquido >= 0
+                          className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
                               ? "text-emerald-400"
                               : "text-red-400"
-                          }`}
+                            }`}
                         >
                           SALDO LÍQUIDO
                         </span>
                         <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                            kpiExtra.saldoLiquido >= 0
+                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0
                               ? "bg-emerald-500/15"
                               : "bg-red-500/15"
-                          }`}
+                            }`}
                         >
                           {kpiExtra.saldoLiquido >= 0 ? (
                             <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -1132,20 +1112,18 @@ const Index = () => {
                       </p>
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
                         <div
-                          className={`h-full ${
-                            kpiExtra.saldoLiquido >= 0
+                          className={`h-full ${kpiExtra.saldoLiquido >= 0
                               ? "bg-emerald-400"
                               : "bg-red-400"
-                          }`}
+                            }`}
                           style={{ width: "70%" }}
                         />
                       </div>
                       <span
-                        className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${
-                          kpiExtra.saldoLiquido >= 0
+                        className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
                             ? "bg-emerald-500/15 text-emerald-300"
                             : "bg-red-500/15 text-red-300"
-                        }`}
+                          }`}
                       >
                         {kpiExtra.saldoLiquido >= 0
                           ? "Fluxo positivo"
@@ -1243,97 +1221,95 @@ const Index = () => {
                 </div>
               )}
 
-            <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,40,0.97)_0%,rgba(6,11,28,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ${
-                presentationMode
-                  ? "h-full overflow-y-auto p-3.5"
-                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
-              }`}
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-5 shrink-0">
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
-                    Distribuição de Custos
-                  </p>
-                  <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-[22px]"}`}>
-                    Indicadores
-                  </p>
+              <aside
+                className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,40,0.97)_0%,rgba(6,11,28,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ${presentationMode
+                    ? "h-full overflow-y-auto p-3.5"
+                    : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
+                  }`}
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-5 shrink-0">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
+                      Distribuição de Custos
+                    </p>
+                    <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-[22px]"}`}>
+                      Indicadores
+                    </p>
+                  </div>
+                  {!presentationMode && (
+                    <button
+                      onClick={togglePresentationMode}
+                      className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-500 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      title="Modo apresentação"
+                      aria-label="Ativar modo apresentação"
+                    >
+                      <Presentation className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
-                {!presentationMode && (
-                  <button
-                    onClick={togglePresentationMode}
-                    className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-500 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-                    title="Modo apresentação"
-                    aria-label="Ativar modo apresentação"
-                  >
-                    <Presentation className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
 
-              {/* Lista — flex-1 para ocupar o espaço restante */}
-              <div className="flex flex-col flex-1 gap-2 min-h-0">
-                {isFetchingDw && !isProcessed ? (
-                  <>
-                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                      <IndicatorSkeleton key={i} />
-                    ))}
-                  </>
-                ) : (
-                  indicadores.map((ind, idx) => {
-                    const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
-                    const progress = Math.min(
-                      (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
-                      100
-                    );
-                    const metaMark = Math.min(
-                      (ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100,
-                      100
-                    );
+                {/* Lista — flex-1 para ocupar o espaço restante */}
+                <div className="flex flex-col flex-1 gap-2 min-h-0">
+                  {isFetchingDw && !isProcessed ? (
+                    <>
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                        <IndicatorSkeleton key={i} />
+                      ))}
+                    </>
+                  ) : (
+                    indicadores.map((ind, idx) => {
+                      const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
+                      const progress = Math.min(
+                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
+                        100
+                      );
+                      const metaMark = Math.min(
+                        (ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100,
+                        100
+                      );
 
-                    return (
-                      <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
-                        <Link
-                          to={`/indicadores/${ind.id}`}
-                          className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
-                        >
-                          {/* Linha nome + valor */}
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-colors duration-300 group-hover:text-slate-300">
-                              {ind.nome}
-                            </p>
-                            <div className="flex shrink-0 items-center gap-1">
-                              <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
-                                {ind.percentualReal}%
-                              </span>
-                              <ArrowRight className="h-2.5 w-2.5 text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                      return (
+                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
+                          <Link
+                            to={`/indicadores/${ind.id}`}
+                            className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
+                          >
+                            {/* Linha nome + valor */}
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-colors duration-300 group-hover:text-slate-300">
+                                {ind.nome}
+                              </p>
+                              <div className="flex shrink-0 items-center gap-1">
+                                <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
+                                  {ind.percentualReal}%
+                                </span>
+                                <ArrowRight className="h-2.5 w-2.5 text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                              </div>
                             </div>
-                          </div>
 
-                          {/* Barra de progresso */}
-                          <div className="relative mt-2 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
-                            <div
-                              className={`h-full rounded-full transition-all duration-700 ease-out ${
-                                abaixoDaMeta
-                                  ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                                  : "bg-gradient-to-r from-red-700 to-red-500"
-                              }`}
-                              style={{ width: `${progress}%` }}
-                            />
-                            <div
-                              className="absolute top-0 h-full w-[2px] rounded-full bg-white/30"
-                              style={{ left: `${metaMark}%` }}
-                              title={`Meta: ${ind.percentualEsperado}%`}
-                            />
-                          </div>
-                        </Link>
-                      </AnimatedCard>
-                    );
-                  })
-                )}
-              </div>
-            </aside>
+                            {/* Barra de progresso */}
+                            <div className="relative mt-2 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
+                              <div
+                                className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
+                                    ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
+                                    : "bg-gradient-to-r from-red-700 to-red-500"
+                                  }`}
+                                style={{ width: `${progress}%` }}
+                              />
+                              <div
+                                className="absolute top-0 h-full w-[2px] rounded-full bg-white/30"
+                                style={{ left: `${metaMark}%` }}
+                                title={`Meta: ${ind.percentualEsperado}%`}
+                              />
+                            </div>
+                          </Link>
+                        </AnimatedCard>
+                      );
+                    })
+                  )}
+                </div>
+              </aside>
             </div>
             {/* end 2-column grid */}
 
