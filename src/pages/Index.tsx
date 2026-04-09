@@ -1233,8 +1233,12 @@ const Index = () => {
                     <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
                       Distribuição de Custos
                     </p>
-                    <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-[22px]"}`}>
-                      INDICADORES
+                    <p
+                      className={`font-extrabold tracking-[-0.02em] text-transparent bg-clip-text 
+                      bg-gradient-to-r from-cyan-300 via-white to-slate-400 
+                      ${presentationMode ? "text-xl" : "text-[26px]"}`}
+                    >
+                       Indicadores
                     </p>
                   </div>
                   {!presentationMode && (
