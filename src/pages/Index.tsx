@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -18,6 +18,96 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+/* ------------------------------------------------------------------ */
+/*  CountUp — animação de número subindo                               */
+/* ------------------------------------------------------------------ */
+const CountUp = ({ value, duration = 1200, prefix = "" }: { value: number; duration?: number; prefix?: string }) => {
+  const [display, setDisplay] = useState(0);
+  const prevValue = useRef(0);
+
+  useEffect(() => {
+    const start = prevValue.current;
+    const diff = value - start;
+    if (Math.abs(diff) < 0.01) { setDisplay(value); return; }
+
+    const startTime = performance.now();
+    let raf: number;
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutExpo
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const current = start + diff * ease;
+      setDisplay(current);
+      if (progress < 1) raf = requestAnimationFrame(tick);
+      else prevValue.current = value;
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+
+  return <>{prefix}{display.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</>;
+};
+
+/* ------------------------------------------------------------------ */
+/*  Skeleton shimmer para loading                                      */
+/* ------------------------------------------------------------------ */
+const Skeleton = ({ className = "" }: { className?: string }) => (
+  <div className={`animate-pulse rounded-xl bg-white/[0.06] ${className}`} />
+);
+
+const CardSkeleton = () => (
+  <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] p-3.5">
+    <Skeleton className="h-3 w-20 mb-3" />
+    <Skeleton className="h-6 w-32 mb-2" />
+    <Skeleton className="h-3 w-24" />
+  </div>
+);
+
+const LargeCardSkeleton = () => (
+  <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] p-3.5">
+    <Skeleton className="h-3 w-28 mb-2" />
+    <Skeleton className="h-7 w-40 mb-1" />
+    <Skeleton className="h-3 w-32 mb-3" />
+    <div className="grid grid-cols-2 gap-2 mb-3">
+      <Skeleton className="h-14 rounded-[12px]" />
+      <Skeleton className="h-14 rounded-[12px]" />
+    </div>
+    <Skeleton className="h-[140px] rounded-[22px]" />
+  </div>
+);
+
+const IndicatorSkeleton = () => (
+  <div className="rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-3">
+    <div className="flex justify-between mb-2">
+      <Skeleton className="h-3 w-24" />
+      <Skeleton className="h-3 w-10" />
+    </div>
+    <Skeleton className="h-1.5 w-full rounded-full" />
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/*  AnimatedCard — fade+slide com stagger                              */
+/* ------------------------------------------------------------------ */
+const AnimatedCard = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+
+  return (
+    <div
+      className={`transition-all duration-500 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /*  Mini line-chart (SVG) — Evolução mensal Previsto vs Realizado      */
@@ -559,7 +649,7 @@ const Index = () => {
                 {title}
               </p>
               <h2 className="mt-0.5 text-[18px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
-                {formatCurrency(total)}
+                <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>
             </div>
@@ -580,7 +670,7 @@ const Index = () => {
                 {primaryLabel}
               </p>
               <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
-                {formatCurrency(primaryValue)}
+                <CountUp value={primaryValue} />
               </p>
             </div>
 
@@ -589,7 +679,7 @@ const Index = () => {
                 {secondaryLabel}
               </p>
               <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
-                {formatCurrency(secondaryValue)}
+                <CountUp value={secondaryValue} />
               </p>
             </div>
           </div>
@@ -791,13 +881,18 @@ const Index = () => {
                   </div>
                 )}
               {/* Top 4 metric cards */}
+              {isFetchingDw && !isProcessed ? (
+                <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+                  {[0,1,2,3].map(i => <CardSkeleton key={i} />)}
+                </div>
+              ) : (
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
-                {topMetrics.map((item) => {
+                {topMetrics.map((item, idx) => {
                   const Icon = item.icon;
 
                   return (
+                    <AnimatedCard key={item.label} delay={idx * 80}>
                     <div
-                      key={item.label}
                       className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                         }`}
                     >
@@ -818,7 +913,7 @@ const Index = () => {
 
                         <div className="mt-2.5">
                           <p className="text-[19px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
-                            {formatCurrency(item.value)}
+                            <CountUp value={item.value} />
                           </p>
                           <p className="mt-1.5 text-xs text-slate-400">
                             {item.helper}
@@ -826,13 +921,21 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
+                    </AnimatedCard>
                   );
                 })}
               </div>
+              )}
 
               {/* Large cards with charts */}
+              {isFetchingDw && !isProcessed ? (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  <LargeCardSkeleton />
+                  <LargeCardSkeleton />
+                </div>
+              ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                {renderLargeCard({
+                <AnimatedCard delay={320}>{renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
                   total: contasReceber.valorAReceber,
@@ -846,9 +949,9 @@ const Index = () => {
                   chartAno: chartReceber.ano,
                   to: "/contas-a-receber",
                   icon: TrendingUp,
-                })}
+                })}</AnimatedCard>
 
-                {renderLargeCard({
+                <AnimatedCard delay={400}>{renderLargeCard({
                   title: "Contas a pagar",
                   tone: "amber",
                   total: contasPagar.valorAPagar,
@@ -862,8 +965,9 @@ const Index = () => {
                   chartAno: chartPagar.ano,
                   to: "/contas-a-pagar",
                   icon: TrendingDown,
-                })}
+                })}</AnimatedCard>
               </div>
+              )}
 
               {/* KPIs Extras */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -885,7 +989,7 @@ const Index = () => {
                       </div>
                     </div>
                     <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate">
-                      {formatCurrency(kpiExtra.saldoLiquido)}
+                      <CountUp value={kpiExtra.saldoLiquido} />
                     </p>
                     <p className="mt-1 text-[10px] text-slate-500">Recebido − Pago</p>
                     <span className={`mt-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
@@ -906,7 +1010,7 @@ const Index = () => {
                       </div>
                     </div>
                     <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate">
-                      {formatCurrency(kpiExtra.inadimplencia)}
+                      <CountUp value={kpiExtra.inadimplencia} />
                     </p>
                     <p className="mt-1 text-[10px] text-slate-500">CR vencido sem recebimento</p>
                     <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-red-300">
@@ -972,7 +1076,12 @@ const Index = () => {
                 </div>
 
                 <div className="mt-3 grid gap-1.5 sm:grid-cols-2 xl:grid-cols-1">
-                  {indicadores.map((ind) => {
+                  {isFetchingDw && !isProcessed ? (
+                    <>
+                      {[0,1,2,3,4,5,6].map(i => <IndicatorSkeleton key={i} />)}
+                    </>
+                  ) : (
+                  indicadores.map((ind, idx) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
                     const progress = Math.min(
@@ -983,11 +1092,11 @@ const Index = () => {
                     );
 
                     return (
+                      <AnimatedCard key={ind.id} delay={480 + idx * 60}>
                       <Link
-                        key={ind.id}
                         to={`/indicadores/${ind.id}`}
                         className={`group relative overflow-hidden rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2.5" : "p-3"
-                          }`}
+                          } block`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
@@ -1008,16 +1117,27 @@ const Index = () => {
                           </div>
                         </div>
 
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                        {/* Progress bar with meta marker */}
+                        <div className="mt-2 relative">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
+                                }`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          {/* Meta marker line */}
                           <div
-                            className={`h-full rounded-full transition-all duration-300 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
-                              }`}
-                            style={{ width: `${progress}%` }}
+                            className="absolute top-0 h-1.5 w-[2px] rounded-full bg-white/40"
+                            style={{ left: `${Math.min((ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100, 100)}%` }}
+                            title={`Meta: ${ind.percentualEsperado}%`}
                           />
                         </div>
                       </Link>
+                      </AnimatedCard>
                     );
-                  })}
+                  })
+                  )}
                 </div>
               </div>
             </aside>
