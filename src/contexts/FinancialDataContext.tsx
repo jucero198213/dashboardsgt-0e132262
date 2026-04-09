@@ -191,10 +191,18 @@ function saveCache(data: CachedState) {
 
 function loadCache(): CachedState | null {
   try {
+    // Limpa versão antiga se existir
+    sessionStorage.removeItem("dw_financial_cache_v1");
+
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const parsed: CachedState = JSON.parse(raw);
     if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
+      sessionStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    // Garante que todos os campos de kpiExtra existem
+    if (parsed.kpiExtra && typeof (parsed.kpiExtra as any).realizacaoCR === "undefined") {
       sessionStorage.removeItem(CACHE_KEY);
       return null;
     }

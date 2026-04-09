@@ -1125,11 +1125,11 @@ const Index = () => {
                               </div>
                             </div>
                             <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
-                              {kpiExtra.realizacaoCR.toFixed(0)}%
+                              {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                             </div>
                             <p className="mt-2 text-sm text-slate-400">Recebido ÷ Previsto no período</p>
                             <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                              <div className="h-full rounded-full bg-cyan-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCR, 100)}%` }} />
+                              <div className="h-full rounded-full bg-cyan-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
                             </div>
                             <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
                               Meta: 100%
