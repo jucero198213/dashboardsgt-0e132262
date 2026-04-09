@@ -8,7 +8,7 @@ import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Admin from "./pages/Admin";
+import PainelAdministrativo from "./pages/admin/PainelAdministrativo";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
@@ -30,7 +30,7 @@ const App = () => (
               <Route path="/contas-a-receber" element={<ProtectedRoute><ContasAReceber /></ProtectedRoute>} />
               <Route path="/contas-a-pagar" element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
               <Route path="/indicadores/:id" element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>
