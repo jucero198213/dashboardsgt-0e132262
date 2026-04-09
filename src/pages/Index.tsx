@@ -709,20 +709,20 @@ const Index = () => {
     return (
       <div
         className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(0,0,0,0.24)] ${isPositive
-            ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-            : "border-amber-500/14 bg-[linear-gradient(180deg,rgba(11,18,38,0.84)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/22 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.90)_0%,rgba(8,14,32,1)_100%)]"
+          ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+          : "border-amber-500/14 bg-[linear-gradient(180deg,rgba(11,18,38,0.84)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/22 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.90)_0%,rgba(8,14,32,1)_100%)]"
           } ${presentationMode ? "flex flex-col p-3.5" : "flex flex-col p-4 xl:p-4.5"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_30%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.07),transparent_30%)]"
+            ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_30%)]"
+            : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.07),transparent_30%)]"
             }`}
         />
         <div
           className={`absolute inset-x-0 bottom-0 h-24 ${isPositive
-              ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.02)_100%)]"
-              : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.018)_100%)]"
+            ? "bg-[linear-gradient(180deg,transparent_0%,rgba(16,185,129,0.02)_100%)]"
+            : "bg-[linear-gradient(180deg,transparent_0%,rgba(245,158,11,0.018)_100%)]"
             }`}
         />
 
@@ -743,8 +743,8 @@ const Index = () => {
 
             <div
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${isPositive
-                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
-                  : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/15"
+                : "border-amber-500/20 bg-amber-500/10 text-amber-300 group-hover:border-amber-400/30 group-hover:bg-amber-400/15"
                 }`}
             >
               <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
@@ -772,8 +772,8 @@ const Index = () => {
 
           <div
             className={`flex items-center justify-between gap-3 rounded-[14px] border px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
-                ? "border-emerald-400/12 bg-[linear-gradient(180deg,rgba(16,185,129,0.07)_0%,rgba(16,185,129,0.025)_100%)]"
-                : "border-amber-400/12 bg-[linear-gradient(180deg,rgba(245,158,11,0.07)_0%,rgba(245,158,11,0.025)_100%)]"
+              ? "border-emerald-400/12 bg-[linear-gradient(180deg,rgba(16,185,129,0.07)_0%,rgba(16,185,129,0.025)_100%)]"
+              : "border-amber-400/12 bg-[linear-gradient(180deg,rgba(245,158,11,0.07)_0%,rgba(245,158,11,0.025)_100%)]"
               }`}
           >
             <div className="min-w-0">
@@ -791,8 +791,8 @@ const Index = () => {
             <Link
               to={to}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-300 hover:-translate-y-0.5 ${isPositive
-                  ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_8px_18px_rgba(16,185,129,0.08)]"
-                  : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_8px_18px_rgba(245,158,11,0.08)]"
+                ? "border-emerald-400/22 bg-emerald-400/12 text-emerald-300 hover:bg-emerald-400/18 hover:shadow-[0_8px_18px_rgba(16,185,129,0.08)]"
+                : "border-amber-400/22 bg-amber-400/12 text-amber-300 hover:bg-amber-400/18 hover:shadow-[0_8px_18px_rgba(245,158,11,0.08)]"
                 }`}
             >
               Ver detalhamento
@@ -807,8 +807,8 @@ const Index = () => {
   return (
     <div
       className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen overflow-hidden p-0"
-          : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+        ? "h-screen w-screen overflow-hidden p-0"
+        : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_24%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.06),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.05),transparent_22%)]" />
@@ -816,14 +816,14 @@ const Index = () => {
 
       <div
         className={`relative flex flex-col ${presentationMode
-            ? "h-full w-full max-w-none"
-            : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
+          ? "h-full w-full max-w-none"
+          : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
           }`}
       >
         <section
           className={`relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_18px_48px_rgba(0,0,0,0.32)] ${presentationMode
-              ? "h-full w-full overflow-hidden rounded-none"
-              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
+            ? "h-full w-full overflow-hidden rounded-none"
+            : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
             }`}
         >
           {/* Global progress bar — top of section */}
@@ -863,8 +863,8 @@ const Index = () => {
 
                 <h1
                   className={`bg-gradient-to-r from-white from-35% via-slate-200 via-72% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_20px_rgba(255,255,255,0.04)] ${presentationMode
-                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
-                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
+                    ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
+                    : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
                     }`}
                 >
                   Análise Consolidada
@@ -935,8 +935,8 @@ const Index = () => {
                 onClick={() => void handleUpdate()}
                 disabled={isFetchingDw}
                 className={`inline-flex h-9 items-center gap-1.5 rounded-xl border px-3 text-[11px] font-semibold transition-all sm:gap-2 sm:px-4 sm:text-xs ${isFetchingDw
-                    ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
-                    : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
+                  ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
+                  : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
                   } disabled:cursor-not-allowed`}
               >
                 <RefreshCw
@@ -989,21 +989,21 @@ const Index = () => {
                         >
                           <div
                             className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 ${isFeatured
-                                ? "border-cyan-400/24 bg-[linear-gradient(180deg,rgba(18,31,61,0.92)_0%,rgba(9,20,44,0.99)_100%)] hover:border-cyan-300/34 hover:shadow-[0_18px_38px_rgba(0,0,0,0.24)]"
-                                : "border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.78)_0%,rgba(10,16,36,0.96)_100%)] hover:border-white/14 hover:bg-[linear-gradient(180deg,rgba(22,32,72,0.84)_0%,rgba(12,18,40,0.98)_100%)] hover:shadow-[0_14px_28px_rgba(0,0,0,0.22)]"
+                              ? "border-cyan-400/24 bg-[linear-gradient(180deg,rgba(18,31,61,0.92)_0%,rgba(9,20,44,0.99)_100%)] hover:border-cyan-300/34 hover:shadow-[0_18px_38px_rgba(0,0,0,0.24)]"
+                              : "border-white/8 bg-[linear-gradient(180deg,rgba(18,26,53,0.78)_0%,rgba(10,16,36,0.96)_100%)] hover:border-white/14 hover:bg-[linear-gradient(180deg,rgba(22,32,72,0.84)_0%,rgba(12,18,40,0.98)_100%)] hover:shadow-[0_14px_28px_rgba(0,0,0,0.22)]"
                               } ${presentationMode ? "p-4" : isFeatured ? "p-4 xl:p-5" : "p-4 xl:p-4.5"}`}
                           >
                             <div className={`pointer-events-none absolute inset-0 ${isFeatured
-                                ? "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.10),transparent_30%)]"
-                                : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.03),transparent_28%)]"
+                              ? "bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.10),transparent_30%)]"
+                              : "bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.03),transparent_28%)]"
                               }`} />
 
                             <div className="relative flex h-full flex-col justify-between">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <p className={`font-semibold uppercase tracking-[0.28em] transition-colors duration-300 ${isFeatured
-                                      ? "text-[10px] text-cyan-300 group-hover:text-cyan-200"
-                                      : "text-[11px] text-slate-400 group-hover:text-slate-300"
+                                    ? "text-[10px] text-cyan-300 group-hover:text-cyan-200"
+                                    : "text-[11px] text-slate-400 group-hover:text-slate-300"
                                     }`}>
                                     {item.label}
                                   </p>
@@ -1016,8 +1016,8 @@ const Index = () => {
 
                                 <div
                                   className={`flex items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-[1.03] ${isFeatured
-                                      ? "h-11 w-11 border-cyan-400/24 bg-cyan-400/10 text-cyan-200"
-                                      : `h-9 w-9 rounded-xl ${toneStyles[item.tone]}`
+                                    ? "h-11 w-11 border-cyan-400/24 bg-cyan-400/10 text-cyan-200"
+                                    : `h-9 w-9 rounded-xl ${toneStyles[item.tone]}`
                                     }`}
                                 >
                                   <Icon className={`${isFeatured ? "h-5 w-5" : "h-4 w-4"} transition-transform duration-300 group-hover:scale-110`} />
@@ -1100,8 +1100,8 @@ const Index = () => {
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[24px] border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_34px_rgba(0,0,0,0.24)] xl:col-span-2 ${kpiExtra.saldoLiquido >= 0
-                        ? "border-emerald-400/28 bg-gradient-to-br from-emerald-500/12 via-cyan-500/6 to-transparent"
-                        : "border-red-400/24 bg-gradient-to-br from-red-500/12 to-red-500/4"
+                      ? "border-emerald-400/28 bg-gradient-to-br from-emerald-500/12 via-cyan-500/6 to-transparent"
+                      : "border-red-400/24 bg-gradient-to-br from-red-500/12 to-red-500/4"
                       }`}
                   >
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_28%)]" />
@@ -1109,16 +1109,16 @@ const Index = () => {
                       <div className="mb-4 flex items-start justify-between">
                         <span
                           className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
-                              ? "text-emerald-400"
-                              : "text-red-400"
+                            ? "text-emerald-400"
+                            : "text-red-400"
                             }`}
                         >
                           SALDO LÍQUIDO
                         </span>
                         <div
                           className={`flex h-14 w-14 items-center justify-center rounded-[20px] border ${kpiExtra.saldoLiquido >= 0
-                              ? "border-emerald-400/20 bg-emerald-500/12"
-                              : "border-red-400/20 bg-red-500/12"
+                            ? "border-emerald-400/20 bg-emerald-500/12"
+                            : "border-red-400/20 bg-red-500/12"
                             }`}
                         >
                           {kpiExtra.saldoLiquido >= 0 ? (
@@ -1137,16 +1137,16 @@ const Index = () => {
                       <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/10">
                         <div
                           className={`h-full ${kpiExtra.saldoLiquido >= 0
-                              ? "bg-emerald-400"
-                              : "bg-red-400"
+                            ? "bg-emerald-400"
+                            : "bg-red-400"
                             }`}
                           style={{ width: "70%" }}
                         />
                       </div>
                       <span
                         className={`mt-5 inline-flex w-fit rounded-full px-3 py-1.5 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
-                            ? "bg-emerald-500/15 text-emerald-300"
-                            : "bg-red-500/15 text-red-300"
+                          ? "bg-emerald-500/15 text-emerald-300"
+                          : "bg-red-500/15 text-red-300"
                           }`}
                       >
                         {kpiExtra.saldoLiquido >= 0
@@ -1247,8 +1247,8 @@ const Index = () => {
 
               <aside
                 className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,40,0.97)_0%,rgba(6,11,28,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_46px_rgba(0,0,0,0.30)] backdrop-blur-xl ${presentationMode
-                    ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
+                  ? "h-full overflow-y-auto p-3.5"
+                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
                   }`}
               >
                 {/* Header */}
@@ -1316,8 +1316,8 @@ const Index = () => {
                             <div className="relative mt-3 h-[4px] overflow-hidden rounded-full bg-white/[0.06]">
                               <div
                                 className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
-                                    ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                                    : "bg-gradient-to-r from-red-700 to-red-500"
+                                  ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
+                                  : "bg-gradient-to-r from-red-700 to-red-500"
                                   }`}
                                 style={{ width: `${progress}%` }}
                               />
