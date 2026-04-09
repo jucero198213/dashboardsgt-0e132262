@@ -1272,8 +1272,8 @@ const Index = () => {
                               </div>
                             </div>
 
-                            <div className="relative mt-2">
-                              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div className="relative mt-2.5">
+                              <div className="h-1 overflow-hidden rounded-full bg-white/10">
                                 <div
                                   className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
                                     ? "bg-emerald-400"
@@ -1284,7 +1284,7 @@ const Index = () => {
                               </div>
 
                               <div
-                                className="absolute top-0 h-1.5 w-[2px] rounded-full bg-white/40"
+                                className="absolute top-0 h-1 w-[2px] rounded-full bg-white/40"
                                 style={{
                                   left: `${Math.min(
                                     (ind.percentualEsperado /
