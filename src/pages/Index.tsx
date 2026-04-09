@@ -929,9 +929,9 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                  ? "h-full overflow-y-auto p-3.5"
-                  : "xl:h-full p-3.5 lg:p-4 overflow-y-auto max-h-[400px] xl:max-h-none"
+              className={`rounded-[16px] sm:rounded-[20px] md:rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
+                  ? "h-full overflow-y-auto p-3 sm:p-3.5"
+                  : "xl:h-full p-3 sm:p-3.5 lg:p-4 overflow-y-auto max-h-[350px] sm:max-h-[400px] xl:max-h-none"
                 }`}
             >
               <div className="flex h-full min-h-0 flex-col">
@@ -961,10 +961,10 @@ const Index = () => {
                 </div>
 
                 <div
-                  className="mt-3 grid min-h-0 gap-1.5 flex-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
+                  className="mt-3 grid min-h-0 gap-1.5 flex-1 sm:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
                   style={
                     presentationMode || window.innerWidth >= 1280
-                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))` }
+                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))`, gridTemplateColumns: undefined }
                       : undefined
                   }
                 >
