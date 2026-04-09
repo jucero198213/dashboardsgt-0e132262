@@ -1238,7 +1238,7 @@ const Index = () => {
                       bg-gradient-to-r from-cyan-300 via-white to-slate-400 
                       ${presentationMode ? "text-xl" : "text-[26px]"}`}
                     >
-                       INDICADORES
+                       Indicadores
                     </p>
                   </div>
                   {!presentationMode && (
