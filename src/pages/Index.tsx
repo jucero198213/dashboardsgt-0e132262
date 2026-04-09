@@ -1228,19 +1228,21 @@ const Index = () => {
                   }`}
               >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-5 shrink-0">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
-                      Distribuição de Custos
-                    </p>
-                    <p
-                      className={`font-extrabold tracking-[-0.02em] text-transparent bg-clip-text 
-                      bg-gradient-to-r from-cyan-300 via-white to-slate-400 
-                      ${presentationMode ? "text-xl" : "text-[26px]"}`}
-                    >
-                       INDICADORES
-                    </p>
-                  </div>
+                <div>
+  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
+    Distribuição de Custos
+  </p>
+
+  <p
+    className={`font-extrabold tracking-[-0.02em] text-transparent bg-clip-text 
+    bg-gradient-to-r from-cyan-300 via-white to-slate-400 
+    ${presentationMode ? "text-xl" : "text-[26px]"}`}
+  >
+    Indicadores
+  </p>
+
+  <div className="mt-2 h-[2px] w-10 rounded-full bg-gradient-to-r from-cyan-400 to-transparent opacity-70" />
+</div>
                   {!presentationMode && (
                     <button
                       onClick={togglePresentationMode}
