@@ -1040,56 +1040,77 @@ const Index = () => {
 
                     {/* KPIs Extras — alinhados com CP */}
                     {isProcessed && (
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+
                         {/* SALDO LÍQUIDO */}
-                        <div
-                          className={`group relative overflow-hidden rounded-[14px] border px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 ${kpiExtra.saldoLiquido >= 0
-                            ? "border-emerald-500/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))]"
-                            : "border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))]"
-                            }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>Saldo Líquido</span>
-                            <div className={`flex h-5 w-5 items-center justify-center rounded-md ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
-                              {kpiExtra.saldoLiquido >= 0 ? <TrendingUp className="h-2.5 w-2.5 text-emerald-400" /> : <TrendingDown className="h-2.5 w-2.5 text-red-400" />}
+                        <div className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0 ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"}`}>
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                          <div className="relative flex h-full flex-col">
+                            <div className="mb-4 flex items-start justify-between">
+                              <span className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>SALDO LÍQUIDO</span>
+                              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
+                                {kpiExtra.saldoLiquido >= 0 ? <TrendingUp className="h-4 w-4 text-emerald-400" /> : <TrendingDown className="h-4 w-4 text-red-400" />}
+                              </div>
                             </div>
+                            <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                              <CountUp value={kpiExtra.saldoLiquido} />
+                            </div>
+                            <p className="mt-2 text-sm text-slate-400">Recebido − Pago no período</p>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                              <div className={`h-full ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`} style={{ width: "70%" }} />
+                            </div>
+                            <span className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
+                              {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
+                            </span>
                           </div>
-                          <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate"><CountUp value={kpiExtra.saldoLiquido} /></p>
-                          <p className="mt-1 text-[10px] text-slate-500">Recebido − Pago</p>
-                          <span className={`mt-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"}`}>
-                            {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
-                          </span>
                         </div>
 
                         {/* INADIMPLÊNCIA */}
-                        <div className="relative overflow-hidden rounded-[14px] border border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400">Inadimplência</span>
-                            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-red-500/15">
-                              <AlertCircle className="h-2.5 w-2.5 text-red-400" />
+                        <div className="group relative overflow-hidden rounded-[22px] border border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                          <div className="relative flex h-full flex-col">
+                            <div className="mb-4 flex items-start justify-between">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">INADIMPLÊNCIA</span>
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/15">
+                                <AlertCircle className="h-4 w-4 text-red-400" />
+                              </div>
                             </div>
+                            <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                              <CountUp value={kpiExtra.inadimplencia} />
+                            </div>
+                            <p className="mt-2 text-sm text-slate-400">CR vencido sem recebimento</p>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                              <div className="h-full bg-red-400" style={{ width: "60%" }} />
+                            </div>
+                            <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
+                              {kpiExtra.inadimplenciaDocs} docs vencidos
+                            </span>
                           </div>
-                          <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate"><CountUp value={kpiExtra.inadimplencia} /></p>
-                          <p className="mt-1 text-[10px] text-slate-500">CR vencido sem recebimento</p>
-                          <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-red-300">
-                            {kpiExtra.inadimplenciaDocs} doc{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""} vencido{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""}
-                          </span>
                         </div>
 
                         {/* % REALIZAÇÃO CP */}
-                        <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(139,92,246,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400">Realização CP</span>
-                            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/15">
-                              <TrendingDown className="h-2.5 w-2.5 text-violet-400" />
+                        <div className="group relative overflow-hidden rounded-[22px] border border-violet-500/25 bg-gradient-to-br from-violet-500/10 to-violet-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                          <div className="relative flex h-full flex-col">
+                            <div className="mb-4 flex items-start justify-between">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">% REALIZAÇÃO CP</span>
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/15">
+                                <TrendingDown className="h-4 w-4 text-violet-400" />
+                              </div>
                             </div>
-                          </div>
-                          <p className="text-[14px] font-bold leading-none tracking-tight text-white">{kpiExtra.realizacaoCP.toFixed(1)}%</p>
-                          <p className="mt-1 text-[10px] text-slate-500">Pago ÷ Previsto CP</p>
-                          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
-                            <div className="h-full rounded-full bg-violet-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
+                            <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                              {kpiExtra.realizacaoCP.toFixed(0)}%
+                            </div>
+                            <p className="mt-2 text-sm text-slate-400">Pago ÷ Previsto no período</p>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                              <div className="h-full rounded-full bg-violet-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
+                            </div>
+                            <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold text-violet-200">
+                              Meta: 100%
+                            </span>
                           </div>
                         </div>
+
                       </div>
                     )}
                   </div>
