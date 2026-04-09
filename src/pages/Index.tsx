@@ -1198,19 +1198,19 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-3.5" : "p-3.5 lg:p-4"
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-3.5" : "self-start p-3 lg:p-3.5"
                 }`}
             >
               <div className="flex flex-col">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <p
-                      className={`font-semibold tracking-tight text-white ${presentationMode ? "text-xl" : "text-2xl"
+                      className={`font-semibold tracking-tight text-white ${presentationMode ? "text-xl" : "text-[28px]"
                         }`}
                     >
                       Indicadores
                     </p>
-                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                    <p className="mt-1 text-[11px] leading-4 text-slate-400">
                       Resumo lateral no padrão da referência.
                     </p>
                   </div>
@@ -1227,7 +1227,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid gap-1.5 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -1247,18 +1247,18 @@ const Index = () => {
                       );
 
                       return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 60}>
+                        <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className={`group relative block overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "px-2.5 py-2.5" : "px-3  py-2.5"}
-                            `}
+                            className={`group relative block overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "px-2.5 py-2.5" : "px-3 py-2"
+                              }`}
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                            <div className="flex items-center justify-between gap-2.5">
+                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
                                 {ind.nome}
                               </p>
 
-                              <div className="flex min-w-[54px] items-center justify-end gap-1.5">
+                              <div className="flex shrink-0 min-w-[58px] items-center justify-end gap-1.5">
                                 <span
                                   className={`text-xs font-semibold ${abaixoDaMeta
                                     ? "text-emerald-300"
@@ -1272,8 +1272,8 @@ const Index = () => {
                               </div>
                             </div>
 
-                            <div className="relative mt-2.5">
-                              <div className="h-1 overflow-hidden rounded-full bg-white/10">
+                            <div className="relative mt-2">
+                              <div className="h-[3px] overflow-hidden rounded-full bg-white/10">
                                 <div
                                   className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
                                     ? "bg-emerald-400"
@@ -1284,7 +1284,7 @@ const Index = () => {
                               </div>
 
                               <div
-                                className="absolute top-0 h-1 w-[2px] rounded-full bg-white/40"
+                                className="absolute top-0 h-[3px] w-[2px] rounded-full bg-white/40"
                                 style={{
                                   left: `${Math.min(
                                     (ind.percentualEsperado /
