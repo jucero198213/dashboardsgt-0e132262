@@ -22,14 +22,25 @@ import {
 /* ------------------------------------------------------------------ */
 /*  CountUp — animação de número subindo                               */
 /* ------------------------------------------------------------------ */
-const CountUp = ({ value, duration = 1200, prefix = "" }: { value: number; duration?: number; prefix?: string }) => {
+const CountUp = ({
+  value,
+  duration = 1200,
+  prefix = "",
+}: {
+  value: number;
+  duration?: number;
+  prefix?: string;
+}) => {
   const [display, setDisplay] = useState(0);
   const prevValue = useRef(0);
 
   useEffect(() => {
     const start = prevValue.current;
     const diff = value - start;
-    if (Math.abs(diff) < 0.01) { setDisplay(value); return; }
+    if (Math.abs(diff) < 0.01) {
+      setDisplay(value);
+      return;
+    }
 
     const startTime = performance.now();
     let raf: number;
@@ -37,7 +48,6 @@ const CountUp = ({ value, duration = 1200, prefix = "" }: { value: number; durat
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // easeOutExpo
       const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       const current = start + diff * ease;
       setDisplay(current);
@@ -49,7 +59,15 @@ const CountUp = ({ value, duration = 1200, prefix = "" }: { value: number; durat
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
 
-  return <>{prefix}{display.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</>;
+  return (
+    <>
+      {prefix}
+      {display.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      })}
+    </>
+  );
 };
 
 /* ------------------------------------------------------------------ */
@@ -61,18 +79,18 @@ const Skeleton = ({ className = "" }: { className?: string }) => (
 
 const CardSkeleton = () => (
   <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] p-3.5">
-    <Skeleton className="h-3 w-20 mb-3" />
-    <Skeleton className="h-6 w-32 mb-2" />
+    <Skeleton className="mb-3 h-3 w-20" />
+    <Skeleton className="mb-2 h-6 w-32" />
     <Skeleton className="h-3 w-24" />
   </div>
 );
 
 const LargeCardSkeleton = () => (
   <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] p-3.5">
-    <Skeleton className="h-3 w-28 mb-2" />
-    <Skeleton className="h-7 w-40 mb-1" />
-    <Skeleton className="h-3 w-32 mb-3" />
-    <div className="grid grid-cols-2 gap-2 mb-3">
+    <Skeleton className="mb-2 h-3 w-28" />
+    <Skeleton className="mb-1 h-7 w-40" />
+    <Skeleton className="mb-3 h-3 w-32" />
+    <div className="mb-3 grid grid-cols-2 gap-2">
       <Skeleton className="h-14 rounded-[12px]" />
       <Skeleton className="h-14 rounded-[12px]" />
     </div>
@@ -82,7 +100,7 @@ const LargeCardSkeleton = () => (
 
 const IndicatorSkeleton = () => (
   <div className="rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-3">
-    <div className="flex justify-between mb-2">
+    <div className="mb-2 flex justify-between">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-3 w-10" />
     </div>
@@ -93,8 +111,17 @@ const IndicatorSkeleton = () => (
 /* ------------------------------------------------------------------ */
 /*  AnimatedCard — fade+slide com stagger                              */
 /* ------------------------------------------------------------------ */
-const AnimatedCard = ({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) => {
+const AnimatedCard = ({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => {
   const [visible, setVisible] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(t);
@@ -102,7 +129,8 @@ const AnimatedCard = ({ children, delay = 0, className = "" }: { children: React
 
   return (
     <div
-      className={`transition-all duration-500 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} ${className}`}
+      className={`transition-all duration-500 ease-out ${visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+        } ${className}`}
     >
       {children}
     </div>
@@ -123,7 +151,20 @@ const MiniLineChart = ({
   tone: "emerald" | "amber";
   ano?: string;
 }) => {
-  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const months = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ];
 
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -146,11 +187,20 @@ const MiniLineChart = ({
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
   const buildPath = (pts: number[]) =>
-    pts.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
+    pts
+      .map(
+        (v, i) =>
+          `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`
+      )
+      .join(" ");
 
   const buildAreaPath = (pts: number[]) => {
-    const linePath = pts.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" L");
-    return `M${linePath} L${toX(11).toFixed(1)},${(padTop + chartH).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
+    const linePath = pts
+      .map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`)
+      .join(" L");
+    return `M${linePath} L${toX(11).toFixed(1)},${(
+      padTop + chartH
+    ).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
   };
 
   const colors =
@@ -196,24 +246,30 @@ const MiniLineChart = ({
   };
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="flex items-center justify-between mb-1">
+    <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
         </span>
         <div className="flex gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="inline-block h-[3px] w-3 rounded-full" style={{ background: colors.legendPrev, opacity: 0.7 }} />
+            <span
+              className="inline-block h-[3px] w-3 rounded-full"
+              style={{ background: colors.legendPrev, opacity: 0.7 }}
+            />
             <span className="text-[9px] text-slate-500">Previsto</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-block h-[3px] w-3 rounded-full" style={{ background: colors.legendReal }} />
+            <span
+              className="inline-block h-[3px] w-3 rounded-full"
+              style={{ background: colors.legendReal }}
+            />
             <span className="text-[9px] text-slate-500">{realizadoLabel}</span>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 relative">
+      <div className="relative min-h-0 flex-1">
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
           preserveAspectRatio="xMidYMid meet"
@@ -222,8 +278,16 @@ const MiniLineChart = ({
         >
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colors.gradFrom} stopOpacity={0.25} />
-              <stop offset="60%" stopColor={colors.gradFrom} stopOpacity={0.08} />
+              <stop
+                offset="0%"
+                stopColor={colors.gradFrom}
+                stopOpacity={0.25}
+              />
+              <stop
+                offset="60%"
+                stopColor={colors.gradFrom}
+                stopOpacity={0.08}
+              />
               <stop offset="100%" stopColor={colors.gradFrom} stopOpacity={0} />
             </linearGradient>
             <filter id={`glow-${tone}`}>
@@ -300,7 +364,10 @@ const MiniLineChart = ({
                 const realVal = realizadoPoints[hoverIndex];
                 const hasData = prevVal > 0 || realVal > 0;
                 const tooltipH = hasData ? 56 : 36;
-                const tooltipY = Math.max(toY(Math.max(prevVal, realVal)) - tooltipH - 8, 2);
+                const tooltipY = Math.max(
+                  toY(Math.max(prevVal, realVal)) - tooltipH - 8,
+                  2
+                );
 
                 return (
                   <>
@@ -370,7 +437,11 @@ const MiniLineChart = ({
               x={toX(i)}
               y={svgH - 4}
               textAnchor="middle"
-              fill={hoverIndex === i ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.25)"}
+              fill={
+                hoverIndex === i
+                  ? "rgba(255,255,255,0.8)"
+                  : "rgba(255,255,255,0.25)"
+              }
               fontSize={9.5}
               fontWeight={hoverIndex === i ? 600 : 400}
               fontFamily="system-ui, sans-serif"
@@ -648,7 +719,7 @@ const Index = () => {
               >
                 {title}
               </p>
-              <h2 className="mt-0.5 text-[18px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
+              <h2 className="mt-0.5 min-w-0 truncate text-[18px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
                 <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>
@@ -669,7 +740,7 @@ const Index = () => {
               <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 {primaryLabel}
               </p>
-              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1 min-w-0 truncate text-[13px] font-bold leading-none tracking-[-0.03em] text-white">
                 <CountUp value={primaryValue} />
               </p>
             </div>
@@ -678,13 +749,12 @@ const Index = () => {
               <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                 {secondaryLabel}
               </p>
-              <p className="mt-1 text-[13px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0">
+              <p className="mt-1 min-w-0 truncate text-[13px] font-bold leading-none tracking-[-0.03em] text-white">
                 <CountUp value={secondaryValue} />
               </p>
             </div>
           </div>
 
-          {/* Overlay de carga incremental — mantém gráfico visível enquanto atualiza */}
           <div className="relative">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
@@ -694,11 +764,12 @@ const Index = () => {
             />
             {isFetchingDw && (
               <div className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/30 backdrop-blur-[1px]">
-                <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${
-                  isPositive
-                    ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
-                    : "border-amber-400/30 bg-amber-500/20 text-amber-300"
-                }`}>
+                <div
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold ${isPositive
+                      ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
+                      : "border-amber-400/30 bg-amber-500/20 text-amber-300"
+                    }`}
+                >
                   <RefreshCw className="h-3 w-3 animate-spin" />
                   Atualizando...
                 </div>
@@ -707,10 +778,10 @@ const Index = () => {
           </div>
 
           <div
-            className={`rounded-[12px] border shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
+            className={`flex items-center justify-between gap-3 rounded-[12px] border px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ${isPositive
                 ? "border-emerald-400/14 bg-[linear-gradient(180deg,rgba(16,185,129,0.09)_0%,rgba(16,185,129,0.03)_100%)]"
                 : "border-amber-400/14 bg-[linear-gradient(180deg,rgba(245,158,11,0.09)_0%,rgba(245,158,11,0.03)_100%)]"
-              } px-2.5 py-1.5 flex items-center justify-between gap-3`}
+              }`}
           >
             <div className="min-w-0">
               <p
@@ -751,18 +822,22 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div
-        className={`relative flex flex-col ${presentationMode ? "h-full w-full max-w-none" : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
+        className={`relative flex flex-col ${presentationMode
+            ? "h-full w-full max-w-none"
+            : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
           }`}
       >
         <section
-          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode ? "h-full w-full rounded-none overflow-hidden" : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
+          className={`relative flex-1 min-h-0 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode
+              ? "h-full w-full overflow-hidden rounded-none"
+              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
             }`}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div
-            className={`relative xl:h-full ${presentationMode
-                ? "grid gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] h-full"
+            className={`relative ${presentationMode
+                ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
                 : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:gap-3"
               }`}
           >
@@ -770,13 +845,15 @@ const Index = () => {
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2.5 mb-2">
+                  <div className="mb-2 flex items-center gap-2.5">
                     <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
                       </span>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                        Tempo real
+                      </span>
                     </div>
                     {isProcessed && (
                       <span className="text-[10px] font-medium text-slate-600">
@@ -784,8 +861,9 @@ const Index = () => {
                       </span>
                     )}
                   </div>
+
                   <h1
-                    className={`font-extrabold tracking-[-0.04em] bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
+                    className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
                         ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
                         : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
                       }`}
@@ -793,260 +871,334 @@ const Index = () => {
                     Análise Consolidada
                   </h1>
                 </div>
+
                 <UserMenu />
               </div>
 
-                <div className="h-px bg-white/6" />
+              <div className="h-px bg-white/6" />
 
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                  <input
-                    type="date"
-                    value={dwFilter.dataInicio}
-                    onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                    className="h-8 w-[120px] sm:w-auto rounded-xl border border-white/10 bg-white/5 px-2 sm:px-3 text-[11px] sm:text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <input
+                  type="date"
+                  value={dwFilter.dataInicio}
+                  onChange={(e) => setDwFilter("dataInicio", e.target.value)}
+                  className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+                />
+
+                <input
+                  type="date"
+                  value={dwFilter.dataFim}
+                  onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                  className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+                />
+
+                <div className="hidden h-5 w-px shrink-0 bg-white/10 sm:block" />
+
+                <Select
+                  value={dwFilter.empresa ?? "__all__"}
+                  onValueChange={(v) =>
+                    setDwFilter("empresa", v === "__all__" ? null : v)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[130px] sm:text-xs">
+                    <SelectValue placeholder="Empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {empresas.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={dwFilter.filial ?? "__all__"}
+                  onValueChange={(v) =>
+                    setDwFilter("filial", v === "__all__" ? null : v)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[140px] sm:text-xs">
+                    <SelectValue placeholder="Filial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {filiaisFiltradas.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <button
+                  onClick={() => void handleUpdate()}
+                  disabled={isFetchingDw}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-2.5 text-[11px] font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:px-3.5 sm:text-xs"
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
+                      }`}
                   />
-
-                  <input
-                    type="date"
-                    value={dwFilter.dataFim}
-                    onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                    className="h-8 w-[120px] sm:w-auto rounded-xl border border-white/10 bg-white/5 px-2 sm:px-3 text-[11px] sm:text-xs text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark]"
-                  />
-
-                  <div className="hidden sm:block h-5 w-px bg-white/10 shrink-0" />
-
-                  <Select
-                    value={dwFilter.empresa ?? "__all__"}
-                    onValueChange={(v) =>
-                      setDwFilter("empresa", v === "__all__" ? null : v)
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[100px] sm:w-[130px] rounded-xl border-white/10 bg-white/5 text-[11px] sm:text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                      <SelectValue placeholder="Empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__all__">Todas</SelectItem>
-                      {empresas.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>
-                          {e.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={dwFilter.filial ?? "__all__"}
-                    onValueChange={(v) =>
-                      setDwFilter("filial", v === "__all__" ? null : v)
-                    }
-                  >
-                    <SelectTrigger className="h-8 w-[100px] sm:w-[140px] rounded-xl border-white/10 bg-white/5 text-[11px] sm:text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10">
-                      <SelectValue placeholder="Filial" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__all__">Todas</SelectItem>
-                      {filiaisFiltradas.map((f) => (
-                        <SelectItem key={f.id} value={f.id}>
-                          {f.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <button
-                    onClick={() => void handleUpdate()}
-                    disabled={isFetchingDw}
-                    className="inline-flex h-8 items-center gap-1.5 sm:gap-2 rounded-xl border border-cyan-400/20 bg-cyan-500/10 px-2.5 sm:px-3.5 text-[11px] sm:text-xs font-semibold text-cyan-300 transition-all hover:border-cyan-300/30 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <RefreshCw
-                      className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`}
-                    />
-                    {isFetchingDw ? (
-                      <span className="flex items-center gap-1.5">
-                        <span className="hidden sm:inline">Buscando...</span>
-                        <span className="font-bold text-cyan-200">
-                          {progress}%
-                        </span>
+                  {isFetchingDw ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="hidden sm:inline">Buscando...</span>
+                      <span className="font-bold text-cyan-200">
+                        {progress}%
                       </span>
-                    ) : (
-                      "Atualizar"
-                    )}
-                  </button>
-                </div>
+                    </span>
+                  ) : (
+                    "Atualizar"
+                  )}
+                </button>
+              </div>
 
-                {dwError && (
-                  <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                    {dwError}
-                  </div>
-                )}
+              {dwError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  {dwError}
+                </div>
+              )}
+
               {/* Top 4 metric cards */}
               {isFetchingDw && !isProcessed ? (
-                <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
-                  {[0,1,2,3].map(i => <CardSkeleton key={i} />)}
+                <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                  {[0, 1, 2, 3].map((i) => (
+                    <CardSkeleton key={i} />
+                  ))}
                 </div>
               ) : (
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
-                {topMetrics.map((item, idx) => {
-                  const Icon = item.icon;
+                <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+                  {topMetrics.map((item, idx) => {
+                    const Icon = item.icon;
 
-                  return (
-                    <AnimatedCard key={item.label} delay={idx * 80}>
-                    <div
-                      className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
-                        }`}
-                    >
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
+                    return (
+                      <AnimatedCard key={item.label} delay={idx * 80}>
+                        <div
+                          className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            }`}
+                        >
+                          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
 
-                      <div className="relative flex h-full flex-col justify-between">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
-                            {item.label}
-                          </p>
+                          <div className="relative flex h-full flex-col justify-between">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                                {item.label}
+                              </p>
 
-                          <div
-                            className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]}`}
-                          >
-                            <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                              <div
+                                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
+                                  }`}
+                              >
+                                <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                              </div>
+                            </div>
+
+                            <div className="mt-2.5">
+                              <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
+                                <CountUp value={item.value} />
+                              </p>
+                              <p className="mt-1.5 text-xs text-slate-400">
+                                {item.helper}
+                              </p>
+                            </div>
                           </div>
                         </div>
-
-                        <div className="mt-2.5">
-                          <p className="text-[19px] font-bold leading-none tracking-[-0.03em] text-white truncate min-w-0 xl:text-[20px]">
-                            <CountUp value={item.value} />
-                          </p>
-                          <p className="mt-1.5 text-xs text-slate-400">
-                            {item.helper}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    </AnimatedCard>
-                  );
-                })}
-              </div>
+                      </AnimatedCard>
+                    );
+                  })}
+                </div>
               )}
 
               {/* Large cards with charts */}
               {isFetchingDw && !isProcessed ? (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
                   <LargeCardSkeleton />
                   <LargeCardSkeleton />
                 </div>
               ) : (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                <AnimatedCard delay={320}>{renderLargeCard({
-                  title: "Contas a receber",
-                  tone: "emerald",
-                  total: contasReceber.valorAReceber,
-                  subtitle: "Saldo pendente a receber",
-                  primaryLabel: "Previsto",
-                  primaryValue: contasReceber.valorAReceber,
-                  secondaryLabel: "Recebido",
-                  secondaryValue: contasReceber.valorRecebido,
-                  monthlyPrevisto: chartReceber.previsto,
-                  monthlyRealizado: chartReceber.realizado,
-                  chartAno: chartReceber.ano,
-                  to: "/contas-a-receber",
-                  icon: TrendingUp,
-                })}</AnimatedCard>
+                <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
+                  <AnimatedCard delay={320}>
+                    {renderLargeCard({
+                      title: "Contas a receber",
+                      tone: "emerald",
+                      total: contasReceber.valorAReceber,
+                      subtitle: "Saldo pendente a receber",
+                      primaryLabel: "Previsto",
+                      primaryValue: contasReceber.valorAReceber,
+                      secondaryLabel: "Recebido",
+                      secondaryValue: contasReceber.valorRecebido,
+                      monthlyPrevisto: chartReceber.previsto,
+                      monthlyRealizado: chartReceber.realizado,
+                      chartAno: chartReceber.ano,
+                      to: "/contas-a-receber",
+                      icon: TrendingUp,
+                    })}
+                  </AnimatedCard>
 
-                <AnimatedCard delay={400}>{renderLargeCard({
-                  title: "Contas a pagar",
-                  tone: "amber",
-                  total: contasPagar.valorAPagar,
-                  subtitle: "Saldo pendente a pagar",
-                  primaryLabel: "Previsto",
-                  primaryValue: contasPagar.valorAPagar,
-                  secondaryLabel: "Pago",
-                  secondaryValue: contasPagar.valorPago,
-                  monthlyPrevisto: chartPagar.previsto,
-                  monthlyRealizado: chartPagar.realizado,
-                  chartAno: chartPagar.ano,
-                  to: "/contas-a-pagar",
-                  icon: TrendingDown,
-                })}</AnimatedCard>
-              </div>
+                  <AnimatedCard delay={400}>
+                    {renderLargeCard({
+                      title: "Contas a pagar",
+                      tone: "amber",
+                      total: contasPagar.valorAPagar,
+                      subtitle: "Saldo pendente a pagar",
+                      primaryLabel: "Previsto",
+                      primaryValue: contasPagar.valorAPagar,
+                      secondaryLabel: "Pago",
+                      secondaryValue: contasPagar.valorPago,
+                      monthlyPrevisto: chartPagar.previsto,
+                      monthlyRealizado: chartPagar.realizado,
+                      chartAno: chartPagar.ano,
+                      to: "/contas-a-pagar",
+                      icon: TrendingDown,
+                    })}
+                  </AnimatedCard>
+                </div>
               )}
 
               {/* KPIs Extras */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {/* SALDO LÍQUIDO */}
+                <div
+                  className={`group relative overflow-hidden rounded-[24px] border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0
+                      ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
+                      : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
+                    }`}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
 
-                  {/* Saldo Líquido */}
-                  <div className={`relative overflow-hidden rounded-[14px] border px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 ${
-                    kpiExtra.saldoLiquido >= 0
-                      ? "border-emerald-500/20 bg-[linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.03))]"
-                      : "border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))]"
-                  }`}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${kpiExtra.saldoLiquido >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        Saldo Líquido
+                  <div className="relative flex h-full flex-col">
+                    <div className="mb-4 flex items-start justify-between">
+                      <span
+                        className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
+                            ? "text-emerald-400"
+                            : "text-red-400"
+                          }`}
+                      >
+                        SALDO LÍQUIDO
                       </span>
-                      <div className={`flex h-5 w-5 items-center justify-center rounded-md ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
-                        {kpiExtra.saldoLiquido >= 0
-                          ? <TrendingUp className="h-2.5 w-2.5 text-emerald-400" />
-                          : <TrendingDown className="h-2.5 w-2.5 text-red-400" />}
-                      </div>
-                    </div>
-                    <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate">
-                      <CountUp value={kpiExtra.saldoLiquido} />
-                    </p>
-                    <p className="mt-1 text-[10px] text-slate-500">Recebido − Pago</p>
-                    <span className={`mt-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
-                      kpiExtra.saldoLiquido >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-red-500/15 text-red-300"
-                    }`}>
-                      {kpiExtra.saldoLiquido >= 0 ? "Fluxo positivo" : "Fluxo negativo"}
-                    </span>
-                  </div>
 
-                  {/* Inadimplência */}
-                  <div className="relative overflow-hidden rounded-[14px] border border-red-500/20 bg-[linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400">
-                        Inadimplência
-                      </span>
-                      <div className="flex h-5 w-5 items-center justify-center rounded-md bg-red-500/15">
-                        <AlertCircle className="h-2.5 w-2.5 text-red-400" />
-                      </div>
-                    </div>
-                    <p className="text-[14px] font-bold leading-none tracking-tight text-white truncate">
-                      <CountUp value={kpiExtra.inadimplencia} />
-                    </p>
-                    <p className="mt-1 text-[10px] text-slate-500">CR vencido sem recebimento</p>
-                    <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-red-300">
-                      {kpiExtra.inadimplenciaDocs} doc{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""} vencido{kpiExtra.inadimplenciaDocs !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  {/* % Realização CP */}
-                  <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(139,92,246,0.03))] px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400">
-                        Realização CP
-                      </span>
-                      <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/15">
-                        <TrendingDown className="h-2.5 w-2.5 text-violet-400" />
-                      </div>
-                    </div>
-                    <p className="text-[14px] font-bold leading-none tracking-tight text-white">
-                      {kpiExtra.realizacaoCP.toFixed(1)}%
-                    </p>
-                    <p className="mt-1 text-[10px] text-slate-500">Pago ÷ Previsto CP</p>
-                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
                       <div
-                        className="h-full rounded-full bg-violet-400 transition-all duration-700"
-                        style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0
+                            ? "bg-emerald-500/15"
+                            : "bg-red-500/15"
+                          }`}
+                      >
+                        {kpiExtra.saldoLiquido >= 0 ? (
+                          <TrendingUp className="h-5 w-5 text-emerald-400" />
+                        ) : (
+                          <TrendingDown className="h-5 w-5 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-[clamp(2.2rem,3vw,3rem)] font-extrabold tracking-[-0.05em] text-white">
+                      <CountUp value={kpiExtra.saldoLiquido} />
+                    </div>
+
+                    <p className="mt-2 text-base text-slate-400">
+                      Recebido − Pago no período
+                    </p>
+
+                    <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className={`h-full ${kpiExtra.saldoLiquido >= 0
+                            ? "bg-emerald-400"
+                            : "bg-red-400"
+                          }`}
+                        style={{ width: "70%" }}
                       />
                     </div>
-                  </div>
 
+                    <span
+                      className={`mt-5 inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-semibold ${kpiExtra.saldoLiquido >= 0
+                          ? "bg-emerald-500/15 text-emerald-300"
+                          : "bg-red-500/15 text-red-300"
+                        }`}
+                    >
+                      {kpiExtra.saldoLiquido >= 0
+                        ? "Fluxo positivo"
+                        : "Fluxo negativo"}
+                    </span>
+                  </div>
                 </div>
+
+                {/* INADIMPLÊNCIA */}
+                <div className="group relative overflow-hidden rounded-[24px] border border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+
+                  <div className="relative flex h-full flex-col">
+                    <div className="mb-4 flex items-start justify-between">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
+                        INADIMPLÊNCIA
+                      </span>
+
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/15">
+                        <AlertCircle className="h-5 w-5 text-red-400" />
+                      </div>
+                    </div>
+
+                    <div className="text-[clamp(2.2rem,3vw,3rem)] font-extrabold tracking-[-0.05em] text-white">
+                      <CountUp value={kpiExtra.inadimplencia} />
+                    </div>
+
+                    <p className="mt-2 text-base text-slate-400">
+                      CR vencido sem recebimento
+                    </p>
+
+                    <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full bg-red-400" style={{ width: "60%" }} />
+                    </div>
+
+                    <span className="mt-5 inline-flex w-fit rounded-full bg-red-500/15 px-3 py-1.5 text-sm font-semibold text-red-300">
+                      {kpiExtra.inadimplenciaDocs} docs vencidos
+                    </span>
+                  </div>
+                </div>
+
+                {/* REALIZAÇÃO */}
+                <div className="group relative overflow-hidden rounded-[24px] border border-violet-500/25 bg-gradient-to-br from-violet-500/10 to-violet-500/5 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+
+                  <div className="relative flex h-full flex-col">
+                    <div className="mb-4 flex items-start justify-between">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
+                        % REALIZAÇÃO CP
+                      </span>
+
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/15">
+                        <TrendingDown className="h-5 w-5 text-violet-400" />
+                      </div>
+                    </div>
+
+                    <div className="text-[clamp(2.2rem,3vw,3rem)] font-extrabold tracking-[-0.05em] text-white">
+                      {kpiExtra.realizacaoCP.toFixed(0)}%
+                    </div>
+
+                    <p className="mt-2 text-base text-slate-400">
+                      Pago ÷ Previsto no período
+                    </p>
+
+                    <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full bg-violet-400"
+                        style={{
+                          width: `${Math.min(kpiExtra.realizacaoCP, 100)}%`,
+                        }}
+                      />
+                    </div>
+
+                    <span className="mt-5 inline-flex w-fit rounded-full bg-violet-500/15 px-3 py-1.5 text-sm font-semibold text-violet-200">
+                      Meta: 100%
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                  ? "h-full overflow-y-auto p-3.5"
-                  : "p-3.5 lg:p-4"
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode ? "h-full overflow-y-auto p-3.5" : "p-3.5 lg:p-4"
                 }`}
             >
               <div className="flex flex-col">
@@ -1078,65 +1230,80 @@ const Index = () => {
                 <div className="mt-3 grid gap-1.5 sm:grid-cols-2 xl:grid-cols-1">
                   {isFetchingDw && !isProcessed ? (
                     <>
-                      {[0,1,2,3,4,5,6].map(i => <IndicatorSkeleton key={i} />)}
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                        <IndicatorSkeleton key={i} />
+                      ))}
                     </>
                   ) : (
-                  indicadores.map((ind, idx) => {
-                    const abaixoDaMeta =
-                      ind.percentualReal < ind.percentualEsperado;
-                    const progress = Math.min(
-                      (ind.percentualReal /
-                        Math.max(ind.percentualEsperado, 1)) *
-                      100,
-                      100
-                    );
+                    indicadores.map((ind, idx) => {
+                      const abaixoDaMeta =
+                        ind.percentualReal < ind.percentualEsperado;
 
-                    return (
-                      <AnimatedCard key={ind.id} delay={480 + idx * 60}>
-                      <Link
-                        to={`/indicadores/${ind.id}`}
-                        className={`group relative overflow-hidden rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2.5" : "p-3"
-                          } block`}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
-                            {ind.nome}
-                          </p>
+                      const progress = Math.min(
+                        (ind.percentualReal /
+                          Math.max(ind.percentualEsperado, 1)) *
+                        100,
+                        100
+                      );
 
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-xs font-semibold ${abaixoDaMeta
-                                  ? "text-emerald-300"
-                                  : "text-red-400"
-                                }`}
-                            >
-                              {ind.percentualReal}%
-                            </span>
+                      return (
+                        <AnimatedCard key={ind.id} delay={480 + idx * 60}>
+                          <Link
+                            to={`/indicadores/${ind.id}`}
+                            className={`group relative block overflow-hidden rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(24,34,84,0.95)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.32)] ${presentationMode ? "p-2.5" : "p-3"
+                              }`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                                {ind.nome}
+                              </p>
 
-                            <ArrowRight className="h-4 w-4 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
-                          </div>
-                        </div>
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-xs font-semibold ${abaixoDaMeta
+                                      ? "text-emerald-300"
+                                      : "text-red-400"
+                                    }`}
+                                >
+                                  {ind.percentualReal}%
+                                </span>
 
-                        {/* Progress bar with meta marker */}
-                        <div className="mt-2 relative">
-                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-500"
-                                }`}
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          {/* Meta marker line */}
-                          <div
-                            className="absolute top-0 h-1.5 w-[2px] rounded-full bg-white/40"
-                            style={{ left: `${Math.min((ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100, 100)}%` }}
-                            title={`Meta: ${ind.percentualEsperado}%`}
-                          />
-                        </div>
-                      </Link>
-                      </AnimatedCard>
-                    );
-                  })
+                                <ArrowRight className="h-4 w-4 text-slate-500 transition-all duration-300 group-hover:translate-x-1 group-hover:text-white" />
+                              </div>
+                            </div>
+
+                            <div className="relative mt-2">
+                              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
+                                      ? "bg-emerald-400"
+                                      : "bg-red-500"
+                                    }`}
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+
+                              <div
+                                className="absolute top-0 h-1.5 w-[2px] rounded-full bg-white/40"
+                                style={{
+                                  left: `${Math.min(
+                                    (ind.percentualEsperado /
+                                      Math.max(
+                                        ind.percentualEsperado,
+                                        ind.percentualReal,
+                                        1
+                                      )) *
+                                    100,
+                                    100
+                                  )}%`,
+                                }}
+                                title={`Meta: ${ind.percentualEsperado}%`}
+                              />
+                            </div>
+                          </Link>
+                        </AnimatedCard>
+                      );
+                    })
                   )}
                 </div>
               </div>
