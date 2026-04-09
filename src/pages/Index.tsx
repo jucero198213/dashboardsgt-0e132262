@@ -866,7 +866,7 @@ const Index = () => {
                       : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
                     }`}
                 >
-                  Análise Consolidada
+                  ANÁLISE CONSOLIDADA
                 </h1>
               </div>
 
@@ -1234,7 +1234,7 @@ const Index = () => {
                       Distribuição de Custos
                     </p>
                     <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-[22px]"}`}>
-                      Indicadores
+                      INDICADORES
                     </p>
                   </div>
                   {!presentationMode && (
