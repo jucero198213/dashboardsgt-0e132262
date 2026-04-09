@@ -951,7 +951,7 @@ const Index = () => {
               )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-3 ${presentationMode ? "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]" : "xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)]"}`}>
+            <div className={`grid gap-3 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="flex flex-col gap-2.5">
 
@@ -1057,9 +1057,12 @@ const Index = () => {
                 </div>
               )}
 
-              {/* KPIs Extras — largura total, abaixo dos dois gráficos */}
+              </div>
+              {/* end left column — row 1 col 1 */}
+
+            {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
               {isProcessed && (
-                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${
@@ -1212,14 +1215,12 @@ const Index = () => {
                   </div>
                 </div>
               )}
-              </div>
-              {/* end left column */}
 
             <aside
               className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
                 presentationMode
                   ? "h-full overflow-y-auto p-3.5"
-                  : "self-start h-fit p-3 lg:p-3.5"
+                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 p-3 lg:p-3.5"
               }`}
             >
               <div className="flex flex-col">
