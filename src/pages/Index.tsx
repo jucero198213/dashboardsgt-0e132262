@@ -1114,6 +1114,29 @@ const Index = () => {
                           </div>
                         </div>
 
+                        {/* % REALIZAÇÃO CR */}
+                        <div className="group relative overflow-hidden rounded-[22px] border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                          <div className="relative flex h-full flex-col">
+                            <div className="mb-4 flex items-start justify-between">
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">% REALIZAÇÃO CR</span>
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/15">
+                                <TrendingUp className="h-4 w-4 text-cyan-400" />
+                              </div>
+                            </div>
+                            <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                              {kpiExtra.realizacaoCR.toFixed(0)}%
+                            </div>
+                            <p className="mt-2 text-sm text-slate-400">Recebido ÷ Previsto no período</p>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                              <div className="h-full rounded-full bg-cyan-400 transition-all duration-700" style={{ width: `${Math.min(kpiExtra.realizacaoCR, 100)}%` }} />
+                            </div>
+                            <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
+                              Meta: 100%
+                            </span>
+                          </div>
+                        </div>
+
                       </div>
                     )}
             </div>

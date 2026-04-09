@@ -54,6 +54,7 @@ const defaultKpiExtra: KpiExtra = {
   inadimplencia:     0,
   inadimplenciaDocs: 0,
   realizacaoCP:      0,
+  realizacaoCR:      0,
 };
 
 
@@ -87,6 +88,7 @@ export interface KpiExtra {
   inadimplencia:     number;  // CR vencido sem DATA_PAGAMENTO
   inadimplenciaDocs: number;  // qtd documentos vencidos
   realizacaoCP:      number;  // PAGO / PREVISTO_CP * 100
+  realizacaoCR:      number;  // RECEBIDO / PREVISTO_CR * 100
 }
 
 // ─── State & Context types ───────────────────────────────────────────────────
@@ -486,9 +488,10 @@ export function FinancialDataProvider({
       const inadimplenciaDocs = inadimDocs.length;
 
       // 3. % Realização CP = PAGO / PREVISTO_CP * 100
-      const realizacaoCP = totalPagar > 0 ? Math.round((valorPago / totalPagar) * 1000) / 10 : 0;
+      const realizacaoCP = totalPagar   > 0 ? Math.round((valorPago     / totalPagar)   * 1000) / 10 : 0;
+      const realizacaoCR = totalReceber > 0 ? Math.round((valorRecebido / totalReceber) * 1000) / 10 : 0;
 
-      const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, realizacaoCP };
+      const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, realizacaoCP, realizacaoCR };
       saveCache({
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber,
