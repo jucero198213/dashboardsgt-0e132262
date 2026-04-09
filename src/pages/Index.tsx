@@ -1217,27 +1217,28 @@ const Index = () => {
               )}
 
             <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.96)_0%,rgba(8,14,34,0.98)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_64px_rgba(0,0,0,0.4)] backdrop-blur-xl ${
                 presentationMode
                   ? "h-full overflow-y-auto p-3.5"
-                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 p-3 lg:p-3.5"
+                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 p-4 lg:p-5"
               }`}
             >
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between gap-3 mb-2.5">
+              <div className="flex flex-col h-full gap-4">
+
+                {/* Header */}
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className={`font-semibold tracking-tight text-white ${presentationMode ? "text-lg" : "text-xl"}`}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 mb-1">
+                      Distribuição de Custos
+                    </p>
+                    <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-2xl"}`}>
                       Indicadores
                     </p>
-                    <p className="mt-0.5 text-[10px] leading-4 text-slate-500">
-                      Resumo lateral no padrão da referência.
-                    </p>
                   </div>
-
                   {!presentationMode && (
                     <button
                       onClick={togglePresentationMode}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
                       title="Modo apresentação"
                       aria-label="Ativar modo apresentação"
                     >
@@ -1246,7 +1247,8 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col flex-1 justify-between gap-1">
+                {/* Lista de indicadores */}
+                <div className="flex flex-col flex-1 justify-between gap-1.5">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -1255,12 +1257,13 @@ const Index = () => {
                     </>
                   ) : (
                     indicadores.map((ind, idx) => {
-                      const abaixoDaMeta =
-                        ind.percentualReal < ind.percentualEsperado;
-
+                      const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
                       const progress = Math.min(
-                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) *
-                          100,
+                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
+                        100
+                      );
+                      const metaMark = Math.min(
+                        (ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100,
                         100
                       );
 
@@ -1268,56 +1271,31 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className={`group relative block overflow-hidden rounded-[10px] border border-white/8 bg-white/[0.03] transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06] ${
-                              presentationMode ? "px-2.5 py-1.5" : "px-2.5 py-[7px]"
-                            }`}
+                            className="group relative flex flex-col gap-2 rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
                           >
+                            {/* Nome + valor */}
                             <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                              <p className="min-w-0 flex-1 truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 transition-colors duration-300 group-hover:text-slate-200">
                                 {ind.nome}
                               </p>
-
-                              <div className="flex shrink-0 items-center gap-1">
-                                <span
-                                  className={`text-[11px] font-semibold ${
-                                    abaixoDaMeta
-                                      ? "text-emerald-300"
-                                      : "text-red-400"
-                                  }`}
-                                >
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                <span className={`text-[13px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
                                   {ind.percentualReal}%
                                 </span>
-
-                                <ArrowRight className="h-3 w-3 text-slate-600 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-white" />
+                                <ArrowRight className="h-3 w-3 text-slate-600 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-300" />
                               </div>
                             </div>
 
-                            <div className="relative mt-1.5">
-                              <div className="h-[2.5px] overflow-hidden rounded-full bg-white/8">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-700 ease-out ${
-                                    abaixoDaMeta
-                                      ? "bg-emerald-400"
-                                      : "bg-red-500"
-                                  }`}
-                                  style={{ width: `${progress}%` }}
-                                />
-                              </div>
-
+                            {/* Barra */}
+                            <div className="relative h-[3px] overflow-hidden rounded-full bg-white/[0.07]">
                               <div
-                                className="absolute top-0 h-[2.5px] w-[1.5px] rounded-full bg-white/40"
-                                style={{
-                                  left: `${Math.min(
-                                    (ind.percentualEsperado /
-                                      Math.max(
-                                        ind.percentualEsperado,
-                                        ind.percentualReal,
-                                        1
-                                      )) *
-                                      100,
-                                    100
-                                  )}%`,
-                                }}
+                                className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : "bg-gradient-to-r from-red-600 to-red-400"}`}
+                                style={{ width: `${progress}%` }}
+                              />
+                              {/* marcador de meta */}
+                              <div
+                                className="absolute top-0 h-full w-[2px] rounded-full bg-white/50"
+                                style={{ left: `${metaMark}%` }}
                                 title={`Meta: ${ind.percentualEsperado}%`}
                               />
                             </div>
