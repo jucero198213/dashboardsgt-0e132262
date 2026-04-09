@@ -831,8 +831,8 @@ const Index = () => {
           <div
             className={`relative ${
               presentationMode
-                ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr] xl:items-start"
-                : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:auto-rows-min xl:gap-3 xl:items-start"
+                ? "grid h-full gap-3 p-3 sm:p-3.5 lg:p-4 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[1fr]"
+                : "flex flex-col gap-3 p-3 sm:gap-4 sm:p-3.5 lg:p-4 xl:grid xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:gap-3"
             }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
@@ -1220,7 +1220,7 @@ const Index = () => {
               className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${
                 presentationMode
                   ? "h-full overflow-y-auto p-3.5"
-                  : "self-start p-3 lg:p-3.5 xl:mt-[180px]"
+                  : "p-3 lg:p-3.5"
               }`}
             >
               <div className="flex flex-col">
@@ -1250,7 +1250,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="mt-3 grid grid-cols-1 gap-1.5">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
