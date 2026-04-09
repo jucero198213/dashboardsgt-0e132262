@@ -2,8 +2,11 @@
 export interface ContaReceber {
   id: string;
   documento: string;
+  parcela: string | null;
   cliente: string;
+  dataEmissao: string;
   vencimento: string;
+  dataPagamento: string | null;
   valor: number;
   status: "Em Aberto" | "Vencido" | "Parcial";
 }
@@ -11,8 +14,11 @@ export interface ContaReceber {
 export interface ContaPagar {
   id: string;
   documento: string;
+  parcela: string | null;
   fornecedor: string;
+  dataEmissao: string;
   vencimento: string;
+  dataPagamento: string | null;
   valor: number;
   status: "Em Aberto" | "Vencido" | "Parcial";
 }

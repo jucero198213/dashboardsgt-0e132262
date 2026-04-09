@@ -340,9 +340,14 @@ export function FinancialDataProvider({
         const valor        = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
         const valorPagoRow = n(r.VLR_PAGO);
         return {
-          id: String(i + 1), documento: r.DOCUMENTO ?? `CP-${i + 1}`,
-          fornecedor: r.NOME_PARCEIRO ?? "N/A",
-          vencimento: isoDate(r.DATA_VENCIMENTO), valor,
+          id:            String(i + 1),
+          documento:     r.DOCUMENTO ?? `CP-${i + 1}`,
+          parcela:       r.PARCELA ?? null,
+          fornecedor:    r.NOME_PARCEIRO ?? "N/A",
+          dataEmissao:   isoDate(r.DATA_EMISSAO),
+          vencimento:    isoDate(r.DATA_VENCIMENTO),
+          dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,
+          valor,
           status: calculateStatus(r.DATA_VENCIMENTO, valor, valorPagoRow, r.SITUACAO ?? ""),
         };
       });
@@ -351,9 +356,14 @@ export function FinancialDataProvider({
         const valor            = n(r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC);
         const valorRecebidoRow = n(r.VLR_PAGO);
         return {
-          id: String(i + 1), documento: r.DOCUMENTO ?? `CR-${i + 1}`,
-          cliente: r.NOME_PARCEIRO ?? "N/A",
-          vencimento: isoDate(r.DATA_VENCIMENTO), valor,
+          id:            String(i + 1),
+          documento:     r.DOCUMENTO ?? `CR-${i + 1}`,
+          parcela:       r.PARCELA ?? null,
+          cliente:       r.NOME_PARCEIRO ?? "N/A",
+          dataEmissao:   isoDate(r.DATA_EMISSAO),
+          vencimento:    isoDate(r.DATA_VENCIMENTO),
+          dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,
+          valor,
           status: calculateStatus(r.DATA_VENCIMENTO, valor, valorRecebidoRow, r.SITUACAO ?? ""),
         };
       });
