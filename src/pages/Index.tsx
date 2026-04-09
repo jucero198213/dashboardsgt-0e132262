@@ -677,17 +677,18 @@ const Index = () => {
               }`}
           >
             <div className="flex min-h-0 flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-3">
-                  <h1
-                    className={`font-semibold tracking-tight text-white ${presentationMode
-                        ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
-                        : "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[36px] xl:leading-[1]"
-                      }`}
-                  >
-                    Análise Consolidada
-                  </h1>
-                  <UserMenu />
-                </div>
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3">
+                <h1
+                  className={`font-semibold tracking-tight text-white ${presentationMode
+                      ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
+                      : "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[36px] xl:leading-[1]"
+                    }`}
+                >
+                  Análise Consolidada
+                </h1>
+                <UserMenu />
+              </div>
 
                 {presentationMode && (
                   <p className="mt-1.5 max-w-2xl text-[13px] text-slate-400">
@@ -781,6 +782,7 @@ const Index = () => {
                     {dwError}
                   </div>
                 )}
+              {/* Top 4 metric cards */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
                 {topMetrics.map((item) => {
                   const Icon = item.icon;
@@ -820,7 +822,8 @@ const Index = () => {
                 })}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* Large cards with charts */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
                 {renderLargeCard({
                   title: "Contas a receber",
                   tone: "emerald",
@@ -854,8 +857,8 @@ const Index = () => {
                 })}
               </div>
 
-              {/* ── KPIs Extras ──────────────────────────────────────────── */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {/* KPIs Extras */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 
                   {/* Saldo Líquido */}
                   <div className={`relative overflow-hidden rounded-[14px] border px-3 py-2.5 transition-all duration-300 hover:-translate-y-0.5 ${
@@ -929,12 +932,12 @@ const Index = () => {
             </div>
 
             <aside
-              className={`rounded-[16px] sm:rounded-[20px] md:rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
-                  ? "h-full overflow-y-auto p-3 sm:p-3.5"
-                  : "xl:h-full p-3 sm:p-3.5 lg:p-4 overflow-y-auto max-h-[350px] sm:max-h-[400px] xl:max-h-none"
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
+                  ? "h-full overflow-y-auto p-3.5"
+                  : "p-3.5 lg:p-4"
                 }`}
             >
-              <div className="flex h-full min-h-0 flex-col">
+              <div className="flex flex-col">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p
@@ -960,14 +963,7 @@ const Index = () => {
                   )}
                 </div>
 
-                <div
-                  className="mt-3 grid min-h-0 gap-1.5 flex-1 sm:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[repeat(auto-fill,minmax(0,1fr))]"
-                  style={
-                    presentationMode || window.innerWidth >= 1280
-                      ? { gridTemplateRows: `repeat(${indicadores.length || 1}, minmax(0, 1fr))`, gridTemplateColumns: undefined }
-                      : undefined
-                  }
-                >
+                <div className="mt-3 grid gap-1.5 sm:grid-cols-2 xl:grid-cols-1">
                   {indicadores.map((ind) => {
                     const abaixoDaMeta =
                       ind.percentualReal < ind.percentualEsperado;
