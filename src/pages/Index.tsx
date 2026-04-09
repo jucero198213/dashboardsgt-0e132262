@@ -1037,12 +1037,15 @@ const Index = () => {
                         icon: TrendingDown,
                       })}
                     </AnimatedCard>
+                  </div>
+                </div>
+              )}
 
-                    {/* KPIs Extras — alinhados com CP */}
-                    {isProcessed && (
-                      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+              {/* KPIs Extras — largura total, abaixo dos dois gráficos */}
+              {isProcessed && (
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-3">
 
-                        {/* SALDO LÍQUIDO */}
+                  {/* SALDO LÍQUIDO */}
                         <div className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0 ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5" : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"}`}>
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
                           <div className="relative flex h-full flex-col">
@@ -1113,15 +1116,12 @@ const Index = () => {
 
                       </div>
                     )}
-                  </div>
-                </div>
-              )}
             </div>
 
             <aside
               className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.94)_0%,rgba(10,16,34,0.88)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl ${presentationMode
                 ? "h-full overflow-y-auto p-3.5"
-                : ":self-start p-3 lg:p-3.5 xl:mt-[143px]"
+                : "self-start p-3 lg:p-3.5"
                 }`}
             >
               <div className="flex flex-col">
