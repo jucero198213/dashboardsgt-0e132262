@@ -1217,94 +1217,94 @@ const Index = () => {
               )}
 
             <aside
-              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(13,22,43,0.96)_0%,rgba(8,14,34,0.98)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_64px_rgba(0,0,0,0.4)] backdrop-blur-xl ${
+              className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,40,0.97)_0%,rgba(6,11,28,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ${
                 presentationMode
                   ? "h-full overflow-y-auto p-3.5"
-                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 p-4 lg:p-5"
+                  : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
               }`}
             >
-              <div className="flex flex-col h-full gap-4">
-
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 mb-1">
-                      Distribuição de Custos
-                    </p>
-                    <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-2xl"}`}>
-                      Indicadores
-                    </p>
-                  </div>
-                  {!presentationMode && (
-                    <button
-                      onClick={togglePresentationMode}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-                      title="Modo apresentação"
-                      aria-label="Ativar modo apresentação"
-                    >
-                      <Presentation className="h-3.5 w-3.5" />
-                    </button>
-                  )}
+              {/* Header */}
+              <div className="flex items-start justify-between mb-5 shrink-0">
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
+                    Distribuição de Custos
+                  </p>
+                  <p className={`font-bold tracking-tight text-white ${presentationMode ? "text-lg" : "text-[22px]"}`}>
+                    Indicadores
+                  </p>
                 </div>
+                {!presentationMode && (
+                  <button
+                    onClick={togglePresentationMode}
+                    className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-500 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    title="Modo apresentação"
+                    aria-label="Ativar modo apresentação"
+                  >
+                    <Presentation className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
 
-                {/* Lista de indicadores */}
-                <div className="flex flex-col flex-1 justify-between gap-1.5">
-                  {isFetchingDw && !isProcessed ? (
-                    <>
-                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                        <IndicatorSkeleton key={i} />
-                      ))}
-                    </>
-                  ) : (
-                    indicadores.map((ind, idx) => {
-                      const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
-                      const progress = Math.min(
-                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
-                        100
-                      );
-                      const metaMark = Math.min(
-                        (ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100,
-                        100
-                      );
+              {/* Lista — flex-1 para ocupar o espaço restante */}
+              <div className="flex flex-col flex-1 gap-2 min-h-0">
+                {isFetchingDw && !isProcessed ? (
+                  <>
+                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                      <IndicatorSkeleton key={i} />
+                    ))}
+                  </>
+                ) : (
+                  indicadores.map((ind, idx) => {
+                    const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
+                    const progress = Math.min(
+                      (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
+                      100
+                    );
+                    const metaMark = Math.min(
+                      (ind.percentualEsperado / Math.max(ind.percentualEsperado, ind.percentualReal, 1)) * 100,
+                      100
+                    );
 
-                      return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 45}>
-                          <Link
-                            to={`/indicadores/${ind.id}`}
-                            className="group relative flex flex-col gap-2 rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.06] hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
-                          >
-                            {/* Nome + valor */}
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 transition-colors duration-300 group-hover:text-slate-200">
-                                {ind.nome}
-                              </p>
-                              <div className="flex shrink-0 items-center gap-1.5">
-                                <span className={`text-[13px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
-                                  {ind.percentualReal}%
-                                </span>
-                                <ArrowRight className="h-3 w-3 text-slate-600 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-300" />
-                              </div>
+                    return (
+                      <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
+                        <Link
+                          to={`/indicadores/${ind.id}`}
+                          className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
+                        >
+                          {/* Linha nome + valor */}
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-colors duration-300 group-hover:text-slate-300">
+                              {ind.nome}
+                            </p>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
+                                {ind.percentualReal}%
+                              </span>
+                              <ArrowRight className="h-2.5 w-2.5 text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-400" />
                             </div>
+                          </div>
 
-                            {/* Barra */}
-                            <div className="relative h-[3px] overflow-hidden rounded-full bg-white/[0.07]">
-                              <div
-                                className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : "bg-gradient-to-r from-red-600 to-red-400"}`}
-                                style={{ width: `${progress}%` }}
-                              />
-                              {/* marcador de meta */}
-                              <div
-                                className="absolute top-0 h-full w-[2px] rounded-full bg-white/50"
-                                style={{ left: `${metaMark}%` }}
-                                title={`Meta: ${ind.percentualEsperado}%`}
-                              />
-                            </div>
-                          </Link>
-                        </AnimatedCard>
-                      );
-                    })
-                  )}
-                </div>
+                          {/* Barra de progresso */}
+                          <div className="relative mt-2 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ease-out ${
+                                abaixoDaMeta
+                                  ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
+                                  : "bg-gradient-to-r from-red-700 to-red-500"
+                              }`}
+                              style={{ width: `${progress}%` }}
+                            />
+                            <div
+                              className="absolute top-0 h-full w-[2px] rounded-full bg-white/30"
+                              style={{ left: `${metaMark}%` }}
+                              title={`Meta: ${ind.percentualEsperado}%`}
+                            />
+                          </div>
+                        </Link>
+                      </AnimatedCard>
+                    );
+                  })
+                )}
               </div>
             </aside>
             </div>
