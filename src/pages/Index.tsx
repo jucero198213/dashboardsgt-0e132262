@@ -678,25 +678,36 @@ const Index = () => {
           >
             <div className="flex min-h-0 flex-col gap-2.5">
               {/* Header */}
-              <div className="flex items-center justify-between gap-3">
-                <h1
-                  className={`font-semibold tracking-tight text-white ${presentationMode
-                      ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
-                      : "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[36px] xl:leading-[1]"
-                    }`}
-                >
-                  Análise Consolidada
-                </h1>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="flex h-8 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-3">
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Tempo real</span>
+                    </div>
+                    {isProcessed && (
+                      <span className="text-[11px] text-slate-500">
+                        {dwFilter.dataInicio} → {dwFilter.dataFim}
+                      </span>
+                    )}
+                  </div>
+                  <h1
+                    className={`font-bold tracking-[-0.03em] bg-gradient-to-r from-white via-white to-slate-400 bg-clip-text text-transparent ${presentationMode
+                        ? "text-[44px] leading-[0.95] 2xl:text-[52px]"
+                        : "text-2xl sm:text-3xl md:text-4xl xl:text-[40px] xl:leading-[1]"
+                      }`}
+                  >
+                    Análise Consolidada
+                  </h1>
+                  <p className="mt-1.5 text-[13px] text-slate-500 max-w-lg">
+                    Panorama executivo com visão integrada das finanças.
+                  </p>
+                </div>
                 <UserMenu />
               </div>
-
-                {presentationMode && (
-                  <p className="mt-1.5 max-w-2xl text-[13px] text-slate-400">
-                    Panorama executivo do período, com leitura rápida das
-                    entradas, saídas e distribuição dos principais
-                    indicadores.
-                  </p>
-                )}
 
                 <div className="h-px bg-white/6" />
 
