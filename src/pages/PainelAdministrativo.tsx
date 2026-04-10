@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ArrowLeft, Users, Settings, Database, Activity, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import GestaoUsuarios from "./Admin/GestaoUsuarios";
-import Configuracoes from "./Admin/Configuracoes";
-import BancoDados from "./Admin/BancoDados";
-import Monitoramento from "./Admin/Monitoramento";
-import Seguranca from "./Admin/Seguranca";
+import GestaoUsuarios from "./admin/GestaoUsuarios";
+import Configuracoes from "./admin/Configuracoes";
+import BancoDados from "./admin/BancoDados";
+import Monitoramento from "./admin/Monitoramento";
+import Seguranca from "./admin/Seguranca";
 
 type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca";
 

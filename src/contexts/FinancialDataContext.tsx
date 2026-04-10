@@ -179,6 +179,7 @@ interface CachedState {
   indicadores: IndicadorComparativo[];
   chartPagar: DadosMensais;
   chartReceber: DadosMensais;
+  kpiExtra?: KpiExtra;
   dwFilter: DwFilter;
   timestamp: number;
 }
