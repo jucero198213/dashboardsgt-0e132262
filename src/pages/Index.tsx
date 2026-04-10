@@ -10,7 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { formatCurrency } from "@/data/mockData";
+import { formatCurrency, formatDate } from "@/data/mockData";
 import {
   Select,
   SelectContent,
