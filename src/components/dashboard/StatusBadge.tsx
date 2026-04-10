@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 
 const statusConfig = {
-  "Em Aberto": "border-accent/30 bg-accent/10 text-accent hover:bg-accent/10",
-  "Vencido": "border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/10",
-  "Parcial": "border-warning/30 bg-warning/10 text-warning hover:bg-warning/10",
+  "Em Aberto": "border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/10",
+  "Vencido": "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/10",
+  "Parcial": "border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/10",
 };
 
 export function StatusBadge({ status }: { status: "Em Aberto" | "Vencido" | "Parcial" }) {
