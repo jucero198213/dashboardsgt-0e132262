@@ -629,7 +629,7 @@ const Index = () => {
       {
         label: "A RECEBER",
         value: contasReceber.saldoAReceber,
-        helper: "Saldo pendente",
+        helper: "Valor à receber",
         icon: TrendingUp,
         tone: "emerald",
       },
@@ -643,7 +643,7 @@ const Index = () => {
       {
         label: "A PAGAR",
         value: contasPagar.saldoAPagar,
-        helper: "Saldo pendente",
+        helper: "Valor à pagar",
         icon: TrendingDown,
         tone: "amber",
       },
