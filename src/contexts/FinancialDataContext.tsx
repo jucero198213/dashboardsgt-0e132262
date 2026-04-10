@@ -170,7 +170,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v2";
+const CACHE_KEY = "dw_financial_cache_v3";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -194,6 +194,7 @@ function loadCache(): CachedState | null {
   try {
     // Limpa versão antiga se existir
     sessionStorage.removeItem("dw_financial_cache_v1");
+    sessionStorage.removeItem("dw_financial_cache_v2");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
