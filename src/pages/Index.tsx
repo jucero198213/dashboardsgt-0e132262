@@ -855,7 +855,7 @@ const Index = () => {
                   </div>
                   {isProcessed && (
                     <span className="text-[10px] font-medium text-slate-600">
-                      {dwFilter.dataInicio} → {dwFilter.dataFim}
+                      {formatDate(dwFilter.dataInicio)} → {formatDate(dwFilter.dataFim)}
                     </span>
                   )}
                 </div>
@@ -1111,13 +1111,14 @@ const Index = () => {
                         Recebido − Pago no período
                       </p>
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className={`h-full ${kpiExtra.saldoLiquido >= 0
-                              ? "bg-emerald-400"
-                              : "bg-red-400"
-                            }`}
-                          style={{ width: "70%" }}
-                        />
+                        {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
+                            style={{ width: `${Math.min(Math.abs(kpiExtra.saldoLiquido) / Math.max(contasReceber.valorRecebido, contasPagar.valorPago, 1) * 100, 100)}%` }}
+                          />
+                        ) : (
+                          <div className="h-full w-full rounded-full bg-white/5" />
+                        )}
                       </div>
                       <span
                         className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
@@ -1151,7 +1152,14 @@ const Index = () => {
                         CR vencido sem recebimento
                       </p>
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full bg-red-400" style={{ width: "60%" }} />
+                        {contasReceber.valorAReceber > 0 ? (
+                          <div
+                            className="h-full rounded-full bg-red-400 transition-all duration-700"
+                            style={{ width: `${Math.min((kpiExtra.inadimplencia / Math.max(contasReceber.valorAReceber, 1)) * 100, 100)}%` }}
+                          />
+                        ) : (
+                          <div className="h-full w-full rounded-full bg-white/5" />
+                        )}
                       </div>
                       <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
                         {kpiExtra.inadimplenciaDocs} docs vencidos
@@ -1231,7 +1239,7 @@ const Index = () => {
                 <div className="flex items-start justify-between mb-5 shrink-0">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
-                      Distribuição de Custos
+                      Distribuição de custos do período
                     </p>
                     <p
                       className={`font-extrabold tracking-[-0.02em] text-transparent bg-clip-text 
