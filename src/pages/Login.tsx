@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 
 export default function Login() {
   const { session, isLoading, signIn } = useAuth();
@@ -35,9 +36,7 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#020617] px-4">
-      {/* Background effects — same as dashboard */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+      <BackgroundEffects />
 
       <div className="relative w-full max-w-md animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Card */}
