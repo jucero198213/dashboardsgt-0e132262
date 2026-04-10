@@ -299,8 +299,8 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");
-  console.log(🚀 DW API Local rodando em http://localhost:${PORT});
-    console.log(📦 Banco: ${ process.env.MSSQL_DATABASE } @${ process.env.MSSQL_SERVER }: ${ process.env.MSSQL_PORT });
+  console.log(`🚀 DW API Local rodando em http://localhost:${PORT}`);
+    console.log(`📦 Banco: ${ process.env.MSSQL_DATABASE } @${ process.env.MSSQL_SERVER }:${ process.env.MSSQL_PORT }`);
   console.log("─────────────────────────────────────────");
   console.log("⏳ Conectando ao SQL Server...");
   getPool().catch((err) => {
