@@ -294,23 +294,37 @@ export function FinancialDataProvider({
       const round2 = (v: number) => Math.round(v * 100) / 100;
 
       // ── Helpers de filtro ───────────────────────────────────────────────────
-      const sit   = (r: DwRow) => (r.SITUACAO ?? "").trim().toUpperCase();
+      const sit    = (r: DwRow) => (r.SITUACAO ?? "").trim().toUpperCase();
       const hasPag = (r: DwRow) => r.DATA_PAGAMENTO !== null && r.DATA_PAGAMENTO !== undefined && r.DATA_PAGAMENTO !== "";
       const noPag  = (r: DwRow) => !hasPag(r);
 
+      // helper: data no intervalo do filtro externo
+      const di = state.dwFilter.dataInicio; // "YYYY-MM-DD"
+      const df = state.dwFilter.dataFim;    // "YYYY-MM-DD"
+      const inRange = (d: string | null, start: string, end: string) => {
+        if (!d) return false;
+        const dd = d.split("T")[0];
+        return dd >= start && dd <= end;
+      };
+
       // ── Todos os registros por origem ───────────────────────────────────────
-      const allCP   = data.filter((r) => r.ORIGEM === "CP");
-      const allCR   = data.filter((r) => r.ORIGEM === "CR");
+      const allCP = data.filter((r) => r.ORIGEM === "CP");
+      const allCR = data.filter((r) => r.ORIGEM === "CR");
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 1. A PAGAR PREVISTO  → CP | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
+      // 1. A PAGAR PREVISTO → CP | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
       // ─────────────────────────────────────────────────────────────────────────
       const cpPrevisto = allCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 2. A RECEBER PREVISTO → CR | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
+      // 2. A RECEBER (card topo)
+      //    → CR | SITUACAO L/P/D | DATA_VENCIMENTO no período | VLR_PARCELA
+      //    Tudo programado para vencer no período (independente de estar pago)
       // ─────────────────────────────────────────────────────────────────────────
-      const crPrevisto = allCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      const crAReceber = allCR.filter((r) =>
+        (sit(r) === "L" || sit(r) === "P" || sit(r) === "D") &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
 
       // ─────────────────────────────────────────────────────────────────────────
       // 3. PAGO → CP | SITUACAO L | DATA_PAGAMENTO NOT NULL | VLR_PAGO
@@ -318,31 +332,46 @@ export function FinancialDataProvider({
       const cpPago = allCP.filter((r) => sit(r) === "L" && hasPag(r));
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 4. RECEBIDO → CR | SITUACAO L | DATA_PAGAMENTO NOT NULL | VLR_PAGO
+      // 4. RECEBIDO (card topo)
+      //    → CR | SITUACAO L/P | DATA_PAGAMENTO no período | VLR_PAGO
+      //    Tudo efetivamente recebido com DATA_PAGAMENTO no intervalo
       // ─────────────────────────────────────────────────────────────────────────
-      const crRecebido = allCR.filter((r) => sit(r) === "L" && hasPag(r));
+      const crRecebido = allCR.filter((r) =>
+        (sit(r) === "L" || sit(r) === "P") &&
+        hasPag(r) &&
+        inRange(r.DATA_PAGAMENTO, di, df)
+      );
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 5. SUB-CARD CONTAS A RECEBER (saldo pendente)
+      //    → CR | SITUACAO D/P | DATA_PAGAMENTO NULL | DATA_VENCIMENTO no período
+      // ─────────────────────────────────────────────────────────────────────────
+      const crPrevisto = allCR.filter((r) =>
+        (sit(r) === "D" || sit(r) === "P") &&
+        noPag(r) &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
 
       // ── Somas ───────────────────────────────────────────────────────────────
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
 
-      const totalPagar    = sumCol(cpPrevisto, "VLR_PARCELA");
-      const valorPago     = sumCol(cpPago,     "VLR_PAGO");
-      const totalReceber  = sumCol(crPrevisto, "VLR_PARCELA");
-      const valorRecebido = sumCol(crRecebido, "VLR_PAGO");
+      const totalPagar    = sumCol(cpPrevisto,  "VLR_PARCELA");
+      const valorPago     = sumCol(cpPago,      "VLR_PAGO");
+      const totalAReceber = sumCol(crAReceber,  "VLR_PARCELA"); // card A RECEBER
+      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO
+      const totalReceber  = sumCol(crPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
           valorAPagar:  totalPagar,
           valorPago,
-          // saldo pendente = o próprio previsto (conjuntos independentes)
           saldoAPagar:  totalPagar,
         },
         contasReceber: {
-          valorAReceber:  totalReceber,
-          valorRecebido,
-          // saldo pendente = o próprio previsto (conjuntos independentes)
-          saldoAReceber:  totalReceber,
+          valorAReceber: totalAReceber,  // card A RECEBER = programado para vencer no período
+          valorRecebido,                  // card RECEBIDO  = recebido com datapag no período
+          saldoAReceber: totalReceber,    // sub-card CONTAS A RECEBER = saldo pendente
         },
       };
 
@@ -497,8 +526,8 @@ export function FinancialDataProvider({
       const inadimplenciaDocs = inadimDocs.length;
 
       // 3. % Realização CP = PAGO / PREVISTO_CP * 100
-      const realizacaoCP = totalPagar   > 0 ? Math.round((valorPago     / totalPagar)   * 1000) / 10 : 0;
-      const realizacaoCR = totalReceber > 0 ? Math.round((valorRecebido / totalReceber) * 1000) / 10 : 0;
+      const realizacaoCP = totalPagar    > 0 ? Math.round((valorPago     / totalPagar)    * 1000) / 10 : 0;
+      const realizacaoCR = totalAReceber > 0 ? Math.round((valorRecebido / totalAReceber) * 1000) / 10 : 0;
 
       const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, realizacaoCP, realizacaoCR };
       saveCache({
