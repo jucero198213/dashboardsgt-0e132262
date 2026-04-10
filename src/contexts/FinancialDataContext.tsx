@@ -359,9 +359,9 @@ export function FinancialDataProvider({
 
       const totalPagar    = sumCol(cpPrevisto,  "VLR_PARCELA");
       const valorPago     = sumCol(cpPago,      "VLR_PAGO");
-      const totalAReceber = sumCol(crAReceber,  "VLR_PARCELA"); // card A RECEBER
-      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO
-      const totalReceber  = sumCol(crPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER
+      const totalAReceber = sumCol(crPrevisto,  "VLR_PARCELA"); // card A RECEBER  (D/P + noPag + DATVEN no período)
+      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO   (L/P + DATREC no período)
+      const totalReceber  = sumCol(crAReceber,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER (saldo pendente)
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
