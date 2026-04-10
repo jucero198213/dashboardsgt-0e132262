@@ -18,7 +18,7 @@ const SUPABASE_ANON_KEY =
 //   2. TUNNEL_URL       (Cloudflare Tunnel atual — atualizar quando reiniciar)
 //   3. Supabase Edge    (fallback)
 
-const TUNNEL_URL = "https://thousands-sie-entity-clinics.trycloudflare.com";
+const TUNNEL_URL = "https://moisture-implementation-freebsd-lotus.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ||
