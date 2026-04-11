@@ -493,10 +493,14 @@ export function FinancialDataProvider({
       const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
       const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
 
+      // Previsto CP → mesmo que card A PAGAR: D/P + noPag (groupByMonth por DATA_VENCIMENTO)
       const chartCpPrevisto  = chartAllCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
-      const chartCpPago      = chartAllCP.filter((r) => sit(r) === "L" && hasPag(r));
+      // Pago CP → mesmo que card PAGO: L/P + hasPag (groupByMonth por DATA_PAGAMENTO)
+      const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      // Previsto CR → mesmo que card A RECEBER: D/P + noPag (groupByMonth por DATA_VENCIMENTO)
       const chartCrPrevisto  = chartAllCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
-      const chartCrRecebido  = chartAllCR.filter((r) => sit(r) === "L" && hasPag(r));
+      // Recebido CR → mesmo que card RECEBIDO: L/P + hasPag (groupByMonth por DATA_PAGAMENTO)
+      const chartCrRecebido  = chartAllCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
 
       const extractMonth = (dateVal: unknown): number => {
         if (dateVal == null) return -1;
