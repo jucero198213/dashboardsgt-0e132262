@@ -1,17 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, DollarSign, Percent, Target, TrendingUp, TrendingDown,
-  ChevronRight, BarChart3, ChevronLeft, ChevronRight as ChevronR,
+  ChevronRight, BarChart3, RefreshCw,
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { formatCurrency, formatDate } from "@/data/mockData";
+import { formatCurrency } from "@/data/mockData";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { InsightsBlock } from "@/components/indicators/InsightsBlock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCardSkeleton } from "@/components/shared/CardSkeleton";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
@@ -42,26 +41,23 @@ const SUBTITLES: Record<string, string> = {
 const PAGE_SIZE_COMP = 8;
 const PAGE_SIZE_DOCS = 50;
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Formata data (Date | string ISO | null) → DD/MM/AAAA ────────────────────
 const fmt = (d: string | Date | null | undefined): string => {
   if (!d) return "—";
-  // Se for objeto Date
   if (d instanceof Date) {
     const dd = String(d.getDate()).padStart(2, "0");
     const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
+    return `${dd}/${mm}/${d.getFullYear()}`;
   }
-  // Se for string — normaliza para YYYY-MM-DD e formata
   const s = String(d).trim();
   if (!s || s.toLowerCase() === "null") return "—";
-  const iso = s.split("T")[0]; // remove hora
+  const iso = s.split("T")[0];
   const parts = iso.split("-");
   if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
   return s;
 };
 
-const CustomTooltipLine = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-white/10 bg-[#0f172a] px-4 py-3 shadow-xl">
@@ -86,27 +82,55 @@ export default function IndicadorDetalhe() {
 
   const [paginaComp, setPaginaComp] = useState(1);
   const [paginaDocs, setPaginaDocs] = useState(1);
+  const [loadingPhase, setLoadingPhase] = useState("");
+  const [progress, setProgress]       = useState(0);
 
-  const indicador = indicadores.find((i) => i.id === id);
-  const codcusList = indicador ? (INDICATOR_CODCUS[indicador.nome] ?? []) : [];
-
-  // ── Filtra rows do DW por CODCUS e DATA_EMISSAO no período ─────────────────
+  const indicador    = indicadores.find((i) => i.id === id);
+  const codcusList   = indicador ? (INDICATOR_CODCUS[indicador.nome] ?? []) : [];
   const di = dwFilter.dataInicio;
   const df = dwFilter.dataFim;
 
+  // ── Botão Atualizar idêntico ao dashboard ───────────────────────────────────
+  const handleUpdate = useCallback(async () => {
+    setProgress(0);
+    setLoadingPhase("Conectando...");
+    let cur = 0;
+    const phases = [
+      { at: 20, label: "Buscando dados..." },
+      { at: 60, label: "Processando..." },
+      { at: 90, label: "Calculando..." },
+    ];
+    const interval = window.setInterval(() => {
+      cur = Math.min(cur + 3, 95);
+      setProgress(Math.floor(cur));
+      const p = [...phases].reverse().find((ph) => cur >= ph.at);
+      if (p) setLoadingPhase(p.label);
+    }, 200);
+    try {
+      await fetchFromDW();
+      window.clearInterval(interval);
+      setLoadingPhase("Concluído!");
+      setProgress(100);
+    } catch {
+      window.clearInterval(interval);
+    } finally {
+      window.setTimeout(() => { setProgress(0); setLoadingPhase(""); }, 800);
+    }
+  }, [fetchFromDW]);
+
+  // ── Rows filtrados por CODCUS + DATA_EMISSAO no período ────────────────────
   const rowsFiltrados = useMemo(() => {
     if (!indicador || codcusList.length === 0) return [];
     return dwRawData.filter((r) => {
       if (r.ORIGEM !== "CP") return false;
       const cod = String(r.CODCUS ?? "").trim();
       if (!codcusList.includes(cod)) return false;
-      const emissao = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
-      if (!emissao) return false;
-      return emissao >= di && emissao <= df;
+      const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
+      if (!em) return false;
+      return em >= di && em <= df;
     });
   }, [dwRawData, indicador, codcusList, di, df]);
 
-  // ── Card Valor Total ────────────────────────────────────────────────────────
   const totalValor = useMemo(
     () => rowsFiltrados.reduce((s, r) => s + (r.VLR_PARCELA ?? 0), 0),
     [rowsFiltrados]
@@ -116,8 +140,8 @@ export default function IndicadorDetalhe() {
   const composicaoAll = useMemo(() => {
     const map: Record<string, number> = {};
     rowsFiltrados.forEach((r) => {
-      const key = r.NOME_PARCEIRO || "N/A";
-      map[key] = (map[key] || 0) + (r.VLR_PARCELA ?? 0);
+      const k = r.NOME_PARCEIRO || "N/A";
+      map[k] = (map[k] || 0) + (r.VLR_PARCELA ?? 0);
     });
     return Object.entries(map)
       .map(([nome, valor]) => ({ nome, valor, pct: totalValor > 0 ? (valor / totalValor) * 100 : 0 }))
@@ -125,15 +149,15 @@ export default function IndicadorDetalhe() {
   }, [rowsFiltrados, totalValor]);
 
   const totalPaginasComp = Math.max(1, Math.ceil(composicaoAll.length / PAGE_SIZE_COMP));
-  const composicaoPag = composicaoAll.slice((paginaComp - 1) * PAGE_SIZE_COMP, paginaComp * PAGE_SIZE_COMP);
+  const composicaoPag    = composicaoAll.slice((paginaComp - 1) * PAGE_SIZE_COMP, paginaComp * PAGE_SIZE_COMP);
 
-  // ── Evolução diária: mês selecionado vs mês anterior ───────────────────────
+  // ── Evolução diária ─────────────────────────────────────────────────────────
   const evolucaoDiaria = useMemo(() => {
-    const mesAtual  = di.substring(0, 7); // "YYYY-MM"
+    const mesAtual  = di.substring(0, 7);
     const [ano, mes] = di.split("-").map(Number);
-    const mesAntNum = mes === 1 ? 12 : mes - 1;
-    const anoAntNum = mes === 1 ? ano - 1 : ano;
-    const mesAnt = `${anoAntNum}-${String(mesAntNum).padStart(2, "0")}`;
+    const mesAntNum  = mes === 1 ? 12 : mes - 1;
+    const anoAntNum  = mes === 1 ? ano - 1 : ano;
+    const mesAnt     = `${anoAntNum}-${String(mesAntNum).padStart(2, "0")}`;
 
     const byDay = (source: typeof dwRawData, prefix: string) => {
       const map: Record<string, number> = {};
@@ -141,72 +165,49 @@ export default function IndicadorDetalhe() {
         if (r.ORIGEM !== "CP") return;
         const cod = String(r.CODCUS ?? "").trim();
         if (!codcusList.includes(cod)) return;
-        const emissao = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
-        if (!emissao || !emissao.startsWith(prefix)) return;
-        const dia = emissao.split("-")[2];
+        const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
+        if (!em || !em.startsWith(prefix)) return;
+        const dia = em.split("-")[2];
         map[dia] = (map[dia] || 0) + (r.VLR_PARCELA ?? 0);
       });
       return map;
     };
 
-    // Mês atual: usa dwRawData (período filtrado)
-    const atual    = byDay(dwRawData,    mesAtual);
-    // Mês anterior: usa dwChartData (ano inteiro, contém todos os meses)
+    const atual    = byDay(dwRawData,   mesAtual);
     const anterior = byDay(dwChartData, mesAnt);
-
-    const dias = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+    const dias     = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
 
     return dias
       .filter((d) => atual[d] !== undefined || anterior[d] !== undefined)
-      .map((d) => ({
-        dia: Number(d),
-        mesAtual:    atual[d]    ?? 0,
-        mesAnterior: anterior[d] ?? 0,
-      }));
+      .map((d) => ({ dia: Number(d), mesAtual: atual[d] ?? 0, mesAnterior: anterior[d] ?? 0 }));
   }, [dwRawData, dwChartData, di, codcusList]);
 
-  // ── Documentos detalhados paginados ────────────────────────────────────────
+  // ── Documentos paginados ────────────────────────────────────────────────────
   const totalPaginasDocs = Math.max(1, Math.ceil(rowsFiltrados.length / PAGE_SIZE_DOCS));
-  const docsPaginados = rowsFiltrados.slice((paginaDocs - 1) * PAGE_SIZE_DOCS, paginaDocs * PAGE_SIZE_DOCS);
+  const docsPaginados    = rowsFiltrados.slice((paginaDocs - 1) * PAGE_SIZE_DOCS, paginaDocs * PAGE_SIZE_DOCS);
 
-  // ── Indicadores auxiliares ──────────────────────────────────────────────────
-  const diffPct = indicador ? indicador.percentualReal - indicador.percentualEsperado : 0;
+  const diffPct    = indicador ? indicador.percentualReal - indicador.percentualEsperado : 0;
   const isPositive = diffPct <= 0;
 
   const insights = useMemo(() => {
     if (!indicador) return [];
-    const diff = indicador.percentualReal - indicador.percentualEsperado;
+    const diff    = indicador.percentualReal - indicador.percentualEsperado;
     const diffAbs = Math.abs(diff);
-    if (diff > 3) return [{ type: "alert" as const, text: `Este indicador está ${diffAbs.toFixed(1)}% acima do esperado. Recomenda-se análise detalhada.` }];
+    if (diff > 3) return [{ type: "alert"    as const, text: `Este indicador está ${diffAbs.toFixed(1)}% acima do esperado. Recomenda-se análise detalhada.` }];
     if (diff < -3) return [{ type: "positive" as const, text: `Este indicador está ${diffAbs.toFixed(1)}% abaixo do esperado. Economia identificada no período.` }];
     return [{ type: "info" as const, text: `Indicador dentro da faixa esperada (diferença de ${diffAbs.toFixed(1)}%).` }];
   }, [indicador]);
 
-  if (!indicador) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#020617] text-white">
-        <BackgroundEffects />
-        <div className="relative text-center">
-          <p className="text-lg text-slate-400">Indicador não encontrado</p>
-          <button onClick={() => navigate("/")} className="mt-4 text-sm text-cyan-400 hover:underline">Voltar ao dashboard</button>
-        </div>
-      </div>
-    );
-  }
+  const filiaisFiltradas = dwFilter.empresa ? filiais.filter((f) => f.empresa === dwFilter.empresa) : filiais;
 
-  const showLoading = isFetchingDw && !isProcessed;
-  const filiaisFiltradas = dwFilter.empresa
-    ? filiais.filter((f) => f.empresa === dwFilter.empresa)
-    : filiais;
-
-  // ── Render paginação genérica ───────────────────────────────────────────────
+  // ── Paginação reutilizável ──────────────────────────────────────────────────
   const Paginacao = ({ atual, total, set }: { atual: number; total: number; set: (n: number) => void }) => {
     if (total <= 1) return null;
     return (
       <div className="flex items-center gap-1">
         <button onClick={() => set(Math.max(1, atual - 1))} disabled={atual === 1}
           className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 hover:text-white disabled:opacity-30">
-          <ChevronLeft className="h-3.5 w-3.5" />
+          <ChevronRight className="h-3.5 w-3.5 rotate-180" />
         </button>
         {Array.from({ length: total }, (_, i) => i + 1)
           .filter((p) => p === 1 || p === total || Math.abs(p - atual) <= 1)
@@ -223,19 +224,34 @@ export default function IndicadorDetalhe() {
           )}
         <button onClick={() => set(Math.min(total, atual + 1))} disabled={atual === total}
           className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 hover:text-white disabled:opacity-30">
-          <ChevronR className="h-3.5 w-3.5" />
+          <ChevronRight className="h-3.5 w-3.5" />
         </button>
       </div>
     );
   };
 
+  if (!indicador) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#020617] text-white">
+        <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%)]" />
+        <div className="relative text-center">
+          <p className="text-lg text-slate-400">Indicador não encontrado</p>
+          <button onClick={() => navigate("/")} className="mt-4 text-sm text-cyan-400 hover:underline">Voltar ao dashboard</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#020617] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
-      <BackgroundEffects />
+      {/* Efeitos de background idênticos ao portal */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+
       <div className="relative mx-auto max-w-[1400px] space-y-5 animate-[fadeSlideIn_0.5s_ease-out]">
 
         {/* Breadcrumb */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -247,7 +263,7 @@ export default function IndicadorDetalhe() {
         {/* Header */}
         <div className="flex items-start gap-4">
           <button onClick={() => navigate("/")}
-            className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:text-white">
+            className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white">
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
@@ -256,37 +272,54 @@ export default function IndicadorDetalhe() {
                 <BarChart3 className="h-3 w-3" /> Indicador Estratégico
               </div>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{indicador.nome}</h1>
-            <p className="mt-1 text-sm text-slate-400">{SUBTITLES[indicador.nome] ?? "Detalhamento do indicador"}</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-4xl">{indicador.nome}</h1>
+            <p className="mt-2 text-sm text-slate-400">{SUBTITLES[indicador.nome] ?? "Detalhamento do indicador estratégico"}</p>
           </div>
         </div>
 
-        {/* ── FILTROS ── */}
+        {/* ── FILTROS (idênticos ao dashboard) ── */}
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
           <input type="date" value={dwFilter.dataInicio}
             onChange={(e) => { setDwFilter("dataInicio", e.target.value); setPaginaComp(1); setPaginaDocs(1); }}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [color-scheme:dark] focus:outline-none focus:border-cyan-500/50" />
+            className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white [color-scheme:dark] focus:outline-none focus:border-cyan-500/50" />
           <input type="date" value={dwFilter.dataFim}
             onChange={(e) => { setDwFilter("dataFim", e.target.value); setPaginaComp(1); setPaginaDocs(1); }}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white [color-scheme:dark] focus:outline-none focus:border-cyan-500/50" />
+            className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white [color-scheme:dark] focus:outline-none focus:border-cyan-500/50" />
           <select value={dwFilter.empresa ?? ""} onChange={(e) => { setDwFilter("empresa", e.target.value || null); setDwFilter("filial", null); }}
-            className="rounded-xl border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50">
+            className="h-8 rounded-xl border border-white/10 bg-[#0f172a] px-3 text-sm text-white focus:outline-none focus:border-cyan-500/50">
             <option value="">Todas as empresas</option>
             {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
           </select>
           <select value={dwFilter.filial ?? ""} onChange={(e) => setDwFilter("filial", e.target.value || null)}
-            className="rounded-xl border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50">
+            className="h-8 rounded-xl border border-white/10 bg-[#0f172a] px-3 text-sm text-white focus:outline-none focus:border-cyan-500/50">
             <option value="">Todas as filiais</option>
             {filiaisFiltradas.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
           </select>
-          <button onClick={fetchFromDW}
-            className="flex items-center gap-2 rounded-xl bg-cyan-500/15 px-4 py-2 text-sm font-semibold text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/25 transition-all">
-            ↺ Atualizar
+
+          {/* Botão Atualizar — idêntico ao dashboard principal */}
+          <button
+            onClick={() => void handleUpdate()}
+            disabled={isFetchingDw}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${
+              isFetchingDw
+                ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
+                : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
+            } disabled:cursor-not-allowed`}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
+            {isFetchingDw ? (
+              <span className="flex items-center gap-2">
+                <span className="hidden sm:inline">{loadingPhase}</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">
+                  {progress}%
+                </span>
+              </span>
+            ) : "Atualizar"}
           </button>
         </div>
 
         {/* ── KPI CARDS ── */}
-        {showLoading ? (
+        {isFetchingDw && !isProcessed ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[0,1,2,3].map(i => <KpiCardSkeleton key={i} />)}
           </div>
@@ -314,27 +347,32 @@ export default function IndicadorDetalhe() {
           </div>
         )}
 
-        {/* ── EVOLUÇÃO DIÁRIA + COMPOSIÇÃO ── */}
+        {/* ── GRÁFICO + COMPOSIÇÃO ── */}
         <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
 
           {/* Gráfico linha diária */}
           <AnimatedCard delay={320}>
             <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-6">
-              <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                Evolução Diária — Mês Atual vs Mês Anterior
-              </p>
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Evolução Diária — Mês Atual vs Mês Anterior
+                </p>
+                <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                  <span className="flex items-center gap-1.5"><span className="h-2 w-6 rounded-full bg-cyan-400 inline-block" /> Mês atual</span>
+                  <span className="flex items-center gap-1.5"><span className="h-[2px] w-6 rounded-full bg-slate-500 inline-block border-dashed" /> Mês anterior</span>
+                </div>
+              </div>
               {evolucaoDiaria.length > 0 ? (
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={evolucaoDiaria}>
+                    <LineChart data={evolucaoDiaria} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                      <XAxis dataKey="dia" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} label={{ value: "Dia", position: "insideBottomRight", offset: -5, fill: "#64748b", fontSize: 11 }} />
-                      <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false}
-                        tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)} />
-                      <Tooltip content={<CustomTooltipLine />} />
-                      <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                      <Line type="monotone" dataKey="mesAtual" name="Mês Atual" stroke="#06b6d4" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                      <Line type="monotone" dataKey="mesAnterior" name="Mês Anterior" stroke="rgba(148,163,184,0.5)" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                      <XAxis dataKey="dia" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false}
+                        tickFormatter={(v) => v >= 1_000_000 ? `${(v/1_000_000).toFixed(1)}M` : v >= 1_000 ? `${(v/1_000).toFixed(0)}k` : String(v)} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="mesAtual"    name="Mês Atual"    stroke="#06b6d4" strokeWidth={2.5} dot={{ r: 3, fill: "#06b6d4" }} activeDot={{ r: 5 }} />
+                      <Line type="monotone" dataKey="mesAnterior" name="Mês Anterior" stroke="rgba(148,163,184,0.5)" strokeWidth={1.5} strokeDasharray="5 4" dot={{ r: 2 }} activeDot={{ r: 4 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -349,22 +387,21 @@ export default function IndicadorDetalhe() {
           {/* Composição */}
           <AnimatedCard delay={360}>
             <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Composição</p>
-                <p className="text-xs text-slate-500">{composicaoAll.length} fornecedor(es)</p>
+                <span className="text-xs text-slate-500">{composicaoAll.length} fornecedor(es)</span>
               </div>
-
               {composicaoPag.length === 0 ? (
-                <p className="text-sm text-slate-500 py-8 text-center">Sem dados no período</p>
+                <p className="py-8 text-center text-sm text-slate-500">Sem dados no período</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {composicaoPag.map((item) => (
                     <div key={item.nome}>
-                      <div className="flex items-center justify-between mb-1 gap-2">
-                        <p className="text-[11px] font-medium text-slate-300 truncate flex-1">{item.nome}</p>
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <p className="text-[11px] font-medium text-slate-300 truncate flex-1 min-w-0">{item.nome}</p>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-[11px] font-bold text-white">{formatCurrency(item.valor)}</span>
-                          <span className="text-[10px] text-cyan-400 font-semibold">{item.pct.toFixed(1)}%</span>
+                          <span className="text-[10px] font-semibold text-cyan-400">{item.pct.toFixed(1)}%</span>
                         </div>
                       </div>
                       <div className="h-[3px] overflow-hidden rounded-full bg-white/8">
@@ -375,11 +412,10 @@ export default function IndicadorDetalhe() {
                   ))}
                 </div>
               )}
-
               {totalPaginasComp > 1 && (
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5">
                   <p className="text-xs text-slate-600">{composicaoAll.length} itens</p>
-                  <Paginacao atual={paginaComp} total={totalPaginasComp} set={(n) => { setPaginaComp(n); }} />
+                  <Paginacao atual={paginaComp} total={totalPaginasComp} set={setPaginaComp} />
                 </div>
               )}
             </div>
@@ -414,35 +450,37 @@ export default function IndicadorDetalhe() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/5 hover:bg-transparent">
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Emissão</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Venc.</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Pag.</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-28">Documento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-16 text-center">Parcela</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[90px]">Dt. Emissão</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[90px]">Dt. Venc.</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[90px]">Dt. Pag.</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[110px]">Documento</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[60px] text-center">Parcela</TableHead>
                       <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Fornecedor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32">C. Custo</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32 text-right">Valor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32 text-right">Vl. Pago</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-20 text-center">Sit.</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[110px]">C. Custo</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[110px] text-right">Valor</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[110px] text-right">Vl. Pago</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-[60px] text-center">Sit.</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {docsPaginados.map((r, i) => (
                       <TableRow key={i} className="border-white/5 hover:bg-white/[0.03]">
-                        <TableCell className="text-sm text-slate-300 w-24 whitespace-nowrap">{fmt(r.DATA_EMISSAO)}</TableCell>
-                        <TableCell className="text-sm text-slate-300 w-24 whitespace-nowrap">{fmt(r.DATA_VENCIMENTO)}</TableCell>
-                        <TableCell className="text-sm w-24 whitespace-nowrap">
+                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(r.DATA_EMISSAO)}</TableCell>
+                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(r.DATA_VENCIMENTO)}</TableCell>
+                        <TableCell className="text-sm whitespace-nowrap">
                           {r.DATA_PAGAMENTO
                             ? <span className="text-amber-400">{fmt(r.DATA_PAGAMENTO)}</span>
                             : <span className="text-slate-600">—</span>}
                         </TableCell>
-                        <TableCell className="text-sm font-medium text-white w-28 whitespace-nowrap">{r.DOCUMENTO ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-300 w-16 text-center">{r.PARCELA ?? "—"}</TableCell>
+                        <TableCell className="text-sm font-medium text-white whitespace-nowrap">{r.DOCUMENTO ?? "—"}</TableCell>
+                        <TableCell className="text-sm text-slate-300 text-center">{r.PARCELA ?? "—"}</TableCell>
                         <TableCell className="text-sm text-slate-300 max-w-[200px] truncate">{r.NOME_PARCEIRO ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-500 w-32 truncate">{r.CENTRO_CUSTO ?? r.CODCUS ?? "—"}</TableCell>
-                        <TableCell className="text-right text-sm font-semibold text-white w-32 whitespace-nowrap">{formatCurrency(r.VLR_PARCELA ?? 0)}</TableCell>
-                        <TableCell className="text-right text-sm text-amber-300 w-32 whitespace-nowrap">
-                          {(r.VLR_PAGO ?? 0) > 0 ? formatCurrency(r.VLR_PAGO ?? 0) : <span className="text-slate-600">—</span>}
+                        <TableCell className="text-sm text-slate-500 truncate max-w-[110px]">{r.CENTRO_CUSTO ?? r.CODCUS ?? "—"}</TableCell>
+                        <TableCell className="text-right text-sm font-semibold text-white whitespace-nowrap">{formatCurrency(r.VLR_PARCELA ?? 0)}</TableCell>
+                        <TableCell className="text-right text-sm whitespace-nowrap">
+                          {(r.VLR_PAGO ?? 0) > 0
+                            ? <span className="text-amber-300">{formatCurrency(r.VLR_PAGO ?? 0)}</span>
+                            : <span className="text-slate-600">—</span>}
                         </TableCell>
                         <TableCell className="text-center">
                           <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
