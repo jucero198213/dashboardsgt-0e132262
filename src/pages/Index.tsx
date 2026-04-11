@@ -1028,7 +1028,7 @@ const Index = () => {
                     {/* Coluna esquerda — Contas a Receber */}
                     <AnimatedCard delay={320}>
                       {renderLargeCard({
-                        title: "Contas a receber",
+                        title: "Saldo a receber",
                         tone: "emerald",
                         total: contasReceber.saldoAReceber,
                         subtitle: "Saldo pendente a receber",
@@ -1048,7 +1048,7 @@ const Index = () => {
                     <div className="flex flex-col gap-2">
                       <AnimatedCard delay={400}>
                         {renderLargeCard({
-                          title: "Contas a pagar",
+                          title: "Saldo a pagar",
                           tone: "amber",
                           total: contasPagar.saldoAPagar,
                           subtitle: "Saldo pendente a pagar",
