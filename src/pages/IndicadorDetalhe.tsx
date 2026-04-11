@@ -334,11 +334,11 @@ export default function IndicadorDetalhe() {
 
         {/* ── KPI CARDS ── */}
         {isFetchingDw && !isProcessed ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
             {[0,1,2,3].map(i => <KpiCardSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
             <AnimatedCard delay={0}>
               <KpiCard label="Valor Total" value={formatCurrency(totalValor)} rawValue={totalValor}
                 subtitle="Soma por data de emissão no período" icon={DollarSign} tone="cyan" />
@@ -411,11 +411,11 @@ export default function IndicadorDetalhe() {
                 <div className="space-y-3.5">
                   {composicaoPag.map((item) => (
                     <div key={item.nome}>
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <p className="text-[11px] font-medium text-slate-300 truncate flex-1 min-w-0">{item.nome}</p>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[11px] font-bold text-white">{formatCurrency(item.valor)}</span>
-                          <span className="text-[10px] font-semibold text-cyan-400">{item.pct.toFixed(1)}%</span>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <p className="text-[11px] font-medium text-slate-300 flex-1 min-w-0 truncate">{item.nome}</p>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <span className="text-[11px] font-bold text-white whitespace-nowrap">{formatCurrency(item.valor)}</span>
+                          <span className="text-[10px] font-semibold text-cyan-400 w-10 text-right whitespace-nowrap">{item.pct.toFixed(1)}%</span>
                         </div>
                       </div>
                       <div className="h-[3px] overflow-hidden rounded-full bg-white/8">
