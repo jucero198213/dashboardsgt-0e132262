@@ -493,12 +493,12 @@ export function FinancialDataProvider({
       const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
       const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
 
-      // Previsto CR → L/P/D + DATA_VENCIMENTO (= card A RECEBER: tudo programado para vencer)
-      const chartCrPrevisto  = chartAllCR.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
+      // Previsto CR → D/P + noPag + DATA_VENCIMENTO (= card A RECEBER)
+      const chartCrPrevisto  = chartAllCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
       // Recebido CR → L/P + hasPag + DATA_PAGAMENTO (= card RECEBIDO)
       const chartCrRecebido  = chartAllCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      // Previsto CP → L/P/D + DATA_VENCIMENTO (= card A PAGAR: tudo programado para pagar)
-      const chartCpPrevisto  = chartAllCP.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
+      // Previsto CP → D/P + noPag + DATA_VENCIMENTO (= card A PAGAR)
+      const chartCpPrevisto  = chartAllCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
       // Pago CP → L/P + hasPag + DATA_PAGAMENTO (= card PAGO)
       const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
 
