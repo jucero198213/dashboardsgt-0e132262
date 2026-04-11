@@ -628,7 +628,7 @@ const Index = () => {
     () => [
       {
         label: "A RECEBER",
-        value: contasReceber.saldoAReceber,
+        value: contasReceber.valorAReceber,
         helper: "Valor à receber",
         icon: TrendingUp,
         tone: "emerald",
@@ -642,7 +642,7 @@ const Index = () => {
       },
       {
         label: "A PAGAR",
-        value: contasPagar.saldoAPagar,
+        value: contasPagar.valorAPagar,
         helper: "Valor à pagar",
         icon: TrendingDown,
         tone: "amber",
@@ -656,9 +656,9 @@ const Index = () => {
       },
     ],
     [
-      contasReceber.saldoAReceber,
+      contasReceber.valorAReceber,
       contasReceber.valorRecebido,
-      contasPagar.saldoAPagar,
+      contasPagar.valorAPagar,
       contasPagar.valorPago,
     ]
   );
@@ -1030,10 +1030,10 @@ const Index = () => {
                       {renderLargeCard({
                         title: "Contas a receber",
                         tone: "emerald",
-                        total: contasReceber.valorAReceber,
+                        total: contasReceber.saldoAReceber,
                         subtitle: "Saldo pendente a receber",
                         primaryLabel: "Previsto",
-                        primaryValue: contasReceber.valorAReceber,
+                        primaryValue: contasReceber.saldoAReceber,
                         secondaryLabel: "Recebido",
                         secondaryValue: contasReceber.valorRecebido,
                         monthlyPrevisto: chartReceber.previsto,
@@ -1050,10 +1050,10 @@ const Index = () => {
                         {renderLargeCard({
                           title: "Contas a pagar",
                           tone: "amber",
-                          total: contasPagar.valorAPagar,
+                          total: contasPagar.saldoAPagar,
                           subtitle: "Saldo pendente a pagar",
                           primaryLabel: "Previsto",
-                          primaryValue: contasPagar.valorAPagar,
+                          primaryValue: contasPagar.saldoAPagar,
                           secondaryLabel: "Pago",
                           secondaryValue: contasPagar.valorPago,
                           monthlyPrevisto: chartPagar.previsto,
