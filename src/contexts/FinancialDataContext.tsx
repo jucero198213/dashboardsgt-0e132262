@@ -493,14 +493,14 @@ export function FinancialDataProvider({
       const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
       const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
 
-      // Previsto CP → mesmo que card A PAGAR: D/P + noPag (groupByMonth por DATA_VENCIMENTO)
-      const chartCpPrevisto  = chartAllCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
-      // Pago CP → mesmo que card PAGO: L/P + hasPag (groupByMonth por DATA_PAGAMENTO)
-      const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      // Previsto CR → mesmo que card A RECEBER: D/P + noPag (groupByMonth por DATA_VENCIMENTO)
-      const chartCrPrevisto  = chartAllCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
-      // Recebido CR → mesmo que card RECEBIDO: L/P + hasPag (groupByMonth por DATA_PAGAMENTO)
+      // Previsto CR → L/P/D + DATA_VENCIMENTO (= card A RECEBER: tudo programado para vencer)
+      const chartCrPrevisto  = chartAllCR.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
+      // Recebido CR → L/P + hasPag + DATA_PAGAMENTO (= card RECEBIDO)
       const chartCrRecebido  = chartAllCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      // Previsto CP → L/P/D + DATA_VENCIMENTO (= card A PAGAR: tudo programado para pagar)
+      const chartCpPrevisto  = chartAllCP.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
+      // Pago CP → L/P + hasPag + DATA_PAGAMENTO (= card PAGO)
+      const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
 
       const extractMonth = (dateVal: unknown): number => {
         if (dateVal == null) return -1;
