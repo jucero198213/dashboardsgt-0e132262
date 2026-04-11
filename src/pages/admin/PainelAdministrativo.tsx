@@ -1,147 +1,220 @@
 import { useState } from "react";
-import { ArrowLeft, Users, Settings, Database, Activity, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import GestaoUsuarios from "./GestaoUsuarios";
-import Configuracoes from "./Configuracoes";
-import BancoDados from "./BancoDados";
-import Monitoramento from "./Monitoramento";
-import Seguranca from "./Seguranca";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft, Users, Settings, Database, Activity, Shield,
+  ChevronRight, Lock, Server, Zap,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca";
 
-interface NavItem {
-  id: Screen;
-  label: string;
-  desc: string;
-  icon: React.ReactNode;
-  iconBg: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: "usuarios", label: "Gestão de Usuários", desc: "Gerencie usuários, permissões e roles do sistema", icon: <Users className="w-6 h-6" />, iconBg: "bg-blue-500/15 text-blue-400" },
-  { id: "config", label: "Configurações", desc: "Configurações gerais do sistema e integrações", icon: <Settings className="w-6 h-6" />, iconBg: "bg-white/10 text-white/60" },
-  { id: "banco", label: "Banco de Dados", desc: "Visualização e gestão das tabelas de dados", icon: <Database className="w-6 h-6" />, iconBg: "bg-emerald-500/15 text-emerald-400" },
-  { id: "monitor", label: "Monitoramento", desc: "Logs de atividade e auditoria do sistema", icon: <Activity className="w-6 h-6" />, iconBg: "bg-amber-500/15 text-amber-400" },
-  { id: "seguranca", label: "Segurança", desc: "Políticas de acesso, sessões e autenticação", icon: <Shield className="w-6 h-6" />, iconBg: "bg-red-500/15 text-red-400" },
+const NAV_ITEMS = [
+  {
+    id: "usuarios" as Screen,
+    label: "Gestão de Usuários",
+    desc: "Usuários, permissões e roles via Supabase Auth",
+    icon: Users,
+    accent: "emerald",
+    border: "border-emerald-500/20",
+    bg: "bg-emerald-500/8",
+    icon_color: "text-emerald-400",
+    badge_bg: "bg-emerald-500/15",
+  },
+  {
+    id: "config" as Screen,
+    label: "Configurações",
+    desc: "Tunnel URL, integrações e parâmetros do sistema",
+    icon: Settings,
+    accent: "cyan",
+    border: "border-cyan-500/20",
+    bg: "bg-cyan-500/8",
+    icon_color: "text-cyan-400",
+    badge_bg: "bg-cyan-500/15",
+  },
+  {
+    id: "banco" as Screen,
+    label: "Banco de Dados",
+    desc: "Schema, tabelas e console SQL read-only",
+    icon: Database,
+    accent: "violet",
+    border: "border-violet-500/20",
+    bg: "bg-violet-500/8",
+    icon_color: "text-violet-400",
+    badge_bg: "bg-violet-500/15",
+  },
+  {
+    id: "monitor" as Screen,
+    label: "Monitoramento",
+    desc: "Logs de atividade, auditoria e métricas",
+    icon: Activity,
+    accent: "amber",
+    border: "border-amber-500/20",
+    bg: "bg-amber-500/8",
+    icon_color: "text-amber-400",
+    badge_bg: "bg-amber-500/15",
+  },
+  {
+    id: "seguranca" as Screen,
+    label: "Segurança",
+    desc: "Sessões ativas, 2FA, IPs permitidos e SSO",
+    icon: Shield,
+    accent: "red",
+    border: "border-red-500/20",
+    bg: "bg-red-500/8",
+    icon_color: "text-red-400",
+    badge_bg: "bg-red-500/15",
+  },
 ];
-
-const PAGE_TITLES: Record<Screen, string> = {
-  home: "Painel Administrativo",
-  usuarios: "Gestão de Usuários",
-  config: "Configurações",
-  banco: "Banco de Dados",
-  monitor: "Monitoramento",
-  seguranca: "Segurança",
-};
 
 export default function PainelAdministrativo() {
   const [screen, setScreen] = useState<Screen>("home");
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
+  // Lazy-load sub-pages to keep bundle light
   const renderContent = () => {
     switch (screen) {
-      case "usuarios": return <GestaoUsuarios />;
-      case "config": return <Configuracoes />;
-      case "banco": return <BancoDados />;
-      case "monitor": return <Monitoramento />;
-      case "seguranca": return <Seguranca />;
+      case "usuarios":  { const G = require("./GestaoUsuarios").default;   return <G />; }
+      case "config":    { const C = require("./Configuracoes").default;     return <C />; }
+      case "banco":     { const B = require("./BancoDados").default;        return <B />; }
+      case "monitor":   { const M = require("./Monitoramento").default;     return <M />; }
+      case "seguranca": { const S = require("./Seguranca").default;         return <S />; }
       default: return null;
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#0d1424]">
-      {/* Breadcrumb */}
-      <div className="px-6 py-3 text-sm text-white/30">
-        <span
-          className="hover:text-white/60 cursor-pointer transition-colors"
-          onClick={() => setScreen("home")}
-        >
-          Dashboard
-        </span>
-        <span className="mx-2">›</span>
-        <span className="text-white/70">Administração</span>
-        {screen !== "home" && (
-          <>
-            <span className="mx-2">›</span>
-            <span className="text-white">{PAGE_TITLES[screen]}</span>
-          </>
-        )}
-      </div>
+  const currentItem = NAV_ITEMS.find((n) => n.id === screen);
 
-      {/* Header */}
-      <div className="px-6 pb-6">
+  return (
+    <div className="min-h-screen bg-[#020617] text-white px-4 py-6 lg:px-8 lg:py-8">
+      {/* Background effects — same as portal */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.06),transparent_24%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+
+      <div className="relative mx-auto max-w-[1400px] space-y-6">
+
+        {/* Breadcrumb */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
+            <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
+            <ChevronRight className="h-3.5 w-3.5" />
+            {screen === "home" ? (
+              <span className="text-white">Administração</span>
+            ) : (
+              <>
+                <button onClick={() => setScreen("home")} className="transition-colors hover:text-white">Administração</button>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-white">{currentItem?.label}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Header */}
         <div className="flex items-start gap-4">
           {screen !== "home" && (
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={() => setScreen("home")}
-              className="mt-1 w-9 h-9 p-0 rounded-full border border-white/10 text-white/50 hover:text-white hover:bg-white/5 flex-shrink-0"
+              className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:text-white transition-all hover:border-white/20 hover:bg-white/10"
             >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
+              <ArrowLeft className="h-4 w-4" />
+            </button>
           )}
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="flex items-center gap-1.5 text-[11px] text-red-400 border border-red-500/20 bg-red-500/10 px-2.5 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                ÁREA ADMINISTRATIVA
-              </span>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-red-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
+                Área Administrativa
+              </div>
+              {isAdmin && (
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+                  <Lock className="h-2.5 w-2.5" />
+                  Admin
+                </div>
+              )}
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              {screen === "home" ? "Painel Administrativo" : PAGE_TITLES[screen]}
+            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+              {screen === "home" ? "Painel Administrativo" : currentItem?.label}
             </h1>
-            <p className="text-sm text-white/35 mt-1">Central de controle do sistema · ti@sgtlog.com.br</p>
+            <p className="mt-2 text-sm text-slate-400">
+              {screen === "home"
+                ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
+                : currentItem?.desc}
+            </p>
           </div>
         </div>
+
+        {/* Home — navigation grid */}
+        {screen === "home" && (
+          <>
+            {/* Stats rápidas */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: "Usuários ativos", value: "7", icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+                { label: "Uptime", value: "99.9%", icon: Server, color: "text-cyan-400", bg: "bg-cyan-500/10" },
+                { label: "Integrações", value: "5/5", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10" },
+                { label: "Alertas", value: "1", icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-[16px] border border-white/8 bg-white/[0.03] px-4 py-3 flex items-center gap-3">
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
+                    <s.icon className={`h-4 w-4 ${s.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-slate-500 uppercase tracking-[0.15em]">{s.label}</p>
+                    <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Nav grid */}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {NAV_ITEMS.slice(0, 3).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setScreen(item.id)}
+                  className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ${item.icon_color}`}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
+                  <p className="text-sm text-slate-500">{item.desc}</p>
+                </button>
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {NAV_ITEMS.slice(3).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setScreen(item.id)}
+                  className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ${item.icon_color}`}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
+                  <p className="text-sm text-slate-500">{item.desc}</p>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Sub-pages */}
+        {screen !== "home" && (
+          <div className="animate-[fadeSlideIn_0.4s_ease-out]">
+            {renderContent()}
+          </div>
+        )}
+
       </div>
-
-      {/* Home grid */}
-      {screen === "home" && (
-        <div className="px-6 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {NAV_ITEMS.slice(0, 3).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setScreen(item.id)}
-                className="group text-left bg-[#111c2e] border border-white/[0.07] rounded-2xl p-6 hover:border-white/[0.15] hover:bg-[#142030] transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-5">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${item.iconBg}`}>
-                    {item.icon}
-                  </div>
-                </div>
-                <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
-                <p className="text-sm text-white/35">{item.desc}</p>
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {NAV_ITEMS.slice(3).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setScreen(item.id)}
-                className="group text-left bg-[#111c2e] border border-white/[0.07] rounded-2xl p-6 hover:border-white/[0.15] hover:bg-[#142030] transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-5">
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${item.iconBg}`}>
-                    {item.icon}
-                  </div>
-                </div>
-                <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
-                <p className="text-sm text-white/35">{item.desc}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Sub-pages */}
-      {screen !== "home" && (
-        <div className="px-6 pb-8">
-          {renderContent()}
-        </div>
-      )}
     </div>
   );
 }

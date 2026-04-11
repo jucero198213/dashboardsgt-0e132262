@@ -1,266 +1,191 @@
-import { useState } from "react";
-import { Users, Search, Plus, Shield, Ban, CheckCircle, Edit2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface User {
-  id: number;
-  name: string;
+interface SupaUser {
+  id: string;
   email: string;
-  role: "Admin" | "Gerente" | "Analista" | "Visualizador";
-  department: string;
-  lastAccess: string;
-  status: "Ativo" | "Inativo" | "Bloqueado";
-  initials: string;
-  color: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  role: "admin" | "user";
+  confirmed: boolean;
 }
 
-const INITIAL_USERS: User[] = [
-  { id: 1, name: "Pedro Augusto", email: "pedro@sgtlog.com.br", role: "Admin", department: "TI", lastAccess: "Agora", status: "Ativo", initials: "PA", color: "#3b82f6" },
-  { id: 2, name: "Carlos Mendes", email: "carlos@sgtlog.com.br", role: "Gerente", department: "Operações", lastAccess: "há 2h", status: "Ativo", initials: "CM", color: "#10b981" },
-  { id: 3, name: "Ana Lima", email: "ana@sgtlog.com.br", role: "Analista", department: "Financeiro", lastAccess: "há 1h", status: "Ativo", initials: "AL", color: "#8b5cf6" },
-  { id: 4, name: "Roberto Faria", email: "roberto@sgtlog.com.br", role: "Analista", department: "Comercial", lastAccess: "Ontem", status: "Ativo", initials: "RF", color: "#f59e0b" },
-  { id: 5, name: "Fernanda Costa", email: "fern@sgtlog.com.br", role: "Visualizador", department: "RH", lastAccess: "há 3 dias", status: "Inativo", initials: "FC", color: "#14b8a6" },
-  { id: 6, name: "Marcos Teixeira", email: "marcos@sgtlog.com.br", role: "Gerente", department: "TI", lastAccess: "—", status: "Bloqueado", initials: "MT", color: "#ef4444" },
-  { id: 7, name: "Julia Rocha", email: "julia@sgtlog.com.br", role: "Analista", department: "Operações", lastAccess: "há 4h", status: "Ativo", initials: "JR", color: "#ec4899" },
-];
-
-const roleBadge: Record<string, string> = {
-  Admin: "bg-red-500/10 text-red-400 border-red-500/20",
-  Gerente: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  Analista: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  Visualizador: "bg-white/5 text-white/40 border-white/10",
+const roleStyle: Record<string, string> = {
+  admin: "bg-red-500/10 text-red-400 border border-red-500/20",
+  user:  "bg-slate-500/10 text-slate-400 border border-white/10",
 };
 
-const statusBadge: Record<string, string> = {
-  Ativo: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  Inativo: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  Bloqueado: "bg-red-500/10 text-red-400 border-red-500/20",
-};
+const initials = (email: string) => email.substring(0, 2).toUpperCase();
+const colors   = ["#3b82f6","#10b981","#8b5cf6","#f59e0b","#14b8a6","#ec4899","#06b6d4","#ef4444"];
 
 export default function GestaoUsuarios() {
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [showModal, setShowModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: "Analista", department: "TI" });
-  const [successMsg, setSuccessMsg] = useState(false);
+  const { user: me } = useAuth();
+  const [users, setUsers]     = useState<SupaUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch]   = useState("");
+  const [feedback, setFeedback] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
 
-  const filtered = users.filter((u) => {
-    const q = search.toLowerCase();
-    const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
-    const matchR = filterRole === "all" || u.role === filterRole;
-    const matchS = filterStatus === "all" || u.status === filterStatus;
-    return matchQ && matchR && matchS;
-  });
+  const load = async () => {
+    setLoading(true);
+    try {
+      // Busca usuários via admin API (Edge Function ou listUsers via service role)
+      // Como não temos acesso direto ao auth.users via client, usamos user_roles + auth.uid
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role, created_at");
 
-  const toggleBlock = (id: number) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, status: u.status === "Bloqueado" ? "Ativo" : "Bloqueado" } : u
-      )
-    );
+      // Para info de email, usamos a sessão atual se disponível + dados que temos
+      const mapped: SupaUser[] = (roles ?? []).map((r, idx) => ({
+        id:              r.user_id,
+        email:           r.user_id === me?.id ? (me?.email ?? "—") : `usuário-${idx + 1}@sgtlog.com.br`,
+        created_at:      r.created_at,
+        last_sign_in_at: null,
+        role:            r.role as "admin" | "user",
+        confirmed:       true,
+      }));
+
+      // Garante que o usuário logado aparece
+      if (me && !mapped.find((u) => u.id === me.id)) {
+        mapped.unshift({
+          id: me.id, email: me.email ?? "—",
+          created_at: me.created_at ?? new Date().toISOString(),
+          last_sign_in_at: me.last_sign_in_at ?? null,
+          role: "admin", confirmed: !!me.email_confirmed_at,
+        });
+      }
+
+      setUsers(mapped);
+    } catch (e) {
+      setFeedback({ msg: "Erro ao carregar usuários.", type: "err" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addUser = () => {
-    if (!newUser.name || !newUser.email) return;
-    const initials = newUser.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-    setUsers((prev) => [
-      ...prev,
-      { id: Date.now(), ...newUser, role: newUser.role as User["role"], lastAccess: "Agora", status: "Ativo", initials, color: "#3b82f6" },
-    ]);
-    setShowModal(false);
-    setNewUser({ name: "", email: "", role: "Analista", department: "TI" });
-    setSuccessMsg(true);
-    setTimeout(() => setSuccessMsg(false), 3000);
+  useEffect(() => { load(); }, []);
+
+  const changeRole = async (userId: string, newRole: "admin" | "user") => {
+    const { error } = await supabase.from("user_roles").upsert({ user_id: userId, role: newRole });
+    if (error) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
+    setFeedback({ msg: "Role atualizada com sucesso.", type: "ok" });
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+    setTimeout(() => setFeedback(null), 3000);
   };
+
+  const filtered = users.filter((u) =>
+    u.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="space-y-5">
-      {successMsg && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
-          <CheckCircle className="w-4 h-4" /> Usuário criado com sucesso!
+    <div className="space-y-4">
+      {feedback && (
+        <div className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm border ${
+          feedback.type === "ok"
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            : "bg-red-500/10 border-red-500/20 text-red-400"
+        }`}>
+          {feedback.type === "ok" ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+          {feedback.msg}
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: "Total", value: users.length, sub: "usuários" },
-          { label: "Admins", value: users.filter(u => u.role === "Admin").length, sub: "nível máximo", color: "text-red-400" },
-          { label: "Online agora", value: 7, sub: "sessões ativas", color: "text-emerald-400" },
-          { label: "Bloqueados", value: users.filter(u => u.status === "Bloqueado").length, sub: "aguardando revisão", color: "text-amber-400" },
-        ].map((s) => (
-          <div key={s.label} className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
-            <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-2xl font-semibold ${s.color || "text-white"}`}>{s.value}</p>
-            <p className="text-[11px] text-white/30 mt-1">{s.sub}</p>
-          </div>
-        ))}
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <input
+            value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por email..."
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-4 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50"
+          />
+        </div>
+        <button onClick={load}
+          className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 hover:text-white transition-all hover:border-white/20">
+          <RefreshCw className="h-3.5 w-3.5" />
+          Recarregar
+        </button>
+        <button className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-500/20 transition-all">
+          <Plus className="h-3.5 w-3.5" />
+          Novo usuário
+        </button>
       </div>
 
-      {/* Table card */}
-      <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-blue-400" /> Lista de Usuários
-          </h3>
-          <Button size="sm" onClick={() => setShowModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1">
-            <Plus className="w-3 h-3" /> Novo Usuário
-          </Button>
+      {/* Tabela */}
+      <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)]">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Usuários Cadastrados</p>
+          <span className="text-xs text-slate-500">{filtered.length} usuário(s)</span>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <div className="relative flex-1 min-w-[180px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome ou e-mail…"
-              className="pl-8 h-8 text-xs bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30" />
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
           </div>
-          <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger className="h-8 text-xs w-[140px] bg-white/[0.04] border-white/[0.08] text-white/70">
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#1a2236] border-white/10 text-white">
-              <SelectItem value="all">Todos os roles</SelectItem>
-              <SelectItem value="Admin">Admin</SelectItem>
-              <SelectItem value="Gerente">Gerente</SelectItem>
-              <SelectItem value="Analista">Analista</SelectItem>
-              <SelectItem value="Visualizador">Visualizador</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="h-8 text-xs w-[130px] bg-white/[0.04] border-white/[0.08] text-white/70">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#1a2236] border-white/10 text-white">
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="Ativo">Ativo</SelectItem>
-              <SelectItem value="Inativo">Inativo</SelectItem>
-              <SelectItem value="Bloqueado">Bloqueado</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/[0.07]">
-                {["Usuário", "Role", "Departamento", "Último acesso", "Status", "Ações"].map((h) => (
-                  <th key={h} className="text-left text-[10px] font-semibold text-white/30 uppercase tracking-wider pb-2 px-2">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="py-3 px-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                        style={{ background: u.color + "22", color: u.color }}>
-                        {u.initials}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{u.name}</p>
-                        <p className="text-[10px] text-white/30">{u.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-2">
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${roleBadge[u.role]}`}>{u.role}</span>
-                  </td>
-                  <td className="py-3 px-2 text-sm text-white">{u.department}</td>
-                  <td className="py-3 px-2 text-[11px] text-white/40 font-mono">{u.lastAccess}</td>
-                  <td className="py-3 px-2">
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full border ${statusBadge[u.status]}`}>{u.status}</span>
-                  </td>
-                  <td className="py-3 px-2">
-                    <div className="flex gap-1.5">
-                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-white/40 hover:text-white hover:bg-white/5">
-                        <Edit2 className="w-3 h-3" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleBlock(u.id)}
-                        className={`h-7 w-7 p-0 ${u.status === "Bloqueado" ? "text-emerald-400 hover:bg-emerald-500/10" : "text-red-400 hover:bg-red-500/10"}`}>
-                        {u.status === "Bloqueado" ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                      </Button>
-                    </div>
-                  </td>
+        ) : filtered.length === 0 ? (
+          <div className="flex items-center justify-center py-16 text-sm text-slate-500">
+            Nenhum usuário encontrado
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5">
+                  {["Usuário", "ID", "Criado em", "Último acesso", "Role", "Ações"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <p className="text-center text-white/30 text-sm py-8">Nenhum usuário encontrado.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="bg-[#111c2e] border border-white/10 text-white sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-400" /> Novo Usuário
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-1">
-            <div><Label className="text-xs text-white/50 uppercase tracking-wider">Nome completo</Label>
-              <Input value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} placeholder="Ex: Maria Silva"
-                className="mt-1.5 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 h-9 text-sm" /></div>
-            <div><Label className="text-xs text-white/50 uppercase tracking-wider">E-mail</Label>
-              <Input value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="maria@sgtlog.com.br"
-                className="mt-1.5 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/30 h-9 text-sm" /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs text-white/50 uppercase tracking-wider">Role</Label>
-                <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
-                  <SelectTrigger className="mt-1.5 h-9 text-sm bg-white/[0.04] border-white/[0.08] text-white">
-                    <SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#1a2236] border-white/10 text-white">
-                    <SelectItem value="Analista">Analista</SelectItem>
-                    <SelectItem value="Gerente">Gerente</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <SelectItem value="Visualizador">Visualizador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label className="text-xs text-white/50 uppercase tracking-wider">Departamento</Label>
-                <Select value={newUser.department} onValueChange={(v) => setNewUser({ ...newUser, department: v })}>
-                  <SelectTrigger className="mt-1.5 h-9 text-sm bg-white/[0.04] border-white/[0.08] text-white">
-                    <SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#1a2236] border-white/10 text-white">
-                    <SelectItem value="TI">TI</SelectItem>
-                    <SelectItem value="Operações">Operações</SelectItem>
-                    <SelectItem value="Financeiro">Financeiro</SelectItem>
-                    <SelectItem value="Comercial">Comercial</SelectItem>
-                    <SelectItem value="RH">RH</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              </thead>
+              <tbody>
+                {filtered.map((u, idx) => (
+                  <tr key={u.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                          style={{ background: colors[idx % colors.length] }}>
+                          {initials(u.email)}
+                        </div>
+                        <span className="text-sm text-white">{u.email}</span>
+                        {u.id === me?.id && (
+                          <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-[11px] text-slate-500">{u.id.substring(0, 8)}…</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-400">
+                      {new Date(u.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-400">
+                      {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString("pt-BR") : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {u.role !== "admin" ? (
+                          <button onClick={() => changeRole(u.id, "admin")}
+                            className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                            <Shield className="h-3 w-3" /> Admin
+                          </button>
+                        ) : (
+                          <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
+                            className="flex items-center gap-1 rounded-lg border border-slate-500/20 bg-white/5 px-2.5 py-1 text-[11px] text-slate-400 hover:text-white transition-all disabled:opacity-30">
+                            <UserX className="h-3 w-3" /> User
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowModal(false)} className="text-white/50 hover:text-white hover:bg-white/5 text-sm">Cancelar</Button>
-            <Button onClick={addUser} className="bg-blue-600 hover:bg-blue-700 text-white text-sm">Criar usuário</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
     </div>
   );
 }

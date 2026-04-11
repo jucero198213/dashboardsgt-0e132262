@@ -1,28 +1,21 @@
 import { useState, useEffect } from "react";
-import { Database, Play, Trash2, Key } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Database, Key, Play, Info } from "lucide-react";
 
-interface DBTable {
-  name: string;
-  rows: string;
-  size: string;
-  cols: { name: string; type: "PK" | "FK" | "col" }[];
-}
-
-const DB_TABLES: DBTable[] = [
-  { name: "faturamento", rows: "1.2M", size: "284MB", cols: [{ name: "id", type: "PK" }, { name: "empresa_id", type: "FK" }, { name: "data_emissao", type: "col" }, { name: "valor_bruto", type: "col" }, { name: "valor_liquido", type: "col" }, { name: "status", type: "col" }, { name: "criado_em", type: "col" }] },
-  { name: "clientes", rows: "48.3K", size: "12MB", cols: [{ name: "id", type: "PK" }, { name: "razao_social", type: "col" }, { name: "cnpj", type: "col" }, { name: "cidade", type: "col" }, { name: "uf", type: "col" }, { name: "ativo", type: "col" }] },
-  { name: "motoristas", rows: "2.1K", size: "3MB", cols: [{ name: "id", type: "PK" }, { name: "nome", type: "col" }, { name: "cnh", type: "col" }, { name: "categoria", type: "col" }, { name: "status", type: "col" }, { name: "veiculo_id", type: "FK" }] },
-  { name: "veiculos", rows: "890", size: "1.2MB", cols: [{ name: "id", type: "PK" }, { name: "placa", type: "col" }, { name: "modelo", type: "col" }, { name: "tipo", type: "col" }, { name: "tara_kg", type: "col" }, { name: "ativo", type: "col" }] },
-  { name: "ocorrencias", rows: "156K", size: "45MB", cols: [{ name: "id", type: "PK" }, { name: "cte_id", type: "FK" }, { name: "tipo", type: "col" }, { name: "descricao", type: "col" }, { name: "data", type: "col" }, { name: "resolvido", type: "col" }] },
-  { name: "usuarios", rows: "24", size: "0.1MB", cols: [{ name: "id", type: "PK" }, { name: "nome", type: "col" }, { name: "email", type: "col" }, { name: "role", type: "col" }, { name: "ativo", type: "col" }, { name: "ultimo_acesso", type: "col" }] },
+const TABLES = [
+  { name: "user_roles",   rows: "24",    size: "0.1MB", cols: [{ name: "id", type: "PK" }, { name: "user_id", type: "FK" }, { name: "role", type: "col" }, { name: "created_at", type: "col" }] },
+  { name: "PAGDOCI",      rows: "1.2M",  size: "284MB", cols: [{ name: "NUMDOC", type: "PK" }, { name: "CODCLIFOR", type: "FK" }, { name: "DATVEN", type: "col" }, { name: "DATPAG", type: "col" }, { name: "VLRPAR", type: "col" }, { name: "VLRPAG", type: "col" }, { name: "SITUAC", type: "col" }] },
+  { name: "RECDOCI",      rows: "980K",  size: "210MB", cols: [{ name: "NUMDUP", type: "PK" }, { name: "CODCLIFOR", type: "FK" }, { name: "DATVEN", type: "col" }, { name: "DATREC", type: "col" }, { name: "VLRPAR", type: "col" }, { name: "VLRREC", type: "col" }, { name: "SITUAC", type: "col" }] },
+  { name: "PAGRAT",       rows: "1.1M",  size: "95MB",  cols: [{ name: "NUMDOC", type: "FK" }, { name: "CODCUS", type: "col" }, { name: "CODCGA", type: "col" }, { name: "VALOR", type: "col" }, { name: "ANALIT", type: "col" }] },
+  { name: "RODFIL",       rows: "48",    size: "0.2MB", cols: [{ name: "CODFIL", type: "PK" }, { name: "CODEMP", type: "FK" }, { name: "NOMEAB", type: "col" }] },
+  { name: "RODCUS",       rows: "156",   size: "0.5MB", cols: [{ name: "CODCUS", type: "PK" }, { name: "DESCRI", type: "col" }] },
 ];
 
+type ColType = "PK" | "FK" | "col";
+
 export default function BancoDados() {
-  const [selected, setSelected] = useState<DBTable | null>(null);
+  const [selected, setSelected] = useState<typeof TABLES[0] | null>(null);
   const [query, setQuery] = useState("");
-  const [queryResult, setQueryResult] = useState<{ msg: string; type: "ok" | "warn" | "" }>({ msg: "", type: "" });
+  const [result, setResult] = useState<{ msg: string; type: "ok" | "warn" | "" }>({ msg: "", type: "" });
   const [qps, setQps] = useState(142);
 
   useEffect(() => {
@@ -32,126 +25,104 @@ export default function BancoDados() {
 
   const runQuery = () => {
     if (!query.trim()) return;
-    setQueryResult({ msg: "Executando…", type: "" });
+    setResult({ msg: "Executando…", type: "" });
     setTimeout(() => {
-      if (/^select/i.test(query)) {
-        setQueryResult({ msg: `✓ ${Math.floor(Math.random() * 500 + 10)} linhas retornadas em ${Math.floor(Math.random() * 300 + 50)}ms`, type: "ok" });
+      if (/^select/i.test(query.trim())) {
+        setResult({ msg: `✓ ${Math.floor(Math.random() * 500 + 10)} linhas retornadas em ${Math.floor(Math.random() * 200 + 50)}ms`, type: "ok" });
       } else {
-        setQueryResult({ msg: "⚠ Operação de escrita requer aprovação do DBA.", type: "warn" });
+        setResult({ msg: "⚠ Operações de escrita requerem aprovação do DBA.", type: "warn" });
       }
-    }, 700);
+    }, 600);
   };
 
-  const colTag = (type: "PK" | "FK" | "col") => {
-    if (type === "PK") return <span className="w-5 h-4 flex items-center justify-center text-[9px] font-bold rounded bg-amber-500/15 text-amber-400 flex-shrink-0"><Key className="w-2.5 h-2.5" /></span>;
-    if (type === "FK") return <span className="w-5 h-4 flex items-center justify-center text-[9px] font-bold rounded bg-purple-500/15 text-purple-400 flex-shrink-0">FK</span>;
-    return <span className="w-5 flex-shrink-0" />;
+  const colTag = (type: ColType) => {
+    if (type === "PK") return <span className="flex h-4 w-5 items-center justify-center rounded bg-amber-500/15 text-amber-400 shrink-0"><Key className="h-2.5 w-2.5" /></span>;
+    if (type === "FK") return <span className="flex h-4 w-5 items-center justify-center rounded bg-violet-500/15 text-[8px] font-bold text-violet-400 shrink-0">FK</span>;
+    return <span className="w-5 shrink-0" />;
   };
 
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Tabelas", value: "47", sub: "schema public" },
-          { label: "Tamanho total", value: "2.8GB", sub: "uso atual" },
-          { label: "Queries/min", value: String(qps), sub: "média última hora", color: "text-emerald-400" },
+          { label: "Tabelas", value: String(TABLES.length), sub: "schema" },
+          { label: "Tamanho total", value: "~600MB", sub: "uso estimado" },
+          { label: "Queries/min", value: String(qps), sub: "média", color: "text-emerald-400" },
           { label: "Conexões ativas", value: "18/100", sub: "pool ativo" },
         ].map((s) => (
-          <div key={s.label} className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
-            <p className="text-[11px] text-white/40 uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-xl font-semibold ${s.color || "text-white"}`}>{s.value}</p>
-            <p className="text-[11px] text-white/30 mt-1">{s.sub}</p>
+          <div key={s.label} className="rounded-[16px] border border-white/8 bg-white/[0.03] px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
+            <p className={`mt-1 text-xl font-bold ${s.color ?? "text-white"}`}>{s.value}</p>
+            <p className="text-[10px] text-slate-600">{s.sub}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Table list */}
-        <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Database className="w-4 h-4 text-teal-400" /> Tabelas Principais
-            </h3>
-            <Button size="sm" variant="outline" className="text-xs border-white/10 text-white/50 hover:bg-white/5 hover:text-white h-7">
-              + Nova tabela
-            </Button>
-          </div>
-          <div className="space-y-1.5">
-            {DB_TABLES.map((t) => (
-              <div key={t.name} onClick={() => setSelected(t)}
-                className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all
-                  ${selected?.name === t.name
-                    ? "border-blue-500/50 bg-blue-500/10"
-                    : "border-white/[0.06] bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"}`}>
-                <div>
-                  <p className="text-xs font-semibold text-white font-mono">{t.name}</p>
-                  <p className="text-[10px] text-white/35 mt-0.5">{t.rows} registros · {t.size}</p>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-white/35 border border-white/10">
-                  {t.cols.length} cols
-                </span>
-              </div>
-            ))}
-          </div>
+      <div className="grid gap-4 xl:grid-cols-[280px_1fr]">
+        {/* Lista de tabelas */}
+        <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-4 space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mb-3">Tabelas</p>
+          {TABLES.map((t) => (
+            <button key={t.name} onClick={() => setSelected(t === selected ? null : t)}
+              className={`w-full flex items-center justify-between rounded-[10px] px-3 py-2 text-sm transition-all ${
+                selected?.name === t.name
+                  ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+              }`}>
+              <span className="flex items-center gap-2">
+                <Database className="h-3.5 w-3.5 shrink-0" />
+                <span className="font-mono text-[12px]">{t.name}</span>
+              </span>
+              <span className="text-[10px] text-slate-600">{t.rows}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Detail + Query */}
         <div className="space-y-4">
-          <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-white mb-3">
-              {selected ? `📊 ${selected.name}` : "← Selecione uma tabela"}
-            </h3>
-            {selected ? (
-              <>
-                <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg overflow-hidden mb-3">
-                  <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04] border-b border-white/[0.06]">
-                    <span className="text-xs font-semibold text-white font-mono">{selected.name}</span>
-                    <span className="text-[10px] text-white/35">{selected.rows} rows · {selected.size}</span>
-                  </div>
-                  {selected.cols.map((col) => (
-                    <div key={col.name} className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.03] last:border-0">
-                      {colTag(col.type)}
-                      <span className="text-xs text-white font-mono">{col.name}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {[`SELECT * FROM ${selected.name} LIMIT 100;`, `SELECT COUNT(*) FROM ${selected.name};`].map((q) => (
-                    <Button key={q} size="sm" variant="outline" onClick={() => setQuery(q)}
-                      className="text-[11px] border-white/10 text-white/50 hover:bg-white/5 hover:text-white h-7">
-                      {q.startsWith("SELECT *") ? "SELECT *" : "COUNT"}
-                    </Button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-white/30">Clique em uma tabela para inspecionar o schema.</p>
-            )}
-          </div>
-
-          {/* Query editor */}
-          <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2 mb-3">
-              <Play className="w-4 h-4 text-emerald-400" /> Query Rápida
-            </h3>
-            <Textarea value={query} onChange={(e) => setQuery(e.target.value)} rows={4}
-              placeholder="SELECT * FROM faturamento WHERE data >= CURRENT_DATE - 30 LIMIT 100;"
-              className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/25 text-xs font-mono resize-y" />
-            <div className="flex gap-2 mt-2">
-              <Button size="sm" onClick={runQuery} className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 gap-1">
-                <Play className="w-3 h-3" /> Executar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => { setQuery(""); setQueryResult({ msg: "", type: "" }); }}
-                className="text-xs border-white/10 text-white/50 hover:bg-white/5 hover:text-white h-8 gap-1">
-                <Trash2 className="w-3 h-3" /> Limpar
-              </Button>
-            </div>
-            {queryResult.msg && (
-              <p className={`text-xs mt-2 font-mono ${queryResult.type === "ok" ? "text-emerald-400" : queryResult.type === "warn" ? "text-amber-400" : "text-white/40"}`}>
-                {queryResult.msg}
+          {/* Schema da tabela selecionada */}
+          {selected && (
+            <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 mb-3">
+                Schema — <span className="font-mono text-cyan-400">{selected.name}</span>
               </p>
-            )}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {selected.cols.map((c) => (
+                  <div key={c.name} className="flex items-center gap-2 rounded-[8px] border border-white/6 bg-white/[0.025] px-3 py-2">
+                    {colTag(c.type as ColType)}
+                    <span className="font-mono text-[12px] text-slate-300">{c.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Console SQL */}
+          <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Console SQL</p>
+              <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[9px] font-semibold text-amber-400 flex items-center gap-1">
+                <Info className="h-2.5 w-2.5" /> Read-only
+              </span>
+            </div>
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="SELECT * FROM user_roles LIMIT 10;"
+              rows={4}
+              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 font-mono text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-cyan-500/50 resize-none"
+            />
+            <div className="flex items-center gap-3">
+              <button onClick={runQuery}
+                className="flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-all">
+                <Play className="h-3.5 w-3.5" /> Executar
+              </button>
+              {result.msg && (
+                <span className={`text-sm ${result.type === "ok" ? "text-emerald-400" : result.type === "warn" ? "text-amber-400" : "text-slate-400"}`}>
+                  {result.msg}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
