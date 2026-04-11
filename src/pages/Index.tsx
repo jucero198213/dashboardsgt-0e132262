@@ -1104,7 +1104,7 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white break-all leading-tight">
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
                       <p className="mt-2 text-sm text-slate-400">
@@ -1145,10 +1145,13 @@ const Index = () => {
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white break-all leading-tight">
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
-                      <p className="mt-2 text-sm text-slate-400">
+                      <p className="mt-1 text-[13px] font-semibold text-red-300">
+                        {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
+                      </p>
+                      <p className="mt-1 text-sm text-slate-400">
                         CR vencido sem recebimento
                       </p>
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
@@ -1209,7 +1212,7 @@ const Index = () => {
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.9rem,2.5vw,2.5rem)] font-extrabold tracking-[-0.05em] text-white">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white leading-tight">
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm text-slate-400">

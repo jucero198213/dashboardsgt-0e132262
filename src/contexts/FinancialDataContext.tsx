@@ -53,6 +53,7 @@ const defaultKpiExtra: KpiExtra = {
   saldoLiquido:      0,
   inadimplencia:     0,
   inadimplenciaDocs: 0,
+  inadimplenciaPerc: 0,
   realizacaoCP:      0,
   realizacaoCR:      0,
 };
@@ -84,11 +85,12 @@ export interface DadosMensais {
 
 // ─── KPIs extras ─────────────────────────────────────────────────────────────
 export interface KpiExtra {
-  saldoLiquido:      number;  // RECEBIDO - PAGO
-  inadimplencia:     number;  // CR vencido sem DATA_PAGAMENTO
-  inadimplenciaDocs: number;  // qtd documentos vencidos
-  realizacaoCP:      number;  // PAGO / PREVISTO_CP * 100
-  realizacaoCR:      number;  // RECEBIDO / PREVISTO_CR * 100
+  saldoLiquido:      number;
+  inadimplencia:     number;
+  inadimplenciaDocs: number;
+  inadimplenciaPerc: number;  // % inadimplência / A RECEBER
+  realizacaoCP:      number;
+  realizacaoCR:      number;
 }
 
 // ─── State & Context types ───────────────────────────────────────────────────
@@ -170,7 +172,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v3";
+const CACHE_KEY = "dw_financial_cache_v4";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -195,6 +197,7 @@ function loadCache(): CachedState | null {
     // Limpa versão antiga se existir
     sessionStorage.removeItem("dw_financial_cache_v1");
     sessionStorage.removeItem("dw_financial_cache_v2");
+    sessionStorage.removeItem("dw_financial_cache_v3");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -554,12 +557,24 @@ export function FinancialDataProvider({
       });
       const inadimplencia     = sumCol(inadimDocs, "VLR_PARCELA");
       const inadimplenciaDocs = inadimDocs.length;
+      // % Inadimplência = inadimplência / A RECEBER total
+      const inadimplenciaPerc = totalAReceber > 0
+        ? Math.round((inadimplencia / totalAReceber) * 1000) / 10
+        : 0;
 
-      // 3. % Realização CP = PAGO / PREVISTO_CP * 100
-      const realizacaoCP = totalPagar    > 0 ? Math.round((valorPago     / totalPagar)    * 1000) / 10 : 0;
-      const realizacaoCR = totalAReceber > 0 ? Math.round((valorRecebido / totalAReceber) * 1000) / 10 : 0;
+      // 3. % Realização CP = PAGO / A PAGAR * 100
+      const realizacaoCP = totalPagar > 0
+        ? Math.round((valorPago / totalPagar) * 1000) / 10
+        : 0;
 
-      const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, realizacaoCP, realizacaoCR };
+      // 4. % Realização CR = docs com DATVEN no período que foram recebidos / A RECEBER
+      //    Mede: do que vencia no período, quanto % foi efetivamente cobrado
+      const crRecebidoPeriodo = crAReceber.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      const realizacaoCR = totalAReceber > 0
+        ? Math.round((sumCol(crRecebidoPeriodo, "VLR_PARCELA") / totalAReceber) * 1000) / 10
+        : 0;
+
+      const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, inadimplenciaPerc, realizacaoCP, realizacaoCR };
       saveCache({
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber,
