@@ -381,12 +381,12 @@ export function FinancialDataProvider({
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
 
-      const totalPagar    = sumCol(cpPrevisto,  "VLR_PARCELA"); // card A PAGAR    (D/P + noPag + DATVEN)
+      const totalPagar    = sumCol(cpAPagar,    "VLR_PARCELA"); // card A PAGAR    (L/P/D + DATVEN)
       const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO       (L/P + DATPAG no período)
-      const saldoAPagar   = sumCol(cpAPagar,    "VLR_PARCELA"); // sub-card CONTAS A PAGAR (L/P/D + DATVEN)
-      const totalAReceber = sumCol(crPrevisto,  "VLR_PARCELA"); // card A RECEBER
-      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO
-      const totalReceber  = sumCol(crAReceber,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER
+      const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR (D/P + noPag + DATVEN)
+      const totalAReceber = sumCol(crAReceber,  "VLR_PARCELA"); // card A RECEBER  (L/P/D + DATVEN)
+      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO   (L/P + DATPAG no período)
+      const totalReceber  = sumCol(crPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER (D/P + noPag + DATVEN)
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
@@ -493,12 +493,12 @@ export function FinancialDataProvider({
       const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
       const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
 
-      // Previsto CR → D/P + noPag + DATA_VENCIMENTO (= card A RECEBER)
-      const chartCrPrevisto  = chartAllCR.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      // Previsto CR → L/P/D + DATA_VENCIMENTO (= card A RECEBER)
+      const chartCrPrevisto  = chartAllCR.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
       // Recebido CR → L/P + hasPag + DATA_PAGAMENTO (= card RECEBIDO)
       const chartCrRecebido  = chartAllCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      // Previsto CP → D/P + noPag + DATA_VENCIMENTO (= card A PAGAR)
-      const chartCpPrevisto  = chartAllCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      // Previsto CP → L/P/D + DATA_VENCIMENTO (= card A PAGAR)
+      const chartCpPrevisto  = chartAllCP.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
       // Pago CP → L/P + hasPag + DATA_PAGAMENTO (= card PAGO)
       const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
 
