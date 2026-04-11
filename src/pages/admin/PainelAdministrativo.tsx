@@ -5,6 +5,11 @@ import {
   ChevronRight, Lock, Server, Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import GestaoUsuarios from "./GestaoUsuarios";
+import Configuracoes from "./Configuracoes";
+import BancoDados from "./BancoDados";
+import Monitoramento from "./Monitoramento";
+import Seguranca from "./Seguranca";
 
 type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca";
 
@@ -71,14 +76,13 @@ export default function PainelAdministrativo() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Lazy-load sub-pages to keep bundle light
   const renderContent = () => {
     switch (screen) {
-      case "usuarios":  { const G = require("./GestaoUsuarios").default;   return <G />; }
-      case "config":    { const C = require("./Configuracoes").default;     return <C />; }
-      case "banco":     { const B = require("./BancoDados").default;        return <B />; }
-      case "monitor":   { const M = require("./Monitoramento").default;     return <M />; }
-      case "seguranca": { const S = require("./Seguranca").default;         return <S />; }
+      case "usuarios":  return <GestaoUsuarios />;
+      case "config":    return <Configuracoes />;
+      case "banco":     return <BancoDados />;
+      case "monitor":   return <Monitoramento />;
+      case "seguranca": return <Seguranca />;
       default: return null;
     }
   };

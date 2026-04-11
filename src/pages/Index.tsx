@@ -494,6 +494,7 @@ const Index = () => {
   const [presentationMode, setPresentationMode] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState<string>("");
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const filiaisFiltradas = useMemo(
     () =>
@@ -535,6 +536,7 @@ const Index = () => {
       window.clearInterval(interval);
       setLoadingPhase("Concluído!");
       setProgress(100);
+      setLastUpdated(new Date());
     } catch (error) {
       window.clearInterval(interval);
       setLoadingPhase("");
@@ -853,9 +855,9 @@ const Index = () => {
                       Tempo real
                     </span>
                   </div>
-                  {isProcessed && (
+                  {lastUpdated && (
                     <span className="text-[10px] font-medium text-slate-600">
-                      {formatDate(dwFilter.dataInicio)} → {formatDate(dwFilter.dataFim)}
+                      {lastUpdated.toLocaleDateString("pt-BR")} {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                     </span>
                   )}
                 </div>
