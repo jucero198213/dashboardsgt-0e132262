@@ -313,9 +313,34 @@ export function FinancialDataProvider({
       const allCR = data.filter((r) => r.ORIGEM === "CR");
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 1. A PAGAR PREVISTO → CP | SITUACAO D ou P | DATA_PAGAMENTO NULL | VLR_PARCELA
+      // 1. A PAGAR (card topo)
+      //    → CP | SITUACAO L/P/D | DATA_VENCIMENTO no período | VLR_PARCELA
+      //    Tudo programado para pagar no período (independente de estar pago)
       // ─────────────────────────────────────────────────────────────────────────
-      const cpPrevisto = allCP.filter((r) => (sit(r) === "D" || sit(r) === "P") && noPag(r));
+      const cpAPagar = allCP.filter((r) =>
+        (sit(r) === "L" || sit(r) === "P" || sit(r) === "D") &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 1b. PAGO (card topo)
+      //    → CP | SITUACAO L/P | DATA_PAGAMENTO no período | VLR_PAGO
+      // ─────────────────────────────────────────────────────────────────────────
+      const cpPago = allCP.filter((r) =>
+        (sit(r) === "L" || sit(r) === "P") &&
+        hasPag(r) &&
+        inRange(r.DATA_PAGAMENTO, di, df)
+      );
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 1c. SUB-CARD CONTAS A PAGAR (saldo pendente)
+      //    → CP | SITUACAO D/P | DATA_PAGAMENTO NULL | DATVEN no período
+      // ─────────────────────────────────────────────────────────────────────────
+      const cpPrevisto = allCP.filter((r) =>
+        (sit(r) === "D" || sit(r) === "P") &&
+        noPag(r) &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
 
       // ─────────────────────────────────────────────────────────────────────────
       // 2. A RECEBER (card topo)
@@ -328,9 +353,8 @@ export function FinancialDataProvider({
       );
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 3. PAGO → CP | SITUACAO L | DATA_PAGAMENTO NOT NULL | VLR_PAGO
+      // 3. PAGO → CP já definido acima como cpPago
       // ─────────────────────────────────────────────────────────────────────────
-      const cpPago = allCP.filter((r) => sit(r) === "L" && hasPag(r));
 
       // ─────────────────────────────────────────────────────────────────────────
       // 4. RECEBIDO (card topo)
@@ -357,17 +381,18 @@ export function FinancialDataProvider({
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
 
-      const totalPagar    = sumCol(cpPrevisto,  "VLR_PARCELA");
-      const valorPago     = sumCol(cpPago,      "VLR_PAGO");
-      const totalAReceber = sumCol(crPrevisto,  "VLR_PARCELA"); // card A RECEBER  (D/P + noPag + DATVEN no período)
-      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO   (L/P + DATREC no período)
-      const totalReceber  = sumCol(crAReceber,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER (saldo pendente)
+      const totalPagar    = sumCol(cpAPagar,    "VLR_PARCELA"); // card A PAGAR
+      const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO
+      const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR
+      const totalAReceber = sumCol(crPrevisto,  "VLR_PARCELA"); // card A RECEBER
+      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO
+      const totalReceber  = sumCol(crAReceber,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
-          valorAPagar:  totalPagar,
-          valorPago,
-          saldoAPagar:  totalPagar,
+          valorAPagar: totalPagar,   // card A PAGAR = programado para pagar no período
+          valorPago,                  // card PAGO    = pago com datapag no período
+          saldoAPagar,                // sub-card CONTAS A PAGAR = saldo pendente (D/P + noPag)
         },
         contasReceber: {
           valorAReceber: totalAReceber,  // card A RECEBER = programado para vencer no período
