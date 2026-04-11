@@ -381,9 +381,9 @@ export function FinancialDataProvider({
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
 
-      const totalPagar    = sumCol(cpAPagar,    "VLR_PARCELA"); // card A PAGAR
-      const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO
-      const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR
+      const totalPagar    = sumCol(cpPrevisto,  "VLR_PARCELA"); // card A PAGAR    (D/P + noPag + DATVEN)
+      const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO       (L/P + DATPAG no período)
+      const saldoAPagar   = sumCol(cpAPagar,    "VLR_PARCELA"); // sub-card CONTAS A PAGAR (L/P/D + DATVEN)
       const totalAReceber = sumCol(crPrevisto,  "VLR_PARCELA"); // card A RECEBER
       const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO
       const totalReceber  = sumCol(crAReceber,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER
