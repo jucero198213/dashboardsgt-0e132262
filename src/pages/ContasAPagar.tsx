@@ -67,9 +67,8 @@ const ContasAPagar = () => {
 
   const fmt = (d: string | null | undefined) => (d ? formatDate(d) : "—");
 
-  const totalEmAberto = contasPagar.filter((c) => c.status === "Em Aberto" || c.status === "Parcial").reduce((s, c) => s + c.valor, 0);
-  const totalVencido = contasPagar.filter((c) => c.status === "Vencido").reduce((s, c) => s + c.valor, 0);
   const pctPago = resumoPagar.valorAPagar > 0 ? (resumoPagar.valorPago / resumoPagar.valorAPagar) * 100 : 0;
+  const totalVencido = contasPagar.filter((c) => c.status === "Vencido").reduce((s, c) => s + c.valor, 0);
 
   const statusFilters = [
     { value: "todos", label: "Todos" },
@@ -129,7 +128,7 @@ const ContasAPagar = () => {
               <KpiCard label="Valor Pago" value={formatCurrency(resumoPagar.valorPago)} rawValue={resumoPagar.valorPago} subtitle={`${pctPago.toFixed(1)}% do previsto`} icon={CheckCircle} tone="emerald" />
             </AnimatedCard>
             <AnimatedCard delay={160}>
-              <KpiCard label="Saldo em Aberto" value={formatCurrency(totalEmAberto)} rawValue={totalEmAberto} subtitle="Pendente de pagamento" icon={Clock} tone="amber" />
+              <KpiCard label="Saldo em Aberto" value={formatCurrency(resumoPagar.saldoAPagar)} rawValue={resumoPagar.saldoAPagar} subtitle="Pendente de pagamento" icon={Clock} tone="amber" />
             </AnimatedCard>
             <AnimatedCard delay={240}>
               <KpiCard label="Vencidos" value={formatCurrency(totalVencido)} rawValue={totalVencido} subtitle={`${contasPagar.filter((c) => c.status === "Vencido").length} documento(s)`} icon={TrendingDown} tone="rose" />

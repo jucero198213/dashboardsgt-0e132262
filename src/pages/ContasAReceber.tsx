@@ -67,7 +67,6 @@ const ContasAReceber = () => {
 
   const fmt = (d: string | null | undefined) => (d ? formatDate(d) : "—");
 
-  const totalEmAberto = contasReceber.filter((c) => c.status === "Em Aberto" || c.status === "Parcial").reduce((s, c) => s + c.valor, 0);
   const totalVencido = contasReceber.filter((c) => c.status === "Vencido").reduce((s, c) => s + c.valor, 0);
   const pctRecebido = resumoReceber.valorAReceber > 0 ? (resumoReceber.valorRecebido / resumoReceber.valorAReceber) * 100 : 0;
 
@@ -129,7 +128,7 @@ const ContasAReceber = () => {
               <KpiCard label="Valor Recebido" value={formatCurrency(resumoReceber.valorRecebido)} rawValue={resumoReceber.valorRecebido} subtitle={`${pctRecebido.toFixed(1)}% do previsto`} icon={CheckCircle} tone="emerald" />
             </AnimatedCard>
             <AnimatedCard delay={160}>
-              <KpiCard label="Saldo em Aberto" value={formatCurrency(totalEmAberto)} rawValue={totalEmAberto} subtitle="Pendente de recebimento" icon={Clock} tone="amber" />
+              <KpiCard label="Saldo em Aberto" value={formatCurrency(resumoReceber.saldoAReceber)} rawValue={resumoReceber.saldoAReceber} subtitle="Pendente de recebimento" icon={Clock} tone="amber" />
             </AnimatedCard>
             <AnimatedCard delay={240}>
               <KpiCard label="Vencidos" value={formatCurrency(totalVencido)} rawValue={totalVencido} subtitle={`${contasReceber.filter((c) => c.status === "Vencido").length} documento(s)`} icon={TrendingUp} tone="rose" />
