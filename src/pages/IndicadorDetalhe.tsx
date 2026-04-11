@@ -22,7 +22,7 @@ import {
 const INDICATOR_CODCUS: Record<string, string[]> = {
   "Compra de Ativo": ["26"],
   "Óleo Diesel":     ["21"],
-  "Folha":           ["3"],
+  "Folha":           ["9"],
   "Imposto":         ["23"],
   "Pedágio":         ["24"],
   "Administrativo":  ["3"],

@@ -458,7 +458,7 @@ export function FinancialDataProvider({
         "Pedágio":         ["24"],
         "Manutenção":      ["4", "5", "6", "7", "25"],
         "Compra de Ativo": ["26"],
-        "Folha":           ["3"],
+        "Folha":           ["9"],
       };
 
       const baseIndicadores = allCP;
