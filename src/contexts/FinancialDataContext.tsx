@@ -109,6 +109,7 @@ interface FinancialDataState {
   empresas:          FilterOption[];
   isFetchingDw:      boolean;
   dwError:           string | null;
+  dwRawData:         DwRow[];   // ← dados brutos para drill-down por indicador
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -239,6 +240,7 @@ export function FinancialDataProvider({
     empresas:     [],
     isFetchingDw: false,
     dwError:      null,
+    dwRawData:    [],
   });
 
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
@@ -590,6 +592,7 @@ export function FinancialDataProvider({
         isProcessed:  true,
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber, kpiExtra,
+        dwRawData: data,
       }));
     } catch (err) {
       setState((prev) => ({
