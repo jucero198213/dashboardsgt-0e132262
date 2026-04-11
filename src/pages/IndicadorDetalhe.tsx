@@ -43,7 +43,23 @@ const PAGE_SIZE_COMP = 8;
 const PAGE_SIZE_DOCS = 50;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-const fmt = (d: string | null | undefined) => (d ? formatDate(d) : "—");
+const fmt = (d: string | Date | null | undefined): string => {
+  if (!d) return "—";
+  // Se for objeto Date
+  if (d instanceof Date) {
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  // Se for string — normaliza para YYYY-MM-DD e formata
+  const s = String(d).trim();
+  if (!s || s.toLowerCase() === "null") return "—";
+  const iso = s.split("T")[0]; // remove hora
+  const parts = iso.split("-");
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return s;
+};
 
 const CustomTooltipLine = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -64,7 +80,7 @@ export default function IndicadorDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {
-    indicadores, dwRawData, dwFilter, setDwFilter, fetchFromDW,
+    indicadores, dwRawData, dwChartData, dwFilter, setDwFilter, fetchFromDW,
     filiais, empresas, isProcessed, isFetchingDw,
   } = useFinancialData();
 
@@ -119,9 +135,9 @@ export default function IndicadorDetalhe() {
     const anoAntNum = mes === 1 ? ano - 1 : ano;
     const mesAnt = `${anoAntNum}-${String(mesAntNum).padStart(2, "0")}`;
 
-    const byDay = (prefix: string) => {
+    const byDay = (source: typeof dwRawData, prefix: string) => {
       const map: Record<string, number> = {};
-      dwRawData.forEach((r) => {
+      source.forEach((r) => {
         if (r.ORIGEM !== "CP") return;
         const cod = String(r.CODCUS ?? "").trim();
         if (!codcusList.includes(cod)) return;
@@ -133,20 +149,21 @@ export default function IndicadorDetalhe() {
       return map;
     };
 
-    const atual = byDay(mesAtual);
-    const anterior = byDay(mesAnt);
+    // Mês atual: usa dwRawData (período filtrado)
+    const atual    = byDay(dwRawData,    mesAtual);
+    // Mês anterior: usa dwChartData (ano inteiro, contém todos os meses)
+    const anterior = byDay(dwChartData, mesAnt);
+
     const dias = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
 
-    const result = dias
+    return dias
       .filter((d) => atual[d] !== undefined || anterior[d] !== undefined)
       .map((d) => ({
         dia: Number(d),
-        mesAtual: atual[d] ?? 0,
+        mesAtual:    atual[d]    ?? 0,
         mesAnterior: anterior[d] ?? 0,
       }));
-
-    return result;
-  }, [dwRawData, di, codcusList]);
+  }, [dwRawData, dwChartData, di, codcusList]);
 
   // ── Documentos detalhados paginados ────────────────────────────────────────
   const totalPaginasDocs = Math.max(1, Math.ceil(rowsFiltrados.length / PAGE_SIZE_DOCS));
@@ -397,34 +414,34 @@ export default function IndicadorDetalhe() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/5 hover:bg-transparent">
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Emissão</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Vencimento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Pagamento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Documento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Parcela</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Emissão</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Venc.</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-24 whitespace-nowrap">Dt. Pag.</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-28">Documento</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-16 text-center">Parcela</TableHead>
                       <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Fornecedor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">C. Custo</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Valor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Vl. Pago</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Situação</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32">C. Custo</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32 text-right">Valor</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-32 text-right">Vl. Pago</TableHead>
+                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 w-20 text-center">Sit.</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {docsPaginados.map((r, i) => (
                       <TableRow key={i} className="border-white/5 hover:bg-white/[0.03]">
-                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(r.DATA_EMISSAO)}</TableCell>
-                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(r.DATA_VENCIMENTO)}</TableCell>
-                        <TableCell className="text-sm whitespace-nowrap">
+                        <TableCell className="text-sm text-slate-300 w-24 whitespace-nowrap">{fmt(r.DATA_EMISSAO)}</TableCell>
+                        <TableCell className="text-sm text-slate-300 w-24 whitespace-nowrap">{fmt(r.DATA_VENCIMENTO)}</TableCell>
+                        <TableCell className="text-sm w-24 whitespace-nowrap">
                           {r.DATA_PAGAMENTO
                             ? <span className="text-amber-400">{fmt(r.DATA_PAGAMENTO)}</span>
                             : <span className="text-slate-600">—</span>}
                         </TableCell>
-                        <TableCell className="text-sm font-medium text-white">{r.DOCUMENTO ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-300 text-center">{r.PARCELA ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-300 max-w-[180px] truncate">{r.NOME_PARCEIRO ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-500">{r.CENTRO_CUSTO ?? r.CODCUS ?? "—"}</TableCell>
-                        <TableCell className="text-right text-sm font-semibold text-white whitespace-nowrap">{formatCurrency(r.VLR_PARCELA ?? 0)}</TableCell>
-                        <TableCell className="text-right text-sm text-amber-300 whitespace-nowrap">
+                        <TableCell className="text-sm font-medium text-white w-28 whitespace-nowrap">{r.DOCUMENTO ?? "—"}</TableCell>
+                        <TableCell className="text-sm text-slate-300 w-16 text-center">{r.PARCELA ?? "—"}</TableCell>
+                        <TableCell className="text-sm text-slate-300 max-w-[200px] truncate">{r.NOME_PARCEIRO ?? "—"}</TableCell>
+                        <TableCell className="text-sm text-slate-500 w-32 truncate">{r.CENTRO_CUSTO ?? r.CODCUS ?? "—"}</TableCell>
+                        <TableCell className="text-right text-sm font-semibold text-white w-32 whitespace-nowrap">{formatCurrency(r.VLR_PARCELA ?? 0)}</TableCell>
+                        <TableCell className="text-right text-sm text-amber-300 w-32 whitespace-nowrap">
                           {(r.VLR_PAGO ?? 0) > 0 ? formatCurrency(r.VLR_PAGO ?? 0) : <span className="text-slate-600">—</span>}
                         </TableCell>
                         <TableCell className="text-center">
