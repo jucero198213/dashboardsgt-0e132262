@@ -243,12 +243,26 @@ export default function IndicadorDetalhe() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen bg-[#020617] text-white flex flex-col px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2">
       {/* Efeitos de background idênticos ao portal */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
-      <div className="relative mx-auto max-w-[1400px] space-y-5 animate-[fadeSlideIn_0.5s_ease-out]">
+      <section className="relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto">
+
+        {/* Progress bar idêntica ao dashboard */}
+        {isFetchingDw && (
+          <div className="absolute inset-x-0 top-0 z-50">
+            <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 shadow-[0_0_12px_rgba(34,211,238,0.5)] transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+      <div className="relative mx-auto max-w-[1400px] space-y-5 px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 animate-[fadeSlideIn_0.5s_ease-out]">
 
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
@@ -513,6 +527,7 @@ export default function IndicadorDetalhe() {
         </AnimatedCard>
 
       </div>
+      </section>
     </div>
   );
 }
