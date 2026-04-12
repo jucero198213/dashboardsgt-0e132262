@@ -320,13 +320,13 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Gráfico + Composição ── */}
-          <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
 
             {/* Gráfico */}
-            <div className="overflow-hidden rounded-[22px] border border-white/[0.09] bg-[linear-gradient(160deg,rgba(14,22,52,0.90)_0%,rgba(7,12,34,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/[0.14]">
+            <div className="flex flex-col overflow-hidden rounded-[22px] border border-white/[0.09] bg-[linear-gradient(160deg,rgba(14,22,52,0.90)_0%,rgba(7,12,34,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/[0.14]">
               {/* Glow interno topo */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-              <div className="p-6 pb-0">
+              <div className="p-6 pb-0 shrink-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Evolução Diária</p>
@@ -345,7 +345,7 @@ export default function IndicadorDetalhe() {
                 </div>
               </div>
               {evolucaoDiaria.length > 0 ? (
-                <div className="h-[300px] px-2 pb-4 pt-4">
+                <div className="flex-1 min-h-[280px] px-2 pb-5 pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={evolucaoDiaria} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
                       <defs>
@@ -365,7 +365,7 @@ export default function IndicadorDetalhe() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex h-[300px] items-center justify-center">
+                <div className="flex flex-1 min-h-[280px] items-center justify-center">
                   <div className="text-center space-y-2">
                     <Sparkles className="h-8 w-8 text-slate-700 mx-auto" />
                     <p className="text-sm text-slate-600">Sem dados no período</p>
