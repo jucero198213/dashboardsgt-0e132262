@@ -80,7 +80,7 @@ const ContasAReceber = () => {
   const showLoading = isFetchingDw && !isProcessed;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen bg-[#060912] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
       <BackgroundEffects />
 
       <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
@@ -155,7 +155,7 @@ const ContasAReceber = () => {
 
         {/* Table */}
         <AnimatedCard delay={320}>
-          <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)]">
+          <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between p-6 pb-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Documentos — Contas a Receber</p>
               {isProcessed && contasFiltradas.length > 0 && (

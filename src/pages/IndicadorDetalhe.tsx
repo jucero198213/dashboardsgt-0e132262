@@ -117,6 +117,147 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
   );
 }
 
+// ─── Config de headers contextuais por indicador ────────────────────────────
+interface HeaderCfg {
+  veilRgba: string;          // cor base do véu right-to-left
+  stripe: string;            // classes gradient da stripe no topo
+  border: string;            // border do card
+  dotColor: string;          // classe da bolinha na info bar
+  infoLabel: string;         // label uppercase esquerdo
+  infoValue: string;         // valor principal da info bar
+  infoValueColor: string;    // cor do valor principal
+  extras: { text: string; color: string }[];
+  codcus: string;
+  badgeClass: string;        // borda + bg + text do badge
+  badgeText: string;
+}
+
+const HEADER_CFG: Record<string, HeaderCfg> = {
+  "Compra de Ativo": {
+    veilRgba: "rgba(139,92,246,0.16)",
+    stripe: "from-violet-400/60 to-violet-700/20",
+    border: "border-violet-400/[0.12]",
+    dotColor: "bg-violet-400", infoLabel: "ATIVO IMOBILIZADO",
+    infoValue: "Equipamentos e Frota", infoValueColor: "text-violet-300",
+    extras: [{ text: "IPCA ▲ +4,8% a.a.", color: "text-amber-400" }, { text: "Custo de reposição monitorado", color: "text-slate-500" }],
+    codcus: "C. Custo 26",
+    badgeClass: "border-violet-400/20 bg-violet-400/10 text-violet-300",
+    badgeText: "Investimento Estratégico",
+  },
+  "Folha": {
+    veilRgba: "rgba(52,211,153,0.13)",
+    stripe: "from-emerald-400/60 to-emerald-700/20",
+    border: "border-emerald-400/[0.12]",
+    dotColor: "bg-emerald-400", infoLabel: "FOLHA DE PAGAMENTO",
+    infoValue: "Salário Mín. R$ 1.518,00", infoValueColor: "text-emerald-300",
+    extras: [{ text: "FGTS 8% + INSS 20%", color: "text-slate-400" }, { text: "Salários, encargos e benefícios", color: "text-slate-500" }],
+    codcus: "C. Custo 09",
+    badgeClass: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "Imposto": {
+    veilRgba: "rgba(244,63,94,0.14)",
+    stripe: "from-rose-400/60 to-rose-700/20",
+    border: "border-rose-400/[0.12]",
+    dotColor: "bg-rose-400", infoLabel: "OBRIGAÇÕES FISCAIS",
+    infoValue: "ICMS · ISS · PIS · COFINS", infoValueColor: "text-rose-300",
+    extras: [{ text: "Tributos estaduais e federais", color: "text-slate-400" }, { text: "Competência: período vigente", color: "text-slate-500" }],
+    codcus: "C. Custo 23",
+    badgeClass: "border-rose-400/20 bg-rose-400/10 text-rose-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "Pedágio": {
+    veilRgba: "rgba(6,182,212,0.13)",
+    stripe: "from-cyan-400/60 to-cyan-700/20",
+    border: "border-cyan-400/[0.12]",
+    dotColor: "bg-cyan-400", infoLabel: "CUSTOS VIÁRIOS",
+    infoValue: "Rotas operacionais", infoValueColor: "text-cyan-300",
+    extras: [{ text: "Tags e cancelamento monitorados", color: "text-slate-400" }, { text: "Praças em todas as rotas", color: "text-slate-500" }],
+    codcus: "C. Custo 24",
+    badgeClass: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "Administrativo": {
+    veilRgba: "rgba(245,158,11,0.13)",
+    stripe: "from-amber-400/60 to-amber-700/20",
+    border: "border-amber-400/[0.12]",
+    dotColor: "bg-amber-400", infoLabel: "DESPESAS GERAIS",
+    infoValue: "Escritório e Serviços", infoValueColor: "text-amber-300",
+    extras: [{ text: "Aluguel, utilities e terceiros", color: "text-slate-400" }, { text: "Overhead corporativo", color: "text-slate-500" }],
+    codcus: "C. Custo 03",
+    badgeClass: "border-amber-400/20 bg-amber-400/10 text-amber-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "Manutenção": {
+    veilRgba: "rgba(245,158,11,0.14)",
+    stripe: "from-amber-400/60 to-orange-700/20",
+    border: "border-amber-400/[0.12]",
+    dotColor: "bg-orange-400", infoLabel: "MANUTENÇÃO DE FROTA",
+    infoValue: "Preventiva e Corretiva", infoValueColor: "text-orange-300",
+    extras: [{ text: "Peças, mão de obra e oficinas", color: "text-slate-400" }, { text: "Veículos e equipamentos", color: "text-slate-500" }],
+    codcus: "C. Custo 04 · 05 · 06 · 07 · 25",
+    badgeClass: "border-amber-400/20 bg-amber-400/10 text-amber-300",
+    badgeText: "Indicador Estratégico",
+  },
+};
+
+// ─── Header contextual genérico (todos exceto Óleo Diesel) ───────────────────
+function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; percentualEsperado: number; percentualReal: number }; navigate: (p: string) => void }) {
+  const cfg = HEADER_CFG[indicador.nome];
+  const subtitle = SUBTITLES[indicador.nome] ?? "Detalhamento do indicador estratégico";
+
+  return (
+    <div className={`relative overflow-hidden rounded-[22px] border ${cfg?.border ?? "border-white/[0.09]"} bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]`}>
+
+      {/* Stripe de identidade no topo */}
+      {cfg && <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${cfg.stripe}`} />}
+
+      {/* Véu de cor à direita */}
+      {cfg && <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l to-transparent"
+        style={{ backgroundImage: `linear-gradient(to left, ${cfg.veilRgba} 0%, ${cfg.veilRgba.replace(/[\d.]+\)$/, "0.04)")} 55%, transparent 100%)` }} />}
+
+      {/* Info bar contextual */}
+      {cfg && (
+        <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+          <div className="flex items-center gap-2">
+            <div className={`h-1.5 w-1.5 rounded-full ${cfg.dotColor}`} />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">{cfg.infoLabel}</span>
+            <span className={`ml-1 text-[12px] font-semibold ${cfg.infoValueColor}`}>{cfg.infoValue}</span>
+          </div>
+          {cfg.extras.map((e, i) => (
+            <span key={i} className="flex items-center gap-3">
+              <span className="h-3 w-px bg-white/10" />
+              <span className={`text-[11px] ${e.color}`}>{e.text}</span>
+            </span>
+          ))}
+          <span className="ml-auto text-[9px] text-slate-600">{cfg.codcus}</span>
+        </div>
+      )}
+
+      {/* Conteúdo textual */}
+      <div className="relative z-10 px-6 py-5">
+        <div className="flex items-start gap-4">
+          <button onClick={() => navigate("/")}
+            className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white">
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <div>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${cfg?.badgeClass ?? "border-amber-400/20 bg-amber-400/10 text-amber-300"}`}>
+                <BarChart3 className="h-2.5 w-2.5" /> {cfg?.badgeText ?? "Indicador Estratégico"}
+              </span>
+            </div>
+            <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
+              {indicador.nome}
+            </h1>
+            <p className="mt-2.5 text-sm text-slate-500">{subtitle}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function IndicadorDetalhe() {
   const { id } = useParams<{ id: string }>();
@@ -344,24 +485,7 @@ export default function IndicadorDetalhe() {
               </div>
             </div>
           ) : (
-            /* Header padrão — demais indicadores */
-            <div className="flex items-start gap-4">
-              <button onClick={() => navigate("/")}
-                className="mt-1 flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <div>
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
-                    <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
-                  </span>
-                </div>
-                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
-                  {indicador.nome}
-                </h1>
-                <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
-              </div>
-            </div>
+            <ContextualHeader indicador={indicador} navigate={navigate} />
           )}
 
           {/* ── Filtros ── */}
