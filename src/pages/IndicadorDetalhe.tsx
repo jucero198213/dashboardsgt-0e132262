@@ -36,14 +36,17 @@ const SUBTITLES: Record<string, string> = {
   "Manutenção":      "Manutenção preventiva e corretiva de veículos e equipamentos",
 };
 
-// Tone config por card — glow, gradiente border e cor do ícone
+// ─── Design system executivo — sem azul de template ─────────────────────────
 type Tone = "cyan" | "emerald" | "amber" | "violet" | "rose";
-const TONE: Record<Tone, { border: string; glow: string; bg: string; icon: string; text: string; badge: string }> = {
-  cyan:    { border: "border-cyan-500/25",    glow: "shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_16px_48px_rgba(6,182,212,0.10)]",    bg: "bg-cyan-500/8",    icon: "bg-cyan-500/15 text-cyan-300 border-cyan-500/20",    text: "text-cyan-400",    badge: "bg-cyan-500/10 text-cyan-300 border-cyan-500/20" },
-  emerald: { border: "border-emerald-500/25", glow: "shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_16px_48px_rgba(16,185,129,0.10)]", bg: "bg-emerald-500/8", icon: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20", text: "text-emerald-400", badge: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" },
-  amber:   { border: "border-amber-500/25",   glow: "shadow-[0_0_0_1px_rgba(245,158,11,0.08),0_16px_48px_rgba(245,158,11,0.08)]",  bg: "bg-amber-500/8",   icon: "bg-amber-500/15 text-amber-300 border-amber-500/20",   text: "text-amber-400",   badge: "bg-amber-500/10 text-amber-300 border-amber-500/20" },
-  violet:  { border: "border-violet-500/25",  glow: "shadow-[0_0_0_1px_rgba(139,92,246,0.08),0_16px_48px_rgba(139,92,246,0.08)]",  bg: "bg-violet-500/8",  icon: "bg-violet-500/15 text-violet-300 border-violet-500/20",  text: "text-violet-400",  badge: "bg-violet-500/10 text-violet-300 border-violet-500/20" },
-  rose:    { border: "border-rose-500/25",    glow: "shadow-[0_0_0_1px_rgba(244,63,94,0.08),0_16px_48px_rgba(244,63,94,0.08)]",    bg: "bg-rose-500/8",    icon: "bg-rose-500/15 text-rose-300 border-rose-500/20",    text: "text-rose-400",    badge: "bg-rose-500/10 text-rose-300 border-rose-500/20" },
+const TONE: Record<Tone, {
+  stripe: string; border: string; glow: string;
+  iconBg: string; iconTxt: string; sub: string; spot: string;
+}> = {
+  cyan:    { stripe:"from-cyan-400/60 to-cyan-700/20",    border:"border-cyan-400/[0.12]",    glow:"hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",    iconBg:"bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt:"text-cyan-300",    sub:"text-cyan-500/80",    spot:"rgba(6,182,212,0.10)" },
+  emerald: { stripe:"from-emerald-400/60 to-emerald-700/20", border:"border-emerald-400/[0.12]", glow:"hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]", iconBg:"bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt:"text-emerald-300", sub:"text-emerald-500/80", spot:"rgba(16,185,129,0.10)" },
+  amber:   { stripe:"from-amber-400/60 to-amber-700/20",   border:"border-amber-400/[0.12]",   glow:"hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",   iconBg:"bg-amber-400/[0.08] border border-amber-400/[0.15]",   iconTxt:"text-amber-300",   sub:"text-amber-500/80",   spot:"rgba(245,158,11,0.10)" },
+  violet:  { stripe:"from-violet-400/60 to-violet-700/20", border:"border-violet-400/[0.12]",  glow:"hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",  iconBg:"bg-violet-400/[0.08] border border-violet-400/[0.15]",  iconTxt:"text-violet-300",  sub:"text-violet-500/80",  spot:"rgba(139,92,246,0.10)" },
+  rose:    { stripe:"from-rose-400/60 to-rose-700/20",     border:"border-rose-400/[0.12]",    glow:"hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",    iconBg:"bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt:"text-rose-300",    sub:"text-rose-500/80",    spot:"rgba(244,63,94,0.10)" },
 };
 
 const PAGE_SIZE_COMP = 8;
@@ -63,45 +66,52 @@ const fmt = (d: string | Date | null | undefined): string => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-2xl border border-white/12 bg-[rgba(7,14,38,0.96)] px-5 py-4 shadow-[0_24px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Dia {label}</p>
+    <div className="rounded-2xl border border-white/[0.1] bg-[#0c0f1c] px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+      <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-600">Dia {label}</p>
       {payload.map((p: any) => (
         <div key={p.dataKey} className="flex items-center gap-3">
-          <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
-          <p className="text-sm font-medium text-slate-300">{p.name}</p>
-          <p className="ml-auto pl-6 text-sm font-bold text-white">{formatCurrency(p.value)}</p>
+          <span className="h-[3px] w-5 rounded-full shrink-0" style={{ background: p.color }} />
+          <p className="text-[12px] font-medium text-slate-400">{p.name}</p>
+          <p className="ml-auto pl-6 text-[13px] font-bold text-white">{formatCurrency(p.value)}</p>
         </div>
       ))}
     </div>
   );
 };
 
-// ─── KPI Card premium ────────────────────────────────────────────────────────
+// ─── KPI Card — nível executivo ──────────────────────────────────────────────
 function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
   label: string; value: string; subtitle: string; Icon: any; tone: Tone;
 }) {
   const t = TONE[tone];
   return (
-    <div className={`group relative flex min-h-[140px] flex-col overflow-hidden rounded-[22px] border ${t.border} bg-[linear-gradient(145deg,rgba(18,28,60,0.85)_0%,rgba(9,15,38,0.97)_100%)] p-5 transition-all duration-500 hover:-translate-y-1.5 ${t.glow} hover:border-opacity-50`}>
-      {/* Shimmer interno */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.04),transparent_55%)]" />
-      {/* Glow de tom no canto */}
-      <div className={`pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full ${t.bg} blur-2xl opacity-60 transition-opacity duration-500 group-hover:opacity-100`} />
+    <div className={`group relative flex min-h-[152px] flex-col overflow-hidden rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
 
-      <div className="mb-auto flex items-start justify-between gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500 transition-colors duration-300 group-hover:text-slate-400">
-          {label}
-        </p>
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg ${t.icon}`}>
-          <Icon className="h-4 w-4" />
+      {/* Stripe de cor no topo — identidade única por card */}
+      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
+
+      {/* Spot glow no canto inferior direito */}
+      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
+        style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
+
+      <div className="relative flex h-full flex-col p-5">
+        {/* Label + ícone */}
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{label}</p>
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+            <Icon className="h-3.5 w-3.5" />
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <p className="text-[28px] font-extrabold leading-none tracking-[-0.04em] text-white">
+        {/* Valor — protagonista da tela */}
+        <p className="mt-auto pt-4 text-[30px] font-black leading-none tracking-[-0.05em] text-white">
           {value}
         </p>
-        <p className={`mt-2 text-[11px] font-medium ${t.text}`}>{subtitle}</p>
+
+        {/* Subtítulo em tom */}
+        <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
+          {subtitle}
+        </p>
       </div>
     </div>
   );
@@ -225,17 +235,17 @@ export default function IndicadorDetalhe() {
   );
 
   return (
-    <div className="min-h-screen bg-[#040810] text-white">
+    <div className="min-h-screen bg-[#060912] text-white">
 
-      {/* ── Background com identidade própria — sem grid de template ── */}
-      {/* Luz ambiente quente: âmbar no topo — identidade diesel/energia */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_90%_60%_at_52%_-8%,rgba(160,100,5,0.20),transparent_62%)]" />
-      {/* Contraluz fria e sutil no canto inferior — profundidade */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_55%_50%_at_-8%_108%,rgba(6,182,212,0.07),transparent_65%)]" />
-      {/* Vinheta perimetral — retira o "flat" e adiciona peso visual */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_130%_130%_at_50%_50%,transparent_20%,rgba(2,4,14,0.65)_100%)]" />
+      {/* ── Atmosfera — identidade, não template ── */}
+      {/* Luz âmbar intensa no topo: diesel, energia, presença */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
+      {/* Contraluz fria: profundidade no rodapé-direito */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
+      {/* Vinheta densa nas bordas — impede o fundo de parecer flat */}
+      <div className="pointer-events-none fixed inset-0" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
 
-      {/* Progress bar — âmbar para manter identidade */}
+      {/* Progress bar — âmbar coerente com tema */}
       {isFetchingDw && (
         <div className="fixed inset-x-0 top-0 z-50 h-[2px] overflow-hidden">
           <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_14px_rgba(251,191,36,0.55)] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
@@ -355,29 +365,29 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Filtros ── */}
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 backdrop-blur-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-4 py-3">
             {[
               { value: dwFilter.dataInicio, onChange: (v: string) => { setDwFilter("dataInicio", v); setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
               { value: dwFilter.dataFim,    onChange: (v: string) => { setDwFilter("dataFim", v);    setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
             ].map((inp, i) => (
               <input key={i} type="date" value={inp.value} onChange={(e) => inp.onChange(e.target.value)}
-                className="h-8 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm text-slate-200 [color-scheme:dark] transition-all focus:border-cyan-500/40 focus:outline-none focus:bg-white/[0.07] focus:shadow-[0_0_0_3px_rgba(6,182,212,0.08)]" />
+                className="h-8 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none focus:bg-white/[0.07] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]" />
             ))}
             <select value={dwFilter.empresa ?? ""} onChange={(e) => { setDwFilter("empresa", e.target.value || null); setDwFilter("filial", null); }}
-              className="h-8 rounded-xl border border-white/10 bg-[#0b1428] px-3 text-sm text-slate-200 transition-all focus:border-cyan-500/40 focus:outline-none">
+              className="h-8 rounded-xl border border-white/[0.08] bg-[#0e1120] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as empresas</option>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
             <select value={dwFilter.filial ?? ""} onChange={(e) => setDwFilter("filial", e.target.value || null)}
-              className="h-8 rounded-xl border border-white/10 bg-[#0b1428] px-3 text-sm text-slate-200 transition-all focus:border-cyan-500/40 focus:outline-none">
+              className="h-8 rounded-xl border border-white/[0.08] bg-[#0e1120] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as filiais</option>
               {filiaisFiltradas.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
             <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-              className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-semibold transition-all disabled:cursor-not-allowed ${isFetchingDw ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200" : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-400/15 hover:border-cyan-400/30 hover:shadow-[0_0_16px_rgba(6,182,212,0.15)]"}`}>
+              className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-semibold transition-all disabled:cursor-not-allowed ${isFetchingDw ? "border-amber-400/30 bg-amber-500/10 text-amber-200" : "border-amber-400/20 bg-amber-500/[0.08] text-amber-300 hover:bg-amber-400/12 hover:border-amber-400/30 hover:shadow-[0_0_18px_rgba(245,158,11,0.18)]"}`}>
               <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
               {isFetchingDw
-                ? <span className="flex items-center gap-2"><span className="hidden sm:inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>
+                ? <span className="flex items-center gap-2"><span className="hidden sm:inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span>
                 : "Atualizar"}
             </button>
           </div>
@@ -404,9 +414,9 @@ export default function IndicadorDetalhe() {
           <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
 
             {/* Gráfico */}
-            <div className="flex flex-col overflow-hidden rounded-[22px] border border-white/[0.09] bg-[linear-gradient(160deg,rgba(14,22,52,0.90)_0%,rgba(7,12,34,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/[0.14]">
-              {/* Glow interno topo */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+            <div className="flex flex-col overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]">
+              {/* Linha de cor no topo */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent pointer-events-none" />
               <div className="p-6 pb-0 shrink-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -456,7 +466,7 @@ export default function IndicadorDetalhe() {
             </div>
 
             {/* Composição */}
-            <div className="overflow-hidden rounded-[22px] border border-white/[0.09] bg-[linear-gradient(160deg,rgba(14,22,52,0.90)_0%,rgba(7,12,34,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/[0.14] p-6 flex flex-col">
+            <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-6 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Composição</p>
@@ -511,7 +521,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Documentos Detalhados ── */}
-          <div className="overflow-hidden rounded-[22px] border border-white/[0.09] bg-[linear-gradient(160deg,rgba(14,22,52,0.90)_0%,rgba(7,12,34,0.98)_100%)] shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+          <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
             {/* Header da tabela */}
             <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
               <div>
