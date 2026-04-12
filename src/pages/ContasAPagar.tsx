@@ -94,23 +94,55 @@ const ContasAPagar = () => {
           <UserMenu />
         </div>
 
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <button
-            onClick={() => navigate("/")}
-            className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
-                <FileText className="h-3 w-3" />
-                Contas a Pagar
+        {/* Header contextual — Contas a Pagar */}
+        <div className="relative overflow-hidden rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]">
+
+          {/* Stripe de identidade amber */}
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/60 to-amber-700/20" />
+
+          {/* Véu amber à direita */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(245,158,11,0.13)] via-[rgba(245,158,11,0.03)] to-transparent" />
+
+          {/* Info bar contextual */}
+          <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">Contas a Pagar</span>
+              <span className="ml-1 text-[12px] font-semibold text-amber-300">Obrigações do Período</span>
+            </div>
+            <span className="flex items-center gap-3">
+              <span className="h-3 w-px bg-white/10" />
+              <span className="text-[11px] text-slate-400">Fornecedores e prestadores</span>
+            </span>
+            <span className="flex items-center gap-3">
+              <span className="h-3 w-px bg-white/10" />
+              <span className="text-[11px] text-slate-500">Emissão no período selecionado</span>
+            </span>
+            <span className="ml-auto text-[9px] text-slate-600">Origem: CP</span>
+          </div>
+
+          {/* Conteúdo */}
+          <div className="relative z-10 px-6 py-5">
+            <div className="flex items-start gap-4">
+              <button
+                onClick={() => navigate("/")}
+                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+                    <FileText className="h-2.5 w-2.5" />
+                    Contas a Pagar
+                  </div>
+                </div>
+                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent sm:text-4xl md:text-5xl">
+                  Detalhamento — Pagamentos
+                </h1>
+                <p className="mt-2.5 text-sm text-slate-500">Visão detalhada de todos os documentos a pagar do período</p>
               </div>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-4xl">Detalhamento — Pagamentos</h1>
-            <p className="mt-2 text-sm text-slate-400 max-w-xl">Visão detalhada de todos os documentos a pagar do período</p>
           </div>
         </div>
 
