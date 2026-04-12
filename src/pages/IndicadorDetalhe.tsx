@@ -225,24 +225,24 @@ export default function IndicadorDetalhe() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white flex flex-col px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2">
-      {/* Background: radial glows + grid — idêntico ao portal */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+    <div className="min-h-screen bg-[#040810] text-white">
 
-      {/* Container principal — mesmo DNA do portal */}
-      <section className="relative flex-1 border border-white/[0.09] bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.52)] rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto">
+      {/* ── Background com identidade própria — sem grid de template ── */}
+      {/* Luz ambiente quente: âmbar no topo — identidade diesel/energia */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_90%_60%_at_52%_-8%,rgba(160,100,5,0.20),transparent_62%)]" />
+      {/* Contraluz fria e sutil no canto inferior — profundidade */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_55%_50%_at_-8%_108%,rgba(6,182,212,0.07),transparent_65%)]" />
+      {/* Vinheta perimetral — retira o "flat" e adiciona peso visual */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_130%_130%_at_50%_50%,transparent_20%,rgba(2,4,14,0.65)_100%)]" />
 
-        {/* Progress bar */}
-        {isFetchingDw && (
-          <div className="absolute inset-x-0 top-0 z-50">
-            <div className="h-[3px] w-full overflow-hidden rounded-t-[24px]">
-              <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 shadow-[0_0_14px_rgba(34,211,238,0.6)] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
+      {/* Progress bar — âmbar para manter identidade */}
+      {isFetchingDw && (
+        <div className="fixed inset-x-0 top-0 z-50 h-[2px] overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_14px_rgba(251,191,36,0.55)] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+        </div>
+      )}
 
-        <div className="relative mx-auto max-w-[1400px] px-4 py-5 sm:px-6 sm:py-7 lg:px-10 lg:py-9 space-y-6">
+      <div className="relative mx-auto max-w-[1400px] px-5 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10 space-y-6">
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export default function IndicadorDetalhe() {
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
           {indicador.nome === "Óleo Diesel" ? (
-            <div className="relative overflow-hidden rounded-[24px] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(13,21,51,0.97)_0%,rgba(7,12,28,0.99)_100%)]">
+            <div className="relative overflow-hidden rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
 
               {/* C — véu âmbar à direita */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(201,162,39,0.17)] via-[rgba(201,162,39,0.05)] to-transparent" />
@@ -598,8 +598,7 @@ export default function IndicadorDetalhe() {
             )}
           </div>
 
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
