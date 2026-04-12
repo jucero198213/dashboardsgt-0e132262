@@ -78,7 +78,7 @@ const Skeleton = ({ className = "" }: { className?: string }) => (
 );
 
 const CardSkeleton = () => (
-  <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] p-3.5">
+  <div className="rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] p-3.5">
     <Skeleton className="mb-3 h-3 w-20" />
     <Skeleton className="mb-2 h-6 w-32" />
     <Skeleton className="h-3 w-24" />
@@ -86,7 +86,7 @@ const CardSkeleton = () => (
 );
 
 const LargeCardSkeleton = () => (
-  <div className="rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] p-3.5">
+  <div className="rounded-[22px] border border-white/[0.07] bg-[#0c0f1c] p-3.5">
     <Skeleton className="mb-2 h-3 w-28" />
     <Skeleton className="mb-1 h-7 w-40" />
     <Skeleton className="mb-3 h-3 w-32" />
@@ -99,7 +99,7 @@ const LargeCardSkeleton = () => (
 );
 
 const IndicatorSkeleton = () => (
-  <div className="rounded-[16px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.88)_0%,rgba(9,14,33,0.98)_100%)] p-3">
+  <div className="rounded-[16px] border border-white/[0.07] bg-[#0c0f1c] p-3">
     <div className="mb-2 flex justify-between">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-3 w-10" />
@@ -246,7 +246,7 @@ const MiniLineChart = ({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col rounded-[22px] border border-white/8 bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-white/[0.07] bg-white/[0.025] p-3">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
@@ -709,9 +709,9 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.32)] ${isPositive
-            ? "border-emerald-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-emerald-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
-            : "border-amber-500/16 bg-[linear-gradient(180deg,rgba(11,18,38,0.82)_0%,rgba(6,11,28,0.99)_100%)] hover:border-amber-400/30 hover:bg-[linear-gradient(180deg,rgba(14,24,46,0.92)_0%,rgba(8,14,32,1)_100%)]"
+        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
+            ? "border-emerald-500/[0.14] bg-[#0c0f1c] hover:border-emerald-400/25"
+            : "border-amber-500/[0.14] bg-[#0c0f1c] hover:border-amber-400/25"
           } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
@@ -807,13 +807,15 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[#020617] text-white transition-all duration-300 ${presentationMode
+      className={`min-h-screen bg-[#060912] text-white transition-all duration-300 ${presentationMode
           ? "h-screen w-screen overflow-hidden p-0"
           : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
     >
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.08),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+      {/* ── Atmosfera — luz âmbar no topo, fria no rodapé, vinheta nas bordas ── */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(160,100,4,0.22),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_50%_40%_at_100%_105%,rgba(6,182,212,0.07),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
 
       <div
         className={`relative flex flex-col ${presentationMode
@@ -822,24 +824,22 @@ const Index = () => {
           }`}
       >
         <section
-          className={`relative flex-1 border border-white/10 bg-[linear-gradient(135deg,rgba(22,32,78,0.94)_0%,rgba(7,14,38,0.985)_54%,rgba(2,8,23,1)_100%)] shadow-[0_30px_80px_rgba(0,0,0,0.48)] ${presentationMode
+          className={`relative flex-1 border border-white/[0.07] bg-[rgba(8,11,20,0.94)] shadow-[0_30px_80px_rgba(0,0,0,0.55)] ${presentationMode
               ? "h-full w-full overflow-hidden rounded-none"
               : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
             }`}
         >
-          {/* Global progress bar — top of section */}
+          {/* Progress bar — âmbar coerente com o tema */}
           {isFetchingDw && (
             <div className="absolute inset-x-0 top-0 z-50">
               <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 shadow-[0_0_12px_rgba(34,211,238,0.5)] transition-all duration-500 ease-out"
+                  className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
           )}
-
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(99,102,241,0.22),transparent_18%),radial-gradient(circle_at_84%_12%,rgba(14,165,233,0.10),transparent_18%),radial-gradient(circle_at_48%_100%,rgba(16,185,129,0.05),transparent_20%)]" />
 
           <div className="relative flex flex-col gap-3 p-3 sm:p-3.5 lg:p-4">
             {/* Header — full width */}
@@ -984,10 +984,10 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.82)_0%,rgba(10,16,36,0.98)_100%)] transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(25,36,86,0.88)_0%,rgba(12,18,40,1)_100%)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.30)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.12] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                               }`}
                           >
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.04),transparent_30%)]" />
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
                             <div className="relative flex h-full flex-col justify-between">
                               <div className="flex items-start justify-between gap-3">
@@ -1077,12 +1077,13 @@ const Index = () => {
                 <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
-                    className={`group relative overflow-hidden rounded-[22px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)] ${kpiExtra.saldoLiquido >= 0
-                        ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5"
-                        : "border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5"
+                    className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                        ? "border-emerald-400/[0.12] bg-[#0c0f1c]"
+                        : "border-rose-400/[0.12] bg-[#0c0f1c]"
                       }`}
                   >
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                    <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32"
+                      style={{ background: kpiExtra.saldoLiquido >= 0 ? "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.09), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
                         <span
@@ -1136,8 +1137,8 @@ const Index = () => {
                   </div>
 
                   {/* INADIMPLÊNCIA */}
-                  <div className="group relative overflow-hidden rounded-[22px] border border-red-500/25 bg-gradient-to-br from-red-500/10 to-red-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
@@ -1170,8 +1171,8 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
-                  <div className="group relative overflow-hidden rounded-[22px] border border-violet-500/25 bg-gradient-to-br from-violet-500/10 to-violet-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
@@ -1200,8 +1201,8 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
-                  <div className="group relative overflow-hidden rounded-[22px] border border-cyan-500/25 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_30%)]" />
+                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
@@ -1232,7 +1233,7 @@ const Index = () => {
               )}
 
               <aside
-                className={`rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,40,0.97)_0%,rgba(6,11,28,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_32px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl ${presentationMode
+                className={`rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] shadow-[0_8px_40px_rgba(0,0,0,0.4)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
                     : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
                   }`}
