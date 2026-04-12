@@ -254,24 +254,105 @@ export default function IndicadorDetalhe() {
             <UserMenu />
           </div>
 
-          {/* ── Header ── */}
-          <div className="flex items-start gap-4">
-            <button onClick={() => navigate("/")}
-              className="mt-1 flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <div>
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
-                  <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
-                </span>
+          {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
+          {indicador.nome === "Óleo Diesel" ? (
+            <div className="relative overflow-hidden rounded-[24px] border border-white/[0.09] bg-[linear-gradient(135deg,rgba(13,21,51,0.97)_0%,rgba(7,12,28,0.99)_100%)]">
+
+              {/* C — véu âmbar à direita */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(201,162,39,0.17)] via-[rgba(201,162,39,0.05)] to-transparent" />
+
+              {/* A — barra de preço ANP */}
+              <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">Diesel S-10</span>
+                  <span className="ml-1 text-[12px] font-semibold text-amber-300">R$ 6,84/L</span>
+                </div>
+                <div className="h-3 w-px bg-white/10" />
+                <span className="text-[11px] font-medium text-emerald-400">▲ +2,3% vs mês anterior</span>
+                <div className="h-3 w-px bg-white/10" />
+                <span className="text-[10px] text-slate-500">Referência nacional ANP</span>
+                <span className="ml-auto text-[9px] text-slate-600">Atualizado hoje · 08:00</span>
               </div>
-              <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
-                {indicador.nome}
-              </h1>
-              <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
+
+              {/* D — gauge semicircular dinâmico */}
+              <div className="absolute right-5 top-[48px] z-10">
+                {(() => {
+                  const cx = 60, cy = 72, r = 48;
+                  const pReal = indicador.percentualReal;
+                  const pMeta = indicador.percentualEsperado;
+                  const pt = (pct: number, radius: number) => {
+                    const a = Math.PI - (pct / 100) * Math.PI;
+                    return { x: +(cx + radius * Math.cos(a)).toFixed(2), y: +(cy - radius * Math.sin(a)).toFixed(2) };
+                  };
+                  const fe  = pt(pReal, r);
+                  const mo  = pt(pMeta, r + 7);
+                  const mi  = pt(pMeta, r - 7);
+                  const ml  = pt(pMeta, r + 15);
+                  const laf = pReal > 50 ? 1 : 0;
+                  return (
+                    <svg viewBox="0 0 120 96" width="112" height="88">
+                      <path d={`M ${cx-r} ${cy} A ${r} ${r} 0 0 0 ${cx+r} ${cy}`}
+                        fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="9" strokeLinecap="round"/>
+                      <path d={`M ${cx-r} ${cy} A ${r} ${r} 0 ${laf} 0 ${fe.x} ${fe.y}`}
+                        fill="none" stroke="#1fb8a6" strokeWidth="9" strokeLinecap="round"/>
+                      <line x1={mi.x} y1={mi.y} x2={mo.x} y2={mo.y}
+                        stroke="#c9a227" strokeWidth="2.5" strokeLinecap="round"/>
+                      <circle cx={mo.x} cy={mo.y} r="3" fill="#c9a227"/>
+                      <text x={ml.x} y={ml.y - 2} textAnchor="middle"
+                        fill="#c9a227" fontSize="7" fontFamily="sans-serif">{pMeta}%</text>
+                      <text x={cx} y={cy - 4} textAnchor="middle"
+                        fill="white" fontSize="12" fontWeight="700" fontFamily="sans-serif">{pReal.toFixed(1)}%</text>
+                      <text x={cx} y={cy + 6} textAnchor="middle"
+                        fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="sans-serif">meta {pMeta}%</text>
+                      <text x={cx-r-3} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">E</text>
+                      <text x={cx+r-4} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">F</text>
+                    </svg>
+                  );
+                })()}
+              </div>
+
+              {/* Conteúdo textual */}
+              <div className="relative z-10 px-6 py-5 pr-[140px]">
+                <div className="flex items-start gap-4">
+                  <button onClick={() => navigate("/")}
+                    className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                  <div>
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+                        <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
+                      </span>
+                    </div>
+                    <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
+                      {indicador.nome}
+                    </h1>
+                    <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Header padrão — demais indicadores */
+            <div className="flex items-start gap-4">
+              <button onClick={() => navigate("/")}
+                className="mt-1 flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+                    <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
+                  </span>
+                </div>
+                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
+                  {indicador.nome}
+                </h1>
+                <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
+              </div>
+            </div>
+          )}
 
           {/* ── Filtros ── */}
           <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.025] px-4 py-3 backdrop-blur-sm">
