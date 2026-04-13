@@ -825,9 +825,9 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen transition-all duration-300 ${presentationMode
-          ? "h-screen w-screen overflow-hidden p-0"
-          : "overflow-y-auto px-0.5 py-0.5 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+      className={`h-[100dvh] flex flex-col transition-all duration-300 ${presentationMode
+          ? "p-0"
+          : "px-0.5 py-0.5 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -837,15 +837,15 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 dark:opacity-100 light:opacity-40" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
 
       <div
-        className={`relative flex flex-col ${presentationMode
-            ? "h-full w-full max-w-none"
-            : "w-full min-h-[calc(100vh-8px)] sm:min-h-[calc(100vh-12px)]"
+        className={`relative flex flex-col flex-1 min-h-0 ${presentationMode
+            ? "w-full max-w-none"
+            : "w-full"
           }`}
       >
         <section
-          className={`relative flex-1 border transition-all duration-300 ${presentationMode
-              ? "h-full w-full overflow-hidden rounded-none"
-              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
+          className={`relative flex-1 min-h-0 flex flex-col border transition-all duration-300 ${presentationMode
+              ? "w-full overflow-hidden rounded-none"
+              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
             }`}
           style={{
             background: "var(--sgt-bg-section)",
@@ -865,7 +865,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col gap-2.5 p-2 sm:p-3 lg:p-4">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto">
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
