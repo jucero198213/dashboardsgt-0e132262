@@ -72,15 +72,22 @@ const CountUp = ({
 };
 
 /* ------------------------------------------------------------------ */
-/*  Adaptive font size — encolhe conforme o texto cresce              */
+/*  Adaptive font size — tamanho baseado no comprimento do texto      */
 /* ------------------------------------------------------------------ */
-function kpiFontSize(value: number): string {
-  const formatted = value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const len = formatted.length;
-  if (len <= 12) return "clamp(1.4rem, 2.2vw, 2rem)";
-  if (len <= 15) return "clamp(1.1rem, 1.8vw, 1.6rem)";
-  if (len <= 18) return "clamp(0.9rem, 1.4vw, 1.3rem)";
-  return "clamp(0.75rem, 1.1vw, 1.1rem)";
+function kpiFontSize(text: string): string {
+  const len = text.length;
+  if (len <= 6)  return "1.75rem";
+  if (len <= 10) return "1.5rem";
+  if (len <= 13) return "1.25rem";
+  if (len <= 16) return "1.05rem";
+  return "0.9rem";
+}
+
+function kpiValueFontSize(value: number, isPercent = false): string {
+  const text = isPercent
+    ? `${value.toFixed(0)}%`
+    : value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return kpiFontSize(text);
 }
 
 
@@ -765,7 +772,7 @@ const Index = () => {
               >
                 {title}
               </p>
-              <h2 className="mt-0.5 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiFontSize(total) }}>
+              <h2 className="mt-0.5 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(total) }}>
                 <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] dark:text-slate-400 text-slate-600">{subtitle}</p>
@@ -1007,7 +1014,7 @@ const Index = () => {
                               </div>
 
                               <div className="mt-2.5">
-                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiFontSize(item.value) }}>
+                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(item.value) }}>
                                   <CountUp value={item.value} />
                                 </p>
                                 <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
@@ -1076,7 +1083,16 @@ const Index = () => {
               {/* end left column — row 1 col 1 */}
 
               {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
-              {isProcessed && (
+              {isProcessed && (() => {
+                // Calcula o tamanho de fonte uniforme para os 4 cards baseado no maior valor
+                const kpiTexts = [
+                  kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+                  kpiExtra.inadimplencia.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+                  `${kpiExtra.realizacaoCP.toFixed(0)}%`,
+                  `${(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%`,
+                ];
+                const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
+                return (
                 <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
@@ -1110,7 +1126,7 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: kpiFontSize(kpiExtra.saldoLiquido) }}>
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1151,7 +1167,7 @@ const Index = () => {
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
-                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: kpiFontSize(kpiExtra.inadimplencia) }}>
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
@@ -1185,7 +1201,7 @@ const Index = () => {
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
-                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "clamp(1.4rem,2.2vw,2rem)" }}>
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1215,7 +1231,7 @@ const Index = () => {
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
-                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "clamp(1.4rem,2.2vw,2rem)" }}>
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1233,7 +1249,9 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
-              )}
+                );
+              })()
+              }
 
               <aside
                 className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
