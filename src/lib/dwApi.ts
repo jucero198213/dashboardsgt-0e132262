@@ -61,6 +61,8 @@ export interface DwRow {
   DESADT: number | null;    // adiantamento (DESADT — só em CR)
   VLR_PAGO: number | null;
   VLR_PARCELA: number | null;
+  VLR_PAR_RAW: number | null;   // I.VLRPAR sem multiplicação de rateio (dedupe safe)
+  VLR_REC_RAW: number | null;   // I.VLRREC+I.DESADT sem rateio (CR) / I.VLRPAG (CP)
   FILIAL: string | null;
   EMPRESA: string | null;
   CODCGA: string | null;

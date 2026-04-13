@@ -365,24 +365,47 @@ export function FinancialDataProvider({
 
       // ─────────────────────────────────────────────────────────────────────────
       // 4. RECEBIDO (card topo)
-      //    → CR | SITUACAO L/P | DATA_PAGAMENTO no período | VLR_PAGO
-      //    Tudo efetivamente recebido com DATA_PAGAMENTO no intervalo
+      //    → CR | SITUACAO L/P | DATA_VENCIMENTO no período | VLR_PAGO
+      //    Tudo recebido cujo vencimento estava no período (independente de
+      //    quando o pagamento foi registrado — corrige parciais com DATREC fora
+      //    do período que antes ficavam de fora).
       // ─────────────────────────────────────────────────────────────────────────
       const crRecebido = allCR.filter((r) =>
         (sit(r) === "L" || sit(r) === "P") &&
         hasPag(r) &&
-        inRange(r.DATA_PAGAMENTO, di, df)
+        inRange(r.DATA_VENCIMENTO, di, df)   // ← era DATA_PAGAMENTO
       );
 
       // ─────────────────────────────────────────────────────────────────────────
       // 5. SUB-CARD CONTAS A RECEBER (saldo pendente)
-      //    → CR | SITUACAO D/P | DATA_PAGAMENTO NULL | DATA_VENCIMENTO no período
+      //    D → totalmente em aberto: saldo = VLR_PARCELA
+      //    P → parcialmente pago:    saldo = VLR_PARCELA - VLR_PAGO
+      //    (o filtro noPag() excluía os P que já tinham DATA_PAGAMENTO, fazendo
+      //    o saldo parcial sumir do card — corrigido abaixo)
       // ─────────────────────────────────────────────────────────────────────────
-      const crPrevisto = allCR.filter((r) =>
-        (sit(r) === "D" || sit(r) === "P") &&
-        noPag(r) &&
+      const crEmAberto = allCR.filter((r) =>
+        sit(r) === "D" &&
         inRange(r.DATA_VENCIMENTO, di, df)
       );
+      const crParcialAberto = allCR.filter((r) =>
+        sit(r) === "P" &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
+
+      // ── Helpers de deduplicação ──────────────────────────────────────────────
+      // O LEFT JOIN RECRAT multiplica cada parcela em N linhas (1 por centro de
+      // custo). Para KPIs financeiros usamos VLR_PAR_RAW / VLR_REC_RAW (campos
+      // diretos de RECDOCI/PAGDOCI sem multiplicação de rateio) e deduplicamos
+      // por (DOCUMENTO, PARCELA) antes de somar.
+      const dedup = (rows: DwRow[]) => {
+        const seen = new Set<string>();
+        return rows.filter((r) => {
+          const k = `${r.DOCUMENTO ?? ""}|${r.PARCELA ?? ""}`;
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+      };
 
       // ── Somas ───────────────────────────────────────────────────────────────
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
@@ -391,9 +414,20 @@ export function FinancialDataProvider({
       const totalPagar    = sumCol(cpAPagar,    "VLR_PARCELA"); // card A PAGAR    (L/P/D + DATVEN)
       const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO       (L/P + DATPAG no período)
       const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR (D/P + noPag + DATVEN)
-      const totalAReceber = sumCol(crAReceber,  "VLR_PARCELA"); // card A RECEBER  (L/P/D + DATVEN)
-      const valorRecebido = sumCol(crRecebido,  "VLR_PAGO");    // card RECEBIDO   (L/P + DATPAG no período)
-      const totalReceber  = sumCol(crPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A RECEBER (D/P + noPag + DATVEN)
+
+      // A RECEBER: VLR_PAR_RAW deduplicado evita dupla contagem de rateio
+      const totalAReceber = round2(
+        dedup(crAReceber).reduce((s, r) => s + n(r.VLR_PAR_RAW), 0)
+      );
+      // RECEBIDO: VLR_REC_RAW deduplicado (I.VLRREC+I.DESADT direto do RECDOCI)
+      const valorRecebido = round2(
+        dedup(crRecebido).reduce((s, r) => s + n(r.VLR_REC_RAW), 0)
+      );
+      // SALDO = D (em aberto total) + P (restante = VLR_PAR_RAW - VLR_REC_RAW)
+      const totalReceber  = round2(
+        dedup(crEmAberto).reduce((s, r) => s + n(r.VLR_PAR_RAW), 0) +
+        dedup(crParcialAberto).reduce((s, r) => s + Math.max(0, n(r.VLR_PAR_RAW) - n(r.VLR_REC_RAW)), 0)
+      );
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
