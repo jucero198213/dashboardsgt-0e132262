@@ -1360,7 +1360,7 @@ const Index = () => {
                                 <p className="truncate text-[12px] font-semibold uppercase tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
                                   {ind.nome}
                                 </p>
-                                <p className="mt-1 text-[11px] dark:text-slate-500 text-slate-500">
+                                <p className="mt-1 text-[12px] font-medium dark:text-slate-400 text-slate-500">
                                   Meta: {ind.percentualEsperado}%
                                 </p>
                               </div>
