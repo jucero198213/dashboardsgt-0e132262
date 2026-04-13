@@ -207,7 +207,10 @@ FROM RECDOCI I WITH (NOLOCK)
   LEFT JOIN RODCLI  C          WITH (NOLOCK) ON P.CODCLIFOR=C.CODCLIFOR
 WHERE I.SITUAC NOT IN ('C','I')
   AND P.VALDUP > 0
-  AND I.DATVEN BETWEEN @dataInicio AND @dataFim
+  AND (
+    I.DATVEN BETWEEN @dataInicio AND @dataFim
+    OR I.DATREC BETWEEN @dataInicio AND @dataFim
+  )
   AND (@filial  IS NULL OR P.CODFIL =@filial)
   AND (@empresa IS NULL OR F.CODEMP =@empresa)
 
