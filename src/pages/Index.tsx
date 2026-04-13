@@ -1289,7 +1289,7 @@ const Index = () => {
                           >
                             {/* Accent bar top */}
                             <div
-                              className={`h-[3px] w-full transition-all duration-700 ${abaixoDaMeta
+                              className={`h-[1.5px] w-full transition-all duration-700 ${abaixoDaMeta
                                 ? "bg-gradient-to-r from-emerald-500 to-emerald-300"
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
