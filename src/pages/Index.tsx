@@ -978,7 +978,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] lg:grid-rows-[auto_auto]`}>
+            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="flex flex-col gap-2 sm:gap-2.5">
 
@@ -1080,10 +1080,7 @@ const Index = () => {
                   </div>
                 )}
 
-              </div>
-              {/* end left column — row 1 col 1 */}
-
-              {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
+              {/* KPIs Extras */}
               {isProcessed && (() => {
                 // Calcula o tamanho de fonte uniforme para os 4 cards baseado no maior valor
                 const kpiTexts = [
@@ -1094,7 +1091,7 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 lg:col-start-1 lg:row-start-2 items-stretch">
+                <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-3 sm:p-4 min-h-[140px] sm:min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
@@ -1253,11 +1250,13 @@ const Index = () => {
                 );
               })()
               }
+              </div>
+              {/* end left column */}
 
               <aside
                 className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "lg:col-start-2 lg:row-start-1 lg:row-span-2 flex flex-col p-3 sm:p-4 lg:p-5"
+                    : "flex flex-col p-3 sm:p-4 lg:p-5 lg:sticky lg:top-0 lg:self-start"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
