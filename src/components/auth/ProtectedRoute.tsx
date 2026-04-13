@@ -11,10 +11,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#020617]">
+      <div className="flex min-h-screen items-center justify-center bg-[#060912]">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-          <p className="text-sm text-slate-400">Carregando...</p>
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+          <p className="text-[13px] text-slate-600">Carregando...</p>
         </div>
       </div>
     );
@@ -25,7 +25,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (requiredRole && role !== requiredRole && role !== "admin") {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

@@ -237,7 +237,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
       {/* Conteúdo textual */}
       <div className="relative z-10 px-6 py-5">
         <div className="flex items-start gap-4">
-          <button onClick={() => navigate("/")}
+          <button onClick={() => navigate("/dashboard")}
             className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white">
             <ArrowLeft className="h-4 w-4" />
           </button>
@@ -368,7 +368,7 @@ export default function IndicadorDetalhe() {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
       <div className="relative text-center space-y-3">
         <p className="text-lg font-medium text-slate-300">Indicador não encontrado</p>
-        <button onClick={() => navigate("/")} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-all">
+        <button onClick={() => navigate("/dashboard")} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-all">
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar ao dashboard
         </button>
       </div>
@@ -398,7 +398,7 @@ export default function IndicadorDetalhe() {
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
             <nav className="flex items-center gap-2 text-xs text-slate-500">
-              <button onClick={() => navigate("/")} className="transition-colors hover:text-slate-200">Dashboard</button>
+              <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-slate-200">Dashboard</button>
               <ChevronRight className="h-3 w-3 opacity-40" />
               <span className="text-slate-300">{indicador.nome}</span>
             </nav>
@@ -466,7 +466,7 @@ export default function IndicadorDetalhe() {
               {/* Conteúdo textual */}
               <div className="relative z-10 px-6 py-5 pr-[140px]">
                 <div className="flex items-start gap-4">
-                  <button onClick={() => navigate("/")}
+                  <button onClick={() => navigate("/dashboard")}
                     className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
                     <ArrowLeft className="h-4 w-4" />
                   </button>

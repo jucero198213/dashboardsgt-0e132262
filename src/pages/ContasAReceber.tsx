@@ -87,7 +87,7 @@ const ContasAReceber = () => {
         {/* Breadcrumb */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-400">
-            <button onClick={() => navigate("/")} className="transition-colors hover:text-white">Dashboard</button>
+            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-white">Dashboard</button>
             <ChevronRight className="h-3.5 w-3.5" />
             <span className="text-white">Contas a Receber</span>
           </div>
@@ -125,7 +125,7 @@ const ContasAReceber = () => {
           <div className="relative z-10 px-6 py-5">
             <div className="flex items-start gap-4">
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
                 className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />

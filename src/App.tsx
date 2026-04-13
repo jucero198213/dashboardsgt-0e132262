@@ -8,6 +8,7 @@ import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Landing from "./pages/Landing";
 import PainelAdministrativo from "./pages/admin/PainelAdministrativo";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
@@ -25,11 +26,12 @@ const App = () => (
         <AuthProvider>
           <FinancialDataProvider>
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/"         element={<Landing />} />
+              <Route path="/login"    element={<Login />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/contas-a-receber" element={<ProtectedRoute><ContasAReceber /></ProtectedRoute>} />
-              <Route path="/contas-a-pagar" element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
-              <Route path="/indicadores/:id" element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
+              <Route path="/contas-a-pagar"   element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
+              <Route path="/indicadores/:id"  element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
