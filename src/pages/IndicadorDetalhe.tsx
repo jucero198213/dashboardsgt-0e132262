@@ -364,10 +364,10 @@ export default function IndicadorDetalhe() {
   };
 
   if (!indicador) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#020617] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
+    <div className="flex min-h-screen items-center justify-center sgt-bg-base sgt-text">
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
       <div className="relative text-center space-y-3">
-        <p className="text-lg font-medium text-slate-300">Indicador não encontrado</p>
+        <p className="text-lg font-medium sgt-text">Indicador não encontrado</p>
         <button onClick={() => navigate("/dashboard")} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-all">
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar ao dashboard
         </button>
@@ -376,7 +376,7 @@ export default function IndicadorDetalhe() {
   );
 
   return (
-    <div className="min-h-screen bg-[#060912] text-white">
+    <div className="min-h-screen sgt-bg-base sgt-text">
 
       {/* ── Atmosfera — identidade, não template ── */}
       {/* Luz âmbar intensa no topo: diesel, energia, presença */}
