@@ -28,7 +28,7 @@ function CompactPagination({ current, total, onChange }: { current: number; tota
   return (
     <div className="flex items-center gap-1">
       <button onClick={() => onChange(Math.max(1, current - 1))} disabled={current === 1}
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:[background:var(--sgt-input-hover)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
       {pages.map((p, i) => p === "…"
@@ -39,7 +39,7 @@ function CompactPagination({ current, total, onChange }: { current: number; tota
           </button>
       )}
       <button onClick={() => onChange(Math.min(total, current + 1))} disabled={current === total}
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:[background:var(--sgt-input-hover)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
         <ChevronRight className="h-3.5 w-3.5" />
       </button>
     </div>
@@ -220,7 +220,7 @@ const ContasAPagar = () => {
                   </TableHeader>
                   <TableBody>
                     {paginados.map((c, idx) => (
-                      <TableRow key={c.id} className={`border-[var(--sgt-border-subtle)] transition-colors hover:[background:var(--sgt-input-bg)] ${idx % 2 === 0 ? "" : "[background:var(--sgt-row-alt)]"}`}>
+                      <TableRow key={c.id} className={`border-[var(--sgt-border-subtle)] transition-colors hover:[background:var(--sgt-row-hover)] ${idx % 2 === 0 ? "" : "[background:var(--sgt-row-alt)]"}`}>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.dataEmissao)}</TableCell>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.vencimento)}</TableCell>
                         <TableCell className="text-sm whitespace-nowrap">{c.dataPagamento ? <span className="text-amber-400">{fmt(c.dataPagamento)}</span> : <span className="text-slate-600">—</span>}</TableCell>

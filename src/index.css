@@ -199,8 +199,16 @@
   transition-duration: 250ms;
   transition-timing-function: ease;
 }
-[class*="animate-"], [class*="hover:-translate"], .transition-none {
-  transition-property: inherit;
+/* Preserve fast transitions on transform/opacity — dont slow them down */
+[class*="hover:-translate"],
+[class*="hover:translate"],
+[class*="group-hover:translate"],
+[class*="group-hover:scale"],
+[class*="hover:scale"],
+[class*="animate-"] {
+  transition-property: transform, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── Light theme: boost contrast on Tailwind slate classes ── */

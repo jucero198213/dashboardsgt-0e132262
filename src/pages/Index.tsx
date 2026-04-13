@@ -934,7 +934,7 @@ const Index = () => {
                   disabled={isFetchingDw}
                   className={`inline-flex h-7 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-semibold transition-all ${isFetchingDw
                     ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
-                    : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-px"
+                    : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"
                   } disabled:cursor-not-allowed`}
                 >
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
@@ -1282,10 +1282,10 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-[1px]"
+                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                             style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(0,0,0,0.18)"; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+                            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 10px 32px rgba(0,0,0,0.22)"; }}
+                            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
                           >
                             {/* Accent bar top */}
                             <div
@@ -1330,7 +1330,7 @@ const Index = () => {
                                   : "bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"}`}>
                                   {abaixoDaMeta ? "OK" : "Alto"}
                                 </span>
-                                <ArrowRight className="h-3.5 w-3.5 dark:text-slate-600 text-slate-400 transition-all duration-300 group-hover:translate-x-0.5 dark:group-hover:text-slate-300 group-hover:text-slate-600" />
+                                <ArrowRight className="h-3.5 w-3.5 dark:text-slate-600 text-slate-400 transition-all duration-300 group-hover:translate-x-1.5 dark:group-hover:text-slate-300 group-hover:text-slate-600" />
                               </div>
                             </div>
                           </Link>
