@@ -87,7 +87,7 @@ const ContasAPagar = () => {
         {/* Breadcrumb */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-400">
-            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-white">Dashboard</button>
+            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:[color:var(--sgt-text-primary)]">Dashboard</button>
             <ChevronRight className="h-3.5 w-3.5" />
             <span className="text-white">Contas a Pagar</span>
           </div>

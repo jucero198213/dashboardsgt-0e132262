@@ -66,13 +66,13 @@ const fmt = (d: string | Date | null | undefined): string => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-2xl border border-white/[0.1] bg-[#0c0f1c] px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-      <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-600">Dia {label}</p>
+    <div className="rounded-2xl border border-white/[0.1] px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
+      <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500">Dia {label}</p>
       {payload.map((p: any) => (
         <div key={p.dataKey} className="flex items-center gap-3">
           <span className="h-[3px] w-5 rounded-full shrink-0" style={{ background: p.color }} />
-          <p className="text-[12px] font-medium text-slate-400">{p.name}</p>
-          <p className="ml-auto pl-6 text-[13px] font-bold text-white">{formatCurrency(p.value)}</p>
+          <p className="text-[12px] font-medium dark:text-slate-400 text-slate-600">{p.name}</p>
+          <p className="ml-auto pl-6 text-[13px] font-bold [color:var(--sgt-text-primary)]">{formatCurrency(p.value)}</p>
         </div>
       ))}
     </div>
@@ -541,8 +541,8 @@ export default function IndicadorDetalhe() {
               <div className="p-6 pb-0 shrink-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Evolução Diária</p>
-                    <p className="mt-0.5 text-sm font-medium text-slate-300">Mês Atual vs Mês Anterior</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Evolução Diária</p>
+                    <p className="mt-0.5 text-sm font-medium [color:var(--sgt-text-secondary)]">Mês Atual vs Mês Anterior</p>
                   </div>
                   <div className="flex items-center gap-4 text-[11px]">
                     <span className="flex items-center gap-2 text-slate-400">
@@ -580,7 +580,7 @@ export default function IndicadorDetalhe() {
                 <div className="flex flex-1 min-h-[280px] items-center justify-center">
                   <div className="text-center space-y-2">
                     <Sparkles className="h-8 w-8 text-slate-700 mx-auto" />
-                    <p className="text-sm text-slate-600">Sem dados no período</p>
+                    <p className="text-sm [color:var(--sgt-text-muted)]">Sem dados no período</p>
                   </div>
                 </div>
               )}
@@ -590,8 +590,8 @@ export default function IndicadorDetalhe() {
             <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-6 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Composição</p>
-                  <p className="mt-0.5 text-sm font-medium text-slate-300">Por fornecedor</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Composição</p>
+                  <p className="mt-0.5 text-sm font-medium [color:var(--sgt-text-secondary)]">Por fornecedor</p>
                 </div>
                 {composicaoAll.length > 0 && (
                   <span className="rounded-full border border-white/8 bg-white/4 px-2.5 py-1 text-[11px] font-medium text-slate-400">
@@ -603,10 +603,10 @@ export default function IndicadorDetalhe() {
               <div className="flex-1 space-y-3">
                 {composicaoPag.length === 0 ? (
                   <div className="flex h-full items-center justify-center py-12">
-                    <p className="text-sm text-slate-600">Sem dados no período</p>
+                    <p className="text-sm [color:var(--sgt-text-muted)]">Sem dados no período</p>
                   </div>
                 ) : composicaoPag.map((item, idx) => (
-                  <div key={item.nome} className="group/row rounded-xl border border-transparent px-3 py-2.5 transition-all duration-200 hover:border-white/6 hover:bg-white/[0.025]">
+                  <div key={item.nome} className="group/row rounded-xl border border-transparent px-3 py-2.5 transition-all duration-200 hover:[background:var(--sgt-row-hover)] hover:border-[var(--sgt-border-subtle)]">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-[10px] font-bold text-slate-600 w-4 shrink-0">
                         {String((paginaComp - 1) * PAGE_SIZE_COMP + idx + 1).padStart(2, "0")}
@@ -614,7 +614,7 @@ export default function IndicadorDetalhe() {
                       <p className="text-[11px] font-medium text-slate-300 flex-1 min-w-0 truncate">{item.nome}</p>
                     </div>
                     <div className="flex items-center gap-3 pl-6">
-                      <div className="flex-1 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
+                      <div className="flex-1 h-[3px] overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-700 ease-out"
                           style={{ width: `${Math.min(item.pct, 100)}%` }} />
                       </div>
@@ -626,8 +626,8 @@ export default function IndicadorDetalhe() {
               </div>
 
               {totalPaginasComp > 1 && (
-                <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-4">
-                  <p className="text-[11px] text-slate-600">{composicaoAll.length} fornecedores</p>
+                <div className="mt-4 flex items-center justify-between border-t border-[var(--sgt-border-subtle)] pt-4">
+                  <p className="text-[11px] [color:var(--sgt-text-muted)]">{composicaoAll.length} fornecedores</p>
                   <Paginacao atual={paginaComp} total={totalPaginasComp} set={setPaginaComp} />
                 </div>
               )}
@@ -642,12 +642,12 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Documentos Detalhados ── */}
-          <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
+          <div className="overflow-hidden rounded-[20px] border" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
             {/* Header da tabela */}
-            <div className="flex flex-wrap items-center justify-between border-b border-white/[0.06] px-3 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-wrap items-center justify-between border-b border-[var(--sgt-border-subtle)] px-3 py-3 sm:px-6 sm:py-4">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Documentos Detalhados</p>
-                <p className="mt-0.5 text-sm font-medium text-slate-300">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Documentos Detalhados</p>
+                <p className="mt-0.5 text-sm font-medium [color:var(--sgt-text-secondary)]">
                   {rowsFiltrados.length > 0 ? `${rowsFiltrados.length} documento(s) encontrado(s)` : "Nenhum documento"}
                 </p>
               </div>
@@ -669,7 +669,7 @@ export default function IndicadorDetalhe() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-white/[0.06] hover:bg-transparent">
+                    <TableRow className="hover:bg-transparent border-[var(--sgt-border-subtle)]">
                       {[
                         { label: "Dt. Emissão",  w: "w-[90px]",  align: "" },
                         { label: "Dt. Venc.",    w: "w-[90px]",  align: "" },
@@ -682,13 +682,13 @@ export default function IndicadorDetalhe() {
                         { label: "Vl. Pago",     w: "w-[115px]", align: "text-right" },
                         { label: "Sit.",         w: "w-[56px]",  align: "text-center" },
                       ].map((h) => (
-                        <TableHead key={h.label} className={`${h.w} ${h.align} bg-white/[0.015] py-3 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600`}>{h.label}</TableHead>
+                        <TableHead key={h.label} className={`${h.w} ${h.align} py-3 text-[9px] font-bold uppercase tracking-[0.22em] dark:text-slate-600 text-slate-500`}>{h.label}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {docsPaginados.map((r, i) => (
-                      <TableRow key={i} className="group/tr border-white/[0.04] transition-colors duration-150 hover:bg-white/[0.025]">
+                      <TableRow key={i} className="group/tr transition-colors duration-150 hover:[background:var(--sgt-row-hover)]">
                         <TableCell className="py-2.5 text-[12px] text-slate-400 whitespace-nowrap font-mono">{fmt(r.DATA_EMISSAO)}</TableCell>
                         <TableCell className="py-2.5 text-[12px] text-slate-400 whitespace-nowrap font-mono">{fmt(r.DATA_VENCIMENTO)}</TableCell>
                         <TableCell className="py-2.5 whitespace-nowrap font-mono text-[12px]">
@@ -717,14 +717,14 @@ export default function IndicadorDetalhe() {
             )}
 
             {totalPaginasDocs > 1 && (
-              <div className="flex items-center justify-between border-t border-white/[0.06] px-3 py-3 sm:px-6 sm:py-4">
-                <p className="text-[11px] text-slate-600">{rowsFiltrados.length} documento(s)</p>
+              <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-3 py-3 sm:px-6 sm:py-4">
+                <p className="text-[11px] [color:var(--sgt-text-muted)]">{rowsFiltrados.length} documento(s)</p>
                 <Paginacao atual={paginaDocs} total={totalPaginasDocs} set={setPaginaDocs} />
               </div>
             )}
             {totalPaginasDocs <= 1 && rowsFiltrados.length > 0 && (
-              <div className="border-t border-white/[0.06] px-3 py-3 sm:px-6">
-                <p className="text-[11px] text-slate-600">{rowsFiltrados.length} documento(s)</p>
+              <div className="border-t border-[var(--sgt-border-subtle)] px-3 py-3 sm:px-6">
+                <p className="text-[11px] [color:var(--sgt-text-muted)]">{rowsFiltrados.length} documento(s)</p>
               </div>
             )}
           </div>

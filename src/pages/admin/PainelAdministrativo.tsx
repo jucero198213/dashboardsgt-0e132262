@@ -5,6 +5,7 @@ import {
   ChevronRight, Lock, Server, Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserMenu } from "@/components/auth/UserMenu";
 import GestaoUsuarios from "./GestaoUsuarios";
 import Configuracoes from "./Configuracoes";
 import BancoDados from "./BancoDados";
@@ -112,6 +113,7 @@ export default function PainelAdministrativo() {
               </>
             )}
           </div>
+          <UserMenu />
         </div>
 
         {/* Header */}

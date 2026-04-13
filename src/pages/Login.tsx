@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon } from "lucide-react";
 
 export default function Login() {
   const { session, isLoading, signIn } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [email,       setEmail]       = useState("");
   const [password,    setPassword]    = useState("");
   const [showPass,    setShowPass]    = useState(false);
@@ -195,9 +197,18 @@ export default function Login() {
           </form>
 
           {/* Rodapé */}
-          <p className="mt-8 text-center text-[11px] text-[var(--sgt-text-faint)]">
-            Acesso restrito · Uso interno SGT Log
-          </p>
+          <div className="mt-8 flex items-center justify-between">
+            <p className="text-[11px] text-[var(--sgt-text-faint)]">Acesso restrito · Uso interno SGT Log</p>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] px-2.5 py-1.5 text-[11px] font-medium text-[color:var(--sgt-text-muted)] transition-all hover:border-[var(--sgt-border-medium)] hover:text-[color:var(--sgt-text-secondary)]"
+              style={{ background: "var(--sgt-input-bg)" }}
+            >
+              {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-cyan-400" />}
+              {theme === "dark" ? "Tema claro" : "Tema escuro"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

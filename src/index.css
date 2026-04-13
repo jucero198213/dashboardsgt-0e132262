@@ -308,3 +308,8 @@
 
 /* Progress track */
 .light .bg-white\/10 { background: rgba(60,45,30,0.10) !important; }
+
+/* ── Shimmer animation for skeletons ── */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}

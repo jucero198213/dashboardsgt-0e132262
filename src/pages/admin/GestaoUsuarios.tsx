@@ -133,7 +133,7 @@ export default function GestaoUsuarios() {
                   <tr key={u.id} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
                           style={{ background: colors[idx % colors.length] }}>
                           {initials(u.email)}
                         </div>
