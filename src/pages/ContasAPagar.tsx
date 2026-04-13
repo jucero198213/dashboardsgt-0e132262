@@ -95,7 +95,7 @@ const ContasAPagar = () => {
         </div>
 
         {/* Header contextual — Contas a Pagar */}
-        <div className="relative overflow-hidden rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]">
+        <div className="relative overflow-hidden rounded-[16px] sm:rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]">
 
           {/* Stripe de identidade amber */}
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/60 to-amber-700/20" />
@@ -104,17 +104,17 @@ const ContasAPagar = () => {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(245,158,11,0.13)] via-[rgba(245,158,11,0.03)] to-transparent" />
 
           {/* Info bar contextual */}
-          <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] px-6 py-2.5">
+          <div className="relative z-10 flex flex-wrap items-center gap-2 sm:gap-4 border-b border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] px-3 sm:px-6 py-2">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">Contas a Pagar</span>
               <span className="ml-1 text-[12px] font-semibold text-amber-300">Obrigações do Período</span>
             </div>
-            <span className="flex items-center gap-3">
+            <span className="hidden sm:flex items-center gap-3">
               <span className="h-3 w-px bg-white/10" />
               <span className="text-[11px] text-slate-400">Fornecedores e prestadores</span>
             </span>
-            <span className="flex items-center gap-3">
+            <span className="hidden md:flex items-center gap-3">
               <span className="h-3 w-px bg-white/10" />
               <span className="text-[11px] text-slate-500">Emissão no período selecionado</span>
             </span>
@@ -122,7 +122,7 @@ const ContasAPagar = () => {
           </div>
 
           {/* Conteúdo */}
-          <div className="relative z-10 px-6 py-5">
+          <div className="relative z-10 px-3 py-3 sm:px-6 sm:py-5">
             <div className="flex items-start gap-4">
               <button
                 onClick={() => navigate("/dashboard")}
@@ -137,7 +137,7 @@ const ContasAPagar = () => {
                     Contas a Pagar
                   </div>
                 </div>
-                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent sm:text-4xl md:text-5xl">
+                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent sm:text-3xl md:text-4xl lg:text-5xl">
                   Detalhamento — Pagamentos
                 </h1>
                 <p className="mt-2.5 text-sm text-slate-500">Visão detalhada de todos os documentos a pagar do período</p>
@@ -187,9 +187,9 @@ const ContasAPagar = () => {
 
         {/* Table */}
         <AnimatedCard delay={320}>
-          <div className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center justify-between p-6 pb-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Documentos — Contas a Pagar</p>
+          <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between p-3 pb-2 sm:p-6 sm:pb-4">
+              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.28em] text-slate-400">Documentos — Contas a Pagar</p>
               {isProcessed && contasFiltradas.length > 0 && (
                 <p className="text-xs text-slate-500">{inicio + 1}–{Math.min(inicio + PAGE_SIZE, contasFiltradas.length)} de {contasFiltradas.length}</p>
               )}
@@ -240,7 +240,7 @@ const ContasAPagar = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-6 py-3">
+            <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-3 sm:px-6 py-3">
               <p className="text-xs text-slate-500">{contasFiltradas.length} documento(s)</p>
               <CompactPagination current={paginaAtual} total={totalPaginas} onChange={setPagina} />
             </div>
