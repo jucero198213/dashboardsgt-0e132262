@@ -378,13 +378,10 @@ export default function IndicadorDetalhe() {
   return (
     <div className="min-h-screen sgt-bg-base sgt-text">
 
-      {/* ── Atmosfera — identidade, não template ── */}
-      {/* Luz âmbar intensa no topo: diesel, energia, presença */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
-      {/* Contraluz fria: profundidade no rodapé-direito */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
-      {/* Vinheta densa nas bordas — impede o fundo de parecer flat */}
-      <div className="pointer-events-none fixed inset-0" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
+      {/* ── Atmosfera ── */}
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
 
       {/* Progress bar — âmbar coerente com tema */}
       {isFetchingDw && (
