@@ -93,19 +93,19 @@
     --card-elevated: 210 20% 98%;
 
     /* SGT tokens — light high-contrast */
-    --sgt-bg-base:        #e2e8f0;
-    --sgt-bg-card:        #ffffff;
-    --sgt-bg-section:     rgba(255,255,255,0.98);
-    --sgt-bg-overlay:     rgba(255,255,255,1);
-    --sgt-border-subtle:  rgba(15,23,42,0.14);
-    --sgt-border-medium:  rgba(15,23,42,0.26);
+    --sgt-bg-base:        #c8d6e8;
+    --sgt-bg-card:        #f8fafc;
+    --sgt-bg-section:     rgba(248,250,252,0.97);
+    --sgt-bg-overlay:     rgba(248,250,252,1);
+    --sgt-border-subtle:  rgba(15,23,42,0.13);
+    --sgt-border-medium:  rgba(15,23,42,0.24);
     --sgt-text-primary:   #0f172a;
     --sgt-text-secondary: #1e3a5f;
     --sgt-text-muted:     #475569;
     --sgt-text-faint:     #94a3b8;
-    --sgt-input-bg:       #f8fafc;
-    --sgt-input-border:   rgba(15,23,42,0.22);
-    --sgt-input-hover:    rgba(15,23,42,0.08);
+    --sgt-input-bg:       rgba(15,23,42,0.05);
+    --sgt-input-border:   rgba(15,23,42,0.20);
+    --sgt-input-hover:    rgba(15,23,42,0.09);
     --sgt-skeleton-bg:    rgba(15,23,42,0.08);
     --sgt-divider:        rgba(15,23,42,0.12);
     --sgt-row-alt:        rgba(15,23,42,0.03);
