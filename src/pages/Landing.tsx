@@ -51,7 +51,7 @@ export default function Landing() {
       <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.65) 100%)" }} />
 
       {/* ══ NAVBAR ══ */}
-      <nav className="relative z-20 mx-auto flex max-w-[1200px] items-center justify-between px-6 py-5 sm:px-10">
+      <nav className="relative z-20 mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10">
             <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
