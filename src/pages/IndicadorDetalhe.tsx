@@ -393,7 +393,7 @@ export default function IndicadorDetalhe() {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[1400px] px-3 py-4 sm:px-8 sm:py-8 lg:px-12 lg:py-10 space-y-4 sm:space-y-6">
+      <div className="relative mx-auto max-w-[1400px] px-2 py-3 sm:px-4 sm:py-6 lg:px-8 lg:py-10 space-y-3 sm:space-y-6">
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
@@ -489,21 +489,21 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Filtros ── */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2.5 sm:px-4 py-2.5 sm:py-3">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2 sm:px-4 py-2 sm:py-3">
             {[
               { value: dwFilter.dataInicio, onChange: (v: string) => { setDwFilter("dataInicio", v); setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
               { value: dwFilter.dataFim,    onChange: (v: string) => { setDwFilter("dataFim", v);    setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
             ].map((inp, i) => (
               <input key={i} type="date" value={inp.value} onChange={(e) => inp.onChange(e.target.value)}
-                className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none" />
+                className="h-7 sm:h-8 w-full min-w-[90px] max-w-[140px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none" />
             ))}
             <select value={dwFilter.empresa ?? ""} onChange={(e) => { setDwFilter("empresa", e.target.value || null); setDwFilter("filial", null); }}
-              className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as empresas</option>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
             <select value={dwFilter.filial ?? ""} onChange={(e) => setDwFilter("filial", e.target.value || null)}
-              className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as filiais</option>
               {filiaisFiltradas.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
@@ -647,7 +647,7 @@ export default function IndicadorDetalhe() {
           {/* ── Documentos Detalhados ── */}
           <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
             {/* Header da tabela */}
-            <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+            <div className="flex flex-wrap items-center justify-between border-b border-white/[0.06] px-3 py-3 sm:px-6 sm:py-4">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Documentos Detalhados</p>
                 <p className="mt-0.5 text-sm font-medium text-slate-300">
@@ -720,13 +720,13 @@ export default function IndicadorDetalhe() {
             )}
 
             {totalPaginasDocs > 1 && (
-              <div className="flex items-center justify-between border-t border-white/[0.06] px-6 py-4">
+              <div className="flex items-center justify-between border-t border-white/[0.06] px-3 py-3 sm:px-6 sm:py-4">
                 <p className="text-[11px] text-slate-600">{rowsFiltrados.length} documento(s)</p>
                 <Paginacao atual={paginaDocs} total={totalPaginasDocs} set={setPaginaDocs} />
               </div>
             )}
             {totalPaginasDocs <= 1 && rowsFiltrados.length > 0 && (
-              <div className="border-t border-white/[0.06] px-6 py-3">
+              <div className="border-t border-white/[0.06] px-3 py-3 sm:px-6">
                 <p className="text-[11px] text-slate-600">{rowsFiltrados.length} documento(s)</p>
               </div>
             )}
