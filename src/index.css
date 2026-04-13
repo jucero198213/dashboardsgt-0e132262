@@ -156,61 +156,61 @@
 /* ── Light theme: boost contrast on Tailwind slate classes ── */
 .light .text-slate-300,
 .light .text-slate-400 {
-  color: #334155 !important;
+  color: #4a3f35 !important;
 }
 .light .text-slate-500 {
-  color: #475569 !important;
+  color: #6b5e52 !important;
 }
 .light .text-slate-600 {
-  color: #334155 !important;
+  color: #4a3f35 !important;
 }
 .light .text-white {
-  color: #0f172a !important;
+  color: #1c1510 !important;
 }
 
 /* Card inner radial glows — tone down in light */
 .light [class*="bg-[radial-gradient"] {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 /* Table header text */
 .light .text-\[10px\].uppercase {
-  color: #334155;
+  color: #4a3f35;
 }
 
 /* Progress bar track */
 .light [class*="bg-white\/10"] {
-  background: rgba(15,23,42,0.10) !important;
+  background: rgba(60,45,30,0.10) !important;
 }
 
 /* Inner card section (ação rápida) */
 .light [class*="border-emerald-400\/14"] {
   background: rgba(16,185,129,0.06) !important;
-  border-color: rgba(16,185,129,0.25) !important;
+  border-color: rgba(16,185,129,0.22) !important;
 }
 .light [class*="border-amber-400\/14"] {
   background: rgba(245,158,11,0.06) !important;
-  border-color: rgba(245,158,11,0.25) !important;
+  border-color: rgba(245,158,11,0.22) !important;
 }
 
 /* KPI extra cards — border opacity boost */
 .light [class*="border-emerald-500\/25"],
 .light [class*="border-emerald-500\/\[0.25\]"] {
-  border-color: rgba(16,185,129,0.35) !important;
+  border-color: rgba(16,185,129,0.30) !important;
 }
 .light [class*="border-red-500\/25"] {
-  border-color: rgba(239,68,68,0.35) !important;
+  border-color: rgba(239,68,68,0.30) !important;
 }
 .light [class*="border-violet-500\/25"] {
-  border-color: rgba(139,92,246,0.35) !important;
+  border-color: rgba(139,92,246,0.30) !important;
 }
 .light [class*="border-cyan-500\/25"] {
-  border-color: rgba(6,182,212,0.35) !important;
+  border-color: rgba(6,182,212,0.30) !important;
 }
 
 /* Chart area: make SVG text visible */
 .light text {
-  fill: #475569;
+  fill: #6b5e52;
 }
 
 /* Gradient title in light mode */
@@ -219,18 +219,18 @@
 }
 
 /* ── Light: additional text contrast fixes ── */
-.light .text-slate-300 { color: #1e3a5f !important; }
-.light .text-slate-400 { color: #334155 !important; }
-.light .text-slate-500 { color: #475569 !important; }
-.light .text-slate-600 { color: #334155 !important; }
-.light .text-white     { color: #0f172a !important; }
+.light .text-slate-300 { color: #4a3f35 !important; }
+.light .text-slate-400 { color: #4a3f35 !important; }
+.light .text-slate-500 { color: #6b5e52 !important; }
+.light .text-slate-600 { color: #4a3f35 !important; }
+.light .text-white     { color: #1c1510 !important; }
 
 /* Gradient title override in light — prevent invisible white */
-.light .from-white { --tw-gradient-from: #0f172a !important; }
-.light .via-white  { --tw-gradient-via: #334155 !important; }
+.light .from-white { --tw-gradient-from: #1c1510 !important; }
+.light .via-white  { --tw-gradient-via: #4a3f35 !important; }
 
 /* SVG text override for chart axes */
-.light svg text { fill: #475569; }
+.light svg text { fill: #6b5e52; }
 
 /* Violet/cyan pill text in light */
 .light .text-violet-200 { color: #5b21b6 !important; }
@@ -249,4 +249,4 @@
 .light .text-violet-200  { color: #5b21b6 !important; }
 
 /* Progress track */
-.light .bg-white\/10 { background: rgba(15,23,42,0.10) !important; }
+.light .bg-white\/10 { background: rgba(60,45,30,0.10) !important; }
