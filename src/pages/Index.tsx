@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { formatCurrency, formatDate } from "@/data/mockData";
 import {
   Select,
@@ -896,19 +897,15 @@ const Index = () => {
 
               {/* Filtros */}
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
-                <input
-                  type="date"
+                <DatePickerInput
                   value={dwFilter.dataInicio}
-                  onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                  className="h-7 w-full min-w-[100px] max-w-[130px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
-                  style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
+                  onChange={(v) => setDwFilter("dataInicio", v)}
+                  placeholder="Data início"
                 />
-                <input
-                  type="date"
+                <DatePickerInput
                   value={dwFilter.dataFim}
-                  onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                  className="h-7 w-full min-w-[100px] max-w-[130px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
-                  style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
+                  onChange={(v) => setDwFilter("dataFim", v)}
+                  placeholder="Data fim"
                 />
                 <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
