@@ -1040,8 +1040,8 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
-                    {/* Coluna esquerda — Contas a Receber */}
-                    <AnimatedCard delay={320}>
+                    <AnimatedCard delay={320} className="flex">
+                      <div className="flex-1 flex flex-col">
                       {renderLargeCard({
                         title: "Saldo a receber",
                         tone: "emerald",
@@ -1057,28 +1057,28 @@ const Index = () => {
                         to: "/contas-a-receber",
                         icon: TrendingUp,
                       })}
+                      </div>
                     </AnimatedCard>
 
-                    {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
-                    <div className="flex flex-col gap-2">
-                      <AnimatedCard delay={400}>
-                        {renderLargeCard({
-                          title: "Saldo a pagar",
-                          tone: "amber",
-                          total: contasPagar.saldoAPagar,
-                          subtitle: "Saldo pendente a pagar",
-                          primaryLabel: "Previsto",
-                          primaryValue: contasPagar.saldoAPagar,
-                          secondaryLabel: "Pago",
-                          secondaryValue: contasPagar.valorPago,
-                          monthlyPrevisto: chartPagar.previsto,
-                          monthlyRealizado: chartPagar.realizado,
-                          chartAno: chartPagar.ano,
-                          to: "/contas-a-pagar",
-                          icon: TrendingDown,
-                        })}
-                      </AnimatedCard>
-                    </div>
+                    <AnimatedCard delay={400} className="flex">
+                      <div className="flex-1 flex flex-col">
+                      {renderLargeCard({
+                        title: "Saldo a pagar",
+                        tone: "amber",
+                        total: contasPagar.saldoAPagar,
+                        subtitle: "Saldo pendente a pagar",
+                        primaryLabel: "Previsto",
+                        primaryValue: contasPagar.saldoAPagar,
+                        secondaryLabel: "Pago",
+                        secondaryValue: contasPagar.valorPago,
+                        monthlyPrevisto: chartPagar.previsto,
+                        monthlyRealizado: chartPagar.realizado,
+                        chartAno: chartPagar.ano,
+                        to: "/contas-a-pagar",
+                        icon: TrendingDown,
+                      })}
+                      </div>
+                    </AnimatedCard>
                   </div>
                 )}
 
