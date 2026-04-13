@@ -273,7 +273,7 @@ const MiniLineChart = ({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-[var(--sgt-border-subtle)] bg-white/[0.025] p-3">
+    <div className="flex h-full flex-col rounded-[18px] border border-[var(--sgt-border-subtle)] bg-white/[0.025] p-3">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
@@ -791,7 +791,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative h-[220px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -1135,7 +1135,8 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido − Pago no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
@@ -1155,6 +1156,7 @@ const Index = () => {
                           ? "Fluxo positivo"
                           : "Fluxo negativo"}
                       </span>
+                      </div>
                     </div>
                   </div>
 
@@ -1173,10 +1175,11 @@ const Index = () => {
                       <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
-                      <p className="mt-1 text-[13px] font-semibold text-red-300">
+                      <p className="mt-2 text-sm font-medium text-red-400">
                         {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 ? (
                           <div
                             className="h-full rounded-full bg-red-400 transition-all duration-700"
@@ -1189,6 +1192,7 @@ const Index = () => {
                       <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
                         {kpiExtra.inadimplenciaDocs} docs vencidos
                       </span>
+                      </div>
                     </div>
                   </div>
 
@@ -1210,7 +1214,8 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Pago ÷ Previsto no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-violet-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
@@ -1219,6 +1224,7 @@ const Index = () => {
                       <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-violet-200 text-violet-700">
                         Meta: 100%
                       </span>
+                      </div>
                     </div>
                   </div>
 
@@ -1240,7 +1246,8 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido ÷ Previsto no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-cyan-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
@@ -1249,6 +1256,7 @@ const Index = () => {
                       <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-cyan-200 text-cyan-700">
                         Meta: 100%
                       </span>
+                      </div>
                     </div>
                   </div>
                 </div>
