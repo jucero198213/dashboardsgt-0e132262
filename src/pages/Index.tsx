@@ -1279,9 +1279,7 @@ const Index = () => {
                       Distribuição de custos do período
                     </p>
                     <p
-                      className={`font-extrabold tracking-[-0.02em] text-transparent bg-clip-text 
-                      bg-gradient-to-r from-cyan-300 via-white to-slate-400 
-                      ${presentationMode ? "text-xl" : "text-[26px]"}`}
+                      className={`font-extrabold tracking-[-0.02em] dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-cyan-300 dark:via-white dark:to-slate-400 text-slate-800 ${presentationMode ? "text-xl" : "text-[26px]"}`}
                     >
                        Indicadores
                     </p>
