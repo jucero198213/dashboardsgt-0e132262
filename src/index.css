@@ -93,10 +93,10 @@
     --card-elevated: 210 20% 98%;
 
     /* SGT tokens — light high-contrast */
-    --sgt-bg-base:        #9fb3cc;
-    --sgt-bg-card:        #f8fafc;
-    --sgt-bg-section:     rgba(248,250,252,0.97);
-    --sgt-bg-overlay:     rgba(248,250,252,1);
+    --sgt-bg-base:        #b8cce0;
+    --sgt-bg-card:        #ffffff;
+    --sgt-bg-section:     #dce8f2;
+    --sgt-bg-overlay:     #dce8f2;
     --sgt-border-subtle:  rgba(15,23,42,0.13);
     --sgt-border-medium:  rgba(15,23,42,0.24);
     --sgt-text-primary:   #0f172a;
