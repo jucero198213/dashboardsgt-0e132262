@@ -148,11 +148,11 @@ const ContasAPagar = () => {
 
         {/* KPI Cards */}
         {showLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
             {[0,1,2,3].map(i => <KpiCardSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
             <AnimatedCard delay={0}>
               <KpiCard label="Valor Previsto" value={formatCurrency(resumoPagar.valorAPagar)} rawValue={resumoPagar.valorAPagar} subtitle="Total previsto no período" icon={DollarSign} tone="cyan" />
             </AnimatedCard>

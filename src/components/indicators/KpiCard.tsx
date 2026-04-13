@@ -59,7 +59,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
   const isPercent  = value.endsWith("%");
 
   return (
-    <div className={`group relative flex min-h-[130px] sm:min-h-[150px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
+    <div className={`group relative flex h-full min-h-[130px] sm:min-h-[150px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
 
       {/* Stripe de cor no topo */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
