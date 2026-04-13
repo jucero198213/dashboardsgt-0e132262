@@ -59,7 +59,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
   const isPercent  = value.endsWith("%");
 
   return (
-    <div className={`group relative flex min-h-[150px] flex-col overflow-hidden rounded-[20px] border ${t.border} bg-[#0b0e1a] shadow-[0_2px_20px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
+    <div className={`group relative flex min-h-[130px] sm:min-h-[150px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} bg-[#0b0e1a] shadow-[0_2px_20px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
 
       {/* Stripe de cor no topo */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -68,7 +68,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
       <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
         style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
 
-      <div className="relative flex h-full flex-col p-5">
+      <div className="relative flex h-full flex-col p-3 sm:p-5">
         {/* Label + ícone */}
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">
@@ -80,7 +80,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
         </div>
 
         {/* Valor — protagonista */}
-        <p className="mt-auto pt-4 text-[28px] font-black leading-none tracking-[-0.05em] text-white sm:text-[30px]">
+        <p className="mt-auto pt-3 sm:pt-4 text-[20px] sm:text-[28px] font-black leading-none tracking-[-0.05em] text-white md:text-[30px]">
           {rawValue !== undefined && isCurrency ? (
             <CountUp value={rawValue} format="currency" />
           ) : rawValue !== undefined && isPercent ? (

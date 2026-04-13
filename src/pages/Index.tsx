@@ -99,12 +99,16 @@ const LargeCardSkeleton = () => (
 );
 
 const IndicatorSkeleton = () => (
-  <div className="rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3">
-    <div className="mb-2 flex justify-between">
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-3 w-10" />
+  <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] overflow-hidden">
+    <div className="h-[3px] w-full" style={{ background: "var(--sgt-skeleton-bg)" }} />
+    <div className="flex items-center gap-4 px-4 py-3.5">
+      <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-2.5 w-24" />
+        <Skeleton className="h-2 w-14" />
+      </div>
+      <Skeleton className="h-4 w-8 rounded-full" />
     </div>
-    <Skeleton className="h-1.5 w-full rounded-full" />
   </div>
 );
 
@@ -822,7 +826,7 @@ const Index = () => {
     <div
       className={`min-h-screen transition-all duration-300 ${presentationMode
           ? "h-screen w-screen overflow-hidden p-0"
-          : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+          : "overflow-y-auto px-0.5 py-0.5 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -860,7 +864,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col gap-3 p-3 sm:p-3.5 lg:p-4">
+          <div className="relative flex flex-col gap-2.5 p-2 sm:p-3.5 lg:p-4">
             {/* Header — full width */}
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -881,39 +885,38 @@ const Index = () => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 mt-1">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-500/10">
-                    <svg className="h-5 w-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center gap-2 sm:gap-3 mt-1">
+                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-500/10">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                     </svg>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h1
                       className={`font-extrabold tracking-[-0.04em] leading-none drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent light:text-slate-900 ${presentationMode
                           ? "text-[40px] 2xl:text-[48px]"
-                          : "text-xl sm:text-2xl md:text-[30px] xl:text-[36px]"
+                          : "text-lg sm:text-2xl md:text-[30px] xl:text-[36px]"
                         }`}
                     >
                       SGT Dashboard
                     </h1>
-                    <p className="mt-0.5 text-[11px] font-medium tracking-[0.18em] uppercase" style={{ color: "var(--sgt-text-muted)" }}>
+                    <p className="mt-0.5 text-[9px] sm:text-[11px] font-medium tracking-[0.18em] uppercase" style={{ color: "var(--sgt-text-muted)" }}>
                       Análise Financeira Consolidada
                     </p>
                   </div>
                 </div>
               </div>
 
-              <UserMenu />
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
               <input
                 type="date"
                 value={dwFilter.dataInicio}
                 onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                className="h-8 w-[120px] rounded-xl border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
+                className="h-7 sm:h-8 w-[105px] sm:w-[120px] rounded-lg sm:rounded-xl border px-1.5 sm:px-2 text-[10px] sm:text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
                 style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
               />
 
@@ -921,7 +924,7 @@ const Index = () => {
                 type="date"
                 value={dwFilter.dataFim}
                 onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                className="h-8 w-[120px] rounded-xl border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
+                className="h-7 sm:h-8 w-[105px] sm:w-[120px] rounded-lg sm:rounded-xl border px-1.5 sm:px-2 text-[10px] sm:text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
                 style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
               />
 
@@ -933,7 +936,7 @@ const Index = () => {
                   setDwFilter("empresa", v === "__all__" ? null : v)
                 }
               >
-                <SelectTrigger className="h-8 w-[100px] rounded-xl text-[11px] transition-all sm:w-[130px] sm:text-xs">
+                <SelectTrigger className="h-7 sm:h-8 w-[90px] sm:w-[100px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] transition-all sm:w-[130px] sm:text-xs">
                   <SelectValue placeholder="Empresa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -952,7 +955,7 @@ const Index = () => {
                   setDwFilter("filial", v === "__all__" ? null : v)
                 }
               >
-                <SelectTrigger className="h-8 w-[100px] rounded-xl text-[11px] transition-all sm:w-[140px] sm:text-xs">
+                <SelectTrigger className="h-7 sm:h-8 w-[90px] sm:w-[100px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] transition-all sm:w-[140px] sm:text-xs">
                   <SelectValue placeholder="Filial" />
                 </SelectTrigger>
                 <SelectContent>
@@ -968,7 +971,7 @@ const Index = () => {
               <button
                 onClick={() => void handleUpdate()}
                 disabled={isFetchingDw}
-                className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${isFetchingDw
+                className={`inline-flex h-7 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl border px-2 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${isFetchingDw
                     ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
                     : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-px"
                   } disabled:cursor-not-allowed`}
@@ -988,6 +991,8 @@ const Index = () => {
                   "Atualizar"
                 )}
               </button>
+              <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
+              <UserMenu />
             </div>
 
             {dwError && (
@@ -998,9 +1003,9 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-3 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
+            <div className={`grid gap-2 sm:gap-3 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2 sm:gap-2.5">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1037,7 +1042,7 @@ const Index = () => {
                               </div>
 
                               <div className="mt-2.5">
-                                <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
+                                <p className="min-w-0 truncate text-[16px] sm:text-[19px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
                                   <CountUp value={item.value} />
                                 </p>
                                 <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
@@ -1107,7 +1112,7 @@ const Index = () => {
 
               {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
               {isProcessed && (
-                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
+                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
@@ -1140,7 +1145,7 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
+                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1181,7 +1186,7 @@ const Index = () => {
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
+                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
@@ -1215,7 +1220,7 @@ const Index = () => {
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
+                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1245,7 +1250,7 @@ const Index = () => {
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
+                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1320,47 +1325,56 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex flex-col justify-between h-full rounded-[12px] border px-3.5 py-2.5 transition-all duration-300 hover:shadow-[0_6px_24px_rgba(0,0,0,0.12)]"
-                            style={{
-                              background: "var(--sgt-input-bg)",
-                              borderColor: "var(--sgt-border-subtle)",
-                            }}
-                            onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-hover)";
-                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)";
-                            }}
-                            onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-bg)";
-                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)";
-                            }}
+                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-[1px]"
+                            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(0,0,0,0.18)"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
                           >
-                            {/* Linha nome + valor */}
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-slate-500 text-slate-600 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-800">
-                                {ind.nome}
-                              </p>
-                              <div className="flex shrink-0 items-center gap-1">
-                                <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
-                                  {ind.percentualReal}%
-                                </span>
-                                <ArrowRight className="h-2.5 w-2.5 transition-all duration-300 group-hover:translate-x-0.5 dark:text-slate-700 text-slate-400 dark:group-hover:text-slate-400 group-hover:text-slate-600" />
-                              </div>
-                            </div>
+                            {/* Accent bar top */}
+                            <div
+                              className={`h-[3px] w-full transition-all duration-700 ${abaixoDaMeta
+                                ? "bg-gradient-to-r from-emerald-500 to-emerald-300"
+                                : "bg-gradient-to-r from-red-600 to-red-400"}`}
+                            />
 
-                            {/* Barra de progresso */}
-                            <div className="relative mt-2 h-[3px] overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                              <div
-                                className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
-                                    ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                                    : "bg-gradient-to-r from-red-700 to-red-500"
-                                  }`}
-                                style={{ width: `${progress}%` }}
-                              />
-                              <div
-                                className="absolute top-0 h-full w-[2px] rounded-full dark:bg-white/30 bg-slate-400/60"
-                                style={{ left: `${metaMark}%` }}
-                                title={`Meta: ${ind.percentualEsperado}%`}
-                              />
+                            <div className="flex items-center gap-4 px-4 py-3.5">
+                              {/* Percentage ring */}
+                              <div className="relative shrink-0 h-14 w-14">
+                                <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
+                                  <circle cx="18" cy="18" r="14" fill="none"
+                                    stroke="var(--sgt-progress-track)" strokeWidth="3" />
+                                  <circle cx="18" cy="18" r="14" fill="none"
+                                    stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${progress * 0.879} 87.9`}
+                                    className="transition-all duration-700"
+                                  />
+                                </svg>
+                                <span className={`absolute inset-0 flex items-center justify-center text-[11px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                                  {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
+                                </span>
+                              </div>
+
+                              {/* Name + meta */}
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[12px] font-semibold uppercase tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
+                                  {ind.nome}
+                                </p>
+                                <p className="mt-1 text-[12px] font-medium dark:text-slate-400 text-slate-500">
+                                  Meta: {ind.percentualEsperado}%
+                                </p>
+                              </div>
+
+                              {/* Status badge + arrow */}
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${abaixoDaMeta
+                                  ? "bg-emerald-500/10 text-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300"
+                                  : "bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"}`}>
+                                  {abaixoDaMeta ? "OK" : "Alto"}
+                                </span>
+                                <ArrowRight className="h-3.5 w-3.5 dark:text-slate-600 text-slate-400 transition-all duration-300 group-hover:translate-x-0.5 dark:group-hover:text-slate-300 group-hover:text-slate-600" />
+                              </div>
                             </div>
                           </Link>
                         </AnimatedCard>

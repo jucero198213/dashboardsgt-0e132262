@@ -207,7 +207,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
   const subtitle = SUBTITLES[indicador.nome] ?? "Detalhamento do indicador estratégico";
 
   return (
-    <div className={`relative overflow-hidden rounded-[22px] border ${cfg?.border ?? "border-white/[0.09]"} bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]`}>
+    <div className={`relative overflow-hidden rounded-[16px] sm:rounded-[22px] border ${cfg?.border ?? "border-white/[0.09]"} bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]`}>
 
       {/* Stripe de identidade no topo */}
       {cfg && <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${cfg.stripe}`} />}
@@ -218,7 +218,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
 
       {/* Info bar contextual */}
       {cfg && (
-        <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+        <div className="relative z-10 flex flex-wrap items-center gap-2 sm:gap-4 border-b border-white/[0.06] bg-black/[0.22] px-3 sm:px-6 py-2">
           <div className="flex items-center gap-2">
             <div className={`h-1.5 w-1.5 rounded-full ${cfg.dotColor}`} />
             <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">{cfg.infoLabel}</span>
@@ -235,7 +235,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
       )}
 
       {/* Conteúdo textual */}
-      <div className="relative z-10 px-6 py-5">
+      <div className="relative z-10 px-3 py-3 sm:px-6 sm:py-5">
         <div className="flex items-start gap-4">
           <button onClick={() => navigate("/dashboard")}
             className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white">
@@ -247,7 +247,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
                 <BarChart3 className="h-2.5 w-2.5" /> {cfg?.badgeText ?? "Indicador Estratégico"}
               </span>
             </div>
-            <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
+            <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-3xl md:text-4xl lg:text-5xl">
               {indicador.nome}
             </h1>
             <p className="mt-2.5 text-sm text-slate-500">{subtitle}</p>
@@ -393,7 +393,7 @@ export default function IndicadorDetalhe() {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[1400px] px-5 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10 space-y-6">
+      <div className="relative mx-auto max-w-[1400px] px-3 py-4 sm:px-8 sm:py-8 lg:px-12 lg:py-10 space-y-4 sm:space-y-6">
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
@@ -407,27 +407,27 @@ export default function IndicadorDetalhe() {
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
           {indicador.nome === "Óleo Diesel" ? (
-            <div className="relative overflow-hidden rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+            <div className="relative overflow-hidden rounded-[16px] sm:rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
 
               {/* C — véu âmbar à direita */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(201,162,39,0.17)] via-[rgba(201,162,39,0.05)] to-transparent" />
 
               {/* A — barra de preço ANP */}
-              <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+              <div className="relative z-10 flex flex-wrap items-center gap-2 sm:gap-4 border-b border-white/[0.06] bg-black/[0.22] px-3 sm:px-6 py-2">
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
                   <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">Diesel S-10</span>
                   <span className="ml-1 text-[12px] font-semibold text-amber-300">R$ 6,84/L</span>
                 </div>
-                <div className="h-3 w-px bg-white/10" />
-                <span className="text-[11px] font-medium text-emerald-400">▲ +2,3% vs mês anterior</span>
-                <div className="h-3 w-px bg-white/10" />
-                <span className="text-[10px] text-slate-500">Referência nacional ANP</span>
-                <span className="ml-auto text-[9px] text-slate-600">Atualizado hoje · 08:00</span>
+                <div className="hidden sm:block h-3 w-px bg-white/10" />
+                <span className="hidden sm:inline text-[11px] font-medium text-emerald-400">▲ +2,3% vs mês anterior</span>
+                <div className="hidden md:block h-3 w-px bg-white/10" />
+                <span className="hidden md:inline text-[10px] text-slate-500">Referência nacional ANP</span>
+                <span className="ml-auto text-[9px] text-slate-600">Atualizado hoje</span>
               </div>
 
               {/* D — gauge semicircular dinâmico */}
-              <div className="absolute right-5 top-[48px] z-10">
+              <div className="absolute right-2 sm:right-5 top-[42px] sm:top-[48px] z-10 scale-75 sm:scale-100 origin-top-right">
                 {(() => {
                   const cx = 60, cy = 72, r = 48;
                   const pReal = indicador.percentualReal;
@@ -464,7 +464,7 @@ export default function IndicadorDetalhe() {
               </div>
 
               {/* Conteúdo textual */}
-              <div className="relative z-10 px-6 py-5 pr-[140px]">
+              <div className="relative z-10 px-3 py-3 pr-[100px] sm:px-6 sm:py-5 sm:pr-[140px]">
                 <div className="flex items-start gap-4">
                   <button onClick={() => navigate("/dashboard")}
                     className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
@@ -476,7 +476,7 @@ export default function IndicadorDetalhe() {
                         <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
                       </span>
                     </div>
-                    <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-3xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-4xl md:text-5xl">
+                    <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-3xl md:text-4xl lg:text-5xl">
                       {indicador.nome}
                     </h1>
                     <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
@@ -489,21 +489,21 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Filtros ── */}
-          <div className="flex flex-wrap items-center gap-2 rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-4 py-3">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2.5 sm:px-4 py-2.5 sm:py-3">
             {[
               { value: dwFilter.dataInicio, onChange: (v: string) => { setDwFilter("dataInicio", v); setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
               { value: dwFilter.dataFim,    onChange: (v: string) => { setDwFilter("dataFim", v);    setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
             ].map((inp, i) => (
               <input key={i} type="date" value={inp.value} onChange={(e) => inp.onChange(e.target.value)}
-                className="h-8 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none focus:bg-white/[0.07] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.08)]" />
+                className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none" />
             ))}
             <select value={dwFilter.empresa ?? ""} onChange={(e) => { setDwFilter("empresa", e.target.value || null); setDwFilter("filial", null); }}
-              className="h-8 rounded-xl border border-white/[0.08] bg-[#0e1120] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as empresas</option>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
             <select value={dwFilter.filial ?? ""} onChange={(e) => setDwFilter("filial", e.target.value || null)}
-              className="h-8 rounded-xl border border-white/[0.08] bg-[#0e1120] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as filiais</option>
               {filiaisFiltradas.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
@@ -535,7 +535,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Gráfico + Composição ── */}
-          <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
+          <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
 
             {/* Gráfico */}
             <div className="flex flex-col overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]">
