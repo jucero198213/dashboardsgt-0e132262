@@ -991,8 +991,7 @@ const Index = () => {
                   "Atualizar"
                 )}
               </button>
-              <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
-              <UserMenu />
+              <div className="ml-auto"><UserMenu /></div>
             </div>
 
             {dwError && (
