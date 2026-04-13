@@ -137,7 +137,7 @@ const ContasAReceber = () => {
                     Contas a Receber
                   </div>
                 </div>
-                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent sm:text-3xl md:text-4xl lg:text-5xl">
+                <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-[clamp(1.25rem,4vw,3rem)] font-extrabold tracking-[-0.04em] text-transparent">
                   Detalhamento — Recebíveis
                 </h1>
                 <p className="mt-2.5 text-sm text-slate-500">Visão detalhada de todos os documentos a receber do período</p>

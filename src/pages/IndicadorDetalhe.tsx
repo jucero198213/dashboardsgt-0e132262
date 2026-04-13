@@ -247,7 +247,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
                 <BarChart3 className="h-2.5 w-2.5" /> {cfg?.badgeText ?? "Indicador Estratégico"}
               </span>
             </div>
-            <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-3xl md:text-4xl lg:text-5xl">
+            <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-[clamp(1.25rem,4vw,3rem)] font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)]">
               {indicador.nome}
             </h1>
             <p className="mt-2.5 text-sm text-slate-500">{subtitle}</p>
@@ -476,7 +476,7 @@ export default function IndicadorDetalhe() {
                         <BarChart3 className="h-2.5 w-2.5" /> Indicador Estratégico
                       </span>
                     </div>
-                    <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-xl font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)] sm:text-3xl md:text-4xl lg:text-5xl">
+                    <h1 className="bg-gradient-to-r from-white from-50% via-slate-200 to-slate-400 bg-clip-text text-[clamp(1.25rem,4vw,3rem)] font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.06)]">
                       {indicador.nome}
                     </h1>
                     <p className="mt-2.5 text-sm text-slate-500">{SUBTITLES[indicador.nome]}</p>
