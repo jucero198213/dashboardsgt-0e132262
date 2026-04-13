@@ -28,18 +28,18 @@ function CompactPagination({ current, total, onChange }: { current: number; tota
   return (
     <div className="flex items-center gap-1">
       <button onClick={() => onChange(Math.max(1, current - 1))} disabled={current === 1}
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
       {pages.map((p, i) => p === "…"
         ? <span key={`e${i}`} className="px-1 text-xs text-slate-600">…</span>
         : <button key={p} onClick={() => onChange(p as number)}
-            className={`flex h-7 min-w-[28px] items-center justify-center rounded-lg border px-2 text-xs font-medium transition-all ${current === p ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"}`}>
+            className={`flex h-7 min-w-[28px] items-center justify-center rounded-lg border px-2 text-xs font-medium transition-all ${current === p ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:text-white"}`}>
             {p}
           </button>
       )}
       <button onClick={() => onChange(Math.min(total, current + 1))} disabled={current === total}
-        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-all hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
+        className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:cursor-not-allowed disabled:opacity-30">
         <ChevronRight className="h-3.5 w-3.5" />
       </button>
     </div>
@@ -80,7 +80,7 @@ const ContasAReceber = () => {
   const showLoading = isFetchingDw && !isProcessed;
 
   return (
-    <div className="min-h-screen bg-[#060912] text-white px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8">
+    <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8" style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}>
       <BackgroundEffects />
 
       <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
@@ -104,7 +104,7 @@ const ContasAReceber = () => {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(52,211,153,0.12)] via-[rgba(52,211,153,0.03)] to-transparent" />
 
           {/* Info bar contextual */}
-          <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-white/[0.06] bg-black/[0.22] px-6 py-2.5">
+          <div className="relative z-10 flex flex-wrap items-center gap-4 border-b border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] px-6 py-2.5">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">Contas a Receber</span>
@@ -126,7 +126,7 @@ const ContasAReceber = () => {
             <div className="flex items-start gap-4">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:[background:var(--sgt-input-hover)] hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
@@ -177,7 +177,7 @@ const ContasAReceber = () => {
               className={`rounded-xl px-4 py-1.5 text-xs font-medium transition-all ${
                 filtroStatus === f.value
                   ? "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                  : "border border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-300"
+                  : "border border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:text-slate-300"
               }`}
             >
               {f.label}
@@ -187,7 +187,7 @@ const ContasAReceber = () => {
 
         {/* Table */}
         <AnimatedCard delay={320}>
-          <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
+          <div className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between p-6 pb-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Documentos — Contas a Receber</p>
               {isProcessed && contasFiltradas.length > 0 && (
@@ -203,7 +203,7 @@ const ContasAReceber = () => {
               <div className="overflow-x-auto">
                 <Table className="min-w-[600px]">
                   <TableHeader>
-                    <TableRow className="border-white/5 hover:bg-transparent">
+                    <TableRow className="border-[var(--sgt-border-subtle)] hover:bg-transparent">
                       <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Emissão</TableHead>
                       <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Vencimento</TableHead>
                       <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Pagamento</TableHead>
@@ -220,7 +220,7 @@ const ContasAReceber = () => {
                   </TableHeader>
                   <TableBody>
                     {paginados.map((c, idx) => (
-                      <TableRow key={c.id} className={`border-white/5 transition-colors hover:bg-white/[0.04] ${idx % 2 === 0 ? "" : "bg-white/[0.02]"}`}>
+                      <TableRow key={c.id} className={`border-[var(--sgt-border-subtle)] transition-colors hover:[background:var(--sgt-input-bg)] ${idx % 2 === 0 ? "" : "[background:var(--sgt-row-alt)]"}`}>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.dataEmissao)}</TableCell>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.vencimento)}</TableCell>
                         <TableCell className="text-sm whitespace-nowrap">{c.dataPagamento ? <span className="text-emerald-400">{fmt(c.dataPagamento)}</span> : <span className="text-slate-600">—</span>}</TableCell>
@@ -240,7 +240,7 @@ const ContasAReceber = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between border-t border-white/5 px-6 py-3">
+            <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-6 py-3">
               <p className="text-xs text-slate-500">{contasFiltradas.length} documento(s)</p>
               <CompactPagination current={paginaAtual} total={totalPaginas} onChange={setPagina} />
             </div>

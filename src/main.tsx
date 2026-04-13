@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// Apply saved theme before React mounts to avoid flash
+const savedTheme = localStorage.getItem("sgt-theme") ?? "dark";
+document.documentElement.classList.add(savedTheme);
+
 // Guard: nunca registrar SW em iframe ou preview do Lovable
 const isInIframe = (() => {
   try { return window.self !== window.top; } catch { return true; }

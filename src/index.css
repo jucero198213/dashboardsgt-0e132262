@@ -3,43 +3,32 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  .dark {
     --background: 220 30% 5%;
     --foreground: 210 20% 92%;
-
     --card: 220 25% 8%;
     --card-foreground: 210 20% 92%;
-
     --popover: 220 25% 8%;
     --popover-foreground: 210 20% 92%;
-
     --primary: 160 60% 45%;
     --primary-foreground: 220 30% 5%;
-
     --secondary: 220 20% 14%;
     --secondary-foreground: 210 20% 85%;
-
     --muted: 220 20% 14%;
     --muted-foreground: 215 15% 55%;
-
     --accent: 215 70% 55%;
     --accent-foreground: 210 20% 95%;
-
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
-
     --warning: 35 92% 50%;
     --warning-foreground: 220 30% 5%;
-
     --success: 160 60% 45%;
     --success-foreground: 220 30% 5%;
-
     --border: 220 15% 16%;
     --input: 220 15% 16%;
     --ring: 160 60% 45%;
-
     --radius: 0.75rem;
-
     --sidebar-background: 220 25% 6%;
     --sidebar-foreground: 210 20% 85%;
     --sidebar-primary: 160 60% 45%;
@@ -48,18 +37,117 @@
     --sidebar-accent-foreground: 210 20% 85%;
     --sidebar-border: 220 15% 14%;
     --sidebar-ring: 160 60% 45%;
-
     --card-elevated: 220 22% 10%;
+
+    --sgt-bg-base:        #060912;
+    --sgt-bg-card:        #0c0f1c;
+    --sgt-bg-section:     rgba(8,11,20,0.94);
+    --sgt-bg-overlay:     rgba(14,20,40,0.98);
+    --sgt-border-subtle:  rgba(255,255,255,0.07);
+    --sgt-border-medium:  rgba(255,255,255,0.12);
+    --sgt-text-primary:   #ffffff;
+    --sgt-text-secondary: #94a3b8;
+    --sgt-text-muted:     #475569;
+    --sgt-text-faint:     #334155;
+    --sgt-input-bg:       rgba(255,255,255,0.05);
+    --sgt-input-border:   rgba(255,255,255,0.10);
+    --sgt-input-hover:    rgba(255,255,255,0.10);
+    --sgt-skeleton-bg:    rgba(255,255,255,0.06);
+    --sgt-divider:        rgba(255,255,255,0.06);
+    --sgt-row-alt:        rgba(255,255,255,0.02);
+    --sgt-row-hover:      rgba(255,255,255,0.04);
+    --sgt-table-head:     rgba(255,255,255,0.03);
+    --sgt-progress-track: rgba(255,255,255,0.10);
+    --sgt-menu-bg:        rgba(14,20,40,0.98);
+    --sgt-scrollbar-track:#0c0f1c;
+    --sgt-scrollbar-thumb:#1e2640;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(255,255,255,0.025), transparent 45%);
+    --sgt-section-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+
+  .light {
+    --background: 210 20% 97%;
+    --foreground: 220 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 15%;
+    --primary: 190 80% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 93%;
+    --secondary-foreground: 220 20% 30%;
+    --muted: 210 20% 93%;
+    --muted-foreground: 215 15% 50%;
+    --accent: 190 80% 38%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 35 92% 45%;
+    --warning-foreground: 0 0% 100%;
+    --success: 160 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 190 80% 38%;
+    --radius: 0.75rem;
+    --card-elevated: 210 20% 98%;
+
+    --sgt-bg-base:        #eef2f7;
+    --sgt-bg-card:        #ffffff;
+    --sgt-bg-section:     rgba(255,255,255,0.97);
+    --sgt-bg-overlay:     rgba(255,255,255,0.99);
+    --sgt-border-subtle:  rgba(0,0,0,0.07);
+    --sgt-border-medium:  rgba(0,0,0,0.14);
+    --sgt-text-primary:   #0f172a;
+    --sgt-text-secondary: #475569;
+    --sgt-text-muted:     #94a3b8;
+    --sgt-text-faint:     #cbd5e1;
+    --sgt-input-bg:       rgba(0,0,0,0.03);
+    --sgt-input-border:   rgba(0,0,0,0.12);
+    --sgt-input-hover:    rgba(0,0,0,0.07);
+    --sgt-skeleton-bg:    rgba(0,0,0,0.06);
+    --sgt-divider:        rgba(0,0,0,0.07);
+    --sgt-row-alt:        rgba(0,0,0,0.025);
+    --sgt-row-hover:      rgba(6,182,212,0.05);
+    --sgt-table-head:     rgba(0,0,0,0.03);
+    --sgt-progress-track: rgba(0,0,0,0.08);
+    --sgt-menu-bg:        rgba(255,255,255,0.99);
+    --sgt-scrollbar-track:#dde4ee;
+    --sgt-scrollbar-thumb:#a8b8cc;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(6,182,212,0.05), transparent 45%);
+    --sgt-section-shadow: 0 30px 80px rgba(0,0,0,0.10);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: var(--sgt-bg-base);
+    color: var(--sgt-text-primary);
   }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--sgt-scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--sgt-scrollbar-thumb); border-radius: 3px; }
+}
+
+@layer utilities {
+  .sgt-bg-base    { background-color: var(--sgt-bg-base); }
+  .sgt-bg-card    { background-color: var(--sgt-bg-card); }
+  .sgt-bg-section { background-color: var(--sgt-bg-section); }
+  .sgt-text       { color: var(--sgt-text-primary); }
+  .sgt-text-2     { color: var(--sgt-text-secondary); }
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+[class*="animate-"], [class*="hover:-translate"], .transition-none {
+  transition-property: inherit;
 }

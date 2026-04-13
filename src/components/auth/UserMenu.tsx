@@ -1,10 +1,12 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Link } from "react-router-dom";
-import { LogOut, Shield, User, ChevronDown } from "lucide-react";
+import { LogOut, Shield, User, ChevronDown, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 export function UserMenu() {
   const { user, isAdmin, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -20,11 +22,29 @@ export function UserMenu() {
 
   const initials = (user.email ?? "U")[0].toUpperCase();
 
+  const menuStyle: React.CSSProperties = {
+    background: "var(--sgt-menu-bg)",
+    borderColor: "var(--sgt-border-medium)",
+  };
+
+  const itemStyle: React.CSSProperties = {
+    color: "var(--sgt-text-secondary)",
+  };
+
+  const dividerStyle: React.CSSProperties = {
+    borderColor: "var(--sgt-border-subtle)",
+  };
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+        className="flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-all"
+        style={{
+          background: "var(--sgt-input-bg)",
+          borderColor: "var(--sgt-input-border)",
+          color: "var(--sgt-text-secondary)",
+        }}
       >
         <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-[10px] font-bold text-cyan-300">
           {initials}
@@ -34,29 +54,47 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-50 min-w-[180px] overflow-hidden rounded-xl border border-white/10 bg-[rgba(14,20,40,0.98)] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
-          <div className="border-b border-white/5 px-4 py-3">
-            <p className="text-xs font-medium text-white truncate">{user.email}</p>
-            <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+        <div
+          className="absolute right-0 top-full mt-2 z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
+          style={menuStyle}
+        >
+          {/* User info */}
+          <div className="border-b px-4 py-3" style={dividerStyle}>
+            <p className="text-xs font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>
+              {user.email}
+            </p>
+            <p className="text-[10px] mt-0.5 flex items-center gap-1" style={{ color: "var(--sgt-text-muted)" }}>
               {isAdmin ? (
-                <>
-                  <Shield className="h-3 w-3 text-red-400" />
-                  Administrador
-                </>
+                <><Shield className="h-3 w-3 text-red-400" />Administrador</>
               ) : (
-                <>
-                  <User className="h-3 w-3" />
-                  Usuário
-                </>
+                <><User className="h-3 w-3" />Usuário</>
               )}
             </p>
           </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-xs transition-colors hover:brightness-110"
+            style={{ ...itemStyle, background: "transparent" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-input-hover)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+          >
+            {theme === "dark" ? (
+              <><Sun className="h-3.5 w-3.5 text-amber-400" />Tema claro</>
+            ) : (
+              <><Moon className="h-3.5 w-3.5 text-cyan-400" />Tema escuro</>
+            )}
+          </button>
 
           {isAdmin && (
             <Link
               to="/admin"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs transition-colors"
+              style={itemStyle}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-input-hover)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
               <Shield className="h-3.5 w-3.5 text-red-400" />
               Área Administrativa
@@ -65,7 +103,10 @@ export function UserMenu() {
 
           <button
             onClick={() => { setOpen(false); signOut(); }}
-            className="flex w-full items-center gap-2 px-4 py-2.5 text-xs text-slate-300 transition-colors hover:bg-white/5 hover:text-red-300"
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-xs transition-colors"
+            style={{ ...itemStyle, background: "transparent" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "var(--sgt-input-hover)"; e.currentTarget.style.color = "#f87171"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--sgt-text-secondary)"; }}
           >
             <LogOut className="h-3.5 w-3.5" />
             Sair

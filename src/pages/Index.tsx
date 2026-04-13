@@ -74,11 +74,11 @@ const CountUp = ({
 /*  Skeleton shimmer para loading                                      */
 /* ------------------------------------------------------------------ */
 const Skeleton = ({ className = "" }: { className?: string }) => (
-  <div className={`animate-pulse rounded-xl bg-white/[0.06] ${className}`} />
+  <div className={`animate-pulse rounded-xl ${className}`} style={{ background: "var(--sgt-skeleton-bg)" }} />
 );
 
 const CardSkeleton = () => (
-  <div className="rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] p-3.5">
+  <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-3 h-3 w-20" />
     <Skeleton className="mb-2 h-6 w-32" />
     <Skeleton className="h-3 w-24" />
@@ -86,7 +86,7 @@ const CardSkeleton = () => (
 );
 
 const LargeCardSkeleton = () => (
-  <div className="rounded-[22px] border border-white/[0.07] bg-[#0c0f1c] p-3.5">
+  <div className="rounded-[22px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-2 h-3 w-28" />
     <Skeleton className="mb-1 h-7 w-40" />
     <Skeleton className="mb-3 h-3 w-32" />
@@ -99,7 +99,7 @@ const LargeCardSkeleton = () => (
 );
 
 const IndicatorSkeleton = () => (
-  <div className="rounded-[16px] border border-white/[0.07] bg-[#0c0f1c] p-3">
+  <div className="rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3">
     <div className="mb-2 flex justify-between">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-3 w-10" />
@@ -247,7 +247,7 @@ const MiniLineChart = ({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-white/[0.07] bg-white/[0.025] p-3">
+    <div className="flex min-h-0 flex-1 flex-col rounded-[18px] border border-[var(--sgt-border-subtle)] bg-white/[0.025] p-3">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução mensal{ano ? ` · ${ano}` : ""}
@@ -723,8 +723,8 @@ const Index = () => {
     return (
       <div
         className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
-            ? "border-emerald-500/[0.14] bg-[#0c0f1c] hover:border-emerald-400/25"
-            : "border-amber-500/[0.14] bg-[#0c0f1c] hover:border-amber-400/25"
+            ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
+            : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
           } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
       >
         <div
@@ -749,7 +749,7 @@ const Index = () => {
               >
                 {title}
               </p>
-              <h2 className="mt-0.5 min-w-0 truncate text-[18px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
+              <h2 className="mt-0.5 min-w-0 truncate text-[18px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
                 <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>
@@ -820,15 +820,16 @@ const Index = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[#060912] text-white transition-all duration-300 ${presentationMode
+      className={`min-h-screen transition-all duration-300 ${presentationMode
           ? "h-screen w-screen overflow-hidden p-0"
           : "overflow-y-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
+      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
-      {/* ── Atmosfera — luz âmbar no topo, fria no rodapé, vinheta nas bordas ── */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(160,100,4,0.22),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_50%_40%_at_100%_105%,rgba(6,182,212,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
+      {/* Atmosfera dark */}
+      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(160,100,4,0.22),transparent_60%)] light:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(6,182,212,0.08),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_50%_40%_at_100%_105%,rgba(6,182,212,0.07),transparent_60%)] light:bg-[radial-gradient(ellipse_50%_40%_at_100%_105%,rgba(6,182,212,0.04),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 dark:opacity-100 light:opacity-40" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
 
       <div
         className={`relative flex flex-col ${presentationMode
@@ -837,10 +838,15 @@ const Index = () => {
           }`}
       >
         <section
-          className={`relative flex-1 border border-white/[0.07] bg-[rgba(8,11,20,0.94)] shadow-[0_30px_80px_rgba(0,0,0,0.55)] ${presentationMode
+          className={`relative flex-1 border transition-all duration-300 ${presentationMode
               ? "h-full w-full overflow-hidden rounded-none"
               : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-y-auto"
             }`}
+          style={{
+            background: "var(--sgt-bg-section)",
+            borderColor: "var(--sgt-border-subtle)",
+            boxShadow: "var(--sgt-section-shadow)",
+          }}
         >
           {/* Progress bar — âmbar coerente com o tema */}
           {isFetchingDw && (
@@ -883,14 +889,14 @@ const Index = () => {
                   </div>
                   <div>
                     <h1
-                      className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] leading-none ${presentationMode
+                      className={`font-extrabold tracking-[-0.04em] leading-none drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent light:text-slate-900 ${presentationMode
                           ? "text-[40px] 2xl:text-[48px]"
                           : "text-xl sm:text-2xl md:text-[30px] xl:text-[36px]"
                         }`}
                     >
                       SGT Dashboard
                     </h1>
-                    <p className="mt-0.5 text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                    <p className="mt-0.5 text-[11px] font-medium tracking-[0.18em] uppercase" style={{ color: "var(--sgt-text-muted)" }}>
                       Análise Financeira Consolidada
                     </p>
                   </div>
@@ -900,24 +906,26 @@ const Index = () => {
               <UserMenu />
             </div>
 
-            <div className="h-px bg-white/6" />
+            <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <input
                 type="date"
                 value={dwFilter.dataInicio}
                 onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+                className="h-8 w-[120px] rounded-xl border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
+                style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
               />
 
               <input
                 type="date"
                 value={dwFilter.dataFim}
                 onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                className="h-8 w-[120px] rounded-xl border border-white/10 bg-white/5 px-2 text-[11px] text-slate-300 outline-none transition-all hover:border-white/20 hover:bg-white/10 focus:border-cyan-400/40 focus:bg-white/10 [color-scheme:dark] sm:w-auto sm:px-3 sm:text-xs"
+                className="h-8 w-[120px] rounded-xl border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
+                style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
               />
 
-              <div className="hidden h-5 w-px shrink-0 bg-white/10 sm:block" />
+              <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               <Select
                 value={dwFilter.empresa ?? "__all__"}
@@ -925,7 +933,7 @@ const Index = () => {
                   setDwFilter("empresa", v === "__all__" ? null : v)
                 }
               >
-                <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[130px] sm:text-xs">
+                <SelectTrigger className="h-8 w-[100px] rounded-xl text-[11px] transition-all sm:w-[130px] sm:text-xs">
                   <SelectValue placeholder="Empresa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -944,7 +952,7 @@ const Index = () => {
                   setDwFilter("filial", v === "__all__" ? null : v)
                 }
               >
-                <SelectTrigger className="h-8 w-[100px] rounded-xl border-white/10 bg-white/5 text-[11px] text-slate-300 transition-all hover:border-white/20 hover:bg-white/10 sm:w-[140px] sm:text-xs">
+                <SelectTrigger className="h-8 w-[100px] rounded-xl text-[11px] transition-all sm:w-[140px] sm:text-xs">
                   <SelectValue placeholder="Filial" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1009,7 +1017,7 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.12] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
@@ -1029,7 +1037,7 @@ const Index = () => {
                               </div>
 
                               <div className="mt-2.5">
-                                <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] text-white xl:text-[20px]">
+                                <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
                                   <CountUp value={item.value} />
                                 </p>
                                 <p className="mt-1.5 text-xs text-slate-400">
@@ -1103,8 +1111,8 @@ const Index = () => {
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
-                        ? "border-emerald-400/[0.12] bg-[#0c0f1c]"
-                        : "border-rose-400/[0.12] bg-[#0c0f1c]"
+                        ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
+                        : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                       }`}
                   >
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32"
@@ -1132,7 +1140,7 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white break-all leading-tight">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
                       <p className="mt-2 text-sm text-slate-400">
@@ -1162,7 +1170,7 @@ const Index = () => {
                   </div>
 
                   {/* INADIMPLÊNCIA */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
@@ -1173,7 +1181,7 @@ const Index = () => {
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white break-all leading-tight">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
@@ -1196,7 +1204,7 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
@@ -1207,7 +1215,7 @@ const Index = () => {
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white leading-tight">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm text-slate-400">
@@ -1226,7 +1234,7 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] bg-[#0c0f1c] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-4 flex items-start justify-between">
@@ -1237,7 +1245,7 @@ const Index = () => {
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] text-white leading-tight">
+                      <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm text-slate-400">
@@ -1258,10 +1266,11 @@ const Index = () => {
               )}
 
               <aside
-                className={`rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] shadow-[0_8px_40px_rgba(0,0,0,0.4)] ${presentationMode
+                className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
                     : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
                   }`}
+                style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-5 shrink-0">
@@ -1313,7 +1322,7 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
+                            className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-[var(--sgt-border-medium)] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
                           >
                             {/* Linha nome + valor */}
                             <div className="flex items-center justify-between gap-2">

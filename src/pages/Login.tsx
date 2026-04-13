@@ -12,7 +12,7 @@ export default function Login() {
   const [submitting,  setSubmitting]  = useState(false);
 
   if (isLoading) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#060912]">
+    <div className="flex min-h-screen items-center justify-center [background:var(--sgt-bg-base)]">
       <div className="h-7 w-7 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
     </div>
   );
@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-[#060912]">
+    <div className="relative flex min-h-screen overflow-hidden [background:var(--sgt-bg-base)]">
 
       {/* ── Atmosfera global ── */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_60%_at_30%_-10%,rgba(180,110,4,0.22),transparent_55%)]" />
