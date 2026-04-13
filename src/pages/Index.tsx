@@ -980,7 +980,7 @@ const Index = () => {
             {/* 2-column grid: cards+charts left, indicators right */}
             <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="flex flex-col gap-2 sm:gap-2.5">
+              <div className="grid gap-2 sm:gap-2.5 xl:grid-cols-2 auto-rows-fr">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1034,13 +1034,13 @@ const Index = () => {
 
                 {/* Large cards with charts */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
+                  <div className="contents">
                     <LargeCardSkeleton />
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
-                    <AnimatedCard delay={320} className="flex">
+                  <div className="contents">
+                    <AnimatedCard delay={320} className="flex h-full">
                       <div className="flex-1 flex flex-col">
                       {renderLargeCard({
                         title: "Saldo a receber",
@@ -1060,7 +1060,7 @@ const Index = () => {
                       </div>
                     </AnimatedCard>
 
-                    <AnimatedCard delay={400} className="flex">
+                    <AnimatedCard delay={400} className="flex h-full">
                       <div className="flex-1 flex flex-col">
                       {renderLargeCard({
                         title: "Saldo a pagar",
@@ -1096,7 +1096,7 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2 items-stretch">
+                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
