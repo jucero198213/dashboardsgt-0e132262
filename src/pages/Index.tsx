@@ -99,12 +99,16 @@ const LargeCardSkeleton = () => (
 );
 
 const IndicatorSkeleton = () => (
-  <div className="rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3">
-    <div className="mb-2 flex justify-between">
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-3 w-10" />
+  <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] overflow-hidden">
+    <div className="h-[3px] w-full" style={{ background: "var(--sgt-skeleton-bg)" }} />
+    <div className="flex items-center gap-3 px-3.5 py-2.5">
+      <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-2.5 w-24" />
+        <Skeleton className="h-2 w-14" />
+      </div>
+      <Skeleton className="h-4 w-8 rounded-full" />
     </div>
-    <Skeleton className="h-1.5 w-full rounded-full" />
   </div>
 );
 
@@ -1320,47 +1324,56 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex flex-col justify-between h-full rounded-[12px] border px-3.5 py-2.5 transition-all duration-300 hover:shadow-[0_6px_24px_rgba(0,0,0,0.12)]"
-                            style={{
-                              background: "var(--sgt-input-bg)",
-                              borderColor: "var(--sgt-border-subtle)",
-                            }}
-                            onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-hover)";
-                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)";
-                            }}
-                            onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-bg)";
-                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)";
-                            }}
+                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-[1px]"
+                            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px_28px rgba(0,0,0,0.18)"; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
                           >
-                            {/* Linha nome + valor */}
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-slate-500 text-slate-600 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-800">
-                                {ind.nome}
-                              </p>
-                              <div className="flex shrink-0 items-center gap-1">
-                                <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
-                                  {ind.percentualReal}%
-                                </span>
-                                <ArrowRight className="h-2.5 w-2.5 transition-all duration-300 group-hover:translate-x-0.5 dark:text-slate-700 text-slate-400 dark:group-hover:text-slate-400 group-hover:text-slate-600" />
-                              </div>
-                            </div>
+                            {/* Accent bar top */}
+                            <div
+                              className={`h-[3px] w-full transition-all duration-700 ${abaixoDaMeta
+                                ? "bg-gradient-to-r from-emerald-500 to-emerald-300"
+                                : "bg-gradient-to-r from-red-600 to-red-400"}`}
+                            />
 
-                            {/* Barra de progresso */}
-                            <div className="relative mt-2 h-[3px] overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                              <div
-                                className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
-                                    ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                                    : "bg-gradient-to-r from-red-700 to-red-500"
-                                  }`}
-                                style={{ width: `${progress}%` }}
-                              />
-                              <div
-                                className="absolute top-0 h-full w-[2px] rounded-full dark:bg-white/30 bg-slate-400/60"
-                                style={{ left: `${metaMark}%` }}
-                                title={`Meta: ${ind.percentualEsperado}%`}
-                              />
+                            <div className="flex items-center gap-3 px-3.5 py-2.5">
+                              {/* Percentage ring */}
+                              <div className="relative shrink-0 h-9 w-9">
+                                <svg viewBox="0 0 36 36" className="h-9 w-9 -rotate-90">
+                                  <circle cx="18" cy="18" r="14" fill="none"
+                                    stroke="var(--sgt-progress-track)" strokeWidth="3" />
+                                  <circle cx="18" cy="18" r="14" fill="none"
+                                    stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${progress * 0.879} 87.9`}
+                                    className="transition-all duration-700"
+                                  />
+                                </svg>
+                                <span className={`absolute inset-0 flex items-center justify-center text-[8px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                                  {ind.percentualReal > 99 ? "99+" : `${ind.percentualReal}%`}
+                                </span>
+                              </div>
+
+                              {/* Name + meta */}
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.14em] dark:text-slate-400 text-slate-600 transition-colors group-hover:dark:text-slate-200 group-hover:text-slate-800">
+                                  {ind.nome}
+                                </p>
+                                <p className="mt-0.5 text-[10px] dark:text-slate-600 text-slate-400">
+                                  Meta: {ind.percentualEsperado}%
+                                </p>
+                              </div>
+
+                              {/* Status badge + arrow */}
+                              <div className="flex shrink-0 items-center gap-1.5">
+                                <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${abaixoDaMeta
+                                  ? "bg-emerald-500/10 text-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300"
+                                  : "bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"}`}>
+                                  {abaixoDaMeta ? "OK" : "Alto"}
+                                </span>
+                                <ArrowRight className="h-3 w-3 dark:text-slate-600 text-slate-400 transition-all duration-300 group-hover:translate-x-0.5 dark:group-hover:text-slate-300 group-hover:text-slate-600" />
+                              </div>
                             </div>
                           </Link>
                         </AnimatedCard>
