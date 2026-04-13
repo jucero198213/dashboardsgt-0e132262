@@ -51,7 +51,7 @@ export default function Landing() {
       <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.65) 100%)" }} />
 
       {/* ══ NAVBAR ══ */}
-      <nav className="relative z-20 mx-auto flex max-w-[1200px] items-center justify-between px-6 py-5 sm:px-10">
+      <nav className="relative z-20 mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10">
             <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
@@ -70,7 +70,7 @@ export default function Landing() {
       </nav>
 
       {/* ══ HERO ══ */}
-      <section className="relative mx-auto max-w-[1200px] px-6 pb-16 pt-16 sm:px-10 sm:pt-20 lg:pt-28">
+      <section className="relative mx-auto max-w-[1200px] px-4 pb-12 pt-12 sm:px-6 sm:pb-16 sm:pt-20 lg:px-10 lg:pt-28">
         <div className="mx-auto max-w-[760px] text-center">
 
           {/* Pill de status */}
@@ -85,7 +85,7 @@ export default function Landing() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl font-black leading-[1.05] tracking-[-0.04em] sm:text-6xl lg:text-7xl">
+          <h1 className="text-[clamp(2.2rem,8vw,4.5rem)] font-black leading-[1.05] tracking-[-0.04em]">
             Análise
             <span className="block bg-gradient-to-r from-amber-300 via-amber-200 to-white bg-clip-text text-transparent">
               Consolidada
@@ -93,7 +93,7 @@ export default function Landing() {
             <span className="block text-slate-400">da Operação</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-[520px] text-[16px] leading-relaxed text-slate-400 sm:text-[17px]">
+          <p className="mx-auto mt-4 max-w-[520px] text-[14px] leading-relaxed text-slate-400 sm:mt-6 sm:text-[16px] lg:text-[17px]">
             Indicadores financeiros estratégicos, contas a pagar e receber, evolução de custos e composição por fornecedor — tudo em uma única visão executiva.
           </p>
 
@@ -111,7 +111,7 @@ export default function Landing() {
         </div>
 
         {/* ── Mini dashboard preview ── */}
-        <div className="relative mx-auto mt-16 max-w-[900px]">
+        <div className="relative mx-auto mt-10 max-w-[900px] sm:mt-16">
           {/* Glow sob o preview */}
           <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(180,110,4,0.14),transparent_65%)]" />
           {/* Cards de métricas */}
@@ -133,10 +133,10 @@ export default function Landing() {
       </section>
 
       {/* ══ FEATURES ══ */}
-      <section className="relative mx-auto max-w-[1200px] px-6 py-20 sm:px-10">
+      <section className="relative mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-20 lg:px-10">
         <div className="mb-12 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-amber-400/60">Módulos disponíveis</p>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.03em] text-white sm:text-4xl">
+          <h2 className="mt-3 text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] text-white">
             Uma visão completa da operação
           </h2>
         </div>
@@ -160,8 +160,8 @@ export default function Landing() {
 
       {/* ══ TRUST BAR ══ */}
       <section className="relative border-t border-white/[0.05] bg-[rgba(6,9,18,0.60)]">
-        <div className="mx-auto max-w-[1200px] px-6 py-10 sm:px-10">
-          <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+        <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
+          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:gap-10 lg:gap-16">
             {[
               { icon: Shield, label: "Acesso por perfil",    sub: "Admin e usuário"     },
               { icon: Zap,    label: "Atualização em tempo real", sub: "Conectado ao DW"  },
@@ -182,9 +182,9 @@ export default function Landing() {
       </section>
 
       {/* ══ CTA FINAL ══ */}
-      <section className="relative mx-auto max-w-[1200px] px-6 py-24 text-center sm:px-10">
+      <section className="relative mx-auto max-w-[1200px] px-4 py-16 text-center sm:px-6 sm:py-24 lg:px-10">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(180,110,4,0.10),transparent_65%)]" />
-        <h2 className="relative text-3xl font-black tracking-[-0.03em] text-white sm:text-4xl">
+        <h2 className="relative text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] text-white">
           Pronto para acessar<br />
           <span className="bg-gradient-to-r from-amber-300 to-white bg-clip-text text-transparent">o portal?</span>
         </h2>

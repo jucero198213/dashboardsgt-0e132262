@@ -864,10 +864,10 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col gap-2.5 p-2 sm:p-3.5 lg:p-4">
+          <div className="relative flex flex-col gap-2.5 p-2 sm:p-3 lg:p-4">
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
 
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
@@ -895,24 +895,24 @@ const Index = () => {
               <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros */}
-              <div className="flex flex-1 flex-wrap items-center gap-1.5">
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <input
                   type="date"
                   value={dwFilter.dataInicio}
                   onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                  className="h-7 w-[110px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
+                  className="h-7 w-full min-w-[100px] max-w-[130px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
                   style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
                 />
                 <input
                   type="date"
                   value={dwFilter.dataFim}
                   onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                  className="h-7 w-[110px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
+                  className="h-7 w-full min-w-[100px] max-w-[130px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
                   style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
                 />
                 <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px] transition-all sm:w-[130px]">
+                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[140px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Empresa" />
                   </SelectTrigger>
                   <SelectContent>
@@ -921,7 +921,7 @@ const Index = () => {
                   </SelectContent>
                 </Select>
                 <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px] transition-all sm:w-[140px]">
+                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[150px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Filial" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1069,7 +1069,7 @@ const Index = () => {
 
               {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
               {isProcessed && (
-                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 md:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
+                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
