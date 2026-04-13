@@ -100,7 +100,7 @@ const Skeleton = ({ className = "" }: { className?: string }) => (
 );
 
 const CardSkeleton = () => (
-  <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
+  <div className="h-full min-h-[110px] rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-3 h-3 w-20" />
     <Skeleton className="mb-2 h-6 w-32" />
     <Skeleton className="h-3 w-24" />
@@ -108,7 +108,7 @@ const CardSkeleton = () => (
 );
 
 const LargeCardSkeleton = () => (
-  <div className="rounded-[22px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
+  <div className="h-full rounded-[22px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-2 h-3 w-28" />
     <Skeleton className="mb-1 h-7 w-40" />
     <Skeleton className="mb-3 h-3 w-32" />
@@ -978,33 +978,33 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]`}>
+            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 items-start lg:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="flex flex-col gap-2 sm:gap-2.5">
+              <div className="flex min-w-0 flex-col gap-2 sm:gap-2.5">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
                     {topMetrics.map((item, idx) => {
                       const Icon = item.icon;
 
                       return (
-                        <AnimatedCard key={item.label} delay={idx * 80}>
+                        <AnimatedCard key={item.label} delay={idx * 80} className="min-w-0">
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] min-h-[110px] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative flex h-full min-h-[110px] flex-col overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
-                            <div className="relative flex h-full flex-col justify-between">
+                            <div className="relative flex h-full min-h-0 flex-col justify-between gap-3">
                               <div className="flex items-start justify-between gap-3">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
+                                <p className="min-w-0 text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
                                   {item.label}
                                 </p>
 
@@ -1016,7 +1016,7 @@ const Index = () => {
                                 </div>
                               </div>
 
-                              <div className="mt-2.5">
+                              <div className="mt-auto min-w-0 pt-2.5">
                                 <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(item.value) }}>
                                   <CountUp value={item.value} />
                                 </p>
@@ -1034,14 +1034,14 @@ const Index = () => {
 
                 {/* Large cards with charts */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
                     <LargeCardSkeleton />
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
                     {/* Coluna esquerda — Contas a Receber */}
-                    <AnimatedCard delay={320} className="flex flex-col">
+                    <AnimatedCard delay={320} className="min-w-0">
                       {renderLargeCard({
                         title: "Saldo a receber",
                         tone: "emerald",
@@ -1060,7 +1060,7 @@ const Index = () => {
                     </AnimatedCard>
 
                     {/* Coluna direita — Contas a Pagar */}
-                    <AnimatedCard delay={400} className="flex flex-col">
+                    <AnimatedCard delay={400} className="min-w-0">
                       {renderLargeCard({
                         title: "Saldo a pagar",
                         tone: "amber",
@@ -1091,10 +1091,10 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 items-stretch">
+                <div className="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
-                    className={`group relative overflow-hidden rounded-[20px] border p-3 sm:p-4 min-h-[140px] sm:min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                    className={`group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                         ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                         : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                       }`}
@@ -1154,7 +1154,7 @@ const Index = () => {
                   </div>
 
                   {/* INADIMPLÊNCIA */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:p-4 min-h-[140px] sm:min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-2 sm:mb-4 flex items-start justify-between">
@@ -1188,7 +1188,7 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:p-4 min-h-[140px] sm:min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-2 sm:mb-4 flex items-start justify-between">
@@ -1218,7 +1218,7 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:p-4 min-h-[140px] sm:min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
                       <div className="mb-2 sm:mb-4 flex items-start justify-between">
@@ -1285,7 +1285,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className="flex flex-col flex-1 gap-2 min-h-0">
+                  <div className="flex min-h-0 flex-col gap-2">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -1305,7 +1305,7 @@ const Index = () => {
                       );
 
                       return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
+                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="min-w-0">
                           <Link
                             to={`/indicadores/${ind.id}`}
                             className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
