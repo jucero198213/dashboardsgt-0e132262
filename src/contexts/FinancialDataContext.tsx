@@ -394,9 +394,10 @@ export function FinancialDataProvider({
 
       // ── Helpers de deduplicação ──────────────────────────────────────────────
       // O LEFT JOIN RECRAT multiplica cada parcela em N linhas (1 por centro de
-      // custo). Para KPIs financeiros usamos VLR_PAR_RAW / VLR_REC_RAW (campos
-      // diretos de RECDOCI/PAGDOCI sem multiplicação de rateio) e deduplicamos
-      // por (DOCUMENTO, PARCELA) antes de somar.
+      // custo). Para KPIs financeiros deduplicamos por (DOCUMENTO, PARCELA) e
+      // usamos VLR_PAR_RAW / VLR_REC_RAW (campos diretos sem multiplicação de
+      // rateio) com fallback para VLR_PARCELA / VLR_PAGO quando forem null
+      // (registros sem entrada em RECRAT — sem rateio de centro de custo).
       const dedup = (rows: DwRow[]) => {
         const seen = new Set<string>();
         return rows.filter((r) => {
@@ -407,6 +408,12 @@ export function FinancialDataProvider({
         });
       };
 
+      // Valor seguro: prefere campo raw (sem rateio), cai em campo proporcional
+      const safeParVal = (r: DwRow) =>
+        n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA ?? r.VLRDOC);
+      const safeRecVal = (r: DwRow) =>
+        n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
+
       // ── Somas ───────────────────────────────────────────────────────────────
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
@@ -415,18 +422,31 @@ export function FinancialDataProvider({
       const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO       (L/P + DATPAG no período)
       const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR (D/P + noPag + DATVEN)
 
-      // A RECEBER: VLR_PAR_RAW deduplicado evita dupla contagem de rateio
+      // A RECEBER: deduplicado — usa VLR_PAR_RAW, fallback VLR_PARCELA
       const totalAReceber = round2(
-        dedup(crAReceber).reduce((s, r) => s + n(r.VLR_PAR_RAW), 0)
+        dedup(crAReceber).reduce((s, r) => s + safeParVal(r), 0)
       );
-      // RECEBIDO: VLR_REC_RAW deduplicado (I.VLRREC+I.DESADT direto do RECDOCI)
+      // RECEBIDO: deduplicado — usa VLR_REC_RAW (VLRREC+DESADT), fallback VLR_PAGO
       const valorRecebido = round2(
-        dedup(crRecebido).reduce((s, r) => s + n(r.VLR_REC_RAW), 0)
+        dedup(crRecebido).reduce((s, r) => s + safeRecVal(r), 0)
       );
-      // SALDO = D (em aberto total) + P (restante = VLR_PAR_RAW - VLR_REC_RAW)
+      // SALDO = D (em aberto total) + P (restante = parcela - recebido)
       const totalReceber  = round2(
-        dedup(crEmAberto).reduce((s, r) => s + n(r.VLR_PAR_RAW), 0) +
-        dedup(crParcialAberto).reduce((s, r) => s + Math.max(0, n(r.VLR_PAR_RAW) - n(r.VLR_REC_RAW)), 0)
+        dedup(crEmAberto).reduce((s, r) => s + safeParVal(r), 0) +
+        dedup(crParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r)), 0)
+      );
+
+      // ── Debug (visível no console do browser) ────────────────────────────────
+      console.log("[DW] Rows totais:", data.length,
+        "| allCR:", allCR.length,
+        "| crAReceber:", crAReceber.length,
+        "| crRecebido:", crRecebido.length,
+        "| crEmAberto:", crEmAberto.length,
+        "| crParcialAberto:", crParcialAberto.length
+      );
+      console.log("[DW] A RECEBER:", totalAReceber,
+        "| RECEBIDO:", valorRecebido,
+        "| SALDO:", totalReceber
       );
 
       const resumo: ResumoFinanceiro = {

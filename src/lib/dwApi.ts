@@ -14,15 +14,23 @@ const SUPABASE_ANON_KEY =
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
 // Prioridade:
-//   1. VITE_DW_API_URL  (variável de ambiente — recomendado em produção)
-//   2. TUNNEL_URL       (Cloudflare Tunnel atual — atualizar quando reiniciar)
-//   3. Supabase Edge    (fallback)
-
-const TUNNEL_URL = "https://penetration-ones-taught-restaurant.trycloudflare.com";
+//   1. VITE_DW_API_URL  (variável de ambiente — defina no .env ou Lovable)
+//   2. Supabase Edge Function (fallback)
+//
+// ⚠️  TUNNEL: Não hardcode a URL do Cloudflare Tunnel aqui pois ela muda a
+//     cada restart. Configure via variável de ambiente:
+//       VITE_DW_API_URL=https://xxx.trycloudflare.com
+//     No Lovable: Project Settings → Environment Variables
 
 const LOCAL_API_URL =
-  ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ||
-  TUNNEL_URL;
+  ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ?? null;
+
+if (!LOCAL_API_URL) {
+  console.warn(
+    "[dwApi] VITE_DW_API_URL não definida — usando Supabase Edge Function como fallback. " +
+    "Para usar a API local via Cloudflare Tunnel, defina VITE_DW_API_URL nas variáveis de ambiente."
+  );
+}
 
 const ENDPOINT = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-financeiro`
