@@ -35,7 +35,7 @@ export default function Landing() {
   const { session, isLoading } = useAuth();
 
   if (isLoading) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#060912]">
+    <div className="flex min-h-screen items-center justify-center sgt-bg-base">
       <div className="h-7 w-7 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
     </div>
   );
@@ -43,12 +43,12 @@ export default function Landing() {
   if (session) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#060912] text-white">
+    <div className="min-h-screen overflow-x-hidden sgt-bg-base sgt-text">
 
-      {/* ── Atmosfera ── */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.26),transparent_58%)]" />
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_50%_45%_at_100%_110%,rgba(6,182,212,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.65) 100%)" }} />
+      {/* ── Atmosfera (hidden in light) ── */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.26),transparent_58%)] dark:block light:hidden" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_50%_45%_at_100%_110%,rgba(6,182,212,0.07),transparent_60%)] dark:block light:hidden" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" />
 
       {/* ══ NAVBAR ══ */}
       <nav className="relative z-20 mx-auto flex max-w-[1200px] items-center justify-between px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
@@ -57,13 +57,13 @@ export default function Landing() {
             <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
           </div>
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.35em] text-white">SGT Log</p>
-            <p className="text-[9px] text-slate-600 tracking-[0.12em]">Gestão Financeira</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.35em] sgt-text">SGT Log</p>
+            <p className="text-[9px] sgt-text-2 tracking-[0.12em]">Gestão Financeira</p>
           </div>
         </div>
         <button
           onClick={() => navigate("/login")}
-          className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/[0.09] bg-white/[0.04] px-4 text-[13px] font-semibold text-slate-300 transition-all hover:border-white/[0.15] hover:bg-white/[0.07] hover:text-white"
+          className="inline-flex h-9 items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 text-[13px] font-semibold sgt-text-2 transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)]"
         >
           Acessar Portal <ChevronRight className="h-3.5 w-3.5" />
         </button>
@@ -87,13 +87,13 @@ export default function Landing() {
           {/* Headline */}
           <h1 className="text-[clamp(2.2rem,8vw,4.5rem)] font-black leading-[1.05] tracking-[-0.04em]">
             Análise
-            <span className="block bg-gradient-to-r from-amber-300 via-amber-200 to-white bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-600 bg-clip-text text-transparent">
               Consolidada
             </span>
-            <span className="block text-slate-400">da Operação</span>
+            <span className="block sgt-text-2">da Operação</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-[520px] text-[14px] leading-relaxed text-slate-400 sm:mt-6 sm:text-[16px] lg:text-[17px]">
+          <p className="mx-auto mt-4 max-w-[520px] text-[14px] leading-relaxed sgt-text-2 sm:mt-6 sm:text-[16px] lg:text-[17px]">
             Indicadores financeiros estratégicos, contas a pagar e receber, evolução de custos e composição por fornecedor — tudo em uma única visão executiva.
           </p>
 
@@ -112,20 +112,17 @@ export default function Landing() {
 
         {/* ── Mini dashboard preview ── */}
         <div className="relative mx-auto mt-10 max-w-[900px] sm:mt-16">
-          {/* Glow sob o preview */}
-          <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(180,110,4,0.14),transparent_65%)]" />
-          {/* Cards de métricas */}
-          <div className="relative grid grid-cols-2 gap-3 rounded-[24px] border border-white/[0.07] bg-[rgba(8,11,20,0.90)] p-4 shadow-[0_40px_80px_rgba(0,0,0,0.6)] sm:grid-cols-4">
-            {/* Stripe no topo do preview */}
+          <div className="pointer-events-none absolute -inset-4 bg-[radial-gradient(ellipse_80%_50%_at_50%_100%,rgba(180,110,4,0.14),transparent_65%)] sgt-atmosphere" />
+          <div className="relative grid grid-cols-2 gap-3 rounded-[24px] border border-[var(--sgt-border-subtle)] sgt-bg-section p-4 shadow-[var(--sgt-section-shadow)] sm:grid-cols-4">
             <div className="absolute inset-x-0 top-0 h-[1.5px] rounded-t-[24px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
             {METRICS.map((m) => (
-              <div key={m.label} className="flex flex-col rounded-[14px] border border-white/[0.06] bg-[#0b0e1a] p-4">
+              <div key={m.label} className="flex flex-col rounded-[14px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-4">
                 <div className="mb-3 flex items-center gap-1.5">
                   <div className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
-                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-600">{m.label}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-[var(--sgt-text-muted)]">{m.label}</p>
                 </div>
                 <p className={`text-[22px] font-black leading-none tracking-[-0.04em] ${m.color}`}>{m.value}</p>
-                <p className="mt-1.5 text-[10px] text-slate-600">{m.delta}</p>
+                <p className="mt-1.5 text-[10px] text-[var(--sgt-text-muted)]">{m.delta}</p>
               </div>
             ))}
           </div>
@@ -136,7 +133,7 @@ export default function Landing() {
       <section className="relative mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-20 lg:px-10">
         <div className="mb-12 text-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-amber-400/60">Módulos disponíveis</p>
-          <h2 className="mt-3 text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] text-white">
+          <h2 className="mt-3 text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] sgt-text">
             Uma visão completa da operação
           </h2>
         </div>
@@ -145,13 +142,13 @@ export default function Landing() {
           {FEATURES.map(({ icon: Icon, title, desc, tone }) => {
             const t = TONE_FT[tone];
             return (
-              <div key={title} className={`group relative overflow-hidden rounded-[20px] border ${t.border} bg-[#0b0e1a] p-6 transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(0,0,0,0.4)]`}>
+              <div key={title} className={`group relative overflow-hidden rounded-[20px] border ${t.border} sgt-bg-card p-6 transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(0,0,0,0.4)]`}>
                 <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
                 <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
                   <Icon className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="mb-2 text-[15px] font-bold text-white">{title}</h3>
-                <p className="text-[13px] leading-relaxed text-slate-500">{desc}</p>
+                <h3 className="mb-2 text-[15px] font-bold sgt-text">{title}</h3>
+                <p className="text-[13px] leading-relaxed sgt-text-2">{desc}</p>
               </div>
             );
           })}
@@ -159,7 +156,7 @@ export default function Landing() {
       </section>
 
       {/* ══ TRUST BAR ══ */}
-      <section className="relative border-t border-white/[0.05] bg-[rgba(6,9,18,0.60)]">
+      <section className="relative border-t border-[var(--sgt-border-subtle)] sgt-bg-section">
         <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
           <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:gap-10 lg:gap-16">
             {[
@@ -168,12 +165,12 @@ export default function Landing() {
               { icon: Globe,  label: "Acesso via browser",   sub: "Qualquer dispositivo" },
             ].map(({ icon: Icon, label, sub }) => (
               <div key={label} className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03]">
-                  <Icon className="h-4 w-4 text-slate-500" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
+                  <Icon className="h-4 w-4 sgt-text-2" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-slate-300">{label}</p>
-                  <p className="text-[11px] text-slate-600">{sub}</p>
+                  <p className="text-[13px] font-semibold sgt-text">{label}</p>
+                  <p className="text-[11px] text-[var(--sgt-text-muted)]">{sub}</p>
                 </div>
               </div>
             ))}
@@ -183,12 +180,12 @@ export default function Landing() {
 
       {/* ══ CTA FINAL ══ */}
       <section className="relative mx-auto max-w-[1200px] px-4 py-16 text-center sm:px-6 sm:py-24 lg:px-10">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(180,110,4,0.10),transparent_65%)]" />
-        <h2 className="relative text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(180,110,4,0.10),transparent_65%)] sgt-atmosphere" />
+        <h2 className="relative text-[clamp(1.5rem,5vw,2.25rem)] font-black tracking-[-0.03em] sgt-text">
           Pronto para acessar<br />
-          <span className="bg-gradient-to-r from-amber-300 to-white bg-clip-text text-transparent">o portal?</span>
+          <span className="bg-gradient-to-r from-amber-300 to-amber-600 bg-clip-text text-transparent">o portal?</span>
         </h2>
-        <p className="relative mt-4 text-[15px] text-slate-500">Acesso restrito. Use suas credenciais corporativas.</p>
+        <p className="relative mt-4 text-[15px] sgt-text-2">Acesso restrito. Use suas credenciais corporativas.</p>
         <button
           onClick={() => navigate("/login")}
           className="relative mt-8 inline-flex h-12 items-center gap-2 overflow-hidden rounded-[14px] border border-amber-400/30 bg-amber-500/[0.12] px-8 text-[14px] font-bold text-amber-300 transition-all duration-300 hover:bg-amber-400/[0.20] hover:border-amber-400/50 hover:shadow-[0_8px_40px_rgba(245,158,11,0.22)]"
@@ -199,8 +196,8 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.05] py-6 text-center">
-        <p className="text-[11px] text-slate-700">© 2026 SGT Log · Portal Financeiro Interno</p>
+      <footer className="border-t border-[var(--sgt-border-subtle)] py-6 text-center">
+        <p className="text-[11px] text-[var(--sgt-text-muted)]">© 2026 SGT Log · Portal Financeiro Interno</p>
       </footer>
     </div>
   );

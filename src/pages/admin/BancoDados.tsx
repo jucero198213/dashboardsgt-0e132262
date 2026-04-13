@@ -51,30 +51,30 @@ export default function BancoDados() {
           { label: "Queries/min", value: String(qps), sub: "média", color: "text-emerald-400" },
           { label: "Conexões ativas", value: "18/100", sub: "pool ativo" },
         ].map((s) => (
-          <div key={s.label} className="rounded-[16px] border border-white/8 bg-white/[0.03] px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
-            <p className={`mt-1 text-xl font-bold ${s.color ?? "text-white"}`}>{s.value}</p>
-            <p className="text-[10px] text-slate-600">{s.sub}</p>
+          <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
+            <p className={`mt-1 text-xl font-bold ${s.color ?? "sgt-text"}`}>{s.value}</p>
+            <p className="text-[10px] text-[var(--sgt-text-muted)]">{s.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[280px_1fr]">
         {/* Lista de tabelas */}
-        <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-4 space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mb-3">Tabelas</p>
+        <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-4 space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--sgt-text-muted)] mb-3">Tabelas</p>
           {TABLES.map((t) => (
             <button key={t.name} onClick={() => setSelected(t === selected ? null : t)}
               className={`w-full flex items-center justify-between rounded-[10px] px-3 py-2 text-sm transition-all ${
                 selected?.name === t.name
                   ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  : "sgt-text-2 hover:bg-[var(--sgt-row-hover)] hover:text-[var(--sgt-text-primary)]"
               }`}>
               <span className="flex items-center gap-2">
                 <Database className="h-3.5 w-3.5 shrink-0" />
                 <span className="font-mono text-[12px]">{t.name}</span>
               </span>
-              <span className="text-[10px] text-slate-600">{t.rows}</span>
+              <span className="text-[10px] text-[var(--sgt-text-muted)]">{t.rows}</span>
             </button>
           ))}
         </div>
@@ -82,15 +82,15 @@ export default function BancoDados() {
         <div className="space-y-4">
           {/* Schema da tabela selecionada */}
           {selected && (
-            <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 mb-3">
+            <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2 mb-3">
                 Schema — <span className="font-mono text-cyan-400">{selected.name}</span>
               </p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {selected.cols.map((c) => (
-                  <div key={c.name} className="flex items-center gap-2 rounded-[8px] border border-white/6 bg-white/[0.025] px-3 py-2">
+                  <div key={c.name} className="flex items-center gap-2 rounded-[8px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-2">
                     {colTag(c.type as ColType)}
-                    <span className="font-mono text-[12px] text-slate-300">{c.name}</span>
+                    <span className="font-mono text-[12px] sgt-text">{c.name}</span>
                   </div>
                 ))}
               </div>
@@ -98,9 +98,9 @@ export default function BancoDados() {
           )}
 
           {/* Console SQL */}
-          <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 space-y-3">
+          <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5 space-y-3">
             <div className="flex items-center gap-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Console SQL</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Console SQL</p>
               <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[9px] font-semibold text-amber-400 flex items-center gap-1">
                 <Info className="h-2.5 w-2.5" /> Read-only
               </span>
@@ -110,7 +110,7 @@ export default function BancoDados() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="SELECT * FROM user_roles LIMIT 10;"
               rows={4}
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 font-mono text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-cyan-500/50 resize-none"
+              className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-3 font-mono text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50 resize-none"
             />
             <div className="flex items-center gap-3">
               <button onClick={runQuery}
@@ -118,7 +118,7 @@ export default function BancoDados() {
                 <Play className="h-3.5 w-3.5" /> Executar
               </button>
               {result.msg && (
-                <span className={`text-sm ${result.type === "ok" ? "text-emerald-400" : result.type === "warn" ? "text-amber-400" : "text-slate-400"}`}>
+                <span className={`text-sm ${result.type === "ok" ? "text-emerald-400" : result.type === "warn" ? "text-amber-400" : "sgt-text-2"}`}>
                   {result.msg}
                 </span>
               )}

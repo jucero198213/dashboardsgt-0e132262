@@ -364,10 +364,10 @@ export default function IndicadorDetalhe() {
   };
 
   if (!indicador) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#020617] text-white">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
+    <div className="flex min-h-screen items-center justify-center sgt-bg-base sgt-text">
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
       <div className="relative text-center space-y-3">
-        <p className="text-lg font-medium text-slate-300">Indicador não encontrado</p>
+        <p className="text-lg font-medium sgt-text">Indicador não encontrado</p>
         <button onClick={() => navigate("/dashboard")} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-all">
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar ao dashboard
         </button>
@@ -376,15 +376,12 @@ export default function IndicadorDetalhe() {
   );
 
   return (
-    <div className="min-h-screen bg-[#060912] text-white">
+    <div className="min-h-screen sgt-bg-base sgt-text">
 
-      {/* ── Atmosfera — identidade, não template ── */}
-      {/* Luz âmbar intensa no topo: diesel, energia, presença */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
-      {/* Contraluz fria: profundidade no rodapé-direito */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
-      {/* Vinheta densa nas bordas — impede o fundo de parecer flat */}
-      <div className="pointer-events-none fixed inset-0" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
+      {/* ── Atmosfera ── */}
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
 
       {/* Progress bar — âmbar coerente com tema */}
       {isFetchingDw && (

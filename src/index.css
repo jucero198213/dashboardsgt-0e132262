@@ -143,6 +143,30 @@
   .sgt-text-2     { color: var(--sgt-text-secondary); }
 }
 
+/* ── Light: hide dark atmosphere gradients ── */
+.light .sgt-atmosphere { opacity: 0; }
+
+/* ── Light: IndicadorDetalhe hardcoded bg overrides ── */
+.light [style*="linear-gradient(150deg"] {
+  background: var(--sgt-bg-card) !important;
+}
+.light [class*="bg-\[#0b0e1a\]"],
+.light [class*="bg-\[#0c0f1c\]"],
+.light [class*="bg-\[#0e1120\]"],
+.light [class*="bg-\[#060912\]"],
+.light [class*="bg-\[#020617\]"] {
+  background-color: var(--sgt-bg-card) !important;
+}
+.light [class*="bg-\[rgba(8,11,20"] {
+  background-color: var(--sgt-bg-section) !important;
+}
+.light [class*="bg-\[linear-gradient(180deg"] {
+  background: var(--sgt-bg-card) !important;
+}
+.light [class*="bg-black\/"] {
+  background-color: rgba(60,45,30,0.04) !important;
+}
+
 /* ── Mobile: safe areas for PWA standalone ── */
 @supports (padding-top: env(safe-area-inset-top)) {
   .min-h-screen {
