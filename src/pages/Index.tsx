@@ -748,7 +748,7 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
+        className={`group relative overflow-hidden rounded-[22px] border h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
           } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
@@ -1041,7 +1041,7 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
                     {/* Coluna esquerda — Contas a Receber */}
-                    <AnimatedCard delay={320}>
+                    <AnimatedCard delay={320} className="flex flex-col">
                       {renderLargeCard({
                         title: "Saldo a receber",
                         tone: "emerald",
@@ -1059,26 +1059,24 @@ const Index = () => {
                       })}
                     </AnimatedCard>
 
-                    {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
-                    <div className="flex flex-col gap-2">
-                      <AnimatedCard delay={400}>
-                        {renderLargeCard({
-                          title: "Saldo a pagar",
-                          tone: "amber",
-                          total: contasPagar.saldoAPagar,
-                          subtitle: "Saldo pendente a pagar",
-                          primaryLabel: "Previsto",
-                          primaryValue: contasPagar.saldoAPagar,
-                          secondaryLabel: "Pago",
-                          secondaryValue: contasPagar.valorPago,
-                          monthlyPrevisto: chartPagar.previsto,
-                          monthlyRealizado: chartPagar.realizado,
-                          chartAno: chartPagar.ano,
-                          to: "/contas-a-pagar",
-                          icon: TrendingDown,
-                        })}
-                      </AnimatedCard>
-                    </div>
+                    {/* Coluna direita — Contas a Pagar */}
+                    <AnimatedCard delay={400} className="flex flex-col">
+                      {renderLargeCard({
+                        title: "Saldo a pagar",
+                        tone: "amber",
+                        total: contasPagar.saldoAPagar,
+                        subtitle: "Saldo pendente a pagar",
+                        primaryLabel: "Previsto",
+                        primaryValue: contasPagar.saldoAPagar,
+                        secondaryLabel: "Pago",
+                        secondaryValue: contasPagar.valorPago,
+                        monthlyPrevisto: chartPagar.previsto,
+                        monthlyRealizado: chartPagar.realizado,
+                        chartAno: chartPagar.ano,
+                        to: "/contas-a-pagar",
+                        icon: TrendingDown,
+                      })}
+                    </AnimatedCard>
                   </div>
                 )}
 
