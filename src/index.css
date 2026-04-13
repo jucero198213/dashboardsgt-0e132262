@@ -143,6 +143,32 @@
   .sgt-text-2     { color: var(--sgt-text-secondary); }
 }
 
+/* ── Mobile: safe areas for PWA standalone ── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .min-h-screen {
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── Mobile: better touch targets ── */
+@media (max-width: 640px) {
+  button, a, [role="button"], select, input[type="date"] {
+    min-height: 32px;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Smoother scrolling on iOS */
+  .overflow-x-auto, .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Smooth theme transitions */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, box-shadow, fill, stroke;
