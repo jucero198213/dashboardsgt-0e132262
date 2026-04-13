@@ -160,8 +160,8 @@ export default function Landing() {
 
       {/* ══ TRUST BAR ══ */}
       <section className="relative border-t border-white/[0.05] bg-[rgba(6,9,18,0.60)]">
-        <div className="mx-auto max-w-[1200px] px-6 py-10 sm:px-10">
-          <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16">
+        <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
+          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap sm:gap-10 lg:gap-16">
             {[
               { icon: Shield, label: "Acesso por perfil",    sub: "Admin e usuário"     },
               { icon: Zap,    label: "Atualização em tempo real", sub: "Conectado ao DW"  },
