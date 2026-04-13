@@ -100,7 +100,7 @@ const Skeleton = ({ className = "" }: { className?: string }) => (
 );
 
 const CardSkeleton = () => (
-  <div className="h-full min-h-[110px] rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
+  <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-3 h-3 w-20" />
     <Skeleton className="mb-2 h-6 w-32" />
     <Skeleton className="h-3 w-24" />
@@ -108,7 +108,7 @@ const CardSkeleton = () => (
 );
 
 const LargeCardSkeleton = () => (
-  <div className="h-full rounded-[22px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
+  <div className="rounded-[22px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] p-3.5">
     <Skeleton className="mb-2 h-3 w-28" />
     <Skeleton className="mb-1 h-7 w-40" />
     <Skeleton className="mb-3 h-3 w-32" />
@@ -748,7 +748,7 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
+        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
           } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
@@ -978,33 +978,33 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 items-start xl:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]`}>
+            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="flex min-w-0 flex-col gap-2 sm:gap-2.5">
+              <div className="flex flex-col gap-2 sm:gap-2.5">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid auto-rows-fr grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid auto-rows-fr grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
                     {topMetrics.map((item, idx) => {
                       const Icon = item.icon;
 
                       return (
-                        <AnimatedCard key={item.label} delay={idx * 80} className="min-w-0">
+                        <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative flex h-full min-h-[110px] flex-col overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] min-h-[110px] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
-                            <div className="relative flex h-full min-h-0 flex-col justify-between gap-3">
+                            <div className="relative flex h-full flex-col justify-between">
                               <div className="flex items-start justify-between gap-3">
-                                <p className="min-w-0 text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
                                   {item.label}
                                 </p>
 
@@ -1016,7 +1016,7 @@ const Index = () => {
                                 </div>
                               </div>
 
-                              <div className="mt-auto min-w-0 pt-2.5">
+                              <div className="mt-2.5">
                                 <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(item.value) }}>
                                   <CountUp value={item.value} />
                                 </p>
@@ -1034,14 +1034,14 @@ const Index = () => {
 
                 {/* Large cards with charts */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid auto-rows-fr grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
+                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
                     <LargeCardSkeleton />
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <div className="grid auto-rows-fr grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
+                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
                     {/* Coluna esquerda — Contas a Receber */}
-                    <AnimatedCard delay={320} className="min-w-0">
+                    <AnimatedCard delay={320}>
                       {renderLargeCard({
                         title: "Saldo a receber",
                         tone: "emerald",
@@ -1059,28 +1059,33 @@ const Index = () => {
                       })}
                     </AnimatedCard>
 
-                    {/* Coluna direita — Contas a Pagar */}
-                    <AnimatedCard delay={400} className="min-w-0">
-                      {renderLargeCard({
-                        title: "Saldo a pagar",
-                        tone: "amber",
-                        total: contasPagar.saldoAPagar,
-                        subtitle: "Saldo pendente a pagar",
-                        primaryLabel: "Previsto",
-                        primaryValue: contasPagar.saldoAPagar,
-                        secondaryLabel: "Pago",
-                        secondaryValue: contasPagar.valorPago,
-                        monthlyPrevisto: chartPagar.previsto,
-                        monthlyRealizado: chartPagar.realizado,
-                        chartAno: chartPagar.ano,
-                        to: "/contas-a-pagar",
-                        icon: TrendingDown,
-                      })}
-                    </AnimatedCard>
+                    {/* Coluna direita — Contas a Pagar + KPIs empilhados */}
+                    <div className="flex flex-col gap-2">
+                      <AnimatedCard delay={400}>
+                        {renderLargeCard({
+                          title: "Saldo a pagar",
+                          tone: "amber",
+                          total: contasPagar.saldoAPagar,
+                          subtitle: "Saldo pendente a pagar",
+                          primaryLabel: "Previsto",
+                          primaryValue: contasPagar.saldoAPagar,
+                          secondaryLabel: "Pago",
+                          secondaryValue: contasPagar.valorPago,
+                          monthlyPrevisto: chartPagar.previsto,
+                          monthlyRealizado: chartPagar.realizado,
+                          chartAno: chartPagar.ano,
+                          to: "/contas-a-pagar",
+                          icon: TrendingDown,
+                        })}
+                      </AnimatedCard>
+                    </div>
                   </div>
                 )}
 
-              {/* KPIs Extras */}
+              </div>
+              {/* end left column — row 1 col 1 */}
+
+              {/* KPIs Extras — col-1 row-2, mesma largura dos gráficos */}
               {isProcessed && (() => {
                 // Calcula o tamanho de fonte uniforme para os 4 cards baseado no maior valor
                 const kpiTexts = [
@@ -1091,10 +1096,10 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-2.5 xl:grid-cols-4 items-stretch">
+                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-start-1 xl:row-start-2 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
-                    className={`group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                    className={`group relative overflow-hidden rounded-[20px] border p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                         ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                         : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                       }`}
@@ -1102,7 +1107,7 @@ const Index = () => {
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32"
                       style={{ background: kpiExtra.saldoLiquido >= 0 ? "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.09), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex flex-col h-full">
-                      <div className="mb-2 sm:mb-4 flex items-start justify-between">
+                      <div className="mb-4 flex items-start justify-between">
                         <span
                           className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
                               ? "text-emerald-400"
@@ -1112,7 +1117,7 @@ const Index = () => {
                           SALDO LÍQUIDO
                         </span>
                         <div
-                          className={`flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl ${kpiExtra.saldoLiquido >= 0
+                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0
                               ? "bg-emerald-500/15"
                               : "bg-red-500/15"
                             }`}
@@ -1127,10 +1132,10 @@ const Index = () => {
                       <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm dark:text-slate-400 text-slate-600">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido − Pago no período
                       </p>
-                      <div className="mt-2 sm:mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
@@ -1141,7 +1146,7 @@ const Index = () => {
                         )}
                       </div>
                       <span
-                        className={`mt-2 sm:mt-4 inline-flex w-fit rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
+                        className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
                             ? "bg-emerald-500/15 text-emerald-300"
                             : "bg-red-500/15 text-red-300"
                           }`}
@@ -1154,14 +1159,14 @@ const Index = () => {
                   </div>
 
                   {/* INADIMPLÊNCIA */}
-                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-2 sm:mb-4 flex items-start justify-between">
+                      <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
                           INADIMPLÊNCIA
                         </span>
-                        <div className="flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl bg-red-500/15">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/15">
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
@@ -1171,7 +1176,7 @@ const Index = () => {
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
                         {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
                       </p>
-                      <div className="mt-2 sm:mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 ? (
                           <div
                             className="h-full rounded-full bg-red-400 transition-all duration-700"
@@ -1181,67 +1186,67 @@ const Index = () => {
                           <div className="h-full w-full rounded-full bg-white/5" />
                         )}
                       </div>
-                      <span className="mt-2 sm:mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-[13px] font-semibold text-red-300">
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
                         {kpiExtra.inadimplenciaDocs} docs vencidos
                       </span>
                     </div>
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
-                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-2 sm:mb-4 flex items-start justify-between">
+                      <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
                           % REALIZAÇÃO CP
                         </span>
-                        <div className="flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl bg-violet-500/15">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/15">
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
                       <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm dark:text-slate-400 text-slate-600">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Pago ÷ Previsto no período
                       </p>
-                      <div className="mt-2 sm:mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-violet-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-2 sm:mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-[13px] font-semibold dark:text-violet-200 text-violet-700">
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-violet-200 text-violet-700">
                         Meta: 100%
                       </span>
                     </div>
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
-                  <div className="group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-2 sm:mb-4 flex items-start justify-between">
+                      <div className="mb-4 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
                           % REALIZAÇÃO CR
                         </span>
-                        <div className="flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl bg-cyan-500/15">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/15">
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
                       <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm dark:text-slate-400 text-slate-600">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido ÷ Previsto no período
                       </p>
-                      <div className="mt-2 sm:mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-cyan-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-2 sm:mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-[13px] font-semibold dark:text-cyan-200 text-cyan-700">
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-cyan-200 text-cyan-700">
                         Meta: 100%
                       </span>
                     </div>
@@ -1250,13 +1255,11 @@ const Index = () => {
                 );
               })()
               }
-              </div>
-              {/* end left column */}
 
               <aside
                 className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "flex flex-col p-3 sm:p-4 lg:p-5 xl:sticky xl:top-0 xl:self-start"
+                    : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
@@ -1285,7 +1288,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                  <div className="flex min-h-0 flex-col gap-2">
+                <div className="flex flex-col flex-1 gap-2 min-h-0">
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -1305,10 +1308,10 @@ const Index = () => {
                       );
 
                       return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="min-w-0">
+                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group relative flex h-full min-h-[84px] min-w-0 flex-col rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                             style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 10px 32px rgba(0,0,0,0.22)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
@@ -1341,7 +1344,7 @@ const Index = () => {
 
                               {/* Name + meta */}
                               <div className="min-w-0 flex-1">
-                                <p className="min-h-[2.25rem] overflow-hidden text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                                <p className="truncate text-[12px] font-semibold uppercase tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
                                   {ind.nome}
                                 </p>
                                 <p className="mt-1 text-[12px] font-medium dark:text-slate-400 text-slate-500">
