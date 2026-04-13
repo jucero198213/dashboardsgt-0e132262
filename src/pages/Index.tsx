@@ -72,15 +72,18 @@ const CountUp = ({
 };
 
 /* ------------------------------------------------------------------ */
-/*  Adaptive font size — tamanho baseado no comprimento do texto      */
+/*  Fluid font size — grande em tela grande, encolhe quando necessário */
 /* ------------------------------------------------------------------ */
 function kpiFontSize(text: string): string {
   const len = text.length;
-  if (len <= 6)  return "1.75rem";
-  if (len <= 10) return "1.5rem";
-  if (len <= 13) return "1.25rem";
-  if (len <= 16) return "1.05rem";
-  return "0.9rem";
+  // clamp(min, fluid-vw, max)
+  // Em tela grande: fonte grande. Em tela pequena: encolhe junto com o card.
+  // Os 4 cards ocupam ~25vw cada em xl, ~50vw em md, 100vw em mobile.
+  if (len <= 6)  return "clamp(1.1rem, 3.5vw, 2.2rem)";
+  if (len <= 10) return "clamp(1rem, 2.8vw, 1.9rem)";
+  if (len <= 13) return "clamp(0.9rem, 2.2vw, 1.6rem)";
+  if (len <= 16) return "clamp(0.8rem, 1.8vw, 1.35rem)";
+  return "clamp(0.75rem, 1.4vw, 1.1rem)";
 }
 
 function kpiValueFontSize(value: number, isPercent = false): string {
