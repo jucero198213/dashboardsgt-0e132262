@@ -66,57 +66,57 @@
   }
 
   .light {
-    --background: 215 25% 94%;
-    --foreground: 220 35% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 35% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 35% 10%;
-    --primary: 190 80% 32%;
+    --background: 36 25% 93%;
+    --foreground: 25 30% 12%;
+    --card: 40 30% 98%;
+    --card-foreground: 25 30% 12%;
+    --popover: 40 30% 98%;
+    --popover-foreground: 25 30% 12%;
+    --primary: 168 55% 34%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 88%;
-    --secondary-foreground: 220 25% 20%;
-    --muted: 210 20% 88%;
-    --muted-foreground: 215 20% 38%;
-    --accent: 190 80% 32%;
+    --secondary: 35 18% 88%;
+    --secondary-foreground: 25 25% 22%;
+    --muted: 35 15% 88%;
+    --muted-foreground: 25 12% 42%;
+    --accent: 168 55% 34%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 46%;
+    --destructive: 0 68% 48%;
     --destructive-foreground: 0 0% 100%;
-    --warning: 35 92% 40%;
+    --warning: 35 88% 42%;
     --warning-foreground: 0 0% 100%;
-    --success: 160 65% 32%;
+    --success: 160 55% 34%;
     --success-foreground: 0 0% 100%;
-    --border: 210 20% 78%;
-    --input: 210 20% 78%;
-    --ring: 190 80% 32%;
+    --border: 30 15% 82%;
+    --input: 30 15% 82%;
+    --ring: 168 55% 34%;
     --radius: 0.75rem;
-    --card-elevated: 210 20% 98%;
+    --card-elevated: 38 25% 96%;
 
-    /* SGT tokens — light high-contrast */
-    --sgt-bg-base:        #b8cce0;
-    --sgt-bg-card:        #ffffff;
-    --sgt-bg-section:     #dce8f2;
-    --sgt-bg-overlay:     #dce8f2;
-    --sgt-border-subtle:  rgba(15,23,42,0.13);
-    --sgt-border-medium:  rgba(15,23,42,0.24);
-    --sgt-text-primary:   #0f172a;
-    --sgt-text-secondary: #1e3a5f;
-    --sgt-text-muted:     #475569;
-    --sgt-text-faint:     #94a3b8;
-    --sgt-input-bg:       rgba(15,23,42,0.05);
-    --sgt-input-border:   rgba(15,23,42,0.20);
-    --sgt-input-hover:    rgba(15,23,42,0.09);
-    --sgt-skeleton-bg:    rgba(15,23,42,0.08);
-    --sgt-divider:        rgba(15,23,42,0.12);
-    --sgt-row-alt:        rgba(15,23,42,0.03);
-    --sgt-row-hover:      rgba(6,182,212,0.07);
-    --sgt-table-head:     rgba(15,23,42,0.04);
-    --sgt-progress-track: rgba(15,23,42,0.10);
-    --sgt-menu-bg:        #ffffff;
-    --sgt-scrollbar-track:#c8d4e0;
-    --sgt-scrollbar-thumb:#8899b0;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(6,182,212,0.06), transparent 45%);
-    --sgt-section-shadow: 0 8px 32px rgba(15,23,42,0.12), 0 1px 0 rgba(15,23,42,0.06);
+    /* SGT tokens — warm light */
+    --sgt-bg-base:        #ede5d8;
+    --sgt-bg-card:        #faf8f5;
+    --sgt-bg-section:     #f2ece3;
+    --sgt-bg-overlay:     #f2ece3;
+    --sgt-border-subtle:  rgba(60,45,30,0.10);
+    --sgt-border-medium:  rgba(60,45,30,0.20);
+    --sgt-text-primary:   #1c1510;
+    --sgt-text-secondary: #4a3f35;
+    --sgt-text-muted:     #6b5e52;
+    --sgt-text-faint:     #a69888;
+    --sgt-input-bg:       rgba(60,45,30,0.04);
+    --sgt-input-border:   rgba(60,45,30,0.15);
+    --sgt-input-hover:    rgba(60,45,30,0.08);
+    --sgt-skeleton-bg:    rgba(60,45,30,0.07);
+    --sgt-divider:        rgba(60,45,30,0.10);
+    --sgt-row-alt:        rgba(60,45,30,0.03);
+    --sgt-row-hover:      rgba(168,120,60,0.07);
+    --sgt-table-head:     rgba(60,45,30,0.04);
+    --sgt-progress-track: rgba(60,45,30,0.10);
+    --sgt-menu-bg:        #faf8f5;
+    --sgt-scrollbar-track:#e4ddd2;
+    --sgt-scrollbar-thumb:#b5a898;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(168,120,60,0.05), transparent 45%);
+    --sgt-section-shadow: 0 8px 32px rgba(60,45,30,0.10), 0 1px 0 rgba(60,45,30,0.05);
   }
 }
 
@@ -156,61 +156,61 @@
 /* ── Light theme: boost contrast on Tailwind slate classes ── */
 .light .text-slate-300,
 .light .text-slate-400 {
-  color: #334155 !important;
+  color: #4a3f35 !important;
 }
 .light .text-slate-500 {
-  color: #475569 !important;
+  color: #6b5e52 !important;
 }
 .light .text-slate-600 {
-  color: #334155 !important;
+  color: #4a3f35 !important;
 }
 .light .text-white {
-  color: #0f172a !important;
+  color: #1c1510 !important;
 }
 
 /* Card inner radial glows — tone down in light */
 .light [class*="bg-[radial-gradient"] {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 /* Table header text */
 .light .text-\[10px\].uppercase {
-  color: #334155;
+  color: #4a3f35;
 }
 
 /* Progress bar track */
 .light [class*="bg-white\/10"] {
-  background: rgba(15,23,42,0.10) !important;
+  background: rgba(60,45,30,0.10) !important;
 }
 
 /* Inner card section (ação rápida) */
 .light [class*="border-emerald-400\/14"] {
   background: rgba(16,185,129,0.06) !important;
-  border-color: rgba(16,185,129,0.25) !important;
+  border-color: rgba(16,185,129,0.22) !important;
 }
 .light [class*="border-amber-400\/14"] {
   background: rgba(245,158,11,0.06) !important;
-  border-color: rgba(245,158,11,0.25) !important;
+  border-color: rgba(245,158,11,0.22) !important;
 }
 
 /* KPI extra cards — border opacity boost */
 .light [class*="border-emerald-500\/25"],
 .light [class*="border-emerald-500\/\[0.25\]"] {
-  border-color: rgba(16,185,129,0.35) !important;
+  border-color: rgba(16,185,129,0.30) !important;
 }
 .light [class*="border-red-500\/25"] {
-  border-color: rgba(239,68,68,0.35) !important;
+  border-color: rgba(239,68,68,0.30) !important;
 }
 .light [class*="border-violet-500\/25"] {
-  border-color: rgba(139,92,246,0.35) !important;
+  border-color: rgba(139,92,246,0.30) !important;
 }
 .light [class*="border-cyan-500\/25"] {
-  border-color: rgba(6,182,212,0.35) !important;
+  border-color: rgba(6,182,212,0.30) !important;
 }
 
 /* Chart area: make SVG text visible */
 .light text {
-  fill: #475569;
+  fill: #6b5e52;
 }
 
 /* Gradient title in light mode */
@@ -219,18 +219,18 @@
 }
 
 /* ── Light: additional text contrast fixes ── */
-.light .text-slate-300 { color: #1e3a5f !important; }
-.light .text-slate-400 { color: #334155 !important; }
-.light .text-slate-500 { color: #475569 !important; }
-.light .text-slate-600 { color: #334155 !important; }
-.light .text-white     { color: #0f172a !important; }
+.light .text-slate-300 { color: #4a3f35 !important; }
+.light .text-slate-400 { color: #4a3f35 !important; }
+.light .text-slate-500 { color: #6b5e52 !important; }
+.light .text-slate-600 { color: #4a3f35 !important; }
+.light .text-white     { color: #1c1510 !important; }
 
 /* Gradient title override in light — prevent invisible white */
-.light .from-white { --tw-gradient-from: #0f172a !important; }
-.light .via-white  { --tw-gradient-via: #334155 !important; }
+.light .from-white { --tw-gradient-from: #1c1510 !important; }
+.light .via-white  { --tw-gradient-via: #4a3f35 !important; }
 
 /* SVG text override for chart axes */
-.light svg text { fill: #475569; }
+.light svg text { fill: #6b5e52; }
 
 /* Violet/cyan pill text in light */
 .light .text-violet-200 { color: #5b21b6 !important; }
@@ -249,4 +249,4 @@
 .light .text-violet-200  { color: #5b21b6 !important; }
 
 /* Progress track */
-.light .bg-white\/10 { background: rgba(15,23,42,0.10) !important; }
+.light .bg-white\/10 { background: rgba(60,45,30,0.10) !important; }
