@@ -978,19 +978,19 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 items-start lg:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]`}>
+            <div className={`grid gap-2 sm:gap-3 flex-1 min-h-0 items-start xl:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="flex min-w-0 flex-col gap-2 sm:gap-2.5">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid auto-rows-fr grid-cols-2 gap-2 lg:grid-cols-4 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
                     {topMetrics.map((item, idx) => {
                       const Icon = item.icon;
 
@@ -1034,12 +1034,12 @@ const Index = () => {
 
                 {/* Large cards with charts */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid auto-rows-fr grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
                     <LargeCardSkeleton />
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <div className="grid auto-rows-fr grid-cols-1 gap-2 lg:grid-cols-2 items-stretch">
+                  <div className="grid auto-rows-fr grid-cols-1 gap-2 xl:grid-cols-2 items-stretch">
                     {/* Coluna esquerda — Contas a Receber */}
                     <AnimatedCard delay={320} className="min-w-0">
                       {renderLargeCard({
@@ -1091,7 +1091,7 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 items-stretch">
+                <div className="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-2.5 xl:grid-cols-4 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative flex h-full min-h-[140px] flex-col overflow-hidden rounded-[20px] border p-3 sm:min-h-[190px] sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
@@ -1256,7 +1256,7 @@ const Index = () => {
               <aside
                 className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "flex flex-col p-3 sm:p-4 lg:p-5 lg:sticky lg:top-0 lg:self-start"
+                    : "flex flex-col p-3 sm:p-4 lg:p-5 xl:sticky xl:top-0 xl:self-start"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
@@ -1308,7 +1308,7 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="min-w-0">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                            className="group relative flex h-full min-h-[84px] min-w-0 flex-col rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                             style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 10px 32px rgba(0,0,0,0.22)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
@@ -1341,7 +1341,7 @@ const Index = () => {
 
                               {/* Name + meta */}
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-[12px] font-semibold uppercase tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
+                                <p className="min-h-[2.25rem] overflow-hidden text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
                                   {ind.nome}
                                 </p>
                                 <p className="mt-1 text-[12px] font-medium dark:text-slate-400 text-slate-500">
