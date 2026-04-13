@@ -67,7 +67,7 @@ export default function Login() {
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo Real</span>
           </div>
 
-          <h1 className="text-4xl font-black leading-[1.08] tracking-[-0.04em] text-white xl:text-5xl">
+          <h1 className="text-[clamp(2rem,4vw,3rem)] font-black leading-[1.08] tracking-[-0.04em] text-white">
             Inteligência<br />
             <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-white bg-clip-text text-transparent">
               Financeira

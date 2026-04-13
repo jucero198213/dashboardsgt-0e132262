@@ -85,7 +85,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
 }) {
   const t = TONE[tone];
   return (
-    <div className={`group relative flex min-h-[152px] flex-col overflow-hidden rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
+    <div className={`group relative flex min-h-[130px] sm:min-h-[152px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
 
       {/* Stripe de cor no topo — identidade única por card */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -94,7 +94,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
       <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
         style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
 
-      <div className="relative flex h-full flex-col p-5">
+      <div className="relative flex h-full flex-col p-3.5 sm:p-5">
         {/* Label + ícone */}
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{label}</p>
@@ -104,7 +104,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
         </div>
 
         {/* Valor — protagonista da tela */}
-        <p className="mt-auto pt-4 text-[30px] font-black leading-none tracking-[-0.05em] text-white">
+        <p className="mt-auto pt-3 text-[clamp(1.2rem,5vw,1.875rem)] font-black leading-none tracking-[-0.05em] text-white break-all">
           {value}
         </p>
 
