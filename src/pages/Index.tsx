@@ -865,135 +865,93 @@ const Index = () => {
           )}
 
           <div className="relative flex flex-col gap-2.5 p-2 sm:p-3.5 lg:p-4">
-            {/* Header — full width */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="mb-2 flex items-center gap-2.5">
-                  <div className="flex h-7 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/8 px-2.5">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                    </span>
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                      Tempo real
-                    </span>
-                  </div>
-                  {lastUpdated && (
-                    <span className="text-[10px] font-medium text-slate-600">
-                      {lastUpdated.toLocaleDateString("pt-BR")} {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                    </span>
-                  )}
-                </div>
 
-                <div className="flex items-center gap-2 sm:gap-3 mt-1">
-                  <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-500/10">
-                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <h1
-                      className={`font-extrabold tracking-[-0.04em] leading-none drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent light:text-slate-900 ${presentationMode
-                          ? "text-[40px] 2xl:text-[48px]"
-                          : "text-lg sm:text-2xl md:text-[30px] xl:text-[36px]"
-                        }`}
-                    >
-                      SGT Dashboard
-                    </h1>
-                    <p className="mt-0.5 text-[9px] sm:text-[11px] font-medium tracking-[0.18em] uppercase" style={{ color: "var(--sgt-text-muted)" }}>
-                      Análise Financeira Consolidada
-                    </p>
-                  </div>
+            {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
+            <div className="flex items-center gap-2 sm:gap-3">
+
+              {/* Logo */}
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
+                  <svg className="h-3.5 w-3.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
                 </div>
+                <span className="hidden sm:block text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
+                  SGT Dashboard
+                </span>
               </div>
 
-            </div>
-
-            <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
-
-            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-              <input
-                type="date"
-                value={dwFilter.dataInicio}
-                onChange={(e) => setDwFilter("dataInicio", e.target.value)}
-                className="h-7 sm:h-8 w-[105px] sm:w-[120px] rounded-lg sm:rounded-xl border px-1.5 sm:px-2 text-[10px] sm:text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
-                style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
-              />
-
-              <input
-                type="date"
-                value={dwFilter.dataFim}
-                onChange={(e) => setDwFilter("dataFim", e.target.value)}
-                className="h-7 sm:h-8 w-[105px] sm:w-[120px] rounded-lg sm:rounded-xl border px-1.5 sm:px-2 text-[10px] sm:text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light] sm:w-auto sm:px-3 sm:text-xs"
-                style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
-              />
+              {/* Badge tempo real */}
+              <div className="flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                </span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                  Tempo real
+                </span>
+              </div>
 
               <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
-              <Select
-                value={dwFilter.empresa ?? "__all__"}
-                onValueChange={(v) =>
-                  setDwFilter("empresa", v === "__all__" ? null : v)
-                }
-              >
-                <SelectTrigger className="h-7 sm:h-8 w-[90px] sm:w-[100px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] transition-all sm:w-[130px] sm:text-xs">
-                  <SelectValue placeholder="Empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">Todas</SelectItem>
-                  {empresas.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={dwFilter.filial ?? "__all__"}
-                onValueChange={(v) =>
-                  setDwFilter("filial", v === "__all__" ? null : v)
-                }
-              >
-                <SelectTrigger className="h-7 sm:h-8 w-[90px] sm:w-[100px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] transition-all sm:w-[140px] sm:text-xs">
-                  <SelectValue placeholder="Filial" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">Todas</SelectItem>
-                  {filiaisFiltradas.map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <button
-                onClick={() => void handleUpdate()}
-                disabled={isFetchingDw}
-                className={`inline-flex h-7 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl border px-2 sm:px-2.5 text-[10px] sm:text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${isFetchingDw
+              {/* Filtros */}
+              <div className="flex flex-1 flex-wrap items-center gap-1.5">
+                <input
+                  type="date"
+                  value={dwFilter.dataInicio}
+                  onChange={(e) => setDwFilter("dataInicio", e.target.value)}
+                  className="h-7 w-[110px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
+                  style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
+                />
+                <input
+                  type="date"
+                  value={dwFilter.dataFim}
+                  onChange={(e) => setDwFilter("dataFim", e.target.value)}
+                  className="h-7 w-[110px] rounded-lg border px-2 text-[11px] outline-none transition-all focus:border-cyan-400/40 dark:[color-scheme:dark] light:[color-scheme:light]"
+                  style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-secondary)" }}
+                />
+                <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px] transition-all sm:w-[130px]">
+                    <SelectValue placeholder="Empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {empresas.map((e) => (<SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px] transition-all sm:w-[140px]">
+                    <SelectValue placeholder="Filial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+                <button
+                  onClick={() => void handleUpdate()}
+                  disabled={isFetchingDw}
+                  className={`inline-flex h-7 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-semibold transition-all ${isFetchingDw
                     ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
                     : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-px"
                   } disabled:cursor-not-allowed`}
-              >
-                <RefreshCw
-                  className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""
-                    }`}
-                />
-                {isFetchingDw ? (
-                  <span className="flex items-center gap-2">
-                    <span className="hidden sm:inline">{loadingPhase}</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">
-                      {progress}%
+                >
+                  <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
+                  {isFetchingDw ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="hidden sm:inline">{loadingPhase}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span>
                     </span>
-                  </span>
-                ) : (
-                  "Atualizar"
-                )}
-              </button>
-              <div className="ml-auto"><UserMenu /></div>
+                  ) : ("Atualizar")}
+                </button>
+              </div>
+
+              {/* User — canto direito */}
+              <UserMenu />
             </div>
 
+            <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
             {dwError && (
               <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
