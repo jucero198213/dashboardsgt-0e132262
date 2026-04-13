@@ -72,7 +72,18 @@ const CountUp = ({
 };
 
 /* ------------------------------------------------------------------ */
-/*  Skeleton shimmer para loading                                      */
+/*  Adaptive font size — encolhe conforme o texto cresce              */
+/* ------------------------------------------------------------------ */
+function kpiFontSize(value: number): string {
+  const formatted = value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const len = formatted.length;
+  if (len <= 12) return "clamp(1.4rem, 2.2vw, 2rem)";
+  if (len <= 15) return "clamp(1.1rem, 1.8vw, 1.6rem)";
+  if (len <= 18) return "clamp(0.9rem, 1.4vw, 1.3rem)";
+  return "clamp(0.75rem, 1.1vw, 1.1rem)";
+}
+
+
 /* ------------------------------------------------------------------ */
 const Skeleton = ({ className = "" }: { className?: string }) => (
   <div className={`animate-pulse rounded-xl ${className}`} style={{ background: "var(--sgt-skeleton-bg)" }} />
@@ -754,7 +765,7 @@ const Index = () => {
               >
                 {title}
               </p>
-              <h2 className="mt-0.5 min-w-0 truncate text-[18px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
+              <h2 className="mt-0.5 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiFontSize(total) }}>
                 <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] dark:text-slate-400 text-slate-600">{subtitle}</p>
@@ -996,7 +1007,7 @@ const Index = () => {
                               </div>
 
                               <div className="mt-2.5">
-                                <p className="min-w-0 truncate text-[16px] sm:text-[19px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
+                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiFontSize(item.value) }}>
                                   <CountUp value={item.value} />
                                 </p>
                                 <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
@@ -1099,7 +1110,7 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: kpiFontSize(kpiExtra.saldoLiquido) }}>
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1140,7 +1151,7 @@ const Index = () => {
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: kpiFontSize(kpiExtra.inadimplencia) }}>
                         <CountUp value={kpiExtra.inadimplencia} />
                       </div>
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
@@ -1174,7 +1185,7 @@ const Index = () => {
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "clamp(1.4rem,2.2vw,2rem)" }}>
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
@@ -1204,7 +1215,7 @@ const Index = () => {
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
-                      <div className="text-[clamp(1.1rem,4.5vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
+                      <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "clamp(1.4rem,2.2vw,2rem)" }}>
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
