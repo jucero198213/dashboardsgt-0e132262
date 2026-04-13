@@ -173,6 +173,7 @@ const MiniLineChart = ({
 
   const allValues = [...previstoPoints, ...realizadoPoints];
   const maxVal = Math.max(...allValues, 1);
+  const isEmpty = allValues.every((v) => v === 0);
 
   const svgW = 520;
   const svgH = 200;
@@ -270,6 +271,17 @@ const MiniLineChart = ({
       </div>
 
       <div className="relative min-h-0 flex-1">
+        {isEmpty ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2 py-6">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tone === "emerald" ? "border-emerald-500/20 bg-emerald-500/8" : "border-amber-500/20 bg-amber-500/8"}`}>
+              <svg className={`h-5 w-5 ${tone === "emerald" ? "text-emerald-400/50" : "text-amber-400/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />
+              </svg>
+            </div>
+            <p className="text-[11px] text-slate-500">Sem dados para o período</p>
+            <p className="text-[10px] text-slate-600">Selecione um intervalo de datas e atualize</p>
+          </div>
+        ) : (
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
           preserveAspectRatio="xMidYMid meet"
@@ -464,6 +476,7 @@ const MiniLineChart = ({
             />
           ))}
         </svg>
+        )}
       </div>
     </div>
   );
@@ -862,14 +875,26 @@ const Index = () => {
                   )}
                 </div>
 
-                <h1
-                  className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] ${presentationMode
-                      ? "text-[48px] leading-[0.92] 2xl:text-[56px]"
-                      : "text-2xl sm:text-3xl md:text-[38px] xl:text-[44px] xl:leading-[0.95]"
-                    }`}
-                >
-                  ANÁLISE CONSOLIDADA
-                </h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-500/10">
+                    <svg className="h-5 w-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h1
+                      className={`bg-gradient-to-r from-white from-40% via-slate-200 via-70% to-slate-500 bg-clip-text font-extrabold tracking-[-0.04em] text-transparent drop-shadow-[0_0_40px_rgba(255,255,255,0.08)] leading-none ${presentationMode
+                          ? "text-[40px] 2xl:text-[48px]"
+                          : "text-xl sm:text-2xl md:text-[30px] xl:text-[36px]"
+                        }`}
+                    >
+                      SGT Dashboard
+                    </h1>
+                    <p className="mt-0.5 text-[11px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                      Análise Financeira Consolidada
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <UserMenu />
@@ -936,8 +961,8 @@ const Index = () => {
                 onClick={() => void handleUpdate()}
                 disabled={isFetchingDw}
                 className={`inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-semibold transition-all sm:gap-2 sm:px-3.5 sm:text-xs ${isFetchingDw
-                    ? "border-cyan-400/30 bg-cyan-500/15 text-cyan-200"
-                    : "border-cyan-400/20 bg-cyan-500/10 text-cyan-300 hover:border-cyan-300/30 hover:bg-cyan-400/15"
+                    ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
+                    : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-px"
                   } disabled:cursor-not-allowed`}
               >
                 <RefreshCw

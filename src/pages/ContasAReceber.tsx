@@ -219,8 +219,8 @@ const ContasAReceber = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginados.map((c) => (
-                      <TableRow key={c.id} className="border-white/5 transition-colors hover:bg-white/[0.03]">
+                    {paginados.map((c, idx) => (
+                      <TableRow key={c.id} className={`border-white/5 transition-colors hover:bg-white/[0.04] ${idx % 2 === 0 ? "" : "bg-white/[0.02]"}`}>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.dataEmissao)}</TableCell>
                         <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.vencimento)}</TableCell>
                         <TableCell className="text-sm whitespace-nowrap">{c.dataPagamento ? <span className="text-emerald-400">{fmt(c.dataPagamento)}</span> : <span className="text-slate-600">—</span>}</TableCell>
