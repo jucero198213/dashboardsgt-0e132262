@@ -32,25 +32,51 @@ const dbConfig = {
   options: {
     encrypt: false,
     trustServerCertificate: true,
-    connectTimeout: 30000,
-    requestTimeout: 120000,
+    connectTimeout: 60000,   // 60s para estabelecer conexão
+    requestTimeout: 300000,  // 5 min para queries pesadas (4 UNIONs)
   },
   pool: {
-    max: 5,
-    min: 0,
-    idleTimeoutMillis: 30000,
+    max: 3,
+    min: 1,                  // mantém 1 conexão sempre viva
+    idleTimeoutMillis: 60000,
+    acquireTimeoutMillis: 60000,
   },
 };
 
-// ── Pool de conexões (singleton) ──────────────────────────────────────────────
+// ── Pool de conexões com auto-recovery ───────────────────────────────────────
 let pool = null;
+let poolConnecting = false;
 
 async function getPool() {
-  if (!pool) {
+  // Retorna pool existente se saudável
+  if (pool && pool.connected) return pool;
+
+  // Evita múltiplas reconexões simultâneas
+  if (poolConnecting) {
+    await new Promise((r) => setTimeout(r, 2000));
+    if (pool && pool.connected) return pool;
+  }
+
+  poolConnecting = true;
+  try {
+    if (pool) {
+      try { await pool.close(); } catch (_) { /* ignora */ }
+      pool = null;
+    }
+    console.log("🔄 Conectando ao SQL Server:", process.env.MSSQL_SERVER);
     pool = await sql.connect(dbConfig);
     console.log("✅ Conectado ao SQL Server:", process.env.MSSQL_SERVER);
+
+    // Reseta pool na próxima requisição se a conexão cair
+    pool.on("error", (err) => {
+      console.error("⚠️  Pool error (vai reconectar):", err.message);
+      pool = null;
+    });
+
+    return pool;
+  } finally {
+    poolConnecting = false;
   }
-  return pool;
 }
 
 // ── Express ───────────────────────────────────────────────────────────────────
@@ -188,7 +214,7 @@ SELECT
   CAST(ROUND((RAT.VALOR/P.VALDUP)*(I.VLRREC+I.DESADT),2) AS DECIMAL(18,2)) AS VLR_PAGO,
   CAST(ROUND((RAT.VALOR/P.VALDUP)*I.VLRPAR,           2) AS DECIMAL(18,2)) AS VLR_PARCELA,
   CAST(ROUND(I.VLRPAR,                                 2) AS DECIMAL(18,2)) AS VLR_PAR_RAW,
-  CAST(ROUND(I.VLRREC+I.DESADT,                        2) AS DECIMAL(18,2)) AS VLR_REC_RAW,
+  CAST(ROUND(I.VLRREC+ISNULL(I.DESADT,0),             2) AS DECIMAL(18,2)) AS VLR_REC_RAW,
   NULL AS JURDOC,
   P.CODFIL    AS FILIAL,
   F.CODEMP    AS EMPRESA,
@@ -303,6 +329,11 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 
   } catch (err) {
     console.error("❌ Erro:", err.message);
+    // Reseta pool para reconexão na próxima chamada
+    if (err.message && (err.message.includes("connect") || err.message.includes("timeout") || err.message.includes("ECONNRESET"))) {
+      console.log("🔄 Resetando pool para reconexão...");
+      pool = null;
+    }
     return res.status(500).json({ error: err.message });
   }
 });
@@ -311,7 +342,8 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");
   console.log(`🚀 DW API Local rodando em http://localhost:${PORT}`);
-    console.log(`📦 Banco: ${ process.env.MSSQL_DATABASE } @${ process.env.MSSQL_SERVER }:${ process.env.MSSQL_PORT }`);
+  console.log(`📦 Banco: ${ process.env.MSSQL_DATABASE } @${ process.env.MSSQL_SERVER }:${ process.env.MSSQL_PORT }`);
+  console.log(`⏱️  Timeouts: connect=60s | request=300s`);
   console.log("─────────────────────────────────────────");
   console.log("⏳ Conectando ao SQL Server...");
   getPool().catch((err) => {
