@@ -1322,7 +1322,19 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex flex-col justify-between h-full rounded-[12px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-2.5 transition-all duration-300 hover:border-[var(--sgt-border-medium)] hover:bg-white/[0.05] hover:shadow-[0_6px_24px_rgba(0,0,0,0.35)]"
+                            className="group flex flex-col justify-between h-full rounded-[12px] border px-3.5 py-2.5 transition-all duration-300 hover:shadow-[0_6px_24px_rgba(0,0,0,0.12)]"
+                            style={{
+                              background: "var(--sgt-input-bg)",
+                              borderColor: "var(--sgt-border-subtle)",
+                            }}
+                            onMouseEnter={e => {
+                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-hover)";
+                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-medium)";
+                            }}
+                            onMouseLeave={e => {
+                              (e.currentTarget as HTMLElement).style.background = "var(--sgt-input-bg)";
+                              (e.currentTarget as HTMLElement).style.borderColor = "var(--sgt-border-subtle)";
+                            }}
                           >
                             {/* Linha nome + valor */}
                             <div className="flex items-center justify-between gap-2">
@@ -1333,12 +1345,12 @@ const Index = () => {
                                 <span className={`text-[13px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-400"}`}>
                                   {ind.percentualReal}%
                                 </span>
-                                <ArrowRight className="h-2.5 w-2.5 text-slate-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                                <ArrowRight className="h-2.5 w-2.5 transition-all duration-300 group-hover:translate-x-0.5 dark:text-slate-700 text-slate-400 dark:group-hover:text-slate-400 group-hover:text-slate-600" />
                               </div>
                             </div>
 
                             {/* Barra de progresso */}
-                            <div className="relative mt-2 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
+                            <div className="relative mt-2 h-[3px] overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                               <div
                                 className={`h-full rounded-full transition-all duration-700 ease-out ${abaixoDaMeta
                                     ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
@@ -1347,7 +1359,7 @@ const Index = () => {
                                 style={{ width: `${progress}%` }}
                               />
                               <div
-                                className="absolute top-0 h-full w-[2px] rounded-full bg-white/30"
+                                className="absolute top-0 h-full w-[2px] rounded-full dark:bg-white/30 bg-slate-400/60"
                                 style={{ left: `${metaMark}%` }}
                                 title={`Meta: ${ind.percentualEsperado}%`}
                               />
