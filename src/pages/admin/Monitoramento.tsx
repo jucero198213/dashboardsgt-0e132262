@@ -22,10 +22,10 @@ const SAMPLE_LOGS: LogEntry[] = [
 
 const actionColor: Record<string, string> = {
   LOGIN:  "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  LOGOUT: "bg-slate-500/10 text-slate-400 border-white/10",
+  LOGOUT: "bg-slate-500/10 sgt-text-2 border-[var(--sgt-border-subtle)]",
   EXPORT: "bg-teal-500/10 text-teal-400 border-teal-500/20",
   CONFIG: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  CRUD:   "bg-white/5 text-slate-400 border-white/10",
+  CRUD:   "bg-[var(--sgt-input-bg)] sgt-text-2 border-[var(--sgt-border-subtle)]",
 };
 
 function ResourceBar({ label, base, color }: { label: string; base: number; color: string }) {
@@ -37,10 +37,10 @@ function ResourceBar({ label, base, color }: { label: string; base: number; colo
   return (
     <div>
       <div className="flex justify-between mb-1.5">
-        <span className="text-xs text-slate-500">{label}</span>
-        <span className="text-xs font-semibold text-white">{val}%</span>
+        <span className="text-xs text-[var(--sgt-text-muted)]">{label}</span>
+        <span className="text-xs font-semibold sgt-text">{val}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="h-1.5 overflow-hidden rounded-full bg-[var(--sgt-progress-track)]">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${val}%`, background: color }} />
       </div>
     </div>
@@ -59,7 +59,6 @@ export default function Monitoramento() {
     return () => clearInterval(t);
   }, []);
 
-  // Injeta evento real da sessão Supabase
   useEffect(() => {
     if (authSession?.user) {
       const realEntry: LogEntry = {
@@ -85,8 +84,8 @@ export default function Monitoramento() {
           { label: "Sessões ativas",     value: "3",            color: "text-emerald-400" },
           { label: "Tempo médio resp.", value: "124ms",        color: "text-violet-400" },
         ].map((s) => (
-          <div key={s.label} className="rounded-[16px] border border-white/8 bg-white/[0.03] px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{s.label}</p>
+          <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
             <p className={`mt-1 text-2xl font-bold ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -94,19 +93,19 @@ export default function Monitoramento() {
 
       <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
         {/* Logs */}
-        <div className="overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)]">
+        <div className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Logs de Atividade</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Logs de Atividade</p>
             <div className="flex items-center gap-2">
               {["all","LOGIN","EXPORT","CRUD","CONFIG"].map((v) => (
                 <button key={v} onClick={() => setFilter(v)}
                   className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
-                    filter === v ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20" : "text-slate-500 hover:text-slate-300"
+                    filter === v ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20" : "text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
                   }`}>
                   {v === "all" ? "Todos" : v}
                 </button>
               ))}
-              <button className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-400 hover:text-white transition-all">
+              <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1 text-xs sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
                 <Download className="h-3 w-3" /> Exportar
               </button>
             </div>
@@ -114,22 +113,22 @@ export default function Monitoramento() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[var(--sgt-divider)]">
                   {["Hora", "Usuário", "Ação", "Módulo", "IP", "Status"].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{h}</th>
+                    <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((l, i) => (
-                  <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02]">
-                    <td className="px-4 py-2.5 font-mono text-[11px] text-slate-400">{l.time}</td>
-                    <td className="px-4 py-2.5 text-sm text-slate-300 max-w-[180px] truncate">{l.user}</td>
+                  <tr key={i} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)]">
+                    <td className="px-4 py-2.5 font-mono text-[11px] sgt-text-2">{l.time}</td>
+                    <td className="px-4 py-2.5 text-sm sgt-text max-w-[180px] truncate">{l.user}</td>
                     <td className="px-4 py-2.5">
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${actionColor[l.action]}`}>{l.action}</span>
                     </td>
-                    <td className="px-4 py-2.5 text-sm text-slate-400">{l.module}</td>
-                    <td className="px-4 py-2.5 font-mono text-[11px] text-slate-500">{l.ip}</td>
+                    <td className="px-4 py-2.5 text-sm sgt-text-2">{l.module}</td>
+                    <td className="px-4 py-2.5 font-mono text-[11px] text-[var(--sgt-text-muted)]">{l.ip}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-1.5">
                         <Circle className={`h-2 w-2 fill-current ${l.status === "OK" ? "text-emerald-400" : "text-red-400"}`} />
@@ -144,8 +143,8 @@ export default function Monitoramento() {
         </div>
 
         {/* Recursos */}
-        <div className="rounded-[20px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,53,0.72)_0%,rgba(11,17,35,0.94)_100%)] p-5 space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Recursos do Servidor</p>
+        <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5 space-y-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Recursos do Servidor</p>
           <ResourceBar label="CPU"    base={42} color="linear-gradient(90deg,#06b6d4,#3b82f6)" />
           <ResourceBar label="Memória" base={61} color="linear-gradient(90deg,#8b5cf6,#6366f1)" />
           <ResourceBar label="Disco"   base={38} color="linear-gradient(90deg,#10b981,#06b6d4)" />

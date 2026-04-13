@@ -90,25 +90,25 @@ export default function PainelAdministrativo() {
   const currentItem = NAV_ITEMS.find((n) => n.id === screen);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white px-4 py-6 lg:px-8 lg:py-8">
-      {/* Background effects — same as portal */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.06),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+    <div className="min-h-screen sgt-bg-base sgt-text px-4 py-6 lg:px-8 lg:py-8">
+      {/* Background effects */}
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.06),transparent_24%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
       <div className="relative mx-auto max-w-[1400px] space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-white">Dashboard</button>
+          <div className="flex items-center gap-2 text-sm sgt-text-2">
+            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Dashboard</button>
             <ChevronRight className="h-3.5 w-3.5" />
             {screen === "home" ? (
-              <span className="text-white">Administração</span>
+              <span className="sgt-text">Administração</span>
             ) : (
               <>
-                <button onClick={() => setScreen("home")} className="transition-colors hover:text-white">Administração</button>
+                <button onClick={() => setScreen("home")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Administração</button>
                 <ChevronRight className="h-3.5 w-3.5" />
-                <span className="text-white">{currentItem?.label}</span>
+                <span className="sgt-text">{currentItem?.label}</span>
               </>
             )}
           </div>
@@ -119,7 +119,7 @@ export default function PainelAdministrativo() {
           {screen !== "home" && (
             <button
               onClick={() => setScreen("home")}
-              className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:text-white transition-all hover:border-white/20 hover:bg-white/10"
+              className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)]"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -137,10 +137,10 @@ export default function PainelAdministrativo() {
                 </div>
               )}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight sgt-text md:text-4xl">
               {screen === "home" ? "Painel Administrativo" : currentItem?.label}
             </h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm sgt-text-2">
               {screen === "home"
                 ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
                 : currentItem?.desc}
@@ -159,12 +159,12 @@ export default function PainelAdministrativo() {
                 { label: "Integrações", value: "5/5", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10" },
                 { label: "Alertas", value: "1", icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10" },
               ].map((s) => (
-                <div key={s.label} className="rounded-[16px] border border-white/8 bg-white/[0.03] px-4 py-3 flex items-center gap-3">
+                <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3 flex items-center gap-3">
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
                     <s.icon className={`h-4 w-4 ${s.color}`} />
                   </div>
                   <div>
-                    <p className="text-[11px] text-slate-500 uppercase tracking-[0.15em]">{s.label}</p>
+                    <p className="text-[11px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
                     <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
                   </div>
                 </div>
@@ -180,13 +180,13 @@ export default function PainelAdministrativo() {
                   className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ${item.icon_color}`}>
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--sgt-input-bg)] ${item.icon_color}`}>
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                    <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                   </div>
-                  <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
-                  <p className="text-sm text-slate-500">{item.desc}</p>
+                  <h3 className="text-base font-semibold sgt-text mb-1">{item.label}</h3>
+                  <p className="text-sm sgt-text-2">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -198,13 +198,13 @@ export default function PainelAdministrativo() {
                   className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 ${item.icon_color}`}>
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--sgt-input-bg)] ${item.icon_color}`}>
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-slate-400" />
+                    <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                   </div>
-                  <h3 className="text-base font-semibold text-white mb-1">{item.label}</h3>
-                  <p className="text-sm text-slate-500">{item.desc}</p>
+                  <h3 className="text-base font-semibold sgt-text mb-1">{item.label}</h3>
+                  <p className="text-sm sgt-text-2">{item.desc}</p>
                 </button>
               ))}
             </div>

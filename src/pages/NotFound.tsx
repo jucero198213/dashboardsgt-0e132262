@@ -11,27 +11,27 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#060912] px-4 text-white">
+    <div className="relative flex min-h-screen items-center justify-center sgt-bg-base px-4 sgt-text">
 
       {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(180,110,4,0.18),transparent_55%)]" />
-      <div className="pointer-events-none fixed inset-0" style={{ background:"radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(180,110,4,0.18),transparent_55%)] sgt-atmosphere" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background:"radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
 
       <div className="relative animate-[fadeSlideIn_0.5s_ease-out] text-center">
 
         {/* Ícone */}
-        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/[0.07] bg-[#0b0e1a]">
-          <MapPinOff className="h-8 w-8 text-slate-600" />
+        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--sgt-border-subtle)] sgt-bg-card">
+          <MapPinOff className="h-8 w-8 text-[var(--sgt-text-muted)]" />
         </div>
 
         {/* 404 */}
-        <h1 className="mb-3 bg-gradient-to-r from-amber-300 via-white to-slate-400 bg-clip-text text-7xl font-black tracking-[-0.05em] text-transparent sm:text-8xl">
+        <h1 className="mb-3 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-700 bg-clip-text text-7xl font-black tracking-[-0.05em] text-transparent sm:text-8xl">
           404
         </h1>
-        <p className="mb-2 text-[18px] font-semibold text-slate-300">Página não encontrada</p>
-        <p className="mb-10 text-[13px] text-slate-600 max-w-xs mx-auto">
+        <p className="mb-2 text-[18px] font-semibold sgt-text">Página não encontrada</p>
+        <p className="mb-10 text-[13px] text-[var(--sgt-text-muted)] max-w-xs mx-auto">
           O endereço{" "}
-          <span className="font-mono text-[11px] text-slate-500">{location.pathname}</span>{" "}
+          <span className="font-mono text-[11px] sgt-text-2">{location.pathname}</span>{" "}
           não existe ou foi movido.
         </p>
 
