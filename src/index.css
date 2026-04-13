@@ -217,3 +217,36 @@
 .light .drop-shadow-\[0_0_40px_rgba\(255\,255\,255\,0\.08\)\] {
   drop-shadow: none;
 }
+
+/* ── Light: additional text contrast fixes ── */
+.light .text-slate-300 { color: #1e3a5f !important; }
+.light .text-slate-400 { color: #334155 !important; }
+.light .text-slate-500 { color: #475569 !important; }
+.light .text-slate-600 { color: #334155 !important; }
+.light .text-white     { color: #0f172a !important; }
+
+/* Gradient title override in light — prevent invisible white */
+.light .from-white { --tw-gradient-from: #0f172a !important; }
+.light .via-white  { --tw-gradient-via: #334155 !important; }
+
+/* SVG text override for chart axes */
+.light svg text { fill: #475569; }
+
+/* Violet/cyan pill text in light */
+.light .text-violet-200 { color: #5b21b6 !important; }
+.light .text-cyan-200   { color: #0e7490 !important; }
+.light .text-emerald-200 { color: #065f46 !important; }
+.light .text-amber-200  { color: #92400e !important; }
+
+/* Emerald/amber "Ação rápida" label */
+.light .text-emerald-200\/75 { color: #065f46 !important; }
+.light .text-amber-200\/75   { color: #92400e !important; }
+
+/* Fluxo positivo / negativo badges */
+.light .text-emerald-300 { color: #065f46 !important; }
+.light .text-red-300     { color: #991b1b !important; }
+.light .text-cyan-300    { color: #0e7490 !important; }
+.light .text-violet-200  { color: #5b21b6 !important; }
+
+/* Progress track */
+.light .bg-white\/10 { background: rgba(15,23,42,0.10) !important; }

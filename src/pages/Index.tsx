@@ -396,7 +396,7 @@ const MiniLineChart = ({
                     <text
                       x={getTooltipX(hoverIndex) + 10}
                       y={tooltipY + 18}
-                      fill="rgba(255,255,255,0.5)"
+                      fill="var(--sgt-text-muted)"
                       fontSize={10}
                       fontWeight={600}
                       fontFamily="system-ui, sans-serif"
@@ -418,7 +418,7 @@ const MiniLineChart = ({
                         <text
                           x={getTooltipX(hoverIndex) + 10}
                           y={tooltipY + 48}
-                          fill="rgba(255,255,255,0.45)"
+                          fill="var(--sgt-text-muted)"
                           fontSize={10}
                           fontWeight={500}
                           fontFamily="system-ui, sans-serif"
@@ -430,7 +430,7 @@ const MiniLineChart = ({
                       <text
                         x={getTooltipX(hoverIndex) + 10}
                         y={tooltipY + 30}
-                        fill="rgba(255,255,255,0.3)"
+                        fill="var(--sgt-text-faint)"
                         fontSize={10}
                         fontFamily="system-ui, sans-serif"
                       >
@@ -451,8 +451,8 @@ const MiniLineChart = ({
               textAnchor="middle"
               fill={
                 hoverIndex === i
-                  ? "rgba(255,255,255,0.8)"
-                  : "rgba(255,255,255,0.25)"
+                  ? "var(--sgt-text-primary)"
+                  : "var(--sgt-text-muted)"
               }
               fontSize={9.5}
               fontWeight={hoverIndex === i ? 600 : 400}
@@ -752,7 +752,7 @@ const Index = () => {
               <h2 className="mt-0.5 min-w-0 truncate text-[18px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
                 <CountUp value={total} />
               </h2>
-              <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>
+              <p className="mt-0.5 text-[11px] dark:text-slate-400 text-slate-600">{subtitle}</p>
             </div>
 
             <div
@@ -792,12 +792,12 @@ const Index = () => {
           >
             <div className="min-w-0">
               <p
-                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-200/75" : "text-amber-200/75"
+                className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${isPositive ? "text-emerald-600 dark:text-emerald-200/75" : "text-amber-600 dark:text-amber-200/75"
                   }`}
               >
                 Ação rápida
               </p>
-              <p className="mt-0.5 text-[11px] text-slate-300">
+              <p className="mt-0.5 text-[11px] dark:text-slate-300 text-slate-600">
                 Abrir detalhamento completo
               </p>
             </div>
@@ -1024,7 +1024,7 @@ const Index = () => {
 
                             <div className="relative flex h-full flex-col justify-between">
                               <div className="flex items-start justify-between gap-3">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 transition-colors duration-300 group-hover:text-slate-300">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
                                   {item.label}
                                 </p>
 
@@ -1040,7 +1040,7 @@ const Index = () => {
                                 <p className="min-w-0 truncate text-[19px] font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)] xl:text-[20px]">
                                   <CountUp value={item.value} />
                                 </p>
-                                <p className="mt-1.5 text-xs text-slate-400">
+                                <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
                                   {item.helper}
                                 </p>
                               </div>
@@ -1143,10 +1143,10 @@ const Index = () => {
                       <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] break-all leading-tight">
                         <CountUp value={kpiExtra.saldoLiquido} />
                       </div>
-                      <p className="mt-2 text-sm text-slate-400">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido − Pago no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
@@ -1187,7 +1187,7 @@ const Index = () => {
                       <p className="mt-1 text-[13px] font-semibold text-red-300">
                         {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 ? (
                           <div
                             className="h-full rounded-full bg-red-400 transition-all duration-700"
@@ -1218,16 +1218,16 @@ const Index = () => {
                       <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {kpiExtra.realizacaoCP.toFixed(0)}%
                       </div>
-                      <p className="mt-2 text-sm text-slate-400">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Pago ÷ Previsto no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-violet-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold text-violet-200">
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-violet-200 text-violet-700">
                         Meta: 100%
                       </span>
                     </div>
@@ -1248,16 +1248,16 @@ const Index = () => {
                       <div className="text-[clamp(1.3rem,1.8vw,2rem)] font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-tight">
                         {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                       </div>
-                      <p className="mt-2 text-sm text-slate-400">
+                      <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido ÷ Previsto no período
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+                      <div className="mt-4 h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-cyan-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold text-cyan-200">
+                      <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-cyan-200 text-cyan-700">
                         Meta: 100%
                       </span>
                     </div>
@@ -1275,7 +1275,7 @@ const Index = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-5 shrink-0">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-600 mb-1.5">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500 mb-1.5">
                       Distribuição de custos do período
                     </p>
                     <p
@@ -1289,7 +1289,7 @@ const Index = () => {
                   {!presentationMode && (
                     <button
                       onClick={togglePresentationMode}
-                      className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-500 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border transition-all border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-[color:var(--sgt-text-muted)] hover:border-[var(--sgt-border-medium)] hover:[background:var(--sgt-input-hover)] hover:text-[color:var(--sgt-text-primary)]"
                       title="Modo apresentação"
                       aria-label="Ativar modo apresentação"
                     >
@@ -1326,7 +1326,7 @@ const Index = () => {
                           >
                             {/* Linha nome + valor */}
                             <div className="flex items-center justify-between gap-2">
-                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 transition-colors duration-300 group-hover:text-slate-300">
+                              <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-slate-500 text-slate-600 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-800">
                                 {ind.nome}
                               </p>
                               <div className="flex shrink-0 items-center gap-1">
