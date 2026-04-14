@@ -1384,6 +1384,60 @@ const Index = () => {
             </div>
             {/* end 2-column grid */}
 
+            {/* ── NEWS TICKER ── */}
+            <div
+              className="relative flex h-8 shrink-0 items-center overflow-hidden rounded-[10px] border"
+              style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
+            >
+              {/* Label */}
+              <div className="flex h-full shrink-0 items-center gap-1.5 border-r px-3" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-cyan-300">Tiker</span>
+              </div>
+
+              {/* Scrolling content */}
+              <div className="relative flex-1 overflow-hidden">
+                <div
+                  className="flex items-center gap-16 whitespace-nowrap text-[11px] font-medium dark:text-slate-400 text-slate-500"
+                  style={{
+                    animation: "sgt-ticker 40s linear infinite",
+                  }}
+                >
+                  {[
+                    "📦 Contas a pagar do período: R$ 3.358.717,19",
+                    "✅ Total pago: R$ 177.572,13",
+                    "📥 A receber: R$ 4.752.942,99",
+                    "💰 Saldo líquido positivo no período",
+                    "⚠️ Inadimplência: 74.7% do A Receber",
+                    "📊 Realização CP: 5% · Realização CR: 25%",
+                    "🔧 Manutenção acima da meta — verifique detalhamento",
+                    "📦 Contas a pagar do período: R$ 3.358.717,19",
+                    "✅ Total pago: R$ 177.572,13",
+                    "📥 A receber: R$ 4.752.942,99",
+                    "💰 Saldo líquido positivo no período",
+                    "⚠️ Inadimplência: 74.7% do A Receber",
+                    "📊 Realização CP: 5% · Realização CR: 25%",
+                    "🔧 Manutenção acima da meta — verifique detalhamento",
+                  ].map((item, i) => (
+                    <span key={i} className="shrink-0">
+                      {item}
+                      <span className="mx-8 opacity-30">◆</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <style>{`
+                @keyframes sgt-ticker {
+                  0%   { transform: translateX(0); }
+                  100% { transform: translateX(-50%); }
+                }
+              `}</style>
+            </div>
+
           </div>
         </section>
       </div>
