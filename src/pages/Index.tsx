@@ -1108,7 +1108,7 @@ const Index = () => {
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32"
                         style={{ background: kpiExtra.saldoLiquido >= 0 ? "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.09), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                       <div className="relative flex flex-col h-full">
-                        <div className="mb-2 flex items-start justify-between">
+                        <div className="mb-2 flex items-center justify-between">
                           <span
                             className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
                                 ? "text-emerald-400"
