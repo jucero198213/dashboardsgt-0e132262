@@ -1301,7 +1301,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className={`flex flex-col flex-1 gap-1 min-h-0 overflow-y-auto justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+                <div className={`flex flex-col flex-1 gap-1 min-h-0 overflow-hidden justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -1321,10 +1321,10 @@ const Index = () => {
                       );
 
                       return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
+                        <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1 min-h-0">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group relative flex flex-col justify-center h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                            className="group relative flex flex-col justify-center h-full rounded-[10px] border overflow-hidden transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
                             style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 10px 32px rgba(0,0,0,0.22)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
@@ -1336,10 +1336,10 @@ const Index = () => {
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
 
-                            <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5">
+                            <div className="flex items-center justify-between gap-2 px-2.5 py-1.5">
                               {/* Percentage ring */}
-                              <div className="relative shrink-0 h-9 w-9 sm:h-11 sm:w-11">
-                                <svg viewBox="0 0 36 36" className="h-9 w-9 sm:h-11 sm:w-11 -rotate-90">
+                              <div className="relative shrink-0 h-8 w-8">
+                                <svg viewBox="0 0 36 36" className="h-8 w-8 -rotate-90">
                                   <circle cx="18" cy="18" r="14" fill="none"
                                     stroke="var(--sgt-progress-track)" strokeWidth="3" />
                                   <circle cx="18" cy="18" r="14" fill="none"
@@ -1350,17 +1350,17 @@ const Index = () => {
                                     className="transition-all duration-700"
                                   />
                                 </svg>
-                                <span className={`absolute inset-0 flex items-center justify-center text-[11px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                                <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
                                   {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                                 </span>
                               </div>
 
                               {/* Name + meta */}
                               <div className="min-w-0 flex-1">
-                                <p className="truncate text-[12px] font-semibold uppercase tracking-[0.12em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
+                                <p className="truncate text-[11px] font-semibold uppercase tracking-[0.10em] dark:text-slate-300 text-slate-700 transition-colors group-hover:dark:text-white group-hover:text-slate-900">
                                   {ind.nome}
                                 </p>
-                                <p className="mt-1 text-[12px] font-medium dark:text-slate-400 text-slate-500">
+                                <p className="mt-0.5 text-[10px] font-medium dark:text-slate-400 text-slate-500">
                                   Meta: {ind.percentualEsperado}%
                                 </p>
                               </div>
