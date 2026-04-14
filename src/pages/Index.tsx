@@ -748,10 +748,10 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
+        className={`group relative overflow-hidden rounded-[16px] sm:rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
-          } ${presentationMode ? "flex flex-col p-3" : "flex flex-col p-3 xl:p-3.5"}`}
+          } ${presentationMode ? "flex flex-col p-2.5 sm:p-3" : "flex flex-col p-2.5 sm:p-3 xl:p-3.5"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
