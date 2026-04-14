@@ -748,10 +748,10 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[22px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
+        className={`group relative overflow-hidden rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
-          } ${presentationMode ? "flex flex-col p-2.5" : "flex flex-col p-2.5 xl:p-3"}`}
+          } ${presentationMode ? "flex flex-col p-3" : "flex flex-col p-3 xl:p-3.5"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
@@ -799,7 +799,7 @@ const Index = () => {
               ano={chartAno}
             />
             {isFetchingDw && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[22px] bg-black/40 backdrop-blur-[2px]">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[20px] bg-black/40 backdrop-blur-[2px]">
                 <div className="flex items-center gap-2">
                   <div className={`h-2 w-2 rounded-full animate-pulse ${isPositive ? "bg-emerald-400" : "bg-amber-400"}`} />
                   <div className={`h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] ${isPositive ? "bg-emerald-400/60" : "bg-amber-400/60"}`} />
@@ -980,7 +980,7 @@ const Index = () => {
             {/* 2-column grid: cards+charts left, indicators right */}
             <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2 sm:gap-2.5 xl:grid-cols-2 auto-rows-fr">
+              <div className="grid gap-2 xl:grid-cols-2 auto-rows-fr">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1101,7 +1101,7 @@ const Index = () => {
                 ];
                 const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                 return (
-                <div className="grid grid-cols-1 gap-2 sm:gap-2.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
                     className={`group relative overflow-hidden rounded-[20px] border p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
