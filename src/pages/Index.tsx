@@ -1166,14 +1166,14 @@ const Index = () => {
                   </div>
 
                   {/* INADIMPLÊNCIA */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-4 flex items-start justify-between">
+                      <div className="mb-2 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
                           INADIMPLÊNCIA
                         </span>
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/15">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/15">
                           <AlertCircle className="h-4 w-4 text-red-400" />
                         </div>
                       </div>
@@ -1183,7 +1183,7 @@ const Index = () => {
                       <p className="mt-2 text-sm font-medium text-red-400">
                         {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
                       </p>
-                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="mt-auto flex flex-col gap-2 pt-2">
                       <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 ? (
                           <div
@@ -1194,7 +1194,7 @@ const Index = () => {
                           <div className="h-full w-full rounded-full bg-white/5" />
                         )}
                       </div>
-                      <span className="mt-4 inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[13px] font-semibold text-red-300">
+                      <span className="inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[12px] font-semibold text-red-300">
                         {kpiExtra.inadimplenciaDocs} docs vencidos
                       </span>
                       </div>
@@ -1202,14 +1202,14 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CP */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-4 flex items-start justify-between">
+                      <div className="mb-2 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
                           % REALIZAÇÃO CP
                         </span>
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/15">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15">
                           <TrendingDown className="h-4 w-4 text-violet-400" />
                         </div>
                       </div>
@@ -1219,14 +1219,14 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Pago ÷ Previsto no período
                       </p>
-                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="mt-auto flex flex-col gap-2 pt-2">
                       <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-violet-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-4 inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-violet-200 text-violet-700">
+                      <span className="inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[12px] font-semibold dark:text-violet-200 text-violet-700">
                         Meta: 100%
                       </span>
                       </div>
@@ -1234,14 +1234,14 @@ const Index = () => {
                   </div>
 
                   {/* % REALIZAÇÃO CR */}
-                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                  <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                     <div className="relative flex h-full flex-col">
-                      <div className="mb-4 flex items-start justify-between">
+                      <div className="mb-2 flex items-start justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
                           % REALIZAÇÃO CR
                         </span>
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/15">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/15">
                           <TrendingUp className="h-4 w-4 text-cyan-400" />
                         </div>
                       </div>
@@ -1251,14 +1251,14 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido ÷ Previsto no período
                       </p>
-                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="mt-auto flex flex-col gap-2 pt-2">
                       <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         <div
                           className="h-full rounded-full bg-cyan-400 transition-all duration-700"
                           style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
                         />
                       </div>
-                      <span className="mt-4 inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[13px] font-semibold dark:text-cyan-200 text-cyan-700">
+                      <span className="inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[12px] font-semibold dark:text-cyan-200 text-cyan-700">
                         Meta: 100%
                       </span>
                       </div>
