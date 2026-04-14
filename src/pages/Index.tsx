@@ -877,7 +877,7 @@ const Index = () => {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          {/* Progress bar — âmbar coerente com o tema */}
+          {/* Progress bar */}
           {isFetchingDw && (
             <div className="absolute inset-x-0 top-0 z-50">
               <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
@@ -889,7 +889,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 xl:px-[clamp(1rem,2vw,2.5rem)] overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
