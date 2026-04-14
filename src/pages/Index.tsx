@@ -850,7 +850,7 @@ const Index = () => {
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
           ? "h-[100dvh] overflow-hidden p-0"
-          : "h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+          : "min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
