@@ -1301,7 +1301,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className={`flex flex-col flex-1 gap-0 min-h-0 justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+                <div className={`flex flex-col flex-1 gap-1 min-h-0 justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -1338,7 +1338,7 @@ const Index = () => {
                                   style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.6))" : "drop-shadow(0 0 4px rgba(248,113,113,0.6))" }}
                                 />
                               </svg>
-                              <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                              <span className={`absolute inset-0 flex items-center justify-center text-[9px] font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`} style={{ fontSize: ind.percentualReal >= 100 ? "8px" : ind.percentualReal >= 10 ? "9px" : "10px" }}>
                                 {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                               </span>
                             </div>
