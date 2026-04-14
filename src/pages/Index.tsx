@@ -768,7 +768,7 @@ const Index = () => {
             }`}
         />
 
-        <div className="relative flex flex-col gap-1.5 h-full">
+        <div className="relative flex flex-col gap-2 h-full">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
@@ -888,7 +888,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
@@ -980,19 +980,19 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-1.5 flex-1 min-h-0 xl:h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
+            <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-1.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
+              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {(() => {
                       const topSharedFont = kpiFontSize(
                         topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
@@ -1098,7 +1098,7 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch h-full">
+                  <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch h-full">
                     {/* SALDO LÍQUIDO */}
                     <div
                       className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
