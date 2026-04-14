@@ -81,11 +81,11 @@ const DASHBOARD_MAX_W = "1860px";
 /* ------------------------------------------------------------------ */
 function kpiFontSize(text: string): string {
   const len = text.length;
-  if (len <= 6)  return "clamp(1rem, 1.8vw, 1.5rem)";
-  if (len <= 10) return "clamp(0.95rem, 1.5vw, 1.3rem)";
-  if (len <= 13) return "clamp(0.85rem, 1.3vw, 1.15rem)";
-  if (len <= 16) return "clamp(0.8rem, 1.1vw, 1.05rem)";
-  return "clamp(0.75rem, 1vw, 0.95rem)";
+  if (len <= 6)  return "clamp(1.2rem, 2.1vw, 1.9rem)";
+  if (len <= 10) return "clamp(1.1rem, 1.8vw, 1.6rem)";
+  if (len <= 13) return "clamp(1rem, 1.55vw, 1.4rem)";
+  if (len <= 16) return "clamp(0.95rem, 1.35vw, 1.2rem)";
+  return "clamp(0.85rem, 1.15vw, 1.05rem)";
 }
 
 function kpiValueFontSize(value: number, isPercent = false): string {
@@ -321,12 +321,12 @@ const MiniLineChart = ({
               <stop
                 offset="0%"
                 stopColor={colors.gradFrom}
-                stopOpacity={0.25}
+                stopOpacity={0.42}
               />
               <stop
-                offset="60%"
+                offset="55%"
                 stopColor={colors.gradFrom}
-                stopOpacity={0.08}
+                stopOpacity={0.14}
               />
               <stop offset="100%" stopColor={colors.gradFrom} stopOpacity={0} />
             </linearGradient>
@@ -357,7 +357,7 @@ const MiniLineChart = ({
             d={buildPath(previstoPoints)}
             fill="none"
             stroke={colors.prevStroke}
-            strokeWidth={1.8}
+            strokeWidth={2.2}
             strokeDasharray="6,4"
             strokeLinecap="round"
           />
@@ -366,7 +366,7 @@ const MiniLineChart = ({
             d={buildPath(realizadoPoints)}
             fill="none"
             stroke={colors.realStroke}
-            strokeWidth={2.5}
+            strokeWidth={3.2}
             strokeLinecap="round"
             strokeLinejoin="round"
             filter={`url(#glow-${tone})`}
@@ -751,14 +751,14 @@ const Index = () => {
     return (
       <div
         className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
-            ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
-            : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
-          } flex flex-col p-2.5 xl:p-3`}
+            ? "border-emerald-500/[0.18] [background:var(--sgt-bg-card)] hover:border-emerald-400/30"
+            : "border-amber-500/[0.18] [background:var(--sgt-bg-card)] hover:border-amber-400/30"
+          } flex flex-col p-3 xl:p-4`}
       >
         <div
           className={`absolute inset-0 ${isPositive
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.11),transparent_34%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.11),transparent_34%)]"
+              ? "bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_40%)]"
+              : "bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.16),transparent_40%)]"
             }`}
         />
         <div
@@ -772,12 +772,12 @@ const Index = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[10px] leading-[14px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                className={`text-[11px] leading-[14px] font-bold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
                   }`}
               >
                 {title}
               </p>
-              <h2 className="mt-1 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-[1] tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(total) }}>
+              <h2 className="mt-1.5 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(total) }}>
                 <CountUp value={total} />
               </h2>
               <p className="mt-0.5 text-[11px] leading-[16px] dark:text-slate-400 text-slate-600">{subtitle}</p>
@@ -1004,13 +1004,13 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] p-2.5 xl:p-3`}
+                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] p-3 xl:p-4`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
                             <div className="relative flex h-full flex-col">
                               <div className="flex items-center justify-between gap-3">
-                                <p className="text-[11px] leading-[16px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
+                                <p className="text-[11px] leading-[16px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 transition-colors duration-300 dark:group-hover:text-white group-hover:text-slate-700">
                                   {item.label}
                                 </p>
 
@@ -1022,11 +1022,11 @@ const Index = () => {
                                 </div>
                               </div>
 
-                              <div className="mt-auto pt-3">
-                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-[1] tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
+                              <div className="mt-auto pt-2">
+                                <p className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
                                   <CountUp value={item.value} />
                                 </p>
-                                <p className="mt-1.5 text-[11px] leading-[16px] dark:text-slate-400 text-slate-600">
+                                <p className="mt-2 text-[12px] leading-[16px] dark:text-slate-400 text-slate-600">
                                   {item.helper}
                                 </p>
                               </div>
@@ -1131,14 +1131,14 @@ const Index = () => {
                             )}
                           </div>
                         </div>
-                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                           <CountUp value={kpiExtra.saldoLiquido} />
                         </div>
-                        <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
+                        <p className="mt-2 text-[12px] dark:text-slate-400 text-slate-600">
                           Recebido − Pago no período
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                           {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
                             <div
                               className={`h-full rounded-full transition-all duration-700 ${kpiExtra.saldoLiquido >= 0 ? "bg-emerald-400" : "bg-red-400"}`}
@@ -1149,9 +1149,9 @@ const Index = () => {
                           )}
                         </div>
                         <span
-                          className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[12px] font-semibold ${kpiExtra.saldoLiquido >= 0
-                              ? "bg-emerald-500/15 text-emerald-300"
-                              : "bg-red-500/15 text-red-300"
+                          className={`inline-flex w-fit rounded-full px-3 py-1 text-[12px] font-bold ${kpiExtra.saldoLiquido >= 0
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20"
+                              : "bg-red-500/20 text-red-300 border border-red-500/20"
                             }`}
                         >
                           {kpiExtra.saldoLiquido >= 0
@@ -1174,14 +1174,14 @@ const Index = () => {
                             <AlertCircle className="h-4 w-4 text-red-400" />
                           </div>
                         </div>
-                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
                           <CountUp value={kpiExtra.inadimplencia} />
                         </div>
-                        <p className="mt-2 text-sm font-medium text-red-400">
+                        <p className="mt-2 text-[12px] font-semibold text-red-400">
                           {(kpiExtra.inadimplenciaPerc ?? 0).toFixed(1)}% do A Receber
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                           {contasReceber.valorAReceber > 0 ? (
                             <div
                               className="h-full rounded-full bg-red-400 transition-all duration-700"
@@ -1191,7 +1191,7 @@ const Index = () => {
                             <div className="h-full w-full rounded-full bg-white/5" />
                           )}
                         </div>
-                        <span className="inline-flex w-fit rounded-full bg-red-500/15 px-2.5 py-1 text-[12px] font-semibold text-red-300">
+                        <span className="inline-flex w-fit rounded-full bg-red-500/20 border border-red-500/20 px-3 py-1 text-[12px] font-bold text-red-300">
                           {kpiExtra.inadimplenciaDocs} docs vencidos
                         </span>
                         </div>
@@ -1217,13 +1217,13 @@ const Index = () => {
                           Pago ÷ Previsto no período
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                           <div
                             className="h-full rounded-full bg-violet-400 transition-all duration-700"
                             style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
                           />
                         </div>
-                        <span className="inline-flex w-fit rounded-full bg-violet-500/15 px-2.5 py-1 text-[12px] font-semibold dark:text-violet-200 text-violet-700">
+                        <span className="inline-flex w-fit rounded-full bg-violet-500/20 border border-violet-500/20 px-3 py-1 text-[12px] font-bold dark:text-violet-200 text-violet-700">
                           Meta: 100%
                         </span>
                         </div>
@@ -1249,13 +1249,13 @@ const Index = () => {
                           Recebido ÷ Previsto no período
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                           <div
                             className="h-full rounded-full bg-cyan-400 transition-all duration-700"
                             style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
                           />
                         </div>
-                        <span className="inline-flex w-fit rounded-full bg-cyan-500/15 px-2.5 py-1 text-[12px] font-semibold dark:text-cyan-200 text-cyan-700">
+                        <span className="inline-flex w-fit rounded-full bg-cyan-500/20 border border-cyan-500/20 px-3 py-1 text-[12px] font-bold dark:text-cyan-200 text-cyan-700">
                           Meta: 100%
                         </span>
                         </div>
