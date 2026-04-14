@@ -850,7 +850,7 @@ const Index = () => {
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
           ? "h-[100dvh] overflow-hidden p-0"
-          : "h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+          : "min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -868,7 +868,7 @@ const Index = () => {
         <section
           className={`relative flex-1 min-h-0 flex flex-col border transition-all duration-300 ${presentationMode
               ? "w-full overflow-hidden rounded-none"
-              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
+              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
             }`}
           style={{
             background: "var(--sgt-bg-section)",
@@ -980,9 +980,9 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-1.5 flex-1 min-h-0 h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
+            <div className={`grid gap-1.5 flex-1 min-h-0 xl:h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-1.5 min-h-0 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
+              <div className="grid gap-1.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] overflow-auto xl:overflow-hidden">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1098,7 +1098,7 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {/* SALDO LÍQUIDO */}
                     <div
                       className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
@@ -1272,7 +1272,7 @@ const Index = () => {
               <aside
                 className={`rounded-[14px] sm:rounded-[16px] border [background:var(--sgt-bg-card)] min-h-0 overflow-hidden ${presentationMode
                     ? "h-full overflow-y-auto p-3"
-                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-2.5 sm:p-3"
+                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-2.5 sm:p-3 max-h-[60vh] xl:max-h-none overflow-y-auto xl:overflow-hidden"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
