@@ -1269,9 +1269,9 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
+                className={`rounded-[16px] sm:rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-4 lg:p-5"
+                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-3 sm:p-4 lg:p-5"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
@@ -1335,7 +1335,7 @@ const Index = () => {
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
 
-                            <div className="flex items-center gap-3 px-4 py-2.5">
+                            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5">
                               {/* Percentage ring */}
                               <div className="relative shrink-0 h-11 w-11">
                                 <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
