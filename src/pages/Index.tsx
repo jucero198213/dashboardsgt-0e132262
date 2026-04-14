@@ -984,13 +984,13 @@ const Index = () => {
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
+                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {(() => {
                       const topSharedFont = kpiFontSize(
                         topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
