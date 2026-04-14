@@ -277,7 +277,7 @@ export function FinancialDataProvider({
       Pedágio:           ["pedagio", "pedágio"],
       Administrativo:    ["administrativo", "adm"],
       Manutenção:        ["manut", "oficina", "peca", "peça", "reparo"],
-      Pneu:              ["pneu", "borracha", "recapagem"],
+
     };
     const keywords = rules[indicatorName] ?? [indicatorName.toLowerCase()];
     return keywords.some((k) => text.includes(k));
@@ -517,7 +517,7 @@ export function FinancialDataProvider({
         "Manutenção":      ["4", "5", "6", "7", "25"],
         "Compra de Ativo": ["26"],
         "Folha":           ["9"],
-        "Pneu":            ["22"],
+        "Pneu":            ["28"],
       };
 
       const baseIndicadores = allCP;
