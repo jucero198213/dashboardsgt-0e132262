@@ -980,7 +980,7 @@ const Index = () => {
             {/* 2-column grid: cards+charts left, indicators right */}
             <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-end">
+              <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
