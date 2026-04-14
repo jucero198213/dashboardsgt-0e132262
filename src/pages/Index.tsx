@@ -1002,7 +1002,7 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-2.5 sm:p-3" : "p-2.5 sm:p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
@@ -1100,7 +1100,7 @@ const Index = () => {
                   <div className="grid grid-cols-1 gap-1.5 sm:gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {/* SALDO LÍQUIDO */}
                     <div
-                      className={`group relative overflow-hidden rounded-[20px] border p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                           ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                           : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                         }`}
@@ -1162,7 +1162,7 @@ const Index = () => {
                     </div>
 
                     {/* INADIMPLÊNCIA */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1198,7 +1198,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1230,7 +1230,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
