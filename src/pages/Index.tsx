@@ -74,7 +74,7 @@ const CountUp = ({
 /* ------------------------------------------------------------------ */
 /*  MAX-WIDTH constante — nunca muda entre breakpoints                 */
 /* ------------------------------------------------------------------ */
-const DASHBOARD_MAX_W = "1600px";
+const DASHBOARD_MAX_W = "1920px";
 
 /* ------------------------------------------------------------------ */
 /*  Fluid font size — grande em tela grande, encolhe quando necessário */
@@ -851,7 +851,7 @@ const Index = () => {
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
           ? "h-[100dvh] p-0"
-          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 2xl:px-6 2xl:py-3"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -981,7 +981,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[1fr_280px] items-start xl:items-stretch`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[1fr_300px] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
