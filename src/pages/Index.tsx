@@ -81,14 +81,12 @@ const DASHBOARD_MAX_W = "1600px";
 /* ------------------------------------------------------------------ */
 function kpiFontSize(text: string): string {
   const len = text.length;
-  // clamp(min, fluid-vw, max)
-  // Em tela grande: fonte grande. Em tela pequena: encolhe junto com o card.
-  // Os 4 cards ocupam ~25vw cada em xl, ~50vw em md, 100vw em mobile.
-  if (len <= 6)  return "clamp(1.1rem, 3.5vw, 2.2rem)";
-  if (len <= 10) return "clamp(1rem, 2.8vw, 1.9rem)";
-  if (len <= 13) return "clamp(0.9rem, 2.2vw, 1.6rem)";
-  if (len <= 16) return "clamp(0.8rem, 1.8vw, 1.35rem)";
-  return "clamp(0.75rem, 1.4vw, 1.1rem)";
+  // Capped max sizes to maintain density on large screens
+  if (len <= 6)  return "clamp(1.1rem, 2.5vw, 1.75rem)";
+  if (len <= 10) return "clamp(1rem, 2.2vw, 1.55rem)";
+  if (len <= 13) return "clamp(0.9rem, 1.8vw, 1.35rem)";
+  if (len <= 16) return "clamp(0.8rem, 1.5vw, 1.2rem)";
+  return "clamp(0.75rem, 1.2vw, 1.05rem)";
 }
 
 function kpiValueFontSize(value: number, isPercent = false): string {
@@ -796,7 +794,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[200px] sm:h-[240px] xl:h-[280px] 2xl:h-[320px]">
+          <div className="relative h-[180px] sm:h-[210px] xl:h-[240px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -891,7 +889,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full max-w-[2200px]">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
