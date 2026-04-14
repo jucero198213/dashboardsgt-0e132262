@@ -96,7 +96,7 @@ export default function PainelAdministrativo() {
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.06),transparent_24%)]" />
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
 
-      <div className="relative mx-auto max-w-[1400px] space-y-6">
+      <div className="relative w-full space-y-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">

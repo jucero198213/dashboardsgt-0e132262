@@ -390,7 +390,7 @@ export default function IndicadorDetalhe() {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[1400px] px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
+      <div className="relative w-full px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">

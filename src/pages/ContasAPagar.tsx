@@ -83,7 +83,7 @@ const ContasAPagar = () => {
     <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8" style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}>
       <BackgroundEffects />
 
-      <div className="relative mx-auto max-w-[1400px] space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
+      <div className="relative w-full space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Breadcrumb */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-400">
