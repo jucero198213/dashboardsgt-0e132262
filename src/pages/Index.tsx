@@ -1300,10 +1300,10 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className="flex flex-col flex-1 gap-2 min-h-0">
+                <div className={`flex flex-col flex-1 gap-2 min-h-0 transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                   {isFetchingDw && !isProcessed ? (
                     <>
-                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                         <IndicatorSkeleton key={i} />
                       ))}
                     </>

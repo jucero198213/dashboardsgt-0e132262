@@ -277,6 +277,7 @@ export function FinancialDataProvider({
       Pedágio:           ["pedagio", "pedágio"],
       Administrativo:    ["administrativo", "adm"],
       Manutenção:        ["manut", "oficina", "peca", "peça", "reparo"],
+      Pneu:              ["pneu", "borracha", "recapagem"],
     };
     const keywords = rules[indicatorName] ?? [indicatorName.toLowerCase()];
     return keywords.some((k) => text.includes(k));
