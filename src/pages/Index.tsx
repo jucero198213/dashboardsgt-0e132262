@@ -889,7 +889,7 @@ const Index = () => {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full max-w-[2200px]">
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
 
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
@@ -917,7 +917,7 @@ const Index = () => {
               <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros */}
-              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+              <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5 min-w-0">
                 <DatePickerInput
                   value={dwFilter.dataInicio}
                   onChange={(v) => setDwFilter("dataInicio", v)}
@@ -930,7 +930,7 @@ const Index = () => {
                 />
                 <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[140px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[130px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Empresa" />
                   </SelectTrigger>
                   <SelectContent>
@@ -939,7 +939,7 @@ const Index = () => {
                   </SelectContent>
                 </Select>
                 <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[150px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[140px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Filial" />
                   </SelectTrigger>
                   <SelectContent>
