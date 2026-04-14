@@ -47,6 +47,7 @@ const EXPECTED_INDICATORS: Record<string, number> = {
   "Pedágio":           5,
   "Administrativo":    5,
   "Manutenção":       15,
+  "Pneu":              5,
 };
 
 const defaultKpiExtra: KpiExtra = {
@@ -515,6 +516,7 @@ export function FinancialDataProvider({
         "Manutenção":      ["4", "5", "6", "7", "25"],
         "Compra de Ativo": ["26"],
         "Folha":           ["9"],
+        "Pneu":            ["22"],
       };
 
       const baseIndicadores = allCP;
