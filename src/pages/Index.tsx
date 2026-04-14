@@ -891,32 +891,32 @@ const Index = () => {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 py-1">
 
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                  <svg className="h-3.5 w-3.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
+                  <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                   </svg>
                 </div>
-                <span className="hidden sm:block text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
+                <span className="hidden sm:block text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
                   SGT Dashboard
                 </span>
               </div>
 
               {/* Badge tempo real */}
-              <div className="flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">
                   Tempo real
                 </span>
               </div>
 
-              <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
+              <div className="hidden h-6 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros */}
               <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5 min-w-0">
@@ -932,7 +932,7 @@ const Index = () => {
                 />
                 <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[130px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
                     <SelectValue placeholder="Empresa" />
                   </SelectTrigger>
                   <SelectContent>
@@ -941,7 +941,7 @@ const Index = () => {
                   </SelectContent>
                 </Select>
                 <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[140px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all">
                     <SelectValue placeholder="Filial" />
                   </SelectTrigger>
                   <SelectContent>
@@ -952,7 +952,7 @@ const Index = () => {
                 <button
                   onClick={() => void handleUpdate()}
                   disabled={isFetchingDw}
-                  className={`inline-flex h-7 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-semibold transition-all ${isFetchingDw
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw
                     ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
                     : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"
                   } disabled:cursor-not-allowed`}
@@ -1320,7 +1320,7 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex items-center gap-3 rounded-[12px] border px-3 py-4 transition-all duration-200 cursor-pointer"
+                            className="group flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all duration-200 cursor-pointer"
                             style={{ background: "var(--sgt-bg-section)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 4px 20px rgba(52,211,153,0.10)" : "0 4px 20px rgba(248,113,113,0.10)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; }}

@@ -39,14 +39,14 @@ export function UserMenu() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-all"
+        className="flex items-center gap-2 rounded-xl border px-3 py-2 text-[12px] transition-all"
         style={{
           background: "var(--sgt-input-bg)",
           borderColor: "var(--sgt-input-border)",
           color: "var(--sgt-text-secondary)",
         }}
       >
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-[10px] font-bold text-cyan-300">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-[11px] font-bold text-cyan-300">
           {initials}
         </div>
         <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>

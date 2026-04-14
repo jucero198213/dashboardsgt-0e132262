@@ -56,16 +56,16 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium transition-all hover:border-[var(--sgt-border-medium)] cursor-pointer"
+        className="flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] font-medium transition-all hover:border-[var(--sgt-border-medium)] cursor-pointer"
         style={{
           background: "var(--sgt-input-bg)",
           borderColor: open ? "rgba(34,211,238,0.4)" : "var(--sgt-input-border)",
           color: value ? "var(--sgt-text-secondary)" : "var(--sgt-text-muted)",
           boxShadow: open ? "0 0 0 3px rgba(34,211,238,0.06)" : "none",
-          minWidth: 110,
+          minWidth: 118,
         }}
       >
-        <CalendarDays className="h-3 w-3 shrink-0 text-cyan-400/70" />
+        <CalendarDays className="h-3.5 w-3.5 shrink-0 text-cyan-400/70" />
         <span className="tabular-nums">
           {value ? fmtDisplay(value) : placeholder}
         </span>
