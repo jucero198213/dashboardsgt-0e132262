@@ -767,18 +767,18 @@ const Index = () => {
         />
 
         <div className="relative flex flex-col gap-1.5">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
+                className={`text-[10px] leading-[14px] font-semibold uppercase tracking-[0.3em] ${isPositive ? "text-emerald-300" : "text-amber-300"
                   }`}
               >
                 {title}
               </p>
-              <h2 className="mt-0.5 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(total) }}>
+              <h2 className="mt-1 min-w-0 overflow-hidden whitespace-nowrap font-bold leading-[1] tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(total) }}>
                 <CountUp value={total} />
               </h2>
-              <p className="mt-0.5 text-[11px] dark:text-slate-400 text-slate-600">{subtitle}</p>
+              <p className="mt-0.5 text-[11px] leading-[16px] dark:text-slate-400 text-slate-600">{subtitle}</p>
             </div>
 
             <div
@@ -1002,30 +1002,30 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] min-h-[110px] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
-                            <div className="relative flex h-full flex-col justify-between">
-                              <div className="flex items-start justify-between gap-3">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
+                            <div className="relative flex h-full flex-col">
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-[11px] leading-[16px] font-semibold uppercase tracking-[0.28em] dark:text-slate-400 text-slate-500 transition-colors duration-300 dark:group-hover:text-slate-300 group-hover:text-slate-700">
                                   {item.label}
                                 </p>
 
                                 <div
-                                  className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
+                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
                                     }`}
                                 >
-                                  <Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                                  <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
                                 </div>
                               </div>
 
-                              <div className="mt-2.5">
-                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
+                              <div className="mt-auto pt-3">
+                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-[1] tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
                                   <CountUp value={item.value} />
                                 </p>
-                                <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
+                                <p className="mt-1.5 text-[11px] leading-[16px] dark:text-slate-400 text-slate-600">
                                   {item.helper}
                                 </p>
                               </div>
