@@ -978,9 +978,9 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] xl:grid-rows-[auto_auto]`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-start`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
+              <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1269,9 +1269,9 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
+                className={`rounded-[20px] border [background:var(--sgt-bg-card)] self-start ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-4 lg:p-5"
+                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-4 lg:p-5"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
