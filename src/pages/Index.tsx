@@ -1104,7 +1104,7 @@ const Index = () => {
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                   {/* SALDO LÍQUIDO */}
                   <div
-                    className={`group relative overflow-hidden rounded-[20px] border p-4 min-h-[190px] flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                    className={`group relative overflow-hidden rounded-[20px] border p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                         ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                         : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                       }`}
@@ -1112,7 +1112,7 @@ const Index = () => {
                     <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32"
                       style={{ background: kpiExtra.saldoLiquido >= 0 ? "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.09), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                     <div className="relative flex flex-col h-full">
-                      <div className="mb-4 flex items-start justify-between">
+                      <div className="mb-2 flex items-start justify-between">
                         <span
                           className={`text-[11px] font-semibold uppercase tracking-[0.28em] ${kpiExtra.saldoLiquido >= 0
                               ? "text-emerald-400"
@@ -1122,7 +1122,7 @@ const Index = () => {
                           SALDO LÍQUIDO
                         </span>
                         <div
-                          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${kpiExtra.saldoLiquido >= 0
+                          className={`flex h-9 w-9 items-center justify-center rounded-xl ${kpiExtra.saldoLiquido >= 0
                               ? "bg-emerald-500/15"
                               : "bg-red-500/15"
                             }`}
@@ -1140,7 +1140,7 @@ const Index = () => {
                       <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
                         Recebido − Pago no período
                       </p>
-                      <div className="mt-auto flex flex-col gap-3 pt-3">
+                      <div className="mt-auto flex flex-col gap-2 pt-2">
                       <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                         {contasReceber.valorAReceber > 0 && contasPagar.valorPago > 0 ? (
                           <div
@@ -1152,7 +1152,7 @@ const Index = () => {
                         )}
                       </div>
                       <span
-                        className={`mt-4 inline-flex w-fit rounded-full px-2.5 py-1 text-[13px] font-semibold ${kpiExtra.saldoLiquido >= 0
+                        className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[12px] font-semibold ${kpiExtra.saldoLiquido >= 0
                             ? "bg-emerald-500/15 text-emerald-300"
                             : "bg-red-500/15 text-red-300"
                           }`}
