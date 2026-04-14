@@ -59,7 +59,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
   const isPercent  = value.endsWith("%");
 
   return (
-    <div className={`group relative flex h-full min-h-[130px] sm:min-h-[150px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
+    <div className={`group relative flex h-full min-h-[110px] sm:min-h-[130px] md:min-h-[150px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
 
       {/* Stripe de cor no topo */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -80,7 +80,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
         </div>
 
         {/* Valor — protagonista */}
-        <p className="mt-auto pt-3 sm:pt-4 text-[20px] sm:text-[28px] font-black leading-none tracking-[-0.05em] [color:var(--sgt-text-primary)] md:text-[30px]">
+        <p className="mt-auto pt-2 sm:pt-3 md:pt-4 text-[16px] sm:text-[20px] md:text-[28px] lg:text-[30px] font-black leading-none tracking-[-0.05em] [color:var(--sgt-text-primary)] break-words">
           {rawValue !== undefined && isCurrency ? (
             <CountUp value={rawValue} format="currency" />
           ) : rawValue !== undefined && isPercent ? (

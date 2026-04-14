@@ -748,10 +748,10 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
+        className={`group relative overflow-hidden rounded-[16px] sm:rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
-          } ${presentationMode ? "flex flex-col p-3" : "flex flex-col p-3 xl:p-3.5"}`}
+          } ${presentationMode ? "flex flex-col p-2.5 sm:p-3" : "flex flex-col p-2.5 sm:p-3 xl:p-3.5"}`}
       >
         <div
           className={`absolute inset-0 ${isPositive
@@ -791,7 +791,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[280px]">
+          <div className="relative h-[200px] sm:h-[240px] xl:h-[280px] 2xl:h-[320px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -846,9 +846,9 @@ const Index = () => {
 
   return (
     <div
-      className={`h-[100dvh] flex flex-col transition-all duration-300 ${presentationMode
-          ? "p-0"
-          : "px-0.5 py-0.5 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+      className={`flex flex-col transition-all duration-300 ${presentationMode
+          ? "h-[100dvh] p-0"
+          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -886,10 +886,10 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full max-w-[2200px]">
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
 
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
@@ -917,7 +917,7 @@ const Index = () => {
               <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros */}
-              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+              <div className="flex flex-1 flex-wrap items-center gap-1 sm:gap-1.5 min-w-0">
                 <DatePickerInput
                   value={dwFilter.dataInicio}
                   onChange={(v) => setDwFilter("dataInicio", v)}
@@ -930,7 +930,7 @@ const Index = () => {
                 />
                 <div className="hidden h-4 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[140px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[130px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Empresa" />
                   </SelectTrigger>
                   <SelectContent>
@@ -939,7 +939,7 @@ const Index = () => {
                   </SelectContent>
                 </Select>
                 <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-7 w-full min-w-[90px] max-w-[150px] rounded-lg text-[11px] transition-all">
+                  <SelectTrigger className="h-7 w-full min-w-[80px] max-w-[140px] rounded-lg text-[11px] transition-all">
                     <SelectValue placeholder="Filial" />
                   </SelectTrigger>
                   <SelectContent>
@@ -978,19 +978,19 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-stretch`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {(() => {
                       const topSharedFont = kpiFontSize(
                         topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
@@ -1002,7 +1002,7 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-3" : "p-3 xl:p-3.5"
+                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-2.5 sm:p-3" : "p-2.5 sm:p-3 xl:p-3.5"
                               }`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
@@ -1097,10 +1097,10 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-1 gap-1.5 sm:gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {/* SALDO LÍQUIDO */}
                     <div
-                      className={`group relative overflow-hidden rounded-[20px] border p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                           ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                           : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                         }`}
@@ -1162,7 +1162,7 @@ const Index = () => {
                     </div>
 
                     {/* INADIMPLÊNCIA */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1198,7 +1198,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1230,7 +1230,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR */}
-                    <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1269,9 +1269,9 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
+                className={`rounded-[16px] sm:rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-4 lg:p-5"
+                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-3 sm:p-4 lg:p-5"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
@@ -1335,10 +1335,10 @@ const Index = () => {
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
 
-                            <div className="flex items-center gap-3 px-4 py-2.5">
+                            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5">
                               {/* Percentage ring */}
-                              <div className="relative shrink-0 h-11 w-11">
-                                <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
+                              <div className="relative shrink-0 h-9 w-9 sm:h-11 sm:w-11">
+                                <svg viewBox="0 0 36 36" className="h-9 w-9 sm:h-11 sm:w-11 -rotate-90">
                                   <circle cx="18" cy="18" r="14" fill="none"
                                     stroke="var(--sgt-progress-track)" strokeWidth="3" />
                                   <circle cx="18" cy="18" r="14" fill="none"

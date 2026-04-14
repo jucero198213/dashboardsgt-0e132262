@@ -85,7 +85,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
 }) {
   const t = TONE[tone];
   return (
-    <div className={`group relative flex min-h-[130px] sm:min-h-[152px] flex-col overflow-hidden rounded-[16px] sm:rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
+    <div className={`group relative flex min-h-[110px] sm:min-h-[130px] md:min-h-[152px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
 
       {/* Stripe de cor no topo — identidade única por card */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -94,7 +94,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
       <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
         style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
 
-      <div className="relative flex h-full flex-col p-3.5 sm:p-5">
+      <div className="relative flex h-full flex-col p-3 sm:p-4 md:p-5">
         {/* Label + ícone */}
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{label}</p>
@@ -104,7 +104,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
         </div>
 
         {/* Valor — protagonista da tela */}
-        <p className="mt-auto pt-3 text-[clamp(1.2rem,5vw,1.875rem)] font-black leading-none tracking-[-0.05em] text-white break-all">
+        <p className="mt-auto pt-2 sm:pt-3 text-[clamp(1rem,4vw,1.875rem)] font-black leading-none tracking-[-0.05em] text-white break-words">
           {value}
         </p>
 
@@ -390,7 +390,7 @@ export default function IndicadorDetalhe() {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[1400px] px-2 py-3 sm:px-4 sm:py-6 lg:px-8 lg:py-10 space-y-3 sm:space-y-6">
+      <div className="relative mx-auto max-w-[1400px] px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
@@ -486,7 +486,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Filtros ── */}
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2 sm:px-4 py-2 sm:py-3">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2 sm:px-4 py-2 sm:py-3 overflow-hidden">
             {[
               { value: dwFilter.dataInicio, onChange: (v: string) => { setDwFilter("dataInicio", v); setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
               { value: dwFilter.dataFim,    onChange: (v: string) => { setDwFilter("dataFim", v);    setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
@@ -532,7 +532,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Gráfico + Composição ── */}
-          <div className="grid gap-3 sm:gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
+          <div className="grid gap-2 sm:gap-3 md:gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
 
             {/* Gráfico */}
             <div className="flex flex-col overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]">
@@ -557,7 +557,7 @@ export default function IndicadorDetalhe() {
                 </div>
               </div>
               {evolucaoDiaria.length > 0 ? (
-                <div className="flex-1 min-h-[280px] px-2 pb-5 pt-4">
+                <div className="flex-1 min-h-[220px] sm:min-h-[280px] px-2 pb-5 pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={evolucaoDiaria} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
                       <defs>
@@ -577,7 +577,7 @@ export default function IndicadorDetalhe() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex flex-1 min-h-[280px] items-center justify-center">
+                <div className="flex flex-1 min-h-[200px] sm:min-h-[280px] items-center justify-center">
                   <div className="text-center space-y-2">
                     <Sparkles className="h-8 w-8 text-slate-700 mx-auto" />
                     <p className="text-sm [color:var(--sgt-text-muted)]">Sem dados no período</p>
@@ -587,7 +587,7 @@ export default function IndicadorDetalhe() {
             </div>
 
             {/* Composição */}
-            <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-6 flex flex-col">
+            <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-3 sm:p-4 md:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Composição</p>
@@ -642,7 +642,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Documentos Detalhados ── */}
-          <div className="overflow-hidden rounded-[20px] border" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+          <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
             {/* Header da tabela */}
             <div className="flex flex-wrap items-center justify-between border-b border-[var(--sgt-border-subtle)] px-3 py-3 sm:px-6 sm:py-4">
               <div>
@@ -667,7 +667,7 @@ export default function IndicadorDetalhe() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[700px]">
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-[var(--sgt-border-subtle)]">
                       {[
