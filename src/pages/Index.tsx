@@ -768,7 +768,7 @@ const Index = () => {
             }`}
         />
 
-        <div className="relative flex flex-col gap-1.5">
+        <div className="relative flex flex-col gap-1.5 h-full">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p
