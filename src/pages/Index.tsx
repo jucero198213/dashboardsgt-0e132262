@@ -1326,8 +1326,8 @@ const Index = () => {
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
                           >
                             {/* Ring */}
-                            <div className="relative shrink-0 h-9 w-9">
-                              <svg viewBox="0 0 36 36" className="h-9 w-9 -rotate-90">
+                            <div className="relative shrink-0 h-12 w-12">
+                              <svg viewBox="0 0 36 36" className="h-12 w-12 -rotate-90">
                                 <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="3" />
                                 <circle cx="18" cy="18" r="14" fill="none"
                                   stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
@@ -1337,29 +1337,29 @@ const Index = () => {
                                   className="transition-all duration-700"
                                 />
                               </svg>
-                              <span className={`absolute inset-0 flex items-center justify-center text-[9px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                              <span className={`absolute inset-0 flex items-center justify-center text-[11px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
                                 {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                               </span>
                             </div>
 
                             {/* Nome + meta */}
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.10em] dark:text-slate-300 text-slate-700">
+                              <p className="truncate text-[13px] font-semibold uppercase tracking-[0.10em] dark:text-slate-300 text-slate-700">
                                 {ind.nome}
                               </p>
-                              <p className="text-[10px] dark:text-slate-500 text-slate-500 mt-0.5">
+                              <p className="text-[11px] dark:text-slate-500 text-slate-500 mt-1">
                                 Meta: {ind.percentualEsperado}%
                               </p>
                             </div>
 
                             {/* Badge + seta */}
                             <div className="flex shrink-0 items-center gap-1.5">
-                              <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${abaixoDaMeta
+                              <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${abaixoDaMeta
                                 ? "bg-emerald-500/10 text-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300"
                                 : "bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"}`}>
                                 {abaixoDaMeta ? "OK" : "Alto"}
                               </span>
-                              <ArrowRight className="h-3 w-3 dark:text-slate-600 text-slate-400 transition-transform duration-200 group-hover:translate-x-1" />
+                              <ArrowRight className="h-3.5 w-3.5 dark:text-slate-600 text-slate-400 transition-transform duration-200 group-hover:translate-x-1" />
                             </div>
                           </Link>
                         </AnimatedCard>
