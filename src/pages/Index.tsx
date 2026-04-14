@@ -791,7 +791,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[220px]">
+          <div className="relative h-[280px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
