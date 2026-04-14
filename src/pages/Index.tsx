@@ -791,7 +791,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[280px]">
+          <div className="relative h-[200px] sm:h-[240px] xl:h-[280px] 2xl:h-[320px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -846,9 +846,9 @@ const Index = () => {
 
   return (
     <div
-      className={`h-[100dvh] flex flex-col transition-all duration-300 ${presentationMode
-          ? "p-0"
-          : "px-0.5 py-0.5 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+      className={`flex flex-col transition-all duration-300 ${presentationMode
+          ? "h-[100dvh] p-0"
+          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -886,7 +886,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full max-w-[2200px]">
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -978,7 +978,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-stretch`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
