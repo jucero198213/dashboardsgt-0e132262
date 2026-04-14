@@ -1265,10 +1265,13 @@ const Index = () => {
                 })()
                 }
 
+              </div>
+              {/* end left column */}
+
               <aside
                 className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 xl:row-span-2 flex flex-col p-4 lg:p-5"
+                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-4 lg:p-5"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
