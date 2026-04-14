@@ -207,7 +207,7 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
   const subtitle = SUBTITLES[indicador.nome] ?? "Detalhamento do indicador estratégico";
 
   return (
-    <div className={`relative overflow-hidden rounded-[16px] sm:rounded-[22px] border ${cfg?.border ?? "border-white/[0.09]"} bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]`}>
+    <div className={`relative overflow-hidden rounded-[16px] sm:rounded-[20px] border ${cfg?.border ?? "border-white/[0.09]"} bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]`}>
 
       {/* Stripe de identidade no topo */}
       {cfg && <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${cfg.stripe}`} />}
@@ -404,7 +404,7 @@ export default function IndicadorDetalhe() {
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
           {indicador.nome === "Óleo Diesel" ? (
-            <div className="relative overflow-hidden rounded-[16px] sm:rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
+            <div className="relative overflow-hidden rounded-[16px] sm:rounded-[20px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
 
               {/* C — véu âmbar à direita */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-[65%] bg-gradient-to-l from-[rgba(201,162,39,0.17)] via-[rgba(201,162,39,0.05)] to-transparent" />

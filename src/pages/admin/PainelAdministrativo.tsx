@@ -174,7 +174,7 @@ export default function PainelAdministrativo() {
             </div>
 
             {/* Nav grid */}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {NAV_ITEMS.slice(0, 3).map((item) => (
                 <button
                   key={item.id}
@@ -192,7 +192,7 @@ export default function PainelAdministrativo() {
                 </button>
               ))}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
               {NAV_ITEMS.slice(3).map((item) => (
                 <button
                   key={item.id}

@@ -95,7 +95,7 @@ const ContasAPagar = () => {
         </div>
 
         {/* Header contextual — Contas a Pagar */}
-        <div className="relative overflow-hidden rounded-[16px] sm:rounded-[22px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]">
+        <div className="relative overflow-hidden rounded-[16px] sm:rounded-[20px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_60px_rgba(0,0,0,0.5)]">
 
           {/* Stripe de identidade amber */}
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/60 to-amber-700/20" />
@@ -148,11 +148,11 @@ const ContasAPagar = () => {
 
         {/* KPI Cards */}
         {showLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 items-stretch">
             {[0,1,2,3].map(i => <KpiCardSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-stretch">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 items-stretch">
             <AnimatedCard delay={0}>
               <KpiCard label="Valor Previsto" value={formatCurrency(resumoPagar.valorAPagar)} rawValue={resumoPagar.valorAPagar} subtitle="Total previsto no período" icon={DollarSign} tone="cyan" />
             </AnimatedCard>

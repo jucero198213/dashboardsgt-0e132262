@@ -77,7 +77,7 @@ export default function Monitoramento() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {[
           { label: "Eventos hoje",      value: String(count),  color: "text-cyan-400" },
           { label: "Erros (24h)",        value: "1",            color: "text-red-400" },
