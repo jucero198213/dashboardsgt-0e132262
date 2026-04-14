@@ -1324,7 +1324,7 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45} className="flex-1">
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group relative flex flex-col h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                            className="group relative flex flex-col justify-center h-full rounded-[14px] border overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                             style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 10px 32px rgba(0,0,0,0.22)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
@@ -1336,7 +1336,7 @@ const Index = () => {
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
 
-                            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5">
+                            <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5">
                               {/* Percentage ring */}
                               <div className="relative shrink-0 h-9 w-9 sm:h-11 sm:w-11">
                                 <svg viewBox="0 0 36 36" className="h-9 w-9 sm:h-11 sm:w-11 -rotate-90">
