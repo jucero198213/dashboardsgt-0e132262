@@ -978,7 +978,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-start`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,0.75fr)] items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
@@ -1269,7 +1269,7 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[20px] border [background:var(--sgt-bg-card)] self-start ${presentationMode
+                className={`rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
                     ? "h-full overflow-y-auto p-3.5"
                     : "xl:col-start-2 xl:row-start-1 flex flex-col p-4 lg:p-5"
                   }`}
@@ -1300,7 +1300,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className={`flex flex-col flex-1 gap-2 min-h-0 transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+                <div className={`flex flex-col flex-1 gap-0 min-h-0 justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
