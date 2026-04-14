@@ -793,7 +793,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[180px] sm:h-[200px] xl:h-[220px]">
+                  <div className="relative flex-1 min-h-0">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -849,8 +849,8 @@ const Index = () => {
   return (
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
-          ? "h-[100dvh] p-0"
-          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+          ? "h-[100dvh] overflow-hidden p-0"
+          : "h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -860,7 +860,7 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 dark:opacity-100 light:opacity-40" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
 
       <div
-        className={`relative flex flex-col flex-1 min-h-0 ${presentationMode
+        className={`relative flex flex-col flex-1 min-h-0 overflow-hidden ${presentationMode
             ? "w-full max-w-none"
             : "w-full"
           }`}
@@ -888,7 +888,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
@@ -980,9 +980,9 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-1.5 flex-1 min-h-0 xl:grid-cols-[1fr_320px] items-start xl:items-stretch`}>
+            <div className={`grid gap-1.5 flex-1 min-h-0 h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-1.5 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
+              <div className="grid gap-1.5 min-h-0 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1046,8 +1046,8 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="contents">
-                    <AnimatedCard delay={320} className="flex h-full">
-                      <div className="flex-1 flex flex-col">
+                    <AnimatedCard delay={320} className="flex min-h-0 h-full">
+                      <div className="flex-1 flex flex-col min-h-0">
                       {renderLargeCard({
                         title: "Saldo a receber",
                         tone: "emerald",
@@ -1066,8 +1066,8 @@ const Index = () => {
                       </div>
                     </AnimatedCard>
 
-                    <AnimatedCard delay={400} className="flex h-full">
-                      <div className="flex-1 flex flex-col">
+                    <AnimatedCard delay={400} className="flex min-h-0 h-full">
+                      <div className="flex-1 flex flex-col min-h-0">
                       {renderLargeCard({
                         title: "Saldo a pagar",
                         tone: "amber",
@@ -1270,9 +1270,9 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[14px] sm:rounded-[16px] border [background:var(--sgt-bg-card)] ${presentationMode
+                className={`rounded-[14px] sm:rounded-[16px] border [background:var(--sgt-bg-card)] min-h-0 overflow-hidden ${presentationMode
                     ? "h-full overflow-y-auto p-3"
-                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-2.5 sm:p-3"
+                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-2.5 sm:p-3"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
@@ -1301,7 +1301,7 @@ const Index = () => {
                 </div>
 
                 {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className={`flex flex-col flex-1 gap-0 min-h-0 justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+                <div className={`flex flex-col flex-1 gap-1 min-h-0 overflow-y-auto justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                   {isFetchingDw && !isProcessed ? (
                     <>
                       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
