@@ -1,5 +1,6 @@
 {
   "imports": {
     "npm:mssql": "npm:mssql@11.0.1"
-  }
+  },
+  "nodeModulesDir": "auto"
 }
