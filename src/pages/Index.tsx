@@ -1165,7 +1165,7 @@ const Index = () => {
                     <div className="group relative overflow-hidden rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
-                        <div className="mb-2 flex items-start justify-between">
+                        <div className="mb-2 flex items-center justify-between">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-400">
                             INADIMPLÊNCIA
                           </span>
@@ -1201,7 +1201,7 @@ const Index = () => {
                     <div className="group relative overflow-hidden rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
-                        <div className="mb-2 flex items-start justify-between">
+                        <div className="mb-2 flex items-center justify-between">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
                             % REALIZAÇÃO CP
                           </span>
@@ -1233,7 +1233,7 @@ const Index = () => {
                     <div className="group relative overflow-hidden rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
-                        <div className="mb-2 flex items-start justify-between">
+                        <div className="mb-2 flex items-center justify-between">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
                             % REALIZAÇÃO CR
                           </span>
