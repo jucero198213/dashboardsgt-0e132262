@@ -1326,8 +1326,8 @@ const Index = () => {
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; }}
                           >
                             {/* Ring */}
-                            <div className="relative shrink-0 h-11 w-11">
-                              <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
+                            <div className="relative shrink-0 h-14 w-14">
+                              <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
                                 <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="3.5" />
                                 <circle cx="18" cy="18" r="14" fill="none"
                                   stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
@@ -1338,7 +1338,7 @@ const Index = () => {
                                   style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.6))" : "drop-shadow(0 0 4px rgba(248,113,113,0.6))" }}
                                 />
                               </svg>
-                              <span className={`absolute inset-0 flex items-center justify-center text-[9px] font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`} style={{ fontSize: ind.percentualReal >= 100 ? "8px" : ind.percentualReal >= 10 ? "9px" : "10px" }}>
+                              <span className={`absolute inset-0 flex items-center justify-center font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`} style={{ fontSize: ind.percentualReal >= 100 ? "10px" : ind.percentualReal >= 10 ? "11px" : "12px" }}>
                                 {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                               </span>
                             </div>
