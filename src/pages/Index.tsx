@@ -991,7 +991,12 @@ const Index = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2 xl:grid-cols-4 items-stretch">
-                    {topMetrics.map((item, idx) => {
+                    {(() => {
+                      const topSharedFont = kpiFontSize(
+                        topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
+                          .reduce((a, b) => a.length >= b.length ? a : b)
+                      );
+                      return topMetrics.map((item, idx) => {
                       const Icon = item.icon;
 
                       return (
@@ -1017,7 +1022,7 @@ const Index = () => {
                               </div>
 
                               <div className="mt-2.5">
-                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: kpiValueFontSize(item.value) }}>
+                                <p className="min-w-0 overflow-hidden whitespace-nowrap font-bold leading-none tracking-[-0.03em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
                                   <CountUp value={item.value} />
                                 </p>
                                 <p className="mt-1.5 text-xs dark:text-slate-400 text-slate-600">
@@ -1028,7 +1033,7 @@ const Index = () => {
                           </div>
                         </AnimatedCard>
                       );
-                    })}
+                    })})()}
                   </div>
                 )}
 
