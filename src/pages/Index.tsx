@@ -1097,7 +1097,7 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch self-end">
                     {/* SALDO LÍQUIDO */}
                     <div
                       className={`group relative overflow-hidden rounded-[20px] border p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
