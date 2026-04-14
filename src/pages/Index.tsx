@@ -982,7 +982,7 @@ const Index = () => {
             {/* 2-column grid: cards+charts left, indicators right */}
             <div className={`grid gap-1.5 flex-1 min-h-0 xl:h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-1.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] overflow-auto xl:overflow-hidden">
+              <div className="grid gap-1.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
@@ -1098,7 +1098,7 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch h-full">
                     {/* SALDO LÍQUIDO */}
                     <div
                       className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
