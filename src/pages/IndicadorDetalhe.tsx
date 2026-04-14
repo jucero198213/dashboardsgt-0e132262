@@ -577,7 +577,7 @@ export default function IndicadorDetalhe() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex flex-1 min-h-[280px] items-center justify-center">
+                <div className="flex flex-1 min-h-[200px] sm:min-h-[280px] items-center justify-center">
                   <div className="text-center space-y-2">
                     <Sparkles className="h-8 w-8 text-slate-700 mx-auto" />
                     <p className="text-sm [color:var(--sgt-text-muted)]">Sem dados no período</p>
@@ -587,7 +587,7 @@ export default function IndicadorDetalhe() {
             </div>
 
             {/* Composição */}
-            <div className="overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-6 flex flex-col">
+            <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-3 sm:p-4 md:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Composição</p>
@@ -642,7 +642,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Documentos Detalhados ── */}
-          <div className="overflow-hidden rounded-[20px] border" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+          <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
             {/* Header da tabela */}
             <div className="flex flex-wrap items-center justify-between border-b border-[var(--sgt-border-subtle)] px-3 py-3 sm:px-6 sm:py-4">
               <div>
@@ -667,7 +667,7 @@ export default function IndicadorDetalhe() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[700px]">
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-[var(--sgt-border-subtle)]">
                       {[
