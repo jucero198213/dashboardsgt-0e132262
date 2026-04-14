@@ -1320,7 +1320,7 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex items-center gap-2.5 rounded-[10px] border px-3 py-3.5 transition-all duration-200 cursor-pointer"
+                            className="group flex items-center gap-2.5 rounded-[10px] border px-3 py-5 transition-all duration-200 cursor-pointer"
                             style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)" }}
                             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.2)"; }}
                             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
