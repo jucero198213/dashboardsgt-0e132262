@@ -74,7 +74,7 @@ const CountUp = ({
 /* ------------------------------------------------------------------ */
 /*  MAX-WIDTH constante — nunca muda entre breakpoints                 */
 /* ------------------------------------------------------------------ */
-const DASHBOARD_MAX_W = "1600px";
+const DASHBOARD_MAX_W = "1920px";
 
 /* ------------------------------------------------------------------ */
 /*  Fluid font size — grande em tela grande, encolhe quando necessário */
@@ -851,7 +851,7 @@ const Index = () => {
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
           ? "h-[100dvh] p-0"
-          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2"
+          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 2xl:px-6 2xl:py-3"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -877,7 +877,7 @@ const Index = () => {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          {/* Progress bar — âmbar coerente com o tema */}
+          {/* Progress bar */}
           {isFetchingDw && (
             <div className="absolute inset-x-0 top-0 z-50">
               <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
@@ -889,7 +889,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 xl:px-[clamp(1rem,2vw,2.5rem)] overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
@@ -981,7 +981,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[1fr_280px] items-start xl:items-stretch`}>
+            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[1fr_300px] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
 
