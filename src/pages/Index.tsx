@@ -74,19 +74,18 @@ const CountUp = ({
 /* ------------------------------------------------------------------ */
 /*  MAX-WIDTH constante — nunca muda entre breakpoints                 */
 /* ------------------------------------------------------------------ */
-const DASHBOARD_MAX_W = "1920px";
+const DASHBOARD_MAX_W = "1860px";
 
 /* ------------------------------------------------------------------ */
-/*  Fluid font size — grande em tela grande, encolhe quando necessário */
+/*  Fluid font size — otimizado para densidade em 1920x1080            */
 /* ------------------------------------------------------------------ */
 function kpiFontSize(text: string): string {
   const len = text.length;
-  // Capped max sizes to maintain density on large screens
-  if (len <= 6)  return "clamp(1.1rem, 2.5vw, 1.75rem)";
-  if (len <= 10) return "clamp(1rem, 2.2vw, 1.55rem)";
-  if (len <= 13) return "clamp(0.9rem, 1.8vw, 1.35rem)";
-  if (len <= 16) return "clamp(0.8rem, 1.5vw, 1.2rem)";
-  return "clamp(0.75rem, 1.2vw, 1.05rem)";
+  if (len <= 6)  return "clamp(1rem, 1.8vw, 1.5rem)";
+  if (len <= 10) return "clamp(0.95rem, 1.5vw, 1.3rem)";
+  if (len <= 13) return "clamp(0.85rem, 1.3vw, 1.15rem)";
+  if (len <= 16) return "clamp(0.8rem, 1.1vw, 1.05rem)";
+  return "clamp(0.75rem, 1vw, 0.95rem)";
 }
 
 function kpiValueFontSize(value: number, isPercent = false): string {
