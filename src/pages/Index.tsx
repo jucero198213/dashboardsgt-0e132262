@@ -72,6 +72,11 @@ const CountUp = ({
 };
 
 /* ------------------------------------------------------------------ */
+/*  MAX-WIDTH constante — nunca muda entre breakpoints                 */
+/* ------------------------------------------------------------------ */
+const DASHBOARD_MAX_W = "1600px";
+
+/* ------------------------------------------------------------------ */
 /*  Fluid font size — grande em tela grande, encolhe quando necessário */
 /* ------------------------------------------------------------------ */
 function kpiFontSize(text: string): string {
