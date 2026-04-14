@@ -1320,46 +1320,47 @@ const Index = () => {
                         <AnimatedCard key={ind.id} delay={480 + idx * 45}>
                           <Link
                             to={`/indicadores/${ind.id}`}
-                            className="group flex items-center gap-2.5 rounded-[10px] border px-3 py-6 transition-all duration-200 cursor-pointer"
-                            style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)" }}
-                            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-medium)"; el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.2)"; }}
-                            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "var(--sgt-border-subtle)"; el.style.boxShadow = "none"; }}
+                            className="group flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all duration-200 cursor-pointer"
+                            style={{ background: "var(--sgt-bg-section)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
+                            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 4px 20px rgba(52,211,153,0.10)" : "0 4px 20px rgba(248,113,113,0.10)"; }}
+                            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; }}
                           >
                             {/* Ring */}
-                            <div className="relative shrink-0 h-10 w-10">
-                              <svg viewBox="0 0 36 36" className="h-10 w-10 -rotate-90">
-                                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="3" />
+                            <div className="relative shrink-0 h-11 w-11">
+                              <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
+                                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="3.5" />
                                 <circle cx="18" cy="18" r="14" fill="none"
                                   stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                  strokeWidth="3"
+                                  strokeWidth="3.5"
                                   strokeLinecap="round"
                                   strokeDasharray={`${progress * 0.879} 87.9`}
                                   className="transition-all duration-700"
+                                  style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.6))" : "drop-shadow(0 0 4px rgba(248,113,113,0.6))" }}
                                 />
                               </svg>
-                              <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                              <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
                                 {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                               </span>
                             </div>
 
                             {/* Nome + meta */}
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[12px] font-semibold uppercase tracking-[0.10em] dark:text-slate-300 text-slate-700">
+                              <p className="truncate text-[12px] font-bold uppercase tracking-[0.12em] dark:text-slate-200 text-slate-700">
                                 {ind.nome}
                               </p>
-                              <p className="text-[10px] dark:text-slate-500 text-slate-500 mt-0.5">
+                              <p className={`text-[11px] font-semibold mt-0.5 ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
                                 Meta: {ind.percentualEsperado}%
                               </p>
                             </div>
 
                             {/* Badge + seta */}
                             <div className="flex shrink-0 items-center gap-1.5">
-                              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${abaixoDaMeta
-                                ? "bg-emerald-500/10 text-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300"
-                                : "bg-red-500/10 text-red-500 dark:bg-red-500/15 dark:text-red-400"}`}>
+                              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border ${abaixoDaMeta
+                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25 dark:bg-emerald-500/15 dark:text-emerald-300"
+                                : "bg-red-500/10 text-red-400 border-red-500/25 dark:bg-red-500/15 dark:text-red-400"}`}>
                                 {abaixoDaMeta ? "OK" : "Alto"}
                               </span>
-                              <ArrowRight className="h-3.5 w-3.5 dark:text-slate-600 text-slate-400 transition-transform duration-200 group-hover:translate-x-1" />
+                              <ArrowRight className={`h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 ${abaixoDaMeta ? "text-emerald-500/50 dark:text-emerald-500/40" : "text-red-500/50 dark:text-red-500/40"}`} />
                             </div>
                           </Link>
                         </AnimatedCard>
