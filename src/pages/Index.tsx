@@ -1335,10 +1335,10 @@ const Index = () => {
                                 : "bg-gradient-to-r from-red-600 to-red-400"}`}
                             />
 
-                            <div className="flex items-center gap-4 px-4 py-3.5">
+                            <div className="flex items-center gap-3 px-4 py-2.5">
                               {/* Percentage ring */}
-                              <div className="relative shrink-0 h-14 w-14">
-                                <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
+                              <div className="relative shrink-0 h-11 w-11">
+                                <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
                                   <circle cx="18" cy="18" r="14" fill="none"
                                     stroke="var(--sgt-progress-track)" strokeWidth="3" />
                                   <circle cx="18" cy="18" r="14" fill="none"
