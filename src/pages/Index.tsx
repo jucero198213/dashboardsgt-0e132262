@@ -868,7 +868,7 @@ const Index = () => {
         <section
           className={`relative flex-1 min-h-0 flex flex-col border transition-all duration-300 ${presentationMode
               ? "w-full overflow-hidden rounded-none"
-              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
+              : "rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
             }`}
           style={{
             background: "var(--sgt-bg-section)",
