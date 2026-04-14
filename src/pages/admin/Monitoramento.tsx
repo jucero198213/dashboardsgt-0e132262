@@ -86,7 +86,7 @@ export default function Monitoramento() {
         ].map((s) => (
           <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
-            <p className={`mt-1 text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className={`mt-1 text-[15px] font-bold ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>

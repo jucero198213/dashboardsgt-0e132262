@@ -139,10 +139,10 @@ export default function PainelAdministrativo() {
                 </div>
               )}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight sgt-text md:text-4xl">
+            <h1 className="text-[22px] font-bold tracking-tight sgt-text">
               {screen === "home" ? "Painel Administrativo" : currentItem?.label}
             </h1>
-            <p className="mt-2 text-sm sgt-text-2">
+            <p className="mt-2 text-[12px] sgt-text-2">
               {screen === "home"
                 ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
                 : currentItem?.desc}
@@ -166,8 +166,8 @@ export default function PainelAdministrativo() {
                     <s.icon className={`h-4 w-4 ${s.color}`} />
                   </div>
                   <div>
-                    <p className="text-[11px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
-                    <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-[10px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
+                    <p className={`text-[15px] font-bold ${s.color}`}>{s.value}</p>
                   </div>
                 </div>
               ))}
@@ -187,8 +187,8 @@ export default function PainelAdministrativo() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                   </div>
-                  <h3 className="text-base font-semibold sgt-text mb-1">{item.label}</h3>
-                  <p className="text-sm sgt-text-2">{item.desc}</p>
+                  <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
+                  <p className="text-[11px] sgt-text-2">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -205,8 +205,8 @@ export default function PainelAdministrativo() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                   </div>
-                  <h3 className="text-base font-semibold sgt-text mb-1">{item.label}</h3>
-                  <p className="text-sm sgt-text-2">{item.desc}</p>
+                  <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
+                  <p className="text-[11px] sgt-text-2">{item.desc}</p>
                 </button>
               ))}
             </div>

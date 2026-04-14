@@ -53,7 +53,7 @@ export default function BancoDados() {
         ].map((s) => (
           <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
-            <p className={`mt-1 text-xl font-bold ${s.color ?? "sgt-text"}`}>{s.value}</p>
+            <p className={`mt-1 text-[15px] font-bold ${s.color ?? "sgt-text"}`}>{s.value}</p>
             <p className="text-[10px] text-[var(--sgt-text-muted)]">{s.sub}</p>
           </div>
         ))}

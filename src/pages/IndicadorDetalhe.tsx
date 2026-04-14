@@ -85,7 +85,7 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
 }) {
   const t = TONE[tone];
   return (
-    <div className={`group relative flex min-h-[110px] sm:min-h-[130px] md:min-h-[152px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} bg-[#0b0e1a] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
+    <div className={`group relative flex min-h-[110px] sm:min-h-[130px] md:min-h-[152px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)]`}>
 
       {/* Stripe de cor no topo — identidade única por card */}
       <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -486,7 +486,7 @@ export default function IndicadorDetalhe() {
           )}
 
           {/* ── Filtros ── */}
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[#0b0e1a] px-2 sm:px-4 py-2 sm:py-3 overflow-hidden">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[12px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] px-2 sm:px-4 py-2 sm:py-3 overflow-hidden">
             {[
               { value: dwFilter.dataInicio, onChange: (v: string) => { setDwFilter("dataInicio", v); setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
               { value: dwFilter.dataFim,    onChange: (v: string) => { setDwFilter("dataFim", v);    setPaginaComp(1); setPaginaDocs(1); }, type: "date" },
@@ -495,12 +495,12 @@ export default function IndicadorDetalhe() {
                 className="h-7 sm:h-8 w-full min-w-[90px] max-w-[140px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none" />
             ))}
             <select value={dwFilter.empresa ?? ""} onChange={(e) => { setDwFilter("empresa", e.target.value || null); setDwFilter("filial", null); }}
-              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[var(--sgt-input-bg)] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as empresas</option>
               {empresas.map((e) => <option key={e.id} value={e.id}>{e.nome}</option>)}
             </select>
             <select value={dwFilter.filial ?? ""} onChange={(e) => setDwFilter("filial", e.target.value || null)}
-              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[#0e1120] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
+              className="h-7 sm:h-8 w-full min-w-[100px] max-w-[160px] rounded-lg sm:rounded-xl border border-white/[0.08] bg-[var(--sgt-input-bg)] px-2 sm:px-3 text-[11px] sm:text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none">
               <option value="">Todas as filiais</option>
               {filiaisFiltradas.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
@@ -535,7 +535,7 @@ export default function IndicadorDetalhe() {
           <div className="grid gap-2 sm:gap-3 md:gap-4 xl:grid-cols-[1.45fr_1fr] items-stretch">
 
             {/* Gráfico */}
-            <div className="flex flex-col overflow-hidden rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]">
+            <div className="flex flex-col overflow-hidden rounded-[20px] border border-white/[0.07] bg-[var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]">
               {/* Linha de cor no topo */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent pointer-events-none" />
               <div className="p-6 pb-0 shrink-0">
@@ -587,7 +587,7 @@ export default function IndicadorDetalhe() {
             </div>
 
             {/* Composição */}
-            <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-3 sm:p-4 md:p-6 flex flex-col">
+            <div className="overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/[0.07] bg-[var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11] p-3 sm:p-4 md:p-6 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-600">Composição</p>
