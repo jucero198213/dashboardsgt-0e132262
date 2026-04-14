@@ -980,7 +980,7 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-1.5 flex-1 min-h-0 xl:grid-cols-[1fr_260px] items-start xl:items-stretch`}>
+            <div className={`grid gap-1.5 flex-1 min-h-0 xl:grid-cols-[1fr_320px] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-1.5 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
 
