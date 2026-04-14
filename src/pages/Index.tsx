@@ -750,10 +750,10 @@ const Index = () => {
 
     return (
       <div
-        className={`group relative overflow-hidden rounded-[16px] sm:rounded-[20px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
+        className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)] h-full ${isPositive
             ? "border-emerald-500/[0.14] [background:var(--sgt-bg-card)] hover:border-emerald-400/25"
             : "border-amber-500/[0.14] [background:var(--sgt-bg-card)] hover:border-amber-400/25"
-          } ${presentationMode ? "flex flex-col p-2.5 sm:p-3" : "flex flex-col p-2.5 sm:p-3 xl:p-3.5"}`}
+          } flex flex-col p-2.5 xl:p-3`}
       >
         <div
           className={`absolute inset-0 ${isPositive
@@ -793,7 +793,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="relative h-[180px] sm:h-[210px] xl:h-[240px]">
+          <div className="relative h-[180px] sm:h-[200px] xl:h-[220px]">
             <MiniLineChart
               previstoMonthly={monthlyPrevisto}
               realizadoMonthly={monthlyRealizado}
@@ -850,7 +850,7 @@ const Index = () => {
     <div
       className={`flex flex-col transition-all duration-300 ${presentationMode
           ? "h-[100dvh] p-0"
-          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 2xl:px-6 2xl:py-3"
+          : "min-h-[100dvh] xl:h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
         }`}
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
@@ -888,7 +888,7 @@ const Index = () => {
             </div>
           )}
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 xl:px-[clamp(1rem,2vw,2.5rem)] overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-y-auto mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* ── NAVBAR: logo + filtros + user numa única linha ── */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3">
@@ -980,19 +980,19 @@ const Index = () => {
             )}
 
             {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2 flex-1 min-h-0 xl:grid-cols-[1fr_300px] items-start xl:items-stretch`}>
+            <div className={`grid gap-1.5 flex-1 min-h-0 xl:grid-cols-[1fr_260px] items-start xl:items-stretch`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2 xl:grid-cols-2 xl:grid-rows-[auto_auto_auto]">
+              <div className="grid gap-1.5 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto]">
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {[0, 1, 2, 3].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {(() => {
                       const topSharedFont = kpiFontSize(
                         topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
@@ -1004,8 +1004,7 @@ const Index = () => {
                       return (
                         <AnimatedCard key={item.label} delay={idx * 80}>
                           <div
-                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] ${presentationMode ? "p-2.5 sm:p-3" : "p-2.5 sm:p-3 xl:p-3.5"
-                              }`}
+                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] p-2.5 xl:p-3`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
@@ -1099,10 +1098,10 @@ const Index = () => {
                   ];
                   const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
                   return (
-                  <div className="grid grid-cols-1 gap-1.5 sm:gap-2 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {/* SALDO LÍQUIDO */}
                     <div
-                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
+                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)] ${kpiExtra.saldoLiquido >= 0
                           ? "border-emerald-400/[0.12] [background:var(--sgt-bg-card)]"
                           : "border-rose-400/[0.12] [background:var(--sgt-bg-card)]"
                         }`}
@@ -1164,7 +1163,7 @@ const Index = () => {
                     </div>
 
                     {/* INADIMPLÊNCIA */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(244,63,94,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1200,7 +1199,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1232,7 +1231,7 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[20px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 sm:p-3 xl:p-3.5 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
                       <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col">
                         <div className="mb-2 flex items-center justify-between">
@@ -1271,20 +1270,20 @@ const Index = () => {
               {/* end left column */}
 
               <aside
-                className={`rounded-[16px] sm:rounded-[20px] border [background:var(--sgt-bg-card)] ${presentationMode
-                    ? "h-full overflow-y-auto p-3.5"
-                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-3 sm:p-4 lg:p-5"
+                className={`rounded-[14px] sm:rounded-[16px] border [background:var(--sgt-bg-card)] ${presentationMode
+                    ? "h-full overflow-y-auto p-3"
+                    : "xl:col-start-2 xl:row-start-1 flex flex-col p-2.5 sm:p-3"
                   }`}
                 style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
               >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-5 shrink-0">
+                <div className="flex items-start justify-between mb-3 shrink-0">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500 mb-1.5">
+                    <p className="text-[8px] font-semibold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500 mb-1">
                       Distribuição de custos do período
                     </p>
                     <p
-                      className={`font-extrabold tracking-[-0.04em] leading-none dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800 ${presentationMode ? "text-xl" : "text-[26px]"}`}
+                      className={`font-extrabold tracking-[-0.04em] leading-none dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800 ${presentationMode ? "text-lg" : "text-xl"}`}
                     >
                        Indicadores
                     </p>
