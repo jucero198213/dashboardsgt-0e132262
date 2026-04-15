@@ -671,7 +671,7 @@ const Index = () => {
   const topMetrics = useMemo(
     () => [
       {
-        label: "A RECEBER",
+        label: "A RECEBER (PREVISTO)",
         value: contasReceber.valorAReceber,
         helper: "Valor à receber",
         icon: TrendingUp,
@@ -685,7 +685,7 @@ const Index = () => {
         tone: "cyan",
       },
       {
-        label: "A PAGAR",
+        label: "A PAGAR (PREVISTO)",
         value: contasPagar.valorAPagar,
         helper: "Valor à pagar",
         icon: TrendingDown,
