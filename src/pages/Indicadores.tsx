@@ -32,19 +32,19 @@ export default function Indicadores() {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* NAVBAR */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex shrink-0 items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                  <svg className="h-3.5 w-3.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
+                  <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                   </svg>
                 </div>
-                <span className="hidden sm:block text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
+                <span className="text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
                   SGT Dashboard
                 </span>
               </div>
 
-              <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
+              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
@@ -52,8 +52,7 @@ export default function Indicadores() {
                 <div className="h-4 w-px mx-1" style={{ background: "var(--sgt-divider)" }} />
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[11px] font-semibold text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white"
-                  title="Voltar ao dashboard"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white hover:-translate-y-0.5"
                 >
                   <ArrowLeft className="h-3 w-3" />
                   Voltar
