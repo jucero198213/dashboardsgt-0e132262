@@ -1032,6 +1032,15 @@ const Index = () => {
                             className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] p-3 xl:p-4`}
                           >
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
+                            {/* Glow sutil por tipo */}
+                            {item.label.includes("(REALIZADO)") && item.tone === "emerald" && (
+                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
+                                style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(16,185,129,0.07), transparent 60%)" }} />
+                            )}
+                            {item.label.includes("(REALIZADO)") && item.tone === "amber" && (
+                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
+                                style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.07), transparent 60%)" }} />
+                            )}
 
                             <div className="relative flex h-full flex-col">
                               <div className="flex items-center justify-between gap-3">
