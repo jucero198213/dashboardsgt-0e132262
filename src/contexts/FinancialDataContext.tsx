@@ -333,21 +333,28 @@ export function FinancialDataProvider({
 
       // ─────────────────────────────────────────────────────────────────────────
       // 1b. PAGO (card topo)
-      //    → CP | SITUACAO L/P | DATA_PAGAMENTO no período | VLR_PAGO
+      //    → CP | SITUACAO L/P | DATA_VENCIMENTO no período | VLR_PAGO
+      //    "Do que vencia no período, quanto foi pago?" — mesmo critério do
+      //    relatório de referência (usa DATVEN, não DATPAG)
       // ─────────────────────────────────────────────────────────────────────────
       const cpPago = allCP.filter((r) =>
         (sit(r) === "L" || sit(r) === "P") &&
         hasPag(r) &&
-        inRange(r.DATA_PAGAMENTO, di, df)
+        inRange(r.DATA_VENCIMENTO, di, df)   // ← era DATA_PAGAMENTO
       );
 
       // ─────────────────────────────────────────────────────────────────────────
-      // 1c. SUB-CARD CONTAS A PAGAR (saldo pendente)
-      //    → CP | SITUACAO D/P | DATA_PAGAMENTO NULL | DATVEN no período
+      // 1c. SUB-CARD CONTAS A PAGAR — saldo pendente (split D/P)
+      //    D → totalmente em aberto: saldo = VLR_PARCELA integral
+      //    P → parcialmente pago:    saldo = VLR_PARCELA − VLR_PAGO
+      //    (noPag() excluía os P com DATPAG preenchida, perdendo saldo residual)
       // ─────────────────────────────────────────────────────────────────────────
-      const cpPrevisto = allCP.filter((r) =>
-        (sit(r) === "D" || sit(r) === "P") &&
-        noPag(r) &&
+      const cpEmAberto = allCP.filter((r) =>
+        sit(r) === "D" &&
+        inRange(r.DATA_VENCIMENTO, di, df)
+      );
+      const cpParcialAberto = allCP.filter((r) =>
+        sit(r) === "P" &&
         inRange(r.DATA_VENCIMENTO, di, df)
       );
 
@@ -420,9 +427,19 @@ export function FinancialDataProvider({
       const sumCol = (rows: DwRow[], f: "VLR_PARCELA" | "VLR_PAGO") =>
         round2(rows.reduce((s, r) => s + n(r[f]), 0));
 
-      const totalPagar    = sumCol(cpAPagar,    "VLR_PARCELA"); // card A PAGAR    (L/P/D + DATVEN)
-      const valorPago     = sumCol(cpPago,      "VLR_PAGO");    // card PAGO       (L/P + DATPAG no período)
-      const saldoAPagar   = sumCol(cpPrevisto,  "VLR_PARCELA"); // sub-card CONTAS A PAGAR (D/P + noPag + DATVEN)
+      // A PAGAR: deduplicado — usa VLR_PAR_RAW, fallback VLR_PARCELA (evita dupla contagem do PAGRAT)
+      const totalPagar  = round2(
+        dedup(cpAPagar).reduce((s, r) => s + safeParVal(r), 0)
+      );
+      // PAGO: deduplicado — usa VLR_REC_RAW (VLRPAG direto do PAGDOCI), fallback VLR_PAGO
+      const valorPago   = round2(
+        dedup(cpPago).reduce((s, r) => s + safeRecVal(r), 0)
+      );
+      // SALDO = D (em aberto total) + P (restante = parcela − pago), deduplicado
+      const saldoAPagar = round2(
+        dedup(cpEmAberto).reduce((s, r) => s + safeParVal(r), 0) +
+        dedup(cpParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r)), 0)
+      );
 
       // A RECEBER: deduplicado — usa VLR_PAR_RAW, fallback VLR_PARCELA
       const totalAReceber = round2(
@@ -440,13 +457,13 @@ export function FinancialDataProvider({
 
       // ── Debug (visível no console do browser) ────────────────────────────────
       console.log("[DW] Rows totais:", data.length,
-        "| allCR:", allCR.length,
-        "| crAReceber:", crAReceber.length,
-        "| crRecebido:", crRecebido.length,
-        "| crEmAberto:", crEmAberto.length,
-        "| crParcialAberto:", crParcialAberto.length
+        "| allCP:", allCP.length, "| allCR:", allCR.length
       );
-      console.log("[DW] A RECEBER:", totalAReceber,
+      console.log("[DW] CP → A PAGAR:", totalPagar,
+        "| PAGO:", valorPago,
+        "| SALDO:", saldoAPagar
+      );
+      console.log("[DW] CR → A RECEBER:", totalAReceber,
         "| RECEBIDO:", valorRecebido,
         "| SALDO:", totalReceber
       );
