@@ -175,7 +175,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v4";
+const CACHE_KEY = "dw_financial_cache_v5";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
