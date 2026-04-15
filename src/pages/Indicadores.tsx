@@ -90,7 +90,7 @@ export default function Indicadores() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-1 content-start">
+                <div className="grid grid-cols-2 lg:grid-cols-4 grid-rows-2 gap-3 flex-1 min-h-0">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
@@ -100,7 +100,7 @@ export default function Indicadores() {
                         const progress = Math.min((ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100, 100);
 
                         return (
-                          <AnimatedCard key={ind.id} delay={idx * 60}>
+                          <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
                               className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-full"
