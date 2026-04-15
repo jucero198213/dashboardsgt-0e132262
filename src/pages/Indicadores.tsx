@@ -209,18 +209,20 @@ export default function Indicadores() {
                               className="group relative flex flex-col rounded-[14px] sm:rounded-[16px] border transition-all duration-300 cursor-pointer h-full hover:-translate-y-1 overflow-hidden"
                               style={{
                                 background: "var(--sgt-bg-card)",
-                                borderColor: `rgba(${identity.colorRgb},0.2)`,
+                                borderColor: abaixoDaMeta ? "rgba(52,211,153,0.2)" : "rgba(248,113,113,0.2)",
                               }}
-                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `rgba(${identity.colorRgb},0.45)`; el.style.boxShadow = `0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(${identity.colorRgb},0.10)`; }}
-                              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `rgba(${identity.colorRgb},0.2)`; el.style.boxShadow = "none"; }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.45)" : "rgba(248,113,113,0.45)"; el.style.boxShadow = abaixoDaMeta ? "0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(52,211,153,0.08)" : "0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(248,113,113,0.08)"; }}
+                              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.2)" : "rgba(248,113,113,0.2)"; el.style.boxShadow = "none"; }}
                             >
-                              {/* Linha de acento no topo */}
+                              {/* Linha de acento no topo — cor de identidade */}
                               <div className="h-[2px] w-full shrink-0"
                                 style={{ background: `linear-gradient(90deg, ${identity.color}, rgba(${identity.colorRgb},0.2))` }} />
 
-                              {/* Glow de identidade */}
+                              {/* Glow de fundo — status verde/vermelho */}
                               <div className="pointer-events-none absolute inset-0"
-                                style={{ background: `radial-gradient(ellipse at 50% 30%, rgba(${identity.colorRgb},0.06), transparent 60%)` }} />
+                                style={{ background: abaixoDaMeta
+                                  ? "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.05), transparent 60%)"
+                                  : "radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.05), transparent 60%)" }} />
 
                               <div className="relative flex flex-col flex-1 p-4 xl:p-5">
 
