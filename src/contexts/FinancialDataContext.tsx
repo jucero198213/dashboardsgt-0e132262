@@ -333,14 +333,14 @@ export function FinancialDataProvider({
 
       // ─────────────────────────────────────────────────────────────────────────
       // 1b. PAGO (card topo)
-      //    → CP | SITUACAO L/P | DATA_VENCIMENTO no período | VLR_PAGO
-      //    "Do que vencia no período, quanto foi pago?" — mesmo critério do
-      //    relatório de referência (usa DATVEN, não DATPAG)
+      //    → CP | SITUACAO L/P | DATA_PAGAMENTO no período | VLR_PAGO
+      //    Opção A — Fluxo de caixa real: tudo que saiu do caixa no período,
+      //    independente de quando vencia (inclui pagamentos de outros meses)
       // ─────────────────────────────────────────────────────────────────────────
       const cpPago = allCP.filter((r) =>
         (sit(r) === "L" || sit(r) === "P") &&
         hasPag(r) &&
-        inRange(r.DATA_VENCIMENTO, di, df)   // ← era DATA_PAGAMENTO
+        inRange(r.DATA_PAGAMENTO, di, df)
       );
 
       // ─────────────────────────────────────────────────────────────────────────
