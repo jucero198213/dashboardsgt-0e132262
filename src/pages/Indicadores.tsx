@@ -126,9 +126,6 @@ export default function Indicadores() {
 
                               {/* CENTRO: ring grande */}
                               <div className="relative flex flex-1 items-center justify-center py-4">
-                                {/* Glow atrás do ring */}
-                                <div className="absolute inset-4 rounded-full blur-lg opacity-25"
-                                  style={{ background: abaixoDaMeta ? "rgba(52,211,153,1)" : "rgba(248,113,113,1)" }} />
                                 <div className="relative h-40 w-40">
                                   <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90">
                                     {/* Track */}
@@ -146,7 +143,7 @@ export default function Indicadores() {
                                       strokeLinecap="round"
                                       strokeDasharray={`${progress * 0.879} 87.9`}
                                       className="transition-all duration-700"
-                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.8))" : "drop-shadow(0 0 4px rgba(248,113,113,0.8))" }}
+                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 3px #34d399) drop-shadow(0 0 6px rgba(52,211,153,0.6))" : "drop-shadow(0 0 3px #f87171) drop-shadow(0 0 6px rgba(248,113,113,0.6))" }}
                                     />
                                   </svg>
                                   {/* Percentual central */}
