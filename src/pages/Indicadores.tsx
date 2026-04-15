@@ -58,6 +58,7 @@ export default function Indicadores() {
                 <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
               </div>
 
+              <div className="flex-1" />
               <UserMenu />
             </div>
 
