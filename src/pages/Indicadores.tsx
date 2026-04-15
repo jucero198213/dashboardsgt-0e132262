@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, TrendingDown, DollarSign, RefreshCw } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -9,6 +10,29 @@ const DASHBOARD_MAX_W = "1800px";
 export default function Indicadores() {
   const navigate = useNavigate();
   const { indicadores, isFetchingDw, isProcessed } = useFinancialData();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!isFetchingDw) {
+      if (progress > 0) {
+        setProgress(100);
+        const t = window.setTimeout(() => setProgress(0), 800);
+        return () => window.clearTimeout(t);
+      }
+      return;
+    }
+    setProgress(0);
+    let current = 0;
+    const interval = window.setInterval(() => {
+      const speed = current < 30 ? 3 + Math.random() * 4
+        : current < 60 ? 2 + Math.random() * 3
+        : current < 85 ? 1 + Math.random() * 2
+        : 0.3 + Math.random() * 0.5;
+      current = Math.min(current + speed, 95);
+      setProgress(Math.floor(current));
+    }, 300);
+    return () => window.clearInterval(interval);
+  }, [isFetchingDw]);
 
   return (
     <div
@@ -29,6 +53,17 @@ export default function Indicadores() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
+          {/* Progress bar */}
+          {isFetchingDw && (
+            <div className="absolute inset-x-0 top-0 z-50">
+              <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          )}
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* NAVBAR — idêntica ao dashboard */}
