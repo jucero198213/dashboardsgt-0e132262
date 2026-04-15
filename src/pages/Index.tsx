@@ -678,7 +678,7 @@ const Index = () => {
         tone: "emerald",
       },
       {
-        label: "RECEBIDO",
+        label: "RECEBIDO (REALIZADO)",
         value: contasReceber.valorRecebido,
         helper: "Entrada consolidada",
         icon: TrendingUp,
@@ -692,7 +692,7 @@ const Index = () => {
         tone: "amber",
       },
       {
-        label: "PAGO",
+        label: "PAGO (REALIZADO)",
         value: contasPagar.valorPago,
         helper: "Saída consolidada",
         icon: TrendingDown,
@@ -1041,6 +1041,13 @@ const Index = () => {
                                       {item.label.replace(" (PREVISTO)", "")}
                                       <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-extrabold tracking-[0.2em] uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
                                         previsto
+                                      </span>
+                                    </>
+                                  ) : item.label.includes("(REALIZADO)") ? (
+                                    <>
+                                      {item.label.replace(" (REALIZADO)", "")}
+                                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-extrabold tracking-[0.2em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                                        realizado
                                       </span>
                                     </>
                                   ) : item.label}
