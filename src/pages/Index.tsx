@@ -979,12 +979,21 @@ const Index = () => {
                 </Select>
               </div>
 
-              {/* Linha 4: botão atualizar centralizado */}
-              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25"} disabled:cursor-not-allowed`}>
-                <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
-              </button>
+              {/* Linha 4: botões atualizar + indicadores */}
+              <div className="flex items-center gap-2">
+                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                  className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25"} disabled:cursor-not-allowed`}>
+                  <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
+                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+                </button>
+                <Link
+                  to="/indicadores"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-violet-400/30 bg-violet-500/10 text-violet-300 hover:border-violet-300/50 hover:bg-violet-400/20"
+                >
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Indicadores
+                </Link>
+              </div>
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
