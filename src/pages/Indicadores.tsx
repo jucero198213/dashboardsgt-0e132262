@@ -260,7 +260,7 @@ export default function Indicadores() {
                                         strokeWidth="2.5" strokeLinecap="round"
                                         strokeDasharray={`${progress * 0.879} 87.9`}
                                         className="transition-all duration-700"
-                                        style={{ filter: `drop-shadow(0 0 3px ${identity.color}) drop-shadow(0 0 5px rgba(${identity.colorRgb},0.4))` }}
+                                        style={{ filter: `drop-shadow(0 0 2px ${identity.color}) drop-shadow(0 0 3px rgba(${identity.colorRgb},0.3))` }}
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
