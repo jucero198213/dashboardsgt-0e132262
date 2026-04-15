@@ -47,6 +47,8 @@ export default function Indicadores() {
               <div className="hidden h-5 w-px shrink-0 sm:block" style={{ background: "var(--sgt-divider)" }} />
 
               <div className="flex items-center gap-2">
+                <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
+                <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="inline-flex h-7 w-7 items-center justify-center rounded-lg border transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white"
@@ -54,8 +56,6 @@ export default function Indicadores() {
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                 </button>
-                <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
-                <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
               </div>
 
               <div className="flex-1" />
