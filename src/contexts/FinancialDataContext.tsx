@@ -412,7 +412,8 @@ export function FinancialDataProvider({
         return rows.filter((r) => {
           // Inclui COD_PARCEIRO para evitar colisão entre fornecedores diferentes
           // com o mesmo número de documento (ex: NUMDOC=1 para N fornecedores)
-          const k = `${r.COD_PARCEIRO ?? ""}|${r.DOCUMENTO ?? ""}|${r.PARCELA ?? ""}`;
+          // SERIE garante unicidade no CP: mesmo fornecedor pode ter NUMDOC=1 em séries diferentes
+          const k = `${r.COD_PARCEIRO ?? ""}|${r.SERIE ?? ""}|${r.DOCUMENTO ?? ""}|${r.PARCELA ?? ""}`;
           if (seen.has(k)) return false;
           seen.add(k);
           return true;

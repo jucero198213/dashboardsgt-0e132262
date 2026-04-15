@@ -52,6 +52,7 @@ export interface DwRow {
   DATA_PAGAMENTO: string | null;
   COD_PARCEIRO: string | null;
   NOME_PARCEIRO: string | null;
+  SERIE: string | null;
   DOCUMENTO: string | null;
   PARCELA: string | null;
   TIPO_DOCUMENTO: string | null;
