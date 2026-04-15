@@ -94,7 +94,7 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
+                              className="group relative flex flex-col rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
                               style={{
                                 background: "var(--sgt-bg-card)",
                                 borderColor: abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)",
@@ -127,7 +127,7 @@ export default function Indicadores() {
                               {/* CENTRO: ring grande */}
                               <div className="relative flex flex-1 items-center justify-center py-4">
                                 <div className="relative h-40 w-40">
-                                  <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90">
+                                  <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90" style={{ overflow: 'visible' }}>
                                     {/* Track */}
                                     <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
                                     {/* Fundo colorido suave */}
