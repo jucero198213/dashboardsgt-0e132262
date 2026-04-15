@@ -88,6 +88,7 @@ export default function Login() {
         setResetError("Erro ao definir senha. Tente novamente.");
       } else {
         setPasswordSet(true);
+        clearPasswordRecovery();
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
