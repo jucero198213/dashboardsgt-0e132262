@@ -251,8 +251,8 @@ export default function Indicadores() {
 
                                 {/* CENTRO: ring grande + percentual dominante */}
                                 <div className="flex flex-1 items-center justify-center py-3">
-                                  <div className="relative h-28 w-28">
-                                    <svg viewBox="0 0 36 36" className="h-28 w-28 -rotate-90" style={{ overflow: "visible" }}>
+                                  <div className="relative h-36 w-36">
+                                    <svg viewBox="0 0 36 36" className="h-36 w-36 -rotate-90" style={{ overflow: "visible" }}>
                                       <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
                                       <circle cx="18" cy="18" r="14" fill="none"
                                         stroke={`rgba(${identity.colorRgb},0.10)`}
