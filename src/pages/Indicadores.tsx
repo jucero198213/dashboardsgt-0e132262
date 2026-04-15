@@ -12,26 +12,26 @@ export default function Indicadores() {
 
   return (
     <div
-      className="min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2 flex flex-col"
-      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
+      className="relative flex h-screen w-screen flex-col overflow-hidden"
+      style={{ background: "var(--sgt-bg-base)" }}
     >
-      {/* Atmosfera dark */}
+      {/* Atmosfera */}
       <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(160,100,4,0.22),transparent_60%)]" />
       <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_50%_40%_at_100%_105%,rgba(6,182,212,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 dark:opacity-100" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
+      <div className="pointer-events-none fixed inset-0" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.68) 100%)" }} />
 
-      <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden w-full">
+      <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
           className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
           style={{
             background: "var(--sgt-bg-section)",
             borderColor: "var(--sgt-border-subtle)",
-            boxShadow: "var(--sgt-section-shadow)",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 32px 80px rgba(0,0,0,0.6)",
           }}
         >
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-hidden w-full">
 
-            {/* NAVBAR */}
+            {/* NAVBAR — idêntica ao dashboard */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
@@ -80,8 +80,17 @@ export default function Indicadores() {
             <div className="flex flex-1 min-h-0 gap-3">
 
               {/* COLUNA ESQUERDA — grid 4x2 */}
-              <div className="flex flex-col min-w-0 gap-3">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="flex flex-col flex-1 min-w-0 gap-3">
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-500 mb-1">
+                    Distribuição de custos do período
+                  </p>
+                  <p className="text-[22px] font-extrabold tracking-[-0.04em] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800">
+                    Indicadores
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-1 content-start">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
@@ -94,7 +103,7 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60}>
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-[160px]"
+                              className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-full"
                               style={{ background: "var(--sgt-bg-card)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
                               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 8px 32px rgba(52,211,153,0.12)" : "0 8px 32px rgba(248,113,113,0.12)"; el.style.transform = "translateY(-2px)"; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; el.style.transform = "none"; }}
