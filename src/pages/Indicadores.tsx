@@ -129,131 +129,135 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group relative flex flex-col gap-3 rounded-[14px] sm:rounded-[16px] border p-3.5 xl:p-4 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
+                              className="group relative flex flex-col rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
                               style={{
                                 background: "var(--sgt-bg-card)",
                                 borderColor: abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)",
                               }}
-                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"; el.style.boxShadow = abaixoDaMeta ? "0 24px 48px rgba(0,0,0,0.4), 0 0 32px rgba(52,211,153,0.07)" : "0 24px 48px rgba(0,0,0,0.4), 0 0 32px rgba(248,113,113,0.07)"; }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"; el.style.boxShadow = abaixoDaMeta ? "0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(52,211,153,0.08)" : "0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(248,113,113,0.08)"; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)"; el.style.boxShadow = "none"; }}
                             >
-                              {/* Glow radial de fundo */}
+                              {/* Glows de fundo */}
                               <div className="pointer-events-none absolute inset-0 rounded-[14px]"
-                                style={{ background: abaixoDaMeta ? "radial-gradient(ellipse at 20% 50%, rgba(52,211,153,0.06), transparent 60%)" : "radial-gradient(ellipse at 20% 50%, rgba(248,113,113,0.06), transparent 60%)" }} />
+                                style={{ background: abaixoDaMeta
+                                  ? "radial-gradient(ellipse at 15% 15%, rgba(52,211,153,0.07), transparent 55%)"
+                                  : "radial-gradient(ellipse at 15% 15%, rgba(248,113,113,0.07), transparent 55%)" }} />
+                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
+                                style={{ background: "radial-gradient(ellipse at 85% 85%, rgba(255,255,255,0.015), transparent 50%)" }} />
 
-                              {/* LINHA PRINCIPAL: ring + info */}
-                              <div className="relative flex items-center gap-3.5">
-                                {/* Ring compacto */}
-                                <div className="relative shrink-0 h-14 w-14">
-                                  <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90" style={{ overflow: 'visible' }}>
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+                              {/* TOPO: ring + nome + badge */}
+                              <div className="relative flex items-center gap-4">
+                                <div className="relative shrink-0 h-16 w-16">
+                                  <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90" style={{ overflow: 'visible' }}>
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.8" />
                                     <circle cx="18" cy="18" r="14" fill="none"
-                                      stroke={abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"}
-                                      strokeWidth="3"
-                                      strokeDasharray="87.9 0"
-                                    />
+                                      stroke={abaixoDaMeta ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)"}
+                                      strokeWidth="2.8" strokeDasharray="87.9 0" />
                                     <circle cx="18" cy="18" r="14" fill="none"
                                       stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                      strokeWidth="3"
-                                      strokeLinecap="round"
+                                      strokeWidth="2.8" strokeLinecap="round"
                                       strokeDasharray={`${progress * 0.879} 87.9`}
                                       className="transition-all duration-700"
-                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 2.5px #34d399) drop-shadow(0 0 5px rgba(52,211,153,0.55))" : "drop-shadow(0 0 2.5px #f87171) drop-shadow(0 0 5px rgba(248,113,113,0.55))" }}
+                                      style={{ filter: abaixoDaMeta
+                                        ? "drop-shadow(0 0 3px #34d399) drop-shadow(0 0 6px rgba(52,211,153,0.6))"
+                                        : "drop-shadow(0 0 3px #f87171) drop-shadow(0 0 6px rgba(248,113,113,0.6))" }}
                                     />
                                   </svg>
-                                  <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
                                     <span className={`font-extrabold leading-none tabular-nums ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`}
-                                      style={{ fontSize: ind.percentualReal >= 100 ? "9px" : ind.percentualReal >= 10 ? "10px" : "12px" }}>
+                                      style={{ fontSize: ind.percentualReal >= 100 ? "10px" : ind.percentualReal >= 10 ? "11px" : "13px" }}>
                                       {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                                     </span>
                                   </div>
                                 </div>
-
-                                {/* Info: nome + meta + badge */}
-                                <div className="flex flex-1 min-w-0 flex-col gap-1">
+                                <div className="flex flex-1 min-w-0 flex-col gap-1.5">
                                   <div className="flex items-start justify-between gap-1.5">
-                                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] dark:text-slate-200 text-slate-600 group-hover:dark:text-white transition-colors duration-300 leading-tight">
+                                    <p className="text-[12px] font-bold uppercase tracking-[0.15em] dark:text-white text-slate-700 group-hover:dark:text-white transition-colors leading-tight">
                                       {ind.nome}
                                     </p>
-                                    <span className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${abaixoDaMeta
-                                      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
-                                      : "bg-red-500/15 text-red-400 border-red-500/25"}`}>
+                                    <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold border ${abaixoDaMeta
+                                      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                      : "bg-red-500/15 text-red-400 border-red-500/30"}`}>
                                       {abaixoDaMeta ? "OK" : "Alto"}
                                     </span>
                                   </div>
-                                  <p className={`text-[10px] font-semibold ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
+                                  <p className={`text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-500/80" : "text-red-500/80"}`}>
                                     Meta: {ind.percentualEsperado}%
                                   </p>
                                 </div>
                               </div>
 
-                              {/* CENTRO: tendência + indicadores rápidos + status */}
-                              <div className="relative flex flex-1 flex-col justify-center gap-3 rounded-[10px] border px-3.5 py-3 my-1"
-                                style={{ borderColor: abaixoDaMeta ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)", background: abaixoDaMeta ? "rgba(52,211,153,0.03)" : "rgba(248,113,113,0.03)" }}>
+                              {/* DIVISOR */}
+                              <div className="relative h-px my-2" style={{ background: abaixoDaMeta ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)" }} />
 
-                                {/* Tendência */}
-                                <p className={`text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
-                                  {abaixoDaMeta
-                                    ? `Faltam ${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% para a meta`
-                                    : `${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima da meta`}
-                                </p>
+                              {/* CENTRO: métricas + status */}
+                              <div className="relative flex flex-1 flex-col justify-center gap-3.5">
 
-                                {/* Indicadores rápidos: Real / Meta / Diferença */}
+                                {/* Três métricas lado a lado */}
                                 <div className="grid grid-cols-3 gap-2">
                                   {[
-                                    { label: "Real", value: `${ind.percentualReal}%`, color: abaixoDaMeta ? "text-emerald-300" : "text-red-300" },
-                                    { label: "Meta", value: `${ind.percentualEsperado}%`, color: "dark:text-slate-300 text-slate-500" },
-                                    { label: "Dif.", value: `${abaixoDaMeta ? "-" : "+"}${Math.abs(ind.percentualReal - ind.percentualEsperado).toFixed(1)}%`, color: abaixoDaMeta ? "text-emerald-400" : "text-red-400" },
-                                  ].map(({ label, value, color }) => (
-                                    <div key={label} className="flex flex-col items-center gap-0.5 rounded-[8px] py-1.5 px-1"
-                                      style={{ background: "rgba(255,255,255,0.03)" }}>
-                                      <span className="text-[9px] font-semibold uppercase tracking-[0.15em] dark:text-slate-500 text-slate-400">{label}</span>
-                                      <span className={`text-[13px] font-extrabold leading-none tabular-nums ${color}`}>{value}</span>
+                                    { label: "Real", value: `${ind.percentualReal}%`, sub: "realizado", color: abaixoDaMeta ? "text-emerald-300" : "text-red-300", bg: abaixoDaMeta ? "rgba(52,211,153,0.06)" : "rgba(248,113,113,0.06)", border: abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)" },
+                                    { label: "Meta", value: `${ind.percentualEsperado}%`, sub: "esperado", color: "dark:text-slate-200 text-slate-600", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.06)" },
+                                    { label: "Dif.", value: `${abaixoDaMeta ? "-" : "+"}${Math.abs(ind.percentualReal - ind.percentualEsperado).toFixed(1)}%`, sub: abaixoDaMeta ? "a atingir" : "acima", color: abaixoDaMeta ? "text-amber-300" : "text-red-400", bg: abaixoDaMeta ? "rgba(251,191,36,0.05)" : "rgba(248,113,113,0.06)", border: abaixoDaMeta ? "rgba(251,191,36,0.15)" : "rgba(248,113,113,0.15)" },
+                                  ].map(({ label, value, sub, color, bg, border }) => (
+                                    <div key={label} className="flex flex-col items-center gap-1 rounded-[10px] py-2.5 px-1 border"
+                                      style={{ background: bg, borderColor: border }}>
+                                      <span className="text-[9px] font-bold uppercase tracking-[0.18em] dark:text-slate-500 text-slate-400">{label}</span>
+                                      <span className={`text-[15px] font-extrabold leading-none tabular-nums ${color}`}>{value}</span>
+                                      <span className="text-[8px] dark:text-slate-600 text-slate-400 font-medium">{sub}</span>
                                     </div>
                                   ))}
                                 </div>
 
-                                {/* Status dinâmico */}
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                                    abaixoDaMeta && (ind.percentualEsperado - ind.percentualReal) <= 2
-                                      ? "bg-cyan-400"
-                                      : abaixoDaMeta
-                                      ? "bg-emerald-400"
-                                      : "bg-red-400"
-                                  }`} style={{ boxShadow: abaixoDaMeta ? "0 0 4px rgba(52,211,153,0.8)" : "0 0 4px rgba(248,113,113,0.8)" }} />
-                                  <span className={`text-[10px] font-semibold ${
-                                    abaixoDaMeta && (ind.percentualEsperado - ind.percentualReal) <= 2
-                                      ? "text-cyan-400"
-                                      : abaixoDaMeta
-                                      ? "text-emerald-400"
-                                      : "text-red-400"
-                                  }`}>
-                                    {!abaixoDaMeta
-                                      ? "Acima da meta — verificar"
-                                      : (ind.percentualEsperado - ind.percentualReal) <= 2
-                                      ? "Meta quase atingida"
-                                      : ind.percentualReal >= ind.percentualEsperado * 0.8
-                                      ? "No ritmo esperado"
-                                      : "Abaixo do planejado"}
+                                {/* Status + tendência */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`h-1.5 w-1.5 rounded-full shrink-0 animate-pulse ${
+                                      !abaixoDaMeta ? "bg-red-400"
+                                      : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "bg-cyan-400"
+                                      : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "bg-emerald-400"
+                                      : "bg-amber-400"
+                                    }`} />
+                                    <span className={`text-[10px] font-semibold ${
+                                      !abaixoDaMeta ? "text-red-400"
+                                      : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "text-cyan-400"
+                                      : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "text-emerald-400"
+                                      : "text-amber-400"
+                                    }`}>
+                                      {!abaixoDaMeta ? "Acima — verificar"
+                                        : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "Quase atingida"
+                                        : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "No ritmo"
+                                        : "Abaixo do plano"}
+                                    </span>
+                                  </div>
+                                  <span className={`text-[10px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-500/70" : "text-red-500/70"}`}>
+                                    {abaixoDaMeta
+                                      ? `−${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% p/ meta`
+                                      : `+${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima`}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* BARRA + rodapé */}
-                              <div className="relative flex flex-col gap-1.5 mt-auto">
+                              {/* DIVISOR */}
+                              <div className="h-px mt-2" style={{ background: abaixoDaMeta ? "rgba(52,211,153,0.08)" : "rgba(248,113,113,0.08)" }} />
+
+                              {/* RODAPÉ: barra de progresso */}
+                              <div className="relative flex flex-col gap-1.5 pt-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] dark:text-slate-500 text-slate-400">Progresso</span>
+                                  <span className={`text-[9px] font-bold tabular-nums ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>{Math.round(progress)}%</span>
+                                </div>
                                 <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className={`h-full rounded-full transition-all duration-700 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-400"}`}
                                     style={{
                                       width: `${Math.min(progress, 100)}%`,
-                                      boxShadow: abaixoDaMeta ? "0 0 5px rgba(52,211,153,0.55)" : "0 0 5px rgba(248,113,113,0.55)"
+                                      boxShadow: abaixoDaMeta ? "0 0 6px rgba(52,211,153,0.6)" : "0 0 6px rgba(248,113,113,0.6)"
                                     }}
                                   />
                                 </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] dark:text-slate-500 text-slate-400">Real: {ind.percentualReal}%</span>
-                                  <span className={`flex items-center gap-1 text-[10px] font-semibold transition-all duration-300 ${abaixoDaMeta ? "text-emerald-500/60 group-hover:text-emerald-400" : "text-red-500/60 group-hover:text-red-400"}`}>
+                                <div className="flex items-center justify-end">
+                                  <span className={`flex items-center gap-1 text-[10px] font-semibold transition-all duration-300 ${abaixoDaMeta ? "text-emerald-500/50 group-hover:text-emerald-400" : "text-red-500/50 group-hover:text-red-400"}`}>
                                     Ver detalhe
                                     <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
                                   </span>
