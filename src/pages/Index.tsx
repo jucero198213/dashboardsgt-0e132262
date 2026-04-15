@@ -1019,70 +1019,75 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
                     {(() => {
+                      const TONE_MAP: Record<string, {
+                        stripe: string; border: string; glow: string;
+                        iconBg: string; iconTxt: string; sub: string; spot: string;
+                      }> = {
+                        emerald: { stripe: "from-emerald-400/60 to-emerald-700/20", border: "border-emerald-400/[0.12]", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", sub: "text-emerald-500/80", spot: "rgba(16,185,129,0.10)" },
+                        cyan:    { stripe: "from-cyan-400/60 to-cyan-700/20",    border: "border-cyan-400/[0.12]",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    sub: "text-cyan-500/80",    spot: "rgba(6,182,212,0.10)" },
+                        amber:   { stripe: "from-amber-400/60 to-amber-700/20",   border: "border-amber-400/[0.12]",   glow: "hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",   iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",   iconTxt: "text-amber-300",   sub: "text-amber-500/80",   spot: "rgba(245,158,11,0.10)" },
+                        violet:  { stripe: "from-violet-400/60 to-violet-700/20", border: "border-violet-400/[0.12]",  glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",  iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",  iconTxt: "text-violet-300",  sub: "text-violet-500/80",  spot: "rgba(139,92,246,0.10)" },
+                      };
                       const topSharedFont = kpiFontSize(
                         topMetrics.map(m => m.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }))
                           .reduce((a, b) => a.length >= b.length ? a : b)
                       );
                       return topMetrics.map((item, idx) => {
-                      const Icon = item.icon;
+                        const Icon = item.icon;
+                        const t = TONE_MAP[item.tone] ?? TONE_MAP.cyan;
+                        const baseLabel = item.label.replace(" (PREVISTO)", "").replace(" (REALIZADO)", "");
+                        const isPrevisto = item.label.includes("(PREVISTO)");
+                        const isRealizado = item.label.includes("(REALIZADO)");
 
-                      return (
-                        <AnimatedCard key={item.label} delay={idx * 80}>
-                          <div
-                            className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--sgt-border-medium)] hover:shadow-[0_20px_42px_rgba(0,0,0,0.35)] p-3 xl:p-4`}
-                          >
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
-                            {/* Glow sutil por tipo */}
-                            {item.label.includes("(REALIZADO)") && item.tone === "emerald" && (
-                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
-                                style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(16,185,129,0.07), transparent 60%)" }} />
-                            )}
-                            {item.label.includes("(REALIZADO)") && item.tone === "amber" && (
-                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
-                                style={{ background: "radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.07), transparent 60%)" }} />
-                            )}
+                        return (
+                          <AnimatedCard key={item.label} delay={idx * 80}>
+                            <div className={`group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
 
-                            <div className="relative flex h-full flex-col">
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="text-[11px] leading-[16px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 transition-colors duration-300 dark:group-hover:text-white group-hover:text-slate-700 flex items-center gap-2">
-                                  {item.label.includes("(PREVISTO)") ? (
-                                    <>
-                                      {item.label.replace(" (PREVISTO)", "")}
-                                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-extrabold tracking-[0.2em] uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+                              {/* Stripe topo */}
+                              <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
+
+                              {/* Spot glow canto inferior direito */}
+                              <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
+                                style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
+
+                              <div className="relative flex h-full flex-col">
+                                {/* Label + badge + ícone */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">
+                                      {baseLabel}
+                                    </p>
+                                    {isPrevisto && (
+                                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
                                         previsto
                                       </span>
-                                    </>
-                                  ) : item.label.includes("(REALIZADO)") ? (
-                                    <>
-                                      {item.label.replace(" (REALIZADO)", "")}
-                                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[9px] font-extrabold tracking-[0.2em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                                    )}
+                                    {isRealizado && (
+                                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
                                         realizado
                                       </span>
-                                    </>
-                                  ) : item.label}
-                                </p>
-
-                                <div
-                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 ${toneStyles[item.tone]
-                                    }`}
-                                >
-                                  <Icon className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110" />
+                                    )}
+                                  </div>
+                                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+                                    <Icon className="h-3.5 w-3.5" />
+                                  </div>
                                 </div>
-                              </div>
 
-                              <div className="mt-auto pt-2">
-                                <p className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]" style={{ fontSize: topSharedFont }}>
+                                {/* Valor protagonista */}
+                                <p className="mt-auto pt-2 sm:pt-3 font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: topSharedFont }}>
                                   <CountUp value={item.value} />
                                 </p>
-                                <p className="mt-2 text-[12px] leading-[16px] dark:text-slate-400 text-slate-600">
+
+                                {/* Helper em tom */}
+                                <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
                                   {item.helper}
                                 </p>
                               </div>
                             </div>
-                          </div>
-                        </AnimatedCard>
-                      );
-                    })})()}
+                          </AnimatedCard>
+                        );
+                      });
+                    })()}
                   </div>
                 )}
 
