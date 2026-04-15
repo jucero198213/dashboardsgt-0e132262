@@ -1074,7 +1074,7 @@ const Index = () => {
                                 </div>
 
                                 {/* Valor protagonista */}
-                                <p className="mt-auto pt-2 sm:pt-3 font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: topSharedFont }}>
+                                <p className="mt-auto pt-2 sm:pt-3 font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: `clamp(1.1rem, 2.2vw, 2rem)` }}>
                                   <CountUp value={item.value} />
                                 </p>
 
