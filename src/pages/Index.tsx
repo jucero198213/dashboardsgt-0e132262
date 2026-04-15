@@ -6,6 +6,7 @@ import {
   ArrowRight,
   RefreshCw,
   AlertCircle,
+  BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -928,6 +929,13 @@ const Index = () => {
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
                 </button>
+                <Link
+                  to="/indicadores"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-violet-400/30 bg-violet-500/10 text-violet-300 hover:border-violet-300/50 hover:bg-violet-400/20 hover:shadow-[0_0_16px_rgba(139,92,246,0.2)] hover:-translate-y-0.5"
+                >
+                  <BarChart3 className="h-3 w-3" />
+                  Indicadores
+                </Link>
               </div>
               <UserMenu />
             </div>
@@ -987,8 +995,8 @@ const Index = () => {
               </div>
             )}
 
-            {/* 2-column grid: cards+charts left, indicators right */}
-            <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0 xl:grid-cols-[1fr_320px] items-stretch`}>
+            {/* Grid principal */}
+            <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0`}>
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
@@ -1277,108 +1285,8 @@ const Index = () => {
               </div>
               {/* end left column */}
 
-              <aside
-                className={`rounded-[14px] sm:rounded-[16px] border [background:var(--sgt-bg-card)] min-h-0 overflow-hidden ${presentationMode
-                    ? "h-full overflow-y-auto p-3"
-                    : "xl:col-start-2 xl:row-start-1 xl:row-span-3 flex flex-col p-2.5 sm:p-3 max-h-[60vh] xl:max-h-none overflow-y-auto xl:overflow-hidden"
-                  }`}
-                style={{ borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-3 shrink-0">
-                  <div>
-                    <p className="text-[8px] font-semibold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500 mb-1">
-                      Distribuição de custos do período
-                    </p>
-                    <p
-                      className={`font-extrabold tracking-[-0.04em] leading-none dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800 ${presentationMode ? "text-lg" : "text-xl"}`}
-                    >
-                       Indicadores
-                    </p>
-                  </div>
-                  {!presentationMode && (
-                    <button
-                      onClick={togglePresentationMode}
-                      className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg border transition-all border-[var(--sgt-border-subtle)] [background:var(--sgt-input-bg)] text-[color:var(--sgt-text-muted)] hover:border-[var(--sgt-border-medium)] hover:[background:var(--sgt-input-hover)] hover:text-[color:var(--sgt-text-primary)]"
-                      title="Modo apresentação"
-                      aria-label="Ativar modo apresentação"
-                    >
-                      <Presentation className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Lista — flex-1 para ocupar o espaço restante */}
-                <div className={`flex flex-col flex-1 gap-1.5 min-h-0 justify-between transition-opacity duration-300 ${isFetchingDw && isProcessed ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
-                  {isFetchingDw && !isProcessed ? (
-                    <>
-                      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                        <IndicatorSkeleton key={i} />
-                      ))}
-                    </>
-                  ) : (
-                    indicadores.map((ind, idx) => {
-                      const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
-                      const progress = Math.min(
-                        (ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100,
-                        100
-                      );
-
-                      return (
-                        <AnimatedCard key={ind.id} delay={480 + idx * 45}>
-                          <Link
-                            to={`/indicadores/${ind.id}`}
-                            className="group flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all duration-200 cursor-pointer"
-                            style={{ background: "var(--sgt-bg-section)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
-                            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 4px 20px rgba(52,211,153,0.10)" : "0 4px 20px rgba(248,113,113,0.10)"; }}
-                            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; }}
-                          >
-                            {/* Ring */}
-                            <div className="relative shrink-0 h-14 w-14">
-                              <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="3.5" />
-                                <circle cx="18" cy="18" r="14" fill="none"
-                                  stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                  strokeWidth="3.5"
-                                  strokeLinecap="round"
-                                  strokeDasharray={`${progress * 0.879} 87.9`}
-                                  className="transition-all duration-700"
-                                  style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.6))" : "drop-shadow(0 0 4px rgba(248,113,113,0.6))" }}
-                                />
-                              </svg>
-                              <span className={`absolute inset-0 flex items-center justify-center font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`} style={{ fontSize: ind.percentualReal >= 100 ? "10px" : ind.percentualReal >= 10 ? "11px" : "12px" }}>
-                                {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
-                              </span>
-                            </div>
-
-                            {/* Nome + meta */}
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-[12px] font-bold uppercase tracking-[0.12em] dark:text-slate-200 text-slate-700">
-                                {ind.nome}
-                              </p>
-                              <p className={`text-[11px] font-semibold mt-0.5 ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
-                                Meta: {ind.percentualEsperado}%
-                              </p>
-                            </div>
-
-                            {/* Badge + seta */}
-                            <div className="flex shrink-0 items-center gap-1.5">
-                              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border ${abaixoDaMeta
-                                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25 dark:bg-emerald-500/15 dark:text-emerald-300"
-                                : "bg-red-500/10 text-red-400 border-red-500/25 dark:bg-red-500/15 dark:text-red-400"}`}>
-                                {abaixoDaMeta ? "OK" : "Alto"}
-                              </span>
-                              <ArrowRight className={`h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 ${abaixoDaMeta ? "text-emerald-500/50 dark:text-emerald-500/40" : "text-red-500/50 dark:text-red-500/40"}`} />
-                            </div>
-                          </Link>
-                        </AnimatedCard>
-                      );
-                    })
-                  )}
-                </div>
-              </aside>
             </div>
-            {/* end 2-column grid */}
+            {/* end grid */}
 
             {/* ── NEWS TICKER ── */}
             <div
