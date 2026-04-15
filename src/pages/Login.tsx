@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle } from "lucide-react";
 
 export default function Login() {
-  const { session, isLoading, signIn } = useAuth();
+  const { session, isLoading, signIn, isPasswordRecovery, clearPasswordRecovery } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email,       setEmail]       = useState("");
@@ -36,8 +37,7 @@ export default function Login() {
   );
 
   // If user arrived via recovery link, show password set form
-  const hash = window.location.hash;
-  const isRecovery = hash.includes("type=recovery") || hash.includes("type=signup");
+  const isRecovery = isPasswordRecovery;
 
   if (session && !isRecovery) return <Navigate to="/dashboard" replace />;
 
@@ -88,6 +88,7 @@ export default function Login() {
         setResetError("Erro ao definir senha. Tente novamente.");
       } else {
         setPasswordSet(true);
+        clearPasswordRecovery();
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);

@@ -87,8 +87,9 @@ Deno.serve(async (req) => {
     }
 
     // Send password reset email so user can set their own password
+    const origin = req.headers.get("origin") || "https://dashboardsgt.lovable.app";
     await adminClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/login`,
+      redirectTo: `${origin}/login`,
     });
 
     return new Response(
