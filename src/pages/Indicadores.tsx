@@ -187,6 +187,59 @@ export default function Indicadores() {
                                 </div>
                               </div>
 
+                              {/* CENTRO: tendência + indicadores rápidos + status */}
+                              <div className="relative flex flex-1 flex-col justify-center gap-3 rounded-[10px] border px-3.5 py-3 my-1"
+                                style={{ borderColor: abaixoDaMeta ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)", background: abaixoDaMeta ? "rgba(52,211,153,0.03)" : "rgba(248,113,113,0.03)" }}>
+
+                                {/* Tendência */}
+                                <p className={`text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                                  {abaixoDaMeta
+                                    ? `Faltam ${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% para a meta`
+                                    : `${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima da meta`}
+                                </p>
+
+                                {/* Indicadores rápidos: Real / Meta / Diferença */}
+                                <div className="grid grid-cols-3 gap-2">
+                                  {[
+                                    { label: "Real", value: `${ind.percentualReal}%`, color: abaixoDaMeta ? "text-emerald-300" : "text-red-300" },
+                                    { label: "Meta", value: `${ind.percentualEsperado}%`, color: "dark:text-slate-300 text-slate-500" },
+                                    { label: "Dif.", value: `${abaixoDaMeta ? "-" : "+"}${Math.abs(ind.percentualReal - ind.percentualEsperado).toFixed(1)}%`, color: abaixoDaMeta ? "text-emerald-400" : "text-red-400" },
+                                  ].map(({ label, value, color }) => (
+                                    <div key={label} className="flex flex-col items-center gap-0.5 rounded-[8px] py-1.5 px-1"
+                                      style={{ background: "rgba(255,255,255,0.03)" }}>
+                                      <span className="text-[9px] font-semibold uppercase tracking-[0.15em] dark:text-slate-500 text-slate-400">{label}</span>
+                                      <span className={`text-[13px] font-extrabold leading-none tabular-nums ${color}`}>{value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Status dinâmico */}
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                                    abaixoDaMeta && (ind.percentualEsperado - ind.percentualReal) <= 2
+                                      ? "bg-cyan-400"
+                                      : abaixoDaMeta
+                                      ? "bg-emerald-400"
+                                      : "bg-red-400"
+                                  }`} style={{ boxShadow: abaixoDaMeta ? "0 0 4px rgba(52,211,153,0.8)" : "0 0 4px rgba(248,113,113,0.8)" }} />
+                                  <span className={`text-[10px] font-semibold ${
+                                    abaixoDaMeta && (ind.percentualEsperado - ind.percentualReal) <= 2
+                                      ? "text-cyan-400"
+                                      : abaixoDaMeta
+                                      ? "text-emerald-400"
+                                      : "text-red-400"
+                                  }`}>
+                                    {!abaixoDaMeta
+                                      ? "Acima da meta — verificar"
+                                      : (ind.percentualEsperado - ind.percentualReal) <= 2
+                                      ? "Meta quase atingida"
+                                      : ind.percentualReal >= ind.percentualEsperado * 0.8
+                                      ? "No ritmo esperado"
+                                      : "Abaixo do planejado"}
+                                  </span>
+                                </div>
+                              </div>
+
                               {/* BARRA + rodapé */}
                               <div className="relative flex flex-col gap-1.5 mt-auto">
                                 <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
