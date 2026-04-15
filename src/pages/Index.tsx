@@ -1035,8 +1035,15 @@ const Index = () => {
 
                             <div className="relative flex h-full flex-col">
                               <div className="flex items-center justify-between gap-3">
-                                <p className="text-[11px] leading-[16px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 transition-colors duration-300 dark:group-hover:text-white group-hover:text-slate-700">
-                                  {item.label}
+                                <p className="text-[11px] leading-[16px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 transition-colors duration-300 dark:group-hover:text-white group-hover:text-slate-700 flex items-center gap-1.5 flex-wrap">
+                                  {item.label.includes("(PREVISTO)") ? (
+                                    <>
+                                      {item.label.replace(" (PREVISTO)", "")}
+                                      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-bold tracking-[0.15em] border border-slate-500/30 bg-slate-500/10 text-slate-400 normal-case">
+                                        previsto
+                                      </span>
+                                    </>
+                                  ) : item.label}
                                 </p>
 
                                 <div
