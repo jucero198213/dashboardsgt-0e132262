@@ -80,17 +80,8 @@ export default function Indicadores() {
             <div className="flex flex-1 min-h-0 gap-3">
 
               {/* COLUNA ESQUERDA — grid 4x2 */}
-              <div className="flex flex-col flex-1 min-w-0 gap-3">
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-500 mb-1">
-                    Distribuição de custos do período
-                  </p>
-                  <p className="text-[22px] font-extrabold tracking-[-0.04em] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800">
-                    Indicadores
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 grid-rows-2 gap-3 flex-1 min-h-0">
+              <div className="flex flex-col flex-1 min-w-0 min-h-0">
+                <div className="grid grid-cols-2 lg:grid-cols-4 grid-rows-2 gap-3 flex-1 min-h-0 h-full">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
