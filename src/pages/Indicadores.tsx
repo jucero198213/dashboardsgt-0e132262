@@ -94,22 +94,20 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group relative flex flex-col justify-between overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
+                              className="group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
                               style={{
                                 background: "var(--sgt-bg-card)",
                                 borderColor: abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)",
-                                boxShadow: "none",
                               }}
-                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"; el.style.boxShadow = abaixoDaMeta ? "0 20px_42px_rgba(0,0,0,0.35), 0 0 40px rgba(52,211,153,0.08)" : "0 20px 42px rgba(0,0,0,0.35), 0 0 40px rgba(248,113,113,0.08)"; }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"; el.style.boxShadow = abaixoDaMeta ? "0 20px 42px rgba(0,0,0,0.35), 0 0 40px rgba(52,211,153,0.08)" : "0 20px 42px rgba(0,0,0,0.35), 0 0 40px rgba(248,113,113,0.08)"; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)"; el.style.boxShadow = "none"; }}
                             >
-                              {/* Glow radial no canto */}
-                              <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 transition-opacity duration-300"
-                                style={{ background: abaixoDaMeta ? "radial-gradient(circle at 100% 100%, rgba(52,211,153,0.10), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.10), transparent 65%)" }} />
-                              {/* Shimmer topo */}
+                              {/* Glow radial */}
+                              <div className="pointer-events-none absolute bottom-0 right-0 h-48 w-48"
+                                style={{ background: abaixoDaMeta ? "radial-gradient(circle at 100% 100%, rgba(52,211,153,0.08), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.08), transparent 65%)" }} />
                               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
 
-                              {/* TOPO: nome + ícone */}
+                              {/* TOPO: nome + badge */}
                               <div className="relative flex items-start justify-between gap-2">
                                 <div>
                                   <p className="text-[11px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 group-hover:dark:text-white transition-colors duration-300">
@@ -119,50 +117,67 @@ export default function Indicadores() {
                                     Meta: {ind.percentualEsperado}%
                                   </p>
                                 </div>
-                                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-105 ${abaixoDaMeta ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
-                                  <svg viewBox="0 0 36 36" className="h-5 w-5 -rotate-90">
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+                                <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold border ${abaixoDaMeta
+                                  ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
+                                  : "bg-red-500/15 text-red-400 border-red-500/25"}`}>
+                                  {abaixoDaMeta ? "OK" : "Alto"}
+                                </span>
+                              </div>
+
+                              {/* CENTRO: ring grande */}
+                              <div className="relative flex flex-1 items-center justify-center py-4">
+                                {/* Glow atrás do ring */}
+                                <div className="absolute h-36 w-36 rounded-full blur-2xl opacity-20"
+                                  style={{ background: abaixoDaMeta ? "rgba(52,211,153,0.6)" : "rgba(248,113,113,0.6)" }} />
+                                <div className="relative h-40 w-40">
+                                  <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90">
+                                    {/* Track */}
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                                    {/* Fundo colorido suave */}
+                                    <circle cx="18" cy="18" r="14" fill="none"
+                                      stroke={abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"}
+                                      strokeWidth="2.5"
+                                      strokeDasharray="87.9 0"
+                                    />
+                                    {/* Progresso */}
                                     <circle cx="18" cy="18" r="14" fill="none"
                                       stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                      strokeWidth="3"
+                                      strokeWidth="2.5"
                                       strokeLinecap="round"
                                       strokeDasharray={`${progress * 0.879} 87.9`}
+                                      className="transition-all duration-700"
+                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.8))" : "drop-shadow(0 0 4px rgba(248,113,113,0.8))" }}
                                     />
                                   </svg>
+                                  {/* Percentual central */}
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className={`font-extrabold leading-none tracking-[-0.04em] [color:var(--sgt-text-primary)]`}
+                                      style={{ fontSize: ind.percentualReal >= 100 ? "1.8rem" : "2.2rem" }}>
+                                      {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
+                                    </span>
+                                    <span className={`mt-1 text-[10px] font-semibold ${abaixoDaMeta ? "text-emerald-400/70" : "text-red-400/70"}`}>
+                                      {abaixoDaMeta ? "dentro" : "acima"}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
 
-                              {/* MEIO: percentual grande */}
-                              <div className="relative mt-auto pt-3">
-                                <p className={`font-extrabold leading-none tracking-[-0.04em] [color:var(--sgt-text-primary)]`}
-                                  style={{ fontSize: ind.percentualReal >= 100 ? "2.2rem" : "2.6rem" }}>
-                                  {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
-                                </p>
-                                <p className="mt-1.5 text-[12px] dark:text-slate-400 text-slate-600">
-                                  {abaixoDaMeta ? "Dentro da meta" : "Acima da meta"}
-                                </p>
-                              </div>
-
-                              {/* BAIXO: barra + badge + link */}
-                              <div className="relative mt-4 flex flex-col gap-2">
-                                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                              {/* BAIXO: barra + ver detalhe */}
+                              <div className="relative flex flex-col gap-2">
+                                <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className={`h-full rounded-full transition-all duration-700 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-400"}`}
                                     style={{
                                       width: `${Math.min(progress, 100)}%`,
-                                      boxShadow: abaixoDaMeta ? "0 0 8px rgba(52,211,153,0.6)" : "0 0 8px rgba(248,113,113,0.6)"
+                                      boxShadow: abaixoDaMeta ? "0 0 6px rgba(52,211,153,0.6)" : "0 0 6px rgba(248,113,113,0.6)"
                                     }}
                                   />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                  <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold border ${abaixoDaMeta
-                                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
-                                    : "bg-red-500/15 text-red-400 border-red-500/25"}`}>
-                                    {abaixoDaMeta ? "OK" : "Alto"}
-                                  </span>
-                                  <span className={`flex items-center gap-1 text-[11px] font-semibold transition-all duration-300 ${abaixoDaMeta ? "text-emerald-500/60 group-hover:text-emerald-400" : "text-red-500/60 group-hover:text-red-400"}`}>
+                                  <span className="text-[10px] dark:text-slate-500 text-slate-400">Real: {ind.percentualReal}%</span>
+                                  <span className={`flex items-center gap-1 text-[10px] font-semibold transition-all duration-300 ${abaixoDaMeta ? "text-emerald-500/60 group-hover:text-emerald-400" : "text-red-500/60 group-hover:text-red-400"}`}>
                                     Ver detalhe
-                                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                                    <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
                                   </span>
                                 </div>
                               </div>
