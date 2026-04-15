@@ -206,7 +206,7 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group relative flex flex-col rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
+                              className="group relative flex flex-col rounded-[14px] sm:rounded-[16px] border transition-all duration-300 cursor-pointer h-full hover:-translate-y-1 overflow-hidden"
                               style={{
                                 background: "var(--sgt-bg-card)",
                                 borderColor: `rgba(${identity.colorRgb},0.2)`,
@@ -214,139 +214,97 @@ export default function Indicadores() {
                               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `rgba(${identity.colorRgb},0.45)`; el.style.boxShadow = `0 24px 48px rgba(0,0,0,0.4), 0 0 40px rgba(${identity.colorRgb},0.10)`; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `rgba(${identity.colorRgb},0.2)`; el.style.boxShadow = "none"; }}
                             >
-                              {/* Glow de identidade no canto */}
-                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
-                                style={{ background: `radial-gradient(ellipse at 15% 15%, rgba(${identity.colorRgb},0.07), transparent 55%)` }} />
-                              <div className="pointer-events-none absolute inset-0 rounded-[14px]"
-                                style={{ background: "radial-gradient(ellipse at 85% 85%, rgba(255,255,255,0.015), transparent 50%)" }} />
+                              {/* Linha de acento no topo */}
+                              <div className="h-[2px] w-full shrink-0"
+                                style={{ background: `linear-gradient(90deg, ${identity.color}, rgba(${identity.colorRgb},0.2))` }} />
 
-                              {/* TOPO: ícone de identidade + nome + badge status */}
-                              <div className="relative flex items-center gap-4">
-                                <div className="relative shrink-0 h-16 w-16">
-                                  <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90" style={{ overflow: 'visible' }}>
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.8" />
-                                    {/* Track colorido da identidade */}
-                                    <circle cx="18" cy="18" r="14" fill="none"
-                                      stroke={`rgba(${identity.colorRgb},0.12)`}
-                                      strokeWidth="2.8" strokeDasharray="87.9 0" />
-                                    {/* Progresso na cor de identidade */}
-                                    <circle cx="18" cy="18" r="14" fill="none"
-                                      stroke={identity.color}
-                                      strokeWidth="2.8" strokeLinecap="round"
-                                      strokeDasharray={`${progress * 0.879} 87.9`}
-                                      className="transition-all duration-700"
-                                      style={{ filter: `drop-shadow(0 0 3px ${identity.color}) drop-shadow(0 0 6px rgba(${identity.colorRgb},0.5))` }}
-                                    />
-                                  </svg>
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="font-extrabold leading-none tabular-nums"
-                                      style={{ color: identity.color, fontSize: ind.percentualReal >= 100 ? "10px" : ind.percentualReal >= 10 ? "11px" : "13px" }}>
-                                      {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex flex-1 min-w-0 flex-col gap-1.5">
-                                  <div className="flex items-start justify-between gap-1.5">
-                                    <p className="text-[12px] font-bold uppercase tracking-[0.15em] dark:text-white text-slate-700 group-hover:dark:text-white transition-colors leading-tight">
-                                      {ind.nome}
-                                    </p>
-                                    {/* Badge status: sempre verde/vermelho */}
-                                    <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold border ${abaixoDaMeta
-                                      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                      : "bg-red-500/15 text-red-400 border-red-500/30"}`}>
-                                      {abaixoDaMeta ? "OK" : "Alto"}
-                                    </span>
-                                  </div>
-                                  {/* Label de identidade + meta */}
-                                  <div className="flex items-center gap-1.5">
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-md" style={{ background: identity.bgColor }}>
-                                      <Icon className="h-3 w-3" style={{ color: identity.color }} />
+                              {/* Glow de identidade */}
+                              <div className="pointer-events-none absolute inset-0"
+                                style={{ background: `radial-gradient(ellipse at 50% 30%, rgba(${identity.colorRgb},0.06), transparent 60%)` }} />
+
+                              <div className="relative flex flex-col flex-1 p-4 xl:p-5">
+
+                                {/* TOPO: nome + ícone + badge */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110"
+                                      style={{ background: identity.bgColor }}>
+                                      <Icon className="h-3.5 w-3.5" style={{ color: identity.color }} />
                                     </div>
-                                    <span className="text-[10px] font-semibold" style={{ color: `rgba(${identity.colorRgb},0.7)` }}>
-                                      {identity.label}
-                                    </span>
-                                    <span className="text-[10px] dark:text-slate-600 text-slate-400">· Meta {ind.percentualEsperado}%</span>
+                                    <div className="min-w-0">
+                                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] dark:text-slate-300 text-slate-600 truncate">
+                                        {ind.nome}
+                                      </p>
+                                      <p className="text-[10px] font-medium mt-0.5" style={{ color: `rgba(${identity.colorRgb},0.6)` }}>
+                                        {identity.label}
+                                      </p>
+                                    </div>
                                   </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold border ${abaixoDaMeta
+                                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                    : "bg-red-500/15 text-red-400 border-red-500/30"}`}>
+                                    {abaixoDaMeta ? "OK" : "Alto"}
+                                  </span>
                                 </div>
-                              </div>
 
-                              {/* DIVISOR com cor de identidade */}
-                              <div className="relative h-px my-2" style={{ background: `rgba(${identity.colorRgb},0.12)` }} />
-
-                              {/* CENTRO: métricas + status */}
-                              <div className="relative flex flex-1 flex-col justify-center gap-3.5">
-                                <div className="grid grid-cols-3 gap-2">
-                                  {[
-                                    { label: "Real", value: `${ind.percentualReal}%`, sub: "realizado", color: identity.color, bg: `rgba(${identity.colorRgb},0.06)`, border: `rgba(${identity.colorRgb},0.15)` },
-                                    { label: "Meta", value: `${ind.percentualEsperado}%`, sub: "esperado", color: undefined, bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.06)" },
-                                    { label: "Dif.", value: `${abaixoDaMeta ? "-" : "+"}${Math.abs(ind.percentualReal - ind.percentualEsperado).toFixed(1)}%`, sub: abaixoDaMeta ? "a atingir" : "acima", color: statusColor, bg: `rgba(${statusRgb},0.06)`, border: `rgba(${statusRgb},0.15)` },
-                                  ].map(({ label, value, sub, color, bg, border }) => (
-                                    <div key={label} className="flex flex-col items-center gap-1 rounded-[10px] py-2.5 px-1 border"
-                                      style={{ background: bg, borderColor: border }}>
-                                      <span className="text-[9px] font-bold uppercase tracking-[0.18em] dark:text-slate-500 text-slate-400">{label}</span>
-                                      <span className="text-[15px] font-extrabold leading-none tabular-nums dark:text-slate-200 text-slate-600"
-                                        style={{ color: color ?? undefined }}>
-                                        {value}
+                                {/* CENTRO: ring grande + percentual dominante */}
+                                <div className="flex flex-1 items-center justify-center py-3">
+                                  <div className="relative h-28 w-28">
+                                    <svg viewBox="0 0 36 36" className="h-28 w-28 -rotate-90" style={{ overflow: "visible" }}>
+                                      <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
+                                      <circle cx="18" cy="18" r="14" fill="none"
+                                        stroke={`rgba(${identity.colorRgb},0.10)`}
+                                        strokeWidth="2.5" strokeDasharray="87.9 0" />
+                                      <circle cx="18" cy="18" r="14" fill="none"
+                                        stroke={identity.color}
+                                        strokeWidth="2.5" strokeLinecap="round"
+                                        strokeDasharray={`${progress * 0.879} 87.9`}
+                                        className="transition-all duration-700"
+                                        style={{ filter: `drop-shadow(0 0 3px ${identity.color}) drop-shadow(0 0 5px rgba(${identity.colorRgb},0.4))` }}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                                      <span className="font-extrabold leading-none tabular-nums tracking-[-0.03em]"
+                                        style={{
+                                          color: identity.color,
+                                          fontSize: ind.percentualReal >= 100 ? "1.4rem" : "1.7rem",
+                                        }}>
+                                        {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                                       </span>
-                                      <span className="text-[8px] dark:text-slate-600 text-slate-400 font-medium">{sub}</span>
+                                      <span className="text-[9px] font-semibold uppercase tracking-[0.12em] dark:text-slate-500 text-slate-400">
+                                        real
+                                      </span>
                                     </div>
-                                  ))}
+                                  </div>
                                 </div>
 
-                                {/* Status + tendência */}
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className={`h-1.5 w-1.5 rounded-full shrink-0 animate-pulse ${
-                                      !abaixoDaMeta ? "bg-red-400"
-                                      : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "bg-cyan-400"
-                                      : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "bg-emerald-400"
-                                      : "bg-amber-400"
-                                    }`} />
-                                    <span className={`text-[10px] font-semibold ${
-                                      !abaixoDaMeta ? "text-red-400"
-                                      : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "text-cyan-400"
-                                      : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "text-emerald-400"
-                                      : "text-amber-400"
-                                    }`}>
-                                      {!abaixoDaMeta ? "Acima — verificar"
-                                        : (ind.percentualEsperado - ind.percentualReal) <= 2 ? "Quase atingida"
-                                        : ind.percentualReal >= ind.percentualEsperado * 0.8 ? "No ritmo"
-                                        : "Abaixo do plano"}
+                                {/* RODAPÉ: meta + barra + link */}
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-semibold dark:text-slate-500 text-slate-400">
+                                      Meta: <span className="dark:text-slate-300 text-slate-600">{ind.percentualEsperado}%</span>
+                                    </span>
+                                    <span className="text-[10px] font-bold tabular-nums" style={{ color: statusColor }}>
+                                      {abaixoDaMeta
+                                        ? `−${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% p/ meta`
+                                        : `+${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima`}
                                     </span>
                                   </div>
-                                  <span className="text-[10px] font-bold tabular-nums" style={{ color: `rgba(${statusRgb},0.7)` }}>
-                                    {abaixoDaMeta
-                                      ? `−${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% p/ meta`
-                                      : `+${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima`}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* DIVISOR */}
-                              <div className="h-px mt-2" style={{ background: `rgba(${identity.colorRgb},0.08)` }} />
-
-                              {/* RODAPÉ: barra de progresso na cor de identidade */}
-                              <div className="relative flex flex-col gap-1.5 pt-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] dark:text-slate-500 text-slate-400">Progresso</span>
-                                  <span className="text-[9px] font-bold tabular-nums" style={{ color: identity.color }}>{Math.round(progress)}%</span>
-                                </div>
-                                <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                                  <div
-                                    className="h-full rounded-full transition-all duration-700"
-                                    style={{
-                                      width: `${Math.min(progress, 100)}%`,
-                                      background: identity.color,
-                                      boxShadow: `0 0 6px rgba(${identity.colorRgb},0.6)`
-                                    }}
-                                  />
-                                </div>
-                                <div className="flex items-center justify-end">
-                                  <span className="flex items-center gap-1 text-[10px] font-semibold transition-all duration-300 opacity-50 group-hover:opacity-100"
-                                    style={{ color: identity.color }}>
-                                    Ver detalhe
-                                    <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
-                                  </span>
+                                  <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                                    <div className="h-full rounded-full transition-all duration-700"
+                                      style={{
+                                        width: `${Math.min(progress, 100)}%`,
+                                        background: identity.color,
+                                        boxShadow: `0 0 6px rgba(${identity.colorRgb},0.5)`,
+                                      }} />
+                                  </div>
+                                  <div className="flex justify-end">
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold opacity-40 group-hover:opacity-100 transition-opacity duration-300"
+                                      style={{ color: identity.color }}>
+                                      Ver detalhe
+                                      <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </Link>
