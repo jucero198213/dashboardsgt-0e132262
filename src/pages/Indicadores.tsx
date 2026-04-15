@@ -94,31 +94,31 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-full"
+                              className="group flex flex-col justify-between gap-0 rounded-[14px] border p-5 transition-all duration-200 cursor-pointer h-full"
                               style={{ background: "var(--sgt-bg-card)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
                               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 8px 32px rgba(52,211,153,0.12)" : "0 8px 32px rgba(248,113,113,0.12)"; el.style.transform = "translateY(-2px)"; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; el.style.transform = "none"; }}
                             >
                               {/* Topo: ring + badge */}
                               <div className="flex items-start justify-between">
-                                <div className="relative h-16 w-16">
-                                  <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="2.5" />
+                                <div className="relative h-24 w-24">
+                                  <svg viewBox="0 0 36 36" className="h-24 w-24 -rotate-90">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="2" />
                                     <circle cx="18" cy="18" r="14" fill="none"
                                       stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                      strokeWidth="2.5"
+                                      strokeWidth="2"
                                       strokeLinecap="round"
                                       strokeDasharray={`${progress * 0.879} 87.9`}
                                       className="transition-all duration-700"
-                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 4px rgba(52,211,153,0.5))" : "drop-shadow(0 0 4px rgba(248,113,113,0.5))" }}
+                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 6px rgba(52,211,153,0.5))" : "drop-shadow(0 0 6px rgba(248,113,113,0.5))" }}
                                     />
                                   </svg>
                                   <span className={`absolute inset-0 flex items-center justify-center font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`}
-                                    style={{ fontSize: ind.percentualReal >= 100 ? "10px" : ind.percentualReal >= 10 ? "11px" : "13px" }}>
+                                    style={{ fontSize: ind.percentualReal >= 100 ? "13px" : "15px" }}>
                                     {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                                   </span>
                                 </div>
-                                <span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest border ${abaixoDaMeta
+                                <span className={`rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-widest border ${abaixoDaMeta
                                   ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25"
                                   : "bg-red-500/10 text-red-400 border-red-500/25"}`}>
                                   {abaixoDaMeta ? "OK" : "Alto"}
@@ -127,27 +127,27 @@ export default function Indicadores() {
 
                               {/* Nome + meta */}
                               <div>
-                                <p className="text-[13px] font-bold uppercase tracking-[0.1em] dark:text-slate-200 text-slate-700 group-hover:dark:text-white transition-colors">
+                                <p className="text-[15px] font-bold uppercase tracking-[0.1em] dark:text-slate-200 text-slate-700 group-hover:dark:text-white transition-colors">
                                   {ind.nome}
                                 </p>
-                                <p className={`text-[11px] font-semibold mt-0.5 ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
+                                <p className={`text-[13px] font-semibold mt-1 ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
                                   Meta: {ind.percentualEsperado}%
                                 </p>
                               </div>
 
                               {/* Barra + link */}
-                              <div className="mt-auto">
-                                <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "var(--sgt-progress-track)" }}>
+                              <div>
+                                <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className={`h-full rounded-full transition-all duration-700 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-400"}`}
                                     style={{ width: `${Math.min(progress, 100)}%` }}
                                   />
                                 </div>
-                                <div className="flex items-center justify-between mt-1.5">
-                                  <span className="text-[10px] dark:text-slate-600 text-slate-400">Real: {ind.percentualReal}%</span>
-                                  <span className={`flex items-center gap-1 text-[10px] font-semibold ${abaixoDaMeta ? "text-emerald-500/70" : "text-red-500/70"}`}>
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-[11px] dark:text-slate-500 text-slate-400">Real: {ind.percentualReal}%</span>
+                                  <span className={`flex items-center gap-1 text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-500/70" : "text-red-500/70"}`}>
                                     Ver detalhe
-                                    <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
+                                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                                   </span>
                                 </div>
                               </div>
