@@ -94,60 +94,75 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group flex flex-col justify-between gap-0 rounded-[14px] border p-5 transition-all duration-200 cursor-pointer h-full"
-                              style={{ background: "var(--sgt-bg-card)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
-                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 8px 32px rgba(52,211,153,0.12)" : "0 8px 32px rgba(248,113,113,0.12)"; el.style.transform = "translateY(-2px)"; }}
-                              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; el.style.transform = "none"; }}
+                              className="group relative flex flex-col justify-between overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 xl:p-5 transition-all duration-300 cursor-pointer h-full hover:-translate-y-1"
+                              style={{
+                                background: "var(--sgt-bg-card)",
+                                borderColor: abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)",
+                                boxShadow: "none",
+                              }}
+                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"; el.style.boxShadow = abaixoDaMeta ? "0 20px_42px_rgba(0,0,0,0.35), 0 0 40px rgba(52,211,153,0.08)" : "0 20px 42px rgba(0,0,0,0.35), 0 0 40px rgba(248,113,113,0.08)"; }}
+                              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)"; el.style.boxShadow = "none"; }}
                             >
-                              {/* Topo: ring + badge */}
-                              <div className="flex items-start justify-between">
-                                <div className="relative h-24 w-24">
-                                  <svg viewBox="0 0 36 36" className="h-24 w-24 -rotate-90">
-                                    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--sgt-progress-track)" strokeWidth="2" />
+                              {/* Glow radial no canto */}
+                              <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 transition-opacity duration-300"
+                                style={{ background: abaixoDaMeta ? "radial-gradient(circle at 100% 100%, rgba(52,211,153,0.10), transparent 65%)" : "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.10), transparent 65%)" }} />
+                              {/* Shimmer topo */}
+                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.025),transparent_45%)]" />
+
+                              {/* TOPO: nome + ícone */}
+                              <div className="relative flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-[11px] font-bold uppercase tracking-[0.28em] dark:text-slate-300 text-slate-500 group-hover:dark:text-white transition-colors duration-300">
+                                    {ind.nome}
+                                  </p>
+                                  <p className={`mt-1 text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-400" : "text-red-400"}`}>
+                                    Meta: {ind.percentualEsperado}%
+                                  </p>
+                                </div>
+                                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-105 ${abaixoDaMeta ? "bg-emerald-500/15" : "bg-red-500/15"}`}>
+                                  <svg viewBox="0 0 36 36" className="h-5 w-5 -rotate-90">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
                                     <circle cx="18" cy="18" r="14" fill="none"
                                       stroke={abaixoDaMeta ? "#34d399" : "#f87171"}
-                                      strokeWidth="2"
+                                      strokeWidth="3"
                                       strokeLinecap="round"
                                       strokeDasharray={`${progress * 0.879} 87.9`}
-                                      className="transition-all duration-700"
-                                      style={{ filter: abaixoDaMeta ? "drop-shadow(0 0 6px rgba(52,211,153,0.5))" : "drop-shadow(0 0 6px rgba(248,113,113,0.5))" }}
                                     />
                                   </svg>
-                                  <span className={`absolute inset-0 flex items-center justify-center font-extrabold tabular-nums leading-none ${abaixoDaMeta ? "text-emerald-300" : "text-red-300"}`}
-                                    style={{ fontSize: ind.percentualReal >= 100 ? "13px" : "15px" }}>
-                                    {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
-                                  </span>
                                 </div>
-                                <span className={`rounded-full px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-widest border ${abaixoDaMeta
-                                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/25"
-                                  : "bg-red-500/10 text-red-400 border-red-500/25"}`}>
-                                  {abaixoDaMeta ? "OK" : "Alto"}
-                                </span>
                               </div>
 
-                              {/* Nome + meta */}
-                              <div>
-                                <p className="text-[15px] font-bold uppercase tracking-[0.1em] dark:text-slate-200 text-slate-700 group-hover:dark:text-white transition-colors">
-                                  {ind.nome}
+                              {/* MEIO: percentual grande */}
+                              <div className="relative mt-auto pt-3">
+                                <p className={`font-extrabold leading-none tracking-[-0.04em] [color:var(--sgt-text-primary)]`}
+                                  style={{ fontSize: ind.percentualReal >= 100 ? "2.2rem" : "2.6rem" }}>
+                                  {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
                                 </p>
-                                <p className={`text-[13px] font-semibold mt-1 ${abaixoDaMeta ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
-                                  Meta: {ind.percentualEsperado}%
+                                <p className="mt-1.5 text-[12px] dark:text-slate-400 text-slate-600">
+                                  {abaixoDaMeta ? "Dentro da meta" : "Acima da meta"}
                                 </p>
                               </div>
 
-                              {/* Barra + link */}
-                              <div>
-                                <div className="h-2 w-full rounded-full overflow-hidden" style={{ background: "var(--sgt-progress-track)" }}>
+                              {/* BAIXO: barra + badge + link */}
+                              <div className="relative mt-4 flex flex-col gap-2">
+                                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className={`h-full rounded-full transition-all duration-700 ${abaixoDaMeta ? "bg-emerald-400" : "bg-red-400"}`}
-                                    style={{ width: `${Math.min(progress, 100)}%` }}
+                                    style={{
+                                      width: `${Math.min(progress, 100)}%`,
+                                      boxShadow: abaixoDaMeta ? "0 0 8px rgba(52,211,153,0.6)" : "0 0 8px rgba(248,113,113,0.6)"
+                                    }}
                                   />
                                 </div>
-                                <div className="flex items-center justify-between mt-2">
-                                  <span className="text-[11px] dark:text-slate-500 text-slate-400">Real: {ind.percentualReal}%</span>
-                                  <span className={`flex items-center gap-1 text-[11px] font-semibold ${abaixoDaMeta ? "text-emerald-500/70" : "text-red-500/70"}`}>
+                                <div className="flex items-center justify-between">
+                                  <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold border ${abaixoDaMeta
+                                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/25"
+                                    : "bg-red-500/15 text-red-400 border-red-500/25"}`}>
+                                    {abaixoDaMeta ? "OK" : "Alto"}
+                                  </span>
+                                  <span className={`flex items-center gap-1 text-[11px] font-semibold transition-all duration-300 ${abaixoDaMeta ? "text-emerald-500/60 group-hover:text-emerald-400" : "text-red-500/60 group-hover:text-red-400"}`}>
                                     Ver detalhe
-                                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                                   </span>
                                 </div>
                               </div>
