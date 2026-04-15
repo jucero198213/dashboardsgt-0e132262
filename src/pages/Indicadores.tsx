@@ -80,8 +80,8 @@ export default function Indicadores() {
             <div className="flex flex-1 min-h-0 gap-3">
 
               {/* COLUNA ESQUERDA — grid 4x2 */}
-              <div className="flex flex-col flex-1 min-w-0 gap-3">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-1 content-start">
+              <div className="flex flex-col min-w-0 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
@@ -94,7 +94,7 @@ export default function Indicadores() {
                           <AnimatedCard key={ind.id} delay={idx * 60}>
                             <Link
                               to={`/indicadores/${ind.id}`}
-                              className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-full"
+                              className="group flex flex-col gap-3 rounded-[14px] border p-4 transition-all duration-200 cursor-pointer h-[160px]"
                               style={{ background: "var(--sgt-bg-card)", borderColor: abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)" }}
                               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"; el.style.boxShadow = abaixoDaMeta ? "0 8px 32px rgba(52,211,153,0.12)" : "0 8px 32px rgba(248,113,113,0.12)"; el.style.transform = "translateY(-2px)"; }}
                               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = abaixoDaMeta ? "rgba(52,211,153,0.12)" : "rgba(248,113,113,0.12)"; el.style.boxShadow = "none"; el.style.transform = "none"; }}
