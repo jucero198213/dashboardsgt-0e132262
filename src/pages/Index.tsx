@@ -313,7 +313,7 @@ const MiniLineChart = ({
         ) : (
         <svg
           viewBox={`0 0 ${svgW} ${svgH}`}
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="none"
           className="h-full w-full"
           onMouseLeave={() => setHoverIndex(null)}
         >
