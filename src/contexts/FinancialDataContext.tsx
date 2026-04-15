@@ -410,7 +410,9 @@ export function FinancialDataProvider({
       const dedup = (rows: DwRow[]) => {
         const seen = new Set<string>();
         return rows.filter((r) => {
-          const k = `${r.DOCUMENTO ?? ""}|${r.PARCELA ?? ""}`;
+          // Inclui COD_PARCEIRO para evitar colisão entre fornecedores diferentes
+          // com o mesmo número de documento (ex: NUMDOC=1 para N fornecedores)
+          const k = `${r.COD_PARCEIRO ?? ""}|${r.DOCUMENTO ?? ""}|${r.PARCELA ?? ""}`;
           if (seen.has(k)) return false;
           seen.add(k);
           return true;
