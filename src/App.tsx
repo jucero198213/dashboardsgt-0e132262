@@ -15,6 +15,7 @@ import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
 import IndicadorDetalhe from "./pages/IndicadorDetalhe";
+import Indicadores from "./pages/Indicadores";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/contas-a-receber" element={<ProtectedRoute><ContasAReceber /></ProtectedRoute>} />
               <Route path="/contas-a-pagar"   element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
+              <Route path="/indicadores"      element={<ProtectedRoute><Indicadores /></ProtectedRoute>} />
               <Route path="/indicadores/:id"  element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
