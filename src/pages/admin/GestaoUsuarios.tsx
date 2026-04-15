@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Eye, EyeOff } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -29,9 +29,7 @@ export default function GestaoUsuarios() {
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<"user" | "admin">("user");
-  const [showPassword, setShowPassword] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -72,13 +70,8 @@ export default function GestaoUsuarios() {
   };
 
   const handleCreateUser = async () => {
-    if (!newEmail || !newPassword) {
-      setFeedback({ msg: "Preencha email e senha.", type: "err" });
-      setTimeout(() => setFeedback(null), 3000);
-      return;
-    }
-    if (newPassword.length < 6) {
-      setFeedback({ msg: "Senha deve ter no mínimo 6 caracteres.", type: "err" });
+    if (!newEmail) {
+      setFeedback({ msg: "Preencha o email.", type: "err" });
       setTimeout(() => setFeedback(null), 3000);
       return;
     }
@@ -86,25 +79,23 @@ export default function GestaoUsuarios() {
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, password: newPassword, role: newRole },
+        body: { email: newEmail, role: newRole },
       });
 
       if (error || data?.error) {
         setFeedback({ msg: data?.error || "Erro ao criar usuário.", type: "err" });
       } else {
-        setFeedback({ msg: "Usuário criado com sucesso!", type: "ok" });
+        setFeedback({ msg: "Usuário criado! Um email foi enviado para definir a senha.", type: "ok" });
         setShowModal(false);
         setNewEmail("");
-        setNewPassword("");
         setNewRole("user");
-        setShowPassword(false);
         load();
       }
     } catch (e) {
       setFeedback({ msg: "Erro ao criar usuário.", type: "err" });
     } finally {
       setCreating(false);
-      setTimeout(() => setFeedback(null), 3000);
+      setTimeout(() => setFeedback(null), 5000);
     }
   };
 
@@ -156,9 +147,9 @@ export default function GestaoUsuarios() {
             <div className="flex items-center justify-between border-b border-[var(--sgt-divider)] px-6 py-4">
               <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4 text-emerald-400" />
-                <h3 className="text-sm font-semibold sgt-text">Criar novo usuário</h3>
+                <h3 className="text-sm font-semibold sgt-text">Cadastrar novo usuário</h3>
               </div>
-              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewPassword(""); setNewRole("user"); setShowPassword(false); }}
+              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
                 className="rounded-lg p-1.5 transition-colors hover:bg-[var(--sgt-input-hover)]">
                 <X className="h-4 w-4 sgt-text-2" />
               </button>
@@ -166,6 +157,13 @@ export default function GestaoUsuarios() {
 
             {/* Body */}
             <div className="space-y-4 px-6 py-5">
+              {/* Info */}
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                <p className="text-[12px] text-amber-300 leading-relaxed">
+                  O usuário receberá um email para definir sua própria senha no primeiro acesso.
+                </p>
+              </div>
+
               {/* Email */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Email</label>
@@ -176,27 +174,6 @@ export default function GestaoUsuarios() {
                   placeholder="usuario@empresa.com.br"
                   className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
                 />
-              </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Senha</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 pr-10 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-primary)] transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
               </div>
 
               {/* Role */}
@@ -230,14 +207,14 @@ export default function GestaoUsuarios() {
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
               <button
-                onClick={() => { setShowModal(false); setNewEmail(""); setNewPassword(""); setNewRole("user"); setShowPassword(false); }}
+                onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
                 className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleCreateUser}
-                disabled={creating || !newEmail || !newPassword}
+                disabled={creating || !newEmail}
                 className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {creating ? (
@@ -245,7 +222,7 @@ export default function GestaoUsuarios() {
                 ) : (
                   <Plus className="h-3.5 w-3.5" />
                 )}
-                {creating ? "Criando..." : "Criar usuário"}
+                {creating ? "Cadastrando..." : "Cadastrar"}
               </button>
             </div>
           </div>

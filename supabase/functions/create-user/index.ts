@@ -11,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify caller is admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
@@ -24,7 +23,7 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the caller is an admin
+    // Verify caller is admin
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -36,7 +35,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check admin role
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: roleData } = await adminClient
       .from("user_roles")
@@ -52,26 +50,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, password, role } = await req.json();
+    const { email, role } = await req.json();
 
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email e senha são obrigatórios" }), {
+    if (!email) {
+      return new Response(JSON.stringify({ error: "Email é obrigatório" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "Senha deve ter no mínimo 6 caracteres" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Create user with random password (user will set their own via "Primeiro acesso")
+    const randomPassword = crypto.randomUUID() + "Aa1!";
 
-    // Create user via admin API (auto-confirms email)
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
-      password,
+      password: randomPassword,
       email_confirm: true,
     });
 
@@ -85,13 +78,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Set role if specified and different from default
+    // Set role if admin
     if (role === "admin" && newUser.user) {
       await adminClient
         .from("user_roles")
         .update({ role: "admin" })
         .eq("user_id", newUser.user.id);
     }
+
+    // Send password reset email so user can set their own password
+    await adminClient.auth.resetPasswordForEmail(email, {
+      redirectTo: `${supabaseUrl.replace('.supabase.co', '.lovable.app')}/login`,
+    });
 
     return new Response(
       JSON.stringify({ success: true, user_id: newUser.user?.id }),
