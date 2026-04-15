@@ -32,7 +32,7 @@ export default function Indicadores() {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* NAVBAR */}
-            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
+            <div className="hidden sm:flex items-center gap-2 md:gap-3">
               <div className="flex shrink-0 items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
                   <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
