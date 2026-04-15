@@ -29,7 +29,7 @@ export default function Indicadores() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          <div className="relative flex flex-col flex-1 min-h-0 gap-1.5 sm:gap-2 p-2 sm:p-2.5 lg:p-3 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* NAVBAR */}
             <div className="flex items-center gap-2 sm:gap-3">
