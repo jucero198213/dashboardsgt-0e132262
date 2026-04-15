@@ -127,8 +127,8 @@ export default function Indicadores() {
                               {/* CENTRO: ring grande */}
                               <div className="relative flex flex-1 items-center justify-center py-4">
                                 {/* Glow atrás do ring */}
-                                <div className="absolute h-36 w-36 rounded-full blur-2xl opacity-20"
-                                  style={{ background: abaixoDaMeta ? "rgba(52,211,153,0.6)" : "rgba(248,113,113,0.6)" }} />
+                                <div className="absolute inset-0 rounded-full blur-xl opacity-20"
+                                  style={{ background: abaixoDaMeta ? "rgba(52,211,153,1)" : "rgba(248,113,113,1)" }} />
                                 <div className="relative h-40 w-40">
                                   <svg viewBox="0 0 36 36" className="h-40 w-40 -rotate-90">
                                     {/* Track */}
