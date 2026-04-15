@@ -32,7 +32,8 @@ export default function Indicadores() {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden mx-auto w-full" style={{ maxWidth: DASHBOARD_MAX_W }}>
 
             {/* NAVBAR */}
-            <div className="hidden sm:flex items-center gap-2 md:gap-3">
+            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
+              {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
                   <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -44,8 +45,18 @@ export default function Indicadores() {
                 </span>
               </div>
 
+              {/* Badge tempo real */}
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+              </div>
+
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
+              {/* Label da tela + botão voltar */}
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
