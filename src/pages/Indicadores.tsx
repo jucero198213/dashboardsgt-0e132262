@@ -49,6 +49,7 @@ export default function Indicadores() {
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
+                <div className="h-4 w-px mx-1" style={{ background: "var(--sgt-divider)" }} />
                 <button
                   onClick={() => navigate("/dashboard")}
                   className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[11px] font-semibold text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white"
