@@ -435,10 +435,12 @@ export function FinancialDataProvider({
       const valorPago   = round2(
         dedup(cpPago).reduce((s, r) => s + safeRecVal(r), 0)
       );
-      // SALDO = D (em aberto total) + P (restante = parcela − pago), deduplicado
+      // SALDO = D (em aberto total) + P (restante = parcela − adiantamento − pago), deduplicado
+      // CP: VLR_REC_RAW = I.VLRPAG (sem DESADT) → precisamos subtrair DESADT separadamente
+      // CR: VLR_REC_RAW = I.VLRREC + DESADT     → já embutido, não subtrair de novo
       const saldoAPagar = round2(
         dedup(cpEmAberto).reduce((s, r) => s + safeParVal(r), 0) +
-        dedup(cpParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r)), 0)
+        dedup(cpParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r) - n(r.DESADT)), 0)
       );
 
       // A RECEBER: deduplicado — usa VLR_PAR_RAW, fallback VLR_PARCELA
