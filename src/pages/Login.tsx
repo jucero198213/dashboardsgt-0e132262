@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { supabase } from "@/integrations/supabase/client";
-import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
 
 export default function Login() {
   const { session, isLoading, signIn, isPasswordRecovery, clearPasswordRecovery } = useAuth();
