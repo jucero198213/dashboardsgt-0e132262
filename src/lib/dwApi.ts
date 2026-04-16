@@ -24,7 +24,13 @@ const SUPABASE_ANON_KEY =
 const TUNNEL_URL = "https://laundry-chubby-vintage-neighbors.trycloudflare.com";
 
 const LOCAL_API_URL =
-  ((import.meta as any).env?.VITE_DW_API_URL as string | undefined) ||
+  ((
+    import.meta as {
+      env?: {
+        VITE_DW_API_URL?: string;
+      };
+    }
+  ).env?.VITE_DW_API_URL ?? undefined) ||
   TUNNEL_URL;
 
 const ENDPOINT = LOCAL_API_URL

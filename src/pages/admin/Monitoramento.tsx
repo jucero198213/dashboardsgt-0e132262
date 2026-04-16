@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Activity, Shield, RefreshCw, Download, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 interface LogEntry {
   time: string;
@@ -50,7 +51,7 @@ function ResourceBar({ label, base, color }: { label: string; base: number; colo
 export default function Monitoramento() {
   const [filter, setFilter] = useState("all");
   const [logs, setLogs] = useState<LogEntry[]>(SAMPLE_LOGS);
-  const [authSession, setAuthSession] = useState<any>(null);
+  const [authSession, setAuthSession] = useState<Session | null>(null);
   const [count, setCount] = useState(847);
 
   useEffect(() => {

@@ -210,7 +210,7 @@ function loadCache(): CachedState | null {
       return null;
     }
     // Garante que todos os campos de kpiExtra existem
-    if (parsed.kpiExtra && typeof (parsed.kpiExtra as any).realizacaoCR === "undefined") {
+    if (parsed.kpiExtra && typeof parsed.kpiExtra.realizacaoCR === "undefined") {
       sessionStorage.removeItem(CACHE_KEY);
       return null;
     }
@@ -236,7 +236,7 @@ export function FinancialDataProvider({
     indicadores:  cached?.indicadores   ?? defaultIndicadores,
     chartPagar:   cached?.chartPagar    ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     chartReceber: cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
-    kpiExtra:     (cached as any)?.kpiExtra ?? defaultKpiExtra,
+    kpiExtra:     cached?.kpiExtra ?? defaultKpiExtra,
     dwFilter:     cached?.dwFilter      ?? defaultDwFilter,
     filiais:      [],
     empresas:     [],
@@ -664,7 +664,7 @@ export function FinancialDataProvider({
         kpiExtra,
         dwFilter: state.dwFilter,
         timestamp: Date.now(),
-      } as any);
+      });
 
       // INCREMENTAL: substitui dados antigos pelos novos com transição suave
       setState((prev) => ({

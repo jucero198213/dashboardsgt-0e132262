@@ -9,6 +9,7 @@ import { InsightsBlock } from "@/components/indicators/InsightsBlock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { KpiCardSkeleton } from "@/components/shared/CardSkeleton";
 import { useCallback, useMemo, useState } from "react";
+import type { ComponentType } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
@@ -63,16 +64,31 @@ const fmt = (d: string | Date | null | undefined): string => {
 };
 
 // ─── Tooltip premium ────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }: any) => {
+type TooltipPayloadItem = {
+  dataKey?: string | number;
+  color?: string;
+  name?: string;
+  value?: number;
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string | number;
+}) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-2xl border border-white/[0.1] px-5 py-4 shadow-[0_20px_50px_rgba(0,0,0,0.4)]">
       <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] dark:text-slate-600 text-slate-500">Dia {label}</p>
-      {payload.map((p: any) => (
-        <div key={p.dataKey} className="flex items-center gap-3">
+      {payload.map((p, idx) => (
+        <div key={p.dataKey ?? idx} className="flex items-center gap-3">
           <span className="h-[3px] w-5 rounded-full shrink-0" style={{ background: p.color }} />
           <p className="text-[12px] font-medium dark:text-slate-400 text-slate-600">{p.name}</p>
-          <p className="ml-auto pl-6 text-[13px] font-bold [color:var(--sgt-text-primary)]">{formatCurrency(p.value)}</p>
+          <p className="ml-auto pl-6 text-[13px] font-bold [color:var(--sgt-text-primary)]">{formatCurrency(typeof p.value === "number" ? p.value : 0)}</p>
         </div>
       ))}
     </div>
@@ -81,7 +97,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // ─── KPI Card — nível executivo ──────────────────────────────────────────────
 function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
-  label: string; value: string; subtitle: string; Icon: any; tone: Tone;
+  label: string; value: string; subtitle: string; Icon: ComponentType<{ className?: string }>; tone: Tone;
 }) {
   const t = TONE[tone];
   return (

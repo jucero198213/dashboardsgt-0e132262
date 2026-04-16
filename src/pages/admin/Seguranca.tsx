@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Shield, Monitor, Smartphone, Globe, Plus, Trash2, CheckCircle, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Session } from "@supabase/supabase-js";
 
 export default function Seguranca() {
   const { user, signOut } = useAuth();
@@ -9,7 +10,7 @@ export default function Seguranca() {
   const [ips, setIps] = useState(["192.168.0.0/16", "10.0.0.0/8", "187.45.0.0/24"]);
   const [pwdLen, setPwdLen] = useState(12);
   const [settings, setSettings] = useState({ uppercase: true, numbers: true, special: true, sms2fa: false, azureSSO: true, google: false });
-  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [currentSession, setCurrentSession] = useState<Session | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setCurrentSession(data.session));

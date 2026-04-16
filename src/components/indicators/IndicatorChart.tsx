@@ -1,5 +1,18 @@
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 
+type TooltipPayloadItem = {
+  dataKey?: string | number;
+  color?: string;
+  name?: string;
+  value?: number;
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string | number;
+};
+
 interface ChartDataPoint {
   name: string;
   real: number;
@@ -11,14 +24,14 @@ interface IndicatorChartProps {
   title?: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-white/10 bg-[#0f172a] px-4 py-3 shadow-xl">
       <p className="mb-2 text-xs font-semibold text-slate-400">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.dataKey} className="text-sm font-medium" style={{ color: p.color }}>
-          {p.name}: R$ {p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+      {payload.map((p, idx) => (
+        <p key={p.dataKey ?? idx} className="text-sm font-medium" style={{ color: p.color }}>
+          {p.name}: R$ {(typeof p.value === "number" ? p.value : 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
         </p>
       ))}
     </div>
