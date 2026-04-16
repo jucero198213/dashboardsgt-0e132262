@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
 
 export default function Login() {
-  const { session, isLoading, signIn, isPasswordRecovery, clearPasswordRecovery } = useAuth();
+  const { session, isLoading, signIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [email,       setEmail]       = useState("");
@@ -33,10 +33,7 @@ export default function Login() {
     </div>
   );
 
-  // If user arrived via recovery link, show password set form
-  const isRecovery = isPasswordRecovery;
-
-  if (session && !isRecovery) return <Navigate to="/dashboard" replace />;
+  if (session) return <Navigate to="/dashboard" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
