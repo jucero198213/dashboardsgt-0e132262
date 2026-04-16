@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2 } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2, BarChart3, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+
+type AppPage = "dashboard" | "indicadores";
 
 interface SupaUser {
   id: string;
@@ -10,6 +12,7 @@ interface SupaUser {
   last_sign_in_at: string | null;
   role: "admin" | "user";
   confirmed: boolean;
+  pages: Set<AppPage>;
 }
 
 const roleStyle: Record<string, string> = {
