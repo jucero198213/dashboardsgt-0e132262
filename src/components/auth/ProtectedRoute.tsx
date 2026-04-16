@@ -1,15 +1,18 @@
 import { Navigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
+import { usePagePermissions, AppPage } from "@/hooks/usePagePermissions";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: AppRole;
+  requiredPage?: AppPage;
 }
 
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requiredRole, requiredPage }: ProtectedRouteProps) {
   const { session, role, isLoading } = useAuth();
+  const { canAccess, isLoading: permsLoading } = usePagePermissions();
 
-  if (isLoading) {
+  if (isLoading || (requiredPage && permsLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#060912]">
         <div className="flex flex-col items-center gap-4">
@@ -25,7 +28,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (requiredRole && role !== requiredRole && role !== "admin") {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/home" replace />;
+  }
+
+  if (requiredPage && !canAccess(requiredPage)) {
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;

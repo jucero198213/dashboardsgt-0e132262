@@ -4,7 +4,12 @@ import { Link } from "react-router-dom";
 import { LogOut, Shield, User, ChevronDown, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
-export function UserMenu() {
+interface UserMenuProps {
+  /** Mostrar link da área administrativa (default: false). Use true apenas na Home. */
+  showAdmin?: boolean;
+}
+
+export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
   const { user, isAdmin, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
@@ -87,7 +92,7 @@ export function UserMenu() {
             )}
           </button>
 
-          {isAdmin && (
+          {isAdmin && showAdmin && (
             <Link
               to="/admin"
               onClick={() => setOpen(false)}
