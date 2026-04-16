@@ -180,7 +180,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v6";
+const CACHE_KEY = "dw_financial_cache_v7";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -207,6 +207,9 @@ function loadCache(): CachedState | null {
     sessionStorage.removeItem("dw_financial_cache_v1");
     sessionStorage.removeItem("dw_financial_cache_v2");
     sessionStorage.removeItem("dw_financial_cache_v3");
+    sessionStorage.removeItem("dw_financial_cache_v4");
+    sessionStorage.removeItem("dw_financial_cache_v5");
+    sessionStorage.removeItem("dw_financial_cache_v6");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -669,8 +672,7 @@ export function FinancialDataProvider({
           resumo, contasReceber, contasPagar, indicadores,
           chartPagar, chartReceber, kpiExtra,
           dwRawData: data,
-          dwChartData: chartData,
-          // faturamento NÃO sobrescrito aqui — será atualizado pelo fetch sequencial abaixo
+          dwChartData: prev.dwChartData,  // preserva dados anteriores — preenchido pelo background fetch
         };
       });
 
