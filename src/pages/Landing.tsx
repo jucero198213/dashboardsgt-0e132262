@@ -40,7 +40,7 @@ export default function Landing() {
     </div>
   );
 
-  if (session) return <Navigate to="/dashboard" replace />;
+  if (session) return <Navigate to="/home" replace />;
 
   return (
     <div className="min-h-screen overflow-x-hidden sgt-bg-base sgt-text">
