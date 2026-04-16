@@ -180,7 +180,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v7";
+const CACHE_KEY = "dw_financial_cache_v8";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -210,6 +210,7 @@ function loadCache(): CachedState | null {
     sessionStorage.removeItem("dw_financial_cache_v4");
     sessionStorage.removeItem("dw_financial_cache_v5");
     sessionStorage.removeItem("dw_financial_cache_v6");
+    sessionStorage.removeItem("dw_financial_cache_v7");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -555,7 +556,12 @@ export function FinancialDataProvider({
         "Pneu":            ["28"],
       };
 
-      const baseIndicadores = allCP;
+      // Base indicadores: CP filtrado por DATA_EMISSAO no período selecionado
+      // (indicadores medem despesas EMITIDAS no período, não vencidas/pagas)
+      const baseIndicadores = allCP.filter((r) => {
+        const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
+        return em ? em >= di && em <= df : false;
+      });
       const totalBaseInd = sumCol(baseIndicadores, "VLR_PARCELA");
 
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
