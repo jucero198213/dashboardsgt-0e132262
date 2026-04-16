@@ -162,7 +162,7 @@ export default function Home() {
       icon: BarChart3,
       title: "Dashboard",
       description:
-        "Acompanhe a visão geral do sistema, acessos rápidos e informações centrais do Workflow SGT.",
+        "Visualize em tempo real contas a pagar, a receber, saldo líquido, inadimplência e evolução mensal do fluxo de caixa.",
       cta: "Acessar dashboard",
       onClick: () => navigate("/dashboard"),
       tone: "amber" as const,
