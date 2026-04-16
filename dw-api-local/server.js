@@ -45,20 +45,28 @@ const dbConfig = {
 // ── Pool de conexões (singleton com reconexão automática) ─────────────────────
 let pool = null;
 
+async function destroyPool() {
+  if (pool) {
+    try { await pool.close(); } catch { /* ignora */ }
+    pool = null;
+  }
+}
+
 async function getPool() {
   if (pool) {
     try {
-      await pool.request().query("SELECT 1"); // verifica se ainda está vivo
+      await pool.request().query("SELECT 1");
       return pool;
-    } catch {
-      console.warn("⚠️  Pool morto, reconectando...");
-      pool = null;
+    } catch (e) {
+      console.warn("⚠️  Pool morto (" + e.message + "), reconectando...");
+      await destroyPool();
     }
   }
+  console.log("🔄 Criando novo pool...");
   pool = await sql.connect(dbConfig);
-  pool.on("error", (err) => {
+  pool.on("error", async (err) => {
     console.error("❌ Erro no pool:", err.message);
-    pool = null; // força reconexão na próxima chamada
+    await destroyPool(); // fecha limpo e força reconexão
   });
   console.log("✅ Conectado ao SQL Server:", process.env.MSSQL_SERVER);
   return pool;
@@ -480,7 +488,12 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 
   } catch (err) {
     console.error("❌ Erro:", err.message);
-    return res.status(500).json({ error: err.message });
+    // ECONNRESET / ECONNABORTED: SQL Server derrubou a conexão — limpa o pool
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      console.warn("🔄 ECONNRESET detectado — destruindo pool para reconexão na próxima chamada");
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
   }
 });
 
