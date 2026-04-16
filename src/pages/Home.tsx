@@ -11,22 +11,21 @@ import {
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
+import sgtLogo from "@/assets/sgt-logo.png";
 
 /* ---------------------------------------------------------------- */
-/*  Slot pronto para receber a logo SGT real depois.                 */
-/*  Para trocar: substitua o conteúdo deste componente por           */
-/*    <img src={logoSgt} alt="SGT" className="h-12 w-auto" />        */
+/*  Logo SGT oficial — PNG vetorizado com fundo transparente.        */
+/*  Para trocar futuramente, basta substituir o arquivo em            */
+/*  src/assets/sgt-logo.png mantendo o mesmo nome.                    */
 /* ---------------------------------------------------------------- */
 function SgtLogoSlot({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={`flex items-center justify-center rounded-2xl border border-amber-400/25 bg-amber-400/[0.06] px-5 py-2.5 ${className}`}
-      aria-label="SGT"
-    >
-      <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-2xl font-black tracking-[0.32em] text-transparent">
-        SGT
-      </span>
-    </div>
+    <img
+      src={sgtLogo}
+      alt="SGT — Sistema de Gestão em Transporte"
+      className={`h-20 w-auto select-none drop-shadow-[0_8px_24px_rgba(245,158,11,0.25)] sm:h-24 lg:h-28 ${className}`}
+      draggable={false}
+    />
   );
 }
 
