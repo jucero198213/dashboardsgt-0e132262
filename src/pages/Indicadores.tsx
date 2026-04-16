@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, TrendingDown, DollarSign, RefreshCw, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -75,7 +75,7 @@ const INDICATOR_IDENTITY: Record<string, {
 
 export default function Indicadores() {
   const navigate = useNavigate();
-  const { indicadores, isFetchingDw, isProcessed } = useFinancialData();
+  const { indicadores, isFetchingDw, isProcessed, faturamento } = useFinancialData();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -318,60 +318,116 @@ export default function Indicadores() {
               </div>
 
               {/* COLUNA DIREITA — Faturamento */}
-              <div
-                className="w-[280px] xl:w-[320px] shrink-0 rounded-[20px] border flex flex-col p-4 gap-4"
-                style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
-              >
-                <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-500 mb-1">
-                    Visão geral
-                  </p>
-                  <p className="text-[20px] font-extrabold tracking-[-0.04em] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800">
-                    Faturamento
-                  </p>
-                </div>
+              {(() => {
+                const totalFat = faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0);
+                const formatBRL = (v: number) =>
+                  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+                const maxFrete = Math.max(...faturamento.map((r) => r.FRETE_TOTAL ?? 0), 1);
+                const BAR_COLORS = [
+                  "#f59e0b", "#22d3ee", "#a78bfa", "#34d399",
+                  "#fb923c", "#f472b6", "#60a5fa", "#94a3b8",
+                ];
 
-                <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
-
-                {[
-                  { label: "Faturamento Bruto",   icon: DollarSign,  color: "emerald" },
-                  { label: "Faturamento Líquido",  icon: TrendingUp,  color: "cyan"    },
-                  { label: "Deduções",             icon: TrendingDown, color: "amber"  },
-                  { label: "Margem",               icon: BarChart3,   color: "violet"  },
-                ].map(({ label, icon: Icon, color }) => (
+                return (
                   <div
-                    key={label}
-                    className="flex flex-col gap-2 rounded-[12px] border p-3"
-                    style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-section)" }}
+                    className="w-[280px] xl:w-[320px] shrink-0 rounded-[20px] border flex flex-col p-4 gap-3"
+                    style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] dark:text-slate-400 text-slate-500">
-                        {label}
-                      </span>
-                      <div className="flex h-6 w-6 items-center justify-center rounded-lg" style={{ background: "var(--sgt-input-bg)" }}>
-                        <Icon className="h-3 w-3 dark:text-slate-400 text-slate-500" />
+                    {/* Cabeçalho */}
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-500 mb-1">
+                        Visão geral
+                      </p>
+                      <p className="text-[20px] font-extrabold tracking-[-0.04em] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800">
+                        Faturamento
+                      </p>
+                    </div>
+
+                    <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+
+                    {/* Card Faturamento do Mês */}
+                    <div
+                      className="flex flex-col gap-2 rounded-[12px] border p-3"
+                      style={{ borderColor: "rgba(251,191,36,0.25)", background: "rgba(251,191,36,0.05)" }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+                          Faturamento do Mês
+                        </span>
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg"
+                          style={{ background: "rgba(251,191,36,0.12)" }}>
+                          <DollarSign className="h-3 w-3 text-amber-400" />
+                        </div>
                       </div>
+                      {isFetchingDw && faturamento.length === 0 ? (
+                        <div className="h-7 w-4/5 rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                      ) : (
+                        <p className="text-[18px] font-extrabold tracking-[-0.03em] text-amber-300 tabular-nums leading-none">
+                          {formatBRL(totalFat)}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                      <div className="h-6 w-3/4 rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
-                      <div className="h-3 w-1/2 rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
-                    </div>
-                    <div className="flex items-center gap-1.5 rounded-full w-fit px-2 py-0.5 border" style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-input-bg)" }}>
-                      <RefreshCw className="h-2.5 w-2.5 text-slate-500" />
-                      <span className="text-[9px] text-slate-500 font-medium">Em breve</span>
+
+                    <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+
+                    {/* Gráfico barras horizontais por grupo */}
+                    <div className="flex flex-col gap-1 overflow-hidden">
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.22em] dark:text-slate-500 text-slate-500 mb-1">
+                        Por grupo de cliente
+                      </p>
+
+                      {isFetchingDw && faturamento.length === 0 ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="flex flex-col gap-1">
+                            <div className="h-3 w-2/3 rounded-sm animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                            <div className="h-2 w-full rounded-full animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                          </div>
+                        ))
+                      ) : faturamento.length === 0 ? (
+                        <p className="text-[10px] dark:text-slate-600 text-slate-400 italic">Sem dados no período</p>
+                      ) : (
+                        <div className="flex flex-col gap-2.5 overflow-y-auto pr-1" style={{ maxHeight: "calc(100dvh - 340px)" }}>
+                          {faturamento.map((row, idx) => {
+                            const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
+                            const color = BAR_COLORS[idx % BAR_COLORS.length];
+                            const colorRgb = color; // used inline
+                            return (
+                              <div key={idx} className="flex flex-col gap-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span
+                                    className="text-[10px] font-semibold truncate dark:text-slate-300 text-slate-600"
+                                    style={{ maxWidth: "62%" }}
+                                    title={row.DESCRI ?? "Sem grupo"}
+                                  >
+                                    {row.DESCRI ?? "Sem grupo"}
+                                  </span>
+                                  <span className="text-[9px] font-bold tabular-nums shrink-0" style={{ color }}>
+                                    {(row.PERCENTUAL ?? 0).toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="h-[5px] w-full rounded-full overflow-hidden"
+                                  style={{ background: "var(--sgt-progress-track)" }}>
+                                  <div
+                                    className="h-full rounded-full transition-all duration-700"
+                                    style={{
+                                      width: `${barW}%`,
+                                      background: color,
+                                      boxShadow: `0 0 6px ${color}55`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-[9px] tabular-nums dark:text-slate-500 text-slate-400">
+                                  {formatBRL(row.FRETE_TOTAL)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
-
-                {/* Gráfico placeholder */}
-                <div className="flex-1 rounded-[12px] border flex flex-col items-center justify-center gap-2 min-h-[100px]"
-                  style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-section)", borderStyle: "dashed" }}>
-                  <BarChart3 className="h-6 w-6 text-slate-600" />
-                  <p className="text-[10px] text-slate-600 font-medium text-center px-4">
-                    Gráfico de faturamento<br />disponível em breve
-                  </p>
-                </div>
-              </div>
+                );
+              })()}
 
             </div>
           </div>

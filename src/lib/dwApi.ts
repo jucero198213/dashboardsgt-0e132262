@@ -87,6 +87,16 @@ export interface DwFetchResponse {
   data: DwRow[];
 }
 
+export interface FaturamentoRow {
+  FRETE_TOTAL: number;
+  DESCRI: string | null;
+  PERCENTUAL: number;
+}
+
+export interface FaturamentoResponse {
+  data: FaturamentoRow[];
+}
+
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 async function callEdge<T>(body: Record<string, unknown>): Promise<T> {
@@ -130,4 +140,12 @@ export async function fetchDwData(params: {
   empresa?: string | null;
 }): Promise<DwFetchResponse> {
   return callEdge<DwFetchResponse>({ action: "fetch", ...params });
+}
+
+/** Busca faturamento por grupo de cliente (VW_FAT_ICMS) */
+export async function fetchFaturamento(params: {
+  dataInicio: string;
+  dataFim: string;
+}): Promise<FaturamentoResponse> {
+  return callEdge<FaturamentoResponse>({ action: "faturamento", ...params });
 }

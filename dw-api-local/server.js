@@ -299,7 +299,44 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
       return res.json({ data: result.recordset });
     }
 
-    return res.status(400).json({ error: "action inválida. Use 'fetch' ou 'filters'" });
+    // ── FATURAMENTO ───────────────────────────────────────────────────────────
+    if (action === "faturamento") {
+      if (!dataInicio || !dataFim) {
+        return res.status(400).json({ error: "dataInicio e dataFim são obrigatórios" });
+      }
+
+      const dbReq = p.request();
+      dbReq.input("dataInicio", sql.DateTime, new Date(dataInicio));
+      dbReq.input("dataFim",    sql.DateTime, new Date(dataFim));
+
+      const query = `
+        SELECT
+          SUM(T.TOTFRE)                                                            AS FRETE_TOTAL,
+          CGR.DESCRI,
+          SUM(T.TOTFRE) * 100.0 / NULLIF(SUM(SUM(T.TOTFRE)) OVER (), 0)           AS PERCENTUAL
+        FROM VW_FAT_ICMS T
+          LEFT OUTER JOIN RODCLI CLI ON T.CODCLIFOR = CLI.CODCLIFOR
+          LEFT OUTER JOIN RODCON CON ON T.CODFIL  = CON.CODFIL
+                                     AND T.SERIE   = CON.SERCON
+                                     AND T.CODIGO  = CON.CODCON
+          LEFT OUTER JOIN ESTNOT EST ON T.CODFIL  = EST.CODFIL
+                                     AND T.SERIE   = EST.SERSUB
+                                     AND T.CODIGO  = EST.CODIGO
+          LEFT OUTER JOIN RODORD ORD ON EST.CODIGO = ORD.CODNOT
+                                     AND EST.SERSUB = ORD.SERNOT
+                                     AND EST.CODFIL = ORD.FILNOT
+          LEFT OUTER JOIN RODCGR CGR ON CLI.CODCGR = CGR.CODCGR
+        WHERE T.DATA >= @dataInicio
+          AND T.DATA <  DATEADD(day, 1, @dataFim)
+        GROUP BY CGR.DESCRI
+        ORDER BY FRETE_TOTAL DESC
+      `;
+
+      const result = await dbReq.query(query);
+      return res.json({ data: result.recordset });
+    }
+
+    return res.status(400).json({ error: "action inválida. Use 'fetch', 'filters' ou 'faturamento'" });
 
   } catch (err) {
     console.error("❌ Erro:", err.message);

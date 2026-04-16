@@ -7,8 +7,10 @@ import type {
 import {
   loadDwFilters,
   fetchDwData,
+  fetchFaturamento,
   type FilterOption,
   type DwRow,
+  type FaturamentoRow,
 } from "@/lib/dwApi";
 
 export interface IndicadorComparativo {
@@ -112,6 +114,7 @@ interface FinancialDataState {
   dwError:           string | null;
   dwRawData:         DwRow[];   // ← dados brutos para drill-down por indicador
   dwChartData:       DwRow[];   // ← dados anuais para gráficos de evolução
+  faturamento:       FaturamentoRow[]; // ← faturamento por grupo de cliente
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -175,7 +178,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v5";
+const CACHE_KEY = "dw_financial_cache_v6";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -185,6 +188,7 @@ interface CachedState {
   chartPagar: DadosMensais;
   chartReceber: DadosMensais;
   kpiExtra?: KpiExtra;
+  faturamento: FaturamentoRow[];
   dwFilter: DwFilter;
   timestamp: number;
 }
@@ -244,6 +248,7 @@ export function FinancialDataProvider({
     dwError:      null,
     dwRawData:    [],
     dwChartData:  [],
+    faturamento:  cached?.faturamento ?? [],
   });
 
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
@@ -292,12 +297,19 @@ export function FinancialDataProvider({
     // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
     setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
     try {
-      const { data } = await fetchDwData({
-        dataInicio: state.dwFilter.dataInicio,
-        dataFim:    state.dwFilter.dataFim,
-        filial:     state.dwFilter.filial,
-        empresa:    state.dwFilter.empresa,
-      });
+      const [{ data }, fatResult] = await Promise.all([
+        fetchDwData({
+          dataInicio: state.dwFilter.dataInicio,
+          dataFim:    state.dwFilter.dataFim,
+          filial:     state.dwFilter.filial,
+          empresa:    state.dwFilter.empresa,
+        }),
+        fetchFaturamento({
+          dataInicio: state.dwFilter.dataInicio,
+          dataFim:    state.dwFilter.dataFim,
+        }).catch(() => ({ data: [] as import("@/lib/dwApi").FaturamentoRow[] })),
+      ]);
+      const faturamento = fatResult.data;
 
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
@@ -662,6 +674,7 @@ export function FinancialDataProvider({
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber,
         kpiExtra,
+        faturamento,
         dwFilter: state.dwFilter,
         timestamp: Date.now(),
       });
@@ -673,6 +686,7 @@ export function FinancialDataProvider({
         isProcessed:  true,
         resumo, contasReceber, contasPagar, indicadores,
         chartPagar, chartReceber, kpiExtra,
+        faturamento,
         dwRawData: data,
         dwChartData: chartData,
       }));
