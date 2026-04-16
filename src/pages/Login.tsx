@@ -33,7 +33,7 @@ export default function Login() {
     </div>
   );
 
-  if (session) return <Navigate to="/dashboard" replace />;
+  if (session) return <Navigate to="/home" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ export default function Login() {
         // Sign in automatically
         setTimeout(async () => {
           await signIn(faEmail, faPassword);
-          navigate("/dashboard");
+          navigate("/home");
         }, 1500);
       }
     } catch {

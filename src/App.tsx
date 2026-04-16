@@ -10,6 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
+import Home from "./pages/Home";
 import PainelAdministrativo from "./pages/admin/PainelAdministrativo";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
@@ -31,11 +32,12 @@ const App = () => (
             <Routes>
               <Route path="/"         element={<Landing />} />
               <Route path="/login"    element={<Login />} />
-              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/contas-a-receber" element={<ProtectedRoute><ContasAReceber /></ProtectedRoute>} />
-              <Route path="/contas-a-pagar"   element={<ProtectedRoute><ContasAPagar /></ProtectedRoute>} />
-              <Route path="/indicadores"      element={<ProtectedRoute><Indicadores /></ProtectedRoute>} />
-              <Route path="/indicadores/:id"  element={<ProtectedRoute><IndicadorDetalhe /></ProtectedRoute>} />
+              <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute requiredPage="dashboard"><Index /></ProtectedRoute>} />
+              <Route path="/contas-a-receber" element={<ProtectedRoute requiredPage="dashboard"><ContasAReceber /></ProtectedRoute>} />
+              <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="dashboard"><ContasAPagar /></ProtectedRoute>} />
+              <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><Indicadores /></ProtectedRoute>} />
+              <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><IndicadorDetalhe /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
