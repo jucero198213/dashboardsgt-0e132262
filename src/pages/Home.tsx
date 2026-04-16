@@ -7,7 +7,7 @@ import {
   ArrowRight,
   ChevronDown,
   ExternalLink,
-  Workflow,
+  Home as HomeIcon,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
