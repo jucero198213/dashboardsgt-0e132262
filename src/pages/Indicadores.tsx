@@ -371,8 +371,8 @@ export default function Indicadores() {
                     <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
                     {/* Gráfico barras horizontais por grupo */}
-                    <div className="flex flex-col gap-1 overflow-hidden flex-1 min-h-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] dark:text-slate-500 text-slate-500 mb-2">
+                    <div className="flex flex-col gap-1 flex-1 min-h-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] dark:text-slate-500 text-slate-500 mb-2 shrink-0">
                         Por grupo de cliente
                       </p>
 
@@ -386,7 +386,7 @@ export default function Indicadores() {
                       ) : faturamento.length === 0 ? (
                         <p className="text-[12px] dark:text-slate-600 text-slate-400 italic">Sem dados no período</p>
                       ) : (
-                        <div className="flex flex-col gap-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(100dvh - 340px)" }}>
+                        <div className="flex flex-col gap-4 overflow-y-auto pr-1 flex-1 min-h-0">
                           {faturamento.map((row, idx) => {
                             const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
                             const color = BAR_COLORS[idx % BAR_COLORS.length];
