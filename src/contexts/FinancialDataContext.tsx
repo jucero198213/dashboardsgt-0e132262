@@ -577,27 +577,8 @@ export function FinancialDataProvider({
         }
       );
 
-      // ── Dados mensais para gráficos — busca o ANO INTEIRO ─────────────────
-      // Extrai o ano do filtro e faz uma segunda query cobrindo jan-dez
+      // ── Dados mensais para gráficos — array vazio inicial, preenchido em background
       const anoFiltro = state.dwFilter.dataInicio.substring(0, 4);
-      const { data: chartData } = await fetchDwData({
-        dataInicio: `${anoFiltro}-01-01`,
-        dataFim:    `${anoFiltro}-12-31`,
-        filial:     state.dwFilter.filial,
-        empresa:    state.dwFilter.empresa,
-      });
-
-      const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
-      const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
-
-      // Previsto CR → L/P/D + DATA_VENCIMENTO (= card A RECEBER)
-      const chartCrPrevisto  = chartAllCR.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
-      // Recebido CR → L/P + hasPag + DATA_PAGAMENTO (= card RECEBIDO)
-      const chartCrRecebido  = chartAllCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      // Previsto CP → L/P/D + DATA_VENCIMENTO (= card A PAGAR)
-      const chartCpPrevisto  = chartAllCP.filter((r) => sit(r) === "L" || sit(r) === "P" || sit(r) === "D");
-      // Pago CP → L/P + hasPag + DATA_PAGAMENTO (= card PAGO)
-      const chartCpPago      = chartAllCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
 
       const extractMonth = (dateVal: unknown): number => {
         if (dateVal == null) return -1;
@@ -622,15 +603,16 @@ export function FinancialDataProvider({
         return result.map(round2);
       };
 
+      // Gráficos inicializam zerados — serão preenchidos após o background fetch
       const chartPagar: DadosMensais = {
-        previsto:  groupByMonth(chartCpPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
-        realizado: groupByMonth(chartCpPago,     "VLR_PAGO",    "DATA_PAGAMENTO"),
+        previsto:  new Array(12).fill(0),
+        realizado: new Array(12).fill(0),
         ano: anoFiltro,
       };
 
       const chartReceber: DadosMensais = {
-        previsto:  groupByMonth(chartCrPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"),
-        realizado: groupByMonth(chartCrRecebido, "VLR_PAGO",    "DATA_PAGAMENTO"),
+        previsto:  new Array(12).fill(0),
+        realizado: new Array(12).fill(0),
         ano: anoFiltro,
       };
 
@@ -692,16 +674,48 @@ export function FinancialDataProvider({
         };
       });
 
-      // ── 2. Faturamento: dispara APÓS o fetch principal terminar ───────────
-      //    Sequencial no banco (evita concorrência), mas assíncrono na UI
-      //    (isFetchingDw já voltou para false — cards já estão visíveis)
-      const fatSnap = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim };
+      // ── 2. Queries secundárias em cadeia (sequencial, não bloqueiam a UI) ──
+      //    Ordem: faturamento → gráfico anual
+      //    Cada uma dispara só quando a anterior terminar, evitando concorrência no pool.
+      const fatSnap    = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim };
+      const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
+
       fetchFaturamento(fatSnap)
         .then(({ data: fatData }) => {
           setState((prev) => ({ ...prev, faturamento: fatData }));
         })
         .catch((err) => {
           console.warn("[DW] Faturamento erro (não crítico):", err?.message ?? err);
+        })
+        .finally(() => {
+          // Gráfico anual: só dispara depois que faturamento terminar (ok ou erro)
+          fetchDwData(chartSnap)
+            .then(({ data: chartData }) => {
+              const chartAllCP = chartData.filter((r) => r.ORIGEM === "CP");
+              const chartAllCR = chartData.filter((r) => r.ORIGEM === "CR");
+              const chartCrPrevisto = chartAllCR.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return s === "L" || s === "P" || s === "D"; });
+              const chartCrRecebido = chartAllCR.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return (s === "L" || s === "P") && r.DATA_PAGAMENTO != null && r.DATA_PAGAMENTO !== ""; });
+              const chartCpPrevisto = chartAllCP.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return s === "L" || s === "P" || s === "D"; });
+              const chartCpPago     = chartAllCP.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return (s === "L" || s === "P") && r.DATA_PAGAMENTO != null && r.DATA_PAGAMENTO !== ""; });
+              const em = (dateVal: unknown): number => {
+                if (dateVal == null) return -1;
+                const s = String(dateVal).trim();
+                const m = s.match(/^\d{4}-(\d{2})/) ?? s.match(/^\d{2}\/(\d{2})\//);
+                return m ? parseInt(m[1], 10) - 1 : -1;
+              };
+              const gbm = (rows: DwRow[], field: "VLR_PARCELA" | "VLR_PAGO", df: "DATA_VENCIMENTO" | "DATA_PAGAMENTO" = "DATA_VENCIMENTO") => {
+                const res = new Array(12).fill(0);
+                for (const r of rows) { const mi = em(r[df]); if (mi >= 0) res[mi] += (r[field] ?? 0); }
+                return res.map((v) => Math.round(v * 100) / 100);
+              };
+              setState((prev) => ({
+                ...prev,
+                chartPagar:   { previsto: gbm(chartCpPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"), realizado: gbm(chartCpPago, "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoFiltro },
+                chartReceber: { previsto: gbm(chartCrPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"), realizado: gbm(chartCrRecebido, "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoFiltro },
+                dwChartData: chartData,
+              }));
+            })
+            .catch((err) => console.warn("[DW] Gráfico anual erro (não crítico):", err?.message ?? err));
         });
 
     } catch (err) {
