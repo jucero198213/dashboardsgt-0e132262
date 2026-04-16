@@ -16,19 +16,16 @@ export default function Login() {
   const [error,       setError]       = useState<string | null>(null);
   const [submitting,  setSubmitting]  = useState(false);
 
-  // Primeiro acesso / reset
-  const [mode, setMode] = useState<"login" | "first-access" | "reset-password">("login");
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetError, setResetError] = useState<string | null>(null);
-
-  // Set new password (from reset link)
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [settingPassword, setSettingPassword] = useState(false);
-  const [passwordSet, setPasswordSet] = useState(false);
+  // Primeiro acesso
+  const [mode, setMode] = useState<"login" | "first-access">("login");
+  const [faEmail, setFaEmail] = useState("");
+  const [faCode, setFaCode] = useState("");
+  const [faPassword, setFaPassword] = useState("");
+  const [faConfirm, setFaConfirm] = useState("");
+  const [faShowPass, setFaShowPass] = useState(false);
+  const [faLoading, setFaLoading] = useState(false);
+  const [faError, setFaError] = useState<string | null>(null);
+  const [faSuccess, setFaSuccess] = useState(false);
 
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center sgt-bg-base">
