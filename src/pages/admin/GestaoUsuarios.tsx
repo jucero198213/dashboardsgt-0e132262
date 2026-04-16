@@ -111,6 +111,8 @@ export default function GestaoUsuarios() {
     setFeedback({ msg: "Permissão atualizada.", type: "ok" });
     setTimeout(() => setFeedback(null), 2000);
   };
+
+  const handleDeleteUser = async (userId: string) => {
     setDeleting(true);
     try {
       const { data, error } = await supabase.functions.invoke("delete-user", {
