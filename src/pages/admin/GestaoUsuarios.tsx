@@ -72,6 +72,27 @@ export default function GestaoUsuarios() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { user_id: userId },
+      });
+      if (error || data?.error) {
+        setFeedback({ msg: data?.error || "Erro ao excluir usuário.", type: "err" });
+      } else {
+        setFeedback({ msg: "Usuário excluído com sucesso.", type: "ok" });
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+      }
+    } catch {
+      setFeedback({ msg: "Erro ao excluir usuário.", type: "err" });
+    } finally {
+      setDeleting(false);
+      setDeleteConfirm(null);
+      setTimeout(() => setFeedback(null), 3000);
+    }
+  };
+
   const handleCreateUser = async () => {
     if (!newEmail) {
       setFeedback({ msg: "Preencha o email.", type: "err" });
