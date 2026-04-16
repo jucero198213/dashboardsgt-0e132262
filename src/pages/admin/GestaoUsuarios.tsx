@@ -30,6 +30,7 @@ export default function GestaoUsuarios() {
   const [creating, setCreating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"user" | "admin">("user");
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -85,8 +86,8 @@ export default function GestaoUsuarios() {
       if (error || data?.error) {
         setFeedback({ msg: data?.error || "Erro ao criar usuário.", type: "err" });
       } else {
-        setFeedback({ msg: "Usuário criado! Um email foi enviado para definir a senha.", type: "ok" });
-        setShowModal(false);
+        setGeneratedCode(data?.access_code || null);
+        setFeedback({ msg: "Usuário criado com sucesso!", type: "ok" });
         setNewEmail("");
         setNewRole("user");
         load();
