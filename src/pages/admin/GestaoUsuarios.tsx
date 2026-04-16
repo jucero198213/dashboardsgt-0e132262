@@ -40,7 +40,18 @@ export default function GestaoUsuarios() {
   const load = async () => {
     setLoading(true);
     try {
-      const { data: roles } = await supabase.from("user_roles").select("user_id, role, created_at");
+      const [{ data: roles }, { data: pagePerms }] = await Promise.all([
+        supabase.from("user_roles").select("user_id, role, created_at"),
+        supabase.from("page_permissions").select("user_id, page"),
+      ]);
+
+      const pagesByUser = new Map<string, Set<AppPage>>();
+      (pagePerms ?? []).forEach((p) => {
+        const set = pagesByUser.get(p.user_id) ?? new Set<AppPage>();
+        set.add(p.page as AppPage);
+        pagesByUser.set(p.user_id, set);
+      });
+
       const mapped: SupaUser[] = (roles ?? []).map((r, idx) => ({
         id:              r.user_id,
         email:           r.user_id === me?.id ? (me?.email ?? "—") : `usuário-${idx + 1}@sgtlog.com.br`,
@@ -48,6 +59,7 @@ export default function GestaoUsuarios() {
         last_sign_in_at: null,
         role:            r.role as "admin" | "user",
         confirmed:       true,
+        pages:           pagesByUser.get(r.user_id) ?? new Set<AppPage>(),
       }));
       if (me && !mapped.find((u) => u.id === me.id)) {
         mapped.unshift({
@@ -55,6 +67,7 @@ export default function GestaoUsuarios() {
           created_at: me.created_at ?? new Date().toISOString(),
           last_sign_in_at: me.last_sign_in_at ?? null,
           role: "admin", confirmed: !!me.email_confirmed_at,
+          pages: new Set<AppPage>(["dashboard", "indicadores"]),
         });
       }
       setUsers(mapped);
