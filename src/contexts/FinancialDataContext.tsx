@@ -299,28 +299,15 @@ export function FinancialDataProvider({
     // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
     setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
 
-    // ── Faturamento: dispara em background, NÃO bloqueia os KPI cards ────────
-    //    Se timeout ou erro, o painel continua funcionando normalmente.
-    const dwFilterSnapshot = { ...state.dwFilter };
-    fetchFaturamento({
-      dataInicio: dwFilterSnapshot.dataInicio,
-      dataFim:    dwFilterSnapshot.dataFim,
-    })
-      .then(({ data: fatData }) => {
-        setState((prev) => ({ ...prev, faturamento: fatData }));
-      })
-      .catch((err) => {
-        console.warn("[DW] Faturamento timeout/erro (não crítico):", err?.message ?? err);
-      });
-
     try {
+      // ── 1. Fetch principal — KPI cards (prioridade máxima) ─────────────────
       const { data } = await fetchDwData({
         dataInicio: state.dwFilter.dataInicio,
         dataFim:    state.dwFilter.dataFim,
         filial:     state.dwFilter.filial,
         empresa:    state.dwFilter.empresa,
       });
-      const faturamento: import("@/lib/dwApi").FaturamentoRow[] = [];  // será preenchido pelo background fetch
+      const faturamento: import("@/lib/dwApi").FaturamentoRow[] = [];  // será preenchido após o fetch principal
 
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
@@ -701,9 +688,22 @@ export function FinancialDataProvider({
           chartPagar, chartReceber, kpiExtra,
           dwRawData: data,
           dwChartData: chartData,
-          // faturamento NÃO sobrescrito aqui — gerenciado pelo background fetch
+          // faturamento NÃO sobrescrito aqui — será atualizado pelo fetch sequencial abaixo
         };
       });
+
+      // ── 2. Faturamento: dispara APÓS o fetch principal terminar ───────────
+      //    Sequencial no banco (evita concorrência), mas assíncrono na UI
+      //    (isFetchingDw já voltou para false — cards já estão visíveis)
+      const fatSnap = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim };
+      fetchFaturamento(fatSnap)
+        .then(({ data: fatData }) => {
+          setState((prev) => ({ ...prev, faturamento: fatData }));
+        })
+        .catch((err) => {
+          console.warn("[DW] Faturamento erro (não crítico):", err?.message ?? err);
+        });
+
     } catch (err) {
       setState((prev) => ({
         ...prev, isFetchingDw: false,
