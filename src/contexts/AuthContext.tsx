@@ -10,10 +10,8 @@ interface AuthContextType {
   role: AppRole | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isPasswordRecovery: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  clearPasswordRecovery: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
