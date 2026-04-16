@@ -187,9 +187,17 @@ export default function Indicadores() {
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
                       ))
-                    : indicadores.map((ind, idx) => {
-                        const abaixoDaMeta = ind.percentualReal < ind.percentualEsperado;
-                        const progress = Math.min((ind.percentualReal / Math.max(ind.percentualEsperado, 1)) * 100, 100);
+                    : (() => {
+                        // totalFat calculado uma vez fora do map
+                        const totalFatInd = faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0);
+                        return indicadores.map((ind, idx) => {
+                        // NOVA FÓRMULA: valor do indicador / faturamento do mês
+                        const percFat = totalFatInd > 0
+                          ? Math.round((ind.valorAbsoluto / totalFatInd) * 1000) / 10
+                          : ind.percentualReal;
+                        const abaixoDaMeta = percFat < ind.percentualEsperado;
+                        // Ring: cheio quando percFat = percentualEsperado; cap em 100%
+                        const progress = Math.min((percFat / Math.max(ind.percentualEsperado, 0.1)) * 100, 100);
                         const identity = INDICATOR_IDENTITY[ind.nome] ?? {
                           icon: BarChart3,
                           color: "#94a3b8",
@@ -198,7 +206,6 @@ export default function Indicadores() {
                           label: "",
                         };
                         const Icon = identity.icon;
-                        // Status: verde/vermelho para OK/Alto
                         const statusColor = abaixoDaMeta ? "#34d399" : "#f87171";
                         const statusRgb = abaixoDaMeta ? "52,211,153" : "248,113,113";
 
@@ -269,12 +276,12 @@ export default function Indicadores() {
                                       <span className="font-extrabold leading-none tabular-nums tracking-[-0.03em]"
                                         style={{
                                           color: identity.color,
-                                          fontSize: ind.percentualReal >= 100 ? "1.4rem" : "1.7rem",
+                                          fontSize: percFat >= 100 ? "1.4rem" : "1.7rem",
                                         }}>
-                                        {ind.percentualReal > 999 ? "999+" : `${ind.percentualReal}%`}
+                                        {percFat > 999 ? "999+" : `${percFat.toFixed(1)}%`}
                                       </span>
                                       <span className="text-[9px] font-semibold uppercase tracking-[0.12em] dark:text-slate-500 text-slate-400">
-                                        real
+                                        do fat.
                                       </span>
                                     </div>
                                   </div>
@@ -288,8 +295,8 @@ export default function Indicadores() {
                                     </span>
                                     <span className="text-[10px] font-bold tabular-nums" style={{ color: statusColor }}>
                                       {abaixoDaMeta
-                                        ? `−${(ind.percentualEsperado - ind.percentualReal).toFixed(1)}% p/ meta`
-                                        : `+${(ind.percentualReal - ind.percentualEsperado).toFixed(1)}% acima`}
+                                        ? `−${(ind.percentualEsperado - percFat).toFixed(1)}% p/ meta`
+                                        : `+${(percFat - ind.percentualEsperado).toFixed(1)}% acima`}
                                     </span>
                                   </div>
                                   <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
@@ -312,7 +319,8 @@ export default function Indicadores() {
                             </Link>
                           </AnimatedCard>
                         );
-                      })
+                      });
+                      })()
                   )}
                 </div>
               </div>

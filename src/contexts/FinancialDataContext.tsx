@@ -18,6 +18,7 @@ export interface IndicadorComparativo {
   nome: string;
   percentualReal: number;
   percentualEsperado: number;
+  valorAbsoluto: number;   // valor bruto do indicador (VLR_PARCELA) — usado para % vs faturamento
 }
 
 // ─── DW Filter state ──────────────────────────────────────────────────────────
@@ -73,6 +74,7 @@ const defaultIndicadores: IndicadorComparativo[] = Object.entries(
   id: String(index + 1),
   nome,
   percentualReal: 0,
+    valorAbsoluto: 0,
   percentualEsperado,
 }));
 
@@ -581,8 +583,9 @@ export function FinancialDataProvider({
           return {
             id: String(index + 1),
             nome,
-            percentualReal:  Math.round(percentualReal * 10) / 10,
+            percentualReal:   Math.round(percentualReal * 10) / 10,
             percentualEsperado,
+            valorAbsoluto:    Math.round(matchedTotal * 100) / 100,
           };
         }
       );
