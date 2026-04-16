@@ -365,7 +365,7 @@ export default function GestaoUsuarios() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--sgt-divider)]">
-                  {["Usuário", "ID", "Criado em", "Último acesso", "Role", "Ações"].map((h) => (
+                  {["Usuário", "ID", "Criado em", "Role", "Páginas", "Ações"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
                   ))}
                 </tr>
@@ -391,13 +391,40 @@ export default function GestaoUsuarios() {
                     <td className="px-4 py-3 text-sm sgt-text-2">
                       {new Date(u.created_at).toLocaleDateString("pt-BR")}
                     </td>
-                    <td className="px-4 py-3 text-sm sgt-text-2">
-                      {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString("pt-BR") : "—"}
-                    </td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>
                         {u.role}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {u.role === "admin" ? (
+                        <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => togglePagePermission(u.id, "dashboard", u.pages.has("dashboard"))}
+                            title={u.pages.has("dashboard") ? "Revogar acesso ao Dashboard" : "Conceder acesso ao Dashboard"}
+                            className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
+                              u.pages.has("dashboard")
+                                ? "border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
+                                : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                            }`}
+                          >
+                            <BarChart3 className="h-3 w-3" /> Dashboard
+                          </button>
+                          <button
+                            onClick={() => togglePagePermission(u.id, "indicadores", u.pages.has("indicadores"))}
+                            title={u.pages.has("indicadores") ? "Revogar acesso a Indicadores" : "Conceder acesso a Indicadores"}
+                            className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
+                              u.pages.has("indicadores")
+                                ? "border-violet-400/30 bg-violet-400/10 text-violet-300 hover:bg-violet-400/20"
+                                : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                            }`}
+                          >
+                            <TrendingUp className="h-3 w-3" /> Indicadores
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
