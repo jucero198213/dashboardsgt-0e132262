@@ -88,7 +88,29 @@ export default function GestaoUsuarios() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const togglePagePermission = async (userId: string, page: AppPage, currentlyHas: boolean) => {
+    if (currentlyHas) {
+      const { error } = await supabase
+        .from("page_permissions")
+        .delete()
+        .eq("user_id", userId)
+        .eq("page", page);
+      if (error) { setFeedback({ msg: "Erro ao revogar permissão.", type: "err" }); return; }
+    } else {
+      const { error } = await supabase
+        .from("page_permissions")
+        .insert({ user_id: userId, page });
+      if (error) { setFeedback({ msg: "Erro ao conceder permissão.", type: "err" }); return; }
+    }
+    setUsers((prev) => prev.map((u) => {
+      if (u.id !== userId) return u;
+      const next = new Set(u.pages);
+      if (currentlyHas) next.delete(page); else next.add(page);
+      return { ...u, pages: next };
+    }));
+    setFeedback({ msg: "Permissão atualizada.", type: "ok" });
+    setTimeout(() => setFeedback(null), 2000);
+  };
     setDeleting(true);
     try {
       const { data, error } = await supabase.functions.invoke("delete-user", {
