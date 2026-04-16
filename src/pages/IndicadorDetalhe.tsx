@@ -11,6 +11,7 @@ import { KpiCardSkeleton } from "@/components/shared/CardSkeleton";
 import { useCallback, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HomeButton } from "@/components/shared/HomeButton";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   Tooltip, CartesianGrid, ReferenceLine,
@@ -415,7 +416,10 @@ export default function IndicadorDetalhe() {
               <ChevronRight className="h-3 w-3 opacity-40" />
               <span className="text-slate-300">{indicador.nome}</span>
             </nav>
-            <UserMenu />
+            <div className="flex items-center gap-2">
+              <HomeButton />
+              <UserMenu />
+            </div>
           </div>
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
