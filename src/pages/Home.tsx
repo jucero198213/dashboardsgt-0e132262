@@ -23,7 +23,7 @@ function SgtLogoSlot({ className = "" }: { className?: string }) {
     <img
       src={sgtLogo}
       alt="SGT — Sistema de Gestão em Transporte"
-      className={`h-20 w-auto select-none drop-shadow-[0_8px_24px_rgba(245,158,11,0.25)] sm:h-24 lg:h-28 ${className}`}
+      className={`mx-auto block h-[88px] w-auto select-none sm:h-[112px] lg:h-[132px] ${className}`}
       draggable={false}
     />
   );
@@ -265,10 +265,10 @@ export default function Home() {
 
         {/* Logo SGT abaixo do Workflow */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.65, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-6"
+          initial={reduce ? false : { opacity: 0, scale: 0.92, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-10 flex w-full justify-center"
         >
           <SgtLogoSlot />
         </motion.div>
