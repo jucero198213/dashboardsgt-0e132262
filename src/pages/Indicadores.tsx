@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DASHBOARD_MAX_W = "1800px";
 
@@ -75,30 +77,43 @@ const INDICATOR_IDENTITY: Record<string, {
 
 export default function Indicadores() {
   const navigate = useNavigate();
-  const { indicadores, isFetchingDw, isProcessed, faturamento } = useFinancialData();
+  const { indicadores, isFetchingDw, isProcessed, faturamento, dwFilter, setDwFilter, fetchFromDW, filiais, empresas } = useFinancialData();
   const [progress, setProgress] = useState(0);
+  const [loadingPhase, setLoadingPhase] = useState("");
 
-  useEffect(() => {
-    if (!isFetchingDw) {
-      if (progress > 0) {
-        setProgress(100);
-        const t = window.setTimeout(() => setProgress(0), 800);
-        return () => window.clearTimeout(t);
-      }
-      return;
-    }
+  const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
+
+  const handleUpdate = async () => {
     setProgress(0);
+    setLoadingPhase("Conectando ao DW...");
     let current = 0;
+    const phases = [
+      { at: 15, label: "Consultando dados..." },
+      { at: 35, label: "Processando contas a pagar..." },
+      { at: 55, label: "Processando contas a receber..." },
+      { at: 70, label: "Calculando indicadores..." },
+      { at: 85, label: "Gerando gráficos..." },
+    ];
     const interval = window.setInterval(() => {
-      const speed = current < 30 ? 3 + Math.random() * 4
-        : current < 60 ? 2 + Math.random() * 3
-        : current < 85 ? 1 + Math.random() * 2
-        : 0.3 + Math.random() * 0.5;
+      const speed = current < 30 ? 3 + Math.random() * 4 : current < 60 ? 2 + Math.random() * 3 : current < 85 ? 1 + Math.random() * 2 : 0.3 + Math.random() * 0.5;
       current = Math.min(current + speed, 95);
       setProgress(Math.floor(current));
+      const phase = [...phases].reverse().find(p => current >= p.at);
+      if (phase) setLoadingPhase(phase.label);
     }, 300);
-    return () => window.clearInterval(interval);
-  }, [isFetchingDw]);
+    try {
+      await fetchFromDW();
+      window.clearInterval(interval);
+      setLoadingPhase("Concluído!");
+      setProgress(100);
+    } catch {
+      window.clearInterval(interval);
+      setLoadingPhase("");
+    } finally {
+      window.setTimeout(() => { setProgress(0); setLoadingPhase(""); }, 800);
+    }
+  };
+
 
   return (
     <div
@@ -171,7 +186,27 @@ export default function Indicadores() {
                 </button>
               </div>
 
-              <div className="flex-1" />
+              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+
+              {/* Filtros + Atualizar */}
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map((e) => (<SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>))}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
+                </Select>
+                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"} disabled:cursor-not-allowed`}>
+                  <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
+                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+                </button>
+              </div>
               <UserMenu />
             </div>
 
