@@ -10,10 +10,8 @@ interface AuthContextType {
   role: AppRole | null;
   isLoading: boolean;
   isAdmin: boolean;
-  isPasswordRecovery: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  clearPasswordRecovery: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  
 
   const fetchRole = useCallback(async (userId: string) => {
     try {
@@ -47,9 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
-        if (event === "PASSWORD_RECOVERY") {
-          setIsPasswordRecovery(true);
-        }
         if (session?.user) {
           setTimeout(() => fetchRole(session.user.id), 0);
         } else {
@@ -86,12 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     setSession(null);
     setRole(null);
-    setIsPasswordRecovery(false);
   }, []);
 
-  const clearPasswordRecovery = useCallback(() => {
-    setIsPasswordRecovery(false);
-  }, []);
 
   const value: AuthContextType = {
     session,
@@ -99,10 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role,
     isLoading,
     isAdmin: role === "admin",
-    isPasswordRecovery,
     signIn,
     signOut,
-    clearPasswordRecovery,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
