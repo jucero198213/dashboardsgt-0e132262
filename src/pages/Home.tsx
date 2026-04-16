@@ -206,6 +206,44 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_50%_at_85%_110%,rgba(139,92,246,0.08),transparent_60%)]" />
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_45%_at_15%_110%,rgba(6,182,212,0.06),transparent_60%)]" />
 
+      {/* Background temático — rodovias e transporte, bem sutil */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-[0.04]">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          {/* Rodovia principal horizontal */}
+          <line x1="0" y1="60%" x2="100%" y2="60%" stroke="white" strokeWidth="48" />
+          <line x1="0" y1="60%" x2="100%" y2="60%" stroke="#0a0a0a" strokeWidth="44" />
+          {/* Faixas tracejadas da rodovia */}
+          {[0,8,16,24,32,40,48,56,64,72,80,88,96].map((x, i) => (
+            <line key={i} x1={`${x}%`} y1="60%" x2={`${x+4}%`} y2="60%" stroke="white" strokeWidth="3" strokeDasharray="40 20" />
+          ))}
+          {/* Rodovia diagonal */}
+          <line x1="-10%" y1="110%" x2="60%" y2="-10%" stroke="white" strokeWidth="32" />
+          <line x1="-10%" y1="110%" x2="60%" y2="-10%" stroke="#0a0a0a" strokeWidth="28" />
+          {/* Caminhão estilizado — esquerda */}
+          <g transform="translate(120, calc(60% - 22))" opacity="0.9">
+            <rect x="0" y="8" width="72" height="26" rx="3" fill="white" />
+            <rect x="52" y="2" width="22" height="32" rx="3" fill="white" />
+            <circle cx="14" cy="36" r="7" fill="white" />
+            <circle cx="58" cy="36" r="7" fill="white" />
+          </g>
+          {/* Caminhão estilizado — direita */}
+          <g transform="translate(75%, calc(60% - 22))" opacity="0.9">
+            <rect x="0" y="8" width="72" height="26" rx="3" fill="white" />
+            <rect x="52" y="2" width="22" height="32" rx="3" fill="white" />
+            <circle cx="14" cy="36" r="7" fill="white" />
+            <circle cx="58" cy="36" r="7" fill="white" />
+          </g>
+          {/* Seta de rota — canto superior direito */}
+          <path d="M 75% 15% Q 82% 10% 88% 18% Q 92% 24% 88% 32%" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <polygon points="86,52 94,46 90,58" fill="white" transform="translate(calc(88% - 90), calc(32% - 52))" />
+          {/* Linhas de velocidade */}
+          <line x1="5%" y1="58%" x2="18%" y2="58%" stroke="white" strokeWidth="1.5" opacity="0.5" />
+          <line x1="5%" y1="62%" x2="15%" y2="62%" stroke="white" strokeWidth="1" opacity="0.3" />
+          <line x1="82%" y1="58%" x2="95%" y2="58%" stroke="white" strokeWidth="1.5" opacity="0.5" />
+          <line x1="85%" y1="62%" x2="95%" y2="62%" stroke="white" strokeWidth="1" opacity="0.3" />
+        </svg>
+      </div>
+
       {/* Section envolvente — mesmo padrão Dashboard / Indicadores */}
       <section
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
