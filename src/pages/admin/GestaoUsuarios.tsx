@@ -148,9 +148,11 @@ export default function GestaoUsuarios() {
             <div className="flex items-center justify-between border-b border-[var(--sgt-divider)] px-6 py-4">
               <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4 text-emerald-400" />
-                <h3 className="text-sm font-semibold sgt-text">Cadastrar novo usuário</h3>
+                <h3 className="text-sm font-semibold sgt-text">
+                  {generatedCode ? "Código de acesso gerado" : "Cadastrar novo usuário"}
+                </h3>
               </div>
-              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
+              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setGeneratedCode(null); }}
                 className="rounded-lg p-1.5 transition-colors hover:bg-[var(--sgt-input-hover)]">
                 <X className="h-4 w-4 sgt-text-2" />
               </button>
@@ -158,73 +160,123 @@ export default function GestaoUsuarios() {
 
             {/* Body */}
             <div className="space-y-4 px-6 py-5">
-              {/* Info */}
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-                <p className="text-[12px] text-amber-300 leading-relaxed">
-                  O usuário receberá um email para definir sua própria senha no primeiro acesso.
-                </p>
-              </div>
+              {generatedCode ? (
+                <>
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                    <p className="text-[12px] text-emerald-300 leading-relaxed">
+                      Usuário criado com sucesso! Envie o código abaixo para o usuário. Ele usará esse código junto com seu email na tela de <strong>Primeiro Acesso</strong>.
+                    </p>
+                  </div>
 
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Email</label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="usuario@empresa.com.br"
-                  className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Código de acesso</label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 rounded-xl border border-amber-400/30 bg-amber-400/5 px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-amber-300">
+                        {generatedCode}
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(generatedCode);
+                          setFeedback({ msg: "Código copiado!", type: "ok" });
+                          setTimeout(() => setFeedback(null), 2000);
+                        }}
+                        className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-3 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
+                        title="Copiar código"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Role */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Permissão</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setNewRole("user")}
-                    className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
-                      newRole === "user"
-                        ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
-                        : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
-                    }`}
-                  >
-                    Usuário
-                  </button>
-                  <button
-                    onClick={() => setNewRole("admin")}
-                    className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
-                      newRole === "admin"
-                        ? "border-red-500/30 bg-red-500/10 text-red-400"
-                        : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
-                    }`}
-                  >
-                    Administrador
-                  </button>
-                </div>
-              </div>
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                    <p className="text-[12px] text-amber-300 leading-relaxed">
+                      ⚠️ Este código só pode ser usado uma vez. Guarde-o em local seguro até enviar ao usuário.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Info */}
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                    <p className="text-[12px] text-amber-300 leading-relaxed">
+                      Ao cadastrar, um código de acesso será gerado. Envie esse código ao usuário para que ele defina sua senha no <strong>Primeiro Acesso</strong>.
+                    </p>
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Email</label>
+                    <input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="usuario@empresa.com.br"
+                      className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
+                    />
+                  </div>
+
+                  {/* Role */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Permissão</label>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setNewRole("user")}
+                        className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                          newRole === "user"
+                            ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
+                        }`}
+                      >
+                        Usuário
+                      </button>
+                      <button
+                        onClick={() => setNewRole("admin")}
+                        className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                          newRole === "admin"
+                            ? "border-red-500/30 bg-red-500/10 text-red-400"
+                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
+                        }`}
+                      >
+                        Administrador
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
-              <button
-                onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
-                className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleCreateUser}
-                disabled={creating || !newEmail}
-                className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {creating ? (
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
-                ) : (
-                  <Plus className="h-3.5 w-3.5" />
-                )}
-                {creating ? "Cadastrando..." : "Cadastrar"}
-              </button>
+              {generatedCode ? (
+                <button
+                  onClick={() => { setShowModal(false); setGeneratedCode(null); }}
+                  className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all"
+                >
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Fechar
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
+                    className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleCreateUser}
+                    disabled={creating || !newEmail}
+                    className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {creating ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
+                    {creating ? "Cadastrando..." : "Cadastrar"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
