@@ -296,20 +296,29 @@ export function FinancialDataProvider({
 
     // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
     setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
+
+    // ── Faturamento: dispara em background, NÃO bloqueia os KPI cards ────────
+    //    Se timeout ou erro, o painel continua funcionando normalmente.
+    const dwFilterSnapshot = { ...state.dwFilter };
+    fetchFaturamento({
+      dataInicio: dwFilterSnapshot.dataInicio,
+      dataFim:    dwFilterSnapshot.dataFim,
+    })
+      .then(({ data: fatData }) => {
+        setState((prev) => ({ ...prev, faturamento: fatData }));
+      })
+      .catch((err) => {
+        console.warn("[DW] Faturamento timeout/erro (não crítico):", err?.message ?? err);
+      });
+
     try {
-      const [{ data }, fatResult] = await Promise.all([
-        fetchDwData({
-          dataInicio: state.dwFilter.dataInicio,
-          dataFim:    state.dwFilter.dataFim,
-          filial:     state.dwFilter.filial,
-          empresa:    state.dwFilter.empresa,
-        }),
-        fetchFaturamento({
-          dataInicio: state.dwFilter.dataInicio,
-          dataFim:    state.dwFilter.dataFim,
-        }).catch(() => ({ data: [] as import("@/lib/dwApi").FaturamentoRow[] })),
-      ]);
-      const faturamento = fatResult.data;
+      const { data } = await fetchDwData({
+        dataInicio: state.dwFilter.dataInicio,
+        dataFim:    state.dwFilter.dataFim,
+        filial:     state.dwFilter.filial,
+        empresa:    state.dwFilter.empresa,
+      });
+      const faturamento: import("@/lib/dwApi").FaturamentoRow[] = [];  // será preenchido pelo background fetch
 
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
@@ -670,26 +679,28 @@ export function FinancialDataProvider({
         : 0;
 
       const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, inadimplenciaPerc, realizacaoCP, realizacaoCR };
-      saveCache({
-        resumo, contasReceber, contasPagar, indicadores,
-        chartPagar, chartReceber,
-        kpiExtra,
-        faturamento,
-        dwFilter: state.dwFilter,
-        timestamp: Date.now(),
+      // Faturamento: preserva o que o background fetch já preencheu (ou o cache anterior)
+      setState((prev) => {
+        const fatAtual = prev.faturamento;
+        saveCache({
+          resumo, contasReceber, contasPagar, indicadores,
+          chartPagar, chartReceber,
+          kpiExtra,
+          faturamento: fatAtual,
+          dwFilter: state.dwFilter,
+          timestamp: Date.now(),
+        });
+        return {
+          ...prev,
+          isFetchingDw: false,
+          isProcessed:  true,
+          resumo, contasReceber, contasPagar, indicadores,
+          chartPagar, chartReceber, kpiExtra,
+          dwRawData: data,
+          dwChartData: chartData,
+          // faturamento NÃO sobrescrito aqui — gerenciado pelo background fetch
+        };
       });
-
-      // INCREMENTAL: substitui dados antigos pelos novos com transição suave
-      setState((prev) => ({
-        ...prev,
-        isFetchingDw: false,
-        isProcessed:  true,
-        resumo, contasReceber, contasPagar, indicadores,
-        chartPagar, chartReceber, kpiExtra,
-        faturamento,
-        dwRawData: data,
-        dwChartData: chartData,
-      }));
     } catch (err) {
       setState((prev) => ({
         ...prev, isFetchingDw: false,

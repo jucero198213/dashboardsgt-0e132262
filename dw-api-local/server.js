@@ -444,31 +444,31 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
         return res.status(400).json({ error: "dataInicio e dataFim são obrigatórios" });
       }
 
+      // Timeout independente de 30s para não bloquear os KPI cards
       const dbReq = p.request();
+      dbReq.timeout = 30000;
       dbReq.input("dataInicio", sql.DateTime, new Date(dataInicio));
       dbReq.input("dataFim",    sql.DateTime, new Date(dataFim));
 
+      // ── Query enxuta: apenas os 2 JOINs necessários para chegar em CGR.DESCRI
+      //    RODCON / ESTNOT / RODORD foram removidos — não contribuem para o SELECT
+      //    e causavam multiplicação de linhas + bloqueio de índice na view.
+      //    WITH (NOLOCK) evita bloqueios de leitura.
+      //    OPTION (RECOMPILE) garante plano de execução fresco (evita parameter sniffing).
       const query = `
         SELECT
-          SUM(T.TOTFRE)                                                            AS FRETE_TOTAL,
-          CGR.DESCRI,
-          SUM(T.TOTFRE) * 100.0 / NULLIF(SUM(SUM(T.TOTFRE)) OVER (), 0)           AS PERCENTUAL
-        FROM VW_FAT_ICMS T
-          LEFT OUTER JOIN RODCLI CLI ON T.CODCLIFOR = CLI.CODCLIFOR
-          LEFT OUTER JOIN RODCON CON ON T.CODFIL    = CON.CODFIL
-                                     AND T.SERIE     = CON.SERCON
-                                     AND T.CODIGO    = CON.CODCON
-          LEFT OUTER JOIN ESTNOT EST ON T.CODFIL    = EST.CODFIL
-                                     AND T.SERIE     = EST.SERSUB
-                                     AND T.CODIGO    = EST.CODIGO
-          LEFT OUTER JOIN RODORD ORD ON EST.CODIGO   = ORD.CODNOT
-                                     AND EST.SERSUB   = ORD.SERNOT
-                                     AND EST.CODFIL   = ORD.FILNOT
-          LEFT OUTER JOIN RODCGR CGR ON CLI.CODCGR   = CGR.CODCGR
+          SUM(T.TOTFRE)                                                  AS FRETE_TOTAL,
+          ISNULL(CGR.DESCRI, 'Sem grupo')                                AS DESCRI,
+          SUM(T.TOTFRE) * 100.0
+            / NULLIF(SUM(SUM(T.TOTFRE)) OVER (), 0)                     AS PERCENTUAL
+        FROM VW_FAT_ICMS T WITH (NOLOCK)
+          LEFT JOIN RODCLI CLI WITH (NOLOCK) ON T.CODCLIFOR = CLI.CODCLIFOR
+          LEFT JOIN RODCGR CGR WITH (NOLOCK) ON CLI.CODCGR  = CGR.CODCGR
         WHERE T.DATA >= @dataInicio
           AND T.DATA <  DATEADD(day, 1, @dataFim)
         GROUP BY CGR.DESCRI
         ORDER BY FRETE_TOTAL DESC
+        OPTION (RECOMPILE)
       `;
 
       const result = await dbReq.query(query);
