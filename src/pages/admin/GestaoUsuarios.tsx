@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
