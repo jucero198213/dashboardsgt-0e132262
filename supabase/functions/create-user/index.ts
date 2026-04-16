@@ -5,6 +5,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function generateCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -59,7 +68,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create user with random password (user will set their own via "Primeiro acesso")
+    // Create user with random password (user will set their own via first access code)
     const randomPassword = crypto.randomUUID() + "Aa1!";
 
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -86,14 +95,18 @@ Deno.serve(async (req) => {
         .eq("user_id", newUser.user.id);
     }
 
-    // Send password reset email so user can set their own password
-    const origin = req.headers.get("origin") || "https://dashboardsgt.lovable.app";
-    await adminClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/login`,
-    });
+    // Generate first access code
+    const accessCode = generateCode();
+    if (newUser.user) {
+      await adminClient.from("first_access_codes").upsert({
+        user_id: newUser.user.id,
+        code: accessCode,
+        used: false,
+      }, { onConflict: "user_id" });
+    }
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUser.user?.id }),
+      JSON.stringify({ success: true, user_id: newUser.user?.id, access_code: accessCode }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
