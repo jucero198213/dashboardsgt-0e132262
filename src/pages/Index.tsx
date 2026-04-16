@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HomeButton } from "@/components/shared/HomeButton";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { formatCurrency, formatDate } from "@/data/mockData";
 import {
@@ -937,6 +938,7 @@ const Index = () => {
                   Indicadores
                 </Link>
               </div>
+              <HomeButton />
               <UserMenu />
             </div>
 
@@ -958,7 +960,10 @@ const Index = () => {
                     <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-cyan-300">Tempo real</span>
                   </div>
                 </div>
-                <UserMenu />
+                <div className="flex items-center gap-2">
+                  <HomeButton />
+                  <UserMenu />
+                </div>
               </div>
 
               {/* Linha 2: datas */}

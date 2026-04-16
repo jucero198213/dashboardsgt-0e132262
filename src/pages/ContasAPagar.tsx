@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { KpiCardSkeleton } from "@/components/shared/CardSkeleton";
 import { useMemo, useState } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HomeButton } from "@/components/shared/HomeButton";
 
 const PAGE_SIZE = 50;
 
@@ -91,7 +92,10 @@ const ContasAPagar = () => {
             <ChevronRight className="h-3.5 w-3.5" />
             <span className="text-white">Contas a Pagar</span>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <HomeButton />
+            <UserMenu />
+          </div>
         </div>
 
         {/* Header contextual — Contas a Pagar */}
