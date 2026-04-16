@@ -172,23 +172,15 @@ export default function Indicadores() {
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Label da tela + botão voltar */}
+              {/* Label da tela */}
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
                 <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
-                <div className="h-4 w-px mx-1" style={{ background: "var(--sgt-divider)" }} />
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white hover:-translate-y-0.5"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Voltar
-                </button>
               </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Filtros + Atualizar */}
+              {/* Filtros + Atualizar + Voltar */}
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
@@ -205,6 +197,13 @@ export default function Indicadores() {
                   className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+                </button>
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white hover:-translate-y-0.5"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  Voltar
                 </button>
               </div>
               <UserMenu />
