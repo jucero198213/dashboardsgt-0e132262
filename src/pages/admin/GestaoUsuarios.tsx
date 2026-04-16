@@ -387,6 +387,47 @@ export default function GestaoUsuarios() {
           </div>
         )}
       </div>
+
+      {/* Modal Confirmar Exclusão */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-[var(--sgt-border-subtle)] sgt-bg-card shadow-2xl">
+            <div className="flex items-center gap-2 border-b border-[var(--sgt-divider)] px-6 py-4">
+              <Trash2 className="h-4 w-4 text-red-400" />
+              <h3 className="text-sm font-semibold sgt-text">Excluir usuário</h3>
+            </div>
+            <div className="px-6 py-5 space-y-3">
+              <p className="text-sm sgt-text-2">
+                Tem certeza que deseja excluir este usuário? Esta ação é <strong className="text-red-400">irreversível</strong>.
+              </p>
+              <p className="text-xs font-mono text-[var(--sgt-text-muted)]">
+                {users.find((u) => u.id === deleteConfirm)?.email}
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={deleting}
+                className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleDeleteUser(deleteConfirm)}
+                disabled={deleting}
+                className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting ? (
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                ) : (
+                  <Trash2 className="h-3.5 w-3.5" />
+                )}
+                {deleting ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
