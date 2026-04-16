@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -31,6 +31,8 @@ export default function GestaoUsuarios() {
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"user" | "admin">("user");
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
