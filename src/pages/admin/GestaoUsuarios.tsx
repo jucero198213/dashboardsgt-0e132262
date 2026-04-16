@@ -372,6 +372,12 @@ export default function GestaoUsuarios() {
                             <UserX className="h-3 w-3" /> User
                           </button>
                         )}
+                        {u.id !== me?.id && (
+                          <button onClick={() => setDeleteConfirm(u.id)}
+                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-500/20 transition-all">
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
