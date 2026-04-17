@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
