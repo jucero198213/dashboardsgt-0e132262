@@ -237,20 +237,6 @@ export default function Home() {
             </defs>
             <rect width="100%" height="100%" fill="url(#dots)" />
             <rect width="100%" height="100%" fill="url(#lines)" />
-
-            {/* Rodovia horizontal — atravessa a tela em ~65% */}
-            <line x1="0" y1="65%" x2="100%" y2="65%" stroke="rgba(255,255,255,0.06)" strokeWidth="18" />
-            <line x1="0" y1="65%" x2="100%" y2="65%" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="60 30" />
-
-            {/* Rodovia diagonal — canto inferior esquerdo ao superior direito */}
-            <line x1="-5%" y1="100%" x2="65%" y2="0%" stroke="rgba(255,255,255,0.05)" strokeWidth="14" />
-            <line x1="-5%" y1="100%" x2="65%" y2="0%" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="50 25" />
-
-            {/* Linha de rota fina — horizontal inferior */}
-            <line x1="0" y1="80%" x2="100%" y2="80%" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="30 20" />
-
-            {/* Linha de rota fina — diagonal secundária */}
-            <line x1="60%" y1="0%" x2="110%" y2="70%" stroke="rgba(255,255,255,0.04)" strokeWidth="8" />
           </svg>
         </div>
 
