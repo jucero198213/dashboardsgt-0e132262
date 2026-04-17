@@ -278,42 +278,20 @@ export default function Login() {
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-amber-400/70">SGT LOG</p>
-              <p className="text-[10px] text-[var(--sgt-text-muted)] tracking-[0.15em]">GESTÃO FINANCEIRA</p>
             </div>
           </div>
         </div>
-        <div className="relative space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/8 px-3 py-1.5">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo Real</span>
-          </div>
-          <h1 className="text-[clamp(2rem,4vw,3rem)] font-black leading-[1.08] tracking-[-0.04em] sgt-text">
-            Inteligência<br />
+        <div className="relative space-y-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-amber-400/70">Bem-vindo ao</p>
+          <h1 className="text-[clamp(2.8rem,4.5vw,4rem)] font-black leading-[1.05] tracking-[-0.04em] sgt-text">
+            Workspace<br />
             <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-600 bg-clip-text text-transparent">
-              Financeira
-            </span><br />
-            para Logística
+              SGT
+            </span>
           </h1>
-          <p className="max-w-[380px] text-[15px] leading-relaxed sgt-text-2">
-            Análise consolidada de contas a pagar, receber e indicadores estratégicos da operação de frota em tempo real.
+          <p className="max-w-[340px] text-[14px] leading-relaxed text-[var(--sgt-text-muted)]">
+            Acesse com suas credenciais para continuar.
           </p>
-          <div className="space-y-3 pt-2">
-            {[
-              { icon: TrendingUp,  text: "Indicadores estratégicos com meta vs realizado" },
-              { icon: BarChart3,   text: "Evolução diária e composição por fornecedor" },
-              { icon: Shield,      text: "Acesso seguro com controle por perfil" },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
-                  <Icon className="h-3.5 w-3.5 text-[var(--sgt-text-muted)]" />
-                </div>
-                <p className="text-[13px] text-[var(--sgt-text-muted)]">{text}</p>
-              </div>
-            ))}
-          </div>
         </div>
         <div className="relative flex items-center justify-between">
           <p className="text-[11px] text-[var(--sgt-text-faint)]">© 2026 SGT Log · Todos os direitos reservados</p>
@@ -331,7 +309,7 @@ export default function Login() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10">
               <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
             </div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/70">SGT LOG · Gestão Financeira</p>
+            <p className="text-[13px] font-bold tracking-[-0.01em] text-white">Workspace <span className="text-amber-300">SGT</span></p>
           </div>
 
           <div className="mb-8">
