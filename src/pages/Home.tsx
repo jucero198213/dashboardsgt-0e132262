@@ -255,61 +255,10 @@ export default function Home() {
       >
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
-          {/* NAVBAR — mesmo padrão do Dashboard / Indicadores */}
-          <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
-            <div className="flex shrink-0 items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-              </div>
-              <span className="text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
-                SGT Dashboard
-              </span>
-            </div>
-
-            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
-            </div>
-
-            <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
-            <div className="flex items-center gap-2">
-              <HomeIcon className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-[12px] font-semibold text-amber-300 uppercase tracking-[0.18em]">Portal</span>
-            </div>
-
-            <div className="flex-1" />
-
-            <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
+          {/* Top bar minimalista — apenas UserMenu à direita */}
+          <div className="flex items-center justify-end py-1">
             <UserMenu showAdmin />
           </div>
-
-          {/* Mobile header */}
-          <div className="flex sm:hidden items-center justify-between py-1">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-              </div>
-              <div className="flex h-6 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                </span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-cyan-300">Tempo real</span>
-              </div>
-            </div>
-            <UserMenu showAdmin />
-          </div>
-
-          <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
           {/* ── HERO ── */}
           <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 py-12 text-center sm:py-16 lg:px-10 lg:py-20">
