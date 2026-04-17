@@ -902,7 +902,7 @@ const Index = () => {
                 </div>
                 <span className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
                   <span>Dashboard</span>
-                  <img src={sgtLogo} alt="SGT" className="h-5 w-auto object-contain dark:brightness-0 dark:invert" />
+                  <img src={sgtLogo} alt="SGT" className="h-7 w-auto object-contain" />
                 </span>
               </div>
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
