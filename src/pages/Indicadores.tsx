@@ -76,7 +76,6 @@ const INDICATOR_IDENTITY: Record<string, {
 };
 
 export default function Indicadores() {
-  const navigate = useNavigate();
   const { indicadores, isFetchingDw, isProcessed, faturamento, dwFilter, setDwFilter, fetchFromDW, filiais, empresas } = useFinancialData();
   const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
