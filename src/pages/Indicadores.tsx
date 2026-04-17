@@ -171,14 +171,6 @@ export default function Indicadores() {
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Label da tela */}
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-3.5 w-3.5 text-violet-400" />
-                <span className="text-[12px] font-semibold text-violet-300 uppercase tracking-[0.18em]">Indicadores</span>
-              </div>
-
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
               {/* Filtros + Atualizar + Voltar */}
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
