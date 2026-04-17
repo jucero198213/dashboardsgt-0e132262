@@ -288,7 +288,7 @@ export default function Login() {
               Workspace
             </h1>
           </div>
-          <img src={sgtLogo} alt="SGT Log" className="h-[120px] w-auto select-none" draggable={false} />
+          <img src={sgtLogo} alt="SGT Log" className="h-[120px] w-auto select-none" draggable={false} style={{ marginLeft: 0 }} />
           <p className="max-w-[340px] text-[14px] leading-relaxed text-[var(--sgt-text-muted)]">
             Acesse com suas credenciais para continuar.
           </p>
