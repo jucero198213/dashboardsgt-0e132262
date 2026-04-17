@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { HomeButton } from "@/components/shared/HomeButton";
+import sgtLogo from "@/assets/sgt-logo.png";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { formatCurrency, formatDate } from "@/data/mockData";
 import {
@@ -899,8 +900,9 @@ const Index = () => {
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                   </svg>
                 </div>
-                <span className="text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
-                  SGT Dashboard
+                <span className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
+                  <span>Dashboard</span>
+                  <img src={sgtLogo} alt="SGT" className="h-5 w-auto object-contain dark:brightness-0 dark:invert" />
                 </span>
               </div>
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
