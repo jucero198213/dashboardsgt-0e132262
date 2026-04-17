@@ -67,7 +67,7 @@ interface ModuleCardData {
   description: string;
   cta: string;
   onClick?: () => void;
-  tone: "amber" | "violet" | "slate";
+  tone: "amber" | "violet" | "slate" | "cyan";
   disabled?: boolean;
 }
 
@@ -95,6 +95,13 @@ const TONE: Record<
     ring: "",
     cta: "text-slate-400",
     glow: "from-slate-400/10",
+  },
+  cyan: {
+    iconBg: "bg-cyan-400/10 border border-cyan-400/20",
+    iconText: "text-cyan-300",
+    ring: "hover:border-cyan-400/40",
+    cta: "text-cyan-400",
+    glow: "from-cyan-400/20",
   },
 };
 
@@ -182,9 +189,9 @@ export default function Home() {
       icon: Sparkles,
       title: "Próximos módulos",
       description:
-        "Espaço preparado para futuras telas e funcionalidades do ecossistema.",
+        "Novos módulos de gestão operacional e logística estão sendo desenvolvidos para o ecossistema SGT.",
       cta: "Em breve",
-      tone: "slate" as const,
+      tone: "cyan" as const,
       disabled: true,
     },
   ].filter(Boolean) as ModuleCardData[];
@@ -207,7 +214,7 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_45%_at_15%_110%,rgba(6,182,212,0.06),transparent_60%)]" />
 
       {/* Background temático — rodovias e transporte, bem sutil */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-[0.04]">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden opacity-[0.06]">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
           {/* Rodovia principal horizontal */}
           <line x1="0" y1="60%" x2="100%" y2="60%" stroke="white" strokeWidth="48" />
@@ -273,12 +280,12 @@ export default function Home() {
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-300">
-                Ecossistema digital
+                SGT Log · Sistema de Gestão em Transporte
               </span>
             </motion.div>
 
             <h1 className="text-[clamp(2.4rem,6.2vw,5.2rem)] font-black leading-[1.02] tracking-[-0.045em] sgt-text">
-              <span className="block">
+              <span className="block bg-gradient-to-r from-slate-200 via-white to-slate-300 bg-clip-text text-transparent">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
               <span className="mt-2 block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -301,8 +308,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 1.15 }}
               className="mt-8 max-w-[680px] text-[15px] leading-relaxed text-[var(--sgt-text-muted)] lg:text-[16px]"
             >
-              Seu ecossistema para gestão, análise e evolução de processos. Acesse módulos
-              principais e ferramentas complementares em um único ambiente.
+              Plataforma centralizada para gestão financeira, operacional e logística da SGT Log. Monitore indicadores, fluxo de caixa e desempenho da operação de transporte em tempo real.
             </motion.p>
 
             <motion.div
