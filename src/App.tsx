@@ -16,6 +16,7 @@ import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
 import IndicadorDetalhe from "./pages/IndicadorDetalhe";
 import Indicadores from "./pages/Indicadores";
+import FinanciamentoFrota from "./pages/FinanciamentoFrota";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="dashboard"><ContasAPagar /></ProtectedRoute>} />
               <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><Indicadores /></ProtectedRoute>} />
               <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><IndicadorDetalhe /></ProtectedRoute>} />
+              <Route path="/financiamento-frota" element={<ProtectedRoute><FinanciamentoFrota /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

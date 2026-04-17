@@ -7,7 +7,7 @@ import {
   ArrowRight,
   ChevronDown,
   ExternalLink,
-  Home as HomeIcon,
+  Truck,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
@@ -67,7 +67,7 @@ interface ModuleCardData {
   description: string;
   cta: string;
   onClick?: () => void;
-  tone: "amber" | "violet" | "slate" | "cyan";
+  tone: "amber" | "violet" | "slate" | "cyan" | "emerald";
   disabled?: boolean;
 }
 
@@ -95,6 +95,13 @@ const TONE: Record<
     ring: "",
     cta: "text-slate-400",
     glow: "from-slate-400/10",
+  },
+  emerald: {
+    iconBg: "bg-emerald-400/10 border border-emerald-400/20",
+    iconText: "text-emerald-300",
+    ring: "hover:border-emerald-400/40",
+    cta: "text-emerald-300",
+    glow: "from-emerald-400/20",
   },
   cyan: {
     iconBg: "bg-cyan-400/10 border border-cyan-400/20",
@@ -185,6 +192,16 @@ export default function Home() {
       cta: "Acessar indicadores",
       onClick: () => navigate("/indicadores"),
       tone: "violet" as const,
+    },
+    {
+      key: "financiamento",
+      icon: Truck,
+      title: "Financiamento de Frota",
+      description:
+        "Gerencie contratos, saldos devedores, parcelas e vencimentos de todos os financiamentos da frota.",
+      cta: "Acessar financiamentos",
+      onClick: () => navigate("/financiamento-frota"),
+      tone: "emerald" as const,
     },
     {
       key: "soon",
