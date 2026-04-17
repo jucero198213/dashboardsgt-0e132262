@@ -253,11 +253,11 @@ export default function Indicadores() {
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
             {/* CONTEÚDO */}
-            <div className="flex flex-1 min-h-0 gap-3">
+            <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-3">
 
               {/* COLUNA ESQUERDA — grid 4x2 */}
-              <div className="flex flex-col flex-1 min-w-0 min-h-0">
-                <div className="grid grid-cols-2 lg:grid-cols-4 grid-rows-2 gap-3 flex-1 min-h-0 h-full">
+              <div className="flex flex-col flex-1 min-w-0 lg:min-h-0">
+                <div className="grid grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-3 flex-1 lg:min-h-0 lg:h-full">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
@@ -413,7 +413,7 @@ export default function Indicadores() {
 
                 return (
                   <div
-                    className="w-[360px] xl:w-[420px] shrink-0 rounded-[20px] border flex flex-col p-5 gap-3"
+                    className="w-full lg:w-[360px] xl:w-[420px] shrink-0 rounded-[20px] border flex flex-col p-5 gap-3"
                     style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
                   >
                     {/* Cabeçalho */}
