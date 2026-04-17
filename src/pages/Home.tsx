@@ -217,27 +217,38 @@ export default function Home() {
       <section
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
-          background: "var(--sgt-bg-section)",
+          background: "linear-gradient(135deg, rgba(18,22,40,0.98) 0%, rgba(12,15,28,0.98) 50%, rgba(20,18,35,0.98) 100%)",
           borderColor: "var(--sgt-border-subtle)",
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Background temático — rodovias e transporte, bem sutil */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-            <line x1="0" y1="60%" x2="100%" y2="60%" stroke="white" strokeWidth="48" />
-            <line x1="0" y1="60%" x2="100%" y2="60%" stroke="#0a0a0a" strokeWidth="44" />
-            {[0,8,16,24,32,40,48,56,64,72,80,88,96].map((x, i) => (
-              <line key={i} x1={`${x}%`} y1="60%" x2={`${x+4}%`} y2="60%" stroke="white" strokeWidth="3" strokeDasharray="40 20" />
-            ))}
-            <line x1="-10%" y1="110%" x2="60%" y2="-10%" stroke="white" strokeWidth="32" />
-            <line x1="-10%" y1="110%" x2="60%" y2="-10%" stroke="#0a0a0a" strokeWidth="28" />
-            <line x1="5%" y1="58%" x2="18%" y2="58%" stroke="white" strokeWidth="1.5" opacity="0.5" />
-            <line x1="5%" y1="62%" x2="15%" y2="62%" stroke="white" strokeWidth="1" opacity="0.3" />
-            <line x1="82%" y1="58%" x2="95%" y2="58%" stroke="white" strokeWidth="1.5" opacity="0.5" />
-            <line x1="85%" y1="62%" x2="95%" y2="62%" stroke="white" strokeWidth="1" opacity="0.3" />
+        {/* Background sutil — malha logística de pontos e linhas finas */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              {/* Grade de pontos */}
+              <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.07)" />
+              </pattern>
+              {/* Linhas diagonais muito finas */}
+              <pattern id="lines" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                <path d="M0 80 L80 0" stroke="rgba(255,255,255,0.03)" strokeWidth="1" fill="none" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dots)" />
+            <rect width="100%" height="100%" fill="url(#lines)" />
           </svg>
         </div>
+
+        {/* Luz central suave — ilumina o hero */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.06), transparent 70%)" }} />
+        {/* Luz lateral esquerda */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.05), transparent 60%)" }} />
+        {/* Luz lateral direita */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.05), transparent 60%)" }} />
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
           {/* Top bar minimalista — apenas UserMenu à direita */}
