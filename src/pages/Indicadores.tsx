@@ -195,6 +195,61 @@ export default function Indicadores() {
               <HomeButton />
             </div>
 
+            {/* Mobile: layout empilhado */}
+            <div className="flex sm:hidden flex-col gap-2 py-1.5">
+              {/* Linha 1: ícone + título com logo + Home */}
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
+                    <svg className="h-4 w-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                  </div>
+                  <span className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none min-w-0">
+                    <span className="truncate">Indicadores</span>
+                    <img src={sgtLogo} alt="SGT" className="block h-5 w-auto shrink-0 object-contain" />
+                  </span>
+                </div>
+                <HomeButton />
+              </div>
+
+              {/* Linha 2: badge tempo real */}
+              <div className="flex items-center">
+                <div className="flex h-6 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  </span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-cyan-300">Tempo real</span>
+                </div>
+              </div>
+
+              {/* Linha 3: datas */}
+              <div className="flex items-center gap-2">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+              </div>
+
+              {/* Linha 4: selects */}
+              <div className="flex items-center gap-2">
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map((e) => (<SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>))}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
+                </Select>
+              </div>
+
+              {/* Linha 5: botão atualizar */}
+              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25"} disabled:cursor-not-allowed`}>
+                <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
+                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>Atualizando…</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+              </button>
+            </div>
+
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
 
             {/* CONTEÚDO */}
