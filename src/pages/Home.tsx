@@ -120,8 +120,10 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={data.disabled ? undefined : { y: -4 }}
-      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/60 p-7 text-left backdrop-blur-sm transition-colors ${tone.ring} ${
-        data.disabled ? "cursor-default opacity-70" : "cursor-pointer hover:bg-[var(--sgt-input-hover)]/70"
+      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${
+        data.disabled
+          ? "cursor-default opacity-80 border-white/8 bg-white/[0.03]"
+          : "cursor-pointer border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
       }`}
     >
       {/* Glow superior */}
@@ -226,13 +228,11 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              {/* Grade de pontos */}
               <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.07)" />
+                <circle cx="20" cy="20" r="1.5" fill="rgba(255,255,255,0.12)" />
               </pattern>
-              {/* Linhas diagonais muito finas */}
               <pattern id="lines" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <path d="M0 80 L80 0" stroke="rgba(255,255,255,0.03)" strokeWidth="1" fill="none" />
+                <path d="M0 80 L80 0" stroke="rgba(255,255,255,0.04)" strokeWidth="1" fill="none" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#dots)" />
@@ -242,13 +242,11 @@ export default function Home() {
 
         {/* Luz central suave — ilumina o hero */}
         <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.06), transparent 70%)" }} />
-        {/* Luz lateral esquerda */}
+          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
         <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.05), transparent 60%)" }} />
-        {/* Luz lateral direita */}
+          style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
         <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.05), transparent 60%)" }} />
+          style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
           {/* Top bar minimalista — apenas UserMenu à direita */}
@@ -257,27 +255,27 @@ export default function Home() {
           </div>
 
           {/* ── HERO ── */}
-          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 py-12 text-center sm:py-16 lg:px-10 lg:py-20">
+          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 py-8 text-center sm:py-12 lg:px-10 lg:py-16">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.05 }}
-              className="mb-7 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-3.5 py-1.5"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/[0.08] px-4 py-2"
             >
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-300">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-300">
                 SGT Log · Sistema de Gestão em Transporte
               </span>
             </motion.div>
 
-            <h1 className="text-[clamp(2.4rem,6.2vw,5.2rem)] font-black leading-[1.02] tracking-[-0.045em] sgt-text">
+            <h1 className="text-[clamp(3.2rem,8vw,7rem)] font-black leading-[1.0] tracking-[-0.045em]">
               <span className="block bg-gradient-to-r from-slate-200 via-white to-slate-300 bg-clip-text text-transparent">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
-              <span className="mt-2 block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-transparent">
                 <AnimatedTitle text="Workspace" delay={0.45} />
               </span>
             </h1>
@@ -286,16 +284,16 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-10 flex w-full justify-center"
+              className="mt-8 flex w-full justify-center"
             >
-              <SgtLogoSlot />
+              <SgtLogoSlot className="h-[100px] sm:h-[130px] lg:h-[155px]" />
             </motion.div>
 
             <motion.p
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.15 }}
-              className="mt-8 max-w-[680px] text-[15px] leading-relaxed text-[var(--sgt-text-muted)] lg:text-[16px]"
+              className="mt-6 max-w-[720px] text-[16px] leading-relaxed text-slate-400 lg:text-[17px]"
             >
               Plataforma centralizada para gestão financeira, operacional e logística da SGT Log. Monitore indicadores, fluxo de caixa e desempenho da operação de transporte em tempo real.
             </motion.p>
@@ -304,18 +302,18 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.3 }}
-              className="mt-9 flex flex-col items-center gap-3 sm:flex-row"
+              className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
             >
               <button
                 onClick={scrollToModules}
-                className="group inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/[0.12] px-6 text-[13px] font-semibold text-amber-200 transition-all hover:-translate-y-0.5 hover:border-amber-400/50 hover:bg-amber-400/[0.2] hover:shadow-[0_8px_28px_rgba(245,158,11,0.18)]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/[0.15] px-8 text-[14px] font-semibold text-amber-200 transition-all hover:-translate-y-0.5 hover:border-amber-400/60 hover:bg-amber-400/[0.25] hover:shadow-[0_8px_28px_rgba(245,158,11,0.25)]"
               >
                 Explorar módulos
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
                 onClick={scrollToTools}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-6 text-[13px] font-semibold text-[var(--sgt-text-secondary)] transition-all hover:-translate-y-0.5 hover:border-[var(--sgt-border-medium)] hover:text-[var(--sgt-text-primary)]"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-8 text-[14px] font-semibold text-slate-300 transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
               >
                 Ferramentas complementares
               </button>
@@ -327,7 +325,7 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 1.6 }}
-              className="mt-12 flex flex-col items-center gap-1.5 text-[var(--sgt-text-muted)] hover:text-amber-300 transition-colors"
+              className="mt-10 flex flex-col items-center gap-1.5 text-slate-600 hover:text-amber-300 transition-colors"
             >
               <motion.div
                 animate={reduce ? undefined : { y: [0, 6, 0] }}
@@ -343,23 +341,23 @@ export default function Home() {
           </section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
-          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-16 lg:px-10 lg:py-20">
+          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.5 }}
-              className="mb-12 text-center"
+              className="mb-10 text-center"
             >
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
                 Módulos principais
               </p>
-              <h2 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-black tracking-[-0.03em] sgt-text">
+              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
                 Acessos do Workspace SGT
               </h2>
             </motion.div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {modules.map((m, i) => (
                 <ModuleCard key={m.key} data={m} index={i} />
               ))}
