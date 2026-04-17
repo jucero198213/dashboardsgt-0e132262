@@ -199,16 +199,8 @@ export default function Indicadores() {
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
                 </button>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white hover:-translate-y-0.5"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Voltar
-                </button>
               </div>
               <HomeButton />
-              <UserMenu />
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
