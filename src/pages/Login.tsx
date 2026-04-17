@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-
+import sgtLogo from "@/assets/sgt-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
 
@@ -281,14 +281,8 @@ export default function Login() {
             </div>
           </div>
         </div>
-        <div className="relative space-y-4">
-          <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-amber-400/70">Bem-vindo ao</p>
-          <h1 className="text-[clamp(2.8rem,4.5vw,4rem)] font-black leading-[1.05] tracking-[-0.04em] sgt-text">
-            Workspace<br />
-            <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-600 bg-clip-text text-transparent">
-              SGT
-            </span>
-          </h1>
+        <div className="relative space-y-6">
+          <img src={sgtLogo} alt="SGT Log" className="h-[120px] w-auto select-none" draggable={false} />
           <p className="max-w-[340px] text-[14px] leading-relaxed text-[var(--sgt-text-muted)]">
             Acesse com suas credenciais para continuar.
           </p>
