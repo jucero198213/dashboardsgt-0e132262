@@ -381,7 +381,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            <div className="mx-auto max-w-[640px]">
+            <div className="mx-auto max-w-[640px] flex flex-col gap-4">
               <motion.a
                 href="https://receitaflow.lovable.app"
                 target="_blank"
@@ -404,6 +404,31 @@ export default function Home() {
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
                     Ferramenta complementar para apoiar rotinas e processos vinculados ao
                     ecossistema Workspace SGT.
+                  </p>
+                </div>
+              </motion.a>
+
+              <motion.a
+                href="https://analyticspro.com.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={reduce ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.55, delay: 0.1 }}
+                whileHover={{ y: -3 }}
+                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-violet-400/30 hover:bg-[var(--sgt-input-hover)]/60"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-400/10 text-violet-300">
+                  <BarChart3 className="h-4.5 w-4.5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[15px] font-bold sgt-text">Analytics Pro</h3>
+                    <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-violet-300" />
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
+                    Plataforma de análise e inteligência de dados para apoiar a tomada de decisão no ecossistema SGT.
                   </p>
                 </div>
               </motion.a>
