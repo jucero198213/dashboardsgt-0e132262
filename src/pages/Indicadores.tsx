@@ -156,7 +156,7 @@ export default function Indicadores() {
                   </svg>
                 </div>
                 <span className="text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
-                  SGT Dashboard
+                  Indicadores SGT
                 </span>
               </div>
 
