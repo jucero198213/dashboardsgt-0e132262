@@ -2,12 +2,13 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
-  ArrowLeft, Truck, Upload, FileSpreadsheet, X,
+  Truck, Upload, FileSpreadsheet, X,
   DollarSign, CreditCard, AlertCircle, TrendingDown,
   ChevronUp, ChevronDown, Search, Filter
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { HomeButton } from "@/components/shared/HomeButton";
 
 interface Financiamento {
   "N CONTRATO": string | number;
@@ -187,13 +188,7 @@ export default function FinanciamentoFrota() {
                 </button>
               )}
 
-              <button
-                onClick={() => navigate("/home")}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] hover:text-white hover:-translate-y-0.5"
-              >
-                <ArrowLeft className="h-3 w-3" />
-                Voltar
-              </button>
+              <HomeButton />
 
               <UserMenu />
             </div>
