@@ -255,7 +255,7 @@ export default function Home() {
           </div>
 
           {/* ── HERO ── */}
-          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 py-8 text-center sm:py-12 lg:px-10 lg:py-16">
+          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-12 pb-8 text-center sm:pt-16 sm:pb-12 lg:px-10 lg:pt-20 lg:pb-16">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
