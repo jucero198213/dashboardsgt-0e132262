@@ -156,9 +156,9 @@ export default function Indicadores() {
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                   </svg>
                 </div>
-                <span className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
+                <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none">
                   <span>Indicadores</span>
-                  <img src={sgtLogo} alt="SGT" className="h-7 w-auto object-contain" />
+                  <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
                 </span>
               </div>
 
