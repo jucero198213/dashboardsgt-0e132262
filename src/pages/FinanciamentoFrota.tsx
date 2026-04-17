@@ -316,14 +316,14 @@ export default function FinanciamentoFrota() {
                       </div>
                       <Filter className="h-3 w-3 text-slate-500 shrink-0" />
                       <select value={filterBanco} onChange={e => setFilterBanco(e.target.value)}
-                        className="h-7 rounded-lg px-2 text-[11px] outline-none border"
-                        style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-primary)" }}>
-                        {bancos.map(b => <option key={b}>{b}</option>)}
+                        className="h-7 rounded-lg px-2 text-[11px] outline-none border appearance-none cursor-pointer"
+                        style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-secondary)", colorScheme: "dark" }}>
+                        {bancos.map(b => <option key={b} style={{ background: "#0f1117", color: "#e2e8f0" }}>{b}</option>)}
                       </select>
                       <select value={filterTipo} onChange={e => setFilterTipo(e.target.value)}
-                        className="h-7 rounded-lg px-2 text-[11px] outline-none border"
-                        style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-primary)" }}>
-                        {tipos.map(t => <option key={t}>{t}</option>)}
+                        className="h-7 rounded-lg px-2 text-[11px] outline-none border appearance-none cursor-pointer"
+                        style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-secondary)", colorScheme: "dark" }}>
+                        {tipos.map(t => <option key={t} style={{ background: "#0f1117", color: "#e2e8f0" }}>{t}</option>)}
                       </select>
                       <span className="ml-auto text-[10px] dark:text-slate-500 shrink-0">{filtered.length} contratos</span>
                     </div>
