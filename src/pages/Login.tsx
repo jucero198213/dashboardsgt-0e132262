@@ -281,8 +281,17 @@ export default function Login() {
             </div>
           </div>
         </div>
-        <div className="relative space-y-6">
+        <div className="relative space-y-4">
           <img src={sgtLogo} alt="SGT Log" className="h-[120px] w-auto select-none" draggable={false} />
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-amber-400/70 mb-1">Bem-vindo ao</p>
+            <h1 className="text-[clamp(2rem,3.5vw,3rem)] font-black leading-[1.05] tracking-[-0.04em] sgt-text">
+              Workspace<br />
+              <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-600 bg-clip-text text-transparent">
+                SGT
+              </span>
+            </h1>
+          </div>
           <p className="max-w-[340px] text-[14px] leading-relaxed text-[var(--sgt-text-muted)]">
             Acesse com suas credenciais para continuar.
           </p>
