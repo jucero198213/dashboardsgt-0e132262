@@ -88,17 +88,6 @@ export default function Login() {
         {/* Left panel - desktop only */}
         <div className="relative hidden flex-col justify-between overflow-hidden border-r border-[var(--sgt-border-subtle)] sgt-bg-section px-12 py-14 lg:flex lg:w-[52%]">
           <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_90%_70%_at_0%_10%,rgba(180,110,4,0.18),transparent_60%)]" />
-          <div className="relative">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-400/25 bg-amber-400/10">
-                <BarChart3 className="h-5 w-5 text-amber-300" />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-amber-400/70">SGT LOG</p>
-                <p className="text-[10px] text-[var(--sgt-text-muted)] tracking-[0.15em]">GESTÃO FINANCEIRA</p>
-              </div>
-            </div>
-          </div>
           <div className="relative space-y-6">
             <h1 className="text-[clamp(2rem,4vw,3rem)] font-black leading-[1.08] tracking-[-0.04em] sgt-text">
               Primeiro<br />
