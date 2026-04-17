@@ -282,7 +282,7 @@ export default function Home() {
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
               <span className="mt-2 block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-transparent">
-                <AnimatedTitle text="Workflow" delay={0.45} />
+                <AnimatedTitle text="Workspace" delay={0.45} />
               </span>
             </h1>
 
@@ -360,7 +360,7 @@ export default function Home() {
                 Módulos principais
               </p>
               <h2 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-black tracking-[-0.03em] sgt-text">
-                Acessos do Workflow SGT
+                Acessos do Workspace SGT
               </h2>
             </motion.div>
 
@@ -410,14 +410,14 @@ export default function Home() {
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
                     Ferramenta complementar para apoiar rotinas e processos vinculados ao
-                    ecossistema Workflow SGT.
+                    ecossistema Workspace SGT.
                   </p>
                 </div>
               </motion.a>
             </div>
 
             <p className="mt-12 text-center text-[10px] tracking-[0.2em] text-[var(--sgt-text-faint)]">
-              © 2026 SGT Log · Workflow Corporativo
+              © 2026 SGT Log · Workspace Corporativo
             </p>
           </section>
         </div>
