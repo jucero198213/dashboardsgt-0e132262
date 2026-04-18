@@ -183,65 +183,84 @@ const ComparativeLineChart = ({
   const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const allValues = [...crRealizado, ...cpRealizado];
-  const maxVal = Math.max(...allValues, 1);
+  // Só plota até o último mês com dados em qualquer das duas séries
+  const lastDataIdx = Math.max(
+    [...crRealizado].reverse().findIndex(v => v > 0),
+    [...cpRealizado].reverse().findIndex(v => v > 0)
+  );
+  const activeMonths = lastDataIdx === -1 ? 0 : 12 - lastDataIdx;
+
+  const cr = crRealizado.slice(0, activeMonths || 12);
+  const cp = cpRealizado.slice(0, activeMonths || 12);
+  const n = cr.length;
+
+  const allValues = [...cr, ...cp].filter(v => v > 0);
+  const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
 
   const svgW = 520;
-  const svgH = 200;
-  const padL = 14;
-  const padR = 14;
-  const padTop = 14;
-  const padBot = 24;
+  const svgH = 190;
+  const padL = 72;
+  const padR = 16;
+  const padTop = 16;
+  const padBot = 28;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
-  const toX = (i: number) => padL + (i / (months.length - 1)) * chartW;
+  const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
-  const buildPath = (pts: number[]) =>
-    pts.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
-
-  const buildArea = (pts: number[]) => {
-    const line = pts.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" L");
-    return `M${line} L${toX(11).toFixed(1)},${(padTop + chartH).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
+  // Smooth bezier path
+  const buildSmooth = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(pts[i - 1]);
+      const x1 = toX(i), y1 = toY(pts[i]);
+      const cpX = (x0 + x1) / 2;
+      d += ` C${cpX.toFixed(1)},${y0.toFixed(1)} ${cpX.toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
   };
 
-  const formatCompact = (v: number) =>
-    v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
-    : v >= 1_000 ? `R$ ${(v / 1_000).toFixed(0)}mil`
-    : formatCurrency(v);
+  const formatY = (v: number) =>
+    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M`
+    : v >= 1_000 ? `${(v / 1_000).toFixed(0)}k`
+    : `${v}`;
 
+  const formatFull = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1];
   const getTooltipX = (i: number) => {
     const x = toX(i);
-    if (i <= 1) return x;
-    if (i >= 10) return x - 155;
-    return x - 78;
+    if (x + 170 > svgW) return x - 175;
+    return x + 10;
   };
 
   return (
-    <div className="flex h-full flex-col rounded-[18px] border border-[var(--sgt-border-subtle)] bg-white/[0.025] p-3">
-      <div className="mb-2 flex items-center justify-between">
+    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] bg-white/[0.018] p-3 overflow-hidden">
+      <div className="mb-2 flex items-center justify-between shrink-0">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
           Evolução anual{ano ? ` · ${ano}` : ""}
         </span>
-        <div className="flex gap-4">
+        <div className="flex gap-5">
           <div className="flex items-center gap-1.5">
-            <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#34d399" }} />
-            <span className="text-[9px] font-semibold text-slate-400">CR Realizado</span>
+            <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"/><circle cx="10" cy="4" r="2.5" fill="#34d399"/></svg>
+            <span className="text-[10px] font-semibold text-emerald-400">CR Realizado</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#f87171" }} />
-            <span className="text-[9px] font-semibold text-slate-400">CP Realizado</span>
+            <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"/><circle cx="10" cy="4" r="2.5" fill="#f87171"/></svg>
+            <span className="text-[10px] font-semibold text-rose-400">CP Realizado</span>
           </div>
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1">
-        {isEmpty ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 py-6">
+      <div className="relative flex-1 min-h-0">
+        {isEmpty || activeMonths === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
-              <svg className="h-5 w-5 text-slate-400/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />
+              <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
               </svg>
             </div>
             <p className="text-[11px] text-slate-500">Sem dados para o período</p>
@@ -251,120 +270,118 @@ const ComparativeLineChart = ({
           <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
-              <linearGradient id="grad-cr" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#34d399" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="grad-cp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f87171" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#f87171" stopOpacity={0} />
-              </linearGradient>
-              <filter id="glow-cr">
-                <feGaussianBlur stdDeviation="2" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              <filter id="glow-cr-line" x="-20%" y="-50%" width="140%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
-              <filter id="glow-cp">
-                <feGaussianBlur stdDeviation="2" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              <filter id="glow-cp-line" x="-20%" y="-50%" width="140%" height="200%">
+                <feGaussianBlur stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
             </defs>
 
-            {/* Grid lines */}
-            {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
-              <line key={frac} x1={padL} y1={padTop + chartH * (1 - frac)}
-                x2={svgW - padR} y2={padTop + chartH * (1 - frac)}
-                stroke="rgba(255,255,255,0.05)" strokeWidth={0.5} />
-            ))}
-
-            {/* Areas */}
-            <path d={buildArea(crRealizado)} fill="url(#grad-cr)" />
-            <path d={buildArea(cpRealizado)} fill="url(#grad-cp)" />
-
-            {/* Lines */}
-            <path d={buildPath(cpRealizado)} fill="none" stroke="#f87171"
-              strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" filter="url(#glow-cp)" />
-            <path d={buildPath(crRealizado)} fill="none" stroke="#34d399"
-              strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" filter="url(#glow-cr)" />
-
-            {/* Dots CR */}
-            {crRealizado.map((v, i) => (
-              <circle key={`cr-${i}`} cx={toX(i)} cy={toY(v)}
-                r={hoverIndex === i ? 4.5 : 3}
-                fill="#34d399"
-                stroke={hoverIndex === i ? "rgba(52,211,153,0.4)" : "transparent"}
-                strokeWidth={hoverIndex === i ? 6 : 0}
-                className="transition-all duration-150" />
-            ))}
-
-            {/* Dots CP */}
-            {cpRealizado.map((v, i) => (
-              <circle key={`cp-${i}`} cx={toX(i)} cy={toY(v)}
-                r={hoverIndex === i ? 4 : 2.5}
-                fill="#f87171"
-                stroke={hoverIndex === i ? "rgba(248,113,113,0.4)" : "transparent"}
-                strokeWidth={hoverIndex === i ? 5 : 0}
-                className="transition-all duration-150" />
-            ))}
-
-            {/* Hover line */}
-            {hoverIndex !== null && (
-              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop + chartH}
-                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3" />
-            )}
-
-            {/* Tooltip */}
-            {hoverIndex !== null && (() => {
-              const cr = crRealizado[hoverIndex];
-              const cp = cpRealizado[hoverIndex];
-              const hasData = cr > 0 || cp > 0;
-              const tooltipH = hasData ? 62 : 36;
-              const tooltipY = Math.max(padTop + 4, 2);
+            {/* Grid horizontal */}
+            {gridLines.map((frac) => {
+              const y = padTop + chartH * (1 - frac);
+              const val = maxVal * frac;
               return (
-                <g>
-                  <rect x={getTooltipX(hoverIndex)} y={tooltipY} width={hasData ? 168 : 120}
-                    height={tooltipH} rx={10}
-                    fill="rgba(10,12,20,0.92)" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
-                  <text x={getTooltipX(hoverIndex) + 10} y={tooltipY + 17}
-                    fill="var(--sgt-text-muted)" fontSize={10} fontWeight={600} fontFamily="system-ui, sans-serif">
-                    {months[hoverIndex]}
-                  </text>
-                  {hasData ? (
-                    <>
-                      <circle cx={getTooltipX(hoverIndex) + 14} cy={tooltipY + 31} r={3} fill="#34d399" />
-                      <text x={getTooltipX(hoverIndex) + 22} y={tooltipY + 35}
-                        fill="#34d399" fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
-                        CR: {formatCompact(cr)}
-                      </text>
-                      <circle cx={getTooltipX(hoverIndex) + 14} cy={tooltipY + 49} r={3} fill="#f87171" />
-                      <text x={getTooltipX(hoverIndex) + 22} y={tooltipY + 53}
-                        fill="#f87171" fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
-                        CP: {formatCompact(cp)}
-                      </text>
-                    </>
-                  ) : (
-                    <text x={getTooltipX(hoverIndex) + 10} y={tooltipY + 30}
-                      fill="var(--sgt-text-faint)" fontSize={10} fontFamily="system-ui, sans-serif">
-                      Sem dados
+                <g key={frac}>
+                  <line x1={padL} y1={y} x2={svgW - padR} y2={y}
+                    stroke={frac === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}
+                    strokeWidth={frac === 0 ? 1 : 0.5} />
+                  {frac > 0 && (
+                    <text x={padL - 6} y={y + 3.5} textAnchor="end"
+                      fill="rgba(148,163,184,0.5)" fontSize={8.5} fontFamily="system-ui, sans-serif">
+                      {formatY(val)}
                     </text>
                   )}
+                </g>
+              );
+            })}
+
+            {/* CP line */}
+            <path d={buildSmooth(cp)} fill="none" stroke="#f87171"
+              strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"
+              filter="url(#glow-cp-line)" opacity={0.85} />
+
+            {/* CR line — on top */}
+            <path d={buildSmooth(cr)} fill="none" stroke="#34d399"
+              strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round"
+              filter="url(#glow-cr-line)" />
+
+            {/* Hover vertical line */}
+            {hoverIndex !== null && hoverIndex < n && (
+              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop + chartH}
+                stroke="rgba(255,255,255,0.10)" strokeWidth={1} strokeDasharray="4,3" />
+            )}
+
+            {/* CP dots */}
+            {cp.map((v, i) => (
+              <circle key={`cp-${i}`} cx={toX(i)} cy={toY(v)}
+                r={hoverIndex === i ? 5 : v > 0 ? 3 : 2}
+                fill={v > 0 ? "#f87171" : "rgba(248,113,113,0.3)"}
+                stroke={hoverIndex === i ? "rgba(248,113,113,0.35)" : "transparent"}
+                strokeWidth={hoverIndex === i ? 7 : 0}
+                className="transition-all duration-150" />
+            ))}
+
+            {/* CR dots */}
+            {cr.map((v, i) => (
+              <circle key={`cr-${i}`} cx={toX(i)} cy={toY(v)}
+                r={hoverIndex === i ? 5.5 : v > 0 ? 3.5 : 2}
+                fill={v > 0 ? "#34d399" : "rgba(52,211,153,0.3)"}
+                stroke={hoverIndex === i ? "rgba(52,211,153,0.4)" : "transparent"}
+                strokeWidth={hoverIndex === i ? 8 : 0}
+                className="transition-all duration-150" />
+            ))}
+
+            {/* Tooltip */}
+            {hoverIndex !== null && hoverIndex < n && (() => {
+              const crV = cr[hoverIndex] ?? 0;
+              const cpV = cp[hoverIndex] ?? 0;
+              const tx = getTooltipX(hoverIndex);
+              const ty = padTop + 4;
+              const diff = crV - cpV;
+              return (
+                <g>
+                  <rect x={tx} y={ty} width={164} height={72} rx={10}
+                    fill="rgba(8,10,20,0.94)" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+                  <text x={tx + 12} y={ty + 17} fill="rgba(203,213,225,0.9)"
+                    fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
+                    {months[hoverIndex]}
+                  </text>
+                  <circle cx={tx + 15} cy={ty + 31} r={3} fill="#34d399" />
+                  <text x={tx + 24} y={ty + 35} fill="#34d399"
+                    fontSize={9.5} fontWeight={600} fontFamily="system-ui, sans-serif">
+                    CR: {formatFull(crV)}
+                  </text>
+                  <circle cx={tx + 15} cy={ty + 47} r={3} fill="#f87171" />
+                  <text x={tx + 24} y={ty + 51} fill="#f87171"
+                    fontSize={9.5} fontWeight={600} fontFamily="system-ui, sans-serif">
+                    CP: {formatFull(cpV)}
+                  </text>
+                  <text x={tx + 12} y={ty + 66} fill={diff >= 0 ? "rgba(52,211,153,0.7)" : "rgba(248,113,113,0.7)"}
+                    fontSize={8.5} fontWeight={500} fontFamily="system-ui, sans-serif">
+                    Saldo: {diff >= 0 ? "+" : ""}{formatFull(diff)}
+                  </text>
                 </g>
               );
             })()}
 
             {/* Month labels */}
-            {months.map((m, i) => (
-              <text key={m} x={toX(i)} y={svgH - 4} textAnchor="middle"
-                fill={hoverIndex === i ? "var(--sgt-text-primary)" : "var(--sgt-text-muted)"}
-                fontSize={9.5} fontWeight={hoverIndex === i ? 600 : 400}
+            {Array.from({ length: n }).map((_, i) => (
+              <text key={`m-${i}`} x={toX(i)} y={svgH - 5} textAnchor="middle"
+                fill={hoverIndex === i ? "rgba(226,232,240,0.9)" : "rgba(100,116,139,0.7)"}
+                fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 400}
                 fontFamily="system-ui, sans-serif" className="transition-all duration-150">
-                {m}
+                {months[i]}
               </text>
             ))}
 
             {/* Hover zones */}
-            {months.map((_, i) => (
-              <rect key={`hz-${i}`} x={toX(i) - chartW / months.length / 2} y={padTop}
-                width={chartW / months.length} height={chartH}
+            {Array.from({ length: n }).map((_, i) => (
+              <rect key={`hz-${i}`} x={toX(i) - chartW / Math.max(n - 1, 1) / 2} y={padTop}
+                width={chartW / Math.max(n - 1, 1)} height={chartH + padBot}
                 fill="transparent" onMouseEnter={() => setHoverIndex(i)}
                 style={{ cursor: "crosshair" }} />
             ))}
@@ -374,6 +391,7 @@ const ComparativeLineChart = ({
     </div>
   );
 };
+
 
 /* ------------------------------------------------------------------ */
 /*  Componente principal                                               */
