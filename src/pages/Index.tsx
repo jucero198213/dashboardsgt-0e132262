@@ -671,25 +671,11 @@ const Index = () => {
   const topMetrics = useMemo(
     () => [
       {
-        label: "A RECEBER (PREVISTO)",
-        value: contasReceber.valorAReceber,
-        helper: "Valor à receber",
-        icon: TrendingUp,
-        tone: "emerald",
-      },
-      {
         label: "RECEBIDO (REALIZADO)",
         value: contasReceber.valorRecebido,
         helper: "Entrada consolidada",
         icon: TrendingUp,
-        tone: "cyan",
-      },
-      {
-        label: "A PAGAR (PREVISTO)",
-        value: contasPagar.valorAPagar,
-        helper: "Valor à pagar",
-        icon: TrendingDown,
-        tone: "amber",
+        tone: "emerald",
       },
       {
         label: "PAGO (REALIZADO)",
@@ -700,9 +686,7 @@ const Index = () => {
       },
     ],
     [
-      contasReceber.valorAReceber,
       contasReceber.valorRecebido,
-      contasPagar.valorAPagar,
       contasPagar.valorPago,
     ]
   );
@@ -996,13 +980,13 @@ const Index = () => {
 
                 {/* Top 4 metric cards */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
-                    {[0, 1, 2, 3].map((i) => (
+                  <div className="grid grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
+                    {[0, 1].map((i) => (
                       <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
                     {(() => {
                       const TONE_MAP: Record<string, {
                         stripe: string; border: string; glow: string;
@@ -1020,9 +1004,7 @@ const Index = () => {
                       return topMetrics.map((item, idx) => {
                         const Icon = item.icon;
                         const t = TONE_MAP[item.tone] ?? TONE_MAP.cyan;
-                        const baseLabel = item.label.replace(" (PREVISTO)", "").replace(" (REALIZADO)", "");
-                        const isPrevisto = item.label.includes("(PREVISTO)");
-                        const isRealizado = item.label.includes("(REALIZADO)");
+                        const baseLabel = item.label.replace(" (REALIZADO)", "");
 
                         return (
                           <AnimatedCard key={item.label} delay={idx * 80}>
@@ -1042,16 +1024,9 @@ const Index = () => {
                                     <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">
                                       {baseLabel}
                                     </p>
-                                    {isPrevisto && (
-                                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-                                        previsto
-                                      </span>
-                                    )}
-                                    {isRealizado && (
-                                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
-                                        realizado
-                                      </span>
-                                    )}
+                                    <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                                      realizado
+                                    </span>
                                   </div>
                                   <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
                                     <Icon className="h-3.5 w-3.5" />
