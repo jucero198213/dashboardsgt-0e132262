@@ -458,7 +458,9 @@ const MiniLineChart = ({
 
 
 /* ------------------------------------------------------------------ */
-/*  Gráfico comparativo entre anos — CR e CP: ano atual vs anterior    */
+/*  YearComparisonChart — CR/CP atual vs anterior                       */
+/*  Premium: prioriza 2 linhas atuais; histórico fica fantasma e        */
+/*  acende no hover; toggle para fixar comparação ano vs ano.           */
 /* ------------------------------------------------------------------ */
 const YearComparisonChart = ({
   crAtual, crAnterior, cpAtual, cpAnterior, anoAtual, anoAnterior,
@@ -469,6 +471,7 @@ const YearComparisonChart = ({
 }) => {
   const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const isEmpty = [...crAtual, ...crAnterior, ...cpAtual, ...cpAnterior].every(v => v === 0);
 
@@ -484,68 +487,96 @@ const YearComparisonChart = ({
   const cp  = cpAtual.slice(0, n);
   const cpP = cpAnterior.slice(0, n);
 
-  const allVals = [...cr, ...crP, ...cp, ...cpP].filter(v => v > 0);
-  const maxVal  = allVals.length ? Math.max(...allVals) * 1.18 : 1;
+  // maxVal considera histórico apenas se estiver visível, para escala fluida
+  const visibleVals = showHistory
+    ? [...cr, ...crP, ...cp, ...cpP].filter(v => v > 0)
+    : [...cr, ...cp].filter(v => v > 0);
+  const maxVal = visibleVals.length ? Math.max(...visibleVals) * 1.15 : 1;
 
-  const svgW = 520; const svgH = 200;
-  const padL = 80; const padR = 18; const padTop = 22; const padBot = 32;
+  const svgW = 560; const svgH = 220;
+  const padL = 64; const padR = 18; const padTop = 26; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
   const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
+  // Suavização controlada (t=0.28)
   const buildSmooth = (pts: number[]) => {
     if (pts.length < 2) return "";
     let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
     for (let i = 1; i < pts.length; i++) {
       const x0 = toX(i-1), y0 = toY(pts[i-1]);
       const x1 = toX(i),   y1 = toY(pts[i]);
-      const t = 0.35;
+      const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
+    return d;
+  };
+
+  const buildArea = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.28;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
     return d;
   };
 
   const formatY = (v: number) => {
     if (v >= 1_000_000) return `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`;
     if (v >= 1_000)     return `R$ ${(v/1_000).toFixed(0)}k`;
-    return `R$ ${v}`;
+    return `R$ ${v.toFixed(0)}`;
   };
   const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const gridFracs = [0, 0.25, 0.5, 0.75, 1];
-  const getTooltipX = (i: number) => toX(i) + 185 > svgW ? toX(i) - 190 : toX(i) + 12;
+  // Grid limpo: 4 linhas
+  const gridFracs = [0, 0.33, 0.66, 1];
+  const getTooltipX = (i: number) => toX(i) + 188 > svgW ? toX(i) - 194 : toX(i) + 12;
+
+  // Opacidade do histórico: se hover, sobe para 0.55; senão fica 0.18 (a menos que toggle ON)
+  const histOpacity = showHistory ? 0.6 : (hoverIndex !== null ? 0.45 : 0.18);
 
   return (
     <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.014)" }}>
+      style={{
+        background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+      }}>
 
-      {/* Header + legenda */}
+      {/* Header + legenda + toggle de histórico */}
       <div className="mb-2 flex items-center gap-3 shrink-0 flex-wrap">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mr-auto">
-          Comparativo {anoAnterior || "anterior"} vs {anoAtual || "atual"}
+          {anoAtual} {showHistory ? "vs" : "·"} {showHistory ? anoAnterior : "ano corrente"}
         </span>
-        {/* CR atual */}
+
+        {/* Legenda focada nas 2 linhas principais */}
         <div className="flex items-center gap-1.5">
-          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#2dd4bf" strokeWidth="2.5" strokeLinecap="round"/></svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf" }}>CR {anoAtual}</span>
+          <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#2dd4bf" }}/>
+          <span className="text-[10px] font-semibold tracking-wide" style={{ color: "#2dd4bf" }}>CR {anoAtual}</span>
         </div>
-        {/* CR anterior */}
         <div className="flex items-center gap-1.5">
-          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#2dd4bf" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf", opacity: 0.5 }}>CR {anoAnterior}</span>
+          <span className="inline-block h-[2px] w-4 rounded-full" style={{ background: "rgba(248,113,113,0.7)" }}/>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(248,113,113,0.85)" }}>CP {anoAtual}</span>
         </div>
-        {/* CP atual */}
-        <div className="flex items-center gap-1.5">
-          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"/></svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#f87171" }}>CP {anoAtual}</span>
-        </div>
-        {/* CP anterior */}
-        <div className="flex items-center gap-1.5">
-          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#f87171" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#f87171", opacity: 0.5 }}>CP {anoAnterior}</span>
-        </div>
+
+        {/* Toggle histórico */}
+        <button
+          type="button"
+          onClick={() => setShowHistory(s => !s)}
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide transition-all
+            ${showHistory
+              ? "border border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+              : "border border-white/8 bg-white/3 text-slate-500 hover:bg-white/6 hover:text-slate-300"}`}
+          aria-pressed={showHistory}>
+          <span className={`h-1.5 w-1.5 rounded-full ${showHistory ? "bg-cyan-400" : "bg-slate-600"}`}/>
+          {anoAnterior}
+        </button>
       </div>
 
       <div className="relative flex-1 min-h-0">
@@ -563,27 +594,37 @@ const YearComparisonChart = ({
           <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
+              <linearGradient id="yc-area-cr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.13"/>
+                <stop offset="55%"  stopColor="#2dd4bf" stopOpacity="0.04"/>
+                <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0"/>
+              </linearGradient>
+              <linearGradient id="yc-bg-shadow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(0,0,0,0.18)"/>
+                <stop offset="20%" stopColor="rgba(0,0,0,0)"/>
+              </linearGradient>
               <clipPath id="yc-clip">
                 <rect x={padL} y={padTop} width={chartW} height={chartH}/>
               </clipPath>
             </defs>
 
-            {/* Fundo da área */}
+            {/* Fundo + inner shadow */}
             <rect x={padL} y={padTop} width={chartW} height={chartH}
-              fill="rgba(255,255,255,0.012)" rx="3"/>
+              fill="rgba(0,0,0,0.18)" rx="4"/>
+            <rect x={padL} y={padTop} width={chartW} height={chartH}
+              fill="url(#yc-bg-shadow)" rx="4"/>
 
-            {/* Grid */}
+            {/* Grid limpo — 4 linhas sólidas sutis */}
             {gridFracs.map(frac => {
               const y = padTop + chartH * (1 - frac);
               return (
                 <g key={frac}>
                   <line x1={padL} y1={y} x2={svgW - padR} y2={y}
-                    stroke="rgba(255,255,255,0.07)"
-                    strokeWidth={frac === 0 ? 1 : 0.6}
-                    strokeDasharray={frac === 0 ? "" : "4,4"}/>
+                    stroke={frac === 0 ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.05)"}
+                    strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="rgba(203,213,225,0.65)" fontSize={9} fontFamily="system-ui,sans-serif">
+                      fill="rgba(203,213,225,0.7)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
                       {formatY(maxVal * frac)}
                     </text>
                   )}
@@ -591,18 +632,25 @@ const YearComparisonChart = ({
               );
             })}
 
-            {/* Linhas ano anterior — tracejadas, opacas */}
+            {/* Linhas histórico (ano anterior) — fantasma; acendem com toggle/hover */}
             <path d={buildSmooth(cpP)} fill="none" stroke="#f87171"
-              strokeWidth={1.5} strokeDasharray="5,3" strokeLinecap="round"
-              opacity={0.4} clipPath="url(#yc-clip)"/>
+              strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"
+              opacity={histOpacity * 0.85}
+              style={{ transition: "opacity 220ms ease" }}
+              clipPath="url(#yc-clip)"/>
             <path d={buildSmooth(crP)} fill="none" stroke="#2dd4bf"
-              strokeWidth={1.5} strokeDasharray="5,3" strokeLinecap="round"
-              opacity={0.4} clipPath="url(#yc-clip)"/>
+              strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"
+              opacity={histOpacity}
+              style={{ transition: "opacity 220ms ease" }}
+              clipPath="url(#yc-clip)"/>
 
-            {/* Linhas ano atual — sólidas, destaque */}
-            <path d={buildSmooth(cp)} fill="none" stroke="#f87171"
-              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-              opacity={0.75} clipPath="url(#yc-clip)"/>
+            {/* Área CR atual — gradient suave */}
+            <path d={buildArea(cr)} fill="url(#yc-area-cr)" clipPath="url(#yc-clip)"/>
+
+            {/* Linhas ano atual — destaque */}
+            <path d={buildSmooth(cp)} fill="none" stroke="rgba(248,113,113,0.85)"
+              strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
+              clipPath="url(#yc-clip)"/>
             <path d={buildSmooth(cr)} fill="none" stroke="#2dd4bf"
               strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round"
               clipPath="url(#yc-clip)"/>
@@ -610,16 +658,24 @@ const YearComparisonChart = ({
             {/* Linha de hover */}
             {hoverIndex !== null && hoverIndex < n && (
               <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
-                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+                stroke="rgba(255,255,255,0.14)" strokeWidth={1} strokeDasharray="3,3"/>
             )}
 
-            {/* Pontos no hover */}
+            {/* Pontos no hover — apenas atuais com força; histórico discreto */}
             {hoverIndex !== null && hoverIndex < n && (
               <>
-                <circle cx={toX(hoverIndex)} cy={toY(cr[hoverIndex])}  r={4}   fill="#2dd4bf" stroke="rgba(45,212,191,0.22)" strokeWidth={7}/>
-                <circle cx={toX(hoverIndex)} cy={toY(crP[hoverIndex])} r={3}   fill="#2dd4bf" stroke="rgba(45,212,191,0.15)" strokeWidth={5} opacity={0.5}/>
-                <circle cx={toX(hoverIndex)} cy={toY(cp[hoverIndex])}  r={3.5} fill="#f87171" stroke="rgba(248,113,113,0.18)" strokeWidth={6} opacity={0.8}/>
-                <circle cx={toX(hoverIndex)} cy={toY(cpP[hoverIndex])} r={3}   fill="#f87171" stroke="rgba(248,113,113,0.12)" strokeWidth={5} opacity={0.45}/>
+                <circle cx={toX(hoverIndex)} cy={toY(cr[hoverIndex])}
+                  r={3.5} fill="#2dd4bf" stroke="#0b1023" strokeWidth={1.5}/>
+                <circle cx={toX(hoverIndex)} cy={toY(cp[hoverIndex])}
+                  r={3} fill="rgba(248,113,113,0.85)" stroke="#0b1023" strokeWidth={1.5}/>
+                {(showHistory || hoverIndex !== null) && crP[hoverIndex] > 0 && (
+                  <circle cx={toX(hoverIndex)} cy={toY(crP[hoverIndex])}
+                    r={2.5} fill="rgba(45,212,191,0.6)" stroke="#0b1023" strokeWidth={1}/>
+                )}
+                {(showHistory || hoverIndex !== null) && cpP[hoverIndex] > 0 && (
+                  <circle cx={toX(hoverIndex)} cy={toY(cpP[hoverIndex])}
+                    r={2.5} fill="rgba(248,113,113,0.5)" stroke="#0b1023" strokeWidth={1}/>
+                )}
               </>
             )}
 
@@ -635,30 +691,30 @@ const YearComparisonChart = ({
               const ty = padTop + 4;
               return (
                 <g>
-                  <rect x={tx} y={ty} width={182} height={100} rx={8}
-                    fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
-                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.9)"
+                  <rect x={tx} y={ty} width={188} height={104} rx={8}
+                    fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
                     fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                     {months[hoverIndex]}
                   </text>
                   {/* CR */}
-                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1} fill="#2dd4bf"/>
-                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
+                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CR {anoAtual}: {formatFull(crA)}
                   </text>
-                  <text x={tx+18} y={ty+44} fill="rgba(45,212,191,0.5)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+45} fill="rgba(45,212,191,0.55)" fontSize={9} fontFamily="system-ui,sans-serif">
                     {anoAnterior}: {formatFull(crB)}{crDiff !== null ? `  (${crDiff >= 0 ? "+" : ""}${crDiff.toFixed(1)}%)` : ""}
                   </text>
                   {/* CP */}
-                  <rect x={tx+10} y={ty+54} width={3} height={10} rx={1} fill="#f87171" opacity="0.8"/>
-                  <text x={tx+18} y={ty+63} fill="rgba(248,113,113,0.85)" fontSize={9} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+10} y={ty+56} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.8)"/>
+                  <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CP {anoAtual}: {formatFull(cpA)}
                   </text>
-                  <text x={tx+18} y={ty+74} fill="rgba(248,113,113,0.45)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
                     {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
                   </text>
-                  <line x1={tx+10} y1={ty+82} x2={tx+172} y2={ty+82} stroke="rgba(255,255,255,0.06)" strokeWidth={0.5}/>
-                  <text x={tx+10} y={ty+93} fill="rgba(148,163,184,0.6)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  <line x1={tx+10} y1={ty+86} x2={tx+178} y2={ty+86} stroke="rgba(255,255,255,0.07)" strokeWidth={0.5}/>
+                  <text x={tx+10} y={ty+98} fill="rgba(148,163,184,0.6)" fontSize={8.5} fontFamily="system-ui,sans-serif">
                     variação vs mesmo mês
                   </text>
                 </g>
@@ -666,14 +722,18 @@ const YearComparisonChart = ({
             })()}
 
             {/* Labels X */}
-            {Array.from({ length: n }).map((_, i) => (
-              <text key={`m-${i}`} x={toX(i)} y={svgH - 9} textAnchor="middle"
-                fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
-                fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 400}
-                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
-                {months[i]}
-              </text>
-            ))}
+            {Array.from({ length: n }).map((_, i) => {
+              const showLabel = n <= 8 || i === 0 || i === n - 1 || i % Math.ceil(n / 6) === 0;
+              if (!showLabel && hoverIndex !== i) return null;
+              return (
+                <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
+                  fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
+                  fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
+                  fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                  {months[i]}
+                </text>
+              );
+            })}
 
             {/* Zonas hover */}
             {Array.from({ length: n }).map((_, i) => {
