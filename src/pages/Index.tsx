@@ -167,6 +167,233 @@ const AnimatedCard = ({
 };
 
 
+/* ------------------------------------------------------------------ */
+/*  MiniLineChart — gráfico compacto premium para cards KPI            */
+/*  Mesmo design system de ComparativeLineChart: hierarquia clara,     */
+/*  area gradient, hover dot, sem pontos fixos                         */
+/* ------------------------------------------------------------------ */
+const MiniLineChart = ({
+  previstoMonthly,
+  realizadoMonthly,
+  tone,
+  ano,
+}: {
+  previstoMonthly: number[];
+  realizadoMonthly: number[];
+  tone: "emerald" | "amber";
+  ano?: string;
+}) => {
+  const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  // Cores semânticas (entrada = verde, saída = âmbar/vermelho)
+  const primaryColor = tone === "emerald" ? "#34d399" : "#fbbf24";
+  const primaryColorRgb = tone === "emerald" ? "52,211,153" : "251,191,36";
+  const secondaryColor = tone === "emerald" ? "rgba(148,163,184,0.55)" : "rgba(148,163,184,0.55)";
+
+  // Plota até o último mês com dados realizados
+  const lastDataIdx = [...realizadoMonthly].reverse().findIndex(v => v > 0);
+  const activeMonths = lastDataIdx === -1 ? 0 : 12 - lastDataIdx;
+  const real = realizadoMonthly.slice(0, activeMonths || 12);
+  const prev = previstoMonthly.slice(0, activeMonths || 12);
+  const n = real.length;
+
+  const isEmpty = real.every(v => v === 0) && prev.every(v => v === 0);
+
+  const allValues = [...real, ...prev].filter(v => v > 0);
+  const maxVal = allValues.length ? Math.max(...allValues) * 1.18 : 1;
+
+  const svgW = 480; const svgH = 160;
+  const padL = 64; const padR = 14; const padTop = 14; const padBot = 22;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+
+  const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
+  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+
+  const buildSmooth = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.32;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
+  };
+
+  const buildArea = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.32;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
+    return d;
+  };
+
+  const formatY = (v: number) => {
+    if (v >= 1_000_000) return `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`;
+    if (v >= 1_000)     return `R$ ${(v/1_000).toFixed(0)}k`;
+    return `R$ ${v.toFixed(0)}`;
+  };
+  const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const gradId = `mini-area-${tone}`;
+  const gridFracs = [0, 0.5, 1];
+  const getTooltipX = (i: number) => toX(i) + 150 > svgW ? toX(i) - 152 : toX(i) + 10;
+
+  if (isEmpty) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-1.5 rounded-[12px] border border-[var(--sgt-border-subtle)]"
+        style={{ background: "rgba(255,255,255,0.012)" }}>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-500/20 bg-slate-500/8">
+          <svg className="h-3.5 w-3.5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </div>
+        <p className="text-[10px] text-slate-500">Sem dados no período</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full w-full rounded-[12px] border border-[var(--sgt-border-subtle)] overflow-hidden"
+      style={{ background: "rgba(255,255,255,0.012)" }}>
+      <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
+        className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={primaryColor} stopOpacity="0.13"/>
+            <stop offset="70%"  stopColor={primaryColor} stopOpacity="0.025"/>
+            <stop offset="100%" stopColor={primaryColor} stopOpacity="0"/>
+          </linearGradient>
+          <clipPath id={`mini-clip-${tone}`}>
+            <rect x={padL} y={padTop} width={chartW} height={chartH}/>
+          </clipPath>
+        </defs>
+
+        {/* Grid horizontal sutil — apenas 3 linhas */}
+        {gridFracs.map(frac => {
+          const y = padTop + chartH * (1 - frac);
+          const val = maxVal * frac;
+          return (
+            <g key={frac}>
+              <line x1={padL} y1={y} x2={svgW - padR} y2={y}
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth={frac === 0 ? 0.8 : 0.5}
+                strokeDasharray={frac === 0 ? "" : "4,4"}/>
+              {frac > 0 && (
+                <text x={padL - 6} y={y + 3} textAnchor="end"
+                  fill="rgba(203,213,225,0.6)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  {formatY(val)}
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Área sob a linha realizada */}
+        <path d={buildArea(real)} fill={`url(#${gradId})`} clipPath={`url(#mini-clip-${tone})`}/>
+
+        {/* Linha previsto — secundária, sutil */}
+        <path d={buildSmooth(prev)} fill="none"
+          stroke={secondaryColor} strokeWidth={1.4}
+          strokeDasharray="5,3" strokeLinecap="round" strokeLinejoin="round"
+          clipPath={`url(#mini-clip-${tone})`}/>
+
+        {/* Linha realizado — principal */}
+        <path d={buildSmooth(real)} fill="none"
+          stroke={primaryColor} strokeWidth={2.4}
+          strokeLinecap="round" strokeLinejoin="round"
+          clipPath={`url(#mini-clip-${tone})`}/>
+
+        {/* Linha vertical hover */}
+        {hoverIndex !== null && hoverIndex < n && (
+          <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
+            stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+        )}
+
+        {/* Pontos no hover */}
+        {hoverIndex !== null && hoverIndex < n && (
+          <>
+            <circle cx={toX(hoverIndex)} cy={toY(real[hoverIndex])} r={3.5}
+              fill={primaryColor} stroke={`rgba(${primaryColorRgb},0.22)`} strokeWidth={6}/>
+            {prev[hoverIndex] > 0 && (
+              <circle cx={toX(hoverIndex)} cy={toY(prev[hoverIndex])} r={2.5}
+                fill={secondaryColor} opacity={0.7}/>
+            )}
+          </>
+        )}
+
+        {/* Tooltip */}
+        {hoverIndex !== null && hoverIndex < n && (() => {
+          const r = real[hoverIndex] ?? 0;
+          const p = prev[hoverIndex] ?? 0;
+          const diff = p > 0 ? ((r - p) / p) * 100 : null;
+          const tx = getTooltipX(hoverIndex);
+          const ty = padTop + 2;
+          return (
+            <g>
+              <rect x={tx} y={ty} width={148} height={62} rx={6}
+                fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
+              <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.9)"
+                fontSize={9.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                {months[hoverIndex]}{ano ? ` ${ano}` : ""}
+              </text>
+              <rect x={tx+8} y={ty+19} width={2.5} height={9} rx={1} fill={primaryColor}/>
+              <text x={tx+15} y={ty+27} fill={primaryColor} fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                Realizado: {formatFull(r)}
+              </text>
+              <rect x={tx+8} y={ty+33} width={2.5} height={9} rx={1} fill={secondaryColor}/>
+              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.75)" fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                Previsto: {formatFull(p)}
+              </text>
+              {diff !== null && (
+                <text x={tx+8} y={ty+55} fill={diff >= 0 ? "#34d399" : "#f87171"}
+                  fontSize={8} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  {diff >= 0 ? "▲" : "▼"} {Math.abs(diff).toFixed(1)}% vs previsto
+                </text>
+              )}
+            </g>
+          );
+        })()}
+
+        {/* Labels X — apenas alguns meses para não poluir */}
+        {Array.from({ length: n }).map((_, i) => {
+          const showLabel = n <= 6 || i === 0 || i === n - 1 || i % Math.ceil(n / 4) === 0;
+          if (!showLabel && hoverIndex !== i) return null;
+          return (
+            <text key={`mx-${i}`} x={toX(i)} y={svgH - 6} textAnchor="middle"
+              fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.7)"}
+              fontSize={8.5} fontWeight={hoverIndex === i ? 700 : 400}
+              fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+              {months[i]}
+            </text>
+          );
+        })}
+
+        {/* Zonas de hover */}
+        {Array.from({ length: n }).map((_, i) => {
+          const zx = i === 0 ? padL : toX(i) - (toX(i)-toX(i-1))/2;
+          const zw = i === 0 ? (toX(1)-toX(0))/2
+                   : i === n-1 ? (toX(n-1)-toX(n-2))/2
+                   : toX(i+1)-toX(i);
+          return (
+            <rect key={`mhz-${i}`} x={zx} y={padTop} width={zw} height={chartH+padBot}
+              fill="transparent" onMouseEnter={() => setHoverIndex(i)}
+              style={{ cursor: "crosshair" }}/>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
 
 
 /* ------------------------------------------------------------------ */
@@ -716,6 +943,8 @@ const Index = () => {
     chartReceberAnterior,
     kpiExtra,
   } = useFinancialData();
+
+  const navigate = useNavigate();
 
   const { contasReceber, contasPagar } = resumo;
 
