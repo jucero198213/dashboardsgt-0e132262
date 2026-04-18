@@ -7,7 +7,7 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { HomeButton } from "@/components/shared/HomeButton";
 import sgtLogo from "@/assets/sgt-logo.png";
