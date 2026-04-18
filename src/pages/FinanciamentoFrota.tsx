@@ -2,11 +2,11 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
-  Truck, Upload, FileSpreadsheet, X,
-  DollarSign, CreditCard, AlertCircle, TrendingDown,
+  Truck, Upload, FileSpreadsheet,
+  DollarSign, CreditCard, AlertCircle,
   ChevronUp, ChevronDown, Search, Filter
 } from "lucide-react";
-import { UserMenu } from "@/components/auth/UserMenu";
+import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 
@@ -155,24 +155,10 @@ export default function FinanciamentoFrota() {
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                   </svg>
                 </div>
-                <span className="text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800">
-                  SGT Dashboard
+                <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none">
+                  <span>Financiamento de Frota</span>
+                  <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
                 </span>
-              </div>
-
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
-              </div>
-
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
-              <div className="flex items-center gap-2">
-                <Truck className="h-3.5 w-3.5 text-amber-400" />
-                <span className="text-[12px] font-semibold text-amber-300 uppercase tracking-[0.18em]">Financiamento de Frota</span>
               </div>
 
               <div className="flex-1" />
@@ -189,8 +175,6 @@ export default function FinanciamentoFrota() {
               )}
 
               <HomeButton />
-
-              <UserMenu />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
