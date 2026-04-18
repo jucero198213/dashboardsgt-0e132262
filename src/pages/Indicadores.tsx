@@ -151,11 +151,6 @@ export default function Indicadores() {
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                  <svg className="h-4.5 w-4.5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </svg>
-                </div>
                 <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none">
                   <span>Indicadores</span>
                   <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
@@ -200,11 +195,6 @@ export default function Indicadores() {
               {/* Linha 1: ícone + título com logo + Home */}
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10">
-                    <svg className="h-4 w-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                    </svg>
-                  </div>
                   <span className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none min-w-0">
                     <span className="truncate">Indicadores</span>
                     <img src={sgtLogo} alt="SGT" className="block h-5 w-auto shrink-0 object-contain" />
