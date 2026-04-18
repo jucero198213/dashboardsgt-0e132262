@@ -317,7 +317,7 @@ const MiniLineChart = ({
 
         {/* Inner shadow no topo do plot */}
         <rect x={padL} y={padTop} width={chartW} height={chartH}
-          fill="url(#" + shadowId + ")" rx="4"/>
+          fill={`url(#${shadowId})`} rx="4"/>
 
         {/* Grid horizontal — apenas 3 linhas, sólidas e sutis (sem dash genérico) */}
         {gridFracs.map(frac => {
