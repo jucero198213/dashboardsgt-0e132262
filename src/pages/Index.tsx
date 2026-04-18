@@ -167,49 +167,31 @@ const AnimatedCard = ({
 };
 
 /* ------------------------------------------------------------------ */
-/*  Mini line-chart (SVG) — Evolução mensal Previsto vs Realizado      */
+/*  Gráfico comparativo anual — CR Realizado vs CP Realizado             */
 /* ------------------------------------------------------------------ */
-const MiniLineChart = ({
-  previstoMonthly,
-  realizadoMonthly,
-  tone,
+const ComparativeLineChart = ({
+  crRealizado,
+  cpRealizado,
   ano,
+  isEmpty,
 }: {
-  previstoMonthly: number[];
-  realizadoMonthly: number[];
-  tone: "emerald" | "amber";
+  crRealizado: number[];
+  cpRealizado: number[];
   ano?: string;
+  isEmpty: boolean;
 }) => {
-  const months = [
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
-  ];
-
+  const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const previstoPoints = previstoMonthly;
-  const realizadoPoints = realizadoMonthly;
-
-  const allValues = [...previstoPoints, ...realizadoPoints];
+  const allValues = [...crRealizado, ...cpRealizado];
   const maxVal = Math.max(...allValues, 1);
-  const isEmpty = allValues.every((v) => v === 0);
 
   const svgW = 520;
   const svgH = 200;
-  const padL = 12;
-  const padR = 12;
-  const padTop = 12;
-  const padBot = 22;
+  const padL = 14;
+  const padR = 14;
+  const padTop = 14;
+  const padBot = 24;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
@@ -217,84 +199,39 @@ const MiniLineChart = ({
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
   const buildPath = (pts: number[]) =>
-    pts
-      .map(
-        (v, i) =>
-          `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`
-      )
-      .join(" ");
+    pts.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
 
-  const buildAreaPath = (pts: number[]) => {
-    const linePath = pts
-      .map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`)
-      .join(" L");
-    return `M${linePath} L${toX(11).toFixed(1)},${(
-      padTop + chartH
-    ).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
+  const buildArea = (pts: number[]) => {
+    const line = pts.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(" L");
+    return `M${line} L${toX(11).toFixed(1)},${(padTop + chartH).toFixed(1)} L${toX(0).toFixed(1)},${(padTop + chartH).toFixed(1)} Z`;
   };
 
-  const colors =
-    tone === "emerald"
-      ? {
-        prevStroke: "rgba(16,185,129,0.35)",
-        realStroke: "#34d399",
-        gradFrom: "#34d399",
-        dot: "#34d399",
-        dotGlow: "rgba(16,185,129,0.4)",
-        legendPrev: "rgba(16,185,129,0.4)",
-        legendReal: "#34d399",
-        tooltipBg: "rgba(6,78,59,0.92)",
-        tooltipBorder: "rgba(52,211,153,0.3)",
-      }
-      : {
-        prevStroke: "rgba(245,158,11,0.35)",
-        realStroke: "#fbbf24",
-        gradFrom: "#fbbf24",
-        dot: "#fbbf24",
-        dotGlow: "rgba(245,158,11,0.4)",
-        legendPrev: "rgba(245,158,11,0.4)",
-        legendReal: "#fbbf24",
-        tooltipBg: "rgba(78,53,6,0.92)",
-        tooltipBorder: "rgba(251,191,36,0.3)",
-      };
-
-  const gradId = `line-grad-${tone}`;
-  const realizadoLabel = tone === "emerald" ? "Recebido" : "Pago";
-
   const formatCompact = (v: number) =>
-    v >= 1_000_000
-      ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
-      : v >= 1_000
-        ? `R$ ${(v / 1_000).toFixed(0)}mil`
-        : formatCurrency(v);
+    v >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`
+    : v >= 1_000 ? `R$ ${(v / 1_000).toFixed(0)}mil`
+    : formatCurrency(v);
 
   const getTooltipX = (i: number) => {
     const x = toX(i);
     if (i <= 1) return x;
-    if (i >= 10) return x - 130;
-    return x - 65;
+    if (i >= 10) return x - 155;
+    return x - 78;
   };
 
   return (
     <div className="flex h-full flex-col rounded-[18px] border border-[var(--sgt-border-subtle)] bg-white/[0.025] p-3">
-      <div className="mb-1 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-          Evolução mensal{ano ? ` · ${ano}` : ""}
+          Evolução anual{ano ? ` · ${ano}` : ""}
         </span>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-[3px] w-3 rounded-full"
-              style={{ background: colors.legendPrev, opacity: 0.7 }}
-            />
-            <span className="text-[9px] text-slate-500">Previsto</span>
+            <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#34d399" }} />
+            <span className="text-[9px] font-semibold text-slate-400">CR Realizado</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-[3px] w-3 rounded-full"
-              style={{ background: colors.legendReal }}
-            />
-            <span className="text-[9px] text-slate-500">{realizadoLabel}</span>
+            <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#f87171" }} />
+            <span className="text-[9px] font-semibold text-slate-400">CP Realizado</span>
           </div>
         </div>
       </div>
@@ -302,8 +239,8 @@ const MiniLineChart = ({
       <div className="relative min-h-0 flex-1">
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 py-6">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tone === "emerald" ? "border-emerald-500/20 bg-emerald-500/8" : "border-amber-500/20 bg-amber-500/8"}`}>
-              <svg className={`h-5 w-5 ${tone === "emerald" ? "text-emerald-400/50" : "text-amber-400/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+              <svg className="h-5 w-5 text-slate-400/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />
               </svg>
             </div>
@@ -311,200 +248,127 @@ const MiniLineChart = ({
             <p className="text-[10px] text-slate-600">Selecione um intervalo de datas e atualize</p>
           </div>
         ) : (
-        <svg
-          viewBox={`0 0 ${svgW} ${svgH}`}
-          preserveAspectRatio="none"
-          className="h-full w-full"
-          onMouseLeave={() => setHoverIndex(null)}
-        >
-          <defs>
-            <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop
-                offset="0%"
-                stopColor={colors.gradFrom}
-                stopOpacity={0.42}
-              />
-              <stop
-                offset="55%"
-                stopColor={colors.gradFrom}
-                stopOpacity={0.14}
-              />
-              <stop offset="100%" stopColor={colors.gradFrom} stopOpacity={0} />
-            </linearGradient>
-            <filter id={`glow-${tone}`}>
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
+          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
+            className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
+            <defs>
+              <linearGradient id="grad-cr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#34d399" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="grad-cp" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f87171" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#f87171" stopOpacity={0} />
+              </linearGradient>
+              <filter id="glow-cr">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+              <filter id="glow-cp">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
 
-          {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
-            <line
-              key={frac}
-              x1={padL}
-              y1={padTop + chartH * (1 - frac)}
-              x2={svgW - padR}
-              y2={padTop + chartH * (1 - frac)}
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth={0.5}
-            />
-          ))}
+            {/* Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
+              <line key={frac} x1={padL} y1={padTop + chartH * (1 - frac)}
+                x2={svgW - padR} y2={padTop + chartH * (1 - frac)}
+                stroke="rgba(255,255,255,0.05)" strokeWidth={0.5} />
+            ))}
 
-          <path d={buildAreaPath(realizadoPoints)} fill={`url(#${gradId})`} />
+            {/* Areas */}
+            <path d={buildArea(crRealizado)} fill="url(#grad-cr)" />
+            <path d={buildArea(cpRealizado)} fill="url(#grad-cp)" />
 
-          <path
-            d={buildPath(previstoPoints)}
-            fill="none"
-            stroke={colors.prevStroke}
-            strokeWidth={2.2}
-            strokeDasharray="6,4"
-            strokeLinecap="round"
-          />
+            {/* Lines */}
+            <path d={buildPath(cpRealizado)} fill="none" stroke="#f87171"
+              strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" filter="url(#glow-cp)" />
+            <path d={buildPath(crRealizado)} fill="none" stroke="#34d399"
+              strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" filter="url(#glow-cr)" />
 
-          <path
-            d={buildPath(realizadoPoints)}
-            fill="none"
-            stroke={colors.realStroke}
-            strokeWidth={3.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            filter={`url(#glow-${tone})`}
-          />
+            {/* Dots CR */}
+            {crRealizado.map((v, i) => (
+              <circle key={`cr-${i}`} cx={toX(i)} cy={toY(v)}
+                r={hoverIndex === i ? 4.5 : 3}
+                fill="#34d399"
+                stroke={hoverIndex === i ? "rgba(52,211,153,0.4)" : "transparent"}
+                strokeWidth={hoverIndex === i ? 6 : 0}
+                className="transition-all duration-150" />
+            ))}
 
-          {realizadoPoints.map((v, i) => (
-            <circle
-              key={`dot-${i}`}
-              cx={toX(i)}
-              cy={toY(v)}
-              r={hoverIndex === i ? 4.5 : 3}
-              fill={colors.dot}
-              stroke={hoverIndex === i ? colors.dotGlow : "transparent"}
-              strokeWidth={hoverIndex === i ? 6 : 0}
-              className="transition-all duration-150"
-            />
-          ))}
+            {/* Dots CP */}
+            {cpRealizado.map((v, i) => (
+              <circle key={`cp-${i}`} cx={toX(i)} cy={toY(v)}
+                r={hoverIndex === i ? 4 : 2.5}
+                fill="#f87171"
+                stroke={hoverIndex === i ? "rgba(248,113,113,0.4)" : "transparent"}
+                strokeWidth={hoverIndex === i ? 5 : 0}
+                className="transition-all duration-150" />
+            ))}
 
-          {hoverIndex !== null && (
-            <line
-              x1={toX(hoverIndex)}
-              y1={padTop}
-              x2={toX(hoverIndex)}
-              y2={padTop + chartH}
-              stroke="rgba(255,255,255,0.15)"
-              strokeWidth={1}
-              strokeDasharray="3,3"
-            />
-          )}
+            {/* Hover line */}
+            {hoverIndex !== null && (
+              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop + chartH}
+                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3" />
+            )}
 
-          {hoverIndex !== null && (
-            <g>
-              {(() => {
-                const prevVal = previstoPoints[hoverIndex];
-                const realVal = realizadoPoints[hoverIndex];
-                const hasData = prevVal > 0 || realVal > 0;
-                const tooltipH = hasData ? 56 : 36;
-                const tooltipY = Math.max(
-                  toY(Math.max(prevVal, realVal)) - tooltipH - 8,
-                  2
-                );
-
-                return (
-                  <>
-                    <rect
-                      x={getTooltipX(hoverIndex)}
-                      y={tooltipY}
-                      width={hasData ? 150 : 110}
-                      height={tooltipH}
-                      rx={10}
-                      fill={colors.tooltipBg}
-                      stroke={colors.tooltipBorder}
-                      strokeWidth={1}
-                    />
-                    <text
-                      x={getTooltipX(hoverIndex) + 10}
-                      y={tooltipY + 18}
-                      fill="var(--sgt-text-muted)"
-                      fontSize={10}
-                      fontWeight={600}
-                      fontFamily="system-ui, sans-serif"
-                    >
-                      {months[hoverIndex]}
-                    </text>
-                    {hasData ? (
-                      <>
-                        <text
-                          x={getTooltipX(hoverIndex) + 10}
-                          y={tooltipY + 33}
-                          fill={colors.realStroke}
-                          fontSize={11}
-                          fontWeight={700}
-                          fontFamily="system-ui, sans-serif"
-                        >
-                          {realizadoLabel}: {formatCompact(realVal)}
-                        </text>
-                        <text
-                          x={getTooltipX(hoverIndex) + 10}
-                          y={tooltipY + 48}
-                          fill="var(--sgt-text-muted)"
-                          fontSize={10}
-                          fontWeight={500}
-                          fontFamily="system-ui, sans-serif"
-                        >
-                          Previsto: {formatCompact(prevVal)}
-                        </text>
-                      </>
-                    ) : (
-                      <text
-                        x={getTooltipX(hoverIndex) + 10}
-                        y={tooltipY + 30}
-                        fill="var(--sgt-text-faint)"
-                        fontSize={10}
-                        fontFamily="system-ui, sans-serif"
-                      >
-                        Sem dados no período
+            {/* Tooltip */}
+            {hoverIndex !== null && (() => {
+              const cr = crRealizado[hoverIndex];
+              const cp = cpRealizado[hoverIndex];
+              const hasData = cr > 0 || cp > 0;
+              const tooltipH = hasData ? 62 : 36;
+              const tooltipY = Math.max(padTop + 4, 2);
+              return (
+                <g>
+                  <rect x={getTooltipX(hoverIndex)} y={tooltipY} width={hasData ? 168 : 120}
+                    height={tooltipH} rx={10}
+                    fill="rgba(10,12,20,0.92)" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+                  <text x={getTooltipX(hoverIndex) + 10} y={tooltipY + 17}
+                    fill="var(--sgt-text-muted)" fontSize={10} fontWeight={600} fontFamily="system-ui, sans-serif">
+                    {months[hoverIndex]}
+                  </text>
+                  {hasData ? (
+                    <>
+                      <circle cx={getTooltipX(hoverIndex) + 14} cy={tooltipY + 31} r={3} fill="#34d399" />
+                      <text x={getTooltipX(hoverIndex) + 22} y={tooltipY + 35}
+                        fill="#34d399" fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
+                        CR: {formatCompact(cr)}
                       </text>
-                    )}
-                  </>
-                );
-              })()}
-            </g>
-          )}
+                      <circle cx={getTooltipX(hoverIndex) + 14} cy={tooltipY + 49} r={3} fill="#f87171" />
+                      <text x={getTooltipX(hoverIndex) + 22} y={tooltipY + 53}
+                        fill="#f87171" fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
+                        CP: {formatCompact(cp)}
+                      </text>
+                    </>
+                  ) : (
+                    <text x={getTooltipX(hoverIndex) + 10} y={tooltipY + 30}
+                      fill="var(--sgt-text-faint)" fontSize={10} fontFamily="system-ui, sans-serif">
+                      Sem dados
+                    </text>
+                  )}
+                </g>
+              );
+            })()}
 
-          {months.map((m, i) => (
-            <text
-              key={m}
-              x={toX(i)}
-              y={svgH - 4}
-              textAnchor="middle"
-              fill={
-                hoverIndex === i
-                  ? "var(--sgt-text-primary)"
-                  : "var(--sgt-text-muted)"
-              }
-              fontSize={9.5}
-              fontWeight={hoverIndex === i ? 600 : 400}
-              fontFamily="system-ui, sans-serif"
-              className="transition-all duration-150"
-            >
-              {m}
-            </text>
-          ))}
+            {/* Month labels */}
+            {months.map((m, i) => (
+              <text key={m} x={toX(i)} y={svgH - 4} textAnchor="middle"
+                fill={hoverIndex === i ? "var(--sgt-text-primary)" : "var(--sgt-text-muted)"}
+                fontSize={9.5} fontWeight={hoverIndex === i ? 600 : 400}
+                fontFamily="system-ui, sans-serif" className="transition-all duration-150">
+                {m}
+              </text>
+            ))}
 
-          {months.map((_, i) => (
-            <rect
-              key={`hover-${i}`}
-              x={toX(i) - chartW / months.length / 2}
-              y={padTop}
-              width={chartW / months.length}
-              height={chartH}
-              fill="transparent"
-              onMouseEnter={() => setHoverIndex(i)}
-              style={{ cursor: "crosshair" }}
-            />
-          ))}
-        </svg>
+            {/* Hover zones */}
+            {months.map((_, i) => (
+              <rect key={`hz-${i}`} x={toX(i) - chartW / months.length / 2} y={padTop}
+                width={chartW / months.length} height={chartH}
+                fill="transparent" onMouseEnter={() => setHoverIndex(i)}
+                style={{ cursor: "crosshair" }} />
+            ))}
+          </svg>
         )}
       </div>
     </div>
@@ -1051,54 +915,65 @@ const Index = () => {
                   </div>
                 )}
 
-                {/* Large cards with charts */}
+                {/* Gráfico comparativo anual CR vs CP */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="contents">
-                    <LargeCardSkeleton />
+                  <div className="xl:col-span-2">
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <div className="contents">
-                    <AnimatedCard delay={320} className="flex min-h-0 h-full">
-                      <div className="flex-1 flex flex-col min-h-0">
-                      {renderLargeCard({
-                        title: "Saldo a receber",
-                        tone: "emerald",
-                        total: contasReceber.saldoAReceber,
-                        subtitle: "Saldo pendente a receber",
-                        primaryLabel: "Previsto",
-                        primaryValue: contasReceber.saldoAReceber,
-                        secondaryLabel: "Recebido",
-                        secondaryValue: contasReceber.valorRecebido,
-                        monthlyPrevisto: chartReceber.previsto,
-                        monthlyRealizado: chartReceber.realizado,
-                        chartAno: chartReceber.ano,
-                        to: "/contas-a-receber",
-                        icon: TrendingUp,
-                      })}
+                  <AnimatedCard delay={320} className="xl:col-span-2 flex min-h-0 h-full">
+                    <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
+                      {/* Header */}
+                      <div className="flex items-center justify-between gap-3 mb-3 shrink-0">
+                        <div>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">
+                            Comparativo Anual
+                          </p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-300">
+                              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+                              CR: <span className="tabular-nums">{contasReceber.valorRecebido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+                            </span>
+                            <span className="text-slate-600">·</span>
+                            <span className="flex items-center gap-1.5 text-[12px] font-bold text-rose-300">
+                              <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
+                              CP: <span className="tabular-nums">{contasPagar.valorPago.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => navigate("/contas-a-receber")}
+                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/20 bg-emerald-400/8 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-400/15 transition-colors">
+                            <TrendingUp className="h-3 w-3" /> CR
+                          </button>
+                          <button onClick={() => navigate("/contas-a-pagar")}
+                            className="inline-flex items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-400/8 px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/15 transition-colors">
+                            <TrendingDown className="h-3 w-3" /> CP
+                          </button>
+                        </div>
                       </div>
-                    </AnimatedCard>
 
-                    <AnimatedCard delay={400} className="flex min-h-0 h-full">
-                      <div className="flex-1 flex flex-col min-h-0">
-                      {renderLargeCard({
-                        title: "Saldo a pagar",
-                        tone: "amber",
-                        total: contasPagar.saldoAPagar,
-                        subtitle: "Saldo pendente a pagar",
-                        primaryLabel: "Previsto",
-                        primaryValue: contasPagar.saldoAPagar,
-                        secondaryLabel: "Pago",
-                        secondaryValue: contasPagar.valorPago,
-                        monthlyPrevisto: chartPagar.previsto,
-                        monthlyRealizado: chartPagar.realizado,
-                        chartAno: chartPagar.ano,
-                        to: "/contas-a-pagar",
-                        icon: TrendingDown,
-                      })}
+                      {/* Chart */}
+                      <div className="relative flex-1 min-h-0">
+                        <ComparativeLineChart
+                          crRealizado={chartReceber.realizado}
+                          cpRealizado={chartPagar.realizado}
+                          ano={chartReceber.ano || chartPagar.ano}
+                          isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
+                        />
+                        {isFetchingDw && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full animate-pulse bg-emerald-400" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-emerald-400/60" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-emerald-400/30" />
+                            </div>
+                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                          </div>
+                        )}
                       </div>
-                    </AnimatedCard>
-                  </div>
+                    </div>
+                  </AnimatedCard>
                 )}
 
                 {/* KPIs Extras — dentro da coluna esquerda */}
