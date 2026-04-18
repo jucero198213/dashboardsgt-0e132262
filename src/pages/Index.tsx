@@ -166,8 +166,14 @@ const AnimatedCard = ({
   );
 };
 
+
 /* ------------------------------------------------------------------ */
-/*  Gráfico comparativo anual — CR Realizado vs CP Realizado             */
+/*  Gráfico comparativo anual — CR Realizado vs CP Realizado           */
+/* Design tokens:                                                       */
+/*   CR (principal):  #2dd4bf  stroke 2.6  area 0.10                  */
+/*   CP (secundária): #f87171  stroke 1.8  dashed  opacity 0.65       */
+/*   Grid: rgba(255,255,255,0.07) dashed 4,4                          */
+/*   Dots: hover-only  Y-labels: "R$ 4,8M"                            */
 /* ------------------------------------------------------------------ */
 const ComparativeLineChart = ({
   crRealizado,
@@ -183,75 +189,104 @@ const ComparativeLineChart = ({
   const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Só plota até o último mês com dados em qualquer das duas séries
   const lastDataIdx = Math.max(
     [...crRealizado].reverse().findIndex(v => v > 0),
     [...cpRealizado].reverse().findIndex(v => v > 0)
   );
   const activeMonths = lastDataIdx === -1 ? 0 : 12 - lastDataIdx;
-
   const cr = crRealizado.slice(0, activeMonths || 12);
   const cp = cpRealizado.slice(0, activeMonths || 12);
   const n = cr.length;
 
   const allValues = [...cr, ...cp].filter(v => v > 0);
-  const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
+  const maxVal = allValues.length ? Math.max(...allValues) * 1.18 : 1;
+  const minVal = 0;
 
-  const svgW = 520;
-  const svgH = 190;
-  const padL = 72;
-  const padR = 16;
-  const padTop = 16;
-  const padBot = 28;
+  const svgW = 520; const svgH = 200;
+  const padL = 80; const padR = 18; const padTop = 22; const padBot = 32;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
   const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
-  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+  const toY = (v: number) => padTop + chartH - ((v - minVal) / (maxVal - minVal)) * chartH;
 
-  // Smooth bezier path
   const buildSmooth = (pts: number[]) => {
     if (pts.length < 2) return "";
     let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
     for (let i = 1; i < pts.length; i++) {
-      const x0 = toX(i - 1), y0 = toY(pts[i - 1]);
-      const x1 = toX(i), y1 = toY(pts[i]);
-      const cpX = (x0 + x1) / 2;
-      d += ` C${cpX.toFixed(1)},${y0.toFixed(1)} ${cpX.toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.35;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
     return d;
   };
 
-  const formatY = (v: number) =>
-    v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M`
-    : v >= 1_000 ? `${(v / 1_000).toFixed(0)}k`
-    : `${v}`;
-
-  const formatFull = (v: number) =>
-    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-  const gridLines = [0, 0.25, 0.5, 0.75, 1];
-  const getTooltipX = (i: number) => {
-    const x = toX(i);
-    if (x + 170 > svgW) return x - 175;
-    return x + 10;
+  const buildArea = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.35;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
+    return d;
   };
 
+  const formatY = (v: number) => {
+    if (v >= 1_000_000) return `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`;
+    if (v >= 1_000)     return `R$ ${(v/1_000).toFixed(0)}k`;
+    return `R$ ${v}`;
+  };
+  const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  // Detecta quedas bruscas (>30%) na linha CR
+  const sharpDrops: number[] = [];
+  for (let i = 1; i < n; i++) {
+    if (cr[i-1] > 0 && cr[i] > 0 && (cr[i-1] - cr[i]) / cr[i-1] > 0.30) sharpDrops.push(i);
+  }
+
+  // Detecta períodos estáveis (baixa variação por 3+ meses)
+  const stableRanges: {start: number; end: number}[] = [];
+  let ss = -1;
+  for (let i = 1; i < n - 1; i++) {
+    const win = cr.slice(Math.max(0, i-1), i+2).filter(v => v > 0);
+    if (win.length >= 2) {
+      const mean = win.reduce((a,b)=>a+b,0) / win.length;
+      const cv = mean > 0 ? Math.sqrt(win.reduce((a,b)=>a+(b-mean)**2,0)/win.length) / mean : 1;
+      if (cv < 0.15) { if (ss === -1) ss = i-1; }
+      else { if (ss !== -1 && i-ss >= 2) stableRanges.push({start:ss, end:i-1}); ss = -1; }
+    }
+  }
+  if (ss !== -1 && n-1-ss >= 2) stableRanges.push({start:ss, end:n-1});
+
+  const gridFracs = [0, 0.25, 0.5, 0.75, 1];
+  const getTooltipX = (i: number) => toX(i) + 175 > svgW ? toX(i) - 178 : toX(i) + 12;
+
   return (
-    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] bg-white/[0.018] p-3 overflow-hidden">
-      <div className="mb-2 flex items-center justify-between shrink-0">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
+      style={{ background: "rgba(255,255,255,0.014)" }}>
+
+      {/* Header + legenda integrada */}
+      <div className="mb-2 flex items-center gap-4 shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mr-auto">
           Evolução anual{ano ? ` · ${ano}` : ""}
         </span>
-        <div className="flex gap-5">
-          <div className="flex items-center gap-1.5">
-            <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"/><circle cx="10" cy="4" r="2.5" fill="#34d399"/></svg>
-            <span className="text-[10px] font-semibold text-emerald-400">CR Realizado</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"/><circle cx="10" cy="4" r="2.5" fill="#f87171"/></svg>
-            <span className="text-[10px] font-semibold text-rose-400">CP Realizado</span>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <svg width="22" height="10">
+            <line x1="0" y1="5" x2="22" y2="5" stroke="#2dd4bf" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf" }}>CR Realizado</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <svg width="22" height="10">
+            <line x1="0" y1="5" x2="22" y2="5" stroke="#f87171" strokeWidth="1.8"
+              strokeDasharray="5,3" strokeLinecap="round" opacity="0.75"/>
+          </svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#f87171", opacity: 0.75 }}>CP Realizado</span>
         </div>
       </div>
 
@@ -270,28 +305,33 @@ const ComparativeLineChart = ({
           <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
-              <filter id="glow-cr-line" x="-20%" y="-50%" width="140%" height="200%">
-                <feGaussianBlur stdDeviation="2.5" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-              <filter id="glow-cp-line" x="-20%" y="-50%" width="140%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
+              <linearGradient id="area-cr-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.10"/>
+                <stop offset="75%"  stopColor="#2dd4bf" stopOpacity="0.02"/>
+                <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0"/>
+              </linearGradient>
+              <clipPath id="chart-area-clip">
+                <rect x={padL} y={padTop} width={chartW} height={chartH}/>
+              </clipPath>
             </defs>
 
-            {/* Grid horizontal */}
-            {gridLines.map((frac) => {
+            {/* Fundo neutro da área */}
+            <rect x={padL} y={padTop} width={chartW} height={chartH}
+              fill="rgba(255,255,255,0.012)" rx="3"/>
+
+            {/* Grid horizontal tracejado */}
+            {gridFracs.map(frac => {
               const y = padTop + chartH * (1 - frac);
-              const val = maxVal * frac;
+              const val = minVal + (maxVal - minVal) * frac;
               return (
                 <g key={frac}>
                   <line x1={padL} y1={y} x2={svgW - padR} y2={y}
-                    stroke={frac === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}
-                    strokeWidth={frac === 0 ? 1 : 0.5} />
+                    stroke="rgba(255,255,255,0.07)"
+                    strokeWidth={frac === 0 ? 1 : 0.6}
+                    strokeDasharray={frac === 0 ? "" : "4,4"}/>
                   {frac > 0 && (
-                    <text x={padL - 6} y={y + 3.5} textAnchor="end"
-                      fill="rgba(148,163,184,0.5)" fontSize={8.5} fontFamily="system-ui, sans-serif">
+                    <text x={padL - 8} y={y + 3.5} textAnchor="end"
+                      fill="rgba(203,213,225,0.65)" fontSize={9} fontFamily="system-ui,sans-serif">
                       {formatY(val)}
                     </text>
                   )}
@@ -299,92 +339,115 @@ const ComparativeLineChart = ({
               );
             })}
 
-            {/* CP line */}
-            <path d={buildSmooth(cp)} fill="none" stroke="#f87171"
-              strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"
-              filter="url(#glow-cp-line)" opacity={0.85} />
+            {/* Períodos estáveis — faixa suave */}
+            {stableRanges.map((r, ri) => (
+              <rect key={`stable-${ri}`}
+                x={toX(r.start)} y={padTop}
+                width={toX(r.end) - toX(r.start)} height={chartH}
+                fill="rgba(255,255,255,0.022)" rx="2"
+                clipPath="url(#chart-area-clip)"/>
+            ))}
 
-            {/* CR line — on top */}
-            <path d={buildSmooth(cr)} fill="none" stroke="#34d399"
-              strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round"
-              filter="url(#glow-cr-line)" />
+            {/* Área CR */}
+            <path d={buildArea(cr)} fill="url(#area-cr-grad)" clipPath="url(#chart-area-clip)"/>
 
-            {/* Hover vertical line */}
+            {/* Linha CP — secundária */}
+            <path d={buildSmooth(cp)} fill="none"
+              stroke="#f87171" strokeWidth={1.8}
+              strokeDasharray="6,3" strokeLinecap="round" strokeLinejoin="round"
+              opacity={0.65} clipPath="url(#chart-area-clip)"/>
+
+            {/* Linha CR — principal */}
+            <path d={buildSmooth(cr)} fill="none"
+              stroke="#2dd4bf" strokeWidth={2.6}
+              strokeLinecap="round" strokeLinejoin="round"
+              clipPath="url(#chart-area-clip)"/>
+
+            {/* Marcadores de quedas bruscas */}
+            {sharpDrops.map(i => (
+              <g key={`drop-${i}`}>
+                <line x1={toX(i)} y1={padTop+2} x2={toX(i)} y2={padTop+chartH}
+                  stroke="rgba(251,191,36,0.18)" strokeWidth={1} strokeDasharray="3,3"/>
+                <polygon
+                  points={`${toX(i)},${padTop+10} ${toX(i)-4},${padTop+2} ${toX(i)+4},${padTop+2}`}
+                  fill="rgba(251,191,36,0.5)"/>
+              </g>
+            ))}
+
+            {/* Linha vertical de hover */}
             {hoverIndex !== null && hoverIndex < n && (
-              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop + chartH}
-                stroke="rgba(255,255,255,0.10)" strokeWidth={1} strokeDasharray="4,3" />
+              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
+                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
             )}
 
-            {/* CP dots */}
-            {cp.map((v, i) => (
-              <circle key={`cp-${i}`} cx={toX(i)} cy={toY(v)}
-                r={hoverIndex === i ? 5 : v > 0 ? 3 : 2}
-                fill={v > 0 ? "#f87171" : "rgba(248,113,113,0.3)"}
-                stroke={hoverIndex === i ? "rgba(248,113,113,0.35)" : "transparent"}
-                strokeWidth={hoverIndex === i ? 7 : 0}
-                className="transition-all duration-150" />
-            ))}
-
-            {/* CR dots */}
-            {cr.map((v, i) => (
-              <circle key={`cr-${i}`} cx={toX(i)} cy={toY(v)}
-                r={hoverIndex === i ? 5.5 : v > 0 ? 3.5 : 2}
-                fill={v > 0 ? "#34d399" : "rgba(52,211,153,0.3)"}
-                stroke={hoverIndex === i ? "rgba(52,211,153,0.4)" : "transparent"}
-                strokeWidth={hoverIndex === i ? 8 : 0}
-                className="transition-all duration-150" />
-            ))}
+            {/* Pontos apenas no hover */}
+            {hoverIndex !== null && hoverIndex < n && (
+              <>
+                <circle cx={toX(hoverIndex)} cy={toY(cr[hoverIndex])}
+                  r={4} fill="#2dd4bf" stroke="rgba(45,212,191,0.22)" strokeWidth={7}/>
+                <circle cx={toX(hoverIndex)} cy={toY(cp[hoverIndex])}
+                  r={3.5} fill="#f87171" stroke="rgba(248,113,113,0.18)" strokeWidth={6}/>
+              </>
+            )}
 
             {/* Tooltip */}
             {hoverIndex !== null && hoverIndex < n && (() => {
               const crV = cr[hoverIndex] ?? 0;
               const cpV = cp[hoverIndex] ?? 0;
+              const diff = crV - cpV;
               const tx = getTooltipX(hoverIndex);
               const ty = padTop + 4;
-              const diff = crV - cpV;
               return (
                 <g>
-                  <rect x={tx} y={ty} width={164} height={72} rx={10}
-                    fill="rgba(8,10,20,0.94)" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
-                  <text x={tx + 12} y={ty + 17} fill="rgba(203,213,225,0.9)"
-                    fontSize={10} fontWeight={700} fontFamily="system-ui, sans-serif">
+                  <rect x={tx} y={ty} width={172} height={80} rx={8}
+                    fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
+                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.9)"
+                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                     {months[hoverIndex]}
                   </text>
-                  <circle cx={tx + 15} cy={ty + 31} r={3} fill="#34d399" />
-                  <text x={tx + 24} y={ty + 35} fill="#34d399"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui, sans-serif">
+                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1} fill="#2dd4bf"/>
+                  <text x={tx+18} y={ty+33} fill="#2dd4bf"
+                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CR: {formatFull(crV)}
                   </text>
-                  <circle cx={tx + 15} cy={ty + 47} r={3} fill="#f87171" />
-                  <text x={tx + 24} y={ty + 51} fill="#f87171"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui, sans-serif">
+                  <rect x={tx+10} y={ty+40} width={3} height={10} rx={1} fill="#f87171" opacity="0.8"/>
+                  <text x={tx+18} y={ty+49} fill="rgba(248,113,113,0.82)"
+                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CP: {formatFull(cpV)}
                   </text>
-                  <text x={tx + 12} y={ty + 66} fill={diff >= 0 ? "rgba(52,211,153,0.7)" : "rgba(248,113,113,0.7)"}
-                    fontSize={8.5} fontWeight={500} fontFamily="system-ui, sans-serif">
+                  <line x1={tx+10} y1={ty+58} x2={tx+162} y2={ty+58}
+                    stroke="rgba(255,255,255,0.06)" strokeWidth={0.5}/>
+                  <text x={tx+10} y={ty+70}
+                    fill={diff >= 0 ? "rgba(45,212,191,0.75)" : "rgba(248,113,113,0.75)"}
+                    fontSize={9} fontWeight={500} fontFamily="system-ui,sans-serif">
                     Saldo: {diff >= 0 ? "+" : ""}{formatFull(diff)}
                   </text>
                 </g>
               );
             })()}
 
-            {/* Month labels */}
+            {/* Labels eixo X */}
             {Array.from({ length: n }).map((_, i) => (
-              <text key={`m-${i}`} x={toX(i)} y={svgH - 5} textAnchor="middle"
-                fill={hoverIndex === i ? "rgba(226,232,240,0.9)" : "rgba(100,116,139,0.7)"}
+              <text key={`m-${i}`} x={toX(i)} y={svgH - 9} textAnchor="middle"
+                fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
                 fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 400}
-                fontFamily="system-ui, sans-serif" className="transition-all duration-150">
+                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
                 {months[i]}
               </text>
             ))}
 
-            {/* Hover zones */}
-            {Array.from({ length: n }).map((_, i) => (
-              <rect key={`hz-${i}`} x={toX(i) - chartW / Math.max(n - 1, 1) / 2} y={padTop}
-                width={chartW / Math.max(n - 1, 1)} height={chartH + padBot}
-                fill="transparent" onMouseEnter={() => setHoverIndex(i)}
-                style={{ cursor: "crosshair" }} />
-            ))}
+            {/* Zonas de hover */}
+            {Array.from({ length: n }).map((_, i) => {
+              const zx = i === 0   ? padL : toX(i) - (toX(i)-toX(i-1))/2;
+              const zw = i === 0   ? (toX(1)-toX(0))/2
+                       : i === n-1 ? (toX(n-1)-toX(n-2))/2
+                       : toX(i+1)-toX(i);
+              return (
+                <rect key={`hz-${i}`} x={zx} y={padTop} width={zw} height={chartH+padBot}
+                  fill="transparent" onMouseEnter={() => setHoverIndex(i)}
+                  style={{ cursor: "crosshair" }}/>
+              );
+            })}
           </svg>
         )}
       </div>
