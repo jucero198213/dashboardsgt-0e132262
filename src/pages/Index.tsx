@@ -634,12 +634,9 @@ const YearComparisonChart = ({
 };
 
 /* ------------------------------------------------------------------ */
-/*  Gráfico comparativo anual — CR Realizado vs CP Realizado           */
-/* Design tokens:                                                       */
-/*   CR (principal):  #2dd4bf  stroke 2.6  area 0.10                  */
-/*   CP (secundária): #f87171  stroke 1.8  dashed  opacity 0.65       */
-/*   Grid: rgba(255,255,255,0.07) dashed 4,4                          */
-/*   Dots: hover-only  Y-labels: "R$ 4,8M"                            */
+/*  ComparativeLineChart — CR vs CP no mesmo período                   */
+/*  Premium: hierarquia clara, area gradient, marker contextual,       */
+/*  grid limpo (4 linhas), suavização controlada, pontos só no hover.  */
 /* ------------------------------------------------------------------ */
 const ComparativeLineChart = ({
   crRealizado,
@@ -665,24 +662,25 @@ const ComparativeLineChart = ({
   const n = cr.length;
 
   const allValues = [...cr, ...cp].filter(v => v > 0);
-  const maxVal = allValues.length ? Math.max(...allValues) * 1.18 : 1;
+  const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
   const minVal = 0;
 
-  const svgW = 520; const svgH = 200;
-  const padL = 80; const padR = 18; const padTop = 22; const padBot = 32;
+  const svgW = 560; const svgH = 220;
+  const padL = 64; const padR = 18; const padTop = 26; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
   const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
   const toY = (v: number) => padTop + chartH - ((v - minVal) / (maxVal - minVal)) * chartH;
 
+  // Suavização controlada (t=0.28 — mais profissional, menos "elástica")
   const buildSmooth = (pts: number[]) => {
     if (pts.length < 2) return "";
     let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
     for (let i = 1; i < pts.length; i++) {
       const x0 = toX(i-1), y0 = toY(pts[i-1]);
       const x1 = toX(i),   y1 = toY(pts[i]);
-      const t = 0.35;
+      const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
     return d;
@@ -695,7 +693,7 @@ const ComparativeLineChart = ({
     for (let i = 1; i < pts.length; i++) {
       const x0 = toX(i-1), y0 = toY(pts[i-1]);
       const x1 = toX(i),   y1 = toY(pts[i]);
-      const t = 0.35;
+      const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
     d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
@@ -705,54 +703,65 @@ const ComparativeLineChart = ({
   const formatY = (v: number) => {
     if (v >= 1_000_000) return `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`;
     if (v >= 1_000)     return `R$ ${(v/1_000).toFixed(0)}k`;
-    return `R$ ${v}`;
+    return `R$ ${v.toFixed(0)}`;
   };
   const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  // Detecta quedas bruscas (>30%) na linha CR
-  const sharpDrops: number[] = [];
+  // Detecta a maior queda na linha CR (>25%) — apenas a mais relevante
+  let biggestDropIdx = -1;
+  let biggestDropPct = 0;
   for (let i = 1; i < n; i++) {
-    if (cr[i-1] > 0 && cr[i] > 0 && (cr[i-1] - cr[i]) / cr[i-1] > 0.30) sharpDrops.push(i);
-  }
-
-  // Detecta períodos estáveis (baixa variação por 3+ meses)
-  const stableRanges: {start: number; end: number}[] = [];
-  let ss = -1;
-  for (let i = 1; i < n - 1; i++) {
-    const win = cr.slice(Math.max(0, i-1), i+2).filter(v => v > 0);
-    if (win.length >= 2) {
-      const mean = win.reduce((a,b)=>a+b,0) / win.length;
-      const cv = mean > 0 ? Math.sqrt(win.reduce((a,b)=>a+(b-mean)**2,0)/win.length) / mean : 1;
-      if (cv < 0.15) { if (ss === -1) ss = i-1; }
-      else { if (ss !== -1 && i-ss >= 2) stableRanges.push({start:ss, end:i-1}); ss = -1; }
+    if (cr[i-1] > 0 && cr[i] > 0) {
+      const pct = (cr[i-1] - cr[i]) / cr[i-1];
+      if (pct > 0.25 && pct > biggestDropPct) {
+        biggestDropPct = pct;
+        biggestDropIdx = i;
+      }
     }
   }
-  if (ss !== -1 && n-1-ss >= 2) stableRanges.push({start:ss, end:n-1});
 
-  const gridFracs = [0, 0.25, 0.5, 0.75, 1];
-  const getTooltipX = (i: number) => toX(i) + 175 > svgW ? toX(i) - 178 : toX(i) + 12;
+  // Detecta período flat (3+ meses com baixa variação) na linha CR
+  const flatRanges: {start: number; end: number}[] = [];
+  let fs = -1;
+  for (let i = 1; i < n; i++) {
+    if (cr[i-1] > 0 && cr[i] > 0) {
+      const pct = Math.abs(cr[i] - cr[i-1]) / cr[i-1];
+      if (pct < 0.08) {
+        if (fs === -1) fs = i - 1;
+      } else {
+        if (fs !== -1 && i - 1 - fs >= 2) flatRanges.push({ start: fs, end: i - 1 });
+        fs = -1;
+      }
+    } else {
+      if (fs !== -1 && i - 1 - fs >= 2) flatRanges.push({ start: fs, end: i - 1 });
+      fs = -1;
+    }
+  }
+  if (fs !== -1 && n - 1 - fs >= 2) flatRanges.push({ start: fs, end: n - 1 });
+
+  // Grid limpo: apenas 4 linhas (0, 33%, 66%, 100%)
+  const gridFracs = [0, 0.33, 0.66, 1];
+  const getTooltipX = (i: number) => toX(i) + 178 > svgW ? toX(i) - 184 : toX(i) + 12;
 
   return (
     <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.014)" }}>
+      style={{
+        background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025), inset 0 0 0 1px rgba(255,255,255,0.008)",
+      }}>
 
-      {/* Header + legenda integrada */}
+      {/* Header + legenda */}
       <div className="mb-2 flex items-center gap-4 shrink-0">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mr-auto">
-          Evolução anual{ano ? ` · ${ano}` : ""}
+          Evolução{ano ? ` · ${ano}` : ""}
         </span>
         <div className="flex items-center gap-1.5">
-          <svg width="22" height="10">
-            <line x1="0" y1="5" x2="22" y2="5" stroke="#2dd4bf" strokeWidth="2.5" strokeLinecap="round"/>
-          </svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf" }}>CR Realizado</span>
+          <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#2dd4bf", boxShadow: "0 0 6px rgba(45,212,191,0.4)" }}/>
+          <span className="text-[10px] font-semibold tracking-wide" style={{ color: "#2dd4bf" }}>Receber</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <svg width="22" height="10">
-            <line x1="0" y1="5" x2="22" y2="5" stroke="#f87171" strokeWidth="1.8"
-              strokeDasharray="5,3" strokeLinecap="round" opacity="0.75"/>
-          </svg>
-          <span className="text-[10px] font-semibold" style={{ color: "#f87171", opacity: 0.75 }}>CP Realizado</span>
+          <span className="inline-block h-[2px] w-4 rounded-full" style={{ background: "rgba(248,113,113,0.55)" }}/>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(248,113,113,0.7)" }}>Pagar</span>
         </div>
       </div>
 
@@ -771,33 +780,40 @@ const ComparativeLineChart = ({
           <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
-              <linearGradient id="area-cr-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.10"/>
-                <stop offset="75%"  stopColor="#2dd4bf" stopOpacity="0.02"/>
+              {/* Área CR — gradient sutil (12% → 0%) */}
+              <linearGradient id="cl-area-cr" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.13"/>
+                <stop offset="55%"  stopColor="#2dd4bf" stopOpacity="0.04"/>
                 <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0"/>
               </linearGradient>
-              <clipPath id="chart-area-clip">
+              {/* Inner shadow no fundo */}
+              <linearGradient id="cl-bg-shadow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(0,0,0,0.18)"/>
+                <stop offset="20%" stopColor="rgba(0,0,0,0)"/>
+              </linearGradient>
+              <clipPath id="cl-clip">
                 <rect x={padL} y={padTop} width={chartW} height={chartH}/>
               </clipPath>
             </defs>
 
-            {/* Fundo neutro da área */}
+            {/* Fundo do plot — levemente mais escuro com inner shadow no topo */}
             <rect x={padL} y={padTop} width={chartW} height={chartH}
-              fill="rgba(255,255,255,0.012)" rx="3"/>
+              fill="rgba(0,0,0,0.18)" rx="4"/>
+            <rect x={padL} y={padTop} width={chartW} height={chartH}
+              fill="url(#cl-bg-shadow)" rx="4"/>
 
-            {/* Grid horizontal tracejado */}
+            {/* Grid horizontal — 4 linhas, sutis */}
             {gridFracs.map(frac => {
               const y = padTop + chartH * (1 - frac);
               const val = minVal + (maxVal - minVal) * frac;
               return (
                 <g key={frac}>
                   <line x1={padL} y1={y} x2={svgW - padR} y2={y}
-                    stroke="rgba(255,255,255,0.07)"
-                    strokeWidth={frac === 0 ? 1 : 0.6}
-                    strokeDasharray={frac === 0 ? "" : "4,4"}/>
+                    stroke={frac === 0 ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.05)"}
+                    strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="rgba(203,213,225,0.65)" fontSize={9} fontFamily="system-ui,sans-serif">
+                      fill="rgba(203,213,225,0.7)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
                       {formatY(val)}
                     </text>
                   )}
@@ -805,54 +821,80 @@ const ComparativeLineChart = ({
               );
             })}
 
-            {/* Períodos estáveis — faixa suave */}
-            {stableRanges.map((r, ri) => (
-              <rect key={`stable-${ri}`}
-                x={toX(r.start)} y={padTop}
-                width={toX(r.end) - toX(r.start)} height={chartH}
-                fill="rgba(255,255,255,0.022)" rx="2"
-                clipPath="url(#chart-area-clip)"/>
-            ))}
-
-            {/* Área CR */}
-            <path d={buildArea(cr)} fill="url(#area-cr-grad)" clipPath="url(#chart-area-clip)"/>
-
-            {/* Linha CP — secundária */}
-            <path d={buildSmooth(cp)} fill="none"
-              stroke="#f87171" strokeWidth={1.8}
-              strokeDasharray="6,3" strokeLinecap="round" strokeLinejoin="round"
-              opacity={0.65} clipPath="url(#chart-area-clip)"/>
-
-            {/* Linha CR — principal */}
-            <path d={buildSmooth(cr)} fill="none"
-              stroke="#2dd4bf" strokeWidth={2.6}
-              strokeLinecap="round" strokeLinejoin="round"
-              clipPath="url(#chart-area-clip)"/>
-
-            {/* Marcadores de quedas bruscas */}
-            {sharpDrops.map(i => (
-              <g key={`drop-${i}`}>
-                <line x1={toX(i)} y1={padTop+2} x2={toX(i)} y2={padTop+chartH}
-                  stroke="rgba(251,191,36,0.18)" strokeWidth={1} strokeDasharray="3,3"/>
-                <polygon
-                  points={`${toX(i)},${padTop+10} ${toX(i)-4},${padTop+2} ${toX(i)+4},${padTop+2}`}
-                  fill="rgba(251,191,36,0.5)"/>
+            {/* Períodos flat — fade leve para indicar baixa movimentação */}
+            {flatRanges.map((r, ri) => (
+              <g key={`flat-${ri}`}>
+                <rect
+                  x={toX(r.start)} y={padTop}
+                  width={toX(r.end) - toX(r.start)} height={chartH}
+                  fill="rgba(148,163,184,0.025)"
+                  clipPath="url(#cl-clip)"/>
+                {/* Anotação discreta no centro do range, se largo o suficiente */}
+                {r.end - r.start >= 3 && (
+                  <text
+                    x={(toX(r.start) + toX(r.end)) / 2}
+                    y={padTop + 12}
+                    textAnchor="middle"
+                    fill="rgba(148,163,184,0.42)"
+                    fontSize={8} fontStyle="italic"
+                    fontFamily="system-ui,sans-serif">
+                    sem movimentação relevante
+                  </text>
+                )}
               </g>
             ))}
 
-            {/* Linha vertical de hover */}
-            {hoverIndex !== null && hoverIndex < n && (
-              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
-                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+            {/* Área CR (principal) — gradient suave */}
+            <path d={buildArea(cr)} fill="url(#cl-area-cr)" clipPath="url(#cl-clip)"/>
+
+            {/* Linha CP (secundária) — fina, dessaturada, sólida (sem dash genérico) */}
+            <path d={buildSmooth(cp)} fill="none"
+              stroke="rgba(248,113,113,0.55)" strokeWidth={1.5}
+              strokeLinecap="round" strokeLinejoin="round"
+              clipPath="url(#cl-clip)"/>
+
+            {/* Linha CR (principal) — espessa, vibrante */}
+            <path d={buildSmooth(cr)} fill="none"
+              stroke="#2dd4bf" strokeWidth={2.6}
+              strokeLinecap="round" strokeLinejoin="round"
+              clipPath="url(#cl-clip)"/>
+
+            {/* Marker contextual: maior queda */}
+            {biggestDropIdx > 0 && (
+              <g>
+                <line
+                  x1={toX(biggestDropIdx)} y1={padTop+4}
+                  x2={toX(biggestDropIdx)} y2={padTop+chartH}
+                  stroke="rgba(251,191,36,0.22)" strokeWidth={1}/>
+                {/* Badge de anotação */}
+                <g transform={`translate(${toX(biggestDropIdx) + 6}, ${padTop + 4})`}>
+                  <rect x="0" y="0" width="76" height="18" rx="9"
+                    fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.35)" strokeWidth="0.8"/>
+                  <text x="38" y="12" textAnchor="middle"
+                    fill="rgba(251,191,36,0.95)" fontSize={9} fontWeight={700}
+                    fontFamily="system-ui,sans-serif">
+                    ▼ {(biggestDropPct * 100).toFixed(0)}% {months[biggestDropIdx]}
+                  </text>
+                </g>
+                {/* Ponto destacado na queda */}
+                <circle cx={toX(biggestDropIdx)} cy={toY(cr[biggestDropIdx])}
+                  r={3.5} fill="#0b1023" stroke="rgba(251,191,36,0.85)" strokeWidth={1.6}/>
+              </g>
             )}
 
-            {/* Pontos apenas no hover */}
+            {/* Linha vertical hover */}
+            {hoverIndex !== null && hoverIndex < n && (
+              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
+                stroke="rgba(255,255,255,0.14)" strokeWidth={1} strokeDasharray="3,3"/>
+            )}
+
+            {/* Pontos apenas no hover — sem glow */}
             {hoverIndex !== null && hoverIndex < n && (
               <>
                 <circle cx={toX(hoverIndex)} cy={toY(cr[hoverIndex])}
-                  r={4} fill="#2dd4bf" stroke="rgba(45,212,191,0.22)" strokeWidth={7}/>
+                  r={3.5} fill="#2dd4bf" stroke="#0b1023" strokeWidth={1.5}/>
                 <circle cx={toX(hoverIndex)} cy={toY(cp[hoverIndex])}
-                  r={3.5} fill="#f87171" stroke="rgba(248,113,113,0.18)" strokeWidth={6}/>
+                  r={3} fill="rgba(248,113,113,0.85)" stroke="#0b1023" strokeWidth={1.5}/>
               </>
             )}
 
@@ -865,42 +907,46 @@ const ComparativeLineChart = ({
               const ty = padTop + 4;
               return (
                 <g>
-                  <rect x={tx} y={ty} width={172} height={80} rx={8}
-                    fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
-                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.9)"
+                  <rect x={tx} y={ty} width={178} height={82} rx={8}
+                    fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
                     fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
-                    {months[hoverIndex]}
+                    {months[hoverIndex]}{ano ? ` ${ano}` : ""}
                   </text>
-                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1} fill="#2dd4bf"/>
+                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
                   <text x={tx+18} y={ty+33} fill="#2dd4bf"
                     fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
-                    CR: {formatFull(crV)}
+                    Receber: {formatFull(crV)}
                   </text>
-                  <rect x={tx+10} y={ty+40} width={3} height={10} rx={1} fill="#f87171" opacity="0.8"/>
-                  <text x={tx+18} y={ty+49} fill="rgba(248,113,113,0.82)"
+                  <rect x={tx+10} y={ty+40} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.7)"/>
+                  <text x={tx+18} y={ty+49} fill="rgba(248,113,113,0.85)"
                     fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
-                    CP: {formatFull(cpV)}
+                    Pagar: {formatFull(cpV)}
                   </text>
-                  <line x1={tx+10} y1={ty+58} x2={tx+162} y2={ty+58}
-                    stroke="rgba(255,255,255,0.06)" strokeWidth={0.5}/>
-                  <text x={tx+10} y={ty+70}
-                    fill={diff >= 0 ? "rgba(45,212,191,0.75)" : "rgba(248,113,113,0.75)"}
-                    fontSize={9} fontWeight={500} fontFamily="system-ui,sans-serif">
+                  <line x1={tx+10} y1={ty+58} x2={tx+168} y2={ty+58}
+                    stroke="rgba(255,255,255,0.07)" strokeWidth={0.5}/>
+                  <text x={tx+10} y={ty+72}
+                    fill={diff >= 0 ? "rgba(45,212,191,0.85)" : "rgba(248,113,113,0.85)"}
+                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     Saldo: {diff >= 0 ? "+" : ""}{formatFull(diff)}
                   </text>
                 </g>
               );
             })()}
 
-            {/* Labels eixo X */}
-            {Array.from({ length: n }).map((_, i) => (
-              <text key={`m-${i}`} x={toX(i)} y={svgH - 9} textAnchor="middle"
-                fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
-                fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 400}
-                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
-                {months[i]}
-              </text>
-            ))}
+            {/* Labels eixo X — espaçamento melhor */}
+            {Array.from({ length: n }).map((_, i) => {
+              const showLabel = n <= 8 || i === 0 || i === n - 1 || i % Math.ceil(n / 6) === 0;
+              if (!showLabel && hoverIndex !== i) return null;
+              return (
+                <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
+                  fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
+                  fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
+                  fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                  {months[i]}
+                </text>
+              );
+            })}
 
             {/* Zonas de hover */}
             {Array.from({ length: n }).map((_, i) => {
