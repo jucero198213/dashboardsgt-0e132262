@@ -1645,32 +1645,6 @@ const Index = () => {
                     {/* Gráfico 1 — CR vs CP (mesmo ano) */}
                     <AnimatedCard delay={320} className="flex min-h-0 h-full">
                       <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
-                        <div className="flex items-center justify-between gap-3 mb-3 shrink-0">
-                          <div>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">Comparativo Anual</p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="flex items-center gap-1.5 text-[12px] font-bold" style={{ color: "#2dd4bf" }}>
-                                <span className="inline-block h-2 w-2 rounded-full" style={{ background: "#2dd4bf" }} />
-                                CR: <span className="tabular-nums">{contasReceber.valorRecebido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-                              </span>
-                              <span className="text-slate-600">·</span>
-                              <span className="flex items-center gap-1.5 text-[12px] font-bold text-rose-300">
-                                <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
-                                CP: <span className="tabular-nums">{contasPagar.valorPago.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <button onClick={() => navigate("/contas-a-receber")}
-                              className="inline-flex items-center gap-1 rounded-lg border border-teal-400/20 bg-teal-400/8 px-2.5 py-1 text-[10px] font-semibold text-teal-300 hover:bg-teal-400/15 transition-colors">
-                              <TrendingUp className="h-3 w-3" /> CR
-                            </button>
-                            <button onClick={() => navigate("/contas-a-pagar")}
-                              className="inline-flex items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-400/8 px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/15 transition-colors">
-                              <TrendingDown className="h-3 w-3" /> CP
-                            </button>
-                          </div>
-                        </div>
                         <div className="relative flex-1 min-h-0">
                           <ComparativeLineChart
                             crRealizado={chartReceber.realizado}
