@@ -167,6 +167,245 @@ const AnimatedCard = ({
 };
 
 
+
+
+/* ------------------------------------------------------------------ */
+/*  Gráfico comparativo entre anos — CR e CP: ano atual vs anterior    */
+/* ------------------------------------------------------------------ */
+const YearComparisonChart = ({
+  crAtual, crAnterior, cpAtual, cpAnterior, anoAtual, anoAnterior,
+}: {
+  crAtual: number[]; crAnterior: number[];
+  cpAtual: number[]; cpAnterior: number[];
+  anoAtual: string;  anoAnterior: string;
+}) => {
+  const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  const isEmpty = [...crAtual, ...crAnterior, ...cpAtual, ...cpAnterior].every(v => v === 0);
+
+  // Plota só até o último mês com dados no ano atual
+  const lastIdx = Math.max(
+    [...crAtual].reverse().findIndex(v => v > 0),
+    [...cpAtual].reverse().findIndex(v => v > 0)
+  );
+  const n = lastIdx === -1 ? 12 : 12 - lastIdx;
+
+  const cr  = crAtual.slice(0, n);
+  const crP = crAnterior.slice(0, n);
+  const cp  = cpAtual.slice(0, n);
+  const cpP = cpAnterior.slice(0, n);
+
+  const allVals = [...cr, ...crP, ...cp, ...cpP].filter(v => v > 0);
+  const maxVal  = allVals.length ? Math.max(...allVals) * 1.18 : 1;
+
+  const svgW = 520; const svgH = 200;
+  const padL = 80; const padR = 18; const padTop = 22; const padBot = 32;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+
+  const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
+  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+
+  const buildSmooth = (pts: number[]) => {
+    if (pts.length < 2) return "";
+    let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = toX(i-1), y0 = toY(pts[i-1]);
+      const x1 = toX(i),   y1 = toY(pts[i]);
+      const t = 0.35;
+      d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
+  };
+
+  const formatY = (v: number) => {
+    if (v >= 1_000_000) return `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`;
+    if (v >= 1_000)     return `R$ ${(v/1_000).toFixed(0)}k`;
+    return `R$ ${v}`;
+  };
+  const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const gridFracs = [0, 0.25, 0.5, 0.75, 1];
+  const getTooltipX = (i: number) => toX(i) + 185 > svgW ? toX(i) - 190 : toX(i) + 12;
+
+  return (
+    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
+      style={{ background: "rgba(255,255,255,0.014)" }}>
+
+      {/* Header + legenda */}
+      <div className="mb-2 flex items-center gap-3 shrink-0 flex-wrap">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mr-auto">
+          Comparativo {anoAnterior || "anterior"} vs {anoAtual || "atual"}
+        </span>
+        {/* CR atual */}
+        <div className="flex items-center gap-1.5">
+          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#2dd4bf" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf" }}>CR {anoAtual}</span>
+        </div>
+        {/* CR anterior */}
+        <div className="flex items-center gap-1.5">
+          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#2dd4bf" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#2dd4bf", opacity: 0.5 }}>CR {anoAnterior}</span>
+        </div>
+        {/* CP atual */}
+        <div className="flex items-center gap-1.5">
+          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#f87171" }}>CP {anoAtual}</span>
+        </div>
+        {/* CP anterior */}
+        <div className="flex items-center gap-1.5">
+          <svg width="18" height="10"><line x1="0" y1="5" x2="18" y2="5" stroke="#f87171" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
+          <span className="text-[10px] font-semibold" style={{ color: "#f87171", opacity: 0.5 }}>CP {anoAnterior}</span>
+        </div>
+      </div>
+
+      <div className="relative flex-1 min-h-0">
+        {isEmpty ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+              <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </div>
+            <p className="text-[11px] text-slate-500">Sem dados para comparação</p>
+            <p className="text-[10px] text-slate-600">Atualize para carregar os anos</p>
+          </div>
+        ) : (
+          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
+            className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
+            <defs>
+              <clipPath id="yc-clip">
+                <rect x={padL} y={padTop} width={chartW} height={chartH}/>
+              </clipPath>
+            </defs>
+
+            {/* Fundo da área */}
+            <rect x={padL} y={padTop} width={chartW} height={chartH}
+              fill="rgba(255,255,255,0.012)" rx="3"/>
+
+            {/* Grid */}
+            {gridFracs.map(frac => {
+              const y = padTop + chartH * (1 - frac);
+              return (
+                <g key={frac}>
+                  <line x1={padL} y1={y} x2={svgW - padR} y2={y}
+                    stroke="rgba(255,255,255,0.07)"
+                    strokeWidth={frac === 0 ? 1 : 0.6}
+                    strokeDasharray={frac === 0 ? "" : "4,4"}/>
+                  {frac > 0 && (
+                    <text x={padL - 8} y={y + 3.5} textAnchor="end"
+                      fill="rgba(203,213,225,0.65)" fontSize={9} fontFamily="system-ui,sans-serif">
+                      {formatY(maxVal * frac)}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Linhas ano anterior — tracejadas, opacas */}
+            <path d={buildSmooth(cpP)} fill="none" stroke="#f87171"
+              strokeWidth={1.5} strokeDasharray="5,3" strokeLinecap="round"
+              opacity={0.4} clipPath="url(#yc-clip)"/>
+            <path d={buildSmooth(crP)} fill="none" stroke="#2dd4bf"
+              strokeWidth={1.5} strokeDasharray="5,3" strokeLinecap="round"
+              opacity={0.4} clipPath="url(#yc-clip)"/>
+
+            {/* Linhas ano atual — sólidas, destaque */}
+            <path d={buildSmooth(cp)} fill="none" stroke="#f87171"
+              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+              opacity={0.75} clipPath="url(#yc-clip)"/>
+            <path d={buildSmooth(cr)} fill="none" stroke="#2dd4bf"
+              strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round"
+              clipPath="url(#yc-clip)"/>
+
+            {/* Linha de hover */}
+            {hoverIndex !== null && hoverIndex < n && (
+              <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
+                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+            )}
+
+            {/* Pontos no hover */}
+            {hoverIndex !== null && hoverIndex < n && (
+              <>
+                <circle cx={toX(hoverIndex)} cy={toY(cr[hoverIndex])}  r={4}   fill="#2dd4bf" stroke="rgba(45,212,191,0.22)" strokeWidth={7}/>
+                <circle cx={toX(hoverIndex)} cy={toY(crP[hoverIndex])} r={3}   fill="#2dd4bf" stroke="rgba(45,212,191,0.15)" strokeWidth={5} opacity={0.5}/>
+                <circle cx={toX(hoverIndex)} cy={toY(cp[hoverIndex])}  r={3.5} fill="#f87171" stroke="rgba(248,113,113,0.18)" strokeWidth={6} opacity={0.8}/>
+                <circle cx={toX(hoverIndex)} cy={toY(cpP[hoverIndex])} r={3}   fill="#f87171" stroke="rgba(248,113,113,0.12)" strokeWidth={5} opacity={0.45}/>
+              </>
+            )}
+
+            {/* Tooltip */}
+            {hoverIndex !== null && hoverIndex < n && (() => {
+              const crA = cr[hoverIndex]  ?? 0;
+              const crB = crP[hoverIndex] ?? 0;
+              const cpA = cp[hoverIndex]  ?? 0;
+              const cpB = cpP[hoverIndex] ?? 0;
+              const crDiff = crB > 0 ? ((crA - crB) / crB) * 100 : null;
+              const cpDiff = cpB > 0 ? ((cpA - cpB) / cpB) * 100 : null;
+              const tx = getTooltipX(hoverIndex);
+              const ty = padTop + 4;
+              return (
+                <g>
+                  <rect x={tx} y={ty} width={182} height={100} rx={8}
+                    fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
+                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.9)"
+                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                    {months[hoverIndex]}
+                  </text>
+                  {/* CR */}
+                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1} fill="#2dd4bf"/>
+                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9} fontWeight={600} fontFamily="system-ui,sans-serif">
+                    CR {anoAtual}: {formatFull(crA)}
+                  </text>
+                  <text x={tx+18} y={ty+44} fill="rgba(45,212,191,0.5)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                    {anoAnterior}: {formatFull(crB)}{crDiff !== null ? `  (${crDiff >= 0 ? "+" : ""}${crDiff.toFixed(1)}%)` : ""}
+                  </text>
+                  {/* CP */}
+                  <rect x={tx+10} y={ty+54} width={3} height={10} rx={1} fill="#f87171" opacity="0.8"/>
+                  <text x={tx+18} y={ty+63} fill="rgba(248,113,113,0.85)" fontSize={9} fontWeight={600} fontFamily="system-ui,sans-serif">
+                    CP {anoAtual}: {formatFull(cpA)}
+                  </text>
+                  <text x={tx+18} y={ty+74} fill="rgba(248,113,113,0.45)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                    {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
+                  </text>
+                  <line x1={tx+10} y1={ty+82} x2={tx+172} y2={ty+82} stroke="rgba(255,255,255,0.06)" strokeWidth={0.5}/>
+                  <text x={tx+10} y={ty+93} fill="rgba(148,163,184,0.6)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                    variação vs mesmo mês
+                  </text>
+                </g>
+              );
+            })()}
+
+            {/* Labels X */}
+            {Array.from({ length: n }).map((_, i) => (
+              <text key={`m-${i}`} x={toX(i)} y={svgH - 9} textAnchor="middle"
+                fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
+                fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 400}
+                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                {months[i]}
+              </text>
+            ))}
+
+            {/* Zonas hover */}
+            {Array.from({ length: n }).map((_, i) => {
+              const zx = i === 0   ? padL : toX(i) - (toX(i)-toX(i-1))/2;
+              const zw = i === 0   ? (toX(1)-toX(0))/2
+                       : i === n-1 ? (toX(n-1)-toX(n-2))/2
+                       : toX(i+1)-toX(i);
+              return (
+                <rect key={`hz-${i}`} x={zx} y={padTop} width={zw} height={chartH+padBot}
+                  fill="transparent" onMouseEnter={() => setHoverIndex(i)}
+                  style={{ cursor: "crosshair" }}/>
+              );
+            })}
+          </svg>
+        )}
+      </div>
+    </div>
+  );
+};
+
 /* ------------------------------------------------------------------ */
 /*  Gráfico comparativo anual — CR Realizado vs CP Realizado           */
 /* Design tokens:                                                       */
@@ -473,6 +712,8 @@ const Index = () => {
     isProcessed,
     chartPagar,
     chartReceber,
+    chartPagarAnterior,
+    chartReceberAnterior,
     kpiExtra,
   } = useFinancialData();
 
@@ -996,65 +1237,92 @@ const Index = () => {
                   </div>
                 )}
 
-                {/* Gráfico comparativo anual CR vs CP */}
+                {/* Gráficos lado a lado */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="xl:col-span-2">
+                  <div className="xl:col-span-2 grid xl:grid-cols-2 gap-2.5">
+                    <LargeCardSkeleton />
                     <LargeCardSkeleton />
                   </div>
                 ) : (
-                  <AnimatedCard delay={320} className="xl:col-span-2 flex min-h-0 h-full">
-                    <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
-                      {/* Header */}
-                      <div className="flex items-center justify-between gap-3 mb-3 shrink-0">
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">
-                            Comparativo Anual
-                          </p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-300">
-                              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
-                              CR: <span className="tabular-nums">{contasReceber.valorRecebido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-                            </span>
-                            <span className="text-slate-600">·</span>
-                            <span className="flex items-center gap-1.5 text-[12px] font-bold text-rose-300">
-                              <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
-                              CP: <span className="tabular-nums">{contasPagar.valorPago.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => navigate("/contas-a-receber")}
-                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/20 bg-emerald-400/8 px-2.5 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-400/15 transition-colors">
-                            <TrendingUp className="h-3 w-3" /> CR
-                          </button>
-                          <button onClick={() => navigate("/contas-a-pagar")}
-                            className="inline-flex items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-400/8 px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/15 transition-colors">
-                            <TrendingDown className="h-3 w-3" /> CP
-                          </button>
-                        </div>
-                      </div>
+                  <div className="xl:col-span-2 grid xl:grid-cols-2 gap-2.5 min-h-0">
 
-                      {/* Chart */}
-                      <div className="relative flex-1 min-h-0">
-                        <ComparativeLineChart
-                          crRealizado={chartReceber.realizado}
-                          cpRealizado={chartPagar.realizado}
-                          ano={chartReceber.ano || chartPagar.ano}
-                          isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
-                        />
-                        {isFetchingDw && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full animate-pulse bg-emerald-400" />
-                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-emerald-400/60" />
-                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-emerald-400/30" />
+                    {/* Gráfico 1 — CR vs CP (mesmo ano) */}
+                    <AnimatedCard delay={320} className="flex min-h-0 h-full">
+                      <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
+                        <div className="flex items-center justify-between gap-3 mb-3 shrink-0">
+                          <div>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400">Comparativo Anual</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="flex items-center gap-1.5 text-[12px] font-bold" style={{ color: "#2dd4bf" }}>
+                                <span className="inline-block h-2 w-2 rounded-full" style={{ background: "#2dd4bf" }} />
+                                CR: <span className="tabular-nums">{contasReceber.valorRecebido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+                              </span>
+                              <span className="text-slate-600">·</span>
+                              <span className="flex items-center gap-1.5 text-[12px] font-bold text-rose-300">
+                                <span className="inline-block h-2 w-2 rounded-full bg-rose-400" />
+                                CP: <span className="tabular-nums">{contasPagar.valorPago.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+                              </span>
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
                           </div>
-                        )}
+                          <div className="flex gap-2">
+                            <button onClick={() => navigate("/contas-a-receber")}
+                              className="inline-flex items-center gap-1 rounded-lg border border-teal-400/20 bg-teal-400/8 px-2.5 py-1 text-[10px] font-semibold text-teal-300 hover:bg-teal-400/15 transition-colors">
+                              <TrendingUp className="h-3 w-3" /> CR
+                            </button>
+                            <button onClick={() => navigate("/contas-a-pagar")}
+                              className="inline-flex items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-400/8 px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/15 transition-colors">
+                              <TrendingDown className="h-3 w-3" /> CP
+                            </button>
+                          </div>
+                        </div>
+                        <div className="relative flex-1 min-h-0">
+                          <ComparativeLineChart
+                            crRealizado={chartReceber.realizado}
+                            cpRealizado={chartPagar.realizado}
+                            ano={chartReceber.ano || chartPagar.ano}
+                            isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
+                          />
+                          {isFetchingDw && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full animate-pulse bg-teal-400" />
+                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-teal-400/60" />
+                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-teal-400/30" />
+                              </div>
+                              <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </AnimatedCard>
+                    </AnimatedCard>
+
+                    {/* Gráfico 2 — ano atual vs ano anterior */}
+                    <AnimatedCard delay={400} className="flex min-h-0 h-full">
+                      <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
+                        <div className="relative flex-1 min-h-0">
+                          <YearComparisonChart
+                            crAtual={chartReceber.realizado}
+                            crAnterior={chartReceberAnterior.realizado}
+                            cpAtual={chartPagar.realizado}
+                            cpAnterior={chartPagarAnterior.realizado}
+                            anoAtual={chartReceber.ano || chartPagar.ano}
+                            anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
+                          />
+                          {isFetchingDw && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full animate-pulse bg-violet-400" />
+                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-violet-400/60" />
+                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-violet-400/30" />
+                              </div>
+                              <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </AnimatedCard>
+
+                  </div>
                 )}
 
                 {/* KPIs Extras — dentro da coluna esquerda */}

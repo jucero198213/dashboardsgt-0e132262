@@ -106,8 +106,10 @@ interface FinancialDataState {
   contasReceber: ContaReceber[];
   contasPagar: ContaPagar[];
   indicadores: IndicadorComparativo[];
-  chartPagar:        DadosMensais;
-  chartReceber:      DadosMensais;
+  chartPagar:            DadosMensais;
+  chartReceber:          DadosMensais;
+  chartPagarAnterior:    DadosMensais;
+  chartReceberAnterior:  DadosMensais;
   kpiExtra:          KpiExtra;
   dwFilter:          DwFilter;
   filiais:           FilterOption[];
@@ -244,8 +246,10 @@ export function FinancialDataProvider({
     contasReceber:cached?.contasReceber ?? [],
     contasPagar:  cached?.contasPagar   ?? [],
     indicadores:  cached?.indicadores   ?? defaultIndicadores,
-    chartPagar:   cached?.chartPagar    ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
-    chartReceber: cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartPagar:            cached?.chartPagar    ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartReceber:          cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartPagarAnterior:    { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartReceberAnterior:  { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     kpiExtra:     cached?.kpiExtra ?? defaultKpiExtra,
     dwFilter:     cached?.dwFilter      ?? defaultDwFilter,
     filiais:      [],
@@ -687,6 +691,8 @@ export function FinancialDataProvider({
       //    Cada uma dispara só quando a anterior terminar, evitando concorrência no pool.
       const fatSnap    = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim };
       const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
+      const anoAnterior = String(parseInt(anoFiltro) - 1);
+      const chartSnapAnterior = { dataInicio: `${anoAnterior}-01-01`, dataFim: `${anoAnterior}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
 
       fetchFaturamento(fatSnap)
         .then(({ data: fatData }) => {
@@ -722,6 +728,21 @@ export function FinancialDataProvider({
                 chartReceber: { previsto: gbm(chartCrPrevisto, "VLR_PARCELA", "DATA_VENCIMENTO"), realizado: gbm(chartCrRecebido, "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoFiltro },
                 dwChartData: chartData,
               }));
+
+              // Busca ano anterior em paralelo (não crítico)
+              fetchDwData(chartSnapAnterior)
+                .then(({ data: prevData }) => {
+                  const prevAllCP = prevData.filter((r) => r.ORIGEM === "CP");
+                  const prevAllCR = prevData.filter((r) => r.ORIGEM === "CR");
+                  const prevCrRecebido = prevAllCR.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return (s === "L" || s === "P") && r.DATA_PAGAMENTO != null && r.DATA_PAGAMENTO !== ""; });
+                  const prevCpPago     = prevAllCP.filter((r) => { const s = (r.SITUACAO ?? "").trim().toUpperCase(); return (s === "L" || s === "P") && r.DATA_PAGAMENTO != null && r.DATA_PAGAMENTO !== ""; });
+                  setState((prev) => ({
+                    ...prev,
+                    chartReceberAnterior: { previsto: new Array(12).fill(0), realizado: gbm(prevCrRecebido, "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoAnterior },
+                    chartPagarAnterior:   { previsto: new Array(12).fill(0), realizado: gbm(prevCpPago,     "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoAnterior },
+                  }));
+                })
+                .catch((err) => console.warn("[DW] Gráfico ano anterior erro (não crítico):", err?.message ?? err));
             })
             .catch((err) => console.warn("[DW] Gráfico anual erro (não crítico):", err?.message ?? err));
         });
