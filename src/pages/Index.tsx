@@ -302,7 +302,7 @@ const ComparativeLineChart = ({
             <p className="text-[10px] text-slate-600">Selecione um intervalo de datas e atualize</p>
           </div>
         ) : (
-          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
+          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
               <linearGradient id="area-cr-grad" x1="0" y1="0" x2="0" y2="1">
