@@ -186,12 +186,11 @@ const MiniLineChart = ({
   const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Cores semânticas (entrada = verde, saída = âmbar/vermelho)
+  // Cores semânticas (entrada = verde, saída = âmbar) — sem efeito neon
   const primaryColor = tone === "emerald" ? "#34d399" : "#fbbf24";
-  const primaryColorRgb = tone === "emerald" ? "52,211,153" : "251,191,36";
-  const secondaryColor = tone === "emerald" ? "rgba(148,163,184,0.55)" : "rgba(148,163,184,0.55)";
+  const primaryRgb   = tone === "emerald" ? "52,211,153" : "251,191,36";
+  const secondaryColor = "rgba(148,163,184,0.55)";
 
-  // Plota até o último mês com dados realizados
   const lastDataIdx = [...realizadoMonthly].reverse().findIndex(v => v > 0);
   const activeMonths = lastDataIdx === -1 ? 0 : 12 - lastDataIdx;
   const real = realizadoMonthly.slice(0, activeMonths || 12);
@@ -201,23 +200,24 @@ const MiniLineChart = ({
   const isEmpty = real.every(v => v === 0) && prev.every(v => v === 0);
 
   const allValues = [...real, ...prev].filter(v => v > 0);
-  const maxVal = allValues.length ? Math.max(...allValues) * 1.18 : 1;
+  const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
 
   const svgW = 480; const svgH = 160;
-  const padL = 64; const padR = 14; const padTop = 14; const padBot = 22;
+  const padL = 56; const padR = 12; const padTop = 16; const padBot = 22;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
   const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
+  // Suavização controlada — profissional, sem curvas elásticas
   const buildSmooth = (pts: number[]) => {
     if (pts.length < 2) return "";
     let d = `M${toX(0).toFixed(1)},${toY(pts[0]).toFixed(1)}`;
     for (let i = 1; i < pts.length; i++) {
       const x0 = toX(i-1), y0 = toY(pts[i-1]);
       const x1 = toX(i),   y1 = toY(pts[i]);
-      const t = 0.32;
+      const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
     return d;
@@ -230,7 +230,7 @@ const MiniLineChart = ({
     for (let i = 1; i < pts.length; i++) {
       const x0 = toX(i-1), y0 = toY(pts[i-1]);
       const x1 = toX(i),   y1 = toY(pts[i]);
-      const t = 0.32;
+      const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
     d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
@@ -244,14 +244,44 @@ const MiniLineChart = ({
   };
   const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  // Detecta a maior queda (>25%) — apenas a mais relevante para não poluir
+  let biggestDropIdx = -1;
+  let biggestDropPct = 0;
+  for (let i = 1; i < n; i++) {
+    if (real[i-1] > 0 && real[i] > 0) {
+      const pct = (real[i-1] - real[i]) / real[i-1];
+      if (pct > 0.25 && pct > biggestDropPct) {
+        biggestDropPct = pct;
+        biggestDropIdx = i;
+      }
+    }
+  }
+
+  // Detecta período flat (3+ meses com baixa variação)
+  const flatRanges: {start: number; end: number}[] = [];
+  let fs = -1;
+  for (let i = 1; i < n; i++) {
+    if (real[i-1] > 0 && real[i] > 0) {
+      const pct = Math.abs(real[i] - real[i-1]) / real[i-1];
+      if (pct < 0.08) { if (fs === -1) fs = i - 1; }
+      else { if (fs !== -1 && i - 1 - fs >= 2) flatRanges.push({ start: fs, end: i - 1 }); fs = -1; }
+    } else {
+      if (fs !== -1 && i - 1 - fs >= 2) flatRanges.push({ start: fs, end: i - 1 });
+      fs = -1;
+    }
+  }
+  if (fs !== -1 && n - 1 - fs >= 2) flatRanges.push({ start: fs, end: n - 1 });
+
   const gradId = `mini-area-${tone}`;
+  const shadowId = `mini-shadow-${tone}`;
+  // Apenas 3 linhas de grid — leitura limpa
   const gridFracs = [0, 0.5, 1];
-  const getTooltipX = (i: number) => toX(i) + 150 > svgW ? toX(i) - 152 : toX(i) + 10;
+  const getTooltipX = (i: number) => toX(i) + 152 > svgW ? toX(i) - 154 : toX(i) + 10;
 
   if (isEmpty) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-1.5 rounded-[12px] border border-[var(--sgt-border-subtle)]"
-        style={{ background: "rgba(255,255,255,0.012)" }}>
+        style={{ background: "linear-gradient(180deg, rgba(8,11,22,0.5) 0%, rgba(5,7,16,0.7) 100%)" }}>
         <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-500/20 bg-slate-500/8">
           <svg className="h-3.5 w-3.5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
@@ -264,33 +294,43 @@ const MiniLineChart = ({
 
   return (
     <div className="h-full w-full rounded-[12px] border border-[var(--sgt-border-subtle)] overflow-hidden"
-      style={{ background: "rgba(255,255,255,0.012)" }}>
+      style={{
+        background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+      }}>
       <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
         className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor={primaryColor} stopOpacity="0.13"/>
-            <stop offset="70%"  stopColor={primaryColor} stopOpacity="0.025"/>
+            <stop offset="0%"   stopColor={primaryColor} stopOpacity="0.15"/>
+            <stop offset="60%"  stopColor={primaryColor} stopOpacity="0.04"/>
             <stop offset="100%" stopColor={primaryColor} stopOpacity="0"/>
+          </linearGradient>
+          <linearGradient id={shadowId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(0,0,0,0.18)"/>
+            <stop offset="25%" stopColor="rgba(0,0,0,0)"/>
           </linearGradient>
           <clipPath id={`mini-clip-${tone}`}>
             <rect x={padL} y={padTop} width={chartW} height={chartH}/>
           </clipPath>
         </defs>
 
-        {/* Grid horizontal sutil — apenas 3 linhas */}
+        {/* Inner shadow no topo do plot */}
+        <rect x={padL} y={padTop} width={chartW} height={chartH}
+          fill="url(#" + shadowId + ")" rx="4"/>
+
+        {/* Grid horizontal — apenas 3 linhas, sólidas e sutis (sem dash genérico) */}
         {gridFracs.map(frac => {
           const y = padTop + chartH * (1 - frac);
           const val = maxVal * frac;
           return (
             <g key={frac}>
               <line x1={padL} y1={y} x2={svgW - padR} y2={y}
-                stroke="rgba(255,255,255,0.06)"
-                strokeWidth={frac === 0 ? 0.8 : 0.5}
-                strokeDasharray={frac === 0 ? "" : "4,4"}/>
+                stroke={frac === 0 ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.05)"}
+                strokeWidth={frac === 0 ? 0.8 : 0.5}/>
               {frac > 0 && (
                 <text x={padL - 6} y={y + 3} textAnchor="end"
-                  fill="rgba(203,213,225,0.6)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  fill="rgba(203,213,225,0.65)" fontSize={9} fontWeight={500} fontFamily="system-ui,sans-serif">
                   {formatY(val)}
                 </text>
               )}
@@ -298,35 +338,56 @@ const MiniLineChart = ({
           );
         })}
 
-        {/* Área sob a linha realizada */}
+        {/* Períodos flat — fade suave */}
+        {flatRanges.map((r, ri) => (
+          <rect key={`flat-${ri}`}
+            x={toX(r.start)} y={padTop}
+            width={toX(r.end) - toX(r.start)} height={chartH}
+            fill="rgba(148,163,184,0.025)"
+            clipPath={`url(#mini-clip-${tone})`}/>
+        ))}
+
+        {/* Área sob a linha realizada — gradient sofisticado */}
         <path d={buildArea(real)} fill={`url(#${gradId})`} clipPath={`url(#mini-clip-${tone})`}/>
 
-        {/* Linha previsto — secundária, sutil */}
+        {/* Linha previsto — secundária, fina, dessaturada (sem dash) */}
         <path d={buildSmooth(prev)} fill="none"
           stroke={secondaryColor} strokeWidth={1.4}
-          strokeDasharray="5,3" strokeLinecap="round" strokeLinejoin="round"
+          strokeLinecap="round" strokeLinejoin="round"
           clipPath={`url(#mini-clip-${tone})`}/>
 
-        {/* Linha realizado — principal */}
+        {/* Linha realizado — principal, espessa, vibrante */}
         <path d={buildSmooth(real)} fill="none"
           stroke={primaryColor} strokeWidth={2.4}
           strokeLinecap="round" strokeLinejoin="round"
           clipPath={`url(#mini-clip-${tone})`}/>
 
+        {/* Marker contextual: maior queda */}
+        {biggestDropIdx > 0 && (
+          <g>
+            <line
+              x1={toX(biggestDropIdx)} y1={padTop+2}
+              x2={toX(biggestDropIdx)} y2={padTop+chartH}
+              stroke="rgba(251,191,36,0.22)" strokeWidth={1}/>
+            <circle cx={toX(biggestDropIdx)} cy={toY(real[biggestDropIdx])}
+              r={2.8} fill="#0b1023" stroke="rgba(251,191,36,0.85)" strokeWidth={1.4}/>
+          </g>
+        )}
+
         {/* Linha vertical hover */}
         {hoverIndex !== null && hoverIndex < n && (
           <line x1={toX(hoverIndex)} y1={padTop} x2={toX(hoverIndex)} y2={padTop+chartH}
-            stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+            stroke="rgba(255,255,255,0.14)" strokeWidth={1} strokeDasharray="3,3"/>
         )}
 
-        {/* Pontos no hover */}
+        {/* Pontos no hover — sem glow, mais discretos */}
         {hoverIndex !== null && hoverIndex < n && (
           <>
-            <circle cx={toX(hoverIndex)} cy={toY(real[hoverIndex])} r={3.5}
-              fill={primaryColor} stroke={`rgba(${primaryColorRgb},0.22)`} strokeWidth={6}/>
+            <circle cx={toX(hoverIndex)} cy={toY(real[hoverIndex])}
+              r={3} fill={primaryColor} stroke="#0b1023" strokeWidth={1.4}/>
             {prev[hoverIndex] > 0 && (
-              <circle cx={toX(hoverIndex)} cy={toY(prev[hoverIndex])} r={2.5}
-                fill={secondaryColor} opacity={0.7}/>
+              <circle cx={toX(hoverIndex)} cy={toY(prev[hoverIndex])}
+                r={2.5} fill={secondaryColor} stroke="#0b1023" strokeWidth={1}/>
             )}
           </>
         )}
@@ -340,9 +401,9 @@ const MiniLineChart = ({
           const ty = padTop + 2;
           return (
             <g>
-              <rect x={tx} y={ty} width={148} height={62} rx={6}
-                fill="rgba(5,7,16,0.96)" stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
-              <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.9)"
+              <rect x={tx} y={ty} width={150} height={64} rx={6}
+                fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+              <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.92)"
                 fontSize={9.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                 {months[hoverIndex]}{ano ? ` ${ano}` : ""}
               </text>
@@ -351,12 +412,12 @@ const MiniLineChart = ({
                 Realizado: {formatFull(r)}
               </text>
               <rect x={tx+8} y={ty+33} width={2.5} height={9} rx={1} fill={secondaryColor}/>
-              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.75)" fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.78)" fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                 Previsto: {formatFull(p)}
               </text>
               {diff !== null && (
                 <text x={tx+8} y={ty+55} fill={diff >= 0 ? "#34d399" : "#f87171"}
-                  fontSize={8} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  fontSize={8.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                   {diff >= 0 ? "▲" : "▼"} {Math.abs(diff).toFixed(1)}% vs previsto
                 </text>
               )}
@@ -364,14 +425,14 @@ const MiniLineChart = ({
           );
         })()}
 
-        {/* Labels X — apenas alguns meses para não poluir */}
+        {/* Labels X — espaçamento limpo */}
         {Array.from({ length: n }).map((_, i) => {
           const showLabel = n <= 6 || i === 0 || i === n - 1 || i % Math.ceil(n / 4) === 0;
           if (!showLabel && hoverIndex !== i) return null;
           return (
             <text key={`mx-${i}`} x={toX(i)} y={svgH - 6} textAnchor="middle"
-              fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.7)"}
-              fontSize={8.5} fontWeight={hoverIndex === i ? 700 : 400}
+              fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.72)"}
+              fontSize={9} fontWeight={hoverIndex === i ? 700 : 500}
               fontFamily="system-ui,sans-serif" className="transition-all duration-150">
               {months[i]}
             </text>
