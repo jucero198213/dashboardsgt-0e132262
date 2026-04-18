@@ -156,6 +156,14 @@ export default function FinanciamentoFrota() {
                 </span>
               </div>
 
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+              </div>
+
               <div className="flex-1" />
 
               {/* Upload sutil — só aparece se já tem dados */}
