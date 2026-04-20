@@ -1638,59 +1638,56 @@ const Index = () => {
 
                         return (
                           <AnimatedCard key={item.label} delay={idx * 80}>
-                            <div className={`group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
+                            <div className={`group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
 
                               {/* Stripe topo */}
                               <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
+                              {/* Spot glow */}
+                              <div className="pointer-events-none absolute bottom-0 right-0 h-48 w-48"
+                                style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 60%)` }} />
 
-                              {/* Spot glow canto inferior direito */}
-                              <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
-                                style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
+                              <div className="relative flex h-full flex-col justify-between gap-3">
 
-                              <div className="relative flex h-full flex-col gap-2">
-                                {/* Label + badge + ícone */}
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">
-                                      {baseLabel}
-                                    </p>
+                                {/* Linha 1: label + badge + ícone */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">{baseLabel}</p>
                                     <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[8px] font-extrabold tracking-[0.18em] uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
                                       realizado
                                     </span>
                                   </div>
-                                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
-                                    <Icon className="h-3.5 w-3.5" />
+                                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${t.iconBg} ${t.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+                                    <Icon className="h-3 w-3" />
                                   </div>
                                 </div>
 
-                                {/* Valor protagonista */}
-                                <p className="font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: `clamp(1.1rem, 2.2vw, 2rem)` }}>
-                                  <CountUp value={item.value} />
-                                </p>
-
-                                {/* Helper em tom */}
-                                <p className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
-                                  {item.helper}
-                                </p>
-
-                                {/* Divider */}
-                                <div className="h-px w-full" style={{ background: "var(--sgt-divider)" }} />
-
-                                {/* Insights */}
-                                <div className="grid grid-cols-3 gap-1">
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight1Label}</span>
-                                    <span className={`text-[11px] font-bold ${insight1Color}`}>{insight1Value}</span>
-                                  </div>
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight2Label}</span>
-                                    <span className={`text-[11px] font-bold truncate ${insight2Color}`}>{insight2Value}</span>
-                                  </div>
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight3Label}</span>
-                                    <span className={`text-[11px] font-bold ${insight3Color}`}>{insight3Value}</span>
-                                  </div>
+                                {/* Linha 2: valor grande */}
+                                <div>
+                                  <p className="font-black leading-none tracking-[-0.05em] text-white" style={{ fontSize: `clamp(1.4rem, 2.8vw, 2.4rem)` }}>
+                                    <CountUp value={item.value} />
+                                  </p>
+                                  <p className={`mt-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${t.sub}`}>
+                                    {item.helper}
+                                  </p>
                                 </div>
+
+                                {/* Linha 3: divider */}
+                                <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+
+                                {/* Linha 4: 3 insights lado a lado */}
+                                <div className="grid grid-cols-3 gap-3">
+                                  {[
+                                    { label: insight1Label, value: insight1Value, color: insight1Color },
+                                    { label: insight2Label, value: insight2Value, color: insight2Color },
+                                    { label: insight3Label, value: insight3Value, color: insight3Color },
+                                  ].map((ins, i) => (
+                                    <div key={i} className="flex flex-col gap-1">
+                                      <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-600 leading-tight">{ins.label}</span>
+                                      <span className={`text-[12px] font-extrabold leading-tight truncate ${ins.color}`}>{ins.value}</span>
+                                    </div>
+                                  ))}
+                                </div>
+
                               </div>
                             </div>
                           </AnimatedCard>
