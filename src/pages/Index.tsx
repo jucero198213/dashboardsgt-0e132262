@@ -539,8 +539,8 @@ const YearComparisonChart = ({
   const gridFracs = [0, 0.33, 0.66, 1];
   const getTooltipX = (i: number) => toX(i) + 188 > svgW ? toX(i) - 194 : toX(i) + 12;
 
-  // Opacidade do histórico: se hover, sobe para 0.55; senão fica 0.18 (a menos que toggle ON)
-  const histOpacity = showHistory ? 0.6 : (hoverIndex !== null ? 0.45 : 0.18);
+  // Linhas do ano anterior sempre visíveis com boa opacidade
+  const histOpacity = 0.55;
 
   return (
     <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
@@ -549,34 +549,32 @@ const YearComparisonChart = ({
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
       }}>
 
-      {/* Header + legenda + toggle de histórico */}
+      {/* Header + legenda com os dois anos */}
       <div className="mb-2 flex items-center gap-3 shrink-0 flex-wrap">
         <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 mr-auto">
-          {anoAtual} {showHistory ? "vs" : "·"} {showHistory ? anoAnterior : "ano corrente"}
+          {anoAtual} vs {anoAnterior || "ano anterior"}
         </span>
 
-        {/* Legenda focada nas 2 linhas principais */}
+        {/* CR atual */}
         <div className="flex items-center gap-1.5">
           <span className="inline-block h-[3px] w-4 rounded-full" style={{ background: "#2dd4bf" }}/>
           <span className="text-[10px] font-semibold tracking-wide" style={{ color: "#2dd4bf" }}>CR {anoAtual}</span>
         </div>
+        {/* CR anterior */}
         <div className="flex items-center gap-1.5">
-          <span className="inline-block h-[2px] w-4 rounded-full" style={{ background: "rgba(248,113,113,0.7)" }}/>
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#2dd4bf" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.6"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#2dd4bf", opacity: 0.6 }}>CR {anoAnterior}</span>
+        </div>
+        {/* CP atual */}
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-[2px] w-4 rounded-full" style={{ background: "rgba(248,113,113,0.85)" }}/>
           <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(248,113,113,0.85)" }}>CP {anoAtual}</span>
         </div>
-
-        {/* Toggle histórico */}
-        <button
-          type="button"
-          onClick={() => setShowHistory(s => !s)}
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wide transition-all
-            ${showHistory
-              ? "border border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
-              : "border border-white/8 bg-white/3 text-slate-500 hover:bg-white/6 hover:text-slate-300"}`}
-          aria-pressed={showHistory}>
-          <span className={`h-1.5 w-1.5 rounded-full ${showHistory ? "bg-cyan-400" : "bg-slate-600"}`}/>
-          {anoAnterior}
-        </button>
+        {/* CP anterior */}
+        <div className="flex items-center gap-1.5">
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#f87171" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#f87171", opacity: 0.5 }}>CP {anoAnterior}</span>
+        </div>
       </div>
 
       <div className="relative flex-1 min-h-0">
