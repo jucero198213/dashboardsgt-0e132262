@@ -101,7 +101,7 @@ export default function PainelAdministrativo() {
         {/* Breadcrumb */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm sgt-text-2">
-            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Dashboard</button>
+            <button onClick={() => navigate("/home")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Início</button>
             <ChevronRight className="h-3.5 w-3.5" />
             {screen === "home" ? (
               <span className="sgt-text">Administração</span>
