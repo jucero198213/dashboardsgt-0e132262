@@ -1643,6 +1643,55 @@ const Index = () => {
                           ano={chartReceber.ano || chartPagar.ano}
                           isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
                         />
+
+                        {/* Insights — CR vs CP mesmo ano */}
+                        {isProcessed && (() => {
+                          const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+                          const cr = chartReceber.realizado;
+                          const cp = chartPagar.realizado;
+                          const totalCR = cr.reduce((a,b) => a+b, 0);
+                          const totalCP = cp.reduce((a,b) => a+b, 0);
+
+                          // Melhor mês CR
+                          const maxCRIdx = cr.indexOf(Math.max(...cr.filter(v => v > 0)));
+                          const melhorMes = maxCRIdx >= 0 ? months[maxCRIdx] : "—";
+
+                          // Cobertura CR/CP
+                          const cobertura = totalCP > 0 ? (totalCR / totalCP * 100) : 0;
+                          const coberturaOk = cobertura >= 100;
+
+                          // Tendência CR (últimos 3 meses com dados)
+                          const crDados = cr.map((v,i) => ({v,i})).filter(x => x.v > 0);
+                          const tendencia = crDados.length >= 2
+                            ? crDados[crDados.length-1].v - crDados[crDados.length-2].v
+                            : 0;
+
+                          const fmtK = (v: number) => v >= 1e6
+                            ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M`
+                            : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v}`;
+
+                          return (
+                            <div className="shrink-0 border-t border-[var(--sgt-border-subtle)] px-3 py-2 grid grid-cols-3 gap-2">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Melhor mês CR</span>
+                                <span className="text-[12px] font-bold" style={{ color: "#2dd4bf" }}>{melhorMes} · {fmtK(Math.max(...cr.filter(v=>v>0), 0))}</span>
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Cobertura CR/CP</span>
+                                <span className={`text-[12px] font-bold ${coberturaOk ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {cobertura.toFixed(0)}% {coberturaOk ? "▲" : "▼"}
+                                </span>
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Tendência CR</span>
+                                <span className={`text-[12px] font-bold ${tendencia >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {tendencia >= 0 ? "↑" : "↓"} {fmtK(Math.abs(tendencia))}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         {isFetchingDw && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
@@ -1667,6 +1716,54 @@ const Index = () => {
                           anoAtual={chartReceber.ano || chartPagar.ano}
                           anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
                         />
+
+                        {/* Insights — YoY */}
+                        {isProcessed && (() => {
+                          const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+                          const crA = chartReceber.realizado;
+                          const crB = chartReceberAnterior.realizado;
+                          const cpA = chartPagar.realizado;
+                          const cpB = chartPagarAnterior.realizado;
+
+                          const totalCRA = crA.reduce((a,b)=>a+b,0);
+                          const totalCRB = crB.reduce((a,b)=>a+b,0);
+                          const totalCPA = cpA.reduce((a,b)=>a+b,0);
+                          const totalCPB = cpB.reduce((a,b)=>a+b,0);
+
+                          const crYoY = totalCRB > 0 ? ((totalCRA - totalCRB) / totalCRB * 100) : null;
+                          const cpYoY = totalCPB > 0 ? ((totalCPA - totalCPB) / totalCPB * 100) : null;
+
+                          // Mês com maior variação CR
+                          const variacoes = crA.map((v,i) => crB[i] > 0 ? Math.abs(v - crB[i]) : 0);
+                          const maxVarIdx = variacoes.indexOf(Math.max(...variacoes));
+                          const maiorVar = crB[maxVarIdx] > 0
+                            ? ((crA[maxVarIdx] - crB[maxVarIdx]) / crB[maxVarIdx] * 100)
+                            : null;
+
+                          return (
+                            <div className="shrink-0 border-t border-[var(--sgt-border-subtle)] px-3 py-2 grid grid-cols-3 gap-2">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">CR vs ano ant.</span>
+                                <span className={`text-[12px] font-bold ${crYoY === null ? "text-slate-500" : crYoY >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {crYoY === null ? "Sem dados" : `${crYoY >= 0 ? "+" : ""}${crYoY.toFixed(1)}%`}
+                                </span>
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">CP vs ano ant.</span>
+                                <span className={`text-[12px] font-bold ${cpYoY === null ? "text-slate-500" : cpYoY <= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {cpYoY === null ? "Sem dados" : `${cpYoY >= 0 ? "+" : ""}${cpYoY.toFixed(1)}%`}
+                                </span>
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Maior var. CR</span>
+                                <span className={`text-[12px] font-bold ${maiorVar === null ? "text-slate-500" : maiorVar >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {maiorVar === null ? "—" : `${months[maxVarIdx]} ${maiorVar >= 0 ? "+" : ""}${maiorVar.toFixed(1)}%`}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         {isFetchingDw && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
