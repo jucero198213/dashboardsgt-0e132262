@@ -483,14 +483,12 @@ const YearComparisonChart = ({
   const n = lastIdx === -1 ? 12 : 12 - lastIdx;
 
   const cr  = crAtual.slice(0, n);
-  const crP = crAnterior.slice(0, n);
+  const crP = crAnterior; // ano anterior sempre com 12 meses completos
   const cp  = cpAtual.slice(0, n);
-  const cpP = cpAnterior.slice(0, n);
+  const cpP = cpAnterior; // ano anterior sempre com 12 meses completos
 
-  // maxVal considera histórico apenas se estiver visível, para escala fluida
-  const visibleVals = showHistory
-    ? [...cr, ...crP, ...cp, ...cpP].filter(v => v > 0)
-    : [...cr, ...cp].filter(v => v > 0);
+  // maxVal sempre considera o histórico para escala correta
+  const visibleVals = [...cr, ...crP, ...cp, ...cpP].filter(v => v > 0);
   const maxVal = visibleVals.length ? Math.max(...visibleVals) * 1.15 : 1;
 
   const svgW = 560; const svgH = 300;
@@ -498,7 +496,7 @@ const YearComparisonChart = ({
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
 
-  const toX = (i: number) => padL + (i / Math.max(n - 1, 1)) * chartW;
+  const toX = (i: number) => padL + (i / 11) * chartW; // sempre 12 meses
   const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
 
   // Suavização controlada (t=0.28)
@@ -719,25 +717,21 @@ const YearComparisonChart = ({
               );
             })()}
 
-            {/* Labels X */}
-            {Array.from({ length: n }).map((_, i) => {
-              const showLabel = n <= 8 || i === 0 || i === n - 1 || i % Math.ceil(n / 6) === 0;
-              if (!showLabel && hoverIndex !== i) return null;
-              return (
-                <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
-                  fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
-                  fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
-                  fontFamily="system-ui,sans-serif" className="transition-all duration-150">
-                  {months[i]}
-                </text>
-              );
-            })}
+            {/* Labels X — sempre 12 meses */}
+            {months.map((m, i) => (
+              <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
+                fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
+                fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
+                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                {m}
+              </text>
+            ))}
 
-            {/* Zonas hover */}
-            {Array.from({ length: n }).map((_, i) => {
-              const zx = i === 0   ? padL : toX(i) - (toX(i)-toX(i-1))/2;
-              const zw = i === 0   ? (toX(1)-toX(0))/2
-                       : i === n-1 ? (toX(n-1)-toX(n-2))/2
+            {/* Zonas hover — sempre 12 meses */}
+            {months.map((_, i) => {
+              const zx = i === 0    ? padL : toX(i) - (toX(i)-toX(i-1))/2;
+              const zw = i === 0    ? (toX(1)-toX(0))/2
+                       : i === 11   ? (toX(11)-toX(10))/2
                        : toX(i+1)-toX(i);
               return (
                 <rect key={`hz-${i}`} x={zx} y={padTop} width={zw} height={chartH+padBot}
