@@ -202,7 +202,7 @@ const MiniLineChart = ({
   const allValues = [...real, ...prev].filter(v => v > 0);
   const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
 
-  const svgW = 480; const svgH = 160;
+  const svgW = 480; const svgH = 220;
   const padL = 56; const padR = 12; const padTop = 16; const padBot = 22;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
@@ -493,7 +493,7 @@ const YearComparisonChart = ({
     : [...cr, ...cp].filter(v => v > 0);
   const maxVal = visibleVals.length ? Math.max(...visibleVals) * 1.15 : 1;
 
-  const svgW = 560; const svgH = 220;
+  const svgW = 560; const svgH = 300;
   const padL = 64; const padR = 18; const padTop = 26; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
@@ -589,7 +589,7 @@ const YearComparisonChart = ({
             <p className="text-[10px] text-slate-600">Atualize para carregar os anos</p>
           </div>
         ) : (
-          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
+          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
               <linearGradient id="yc-area-cr" x1="0" y1="0" x2="0" y2="1">
@@ -896,7 +896,7 @@ const ComparativeLineChart = ({
             <p className="text-[10px] text-slate-600">Selecione um intervalo de datas e atualize</p>
           </div>
         ) : (
-          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="xMidYMid meet"
+          <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
               {/* Área CR — gradient sutil (12% → 0%) */}
