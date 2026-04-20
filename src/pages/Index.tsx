@@ -1579,10 +1579,66 @@ const Index = () => {
                         const Icon = item.icon;
                         const t = TONE_MAP[item.tone] ?? TONE_MAP.cyan;
                         const baseLabel = item.label.replace(" (REALIZADO)", "");
+                        const isRecebido = item.label.includes("RECEBIDO");
+
+                        // Insights por card
+                        const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+                        const fmtK = (v: number) => v >= 1e6
+                          ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M`
+                          : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ 0`;
+
+                        let insight1Label = "", insight1Value = "", insight1Color = "";
+                        let insight2Label = "", insight2Value = "", insight2Color = "";
+                        let insight3Label = "", insight3Value = "", insight3Color = "";
+
+                        if (isRecebido) {
+                          const cr = chartReceber.realizado;
+                          const crAnt = chartReceberAnterior.realizado;
+                          const totalCR = cr.reduce((a,b)=>a+b,0);
+                          const totalCRAnt = crAnt.reduce((a,b)=>a+b,0);
+                          const yoy = totalCRAnt > 0 ? ((totalCR - totalCRAnt) / totalCRAnt * 100) : null;
+                          const maxIdx = cr.indexOf(Math.max(...cr.filter(v=>v>0)));
+                          const crDados = cr.map((v,i)=>({v,i})).filter(x=>x.v>0);
+                          const tend = crDados.length >= 2 ? crDados[crDados.length-1].v - crDados[crDados.length-2].v : 0;
+
+                          insight1Label = "vs ano anterior";
+                          insight1Value = yoy === null ? "Sem dados" : `${yoy >= 0 ? "+" : ""}${yoy.toFixed(1)}%`;
+                          insight1Color = yoy === null ? "text-slate-500" : yoy >= 0 ? "text-emerald-400" : "text-rose-400";
+
+                          insight2Label = "melhor mês";
+                          insight2Value = maxIdx >= 0 ? `${months[maxIdx]} · ${fmtK(cr[maxIdx])}` : "—";
+                          insight2Color = "text-teal-300";
+
+                          insight3Label = "tendência";
+                          insight3Value = crDados.length < 2 ? "—" : `${tend >= 0 ? "↑" : "↓"} ${fmtK(Math.abs(tend))}`;
+                          insight3Color = tend >= 0 ? "text-emerald-400" : "text-rose-400";
+                        } else {
+                          const cp = chartPagar.realizado;
+                          const cpAnt = chartPagarAnterior.realizado;
+                          const totalCP = cp.reduce((a,b)=>a+b,0);
+                          const totalCPAnt = cpAnt.reduce((a,b)=>a+b,0);
+                          const yoy = totalCPAnt > 0 ? ((totalCP - totalCPAnt) / totalCPAnt * 100) : null;
+                          const maxIdx = cp.indexOf(Math.max(...cp.filter(v=>v>0)));
+                          const cr = chartReceber.realizado;
+                          const totalCR = cr.reduce((a,b)=>a+b,0);
+                          const cobertura = totalCP > 0 ? (totalCR / totalCP * 100) : 0;
+
+                          insight1Label = "vs ano anterior";
+                          insight1Value = yoy === null ? "Sem dados" : `${yoy >= 0 ? "+" : ""}${yoy.toFixed(1)}%`;
+                          insight1Color = yoy === null ? "text-slate-500" : yoy <= 0 ? "text-emerald-400" : "text-rose-400";
+
+                          insight2Label = "maior despesa";
+                          insight2Value = maxIdx >= 0 ? `${months[maxIdx]} · ${fmtK(cp[maxIdx])}` : "—";
+                          insight2Color = "text-rose-300";
+
+                          insight3Label = "cobertura CR";
+                          insight3Value = `${cobertura.toFixed(0)}%`;
+                          insight3Color = cobertura >= 100 ? "text-emerald-400" : "text-rose-400";
+                        }
 
                         return (
                           <AnimatedCard key={item.label} delay={idx * 80}>
-                            <div className={`group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
+                            <div className={`group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
 
                               {/* Stripe topo */}
                               <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
@@ -1591,7 +1647,7 @@ const Index = () => {
                               <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                                 style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
 
-                              <div className="relative flex h-full flex-col">
+                              <div className="relative flex h-full flex-col gap-2">
                                 {/* Label + badge + ícone */}
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -1608,14 +1664,33 @@ const Index = () => {
                                 </div>
 
                                 {/* Valor protagonista */}
-                                <p className="mt-auto pt-2 sm:pt-3 font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: `clamp(1.1rem, 2.2vw, 2rem)` }}>
+                                <p className="font-black leading-none tracking-[-0.05em] text-white break-words overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: `clamp(1.1rem, 2.2vw, 2rem)` }}>
                                   <CountUp value={item.value} />
                                 </p>
 
                                 {/* Helper em tom */}
-                                <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
+                                <p className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
                                   {item.helper}
                                 </p>
+
+                                {/* Divider */}
+                                <div className="h-px w-full" style={{ background: "var(--sgt-divider)" }} />
+
+                                {/* Insights */}
+                                <div className="grid grid-cols-3 gap-1">
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight1Label}</span>
+                                    <span className={`text-[11px] font-bold ${insight1Color}`}>{insight1Value}</span>
+                                  </div>
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight2Label}</span>
+                                    <span className={`text-[11px] font-bold truncate ${insight2Color}`}>{insight2Value}</span>
+                                  </div>
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">{insight3Label}</span>
+                                    <span className={`text-[11px] font-bold ${insight3Color}`}>{insight3Value}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </AnimatedCard>
@@ -1644,54 +1719,6 @@ const Index = () => {
                           isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
                         />
 
-                        {/* Insights — CR vs CP mesmo ano */}
-                        {isProcessed && (() => {
-                          const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-                          const cr = chartReceber.realizado;
-                          const cp = chartPagar.realizado;
-                          const totalCR = cr.reduce((a,b) => a+b, 0);
-                          const totalCP = cp.reduce((a,b) => a+b, 0);
-
-                          // Melhor mês CR
-                          const maxCRIdx = cr.indexOf(Math.max(...cr.filter(v => v > 0)));
-                          const melhorMes = maxCRIdx >= 0 ? months[maxCRIdx] : "—";
-
-                          // Cobertura CR/CP
-                          const cobertura = totalCP > 0 ? (totalCR / totalCP * 100) : 0;
-                          const coberturaOk = cobertura >= 100;
-
-                          // Tendência CR (últimos 3 meses com dados)
-                          const crDados = cr.map((v,i) => ({v,i})).filter(x => x.v > 0);
-                          const tendencia = crDados.length >= 2
-                            ? crDados[crDados.length-1].v - crDados[crDados.length-2].v
-                            : 0;
-
-                          const fmtK = (v: number) => v >= 1e6
-                            ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M`
-                            : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v}`;
-
-                          return (
-                            <div className="shrink-0 border-t border-[var(--sgt-border-subtle)] px-3 py-2 grid grid-cols-3 gap-2">
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Melhor mês CR</span>
-                                <span className="text-[12px] font-bold" style={{ color: "#2dd4bf" }}>{melhorMes} · {fmtK(Math.max(...cr.filter(v=>v>0), 0))}</span>
-                              </div>
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Cobertura CR/CP</span>
-                                <span className={`text-[12px] font-bold ${coberturaOk ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {cobertura.toFixed(0)}% {coberturaOk ? "▲" : "▼"}
-                                </span>
-                              </div>
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Tendência CR</span>
-                                <span className={`text-[12px] font-bold ${tendencia >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {tendencia >= 0 ? "↑" : "↓"} {fmtK(Math.abs(tendencia))}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-
                         {isFetchingDw && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
@@ -1716,54 +1743,6 @@ const Index = () => {
                           anoAtual={chartReceber.ano || chartPagar.ano}
                           anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
                         />
-
-                        {/* Insights — YoY */}
-                        {isProcessed && (() => {
-                          const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-                          const crA = chartReceber.realizado;
-                          const crB = chartReceberAnterior.realizado;
-                          const cpA = chartPagar.realizado;
-                          const cpB = chartPagarAnterior.realizado;
-
-                          const totalCRA = crA.reduce((a,b)=>a+b,0);
-                          const totalCRB = crB.reduce((a,b)=>a+b,0);
-                          const totalCPA = cpA.reduce((a,b)=>a+b,0);
-                          const totalCPB = cpB.reduce((a,b)=>a+b,0);
-
-                          const crYoY = totalCRB > 0 ? ((totalCRA - totalCRB) / totalCRB * 100) : null;
-                          const cpYoY = totalCPB > 0 ? ((totalCPA - totalCPB) / totalCPB * 100) : null;
-
-                          // Mês com maior variação CR
-                          const variacoes = crA.map((v,i) => crB[i] > 0 ? Math.abs(v - crB[i]) : 0);
-                          const maxVarIdx = variacoes.indexOf(Math.max(...variacoes));
-                          const maiorVar = crB[maxVarIdx] > 0
-                            ? ((crA[maxVarIdx] - crB[maxVarIdx]) / crB[maxVarIdx] * 100)
-                            : null;
-
-                          return (
-                            <div className="shrink-0 border-t border-[var(--sgt-border-subtle)] px-3 py-2 grid grid-cols-3 gap-2">
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">CR vs ano ant.</span>
-                                <span className={`text-[12px] font-bold ${crYoY === null ? "text-slate-500" : crYoY >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {crYoY === null ? "Sem dados" : `${crYoY >= 0 ? "+" : ""}${crYoY.toFixed(1)}%`}
-                                </span>
-                              </div>
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">CP vs ano ant.</span>
-                                <span className={`text-[12px] font-bold ${cpYoY === null ? "text-slate-500" : cpYoY <= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {cpYoY === null ? "Sem dados" : `${cpYoY >= 0 ? "+" : ""}${cpYoY.toFixed(1)}%`}
-                                </span>
-                              </div>
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">Maior var. CR</span>
-                                <span className={`text-[12px] font-bold ${maiorVar === null ? "text-slate-500" : maiorVar >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {maiorVar === null ? "—" : `${months[maxVarIdx]} ${maiorVar >= 0 ? "+" : ""}${maiorVar.toFixed(1)}%`}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-
                         {isFetchingDw && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
