@@ -543,7 +543,7 @@ const YearComparisonChart = ({
   const histOpacity = 0.55;
 
   return (
-    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
+    <div className="flex h-full flex-col p-3 overflow-hidden"
       style={{
         background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
@@ -863,7 +863,7 @@ const ComparativeLineChart = ({
   const getTooltipX = (i: number) => toX(i) + 178 > svgW ? toX(i) - 184 : toX(i) + 12;
 
   return (
-    <div className="flex h-full flex-col rounded-[16px] border border-[var(--sgt-border-subtle)] p-3 overflow-hidden"
+    <div className="flex h-full flex-col p-3 overflow-hidden"
       style={{
         background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025), inset 0 0 0 1px rgba(255,255,255,0.008)",
@@ -1642,51 +1642,47 @@ const Index = () => {
 
                     {/* Gráfico 1 — CR vs CP (mesmo ano) */}
                     <AnimatedCard delay={320} className="flex min-h-0 h-full">
-                      <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
-                        <div className="relative flex-1 min-h-0">
-                          <ComparativeLineChart
-                            crRealizado={chartReceber.realizado}
-                            cpRealizado={chartPagar.realizado}
-                            ano={chartReceber.ano || chartPagar.ano}
-                            isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
-                          />
-                          {isFetchingDw && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
-                              <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full animate-pulse bg-teal-400" />
-                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-teal-400/60" />
-                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-teal-400/30" />
-                              </div>
-                              <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                      <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                        <ComparativeLineChart
+                          crRealizado={chartReceber.realizado}
+                          cpRealizado={chartPagar.realizado}
+                          ano={chartReceber.ano || chartPagar.ano}
+                          isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
+                        />
+                        {isFetchingDw && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full animate-pulse bg-teal-400" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-teal-400/60" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-teal-400/30" />
                             </div>
-                          )}
-                        </div>
+                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                          </div>
+                        )}
                       </div>
                     </AnimatedCard>
 
                     {/* Gráfico 2 — ano atual vs ano anterior */}
                     <AnimatedCard delay={400} className="flex min-h-0 h-full">
-                      <div className="flex-1 flex flex-col min-h-0 group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3 xl:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]">
-                        <div className="relative flex-1 min-h-0">
-                          <YearComparisonChart
-                            crAtual={chartReceber.realizado}
-                            crAnterior={chartReceberAnterior.realizado}
-                            cpAtual={chartPagar.realizado}
-                            cpAnterior={chartPagarAnterior.realizado}
-                            anoAtual={chartReceber.ano || chartPagar.ano}
-                            anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
-                          />
-                          {isFetchingDw && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[18px] bg-black/40 backdrop-blur-[2px]">
-                              <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full animate-pulse bg-violet-400" />
-                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-violet-400/60" />
-                                <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-violet-400/30" />
-                              </div>
-                              <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                      <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                        <YearComparisonChart
+                          crAtual={chartReceber.realizado}
+                          crAnterior={chartReceberAnterior.realizado}
+                          cpAtual={chartPagar.realizado}
+                          cpAnterior={chartPagarAnterior.realizado}
+                          anoAtual={chartReceber.ano || chartPagar.ano}
+                          anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
+                        />
+                        {isFetchingDw && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full animate-pulse bg-violet-400" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-violet-400/60" />
+                              <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-violet-400/30" />
                             </div>
-                          )}
-                        </div>
+                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                          </div>
+                        )}
                       </div>
                     </AnimatedCard>
 
