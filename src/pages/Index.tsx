@@ -1558,7 +1558,8 @@ const Index = () => {
                     {[0, 1, 2].map((i) => (<CardSkeleton key={i} />))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2.5 xl:col-span-2 items-stretch">
+                  <div className="grid grid-cols-3 gap-2.5 xl:col-span-2 items-stretch" />
+                )}
 
                 {/* Gráficos lado a lado */}
                 {isFetchingDw && !isProcessed ? (
