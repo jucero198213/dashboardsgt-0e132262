@@ -1265,6 +1265,60 @@ const Index = () => {
     ]
   );
 
+  // Insights derivados dos arrays mensais — usados nos cards RECEBIDO e PAGO
+  const cardInsights = useMemo(() => {
+    const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const fmtM = (v: number) => v >= 1_000_000
+      ? `R$ ${(v/1_000_000).toFixed(1).replace(".",",")}M`
+      : v >= 1_000 ? `R$ ${(v/1_000).toFixed(0)}k`
+      : `R$ ${v.toFixed(0)}`;
+
+    // Melhor mês de recebimento (maior valor no realizado do CR)
+    const crReal = chartReceber.realizado || [];
+    const cpReal = chartPagar.realizado || [];
+    const crBestIdx = crReal.reduce((best, v, i) => v > (crReal[best] ?? 0) ? i : best, 0);
+    const cpWorstIdx = cpReal.reduce((worst, v, i) => v > (cpReal[worst] ?? 0) ? i : worst, 0);
+    const melhorMes = (crReal[crBestIdx] ?? 0) > 0
+      ? `${months[crBestIdx]} · ${fmtM(crReal[crBestIdx])}`
+      : "—";
+    const maiorDespesa = (cpReal[cpWorstIdx] ?? 0) > 0
+      ? `${months[cpWorstIdx]} · ${fmtM(cpReal[cpWorstIdx])}`
+      : "—";
+
+    // Tendência: média dos últimos 3 meses com dado - média dos 3 anteriores
+    const activeCr = crReal.filter(v => v > 0);
+    let tendencia: { label: string; positive: boolean } = { label: "—", positive: true };
+    if (activeCr.length >= 2) {
+      const half = Math.ceil(activeCr.length / 2);
+      const recent = activeCr.slice(-half);
+      const older = activeCr.slice(0, activeCr.length - half);
+      if (older.length > 0) {
+        const avgRecent = recent.reduce((a,b) => a+b, 0) / recent.length;
+        const avgOlder = older.reduce((a,b) => a+b, 0) / older.length;
+        const diff = avgRecent - avgOlder;
+        tendencia = {
+          label: `${diff >= 0 ? "↑" : "↓"} ${fmtM(Math.abs(diff))}`,
+          positive: diff >= 0,
+        };
+      }
+    }
+
+    // Cobertura CR: quanto do Pago é coberto pelo Recebido (valorRecebido / valorPago)
+    const cobertura = contasPagar.valorPago > 0
+      ? Math.round((contasReceber.valorRecebido / contasPagar.valorPago) * 100)
+      : 0;
+    const coberturaLabel = cobertura > 0 ? `${Math.min(cobertura, 999)}%` : "—";
+
+    return {
+      melhorMes,
+      maiorDespesa,
+      tendencia,
+      coberturaLabel,
+      realizacaoCR: kpiExtra.realizacaoCR,
+      realizacaoCP: kpiExtra.realizacaoCP,
+    };
+  }, [chartReceber.realizado, chartPagar.realizado, contasPagar.valorPago, contasReceber.valorRecebido, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP]);
+
   const toneStyles: Record<string, string> = {
     emerald:
       "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 shadow-[0_0_0_1px_rgba(16,185,129,0.05)]",
@@ -1552,13 +1606,79 @@ const Index = () => {
               {/* Left column — cards, charts, KPIs */}
               <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
-                {/* Top: 3 colunas — RECEBIDO | PAGO | Saldo + Inadimplência */}
+                {/* Top: 2 colunas — RECEBIDO | PAGO com insights integrados */}
                 {isFetchingDw && !isProcessed ? (
-                  <div className="grid grid-cols-3 gap-2.5 xl:col-span-2 items-stretch">
-                    {[0, 1, 2].map((i) => (<CardSkeleton key={i} />))}
+                  <div className="grid grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
+                    {[0, 1].map((i) => (<CardSkeleton key={i} />))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2.5 xl:col-span-2 items-stretch" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
+                    {/* RECEBIDO */}
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_45%)]" />
+                      <div className="relative flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">RECEBIDO</span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 border border-emerald-500/25 px-2 py-0.5 text-[9px] font-bold text-emerald-300">
+                            <TrendingUp className="h-2.5 w-2.5" /> Realizado
+                          </span>
+                        </div>
+                        <h2 className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]"
+                          style={{ fontSize: kpiValueFontSize(contasReceber.valorRecebido) }}>
+                          <CountUp value={contasReceber.valorRecebido} />
+                        </h2>
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-medium">Entrada consolidada</p>
+                        <div className="mt-1.5 grid grid-cols-3 gap-2 pt-2 border-t border-emerald-500/[0.08]">
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Melhor mês</div>
+                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.melhorMes}</div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Tendência</div>
+                            <div className={`text-[11px] font-semibold mt-0.5 ${cardInsights.tendencia.positive ? "text-emerald-300" : "text-red-300"}`}>
+                              {cardInsights.tendencia.label}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">vs previsto</div>
+                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.realizacaoCR.toFixed(0)}%</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PAGO */}
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-red-500/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.12),transparent_45%)]" />
+                      <div className="relative flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-red-300">PAGO</span>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/12 border border-red-500/25 px-2 py-0.5 text-[9px] font-bold text-red-300">
+                            <TrendingDown className="h-2.5 w-2.5" /> Realizado
+                          </span>
+                        </div>
+                        <h2 className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]"
+                          style={{ fontSize: kpiValueFontSize(contasPagar.valorPago) }}>
+                          <CountUp value={contasPagar.valorPago} />
+                        </h2>
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-medium">Saída consolidada</p>
+                        <div className="mt-1.5 grid grid-cols-3 gap-2 pt-2 border-t border-red-500/[0.08]">
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Maior despesa</div>
+                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.maiorDespesa}</div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Cobertura CR</div>
+                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.coberturaLabel}</div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">vs previsto</div>
+                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.realizacaoCP.toFixed(0)}%</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {/* Gráficos lado a lado */}
@@ -1620,78 +1740,140 @@ const Index = () => {
                   </div>
                 )}
 
-                {/* KPIs Extras — dentro da coluna esquerda */}
+                {/* KPIs Extras — 4 cards: Saldo (destaque) | Inadimplência | %CP | %CR */}
                 {isProcessed && (() => {
-                  const kpiTexts = [
-                    kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
-                    kpiExtra.inadimplencia.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
-                    `${kpiExtra.realizacaoCP.toFixed(0)}%`,
-                    `${(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%`,
-                  ];
-                  const sharedFontSize = kpiFontSize(kpiTexts.reduce((a, b) => a.length >= b.length ? a : b));
+                  // Cor dinâmica baseada em quão longe está da meta de 100%
+                  const toneFor = (pct: number) => {
+                    if (pct >= 80) return { text: "text-emerald-300", bar: "bg-emerald-400", border: "border-emerald-400/[0.15]", hoverBorder: "hover:border-emerald-400/30", chipBg: "bg-emerald-500/15", chipBorder: "border-emerald-500/25", glow: "rgba(52,211,153,0.12)" };
+                    if (pct >= 50) return { text: "text-amber-300", bar: "bg-amber-400", border: "border-amber-400/[0.15]", hoverBorder: "hover:border-amber-400/30", chipBg: "bg-amber-500/15", chipBorder: "border-amber-500/25", glow: "rgba(251,191,36,0.12)" };
+                    return { text: "text-red-300", bar: "bg-red-400", border: "border-red-400/[0.15]", hoverBorder: "hover:border-red-400/30", chipBg: "bg-red-500/15", chipBorder: "border-red-500/25", glow: "rgba(248,113,113,0.12)" };
+                  };
+                  const cpTone = toneFor(kpiExtra.realizacaoCP);
+                  const crTone = toneFor(kpiExtra.realizacaoCR ?? 0);
+                  const saldoPositivo = kpiExtra.saldoLiquido >= 0;
+                  const docsVencidos = kpiExtra.inadimplenciaDocs;
+                  const inadimplenciaValor = kpiExtra.inadimplencia.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
                   return (
-                  <div className="grid grid-cols-2 gap-2.5 xl:col-span-2 items-stretch h-full">
-                    {/* % REALIZAÇÃO CP */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-violet-400/[0.15] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-violet-400/60 to-violet-700/20" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.12), transparent 65%)" }} />
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch h-full">
+
+                    {/* SALDO LÍQUIDO — destaque cyan */}
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border-[1.5px] border-cyan-400/35 [background:linear-gradient(135deg,rgba(34,211,238,0.06),var(--sgt-bg-card))] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400 to-cyan-300/40" />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(34,211,238,0.18), transparent 65%)" }} />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-violet-400/80">% Realização CP</span>
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15 border border-violet-500/20 transition-transform duration-300 group-hover:scale-110">
-                            <TrendingDown className="h-3 w-3 text-violet-400" />
+                          <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-300">Saldo Líquido</span>
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/20 border border-cyan-400/30 transition-transform duration-300 group-hover:scale-110">
+                            {saldoPositivo ? <TrendingUp className="h-3 w-3 text-cyan-300" /> : <TrendingDown className="h-3 w-3 text-red-300" />}
                           </div>
                         </div>
-                        <div className="font-black tracking-[-0.05em] text-white leading-none" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-black tracking-[-0.04em] text-white leading-none whitespace-nowrap overflow-hidden text-ellipsis"
+                          style={{ fontSize: kpiFontSize(kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })) }}>
+                          {kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        </div>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
+                          Recebido − Pago no período
+                        </p>
+                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                          <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div className="h-full rounded-full bg-cyan-400 transition-all duration-1000 ease-out" style={{ width: saldoPositivo ? "100%" : "20%" }} />
+                          </div>
+                          <span className={`inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${saldoPositivo ? "bg-cyan-500/20 border border-cyan-400/30 text-cyan-200" : "bg-red-500/15 border border-red-400/25 text-red-300"}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${saldoPositivo ? "bg-cyan-400" : "bg-red-400"}`} />
+                            {saldoPositivo ? "Fluxo positivo" : "Fluxo negativo"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* INADIMPLÊNCIA — % em destaque, valor absoluto e docs como subtítulo */}
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-red-400/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-red-400/60 to-red-700/20" />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.12), transparent 65%)" }} />
+                      <div className="relative flex h-full flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-red-300/85">Inadimplência</span>
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/15 border border-red-500/20 transition-transform duration-300 group-hover:scale-110">
+                            <AlertCircle className="h-3 w-3 text-red-400" />
+                          </div>
+                        </div>
+                        <div className="font-black tracking-[-0.04em] text-red-300 leading-none"
+                          style={{ fontSize: kpiFontSize(`${kpiExtra.inadimplenciaPerc.toFixed(1)}%`) }}>
+                          {kpiExtra.inadimplenciaPerc.toFixed(1)}%
+                        </div>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
+                          {inadimplenciaValor}
+                        </p>
+                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                          <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div className="h-full rounded-full bg-red-400 transition-all duration-1000 ease-out" style={{ width: `${Math.min(kpiExtra.inadimplenciaPerc, 100)}%` }} />
+                          </div>
+                          <span className="inline-flex w-fit rounded-full bg-red-500/15 border border-red-500/25 px-2.5 py-0.5 text-[10px] font-bold text-red-300">
+                            {docsVencidos.toLocaleString("pt-BR")} docs vencidos
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* % REALIZAÇÃO CP — cor dinâmica */}
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${cpTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${cpTone.text} opacity-50`} />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${cpTone.glow}, transparent 65%)` }} />
+                      <div className="relative flex h-full flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${cpTone.text} opacity-90`}>% Realização CP</span>
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${cpTone.chipBg} border ${cpTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
+                            <TrendingDown className={`h-3 w-3 ${cpTone.text}`} />
+                          </div>
+                        </div>
+                        <div className="font-black tracking-[-0.04em] text-white leading-none"
+                          style={{ fontSize: kpiFontSize(`${kpiExtra.realizacaoCP.toFixed(0)}%`) }}>
                           {kpiExtra.realizacaoCP.toFixed(0)}%
                         </div>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Pago ÷ Previsto
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-1">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                            <div
-                              className="h-full rounded-full bg-violet-400 transition-all duration-1000 ease-out"
-                              style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
-                            />
+                            <div className={`h-full rounded-full ${cpTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
                           </div>
-                          <span className="inline-flex w-fit rounded-full bg-violet-500/15 border border-violet-500/25 px-2.5 py-0.5 text-[10px] font-bold text-violet-300">
+                          <span className={`inline-flex w-fit rounded-full ${cpTone.chipBg} border ${cpTone.chipBorder} px-2.5 py-0.5 text-[10px] font-bold ${cpTone.text}`}>
                             Meta: 100%
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* % REALIZAÇÃO CR */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-cyan-400/[0.15] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/60 to-cyan-700/20" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.12), transparent 65%)" }} />
+                    {/* % REALIZAÇÃO CR — cor dinâmica */}
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${crTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${crTone.text} opacity-50`} />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${crTone.glow}, transparent 65%)` }} />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-cyan-400/80">% Realização CR</span>
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/15 border border-cyan-500/20 transition-transform duration-300 group-hover:scale-110">
-                            <TrendingUp className="h-3 w-3 text-cyan-400" />
+                          <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${crTone.text} opacity-90`}>% Realização CR</span>
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${crTone.chipBg} border ${crTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
+                            <TrendingUp className={`h-3 w-3 ${crTone.text}`} />
                           </div>
                         </div>
-                        <div className="font-black tracking-[-0.05em] text-white leading-none" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-black tracking-[-0.04em] text-white leading-none"
+                          style={{ fontSize: kpiFontSize(`${(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%`) }}>
                           {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                         </div>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Recebido ÷ Previsto
                         </p>
                         <div className="mt-auto flex flex-col gap-2 pt-1">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                            <div
-                              className="h-full rounded-full bg-cyan-400 transition-all duration-1000 ease-out"
-                              style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
-                            />
+                            <div className={`h-full rounded-full ${crTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
                           </div>
-                          <span className="inline-flex w-fit rounded-full bg-cyan-500/15 border border-cyan-500/25 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300">
+                          <span className={`inline-flex w-fit rounded-full ${crTone.chipBg} border ${crTone.chipBorder} px-2.5 py-0.5 text-[10px] font-bold ${crTone.text}`}>
                             Meta: 100%
                           </span>
                         </div>
                       </div>
                     </div>
+
                   </div>
                   );
                 })()
