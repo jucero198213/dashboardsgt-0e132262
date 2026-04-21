@@ -233,7 +233,8 @@ const MiniLineChart = ({
       const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
-    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
+    const __last = pts.length - 1;
+    d += ` L${toX(__last).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
     return d;
   };
 
@@ -425,9 +426,9 @@ const MiniLineChart = ({
           );
         })()}
 
-        {/* Labels X — espaçamento limpo */}
-        {Array.from({ length: n }).map((_, i) => {
-          const showLabel = n <= 6 || i === 0 || i === n - 1 || i % Math.ceil(n / 4) === 0;
+        {/* Labels X — sempre 12 meses (ano anterior é o período completo de referência) */}
+        {Array.from({ length: 12 }).map((_, i) => {
+          const showLabel = i === 0 || i === 11 || i % 2 === 0;
           if (!showLabel && hoverIndex !== i) return null;
           return (
             <text key={`mx-${i}`} x={toX(i)} y={svgH - 6} textAnchor="middle"
@@ -439,11 +440,11 @@ const MiniLineChart = ({
           );
         })}
 
-        {/* Zonas de hover */}
-        {Array.from({ length: n }).map((_, i) => {
+        {/* Zonas de hover — sempre 12 meses (pra permitir hover no período onde só tem dado do ano anterior) */}
+        {Array.from({ length: 12 }).map((_, i) => {
           const zx = i === 0 ? padL : toX(i) - (toX(i)-toX(i-1))/2;
           const zw = i === 0 ? (toX(1)-toX(0))/2
-                   : i === n-1 ? (toX(n-1)-toX(n-2))/2
+                   : i === 11 ? (toX(11)-toX(10))/2
                    : toX(i+1)-toX(i);
           return (
             <rect key={`mhz-${i}`} x={zx} y={padTop} width={zw} height={chartH+padBot}
@@ -475,12 +476,12 @@ const YearComparisonChart = ({
 
   const isEmpty = [...crAtual, ...crAnterior, ...cpAtual, ...cpAnterior].every(v => v === 0);
 
-  // Plota só até o último mês com dados no ano atual
-  const lastIdx = Math.max(
-    [...crAtual].reverse().findIndex(v => v > 0),
-    [...cpAtual].reverse().findIndex(v => v > 0)
-  );
-  const n = lastIdx === -1 ? 12 : 12 - lastIdx;
+  // Limite = mês atual se anoAtual é o ano corrente; senão 12.
+  // Ano anterior sempre renderiza completo (referência histórica).
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth(); // 0-11
+  const isAnoCorrente = !anoAtual || parseInt(anoAtual, 10) === currentYear;
+  const n = isAnoCorrente ? currentMonth + 1 : 12;
 
   const cr  = crAtual.slice(0, n);
   const crP = crAnterior; // ano anterior sempre com 12 meses completos
@@ -522,7 +523,8 @@ const YearComparisonChart = ({
       const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
-    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
+    const __last = pts.length - 1;
+    d += ` L${toX(__last).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
     return d;
   };
 
@@ -765,13 +767,15 @@ const ComparativeLineChart = ({
   const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const lastDataIdx = Math.max(
-    [...crRealizado].reverse().findIndex(v => v > 0),
-    [...cpRealizado].reverse().findIndex(v => v > 0)
-  );
-  const activeMonths = lastDataIdx === -1 ? 0 : 12 - lastDataIdx;
-  const cr = crRealizado.slice(0, activeMonths || 12);
-  const cp = cpRealizado.slice(0, activeMonths || 12);
+  // Limite = mês atual se o ano do gráfico é o ano corrente; senão plota 12 meses.
+  // Isso evita que lixo residual (centavos, provisões futuras) estenda a linha até Dez.
+  const anoAtual = new Date().getFullYear();
+  const mesAtual = new Date().getMonth(); // 0-11
+  const isAnoCorrente = !ano || parseInt(ano, 10) === anoAtual;
+  const limiteMes = isAnoCorrente ? mesAtual + 1 : 12; // inclui o mês corrente
+
+  const cr = crRealizado.slice(0, limiteMes);
+  const cp = cpRealizado.slice(0, limiteMes);
   const n = cr.length;
 
   const allValues = [...cr, ...cp].filter(v => v > 0);
@@ -809,7 +813,8 @@ const ComparativeLineChart = ({
       const t = 0.28;
       d += ` C${(x0+(x1-x0)*t).toFixed(1)},${y0.toFixed(1)} ${(x1-(x1-x0)*t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
     }
-    d += ` L${toX(n-1).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
+    const __last = pts.length - 1;
+    d += ` L${toX(__last).toFixed(1)},${base} L${toX(0).toFixed(1)},${base} Z`;
     return d;
   };
 
