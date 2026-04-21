@@ -1479,7 +1479,7 @@ const Index = () => {
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
                 <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"} disabled:cursor-not-allowed`}>
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 font-bold hover:border-cyan-300/70 hover:bg-cyan-400/30 hover:shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 active:scale-95"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
                 </button>
@@ -1532,7 +1532,7 @@ const Index = () => {
               {/* Linha 4: botão atualizar */}
               <div className="flex items-center gap-2">
                 <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                  className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25"} disabled:cursor-not-allowed`}>
+                  className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-[12px] font-bold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 hover:border-cyan-300/70 hover:bg-cyan-400/30 active:scale-95"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
                 </button>
@@ -1632,65 +1632,63 @@ const Index = () => {
                   return (
                   <div className="grid grid-cols-2 gap-2.5 xl:col-span-2 items-stretch h-full">
                     {/* % REALIZAÇÃO CP */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-violet-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.09), transparent 65%)" }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400">
-                            % REALIZAÇÃO CP
-                          </span>
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15">
-                            <TrendingDown className="h-4 w-4 text-violet-400" />
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-violet-400/[0.15] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-violet-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-violet-400/60 to-violet-700/20" />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(139,92,246,0.12), transparent 65%)" }} />
+                      <div className="relative flex h-full flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-violet-400/80">% Realização CP</span>
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/15 border border-violet-500/20 transition-transform duration-300 group-hover:scale-110">
+                            <TrendingDown className="h-3 w-3 text-violet-400" />
                           </div>
                         </div>
-                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-black tracking-[-0.05em] text-white leading-none" style={{ fontSize: sharedFontSize }}>
                           {kpiExtra.realizacaoCP.toFixed(0)}%
                         </div>
-                        <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
-                          Pago ÷ Previsto no período
+                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
+                          Pago ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                          <div
-                            className="h-full rounded-full bg-violet-400 transition-all duration-700"
-                            style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
-                          />
-                        </div>
-                        <span className="inline-flex w-fit rounded-full bg-violet-500/20 border border-violet-500/20 px-3 py-1 text-[12px] font-bold dark:text-violet-200 text-violet-700">
-                          Meta: 100%
-                        </span>
+                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                          <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div
+                              className="h-full rounded-full bg-violet-400 transition-all duration-1000 ease-out"
+                              style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }}
+                            />
+                          </div>
+                          <span className="inline-flex w-fit rounded-full bg-violet-500/15 border border-violet-500/25 px-2.5 py-0.5 text-[10px] font-bold text-violet-300">
+                            Meta: 100%
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* % REALIZAÇÃO CR */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-cyan-400/[0.12] [background:var(--sgt-bg-card)] p-2.5 xl:p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(0,0,0,0.4)]">
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-32 w-32" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.09), transparent 65%)" }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400">
-                            % REALIZAÇÃO CR
-                          </span>
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/15">
-                            <TrendingUp className="h-4 w-4 text-cyan-400" />
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-cyan-400/[0.15] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/60 to-cyan-700/20" />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.12), transparent 65%)" }} />
+                      <div className="relative flex h-full flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-cyan-400/80">% Realização CR</span>
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/15 border border-cyan-500/20 transition-transform duration-300 group-hover:scale-110">
+                            <TrendingUp className="h-3 w-3 text-cyan-400" />
                           </div>
                         </div>
-                        <div className="font-extrabold tracking-[-0.04em] [color:var(--sgt-text-primary)] leading-none whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: sharedFontSize }}>
+                        <div className="font-black tracking-[-0.05em] text-white leading-none" style={{ fontSize: sharedFontSize }}>
                           {(kpiExtra.realizacaoCR ?? 0).toFixed(0)}%
                         </div>
-                        <p className="mt-2 text-sm dark:text-slate-400 text-slate-600">
-                          Recebido ÷ Previsto no período
+                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
+                          Recebido ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-2">
-                        <div className="h-2.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                          <div
-                            className="h-full rounded-full bg-cyan-400 transition-all duration-700"
-                            style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
-                          />
-                        </div>
-                        <span className="inline-flex w-fit rounded-full bg-cyan-500/20 border border-cyan-500/20 px-3 py-1 text-[12px] font-bold dark:text-cyan-200 text-cyan-700">
-                          Meta: 100%
-                        </span>
+                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                          <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div
+                              className="h-full rounded-full bg-cyan-400 transition-all duration-1000 ease-out"
+                              style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }}
+                            />
+                          </div>
+                          <span className="inline-flex w-fit rounded-full bg-cyan-500/15 border border-cyan-500/25 px-2.5 py-0.5 text-[10px] font-bold text-cyan-300">
+                            Meta: 100%
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -39,30 +39,30 @@
     --sidebar-ring: 160 60% 45%;
     --card-elevated: 220 22% 10%;
 
-    --sgt-bg-base:        #060912;
-    --sgt-bg-card:        #0c0f1c;
-    --sgt-bg-section:     rgba(8,11,20,0.94);
+    --sgt-bg-base:        #04060f;
+    --sgt-bg-card:        #0d1120;
+    --sgt-bg-section:     rgba(7,10,20,0.96);
     --sgt-bg-overlay:     rgba(14,20,40,0.98);
-    --sgt-border-subtle:  rgba(255,255,255,0.07);
-    --sgt-border-medium:  rgba(255,255,255,0.12);
-    --sgt-text-primary:   #ffffff;
+    --sgt-border-subtle:  rgba(255,255,255,0.09);
+    --sgt-border-medium:  rgba(255,255,255,0.16);
+    --sgt-text-primary:   #f1f5f9;
     --sgt-text-secondary: #94a3b8;
-    --sgt-text-muted:     #475569;
+    --sgt-text-muted:     #64748b;
     --sgt-text-faint:     #334155;
-    --sgt-input-bg:       rgba(255,255,255,0.05);
-    --sgt-input-border:   rgba(255,255,255,0.10);
-    --sgt-input-hover:    rgba(255,255,255,0.10);
-    --sgt-skeleton-bg:    rgba(255,255,255,0.06);
-    --sgt-divider:        rgba(255,255,255,0.06);
-    --sgt-row-alt:        rgba(255,255,255,0.02);
-    --sgt-row-hover:      rgba(255,255,255,0.04);
-    --sgt-table-head:     rgba(255,255,255,0.03);
-    --sgt-progress-track: rgba(255,255,255,0.10);
-    --sgt-menu-bg:        rgba(14,20,40,0.98);
-    --sgt-scrollbar-track:#0c0f1c;
-    --sgt-scrollbar-thumb:#1e2640;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(255,255,255,0.025), transparent 45%);
-    --sgt-section-shadow: 0 30px 80px rgba(0,0,0,0.55);
+    --sgt-input-bg:       rgba(255,255,255,0.06);
+    --sgt-input-border:   rgba(255,255,255,0.12);
+    --sgt-input-hover:    rgba(255,255,255,0.11);
+    --sgt-skeleton-bg:    rgba(255,255,255,0.07);
+    --sgt-divider:        rgba(255,255,255,0.08);
+    --sgt-row-alt:        rgba(255,255,255,0.025);
+    --sgt-row-hover:      rgba(255,255,255,0.05);
+    --sgt-table-head:     rgba(255,255,255,0.04);
+    --sgt-progress-track: rgba(255,255,255,0.12);
+    --sgt-menu-bg:        rgba(10,14,30,0.98);
+    --sgt-scrollbar-track:#0d1120;
+    --sgt-scrollbar-thumb:#1e2a45;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(255,255,255,0.03), transparent 45%);
+    --sgt-section-shadow: 0 30px 80px rgba(0,0,0,0.65);
   }
 
   .light {
@@ -142,6 +142,39 @@
   .sgt-text       { color: var(--sgt-text-primary); }
   .sgt-text-2     { color: var(--sgt-text-secondary); }
 }
+
+/* ── Microinterações globais ── */
+* { -webkit-font-smoothing: antialiased; }
+
+/* Transição padrão para todos os elementos interativos */
+button, a, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus ring acessível */
+button:focus-visible, a:focus-visible {
+  outline: 2px solid rgba(34,211,238,0.6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Barras de progresso com transição suave no mount */
+@keyframes progressIn {
+  from { width: 0% !important; }
+}
+.animate-progress { animation: progressIn 1s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* CountUp — sem flash de conteúdo */
+.count-up-value { font-variant-numeric: tabular-nums; }
+
+/* Pulse sutil para badges "Tempo real" */
+@keyframes softPing {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+.animate-ping { animation: softPing 2s cubic-bezier(0,0,0.2,1) infinite; }
 
 /* ── Light: hide dark atmosphere gradients ── */
 .light .sgt-atmosphere { opacity: 0; }
