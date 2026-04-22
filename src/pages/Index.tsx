@@ -825,19 +825,6 @@ const ComparativeLineChart = ({
   };
   const formatFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  // Detecta a maior queda na linha CR (>25%) — apenas a mais relevante
-  let biggestDropIdx = -1;
-  let biggestDropPct = 0;
-  for (let i = 1; i < n; i++) {
-    if (cr[i-1] > 0 && cr[i] > 0) {
-      const pct = (cr[i-1] - cr[i]) / cr[i-1];
-      if (pct > 0.25 && pct > biggestDropPct) {
-        biggestDropPct = pct;
-        biggestDropIdx = i;
-      }
-    }
-  }
-
   // Detecta período flat (3+ meses com baixa variação) na linha CR
   const flatRanges: {start: number; end: number}[] = [];
   let fs = -1;
@@ -977,28 +964,6 @@ const ComparativeLineChart = ({
               strokeLinecap="round" strokeLinejoin="round"
               clipPath="url(#cl-clip)"/>
 
-            {/* Marker contextual: maior queda */}
-            {biggestDropIdx > 0 && (
-              <g>
-                <line
-                  x1={toX(biggestDropIdx)} y1={padTop+4}
-                  x2={toX(biggestDropIdx)} y2={padTop+chartH}
-                  stroke="rgba(251,191,36,0.22)" strokeWidth={1}/>
-                {/* Badge de anotação */}
-                <g transform={`translate(${toX(biggestDropIdx) + 6}, ${padTop + 4})`}>
-                  <rect x="0" y="0" width="76" height="18" rx="9"
-                    fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.35)" strokeWidth="0.8"/>
-                  <text x="38" y="12" textAnchor="middle"
-                    fill="rgba(251,191,36,0.95)" fontSize={9} fontWeight={700}
-                    fontFamily="system-ui,sans-serif">
-                    ▼ {(biggestDropPct * 100).toFixed(0)}% {months[biggestDropIdx]}
-                  </text>
-                </g>
-                {/* Ponto destacado na queda */}
-                <circle cx={toX(biggestDropIdx)} cy={toY(cr[biggestDropIdx])}
-                  r={3.5} fill="#0b1023" stroke="rgba(251,191,36,0.85)" strokeWidth={1.6}/>
-              </g>
-            )}
 
             {/* Linha vertical hover */}
             {hoverIndex !== null && hoverIndex < n && (
