@@ -671,11 +671,13 @@ export function FinancialDataProvider({
 
       const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, inadimplenciaPerc, realizacaoCP, realizacaoCR };
 
-      // Arrays mensais calculados do período filtrado (para MoM nos cards)
-      const crRecebidoAll = allCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      const cpPagoAll     = allCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
-      const chartReceberFiltro = groupByMonth(crRecebidoAll, "VLR_PAGO", "DATA_PAGAMENTO");
-      const chartPagarFiltro   = groupByMonth(cpPagoAll,     "VLR_PAGO", "DATA_PAGAMENTO");
+      // Arrays mensais do ANO TODO para cálculo MoM nos cards
+      // CR: agrupa por DATA_VENCIMENTO (mesma lógica do card RECEBIDO)
+      // CP: agrupa por DATA_PAGAMENTO (mesma lógica do card PAGO)
+      const crRecebidoMoM = allCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      const cpPagoMoM     = allCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      const chartReceberFiltro = groupByMonth(crRecebidoMoM, "VLR_PAGO", "DATA_VENCIMENTO");
+      const chartPagarFiltro   = groupByMonth(cpPagoMoM,     "VLR_PAGO", "DATA_PAGAMENTO");
       // Faturamento: preserva o que o background fetch já preencheu (ou o cache anterior)
       setState((prev) => {
         const fatAtual = prev.faturamento;

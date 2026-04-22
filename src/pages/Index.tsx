@@ -1248,6 +1248,7 @@ const Index = () => {
       : `R$ ${v.toFixed(0)}`;
 
     // Melhor mês de recebimento (maior valor no realizado do CR)
+    // Variação CR: mês atual = valor do card, mês anterior = gráfico anual
     const crReal = chartReceber.realizado || [];
     const cpReal = chartPagar.realizado   || [];
     const crBestIdx = crReal.reduce((best, v, i) => v > (crReal[best] ?? 0) ? i : best, 0);
@@ -1283,14 +1284,20 @@ const Index = () => {
       : new Date().getMonth();
     const nowMonth = filterEndMonth; // 0-11
 
+    // Sobrescreve o mês atual com o valor exato do card (mesma lógica)
+    const crRealAdj = [...crReal];
+    const cpRealAdj = [...cpReal];
+    crRealAdj[nowMonth] = contasReceber.valorRecebido;
+    cpRealAdj[nowMonth] = contasPagar.valorPago;
+
     // Variação CR: dois últimos meses com dados dentro do período filtrado (incluindo mês atual)
     let crLastFullIdx = -1;
     for (let i = nowMonth; i >= 0; i--) {
-      if ((crReal[i] ?? 0) > 0) { crLastFullIdx = i; break; }
+      if ((crRealAdj[i] ?? 0) > 0) { crLastFullIdx = i; break; }
     }
     let crPrevFullIdx = -1;
     for (let i = crLastFullIdx - 1; i >= 0; i--) {
-      if ((crReal[i] ?? 0) > 0) { crPrevFullIdx = i; break; }
+      if ((crRealAdj[i] ?? 0) > 0) { crPrevFullIdx = i; break; }
     }
     let crVarMesAtual = "";
     let crVarMesAnterior = "";
@@ -1299,8 +1306,8 @@ const Index = () => {
     let crVarPct = 0;
     let crVarPositive = false;
     if (crLastFullIdx >= 0 && crPrevFullIdx >= 0) {
-      crVarValAtual    = crReal[crLastFullIdx];
-      crVarValAnterior = crReal[crPrevFullIdx];
+      crVarValAtual    = crRealAdj[crLastFullIdx];
+      crVarValAnterior = crRealAdj[crPrevFullIdx];
       crVarPct         = ((crVarValAtual - crVarValAnterior) / crVarValAnterior) * 100;
       crVarMesAtual    = months[crLastFullIdx];
       crVarMesAnterior = months[crPrevFullIdx];
@@ -1310,11 +1317,11 @@ const Index = () => {
     // Variação CP: dois últimos meses com dados dentro do período filtrado (incluindo mês atual)
     let lastFullIdx = -1;
     for (let i = nowMonth; i >= 0; i--) {
-      if ((cpReal[i] ?? 0) > 0) { lastFullIdx = i; break; }
+      if ((cpRealAdj[i] ?? 0) > 0) { lastFullIdx = i; break; }
     }
     let prevFullIdx = -1;
     for (let i = lastFullIdx - 1; i >= 0; i--) {
-      if ((cpReal[i] ?? 0) > 0) { prevFullIdx = i; break; }
+      if ((cpRealAdj[i] ?? 0) > 0) { prevFullIdx = i; break; }
     }
     let variacaoLabel = "—";
     let variacaoPositive = false;
@@ -1325,8 +1332,8 @@ const Index = () => {
     let variacaoValAnterior = 0;
     let variacaoPct = 0;
     if (lastFullIdx >= 0 && prevFullIdx >= 0) {
-      const atual = cpReal[lastFullIdx];
-      const anterior = cpReal[prevFullIdx];
+      const atual = cpRealAdj[lastFullIdx];
+      const anterior = cpRealAdj[prevFullIdx];
       const pct = ((atual - anterior) / anterior) * 100;
       variacaoLabel = `${pct >= 0 ? "↑" : "↓"} ${Math.abs(pct).toFixed(0)}%`;
       variacaoPositive = pct <= 0;
@@ -1366,7 +1373,7 @@ const Index = () => {
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
-  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
+  }, [chartReceber.realizado, chartPagar.realizado, contasReceber.valorRecebido, contasPagar.valorPago, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
 
   const toneStyles: Record<string, string> = {
     emerald:
