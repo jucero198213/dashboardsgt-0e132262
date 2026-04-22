@@ -782,7 +782,8 @@ const ComparativeLineChart = ({
   const maxVal = allValues.length ? Math.max(...allValues) * 1.15 : 1;
   const minVal = 0;
 
-  const svgW = 560; const svgH = 220;
+  // Mesmas dimensões do YearComparisonChart para harmonia visual e fontes consistentes
+  const svgW = 560; const svgH = 300;
   const padL = 64; const padR = 18; const padTop = 26; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
