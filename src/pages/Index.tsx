@@ -884,7 +884,7 @@ const ComparativeLineChart = ({
       </div>
 
       <div className="relative flex-1 min-h-0">
-        {isEmpty || activeMonths === 0 ? (
+        {isEmpty || n === 0 || (cr.every(v => v === 0) && cp.every(v => v === 0)) ? (
           <div className="flex h-full flex-col items-center justify-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
               <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
