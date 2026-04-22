@@ -110,6 +110,8 @@ interface FinancialDataState {
   chartReceber:          DadosMensais;
   chartPagarAnterior:    DadosMensais;
   chartReceberAnterior:  DadosMensais;
+  chartReceberFiltro:    number[];
+  chartPagarFiltro:      number[];
   kpiExtra:          KpiExtra;
   dwFilter:          DwFilter;
   filiais:           FilterOption[];
@@ -251,6 +253,8 @@ export function FinancialDataProvider({
     chartReceber:          cached?.chartReceber  ?? { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     chartPagarAnterior:    { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
     chartReceberAnterior:  { previsto: new Array(12).fill(0), realizado: new Array(12).fill(0), ano: "" },
+    chartReceberFiltro:    new Array(12).fill(0),
+    chartPagarFiltro:      new Array(12).fill(0),
     kpiExtra:     cached?.kpiExtra ?? defaultKpiExtra,
     dwFilter:     cached?.dwFilter      ?? defaultDwFilter,
     filiais:      [],
@@ -666,6 +670,12 @@ export function FinancialDataProvider({
         : 0;
 
       const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, inadimplenciaPerc, realizacaoCP, realizacaoCR };
+
+      // Arrays mensais calculados do período filtrado (para MoM nos cards)
+      const crRecebidoAll = allCR.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      const cpPagoAll     = allCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
+      const chartReceberFiltro = groupByMonth(crRecebidoAll, "VLR_PAGO", "DATA_PAGAMENTO");
+      const chartPagarFiltro   = groupByMonth(cpPagoAll,     "VLR_PAGO", "DATA_PAGAMENTO");
       // Faturamento: preserva o que o background fetch já preencheu (ou o cache anterior)
       setState((prev) => {
         const fatAtual = prev.faturamento;
@@ -683,6 +693,7 @@ export function FinancialDataProvider({
           isProcessed:  true,
           resumo, contasReceber, contasPagar, indicadores,
           chartPagar, chartReceber, kpiExtra,
+          chartReceberFiltro, chartPagarFiltro,
           dwRawData: data,
           dwChartData: prev.dwChartData,  // preserva dados anteriores — preenchido pelo background fetch
         };

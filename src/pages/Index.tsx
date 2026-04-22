@@ -1072,6 +1072,8 @@ const Index = () => {
     chartReceber,
     chartPagarAnterior,
     chartReceberAnterior,
+    chartReceberFiltro,
+    chartPagarFiltro,
     kpiExtra,
   } = useFinancialData();
 
@@ -1246,8 +1248,8 @@ const Index = () => {
       : `R$ ${v.toFixed(0)}`;
 
     // Melhor mês de recebimento (maior valor no realizado do CR)
-    const crReal = chartReceber.realizado || [];
-    const cpReal = chartPagar.realizado || [];
+    const crReal = chartReceberFiltro || [];
+    const cpReal = chartPagarFiltro   || [];
     const crBestIdx = crReal.reduce((best, v, i) => v > (crReal[best] ?? 0) ? i : best, 0);
     const cpWorstIdx = cpReal.reduce((worst, v, i) => v > (cpReal[worst] ?? 0) ? i : worst, 0);
     const melhorMes = (crReal[crBestIdx] ?? 0) > 0
@@ -1364,7 +1366,7 @@ const Index = () => {
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
-  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
+  }, [chartReceberFiltro, chartPagarFiltro, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
 
   const toneStyles: Record<string, string> = {
     emerald:
