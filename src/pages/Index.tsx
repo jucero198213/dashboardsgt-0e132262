@@ -1281,14 +1281,14 @@ const Index = () => {
       : new Date().getMonth();
     const nowMonth = filterEndMonth; // 0-11
 
-    // Variação CR: mês atual vs mês anterior
+    // Variação CR: dois últimos meses com dados
     let crLastFullIdx = -1;
-    for (let i = Math.min(nowMonth - 1, crReal.length - 1); i >= 0; i--) {
-      if (crReal[i] > 0) { crLastFullIdx = i; break; }
+    for (let i = 11; i >= 0; i--) {
+      if ((crReal[i] ?? 0) > 0) { crLastFullIdx = i; break; }
     }
     let crPrevFullIdx = -1;
     for (let i = crLastFullIdx - 1; i >= 0; i--) {
-      if (crReal[i] > 0) { crPrevFullIdx = i; break; }
+      if ((crReal[i] ?? 0) > 0) { crPrevFullIdx = i; break; }
     }
     let crVarMesAtual = "";
     let crVarMesAnterior = "";
@@ -1305,15 +1305,14 @@ const Index = () => {
       crVarPositive    = crVarPct >= 0;
     }
 
-    // Variação CP: mês atual vs mês anterior
+    // Variação CP: dois últimos meses com dados
     let lastFullIdx = -1;
-    for (let i = Math.min(nowMonth - 1, cpReal.length - 1); i >= 0; i--) {
-      if (cpReal[i] > 0) { lastFullIdx = i; break; }
+    for (let i = 11; i >= 0; i--) {
+      if ((cpReal[i] ?? 0) > 0) { lastFullIdx = i; break; }
     }
-    // Índice do mês anterior ao "último completo", com dado
     let prevFullIdx = -1;
     for (let i = lastFullIdx - 1; i >= 0; i--) {
-      if (cpReal[i] > 0) { prevFullIdx = i; break; }
+      if ((cpReal[i] ?? 0) > 0) { prevFullIdx = i; break; }
     }
     let variacaoLabel = "—";
     let variacaoPositive = false;
