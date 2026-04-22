@@ -1304,6 +1304,10 @@ const Index = () => {
       variacaoSub = `${months[lastFullIdx]} · sem base`;
     }
 
+    const totalCR = crReal.reduce((a,b) => a+b, 0);
+    const totalCP = cpReal.reduce((a,b) => a+b, 0);
+    const coberturaCP = totalCP > 0 ? (totalCR / totalCP * 100) : 0;
+
     return {
       melhorMes,
       maiorDespesa,
@@ -1311,6 +1315,7 @@ const Index = () => {
       variacaoLabel,
       variacaoPositive,
       variacaoSub,
+      coberturaCP,
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
@@ -1611,73 +1616,102 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
                     {/* RECEBIDO */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_45%)]" />
-                      <div className="relative flex flex-col gap-1.5">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">RECEBIDO</span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/12 border border-emerald-500/25 px-2 py-0.5 text-[9px] font-bold text-emerald-300">
-                            <TrendingUp className="h-2.5 w-2.5" /> Realizado
-                          </span>
-                        </div>
-                        <h2 className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]"
-                          style={{ fontSize: kpiValueFontSize(contasReceber.valorRecebido) }}>
-                          <CountUp value={contasReceber.valorRecebido} />
-                        </h2>
-                        <p className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-medium">Entrada consolidada</p>
-                        <div className="mt-1.5 grid grid-cols-3 gap-2 pt-2 border-t border-emerald-500/[0.08]">
-                          <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Melhor mês</div>
-                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.melhorMes}</div>
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_55%)]" />
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                      <div className="relative flex h-full">
+
+                        {/* Esquerda — valor principal */}
+                        <div className="flex flex-col justify-between p-5 xl:p-6 flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-emerald-400">RECEBIDO</span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-[8px] font-bold text-emerald-300">
+                              <TrendingUp className="h-2.5 w-2.5" /> Realizado
+                            </span>
                           </div>
                           <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Tendência</div>
-                            <div className={`text-[11px] font-semibold mt-0.5 ${cardInsights.tendencia.positive ? "text-emerald-300" : "text-red-300"}`}>
+                            <h2 className="font-black leading-none tracking-[-0.05em] text-white mt-3"
+                              style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}>
+                              <CountUp value={contasReceber.valorRecebido} />
+                            </h2>
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold mt-2">Entrada consolidada</p>
+                          </div>
+                        </div>
+
+                        {/* Divisor vertical */}
+                        <div className="w-px shrink-0 my-4" style={{ background: "rgba(16,185,129,0.12)" }} />
+
+                        {/* Direita — insights empilhados */}
+                        <div className="flex flex-col justify-around p-4 xl:p-5 w-[185px] shrink-0 gap-3">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Melhor mês</span>
+                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.melhorMes}</span>
+                          </div>
+                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Tendência</span>
+                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.tendencia.positive ? "text-emerald-300" : "text-rose-300"}`}>
                               {cardInsights.tendencia.label}
-                            </div>
+                            </span>
                           </div>
-                          <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">vs previsto</div>
-                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.realizacaoCR.toFixed(0)}%</div>
+                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs Previsto</span>
+                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.realizacaoCR.toFixed(0)}%</span>
                           </div>
                         </div>
+
                       </div>
                     </div>
 
                     {/* PAGO */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-red-500/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.12),transparent_45%)]" />
-                      <div className="relative flex flex-col gap-1.5">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-red-300">PAGO</span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/12 border border-red-500/25 px-2 py-0.5 text-[9px] font-bold text-red-300">
-                            <TrendingDown className="h-2.5 w-2.5" /> Realizado
-                          </span>
-                        </div>
-                        <h2 className="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis font-extrabold leading-[1] tracking-[-0.04em] [color:var(--sgt-text-primary)]"
-                          style={{ fontSize: kpiValueFontSize(contasPagar.valorPago) }}>
-                          <CountUp value={contasPagar.valorPago} />
-                        </h2>
-                        <p className="text-[10px] uppercase tracking-[0.15em] text-slate-400 font-medium">Saída consolidada</p>
-                        <div className="mt-1.5 grid grid-cols-3 gap-2 pt-2 border-t border-red-500/[0.08]">
-                          <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Maior despesa</div>
-                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.maiorDespesa}</div>
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.10),transparent_55%)]" />
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
+                      <div className="relative flex h-full">
+
+                        {/* Esquerda — valor principal */}
+                        <div className="flex flex-col justify-between p-5 xl:p-6 flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-rose-400">PAGO</span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 text-[8px] font-bold text-rose-300">
+                              <TrendingDown className="h-2.5 w-2.5" /> Realizado
+                            </span>
                           </div>
                           <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Variação</div>
-                            <div className={`text-[11px] font-semibold mt-0.5 ${cardInsights.variacaoLabel === "—" ? "text-slate-300" : (cardInsights.variacaoPositive ? "text-emerald-300" : "text-red-300")}`}>
+                            <h2 className="font-black leading-none tracking-[-0.05em] text-white mt-3"
+                              style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}>
+                              <CountUp value={contasPagar.valorPago} />
+                            </h2>
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-rose-500/80 font-semibold mt-2">Saída consolidada</p>
+                          </div>
+                        </div>
+
+                        {/* Divisor vertical */}
+                        <div className="w-px shrink-0 my-4" style={{ background: "rgba(248,113,113,0.12)" }} />
+
+                        {/* Direita — insights empilhados */}
+                        <div className="flex flex-col justify-around p-4 xl:p-5 w-[185px] shrink-0 gap-3">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Maior despesa</span>
+                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.maiorDespesa}</span>
+                          </div>
+                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Variação MoM</span>
+                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.variacaoLabel === "—" ? "text-slate-400" : cardInsights.variacaoPositive ? "text-emerald-300" : "text-rose-300"}`}>
                               {cardInsights.variacaoLabel}
-                            </div>
-                            {cardInsights.variacaoSub && (
-                              <div className="text-[8px] text-slate-500 mt-0.5">{cardInsights.variacaoSub}</div>
-                            )}
+                            </span>
                           </div>
-                          <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">vs previsto</div>
-                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.realizacaoCP.toFixed(0)}%</div>
+                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Cobertura CR</span>
+                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.coberturaCP >= 100 ? "text-emerald-300" : "text-rose-300"}`}>
+                              {cardInsights.coberturaCP.toFixed(0)}%
+                            </span>
                           </div>
                         </div>
+
                       </div>
                     </div>
                   </div>
