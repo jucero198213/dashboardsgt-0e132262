@@ -1281,9 +1281,9 @@ const Index = () => {
       : new Date().getMonth();
     const nowMonth = filterEndMonth; // 0-11
 
-    // Variação CR: dois últimos meses com dados
+    // Variação CR: dois últimos meses com dados dentro do período filtrado
     let crLastFullIdx = -1;
-    for (let i = 11; i >= 0; i--) {
+    for (let i = nowMonth; i >= 0; i--) {
       if ((crReal[i] ?? 0) > 0) { crLastFullIdx = i; break; }
     }
     let crPrevFullIdx = -1;
@@ -1305,9 +1305,9 @@ const Index = () => {
       crVarPositive    = crVarPct >= 0;
     }
 
-    // Variação CP: dois últimos meses com dados
+    // Variação CP: dois últimos meses com dados dentro do período filtrado
     let lastFullIdx = -1;
-    for (let i = 11; i >= 0; i--) {
+    for (let i = nowMonth; i >= 0; i--) {
       if ((cpReal[i] ?? 0) > 0) { lastFullIdx = i; break; }
     }
     let prevFullIdx = -1;
