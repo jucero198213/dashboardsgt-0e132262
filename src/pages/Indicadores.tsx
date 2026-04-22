@@ -348,6 +348,14 @@ export default function Indicadores() {
                                       <span className="text-[9px] font-semibold uppercase tracking-[0.12em] dark:text-slate-500 text-slate-400">
                                         do fat.
                                       </span>
+                                      <div className="my-0.5 h-px w-8 bg-white/10" />
+                                      <span className="text-[11px] font-bold tabular-nums tracking-[-0.02em] dark:text-slate-200 text-slate-700">
+                                        {ind.valorAbsoluto >= 1_000_000
+                                          ? `R$ ${(ind.valorAbsoluto / 1_000_000).toFixed(1).replace(".", ",")}M`
+                                          : ind.valorAbsoluto >= 1_000
+                                          ? `R$ ${(ind.valorAbsoluto / 1_000).toFixed(0)}k`
+                                          : `R$ ${ind.valorAbsoluto.toFixed(0)}`}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
