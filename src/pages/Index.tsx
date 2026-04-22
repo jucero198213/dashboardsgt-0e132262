@@ -1248,8 +1248,8 @@ const Index = () => {
       : `R$ ${v.toFixed(0)}`;
 
     // Melhor mês de recebimento (maior valor no realizado do CR)
-    const crReal = chartReceberFiltro || [];
-    const cpReal = chartPagarFiltro   || [];
+    const crReal = chartReceber.realizado || [];
+    const cpReal = chartPagar.realizado   || [];
     const crBestIdx = crReal.reduce((best, v, i) => v > (crReal[best] ?? 0) ? i : best, 0);
     const cpWorstIdx = cpReal.reduce((worst, v, i) => v > (cpReal[worst] ?? 0) ? i : worst, 0);
     const melhorMes = (crReal[crBestIdx] ?? 0) > 0
@@ -1283,7 +1283,7 @@ const Index = () => {
       : new Date().getMonth();
     const nowMonth = filterEndMonth; // 0-11
 
-    // Variação CR: dois últimos meses com dados dentro do período filtrado
+    // Variação CR: dois últimos meses com dados dentro do período filtrado (incluindo mês atual)
     let crLastFullIdx = -1;
     for (let i = nowMonth; i >= 0; i--) {
       if ((crReal[i] ?? 0) > 0) { crLastFullIdx = i; break; }
@@ -1307,7 +1307,7 @@ const Index = () => {
       crVarPositive    = crVarPct >= 0;
     }
 
-    // Variação CP: dois últimos meses com dados dentro do período filtrado
+    // Variação CP: dois últimos meses com dados dentro do período filtrado (incluindo mês atual)
     let lastFullIdx = -1;
     for (let i = nowMonth; i >= 0; i--) {
       if ((cpReal[i] ?? 0) > 0) { lastFullIdx = i; break; }
@@ -1366,7 +1366,7 @@ const Index = () => {
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
-  }, [chartReceberFiltro, chartPagarFiltro, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
+  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
 
   const toneStyles: Record<string, string> = {
     emerald:
