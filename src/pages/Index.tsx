@@ -1292,14 +1292,23 @@ const Index = () => {
     let variacaoLabel = "—";
     let variacaoPositive = false;
     let variacaoSub = "";
+    let variacaoMesAtual = "";
+    let variacaoMesAnterior = "";
+    let variacaoValAtual = 0;
+    let variacaoValAnterior = 0;
+    let variacaoPct = 0;
     if (lastFullIdx >= 0 && prevFullIdx >= 0) {
       const atual = cpReal[lastFullIdx];
       const anterior = cpReal[prevFullIdx];
       const pct = ((atual - anterior) / anterior) * 100;
       variacaoLabel = `${pct >= 0 ? "↑" : "↓"} ${Math.abs(pct).toFixed(0)}%`;
-      // No contexto de PAGO: aumento = ruim (gastou mais), redução = bom
       variacaoPositive = pct <= 0;
       variacaoSub = `${months[lastFullIdx]} vs ${months[prevFullIdx]}`;
+      variacaoMesAtual = months[lastFullIdx];
+      variacaoMesAnterior = months[prevFullIdx];
+      variacaoValAtual = atual;
+      variacaoValAnterior = anterior;
+      variacaoPct = pct;
     } else if (lastFullIdx >= 0) {
       variacaoSub = `${months[lastFullIdx]} · sem base`;
     }
@@ -1315,6 +1324,11 @@ const Index = () => {
       variacaoLabel,
       variacaoPositive,
       variacaoSub,
+      variacaoMesAtual,
+      variacaoMesAnterior,
+      variacaoValAtual,
+      variacaoValAnterior,
+      variacaoPct,
       coberturaCP,
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
@@ -1698,10 +1712,27 @@ const Index = () => {
                           </div>
                           <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Variação MoM</span>
-                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.variacaoLabel === "—" ? "text-slate-400" : cardInsights.variacaoPositive ? "text-emerald-300" : "text-rose-300"}`}>
-                              {cardInsights.variacaoLabel}
-                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs mês anterior</span>
+                            {cardInsights.variacaoMesAtual ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex flex-col items-center">
+                                  <span className="text-[9px] text-slate-500 font-medium">{cardInsights.variacaoMesAnterior}</span>
+                                  <span className="text-[12px] font-bold text-slate-300">{cardInsights.variacaoValAnterior >= 1e6 ? `${(cardInsights.variacaoValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAnterior/1e3).toFixed(0)}k`}</span>
+                                </div>
+                                <span className={`text-[13px] font-black ${cardInsights.variacaoPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {cardInsights.variacaoPct >= 0 ? "→" : "→"}
+                                </span>
+                                <div className="flex flex-col items-center">
+                                  <span className="text-[9px] text-slate-500 font-medium">{cardInsights.variacaoMesAtual}</span>
+                                  <span className={`text-[12px] font-bold ${cardInsights.variacaoPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.variacaoValAtual >= 1e6 ? `${(cardInsights.variacaoValAtual/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAtual/1e3).toFixed(0)}k`}</span>
+                                </div>
+                                <span className={`text-[11px] font-bold ml-0.5 ${cardInsights.variacaoPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {cardInsights.variacaoPct >= 0 ? "↑" : "↓"}{Math.abs(cardInsights.variacaoPct).toFixed(0)}%
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[15px] font-bold text-slate-500">—</span>
+                            )}
                           </div>
                           <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
