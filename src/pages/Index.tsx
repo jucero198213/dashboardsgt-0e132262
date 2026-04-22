@@ -1278,7 +1278,11 @@ const Index = () => {
     // Variação de pagamentos: último mês completo vs mês anterior ao completo.
     // "Completo" = último mês com índice < mês corrente. Em abril, compara Mar vs Fev.
     // Usa só meses com dado (> 0) pra evitar divisão por zero em meses sem operação.
-    const nowMonth = new Date().getMonth(); // 0-11
+    // Usa o mês final do filtro como referência, não o mês do sistema
+    const filterEndMonth = dwFilter.dataFim
+      ? new Date(dwFilter.dataFim).getMonth()
+      : new Date().getMonth();
+    const nowMonth = filterEndMonth; // 0-11
     // Último índice anterior ao mês atual com dado realizado (mês "completo" mais recente)
     let lastFullIdx = -1;
     for (let i = Math.min(nowMonth - 1, cpReal.length - 1); i >= 0; i--) {
@@ -1333,7 +1337,7 @@ const Index = () => {
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
-  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP]);
+  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP, dwFilter.dataFim]);
 
   const toneStyles: Record<string, string> = {
     emerald:
