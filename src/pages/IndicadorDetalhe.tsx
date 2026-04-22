@@ -26,6 +26,7 @@ const INDICATOR_CODCUS: Record<string, string[]> = {
   "Pedágio":         ["24"],
   "Administrativo":  ["3"],
   "Manutenção":      ["4", "5", "6", "7", "25"],
+  "Pneu":            ["28"],
 };
 
 const SUBTITLES: Record<string, string> = {
