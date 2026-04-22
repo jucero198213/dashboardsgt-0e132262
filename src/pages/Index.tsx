@@ -1061,6 +1061,7 @@ const Index = () => {
     indicadores,
     fetchFromDW,
     isFetchingDw,
+    isFetchingCharts,
     dwError,
     dwFilter,
     setDwFilter,
@@ -1274,21 +1275,46 @@ const Index = () => {
       }
     }
 
-    // Cobertura CR: quanto do Pago é coberto pelo Recebido (valorRecebido / valorPago)
-    const cobertura = contasPagar.valorPago > 0
-      ? Math.round((contasReceber.valorRecebido / contasPagar.valorPago) * 100)
-      : 0;
-    const coberturaLabel = cobertura > 0 ? `${Math.min(cobertura, 999)}%` : "—";
+    // Variação de pagamentos: último mês completo vs mês anterior ao completo.
+    // "Completo" = último mês com índice < mês corrente. Em abril, compara Mar vs Fev.
+    // Usa só meses com dado (> 0) pra evitar divisão por zero em meses sem operação.
+    const nowMonth = new Date().getMonth(); // 0-11
+    // Último índice anterior ao mês atual com dado realizado (mês "completo" mais recente)
+    let lastFullIdx = -1;
+    for (let i = Math.min(nowMonth - 1, cpReal.length - 1); i >= 0; i--) {
+      if (cpReal[i] > 0) { lastFullIdx = i; break; }
+    }
+    // Índice do mês anterior ao "último completo", com dado
+    let prevFullIdx = -1;
+    for (let i = lastFullIdx - 1; i >= 0; i--) {
+      if (cpReal[i] > 0) { prevFullIdx = i; break; }
+    }
+    let variacaoLabel = "—";
+    let variacaoPositive = false;
+    let variacaoSub = "";
+    if (lastFullIdx >= 0 && prevFullIdx >= 0) {
+      const atual = cpReal[lastFullIdx];
+      const anterior = cpReal[prevFullIdx];
+      const pct = ((atual - anterior) / anterior) * 100;
+      variacaoLabel = `${pct >= 0 ? "↑" : "↓"} ${Math.abs(pct).toFixed(0)}%`;
+      // No contexto de PAGO: aumento = ruim (gastou mais), redução = bom
+      variacaoPositive = pct <= 0;
+      variacaoSub = `${months[lastFullIdx]} vs ${months[prevFullIdx]}`;
+    } else if (lastFullIdx >= 0) {
+      variacaoSub = `${months[lastFullIdx]} · sem base`;
+    }
 
     return {
       melhorMes,
       maiorDespesa,
       tendencia,
-      coberturaLabel,
+      variacaoLabel,
+      variacaoPositive,
+      variacaoSub,
       realizacaoCR: kpiExtra.realizacaoCR,
       realizacaoCP: kpiExtra.realizacaoCP,
     };
-  }, [chartReceber.realizado, chartPagar.realizado, contasPagar.valorPago, contasReceber.valorRecebido, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP]);
+  }, [chartReceber.realizado, chartPagar.realizado, kpiExtra.realizacaoCR, kpiExtra.realizacaoCP]);
 
   const toneStyles: Record<string, string> = {
     emerald:
@@ -1503,7 +1529,7 @@ const Index = () => {
                   <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
-                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                <button onClick={() => void handleUpdate()} disabled={isFetchingDw || isFetchingCharts}
                   className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 font-bold hover:border-cyan-300/70 hover:bg-cyan-400/30 hover:shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 active:scale-95"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
@@ -1556,7 +1582,7 @@ const Index = () => {
 
               {/* Linha 4: botão atualizar */}
               <div className="flex items-center gap-2">
-                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                <button onClick={() => void handleUpdate()} disabled={isFetchingDw || isFetchingCharts}
                   className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-[12px] font-bold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 hover:border-cyan-300/70 hover:bg-cyan-400/30 active:scale-95"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
                   {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
@@ -1639,8 +1665,13 @@ const Index = () => {
                             <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.maiorDespesa}</div>
                           </div>
                           <div>
-                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Cobertura CR</div>
-                            <div className="text-[11px] text-slate-200 font-semibold mt-0.5">{cardInsights.coberturaLabel}</div>
+                            <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">Variação</div>
+                            <div className={`text-[11px] font-semibold mt-0.5 ${cardInsights.variacaoLabel === "—" ? "text-slate-300" : (cardInsights.variacaoPositive ? "text-emerald-300" : "text-red-300")}`}>
+                              {cardInsights.variacaoLabel}
+                            </div>
+                            {cardInsights.variacaoSub && (
+                              <div className="text-[8px] text-slate-500 mt-0.5">{cardInsights.variacaoSub}</div>
+                            )}
                           </div>
                           <div>
                             <div className="text-[8px] uppercase tracking-[0.12em] text-slate-500 font-medium">vs previsto</div>
@@ -1671,14 +1702,14 @@ const Index = () => {
                           isEmpty={[...chartReceber.realizado, ...chartPagar.realizado].every(v => v === 0)}
                         />
 
-                        {isFetchingDw && (
+                        {isFetchingCharts && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
                               <div className="h-2 w-2 rounded-full animate-pulse bg-teal-400" />
                               <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-teal-400/60" />
                               <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-teal-400/30" />
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                            <span className="text-[10px] font-medium text-slate-400">Atualizando gráficos...</span>
                           </div>
                         )}
                       </div>
@@ -1695,14 +1726,14 @@ const Index = () => {
                           anoAtual={chartReceber.ano || chartPagar.ano}
                           anoAnterior={chartReceberAnterior.ano || chartPagarAnterior.ano}
                         />
-                        {isFetchingDw && (
+                        {isFetchingCharts && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[2px] rounded-[14px]">
                             <div className="flex items-center gap-2">
                               <div className="h-2 w-2 rounded-full animate-pulse bg-violet-400" />
                               <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:150ms] bg-violet-400/60" />
                               <div className="h-2 w-2 rounded-full animate-pulse [animation-delay:300ms] bg-violet-400/30" />
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400">{loadingPhase || "Carregando..."}</span>
+                            <span className="text-[10px] font-medium text-slate-400">Atualizando gráficos...</span>
                           </div>
                         )}
                       </div>

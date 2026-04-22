@@ -115,6 +115,7 @@ interface FinancialDataState {
   filiais:           FilterOption[];
   empresas:          FilterOption[];
   isFetchingDw:      boolean;
+  isFetchingCharts:  boolean;  // separado: KPIs chegam rápido, charts fazem 2 fetches extras
   dwError:           string | null;
   dwRawData:         DwRow[];   // ← dados brutos para drill-down por indicador
   dwChartData:       DwRow[];   // ← dados anuais para gráficos de evolução
@@ -255,6 +256,7 @@ export function FinancialDataProvider({
     filiais:      [],
     empresas:     [],
     isFetchingDw: false,
+    isFetchingCharts: false,
     dwError:      null,
     dwRawData:    [],
     dwChartData:  [],
@@ -305,7 +307,7 @@ export function FinancialDataProvider({
     abortRef.current = new AbortController();
 
     // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
-    setState((prev) => ({ ...prev, isFetchingDw: true, dwError: null }));
+    setState((prev) => ({ ...prev, isFetchingDw: true, isFetchingCharts: true, dwError: null }));
 
     try {
       // ── 1. Fetch principal — KPI cards (prioridade máxima) ─────────────────
@@ -742,14 +744,21 @@ export function FinancialDataProvider({
                     chartPagarAnterior:   { previsto: new Array(12).fill(0), realizado: gbm(prevCpPago,     "VLR_PAGO", "DATA_PAGAMENTO"), ano: anoAnterior },
                   }));
                 })
-                .catch((err) => console.warn("[DW] Gráfico ano anterior erro (não crítico):", err?.message ?? err));
+                .catch((err) => console.warn("[DW] Gráfico ano anterior erro (não crítico):", err?.message ?? err))
+                .finally(() => {
+                  setState((prev) => ({ ...prev, isFetchingCharts: false }));
+                });
             })
-            .catch((err) => console.warn("[DW] Gráfico anual erro (não crítico):", err?.message ?? err));
+            .catch((err) => {
+              console.warn("[DW] Gráfico anual erro (não crítico):", err?.message ?? err);
+              // Se o fetch do ano atual falhou, o do ano anterior nem dispara — libera a flag aqui
+              setState((prev) => ({ ...prev, isFetchingCharts: false }));
+            });
         });
 
     } catch (err) {
       setState((prev) => ({
-        ...prev, isFetchingDw: false,
+        ...prev, isFetchingDw: false, isFetchingCharts: false,
         dwError: err instanceof Error ? err.message : "Erro ao buscar dados do DW",
       }));
     }
