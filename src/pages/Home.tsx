@@ -8,6 +8,15 @@ import {
   ChevronDown,
   ExternalLink,
   Truck,
+  Users,
+  CreditCard,
+  ShoppingCart,
+  Wrench,
+  Settings,
+  Receipt,
+  Fuel,
+  Car,
+  LineChart,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
@@ -67,7 +76,7 @@ interface ModuleCardData {
   description: string;
   cta: string;
   onClick?: () => void;
-  tone: "amber" | "violet" | "slate" | "cyan" | "emerald";
+  tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange";
   disabled?: boolean;
 }
 
@@ -109,6 +118,20 @@ const TONE: Record<
     ring: "hover:border-cyan-400/40",
     cta: "text-cyan-400",
     glow: "from-cyan-400/20",
+  },
+  rose: {
+    iconBg: "bg-rose-400/10 border border-rose-400/20",
+    iconText: "text-rose-300",
+    ring: "hover:border-rose-400/40",
+    cta: "text-rose-300",
+    glow: "from-rose-400/20",
+  },
+  orange: {
+    iconBg: "bg-orange-400/10 border border-orange-400/20",
+    iconText: "text-orange-300",
+    ring: "hover:border-orange-400/40",
+    cta: "text-orange-300",
+    glow: "from-orange-400/20",
   },
 };
 
@@ -197,21 +220,100 @@ export default function Home() {
       key: "financiamento",
       icon: Truck,
       title: "Financiamento de Frota",
-      description:
-        "Gerencie contratos, saldos devedores, parcelas e vencimentos de todos os financiamentos da frota.",
+      description: "Gerencie contratos, saldos devedores, parcelas e vencimentos de todos os financiamentos da frota.",
       cta: "Acessar financiamentos",
       onClick: () => navigate("/financiamento-frota"),
       tone: "emerald" as const,
     },
     {
-      key: "soon",
-      icon: Sparkles,
-      title: "Próximos módulos",
-      description:
-        "Novos módulos de gestão operacional e logística estão sendo desenvolvidos para o ecossistema SGT.",
+      key: "rh",
+      icon: Users,
+      title: "RH",
+      description: "Gestão de colaboradores, folha de pagamento, admissões e desligamentos.",
       cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/rh"),
+      tone: "violet" as const,
+    },
+    {
+      key: "contas-a-pagar",
+      icon: CreditCard,
+      title: "Contas a Pagar",
+      description: "Controle e gestão dos títulos a pagar, vencimentos e fluxo de caixa.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/contas-a-pagar"),
+      tone: "rose" as const,
+    },
+    {
+      key: "contas-a-receber",
+      icon: Receipt,
+      title: "Contas a Receber",
+      description: "Acompanhe títulos em aberto, recebimentos e inadimplência dos clientes.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/contas-a-receber"),
+      tone: "emerald" as const,
+    },
+    {
+      key: "compras",
+      icon: ShoppingCart,
+      title: "Compras",
+      description: "Pedidos de compra, fornecedores, cotações e controle de estoque.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/compras"),
+      tone: "amber" as const,
+    },
+    {
+      key: "manutencao",
+      icon: Wrench,
+      title: "Manutenção",
+      description: "Ordens de serviço, preventiva e corretiva de veículos e equipamentos.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/manutencao"),
+      tone: "orange" as const,
+    },
+    {
+      key: "operacional",
+      icon: Settings,
+      title: "Operacional",
+      description: "Gestão de rotas, viagens, motoristas e desempenho operacional.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/operacional"),
       tone: "cyan" as const,
-      disabled: true,
+    },
+    {
+      key: "faturamento",
+      icon: LineChart,
+      title: "Faturamento",
+      description: "Emissão de NF, faturamento por cliente e acompanhamento de receitas.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/faturamento"),
+      tone: "amber" as const,
+    },
+    {
+      key: "abastecimento",
+      icon: Fuel,
+      title: "Abastecimento",
+      description: "Controle de combustível, consumo por veículo e custo operacional.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/abastecimento"),
+      tone: "orange" as const,
+    },
+    {
+      key: "frota",
+      icon: Car,
+      title: "Frota",
+      description: "Gestão de veículos, documentação, licenciamento e disponibilidade da frota.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/frota"),
+      tone: "cyan" as const,
+    },
+    {
+      key: "executivo",
+      icon: BarChart3,
+      title: "Executivo",
+      description: "Painel gerencial com visão consolidada de todos os indicadores da empresa.",
+      cta: "Em breve",
+      onClick: () => navigate("/em-desenvolvimento/executivo"),
+      tone: "violet" as const,
     },
   ].filter(Boolean) as ModuleCardData[];
 
