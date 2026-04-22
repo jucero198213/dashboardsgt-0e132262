@@ -1275,7 +1275,13 @@ const Index = () => {
       }
     }
 
-    // Variação CR: mesmo mês anterior vs mês atual (igual ao CP)
+    // Mês de referência = data fim do filtro
+    const filterEndMonth = dwFilter.dataFim
+      ? new Date(dwFilter.dataFim).getMonth()
+      : new Date().getMonth();
+    const nowMonth = filterEndMonth; // 0-11
+
+    // Variação CR: mês atual vs mês anterior
     let crLastFullIdx = -1;
     for (let i = Math.min(nowMonth - 1, crReal.length - 1); i >= 0; i--) {
       if (crReal[i] > 0) { crLastFullIdx = i; break; }
@@ -1291,21 +1297,15 @@ const Index = () => {
     let crVarPct = 0;
     let crVarPositive = false;
     if (crLastFullIdx >= 0 && crPrevFullIdx >= 0) {
-      crVarValAtual   = crReal[crLastFullIdx];
+      crVarValAtual    = crReal[crLastFullIdx];
       crVarValAnterior = crReal[crPrevFullIdx];
-      crVarPct = ((crVarValAtual - crVarValAnterior) / crVarValAnterior) * 100;
-      crVarMesAtual   = months[crLastFullIdx];
+      crVarPct         = ((crVarValAtual - crVarValAnterior) / crVarValAnterior) * 100;
+      crVarMesAtual    = months[crLastFullIdx];
       crVarMesAnterior = months[crPrevFullIdx];
-      crVarPositive   = crVarPct >= 0; // para CR: subir é bom
+      crVarPositive    = crVarPct >= 0;
     }
-    // "Completo" = último mês com índice < mês corrente. Em abril, compara Mar vs Fev.
-    // Usa só meses com dado (> 0) pra evitar divisão por zero em meses sem operação.
-    // Usa o mês final do filtro como referência, não o mês do sistema
-    const filterEndMonth = dwFilter.dataFim
-      ? new Date(dwFilter.dataFim).getMonth()
-      : new Date().getMonth();
-    const nowMonth = filterEndMonth; // 0-11
-    // Último índice anterior ao mês atual com dado realizado (mês "completo" mais recente)
+
+    // Variação CP: mês atual vs mês anterior
     let lastFullIdx = -1;
     for (let i = Math.min(nowMonth - 1, cpReal.length - 1); i >= 0; i--) {
       if (cpReal[i] > 0) { lastFullIdx = i; break; }
