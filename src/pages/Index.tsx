@@ -1275,7 +1275,29 @@ const Index = () => {
       }
     }
 
-    // Variação de pagamentos: último mês completo vs mês anterior ao completo.
+    // Variação CR: mesmo mês anterior vs mês atual (igual ao CP)
+    let crLastFullIdx = -1;
+    for (let i = Math.min(nowMonth - 1, crReal.length - 1); i >= 0; i--) {
+      if (crReal[i] > 0) { crLastFullIdx = i; break; }
+    }
+    let crPrevFullIdx = -1;
+    for (let i = crLastFullIdx - 1; i >= 0; i--) {
+      if (crReal[i] > 0) { crPrevFullIdx = i; break; }
+    }
+    let crVarMesAtual = "";
+    let crVarMesAnterior = "";
+    let crVarValAtual = 0;
+    let crVarValAnterior = 0;
+    let crVarPct = 0;
+    let crVarPositive = false;
+    if (crLastFullIdx >= 0 && crPrevFullIdx >= 0) {
+      crVarValAtual   = crReal[crLastFullIdx];
+      crVarValAnterior = crReal[crPrevFullIdx];
+      crVarPct = ((crVarValAtual - crVarValAnterior) / crVarValAnterior) * 100;
+      crVarMesAtual   = months[crLastFullIdx];
+      crVarMesAnterior = months[crPrevFullIdx];
+      crVarPositive   = crVarPct >= 0; // para CR: subir é bom
+    }
     // "Completo" = último mês com índice < mês corrente. Em abril, compara Mar vs Fev.
     // Usa só meses com dado (> 0) pra evitar divisão por zero em meses sem operação.
     // Usa o mês final do filtro como referência, não o mês do sistema
@@ -1325,6 +1347,12 @@ const Index = () => {
       melhorMes,
       maiorDespesa,
       tendencia,
+      crVarMesAtual,
+      crVarMesAnterior,
+      crVarValAtual,
+      crVarValAnterior,
+      crVarPct,
+      crVarPositive,
       variacaoLabel,
       variacaoPositive,
       variacaoSub,
@@ -1667,15 +1695,36 @@ const Index = () => {
                           </div>
                           <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Tendência</span>
-                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.tendencia.positive ? "text-emerald-300" : "text-rose-300"}`}>
-                              {cardInsights.tendencia.label}
-                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs mês anterior</span>
+                            {cardInsights.crVarMesAtual ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex flex-col items-center">
+                                  <span className="text-[9px] text-slate-500 font-medium">{cardInsights.crVarMesAnterior}</span>
+                                  <span className="text-[12px] font-bold text-slate-300">{cardInsights.crVarValAnterior >= 1e6 ? `${(cardInsights.crVarValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAnterior/1e3).toFixed(0)}k`}</span>
+                                </div>
+                                <span className="text-[13px] font-black text-slate-500">→</span>
+                                <div className="flex flex-col items-center">
+                                  <span className="text-[9px] text-slate-500 font-medium">{cardInsights.crVarMesAtual}</span>
+                                  <span className={`text-[12px] font-bold ${cardInsights.crVarPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.crVarValAtual >= 1e6 ? `${(cardInsights.crVarValAtual/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAtual/1e3).toFixed(0)}k`}</span>
+                                </div>
+                                <span className={`text-[11px] font-bold ml-0.5 ${cardInsights.crVarPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                                  {cardInsights.crVarPct >= 0 ? "↑" : "↓"}{Math.abs(cardInsights.crVarPct).toFixed(0)}%
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-[15px] font-bold text-slate-500">—</span>
+                            )}
                           </div>
                           <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
-                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs Previsto</span>
-                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.realizacaoCR.toFixed(0)}%</span>
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Previsto</span>
+                            <span className="text-[15px] font-bold text-slate-100 leading-tight">
+                              {contasReceber.valorAReceber >= 1e6
+                                ? `R$ ${(contasReceber.valorAReceber/1e6).toFixed(1).replace(".",",")}M`
+                                : contasReceber.valorAReceber >= 1e3
+                                ? `R$ ${(contasReceber.valorAReceber/1e3).toFixed(0)}k`
+                                : `R$ ${contasReceber.valorAReceber.toFixed(0)}`}
+                            </span>
                           </div>
                         </div>
 
