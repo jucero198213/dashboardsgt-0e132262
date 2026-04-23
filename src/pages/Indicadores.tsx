@@ -253,9 +253,9 @@ export default function Indicadores() {
             {/* CONTEÚDO */}
             <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-3">
 
-              {/* COLUNA ESQUERDA — grid 4x2 */}
+              {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 4x2 desktop */}
               <div className="flex flex-col flex-1 min-w-0 lg:min-h-0">
-                <div className="grid grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-3 flex-1 lg:min-h-0 lg:h-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-2.5 sm:gap-3 flex-1 lg:min-h-0 lg:h-full">
                   {(isFetchingDw && !isProcessed
                     ? Array.from({ length: 8 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
