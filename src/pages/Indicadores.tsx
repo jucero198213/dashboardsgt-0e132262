@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw } from "lucide-react";
+import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw, AlertCircle } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -77,7 +77,7 @@ const INDICATOR_IDENTITY: Record<string, {
 };
 
 export default function Indicadores() {
-  const { indicadores, isFetchingDw, isProcessed, faturamento, dwFilter, setDwFilter, fetchFromDW, filiais, empresas } = useFinancialData();
+  const { indicadores, isFetchingDw, isProcessed, faturamento, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
   const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
 
@@ -241,6 +241,13 @@ export default function Indicadores() {
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+
+            {dwError && (
+              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs text-red-300 mx-3 mt-2 shrink-0">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {dwError}
+              </div>
+            )}
 
             {/* CONTEÚDO */}
             <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-3">
