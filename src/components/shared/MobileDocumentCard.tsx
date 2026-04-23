@@ -13,7 +13,7 @@ export interface MobileDocumentCardProps {
   /** Data de vencimento */
   vencimento: string | null | undefined;
   /** Status para o badge */
-  status: string;
+  status: "Em Aberto" | "Vencido" | "Parcial";
   /** Cor do tom (paga = amber, recebe = emerald) */
   tone: "emerald" | "amber";
   /** Detalhes extras mostrados ao expandir */
