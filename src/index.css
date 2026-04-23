@@ -146,12 +146,13 @@
 /* ── Microinterações globais ── */
 * { -webkit-font-smoothing: antialiased; }
 
-/* Transição padrão para todos os elementos interativos */
+/* Transição padrão para elementos interativos — não afeta filhos SVG/animações */
 button, a, [role="button"] {
   transition-property: color, background-color, border-color, box-shadow, transform, opacity;
   transition-duration: 180ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+button svg, a svg { transition: none; }
 
 /* Focus ring acessível */
 button:focus-visible, a:focus-visible {
