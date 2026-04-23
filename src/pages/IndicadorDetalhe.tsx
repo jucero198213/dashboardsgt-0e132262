@@ -12,6 +12,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   Tooltip, CartesianGrid, ReferenceLine,
@@ -412,15 +413,16 @@ export default function IndicadorDetalhe() {
 
           {/* ── Breadcrumb ── */}
           <div className="flex items-center justify-between">
-            <nav className="flex items-center gap-2 text-xs text-slate-500">
+            <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
               <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200">Indicadores</button>
-              <ChevronRight className="h-3 w-3 opacity-40" />
-              <span className="text-slate-300">{indicador.nome}</span>
+              <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
+              <span className="truncate text-slate-300">{indicador.nome}</span>
             </nav>
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <HomeButton />
               <UserMenu />
             </div>
+            <MobileNav />
           </div>
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}

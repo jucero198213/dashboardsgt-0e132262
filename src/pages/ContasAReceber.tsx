@@ -12,6 +12,8 @@ import { KpiCardSkeleton } from "@/components/shared/CardSkeleton";
 import { useMemo, useState } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
+import { MobileDocumentCard } from "@/components/shared/MobileDocumentCard";
 
 const PAGE_SIZE = 50;
 
