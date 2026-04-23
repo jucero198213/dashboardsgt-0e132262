@@ -167,7 +167,7 @@ button:focus-visible, a:focus-visible {
   0%, 100% { transform: scale(1); opacity: 0.6; }
   50% { transform: scale(1.8); opacity: 0; }
 }
-.animate-ping { animation: softPing 2s cubic-bezier(0,0,0.2,1) infinite; }
+.animate-soft-ping { animation: softPing 2s cubic-bezier(0,0,0.2,1) infinite; }
 
 /* ── Light: hide dark atmosphere gradients ── */
 .light .sgt-atmosphere { opacity: 0; }
