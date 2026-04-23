@@ -390,7 +390,7 @@ export default function Home() {
               </span>
             </motion.div>
 
-            <h1 className="text-[clamp(3.2rem,8vw,7rem)] font-black leading-[1.0] tracking-[-0.045em]">
+            <h1 className="text-[clamp(2rem,8vw,7rem)] font-black leading-[1.05] tracking-[-0.045em]">
               <span className="block bg-gradient-to-r from-slate-200 via-white to-slate-300 bg-clip-text text-transparent">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
