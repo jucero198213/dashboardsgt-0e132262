@@ -293,6 +293,9 @@ export default function IndicadorDetalhe() {
   const di = dwFilter.dataInicio;
   const df = dwFilter.dataFim;
 
+  // Compra de Ativo (CODCUS 26): usa DATA_VENCIMENTO; demais: DATA_EMISSAO
+  const usaVencimento = indicador?.nome === "Compra de Ativo";
+
   const handleUpdate = useCallback(async () => {
     setProgress(0); setLoadingPhase("Conectando...");
     let cur = 0;
@@ -312,10 +315,11 @@ export default function IndicadorDetalhe() {
     return dwRawData.filter((r) => {
       if (r.ORIGEM !== "CP") return false;
       if (!codcusList.includes(String(r.CODCUS ?? "").trim())) return false;
-      const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
-      return em ? em >= di && em <= df : false;
+      const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
+      const dt = dateField ? String(dateField).split("T")[0] : null;
+      return dt ? dt >= di && dt <= df : false;
     });
-  }, [dwRawData, indicador, codcusList, di, df]);
+  }, [dwRawData, indicador, codcusList, di, df, usaVencimento]);
 
   const totalValor = useMemo(() => rowsFiltrados.reduce((s, r) => s + (r.VLR_PARCELA ?? 0), 0), [rowsFiltrados]);
 
@@ -336,16 +340,17 @@ export default function IndicadorDetalhe() {
       const m: Record<string, number> = {};
       src.forEach((r) => {
         if (r.ORIGEM !== "CP" || !codcusList.includes(String(r.CODCUS ?? "").trim())) return;
-        const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
-        if (!em || !em.startsWith(pfx)) return;
-        const dia = em.split("-")[2]; m[dia] = (m[dia] || 0) + (r.VLR_PARCELA ?? 0);
+        const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
+        const dt = dateField ? String(dateField).split("T")[0] : null;
+        if (!dt || !dt.startsWith(pfx)) return;
+        const dia = dt.split("-")[2]; m[dia] = (m[dia] || 0) + (r.VLR_PARCELA ?? 0);
       }); return m;
     };
     const atual = byDay(dwRawData, mesAtual), anterior = byDay(dwChartData, mesAnt);
     const dias = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
     return dias.filter((d) => atual[d] !== undefined || anterior[d] !== undefined)
       .map((d) => ({ dia: Number(d), mesAtual: atual[d] ?? 0, mesAnterior: anterior[d] ?? 0 }));
-  }, [dwRawData, dwChartData, di, codcusList]);
+  }, [dwRawData, dwChartData, di, codcusList, usaVencimento]);
 
   const totalPaginasDocs = Math.max(1, Math.ceil(rowsFiltrados.length / PAGE_SIZE_DOCS));
   const docsPaginados    = rowsFiltrados.slice((paginaDocs - 1) * PAGE_SIZE_DOCS, paginaDocs * PAGE_SIZE_DOCS);

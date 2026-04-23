@@ -185,7 +185,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v8";
+const CACHE_KEY = "dw_financial_cache_v9";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -216,6 +216,7 @@ function loadCache(): CachedState | null {
     sessionStorage.removeItem("dw_financial_cache_v5");
     sessionStorage.removeItem("dw_financial_cache_v6");
     sessionStorage.removeItem("dw_financial_cache_v7");
+    sessionStorage.removeItem("dw_financial_cache_v8");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -577,9 +578,19 @@ export function FinancialDataProvider({
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
         ([nome, percentualEsperado], index) => {
           const codcusList = indicadorRules[nome] ?? [];
+
+          // Compra de Ativo (CODCUS 26): filtra por DATA_VENCIMENTO
+          // Demais indicadores: filtra por DATA_EMISSAO (baseIndicadores já filtrado)
+          const usaVencimento = nome === "Compra de Ativo";
+          const pool = usaVencimento
+            ? allCP.filter((r) => {
+                const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
+                return ven ? ven >= di && ven <= df : false;
+              })
+            : baseIndicadores;
+
           const matched = codcusList.length > 0
-            ? baseIndicadores.filter((r) => {
-                // compara CODCUS (código) — pode vir como string ou número
+            ? pool.filter((r) => {
                 const cod = String(r.CODCUS ?? "").trim();
                 return codcusList.includes(cod);
               })
