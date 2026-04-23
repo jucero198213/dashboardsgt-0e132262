@@ -10,6 +10,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { formatCurrency, formatDate } from "@/data/mockData";
@@ -1605,7 +1606,7 @@ const Index = () => {
 
             {/* Mobile: layout empilhado bonito */}
             <div className="flex sm:hidden flex-col gap-2 py-1.5">
-              {/* Linha 1: ícone + título com logo SGT + Home */}
+              {/* Linha 1: ícone + título com logo SGT + Menu mobile */}
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none min-w-0">
@@ -1613,7 +1614,7 @@ const Index = () => {
                     <img src={sgtLogo} alt="SGT" className="block h-5 w-auto shrink-0 object-contain" />
                   </span>
                 </div>
-                <HomeButton />
+                <MobileNav />
               </div>
 
               {/* Linha 2: badge tempo real */}
