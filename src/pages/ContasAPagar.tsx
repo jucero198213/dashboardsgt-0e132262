@@ -207,44 +207,71 @@ const ContasAPagar = () => {
             ) : contasFiltradas.length === 0 ? (
               <EmptyState title="Nenhum documento encontrado" description="Não há documentos com o filtro selecionado neste período." />
             ) : (
-              <div className="overflow-x-auto">
-                <Table className="min-w-[600px]">
-                  <TableHeader>
-                    <TableRow className="border-[var(--sgt-border-subtle)] hover:bg-transparent">
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Emissão</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Vencimento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Pagamento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Documento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Parcela</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Fornecedor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Valor</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Vl. Pago</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Juros</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Descontos</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Adiantamento</TableHead>
-                      <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginados.map((c, idx) => (
-                      <TableRow key={c.id} className={`border-[var(--sgt-border-subtle)] transition-colors hover:[background:var(--sgt-row-hover)] ${idx % 2 === 0 ? "" : "[background:var(--sgt-row-alt)]"}`}>
-                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.dataEmissao)}</TableCell>
-                        <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.vencimento)}</TableCell>
-                        <TableCell className="text-sm whitespace-nowrap">{c.dataPagamento ? <span className="text-amber-400">{fmt(c.dataPagamento)}</span> : <span className="text-slate-600">—</span>}</TableCell>
-                        <TableCell className="text-sm font-medium text-white">{c.documento}</TableCell>
-                        <TableCell className="text-sm text-slate-300 text-center">{c.parcela ?? "—"}</TableCell>
-                        <TableCell className="text-sm text-slate-300 max-w-[180px] truncate">{c.fornecedor}</TableCell>
-                        <TableCell className="text-right text-sm font-semibold text-white whitespace-nowrap">{formatCurrency(c.valor)}</TableCell>
-                        <TableCell className="text-right text-sm font-semibold text-amber-300 whitespace-nowrap">{c.valorPago > 0 ? formatCurrency(c.valorPago) : <span className="text-slate-600">—</span>}</TableCell>
-                        <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.juros > 0 ? formatCurrency(c.juros) : <span className="text-slate-600">—</span>}</TableCell>
-                        <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.descontos > 0 ? formatCurrency(c.descontos) : <span className="text-slate-600">—</span>}</TableCell>
-                        <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.adiantamento > 0 ? formatCurrency(c.adiantamento) : <span className="text-slate-600">—</span>}</TableCell>
-                        <TableCell className="text-center"><StatusBadge status={c.status} /></TableCell>
+              <>
+                {/* Mobile: cards expansíveis */}
+                <div className="flex flex-col gap-2 px-3 pb-3 md:hidden">
+                  {paginados.map((c) => (
+                    <MobileDocumentCard
+                      key={c.id}
+                      tone="amber"
+                      documento={c.documento}
+                      parceiro={c.fornecedor}
+                      valor={c.valor}
+                      vencimento={c.vencimento}
+                      status={c.status}
+                      details={[
+                        { label: "Dt. Emissão", value: fmt(c.dataEmissao) },
+                        { label: "Dt. Pagamento", value: c.dataPagamento ? fmt(c.dataPagamento) : "—" },
+                        { label: "Parcela", value: c.parcela ?? "—" },
+                        { label: "Vl. Pago", value: c.valorPago > 0 ? formatCurrency(c.valorPago) : "—" },
+                        { label: "Juros", value: c.juros > 0 ? formatCurrency(c.juros) : "—" },
+                        { label: "Descontos", value: c.descontos > 0 ? formatCurrency(c.descontos) : "—" },
+                        { label: "Adiantamento", value: c.adiantamento > 0 ? formatCurrency(c.adiantamento) : "—" },
+                      ]}
+                    />
+                  ))}
+                </div>
+
+                {/* Desktop: tabela completa */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table className="min-w-[600px]">
+                    <TableHeader>
+                      <TableRow className="border-[var(--sgt-border-subtle)] hover:bg-transparent">
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Emissão</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Vencimento</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">Dt. Pagamento</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Documento</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Parcela</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Fornecedor</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Valor</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Vl. Pago</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Juros</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Descontos</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Adiantamento</TableHead>
+                        <TableHead className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 text-center">Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {paginados.map((c, idx) => (
+                        <TableRow key={c.id} className={`border-[var(--sgt-border-subtle)] transition-colors hover:[background:var(--sgt-row-hover)] ${idx % 2 === 0 ? "" : "[background:var(--sgt-row-alt)]"}`}>
+                          <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.dataEmissao)}</TableCell>
+                          <TableCell className="text-sm text-slate-300 whitespace-nowrap">{fmt(c.vencimento)}</TableCell>
+                          <TableCell className="text-sm whitespace-nowrap">{c.dataPagamento ? <span className="text-amber-400">{fmt(c.dataPagamento)}</span> : <span className="text-slate-600">—</span>}</TableCell>
+                          <TableCell className="text-sm font-medium text-white">{c.documento}</TableCell>
+                          <TableCell className="text-sm text-slate-300 text-center">{c.parcela ?? "—"}</TableCell>
+                          <TableCell className="text-sm text-slate-300 max-w-[180px] truncate">{c.fornecedor}</TableCell>
+                          <TableCell className="text-right text-sm font-semibold text-white whitespace-nowrap">{formatCurrency(c.valor)}</TableCell>
+                          <TableCell className="text-right text-sm font-semibold text-amber-300 whitespace-nowrap">{c.valorPago > 0 ? formatCurrency(c.valorPago) : <span className="text-slate-600">—</span>}</TableCell>
+                          <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.juros > 0 ? formatCurrency(c.juros) : <span className="text-slate-600">—</span>}</TableCell>
+                          <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.descontos > 0 ? formatCurrency(c.descontos) : <span className="text-slate-600">—</span>}</TableCell>
+                          <TableCell className="text-right text-sm text-slate-300 whitespace-nowrap">{c.adiantamento > 0 ? formatCurrency(c.adiantamento) : <span className="text-slate-600">—</span>}</TableCell>
+                          <TableCell className="text-center"><StatusBadge status={c.status} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
 
             <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-3 sm:px-6 py-3">
