@@ -362,7 +362,51 @@ button:focus-visible, a:focus-visible {
 /* Progress track */
 .light .bg-white\/10 { background: rgba(60,45,30,0.10) !important; }
 
-/* ── Shimmer animation for skeletons ── */
+/* ── Light: chart and graph backgrounds ── */
+.light svg rect[fill="var(--sgt-bg-card)"] { fill: var(--sgt-bg-card); }
+.light svg rect[fill="var(--sgt-bg-section)"] { fill: var(--sgt-bg-section); }
+
+/* Inner chart bg rects via inline style */
+.light [style*="rgba(8,11,22"] { background: var(--sgt-bg-card) !important; }
+.light [style*="rgba(5,7,16"] { background: var(--sgt-bg-card) !important; }
+.light [style*="rgba(0,0,0,0.18)"] { background: var(--sgt-bg-section) !important; }
+.light [style*="rgba(0,0,0,0.4)"] { background: rgba(0,0,0,0.04) !important; }
+
+/* Separator lines white/rgba → use token */
+.light [style*="rgba(255,255,255,0.05)"] { background: var(--sgt-divider) !important; }
+.light [style*="rgba(255,255,255,0.08)"] { background: var(--sgt-divider) !important; }
+.light [style*="rgba(255,255,255,0.06)"] { background: var(--sgt-divider) !important; }
+
+/* Home page: force background tokens */
+.light .sgt-atmosphere { display: none !important; }
+
+/* Chart area gradients */
+.light [style*="linear-gradient(180deg, rgba(8"] { background: var(--sgt-bg-card) !important; }
+.light [style*="linear-gradient(180deg, rgba(5"] { background: var(--sgt-bg-card) !important; }
+
+/* SVG fills */
+.light svg text { fill: var(--sgt-text-muted) !important; }
+.light svg .recharts-text { fill: var(--sgt-text-secondary) !important; }
+
+/* Emerald/rose text in light */
+.light .text-emerald-400 { color: #065f46 !important; }
+.light .text-emerald-500 { color: #047857 !important; }
+.light .text-rose-400    { color: #9f1239 !important; }
+.light .text-rose-300    { color: #be123c !important; }
+.light .text-teal-300    { color: #0f766e !important; }
+.light .text-teal-400    { color: #0d9488 !important; }
+.light .text-cyan-400    { color: #0e7490 !important; }
+.light .text-violet-400  { color: #5b21b6 !important; }
+.light .text-amber-400   { color: #92400e !important; }
+.light .text-amber-300   { color: #b45309 !important; }
+
+/* KPI card values in light */
+.light .font-black.text-white,
+.light .font-extrabold.text-white { color: #1c1510 !important; }
+
+/* Progress bars track */
+.light [style*="rgba(255,255,255,0.12)"] { background: rgba(60,45,30,0.12) !important; }
+.light [style*="rgba(255,255,255,0.10)"] { background: rgba(60,45,30,0.10) !important; }
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
