@@ -283,7 +283,7 @@ const MiniLineChart = ({
   if (isEmpty) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-1.5 rounded-[12px] border border-[var(--sgt-border-subtle)]"
-        style={{ background: "linear-gradient(180deg, rgba(8,11,22,0.5) 0%, rgba(5,7,16,0.7) 100%)" }}>
+        style={{ background: "var(--sgt-bg-card)" }}>
         <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-500/20 bg-slate-500/8">
           <svg className="h-3.5 w-3.5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
@@ -295,9 +295,8 @@ const MiniLineChart = ({
   }
 
   return (
-    <div className="h-full w-full rounded-[12px] border border-[var(--sgt-border-subtle)] overflow-hidden"
+    <div className="h-full w-full rounded-[12px] border border-[var(--sgt-border-subtle)] overflow-hidden bg-[var(--sgt-bg-card)]"
       style={{
-        background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
       }}>
       <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
@@ -404,7 +403,7 @@ const MiniLineChart = ({
           return (
             <g>
               <rect x={tx} y={ty} width={150} height={64} rx={6}
-                fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+                fill="var(--sgt-bg-overlay, rgba(5,7,16,0.97))" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
               <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.92)"
                 fontSize={9.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                 {months[hoverIndex]}{ano ? ` ${ano}` : ""}
@@ -546,7 +545,6 @@ const YearComparisonChart = ({
   return (
     <div className="flex h-full flex-col p-3 overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, rgba(8,11,22,0.55) 0%, rgba(5,7,16,0.75) 100%)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
       }}>
 
@@ -691,7 +689,7 @@ const YearComparisonChart = ({
               return (
                 <g>
                   <rect x={tx} y={ty} width={188} height={104} rx={8}
-                    fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+                    fill="var(--sgt-bg-overlay, rgba(5,7,16,0.97))" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
                   <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
                     fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                     {months[hoverIndex]}
@@ -993,7 +991,7 @@ const ComparativeLineChart = ({
               return (
                 <g>
                   <rect x={tx} y={ty} width={178} height={82} rx={8}
-                    fill="rgba(5,7,16,0.97)" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
+                    fill="var(--sgt-bg-overlay, rgba(5,7,16,0.97))" stroke="rgba(255,255,255,0.09)" strokeWidth={1}/>
                   <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
                     fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
                     {months[hoverIndex]}{ano ? ` ${ano}` : ""}

@@ -152,8 +152,8 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       whileHover={data.disabled ? undefined : { y: -4 }}
       className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${
         data.disabled
-          ? "cursor-default opacity-80 border-white/8 bg-white/[0.03]"
-          : "cursor-pointer border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+          ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
+          : "cursor-pointer dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white hover:dark:bg-white/[0.08] hover:bg-slate-50 dark:hover:border-white/20 hover:border-slate-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
       }`}
     >
       {/* Glow superior */}
@@ -338,7 +338,7 @@ export default function Home() {
       <section
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
-          background: "linear-gradient(135deg, rgba(18,22,40,0.98) 0%, rgba(12,15,28,0.98) 50%, rgba(20,18,35,0.98) 100%)",
+          background: "var(--sgt-bg-section)",
           borderColor: "var(--sgt-border-subtle)",
           boxShadow: "var(--sgt-section-shadow)",
         }}
@@ -391,10 +391,10 @@ export default function Home() {
             </motion.div>
 
             <h1 className="text-[clamp(2rem,8vw,7rem)] font-black leading-[1.05] tracking-[-0.045em]">
-              <span className="block bg-gradient-to-r from-slate-200 via-white to-slate-300 bg-clip-text text-transparent">
+              <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
-              <span className="mt-1 block bg-gradient-to-r from-amber-300 via-amber-200 to-amber-500 bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent">
                 <AnimatedTitle text="Workspace" delay={0.45} />
               </span>
             </h1>
@@ -412,7 +412,7 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 1.15 }}
-              className="mt-6 max-w-[720px] text-[16px] leading-relaxed text-slate-400 lg:text-[17px]"
+              className="mt-6 max-w-[720px] text-[16px] leading-relaxed dark:text-slate-400 text-slate-600 lg:text-[17px]"
             >
               Plataforma centralizada para gestão financeira, operacional e logística da SGT Log. Monitore indicadores, fluxo de caixa e desempenho da operação de transporte em tempo real.
             </motion.p>
@@ -425,14 +425,14 @@ export default function Home() {
             >
               <button
                 onClick={scrollToModules}
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/[0.15] px-8 text-[14px] font-semibold text-amber-200 transition-all hover:-translate-y-0.5 hover:border-amber-400/60 hover:bg-amber-400/[0.25] hover:shadow-[0_8px_28px_rgba(245,158,11,0.25)]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/[0.15] px-8 text-[14px] font-semibold dark:text-amber-200 text-amber-700 transition-all hover:-translate-y-0.5 hover:border-amber-500/60 hover:bg-amber-500/[0.25] hover:shadow-[0_8px_28px_rgba(245,158,11,0.25)]"
               >
                 Explorar módulos
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
                 onClick={scrollToTools}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-8 text-[14px] font-semibold text-slate-300 transition-all hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border dark:border-white/10 border-slate-300 dark:bg-white/[0.04] bg-slate-100 px-8 text-[14px] font-semibold dark:text-slate-300 text-slate-600 transition-all hover:-translate-y-0.5 dark:hover:border-white/20 hover:border-slate-400 dark:hover:bg-white/[0.08] hover:bg-slate-200 dark:hover:text-white hover:text-slate-800"
               >
                 Ferramentas complementares
               </button>

@@ -169,8 +169,31 @@ button:focus-visible, a:focus-visible {
 }
 .animate-soft-ping { animation: softPing 2s cubic-bezier(0,0,0.2,1) infinite; }
 
-/* ── Light: hide dark atmosphere gradients ── */
-.light .sgt-atmosphere { opacity: 0; }
+/* ── Light: chart backgrounds ── */
+.light [style*="rgba(8,11,22"],
+.light [style*="rgba(5,7,16"],
+.light [style*="rgba(8,11,20"],
+.light [style*="rgba(0,0,0,0.18)"],
+.light [style*="rgba(14,20,40"] {
+  background: var(--sgt-bg-card) !important;
+}
+
+/* ── Light: hero dots/lines pattern invisible ── */
+.light circle[fill="rgba(255,255,255,0.12)"] { fill: rgba(60,45,30,0.08); }
+.light path[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(60,45,30,0.04); }
+
+/* ── Light: chart SVG fills ── */
+.light rect[fill*="rgba(0,0,0"] { fill: transparent !important; }
+.light rect[fill*="rgba(255,255,255,0.012)"],
+.light rect[fill*="rgba(255,255,255,0.018)"] { fill: rgba(60,45,30,0.03) !important; }
+
+/* ── Light: grid lines in charts ── */
+.light line[stroke*="rgba(255,255,255,0.07)"],
+.light line[stroke*="rgba(255,255,255,0.05)"],
+.light line[stroke*="rgba(255,255,255,0.10)"] { stroke: rgba(60,45,30,0.12) !important; }
+
+/* ── Light: module card dots background ── */
+.light .sgt-atmosphere { opacity: 0 !important; }
 
 /* ── Light: IndicadorDetalhe hardcoded bg overrides ── */
 .light [style*="linear-gradient(150deg"] {
