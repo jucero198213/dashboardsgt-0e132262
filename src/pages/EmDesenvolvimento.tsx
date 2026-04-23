@@ -37,10 +37,14 @@ export default function EmDesenvolvimento() {
         >
           {/* Navbar */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3 p-2 sm:p-3 lg:p-4 py-3">
-            <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent leading-none">
-              <span>{label}</span>
-              <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
-            </span>
+            <div className="flex items-center gap-3">
+              <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
+              <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
+              <div className="flex flex-col leading-none">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">{label}</span>
+              </div>
+            </div>
             <div className="flex-1" />
             <HomeButton />
           </div>

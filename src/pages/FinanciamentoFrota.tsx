@@ -150,10 +150,14 @@ export default function FinanciamentoFrota() {
             {/* NAVBAR */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex shrink-0 items-center gap-2">
-                <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none">
-                  <span>Financiamento de Frota</span>
-                  <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
-                </span>
+                <div className="flex shrink-0 items-center gap-3">
+                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
+                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Financiamento de Frota</span>
+                </div>
+              </div>
               </div>
 
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
