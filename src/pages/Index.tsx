@@ -1570,11 +1570,12 @@ const Index = () => {
             {/* Desktop: tudo em uma linha */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex shrink-0 items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                <div className="h-5 w-px" style={{ background: "var(--sgt-border-medium)" }} />
-                <span className="text-[16px] font-black tracking-[-0.02em] dark:text-white text-slate-800 leading-none">
-                  Dashboard
-                </span>
+                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
+                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Dashboard</span>
+                </div>
               </div>
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
@@ -1610,11 +1611,12 @@ const Index = () => {
               {/* Linha 1: ícone + título com logo SGT + Menu mobile */}
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
-                  <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                  <span className="text-[15px] font-black tracking-[-0.02em] dark:text-white text-slate-800 leading-none truncate">
-                    Dashboard
-                  </span>
+                  <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                  <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                  <div className="flex flex-col leading-none min-w-0">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Dashboard</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <HomeButton />
