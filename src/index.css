@@ -195,10 +195,14 @@ button:focus-visible, a:focus-visible {
 
 /* ── Mobile: safe areas for PWA standalone ── */
 @supports (padding-top: env(safe-area-inset-top)) {
-  .min-h-screen {
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  body {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .min-h-screen, [class*="min-h-\[100dvh\]"], [class*="min-h-\[100vh\]"] {
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
