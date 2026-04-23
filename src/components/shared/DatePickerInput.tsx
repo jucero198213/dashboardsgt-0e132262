@@ -33,6 +33,7 @@ function fmtDisplay(s: string): string {
 export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }: DatePickerInputProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date>(toDate(value) ?? new Date());
+  const [dropRight, setDropRight] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,6 +49,16 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
     if (d) setMonth(d);
   }, [value]);
 
+  // Ao abrir, verifica se há espaço à direita; se não, alinha à direita do botão
+  const handleOpen = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const spaceRight = window.innerWidth - rect.left;
+      setDropRight(spaceRight < 300);
+    }
+    setOpen(!open);
+  };
+
   const selected = toDate(value);
 
   return (
@@ -55,7 +66,7 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
       {/* Trigger */}
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => handleOpen()}
         className="flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] font-medium transition-all hover:border-[var(--sgt-border-medium)] cursor-pointer"
         style={{
           background: "var(--sgt-input-bg)",
@@ -74,7 +85,7 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute left-0 top-full z-[200] mt-2 overflow-hidden rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+          className={`absolute ${dropRight ? "right-0" : "left-0"} top-full z-[200] mt-2 overflow-hidden rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.35)]`}
           style={{
             background: "var(--sgt-bg-overlay)",
             borderColor: "var(--sgt-border-subtle)",
