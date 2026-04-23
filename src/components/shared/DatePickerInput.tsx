@@ -33,7 +33,7 @@ function fmtDisplay(s: string): string {
 export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }: DatePickerInputProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState<Date>(toDate(value) ?? new Date());
-  const [dropRight, setDropRight] = useState(false);
+  const [dropPos, setDropPos] = useState<{ top: number; left: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,12 +49,16 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
     if (d) setMonth(d);
   }, [value]);
 
-  // Ao abrir, verifica se há espaço à direita; se não, alinha à direita do botão
   const handleOpen = () => {
-    if (ref.current) {
+    if (!open && ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      const spaceRight = window.innerWidth - rect.left;
-      setDropRight(spaceRight < 300);
+      const calWidth = 280;
+      let left = rect.left;
+      // Se transbordar à direita, alinha pela direita do botão
+      if (left + calWidth > window.innerWidth - 8) {
+        left = Math.max(8, window.innerWidth - calWidth - 8);
+      }
+      setDropPos({ top: rect.bottom + 8, left });
     }
     setOpen(!open);
   };
@@ -83,13 +87,15 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
       </button>
 
       {/* Dropdown */}
-      {open && (
+      {open && dropPos && (
         <div
-          className={`absolute ${dropRight ? "right-0" : "left-0"} top-full z-[200] mt-2 overflow-hidden rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.35)]`}
+          className="fixed z-[999] overflow-hidden rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
           style={{
             background: "var(--sgt-bg-overlay)",
             borderColor: "var(--sgt-border-subtle)",
-            minWidth: 280,
+            width: 280,
+            top: dropPos.top,
+            left: dropPos.left,
           }}
         >
           {/* Header do calendário */}
