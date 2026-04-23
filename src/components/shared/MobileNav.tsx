@@ -54,14 +54,6 @@ export function MobileNav() {
     show: boolean;
   }> = [
     {
-      to: "/home",
-      label: "Início",
-      icon: Home,
-      color: "text-amber-300",
-      bg: "bg-amber-400/10 border-amber-400/20",
-      show: true,
-    },
-    {
       to: "/dashboard",
       label: "Dashboard",
       icon: BarChart3,

@@ -1614,7 +1614,10 @@ const Index = () => {
                     <img src={sgtLogo} alt="SGT" className="block h-5 w-auto shrink-0 object-contain" />
                   </span>
                 </div>
-                <MobileNav />
+                <div className="flex items-center gap-2 shrink-0">
+                  <HomeButton />
+                  <MobileNav />
+                </div>
               </div>
 
               {/* Linha 2: badge tempo real */}
