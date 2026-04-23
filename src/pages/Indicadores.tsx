@@ -153,8 +153,8 @@ export default function Indicadores() {
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-2">
                 <span className="flex items-center gap-2 text-[17px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none">
-                  <span>Indicadores</span>
                   <img src={sgtLogo} alt="SGT" className="block h-6 w-auto shrink-0 object-contain" />
+                  <span>Indicadores</span>
                 </span>
               </div>
 
@@ -197,8 +197,8 @@ export default function Indicadores() {
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.03em] dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-slate-400 dark:bg-clip-text dark:text-transparent text-slate-800 leading-none min-w-0">
-                    <span className="truncate">Indicadores</span>
                     <img src={sgtLogo} alt="SGT" className="block h-5 w-auto shrink-0 object-contain" />
+                    <span className="truncate">Indicadores</span>
                   </span>
                 </div>
                 <MobileNav />
