@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
       manifest: {
-        name: "SGT Financeiro - Dashboard",
-        short_name: "SGT Financeiro",
+        name: "Workspace SGT",
+        short_name: "Workspace SGT",
         description: "Detalhamento Financeiro - SGTLOG",
         theme_color: "#060912",
         background_color: "#060912",
