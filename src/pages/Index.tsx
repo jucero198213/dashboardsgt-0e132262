@@ -1680,10 +1680,10 @@ const Index = () => {
                     <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_55%)]" />
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
-                      <div className="relative flex h-full">
+                      <div className="relative flex flex-col sm:flex-row h-full">
 
-                        {/* Esquerda — valor principal */}
-                        <div className="flex flex-col justify-between p-5 xl:p-6 flex-1 min-w-0">
+                        {/* Topo/Esquerda — valor principal */}
+                        <div className="flex flex-col justify-between p-4 sm:p-5 xl:p-6 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-emerald-400">RECEBIDO</span>
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-[8px] font-bold text-emerald-300">
@@ -1692,48 +1692,49 @@ const Index = () => {
                           </div>
                           <div>
                             <h2 className="font-black leading-none tracking-[-0.05em] text-white mt-3"
-                              style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}>
+                              style={{ fontSize: "clamp(1.4rem, 5vw, 3rem)" }}>
                               <CountUp value={contasReceber.valorRecebido} />
                             </h2>
                             <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold mt-2">Entrada consolidada</p>
                           </div>
                         </div>
 
-                        {/* Divisor vertical */}
-                        <div className="w-px shrink-0 my-4" style={{ background: "rgba(16,185,129,0.12)" }} />
+                        {/* Divisor — horizontal em mobile, vertical em sm+ */}
+                        <div className="sm:hidden h-px mx-4" style={{ background: "rgba(16,185,129,0.12)" }} />
+                        <div className="hidden sm:block w-px shrink-0 my-4" style={{ background: "rgba(16,185,129,0.12)" }} />
 
-                        {/* Direita — insights empilhados */}
-                        <div className="flex flex-col justify-around p-4 xl:p-5 w-[185px] shrink-0 gap-3">
+                        {/* Base/Direita — insights */}
+                        <div className="flex sm:flex-col sm:justify-around p-4 sm:p-4 xl:p-5 sm:w-[185px] sm:shrink-0 gap-3 grid grid-cols-3 sm:grid-cols-1">
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Melhor mês</span>
-                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.melhorMes}</span>
+                            <span className="text-[13px] sm:text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.melhorMes}</span>
                           </div>
-                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="hidden sm:block h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs mês anterior</span>
                             {cardInsights.crVarMesAtual ? (
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1">
                                 <div className="flex flex-col items-center">
                                   <span className="text-[9px] text-slate-500 font-medium">{cardInsights.crVarMesAnterior}</span>
-                                  <span className="text-[12px] font-bold text-slate-300">{cardInsights.crVarValAnterior >= 1e6 ? `${(cardInsights.crVarValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAnterior/1e3).toFixed(0)}k`}</span>
+                                  <span className="text-[11px] font-bold text-slate-300">{cardInsights.crVarValAnterior >= 1e6 ? `${(cardInsights.crVarValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAnterior/1e3).toFixed(0)}k`}</span>
                                 </div>
-                                <span className="text-[13px] font-black text-slate-500">→</span>
+                                <span className="text-[11px] font-black text-slate-500">→</span>
                                 <div className="flex flex-col items-center">
                                   <span className="text-[9px] text-slate-500 font-medium">{cardInsights.crVarMesAtual}</span>
-                                  <span className={`text-[12px] font-bold ${cardInsights.crVarPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.crVarValAtual >= 1e6 ? `${(cardInsights.crVarValAtual/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAtual/1e3).toFixed(0)}k`}</span>
+                                  <span className={`text-[11px] font-bold ${cardInsights.crVarPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.crVarValAtual >= 1e6 ? `${(cardInsights.crVarValAtual/1e6).toFixed(1)}M` : `${(cardInsights.crVarValAtual/1e3).toFixed(0)}k`}</span>
                                 </div>
-                                <span className={`text-[11px] font-bold ml-0.5 ${cardInsights.crVarPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                                <span className={`text-[10px] font-bold ${cardInsights.crVarPositive ? "text-emerald-400" : "text-rose-400"}`}>
                                   {cardInsights.crVarPct >= 0 ? "↑" : "↓"}{Math.abs(cardInsights.crVarPct).toFixed(0)}%
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-[15px] font-bold text-slate-500">—</span>
+                              <span className="text-[13px] font-bold text-slate-500">—</span>
                             )}
                           </div>
-                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="hidden sm:block h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Previsto</span>
-                            <span className="text-[15px] font-bold text-slate-100 leading-tight">
+                            <span className="text-[13px] sm:text-[15px] font-bold text-slate-100 leading-tight">
                               {contasReceber.valorAReceber >= 1e6
                                 ? `R$ ${(contasReceber.valorAReceber/1e6).toFixed(1).replace(".",",")}M`
                                 : contasReceber.valorAReceber >= 1e3
@@ -1750,10 +1751,10 @@ const Index = () => {
                     <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.10),transparent_55%)]" />
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
-                      <div className="relative flex h-full">
+                      <div className="relative flex flex-col sm:flex-row h-full">
 
-                        {/* Esquerda — valor principal */}
-                        <div className="flex flex-col justify-between p-5 xl:p-6 flex-1 min-w-0">
+                        {/* Topo/Esquerda — valor principal */}
+                        <div className="flex flex-col justify-between p-4 sm:p-5 xl:p-6 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-rose-400">PAGO</span>
                             <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 text-[8px] font-bold text-rose-300">
@@ -1762,50 +1763,49 @@ const Index = () => {
                           </div>
                           <div>
                             <h2 className="font-black leading-none tracking-[-0.05em] text-white mt-3"
-                              style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}>
+                              style={{ fontSize: "clamp(1.4rem, 5vw, 3rem)" }}>
                               <CountUp value={contasPagar.valorPago} />
                             </h2>
                             <p className="text-[11px] uppercase tracking-[0.2em] text-rose-500/80 font-semibold mt-2">Saída consolidada</p>
                           </div>
                         </div>
 
-                        {/* Divisor vertical */}
-                        <div className="w-px shrink-0 my-4" style={{ background: "rgba(248,113,113,0.12)" }} />
+                        {/* Divisor — horizontal em mobile, vertical em sm+ */}
+                        <div className="sm:hidden h-px mx-4" style={{ background: "rgba(248,113,113,0.12)" }} />
+                        <div className="hidden sm:block w-px shrink-0 my-4" style={{ background: "rgba(248,113,113,0.12)" }} />
 
-                        {/* Direita — insights empilhados */}
-                        <div className="flex flex-col justify-around p-4 xl:p-5 w-[185px] shrink-0 gap-3">
+                        {/* Base/Direita — insights */}
+                        <div className="flex sm:flex-col sm:justify-around p-4 sm:p-4 xl:p-5 sm:w-[185px] sm:shrink-0 gap-3 grid grid-cols-3 sm:grid-cols-1">
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Maior despesa</span>
-                            <span className="text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.maiorDespesa}</span>
+                            <span className="text-[13px] sm:text-[15px] font-bold text-slate-100 leading-tight">{cardInsights.maiorDespesa}</span>
                           </div>
-                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="hidden sm:block h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">vs mês anterior</span>
                             {cardInsights.variacaoMesAtual ? (
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1">
                                 <div className="flex flex-col items-center">
                                   <span className="text-[9px] text-slate-500 font-medium">{cardInsights.variacaoMesAnterior}</span>
-                                  <span className="text-[12px] font-bold text-slate-300">{cardInsights.variacaoValAnterior >= 1e6 ? `${(cardInsights.variacaoValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAnterior/1e3).toFixed(0)}k`}</span>
+                                  <span className="text-[11px] font-bold text-slate-300">{cardInsights.variacaoValAnterior >= 1e6 ? `${(cardInsights.variacaoValAnterior/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAnterior/1e3).toFixed(0)}k`}</span>
                                 </div>
-                                <span className={`text-[13px] font-black ${cardInsights.variacaoPositive ? "text-emerald-400" : "text-rose-400"}`}>
-                                  {cardInsights.variacaoPct >= 0 ? "→" : "→"}
-                                </span>
+                                <span className="text-[11px] font-black text-slate-500">→</span>
                                 <div className="flex flex-col items-center">
                                   <span className="text-[9px] text-slate-500 font-medium">{cardInsights.variacaoMesAtual}</span>
-                                  <span className={`text-[12px] font-bold ${cardInsights.variacaoPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.variacaoValAtual >= 1e6 ? `${(cardInsights.variacaoValAtual/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAtual/1e3).toFixed(0)}k`}</span>
+                                  <span className={`text-[11px] font-bold ${cardInsights.variacaoPositive ? "text-emerald-300" : "text-rose-300"}`}>{cardInsights.variacaoValAtual >= 1e6 ? `${(cardInsights.variacaoValAtual/1e6).toFixed(1)}M` : `${(cardInsights.variacaoValAtual/1e3).toFixed(0)}k`}</span>
                                 </div>
-                                <span className={`text-[11px] font-bold ml-0.5 ${cardInsights.variacaoPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                                <span className={`text-[10px] font-bold ${cardInsights.variacaoPositive ? "text-emerald-400" : "text-rose-400"}`}>
                                   {cardInsights.variacaoPct >= 0 ? "↑" : "↓"}{Math.abs(cardInsights.variacaoPct).toFixed(0)}%
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-[15px] font-bold text-slate-500">—</span>
+                              <span className="text-[13px] font-bold text-slate-500">—</span>
                             )}
                           </div>
-                          <div className="h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+                          <div className="hidden sm:block h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Cobertura CR</span>
-                            <span className={`text-[15px] font-bold leading-tight ${cardInsights.coberturaCP >= 100 ? "text-emerald-300" : "text-rose-300"}`}>
+                            <span className={`text-[13px] sm:text-[15px] font-bold leading-tight ${cardInsights.coberturaCP >= 100 ? "text-emerald-300" : "text-rose-300"}`}>
                               {cardInsights.coberturaCP.toFixed(0)}%
                             </span>
                           </div>
