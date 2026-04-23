@@ -86,18 +86,19 @@ const ContasAReceber = () => {
     <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8" style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}>
       <BackgroundEffects />
 
-      <div className="relative w-full space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
+      <div className="relative w-full space-y-4 sm:space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         {/* Breadcrumb */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <button onClick={() => navigate("/dashboard")} className="transition-colors hover:[color:var(--sgt-text-primary)]">Dashboard</button>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="text-white">Contas a Receber</span>
+          <div className="flex min-w-0 items-center gap-2 text-sm text-slate-400">
+            <button onClick={() => navigate("/dashboard")} className="shrink-0 transition-colors hover:[color:var(--sgt-text-primary)]">Dashboard</button>
+            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate text-white">Contas a Receber</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <HomeButton />
             <UserMenu />
           </div>
+          <MobileNav />
         </div>
 
         {/* Header contextual — Contas a Receber */}
