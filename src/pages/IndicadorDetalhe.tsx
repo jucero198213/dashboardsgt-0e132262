@@ -315,6 +315,7 @@ export default function IndicadorDetalhe() {
     return dwRawData.filter((r) => {
       if (r.ORIGEM !== "CP") return false;
       if (!codcusList.includes(String(r.CODCUS ?? "").trim())) return false;
+      if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em Compra de Ativo
       const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
       const dt = dateField ? String(dateField).split("T")[0] : null;
       return dt ? dt >= di && dt <= df : false;
@@ -340,6 +341,7 @@ export default function IndicadorDetalhe() {
       const m: Record<string, number> = {};
       src.forEach((r) => {
         if (r.ORIGEM !== "CP" || !codcusList.includes(String(r.CODCUS ?? "").trim())) return;
+        if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return;  // NFE não entra em Compra de Ativo
         const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
         const dt = dateField ? String(dateField).split("T")[0] : null;
         if (!dt || !dt.startsWith(pfx)) return;

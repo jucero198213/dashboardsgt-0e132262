@@ -185,7 +185,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v9";
+const CACHE_KEY = "dw_financial_cache_v10";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -217,6 +217,7 @@ function loadCache(): CachedState | null {
     sessionStorage.removeItem("dw_financial_cache_v6");
     sessionStorage.removeItem("dw_financial_cache_v7");
     sessionStorage.removeItem("dw_financial_cache_v8");
+    sessionStorage.removeItem("dw_financial_cache_v9");
 
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -584,6 +585,7 @@ export function FinancialDataProvider({
           const usaVencimento = nome === "Compra de Ativo";
           const pool = usaVencimento
             ? allCP.filter((r) => {
+                if (r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em Compra de Ativo
                 const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
                 return ven ? ven >= di && ven <= df : false;
               })
