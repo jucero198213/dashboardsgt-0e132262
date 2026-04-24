@@ -284,8 +284,8 @@ export default function Home() {
       icon: LineChart,
       title: "Faturamento",
       description: "Emissão de NF, faturamento por cliente e acompanhamento de receitas.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/faturamento"),
+      cta: "Acessar faturamento",
+      onClick: () => navigate("/faturamento"),
       tone: "amber" as const,
     },
     {

@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import IndicadorDetalhe from "./pages/IndicadorDetalhe";
 import Indicadores from "./pages/Indicadores";
 import FinanciamentoFrota from "./pages/FinanciamentoFrota";
+import Faturamento from "./pages/Faturamento";
 import EmDesenvolvimento from "./pages/EmDesenvolvimento";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><Indicadores /></ProtectedRoute>} />
               <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><IndicadorDetalhe /></ProtectedRoute>} />
               <Route path="/financiamento-frota" element={<ProtectedRoute><FinanciamentoFrota /></ProtectedRoute>} />
+              <Route path="/faturamento" element={<ProtectedRoute><Faturamento /></ProtectedRoute>} />
               <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><EmDesenvolvimento /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
