@@ -717,7 +717,7 @@ export function FinancialDataProvider({
       // ── 2. Queries secundárias em cadeia (sequencial, não bloqueiam a UI) ──
       //    Ordem: faturamento → gráfico anual
       //    Cada uma dispara só quando a anterior terminar, evitando concorrência no pool.
-      const fatSnap    = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim };
+      const fatSnap = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const anoAnterior = String(parseInt(anoFiltro) - 1);
       const chartSnapAnterior = { dataInicio: `${anoAnterior}-01-01`, dataFim: `${anoAnterior}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };

@@ -146,6 +146,8 @@ export async function fetchDwData(params: {
 export async function fetchFaturamento(params: {
   dataInicio: string;
   dataFim: string;
+  filial?: string | null;
+  empresa?: string | null;
 }): Promise<FaturamentoResponse> {
   return callEdge<FaturamentoResponse>({ action: "faturamento", ...params });
 }
