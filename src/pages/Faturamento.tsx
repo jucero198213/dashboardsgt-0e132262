@@ -269,7 +269,7 @@ export default function Faturamento() {
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-emerald-400">Provisão do Mês</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-emerald-400">Faturamento Projetado</span>
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-400/[0.08] border border-emerald-400/[0.15]">
                       <TrendingUp className="h-3 w-3 text-emerald-300" />
                     </div>
@@ -279,7 +279,7 @@ export default function Faturamento() {
                       {provisao > 0 ? fmtK(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
                     </p>
                   )}
-                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold">Estimativa restante do mês</p>
+                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold">Projeção até fim do mês</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative">
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
