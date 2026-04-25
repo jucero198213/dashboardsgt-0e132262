@@ -18,6 +18,30 @@ const Skel = ({ h = "h-4", w = "w-full" }: { h?: string; w?: string }) => (
   <div className={`${h} ${w} rounded-md animate-pulse`} style={{ background: "var(--sgt-skeleton-bg)" }} />
 );
 
+// ─── Helpers de dias úteis (sábado = útil, remove só domingo) ─────────────────
+function countWorkdays(start: Date, end: Date): number {
+  let count = 0;
+  const cur = new Date(start);
+  cur.setHours(0, 0, 0, 0);
+  const fin = new Date(end);
+  fin.setHours(0, 0, 0, 0);
+  while (cur <= fin) {
+    if (cur.getDay() !== 0) count++; // 0 = domingo
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}
+
+function parseDate(str: string): Date | null {
+  if (!str) return null;
+  // aceita YYYY-MM-DD e DD/MM/YYYY
+  const iso = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+  const br  = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (br)  return new Date(Number(br[3]), Number(br[2])-1, Number(br[1]));
+  return null;
+}
+
 export default function Faturamento() {
   const navigate = useNavigate();
   const { faturamento, isFetchingDw, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
@@ -45,6 +69,32 @@ export default function Faturamento() {
 
   // ── Derived data ──
   const totalFaturado = useMemo(() => faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0), [faturamento]);
+
+  // ── Dias úteis, média e provisão ──
+  const { diasUteis, mediaDiaUtil, diasUteisRestantes, provisao } = useMemo(() => {
+    const inicio = parseDate(dwFilter.dataInicio);
+    const fim    = parseDate(dwFilter.dataFim);
+    if (!inicio || !fim || totalFaturado === 0) {
+      return { diasUteis: 0, mediaDiaUtil: 0, diasUteisRestantes: 0, provisao: 0 };
+    }
+
+    // Dias úteis no período filtrado
+    const diasUteis = countWorkdays(inicio, fim);
+
+    // Média por dia útil
+    const mediaDiaUtil = diasUteis > 0 ? totalFaturado / diasUteis : 0;
+
+    // Dias úteis restantes: do dia seguinte ao fim do filtro até o último dia do mês de fim
+    const ultimoDiaMes = new Date(fim.getFullYear(), fim.getMonth() + 1, 0); // último dia do mês
+    const amanha = new Date(fim);
+    amanha.setDate(amanha.getDate() + 1);
+    const diasUteisRestantes = amanha <= ultimoDiaMes ? countWorkdays(amanha, ultimoDiaMes) : 0;
+
+    // Provisão = média × dias úteis restantes
+    const provisao = mediaDiaUtil * diasUteisRestantes;
+
+    return { diasUteis, mediaDiaUtil, diasUteisRestantes, provisao };
+  }, [dwFilter.dataInicio, dwFilter.dataFim, totalFaturado]);
 
   const rows = useMemo(() => {
     let data = faturamento
@@ -153,7 +203,7 @@ export default function Faturamento() {
           {/* ── CONTEÚDO ── */}
           <div className="flex flex-col flex-1 min-h-0 gap-3 p-3 xl:p-4 overflow-auto">
 
-            {/* KPI + Top 5 */}
+            {/* KPIs linha 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
               {/* KPI Total */}
@@ -169,9 +219,7 @@ export default function Faturamento() {
                       <TrendingUp className="h-3 w-3 text-amber-300" />
                     </div>
                   </div>
-                  {!isProcessed ? (
-                    <Skel h="h-9" w="w-3/4" />
-                  ) : (
+                  {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
                     <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.3rem, 2.4vw, 2rem)" }}>
                       {fmtK(totalFaturado)}
                     </p>
@@ -179,46 +227,103 @@ export default function Faturamento() {
                   <p className="relative text-[10px] uppercase tracking-[0.2em] text-amber-500/80 font-semibold">Receita consolidada</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">Clientes/grupos</span>
-                    <span className="text-[14px] font-extrabold dark:text-white text-slate-700">{faturamento.length}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">{diasUteis} dias úteis no período</span>
+                    <span className="text-[13px] font-extrabold dark:text-white text-slate-700">{faturamento.length} clientes</span>
                   </div>
                 </div>
               </AnimatedCard>
 
-              {/* Top 5 barras */}
-              <AnimatedCard delay={80} className="sm:col-span-2">
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 h-full flex flex-col gap-3">
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
-                  {!isProcessed ? (
-                    <div className="flex flex-col gap-2">
-                      {[...Array(5)].map((_,i) => <Skel key={i} h="h-6" />)}
+              {/* Média por dia útil */}
+              <AnimatedCard delay={60}>
+                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_55%)]" />
+                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
+                  <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
+                    style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.08), transparent 65%)" }} />
+                  <div className="relative flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-cyan-400">Média / Dia Útil</span>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-400/[0.08] border border-cyan-400/[0.15]">
+                      <ArrowUp className="h-3 w-3 text-cyan-300" />
                     </div>
-                  ) : top5.length === 0 ? (
-                    <p className="text-[12px] text-slate-500 my-auto">Sem dados no período</p>
-                  ) : (
-                    <div className="flex flex-col gap-2 flex-1 justify-around">
-                      {top5.map((r, i) => (
-                        <div key={r.descri} className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold shrink-0 w-4 text-right" style={{ color: COLORS[i] }}>{i+1}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-0.5">
-                              <span className="text-[11px] font-semibold truncate dark:text-slate-200 text-slate-700">{r.descri}</span>
-                              <span className="text-[10px] font-bold shrink-0 dark:text-slate-300 text-slate-600">{fmtK(r.total)}</span>
-                            </div>
-                            <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                              <div className="h-full rounded-full transition-all duration-700"
-                                style={{ width: `${(r.total / maxTotal) * 100}%`, background: COLORS[i] }} />
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold shrink-0 w-10 text-right" style={{ color: COLORS[i] }}>{r.pct.toFixed(1)}%</span>
-                        </div>
-                      ))}
-                    </div>
+                  </div>
+                  {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
+                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
+                      {mediaDiaUtil > 0 ? fmtK(mediaDiaUtil) : "—"}
+                    </p>
                   )}
+                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-cyan-500/80 font-semibold">Por dia útil (sáb. incluso)</p>
+                  <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
+                  <div className="relative">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                      {fmtBRL(totalFaturado)} ÷ {diasUteis} dias úteis
+                    </span>
+                  </div>
                 </div>
               </AnimatedCard>
+
+              {/* Provisão */}
+              <AnimatedCard delay={120}>
+                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_55%)]" />
+                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                  <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
+                    style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
+                  <div className="relative flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-emerald-400">Provisão do Mês</span>
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-400/[0.08] border border-emerald-400/[0.15]">
+                      <TrendingUp className="h-3 w-3 text-emerald-300" />
+                    </div>
+                  </div>
+                  {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
+                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
+                      {provisao > 0 ? fmtK(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
+                    </p>
+                  )}
+                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold">Estimativa restante do mês</p>
+                  <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
+                  <div className="relative">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                      {diasUteisRestantes > 0 ? `${diasUteisRestantes} dias úteis restantes` : "Sem dias úteis restantes"}
+                    </span>
+                  </div>
+                </div>
+              </AnimatedCard>
+
             </div>
+
+            {/* Top 5 */}
+            <AnimatedCard delay={180}>
+              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3">
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
+                {!isProcessed ? (
+                  <div className="flex flex-col gap-2">
+                    {[...Array(5)].map((_,i) => <Skel key={i} h="h-6" />)}
+                  </div>
+                ) : top5.length === 0 ? (
+                  <p className="text-[12px] text-slate-500 my-auto">Sem dados no período</p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {top5.map((r, i) => (
+                      <div key={r.descri} className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold shrink-0 w-4 text-right" style={{ color: COLORS[i] }}>{i+1}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <span className="text-[11px] font-semibold truncate dark:text-slate-200 text-slate-700">{r.descri}</span>
+                            <span className="text-[10px] font-bold shrink-0 dark:text-slate-300 text-slate-600">{fmtK(r.total)}</span>
+                          </div>
+                          <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div className="h-full rounded-full transition-all duration-700"
+                              style={{ width: `${(r.total / maxTotal) * 100}%`, background: COLORS[i] }} />
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold shrink-0 w-10 text-right" style={{ color: COLORS[i] }}>{r.pct.toFixed(1)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </AnimatedCard>
 
             {/* Tabela completa */}
             <AnimatedCard delay={160} className="flex-1 min-h-0 flex flex-col">
