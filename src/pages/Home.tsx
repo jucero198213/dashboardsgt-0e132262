@@ -226,6 +226,15 @@ export default function Home() {
       tone: "emerald" as const,
     },
     {
+      key: "faturamento",
+      icon: LineChart,
+      title: "Faturamento",
+      description: "Emissão de NF, faturamento por cliente e acompanhamento de receitas.",
+      cta: "Acessar faturamento",
+      onClick: () => navigate("/faturamento"),
+      tone: "amber" as const,
+    },
+    {
       key: "rh",
       icon: Users,
       title: "RH",
@@ -278,15 +287,6 @@ export default function Home() {
       cta: "Em breve",
       onClick: () => navigate("/em-desenvolvimento/operacional"),
       tone: "cyan" as const,
-    },
-    {
-      key: "faturamento",
-      icon: LineChart,
-      title: "Faturamento",
-      description: "Emissão de NF, faturamento por cliente e acompanhamento de receitas.",
-      cta: "Acessar faturamento",
-      onClick: () => navigate("/faturamento"),
-      tone: "amber" as const,
     },
     {
       key: "abastecimento",
