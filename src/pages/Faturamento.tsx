@@ -470,7 +470,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-72">
+                        <svg viewBox="0 0 480 260" preserveAspectRatio="none" className="w-full h-72">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -478,16 +478,16 @@ export default function Faturamento() {
                           </linearGradient>
                         </defs>
                         {[0.25,0.5,0.75,1].map(f => (
-                          <line key={f} x1={48} y1={16+(160-16-28)*(1-f)} x2={472} y2={16+(160-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
+                          <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(160-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
                         ))}
-                        <path d={`${buildPath(faturamentoMensal,480,160,48,8,16,28)} L472,132 L48,132 Z`} fill="url(#fatGrad)"/>
-                        <path d={buildPath(faturamentoMensalAnterior,480,160,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
-                        <path d={buildPath(faturamentoMensal,480,160,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
+                        <path d={`${buildPath(faturamentoMensal,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#fatGrad)"/>
+                        <path d={buildPath(faturamentoMensalAnterior,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
+                        <path d={buildPath(faturamentoMensal,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={155} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
                         ))}
                       </svg>
                       )}
