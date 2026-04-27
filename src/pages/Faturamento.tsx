@@ -226,7 +226,7 @@ export default function Faturamento() {
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
                     <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.3rem, 2.4vw, 2rem)" }}>
-                      {fmtK(totalFaturado)}
+                      {fmtBRL(totalFaturado)}
                     </p>
                   )}
                   <p className="relative text-[10px] uppercase tracking-[0.2em] text-amber-500/80 font-semibold">Receita consolidada</p>
