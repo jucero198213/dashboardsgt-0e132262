@@ -15,7 +15,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Configuracoes() {
-  const [tunnelUrl, setTunnelUrl] = useState("https://burn-screenshot-however-scientist.trycloudflare.com");
+  const [tunnelUrl, setTunnelUrl] = useState("https://diversity-crossword-reducing-three.trycloudflare.com");
   const [saved, setSaved] = useState(false);
   const [features, setFeatures] = useState({
     twofa: true, audit: true, email: true, maintenance: false, api: true, cache: true,
