@@ -389,17 +389,15 @@ export default function Faturamento() {
                         onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
                         onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
                           <span className="text-[10px] font-bold shrink-0 w-5 text-right tabular-nums" style={{ color: "var(--sgt-text-faint)" }}>{i+1}</span>
-                          <span className="text-[12px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{r.descri}</span>
-                        </div>
-                        <span className="text-[12px] font-bold tabular-nums text-right w-24 dark:text-amber-200 text-amber-700">{fmtBRL(r.total)}</span>
-                        <div className="flex items-center justify-end gap-1.5 w-14">
-                          <div className="flex-1 h-1 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                            <div className="h-full rounded-full bg-amber-400/60" style={{ width: `${Math.min(r.pct, 100)}%` }} />
+                          <span className="text-[12px] font-medium shrink-0 max-w-[35%] truncate" style={{ color: "var(--sgt-text-primary)" }}>{r.descri}</span>
+                          <div className="flex-1 h-1.5 overflow-hidden rounded-full mx-1" style={{ background: "var(--sgt-progress-track)" }}>
+                            <div className="h-full rounded-full bg-amber-400/70 transition-all duration-700" style={{ width: `${Math.min(r.pct, 100)}%` }} />
                           </div>
-                          <span className="text-[11px] font-bold tabular-nums shrink-0 dark:text-slate-300 text-slate-600">{r.pct.toFixed(1)}%</span>
                         </div>
+                        <span className="text-[12px] font-bold tabular-nums text-right w-24 shrink-0 dark:text-amber-200 text-amber-700">{fmtBRL(r.total)}</span>
+                        <span className="text-[11px] font-bold tabular-nums text-right w-10 shrink-0 dark:text-slate-300 text-slate-600">{r.pct.toFixed(1)}%</span>
                       </div>
                     ))
                   )}
