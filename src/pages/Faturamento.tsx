@@ -297,7 +297,7 @@ export default function Faturamento() {
             </div>
 
             {/* Top 5 + Tabela lado a lado */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 flex-1 min-h-0">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3" style={{ maxHeight: 280 }}>
 
               {/* Top 5 */}
               <AnimatedCard delay={180} className="flex flex-col">
@@ -440,7 +440,7 @@ export default function Faturamento() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                   {/* Gráfico 1 — Linha: Ano atual vs Ano anterior */}
                   <AnimatedCard delay={280}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 200 }}>
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 260 }}>
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Faturamento Mensal — {anoAtual} vs {anoAnt}</span>
@@ -470,7 +470,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-36">
+                        <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-52">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -495,7 +495,7 @@ export default function Faturamento() {
                   </AnimatedCard>
                   {/* Gráfico 2 — Barras: Evolução mensal */}
                   <AnimatedCard delay={340}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 200 }}>
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 260 }}>
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
                       {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
@@ -514,7 +514,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-end gap-1.5 h-36 px-1 pt-4">
+                        <div className="flex items-end gap-1.5 h-52 px-1 pt-4">
                           {faturamentoMensal.map((v, i) => {
                             const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
                             const isMax = v > 0 && v === Math.max(...faturamentoMensal);
