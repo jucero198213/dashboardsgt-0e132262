@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import sgtLogo from "@/assets/sgt-logo.png";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
-const fmtBRL  = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const fmtBRL  = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const fmtK    = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : fmtBRL(v);
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
