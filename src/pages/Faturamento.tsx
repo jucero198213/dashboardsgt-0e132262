@@ -106,17 +106,6 @@ export default function Faturamento() {
 
   const top5 = useMemo(() => [...rows].sort((a,b) => b.total - a.total).slice(0, 5), [rows]);
   const maxTotal = top5[0]?.total ?? 1;
-
-  // Donut chart data — top 5 + "Outros"
-  const donutData = useMemo(() => {
-    const sorted = [...faturamento].sort((a,b) => (b.FRETE_TOTAL??0) - (a.FRETE_TOTAL??0));
-    const top    = sorted.slice(0, 5);
-    const outros = sorted.slice(5).reduce((s,r) => s + (r.FRETE_TOTAL??0), 0);
-    const result = top.map(r => ({ label: r.DESCRI ?? "—", value: r.FRETE_TOTAL??0, pct: r.PERCENTUAL??0 }));
-    if (outros > 0) result.push({ label: "Outros", value: outros, pct: result.reduce((s,r) => s-r.pct, 100) });
-    return result;
-  }, [faturamento]);
-
   const COLORS = ["#2dd4bf","#f87171","#a78bfa","#fbbf24","#34d399","#94a3b8"];
 
   return (
@@ -301,11 +290,8 @@ export default function Faturamento() {
 
             </div>
 
-            {/* Top 5 + Gráfico Pizza */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-              {/* Top 5 */}
-              <AnimatedCard delay={180}>
+            {/* Top 5 — linha única por enquanto */}
+            <AnimatedCard delay={180}>
                 <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
@@ -333,71 +319,9 @@ export default function Faturamento() {
                     </div>
                   )}
                 </div>
-              </AnimatedCard>
 
-              {/* Donut chart */}
-              <AnimatedCard delay={240}>
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Participação no faturamento</span>
-                  {!isProcessed ? (
-                    <div className="flex items-center justify-center flex-1"><Skel h="h-40" w="w-40" /></div>
-                  ) : donutData.length === 0 ? (
-                    <p className="text-[12px] text-slate-500 my-auto text-center">Sem dados no período</p>
-                  ) : (() => {
-                    // Build SVG donut
-                    const size = 160; const cx = size/2; const cy = size/2;
-                    const outerR = 68; const innerR = 42;
-                    let cumAngle = -90; // start top
-                    const slices = donutData.map((d, i) => {
-                      const angle = (d.pct / 100) * 360;
-                      const startAngle = cumAngle;
-                      cumAngle += angle;
-                      const endAngle = cumAngle;
-                      const toRad = (a: number) => (a * Math.PI) / 180;
-                      const x1 = cx + outerR * Math.cos(toRad(startAngle));
-                      const y1 = cy + outerR * Math.sin(toRad(startAngle));
-                      const x2 = cx + outerR * Math.cos(toRad(endAngle));
-                      const y2 = cy + outerR * Math.sin(toRad(endAngle));
-                      const x3 = cx + innerR * Math.cos(toRad(endAngle));
-                      const y3 = cy + innerR * Math.sin(toRad(endAngle));
-                      const x4 = cx + innerR * Math.cos(toRad(startAngle));
-                      const y4 = cy + innerR * Math.sin(toRad(startAngle));
-                      const large = angle > 180 ? 1 : 0;
-                      const path = `M${x1.toFixed(2)},${y1.toFixed(2)} A${outerR},${outerR} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${x3.toFixed(2)},${y3.toFixed(2)} A${innerR},${innerR} 0 ${large},0 ${x4.toFixed(2)},${y4.toFixed(2)} Z`;
-                      return { path, color: COLORS[i], pct: d.pct, label: d.label, value: d.value };
-                    });
-                    return (
-                      <div className="flex flex-col sm:flex-row items-center gap-4 flex-1">
-                        {/* SVG */}
-                        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-                          {slices.map((s, i) => (
-                            <path key={i} d={s.path} fill={s.color} opacity={0.85}
-                              className="transition-opacity hover:opacity-100 cursor-pointer" />
-                          ))}
-                          {/* Centro */}
-                          <text x={cx} y={cy-6} textAnchor="middle" fontSize={10} fontWeight={700} fill="var(--sgt-text-secondary)" fontFamily="system-ui">Total</text>
-                          <text x={cx} y={cy+10} textAnchor="middle" fontSize={11} fontWeight={800} fill="var(--sgt-text-primary)" fontFamily="system-ui">
-                            {fmtK(totalFaturado)}
-                          </text>
-                        </svg>
-                        {/* Legenda */}
-                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                          {slices.map((s, i) => (
-                            <div key={i} className="flex items-center gap-2 min-w-0">
-                              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-                              <span className="text-[10px] truncate dark:text-slate-300 text-slate-600 flex-1">{s.label}</span>
-                              <span className="text-[10px] font-bold shrink-0 tabular-nums" style={{ color: s.color }}>{s.pct.toFixed(1)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </AnimatedCard>
+            </AnimatedCard>
 
-            </div>
 
             {/* Tabela completa */}
             <AnimatedCard delay={160} className="flex-1 min-h-0 flex flex-col">
