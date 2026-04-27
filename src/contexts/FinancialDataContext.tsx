@@ -121,7 +121,9 @@ interface FinancialDataState {
   dwError:           string | null;
   dwRawData:         DwRow[];   // ← dados brutos para drill-down por indicador
   dwChartData:       DwRow[];   // ← dados anuais para gráficos de evolução
-  faturamento:       FaturamentoRow[]; // ← faturamento por grupo de cliente
+  faturamento:              FaturamentoRow[];
+  faturamentoMensal:        number[];  // jan-dez ano atual
+  faturamentoMensalAnterior: number[]; // jan-dez ano anterior
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -266,7 +268,9 @@ export function FinancialDataProvider({
     dwError:      null,
     dwRawData:    [],
     dwChartData:  [],
-    faturamento:  cached?.faturamento ?? [],
+    faturamento:               cached?.faturamento ?? [],
+    faturamentoMensal:         new Array(12).fill(0),
+    faturamentoMensalAnterior: new Array(12).fill(0),
   });
 
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
@@ -725,6 +729,38 @@ export function FinancialDataProvider({
       fetchFaturamento(fatSnap)
         .then(({ data: fatData }) => {
           setState((prev) => ({ ...prev, faturamento: fatData }));
+
+          // Busca mensal em background — ano atual e anterior
+          const anoAtual = new Date(fatSnap.dataFim).getFullYear();
+          const anoAnt   = anoAtual - 1;
+
+          const mesesAtual = Array.from({ length: 12 }, (_, m) => {
+            const ini = `${anoAtual}-${String(m+1).padStart(2,"0")}-01`;
+            const fim = new Date(anoAtual, m+1, 0);
+            const fimStr = `${anoAtual}-${String(m+1).padStart(2,"0")}-${String(fim.getDate()).padStart(2,"0")}`;
+            return fetchFaturamento({ dataInicio: ini, dataFim: fimStr, filial: fatSnap.filial, empresa: fatSnap.empresa })
+              .then(r => r.data.reduce((s, x) => s + (x.FRETE_TOTAL ?? 0), 0))
+              .catch(() => 0);
+          });
+
+          const mesesAnt = Array.from({ length: 12 }, (_, m) => {
+            const ini = `${anoAnt}-${String(m+1).padStart(2,"0")}-01`;
+            const fim = new Date(anoAnt, m+1, 0);
+            const fimStr = `${anoAnt}-${String(m+1).padStart(2,"0")}-${String(fim.getDate()).padStart(2,"0")}`;
+            return fetchFaturamento({ dataInicio: ini, dataFim: fimStr, filial: fatSnap.filial, empresa: fatSnap.empresa })
+              .then(r => r.data.reduce((s, x) => s + (x.FRETE_TOTAL ?? 0), 0))
+              .catch(() => 0);
+          });
+
+          Promise.all([Promise.all(mesesAtual), Promise.all(mesesAnt)])
+            .then(([atual, anterior]) => {
+              setState((prev) => ({
+                ...prev,
+                faturamentoMensal:         atual,
+                faturamentoMensalAnterior: anterior,
+              }));
+            })
+            .catch(err => console.warn("[FAT] Mensal erro:", err?.message ?? err));
         })
         .catch((err) => {
           console.warn("[DW] Faturamento erro (não crítico):", err?.message ?? err);
