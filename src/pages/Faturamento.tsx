@@ -44,7 +44,7 @@ function parseDate(str: string): Date | null {
 
 export default function Faturamento() {
   const navigate = useNavigate();
-  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
+  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
   const [sortDir, setSortDir]           = useState<"desc" | "asc">("desc");
@@ -440,7 +440,7 @@ export default function Faturamento() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                   {/* Gráfico 1 — Linha: Ano atual vs Ano anterior */}
                   <AnimatedCard delay={280}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2">
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 200 }}>
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Faturamento Mensal — {anoAtual} vs {anoAnt}</span>
@@ -455,7 +455,22 @@ export default function Faturamento() {
                           </div>
                         </div>
                       </div>
-                      <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-36">
+                      {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
+                        <div className="flex flex-col gap-2 flex-1 justify-center py-4">
+                          {isFetchingCharts ? (
+                            <>
+                              <Skel h="h-28" />
+                              <div className="flex justify-center gap-1">
+                                {[...Array(3)].map((_,i) => <div key={i} className="h-1.5 w-1.5 rounded-full animate-pulse bg-amber-400/50" style={{ animationDelay: `${i*150}ms` }} />)}
+                              </div>
+                              <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
+                            </>
+                          ) : (
+                            <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
+                          )}
+                        </div>
+                      ) : (
+                        <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-36">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -475,27 +490,45 @@ export default function Faturamento() {
                           <text key={m} x={48+(i/11)*424} y={155} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
                         ))}
                       </svg>
+                      )}
                     </div>
                   </AnimatedCard>
                   {/* Gráfico 2 — Barras: Evolução mensal */}
                   <AnimatedCard delay={340}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2">
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 200 }}>
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
-                      <div className="flex items-end gap-1.5 h-36 px-1 pt-4">
-                        {faturamentoMensal.map((v, i) => {
-                          const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
-                          const isMax = v > 0 && v === Math.max(...faturamentoMensal);
-                          return (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                              <span className="text-[7px] font-bold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#22d3ee" }}>{fmtY(v)}</span>
-                              <div className="w-full rounded-t-[3px] transition-all duration-700"
-                                style={{ height: `${Math.max(pct, v > 0 ? 2 : 0)}%`, background: isMax ? "linear-gradient(180deg,#22d3ee,#0891b2)" : "linear-gradient(180deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))", boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none" }} />
-                              <span className="text-[7.5px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>{months[i]}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
+                        <div className="flex flex-col gap-2 flex-1 justify-center py-4">
+                          {isFetchingCharts ? (
+                            <>
+                              <div className="flex items-end gap-1.5 h-24 px-1">
+                                {[...Array(12)].map((_,i) => (
+                                  <div key={i} className="flex-1 rounded-t-sm animate-pulse" style={{ height: `${20+Math.random()*60}%`, background: "var(--sgt-skeleton-bg)", animationDelay: `${i*50}ms` }} />
+                                ))}
+                              </div>
+                              <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
+                            </>
+                          ) : (
+                            <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-end gap-1.5 h-36 px-1 pt-4">
+                          {faturamentoMensal.map((v, i) => {
+                            const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
+                            const isMax = v > 0 && v === Math.max(...faturamentoMensal);
+                            return (
+                              <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
+                                <span className="text-[7px] font-bold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#22d3ee" }}>{fmtY(v)}</span>
+                                <div className="w-full rounded-t-[3px] transition-all duration-700"
+                                  style={{ height: `${Math.max(pct, v > 0 ? 2 : 0)}%`, background: isMax ? "linear-gradient(180deg,#22d3ee,#0891b2)" : "linear-gradient(180deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))", boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none" }} />
+                                <span className="text-[7.5px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>{months[i]}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </AnimatedCard>
                 </div>
