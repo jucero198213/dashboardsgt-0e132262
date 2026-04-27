@@ -119,6 +119,12 @@ export default function Faturamento() {
         <section className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}>
 
+          {/* Barra de progresso */}
+          <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] bg-transparent shrink-0">
+            <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
+          </div>
+
           {/* ── NAVBAR DESKTOP ── */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3 p-3 lg:p-4 py-3">
             <div className="flex shrink-0 items-center gap-3">
