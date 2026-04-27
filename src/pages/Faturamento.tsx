@@ -281,7 +281,7 @@ export default function Faturamento() {
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
                     <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
-                      {provisao > 0 ? fmtK(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
+                      {provisao > 0 ? fmtBRL(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
                     </p>
                   )}
                   <p className="relative text-[10px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold">Projeção até fim do mês</p>
