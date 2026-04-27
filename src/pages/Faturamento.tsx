@@ -296,8 +296,11 @@ export default function Faturamento() {
 
             </div>
 
-            {/* Top 5 — linha única por enquanto */}
-            <AnimatedCard delay={180}>
+            {/* Top 5 + Tabela lado a lado */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 flex-1 min-h-0">
+
+              {/* Top 5 */}
+              <AnimatedCard delay={180} className="flex flex-col">
                 <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
@@ -326,126 +329,11 @@ export default function Faturamento() {
                   )}
                 </div>
 
-            </AnimatedCard>
 
+              </AnimatedCard>
 
-            {/* Gráficos mensais */}
-            {(() => {
-              const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-              const anoAtual = dwFilter.dataFim ? new Date(dwFilter.dataFim).getFullYear() : new Date().getFullYear();
-              const anoAnt   = anoAtual - 1;
-              const maxVal   = Math.max(...faturamentoMensal, ...faturamentoMensalAnterior, 1);
-
-              const fmtY = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : "0";
-
-              // SVG line chart helper
-              const buildPath = (data: number[], w: number, h: number, padL: number, padR: number, padT: number, padB: number) => {
-                const n = 12;
-                const toX = (i: number) => padL + (i / (n-1)) * (w - padL - padR);
-                const toY = (v: number) => padT + (h - padT - padB) - (v / maxVal) * (h - padT - padB);
-                let d = `M${toX(0)},${toY(data[0])}`;
-                for (let i = 1; i < n; i++) {
-                  const x0 = toX(i-1), y0 = toY(data[i-1]), x1 = toX(i), y1 = toY(data[i]);
-                  const t = 0.3;
-                  d += ` C${x0+(x1-x0)*t},${y0} ${x1-(x1-x0)*t},${y1} ${x1},${y1}`;
-                }
-                return d;
-              };
-
-              return (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-
-                  {/* Gráfico 1 — Ano atual vs Ano anterior */}
-                  <AnimatedCard delay={200}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2">
-                      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
-                          Faturamento Mensal — {anoAtual} vs {anoAnt}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className="h-[2px] w-4 rounded-full bg-amber-400 inline-block" />
-                            <span className="text-[9px] font-semibold text-amber-400">{anoAtual}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,3"/></svg>
-                            <span className="text-[9px] font-semibold text-slate-400">{anoAnt}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <svg viewBox="0 0 480 160" preserveAspectRatio="none" className="w-full h-36">
-                        <defs>
-                          <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
-                            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
-                          </linearGradient>
-                        </defs>
-                        {/* Grid */}
-                        {[0.25,0.5,0.75,1].map(f => (
-                          <line key={f} x1={48} y1={16 + (160-16-28)*(1-f)} x2={472} y2={16 + (160-16-28)*(1-f)}
-                            stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
-                        ))}
-                        {/* Labels Y */}
-                        {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16 + (160-16-28)*(1-f) + 4} textAnchor="end"
-                            fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">
-                            {fmtY(maxVal * f)}
-                          </text>
-                        ))}
-                        {/* Área ano atual */}
-                        <path d={`${buildPath(faturamentoMensal,480,160,48,8,16,28)} L${48+(11/11)*424},${16+116} L48,${16+116} Z`}
-                          fill="url(#fatGrad)"/>
-                        {/* Linha ano anterior */}
-                        <path d={buildPath(faturamentoMensalAnterior,480,160,48,8,16,28)}
-                          fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
-                        {/* Linha ano atual */}
-                        <path d={buildPath(faturamentoMensal,480,160,48,8,16,28)}
-                          fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
-                        {/* Labels X */}
-                        {months.map((m, i) => (
-                          <text key={m} x={48 + (i/11)*424} y={155} textAnchor="middle"
-                            fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
-                        ))}
-                      </svg>
-                    </div>
-                  </AnimatedCard>
-
-                  {/* Gráfico 2 — Evolução mês a mês (barras) */}
-                  <AnimatedCard delay={260}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2">
-                      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
-                        Evolução Mensal — {anoAtual}
-                      </span>
-                      <div className="flex items-end gap-1.5 h-36 px-1 pt-4">
-                        {faturamentoMensal.map((v, i) => {
-                          const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
-                          const isMax = v === Math.max(...faturamentoMensal.filter(x => x > 0));
-                          return (
-                            <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                              <span className="text-[7px] font-bold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity"
-                                style={{ color: "#22d3ee" }}>{fmtY(v)}</span>
-                              <div className="w-full rounded-t-[3px] transition-all duration-700 relative"
-                                style={{
-                                  height: `${Math.max(pct, v > 0 ? 2 : 0)}%`,
-                                  background: isMax ? "linear-gradient(180deg,#22d3ee,#0891b2)" : "linear-gradient(180deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))",
-                                  boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none",
-                                }} />
-                              <span className="text-[7.5px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>{months[i]}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </AnimatedCard>
-
-                </div>
-              );
-            })()}
-
-            {/* Tabela completa */}
-            <AnimatedCard delay={160} className="flex-1 min-h-0 flex flex-col">
+              {/* Tabela */}
+              <AnimatedCard delay={220} className="flex-1 min-h-0 flex flex-col">
               <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
@@ -528,6 +416,8 @@ export default function Faturamento() {
               </div>
             </AnimatedCard>
 
+
+            </div>
           </div>
         </section>
       </div>
