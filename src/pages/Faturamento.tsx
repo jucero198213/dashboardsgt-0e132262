@@ -202,7 +202,7 @@ export default function Faturamento() {
           <div className="flex flex-col flex-1 min-h-0 gap-3 p-3 xl:p-4 overflow-auto">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
@@ -290,7 +290,7 @@ export default function Faturamento() {
             </div>
 
             {/* Top 5 + Tabela lado a lado */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch">
 
               {/* Top 5 */}
               <AnimatedCard delay={180}>
@@ -461,7 +461,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <svg viewBox="0 0 480 260" preserveAspectRatio="none" className="w-full h-48 sm:h-56 xl:h-72">
+                        <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[180px]">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -505,7 +505,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-end gap-1.5 h-48 sm:h-56 xl:h-72 px-1 pt-4">
+                        <div className="flex items-end gap-1 sm:gap-1.5 flex-1 min-h-[180px] px-1 pt-4">
                           {faturamentoMensal.map((v, i) => {
                             const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
                             const isMax = v > 0 && v === Math.max(...faturamentoMensal);
