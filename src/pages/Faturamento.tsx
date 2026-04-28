@@ -202,7 +202,7 @@ export default function Faturamento() {
           <div className="flex flex-col flex-1 min-h-0 gap-3 p-3 xl:p-4 overflow-auto">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
@@ -290,11 +290,11 @@ export default function Faturamento() {
             </div>
 
             {/* Top 5 + Tabela lado a lado */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3" style={{ maxHeight: 230 }}>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
 
               {/* Top 5 */}
-              <AnimatedCard delay={180} className="flex flex-col">
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+              <AnimatedCard delay={180}>
+                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3">
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
                   {!isProcessed ? (
@@ -326,8 +326,8 @@ export default function Faturamento() {
               </AnimatedCard>
 
               {/* Tabela */}
-              <AnimatedCard delay={220} className="flex-1 min-h-0 flex flex-col">
-              <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+              <AnimatedCard delay={220} className="flex flex-col">
+              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]" style={{ maxHeight: "min(320px, 45vw)", minHeight: 200 }}>
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
                 {/* Tabela header */}
@@ -461,7 +461,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <svg viewBox="0 0 480 260" preserveAspectRatio="none" className="w-full h-72">
+                        <svg viewBox="0 0 480 260" preserveAspectRatio="none" className="w-full h-48 sm:h-56 xl:h-72">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -505,7 +505,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-end gap-1.5 h-72 px-1 pt-4">
+                        <div className="flex items-end gap-1.5 h-48 sm:h-56 xl:h-72 px-1 pt-4">
                           {faturamentoMensal.map((v, i) => {
                             const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
                             const isMax = v > 0 && v === Math.max(...faturamentoMensal);
