@@ -61,7 +61,7 @@ export default function Faturamento() {
     const iv = window.setInterval(() => {
       const spd = cur < 30 ? 3 + Math.random()*4 : cur < 70 ? 2 + Math.random()*3 : 0.5 + Math.random()*0.8;
       cur = Math.min(cur + spd, 95);
-      const p = phases.findLast(ph => cur >= ph.at);
+      const p = [...phases].reverse().find(ph => cur >= ph.at);
       if (p) setLoadingPhase(p.label);
       setProgress(Math.round(cur));
     }, 120);
