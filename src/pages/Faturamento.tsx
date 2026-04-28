@@ -352,11 +352,11 @@ export default function Faturamento() {
                 </div>
 
                 {/* Cabeçalho colunas */}
-                <div className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2 shrink-0 text-[9px] font-bold uppercase tracking-[0.22em]"
+                <div className="grid grid-cols-[1fr_6rem_3.5rem] gap-3 px-4 py-2 shrink-0 text-[9px] font-bold uppercase tracking-[0.22em]"
                   style={{ color: "var(--sgt-text-faint)", borderBottom: "1px solid var(--sgt-divider)" }}>
                   <span>Cliente / Grupo</span>
-                  <span className="text-right w-24">Faturamento</span>
-                  <span className="text-right w-14">Part. %</span>
+                  <span className="text-right">Faturamento</span>
+                  <span className="text-right">Part. %</span>
                 </div>
 
                 {/* Linhas */}
@@ -374,7 +374,7 @@ export default function Faturamento() {
                   ) : (
                     rows.map((r, i) => (
                       <div key={`${r.descri}-${i}`}
-                        className="grid grid-cols-[1fr_auto_auto] gap-4 px-4 py-2.5 items-center transition-colors"
+                        className="grid grid-cols-[1fr_6rem_3.5rem] gap-3 px-4 py-2.5 items-center transition-colors"
                         style={{
                           borderBottom: "1px solid var(--sgt-divider)",
                           background: i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent",
@@ -382,15 +382,15 @@ export default function Faturamento() {
                         onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
                         onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}
                       >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
                           <span className="text-[10px] font-bold shrink-0 w-5 text-right tabular-nums" style={{ color: "var(--sgt-text-faint)" }}>{i+1}</span>
-                          <span className="text-[12px] font-medium shrink-0 max-w-[35%] truncate" style={{ color: "var(--sgt-text-primary)" }}>{r.descri}</span>
-                          <div className="flex-1 h-1.5 overflow-hidden rounded-full mx-1" style={{ background: "var(--sgt-progress-track)" }}>
+                          <span className="text-[12px] font-medium shrink-0 max-w-[40%] truncate" style={{ color: "var(--sgt-text-primary)" }}>{r.descri}</span>
+                          <div className="flex-1 h-1.5 overflow-hidden rounded-full mx-1 min-w-[20px]" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className="h-full rounded-full bg-amber-400/70 transition-all duration-700" style={{ width: `${Math.min(r.pct, 100)}%` }} />
                           </div>
                         </div>
-                        <span className="text-[12px] font-bold tabular-nums text-right w-24 shrink-0 dark:text-amber-200 text-amber-700">{fmtBRL(r.total)}</span>
-                        <span className="text-[11px] font-bold tabular-nums text-right w-10 shrink-0 dark:text-slate-300 text-slate-600">{r.pct.toFixed(1)}%</span>
+                        <span className="text-[12px] font-bold tabular-nums text-right dark:text-amber-200 text-amber-700">{fmtBRL(r.total)}</span>
+                        <span className="text-[11px] font-bold tabular-nums text-right dark:text-slate-300 text-slate-600">{r.pct.toFixed(1)}%</span>
                       </div>
                     ))
                   )}
