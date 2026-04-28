@@ -61,7 +61,7 @@ export default function Faturamento() {
     const iv = window.setInterval(() => {
       const spd = cur < 30 ? 3 + Math.random()*4 : cur < 70 ? 2 + Math.random()*3 : 0.5 + Math.random()*0.8;
       cur = Math.min(cur + spd, 95);
-      const p = phases.findLast(ph => cur >= ph.at);
+      const p = [...phases].reverse().find(ph => cur >= ph.at);
       if (p) setLoadingPhase(p.label);
       setProgress(Math.round(cur));
     }, 120);
@@ -202,7 +202,7 @@ export default function Faturamento() {
           <div className="flex flex-col flex-1 min-h-0 gap-3 p-3 xl:p-4 overflow-auto">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
@@ -290,11 +290,11 @@ export default function Faturamento() {
             </div>
 
             {/* Top 5 + Tabela lado a lado */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch">
 
               {/* Top 5 */}
-              <AnimatedCard delay={180}>
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3">
+              <AnimatedCard delay={180} className="h-full">
+                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full min-h-[260px]">
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
                   {!isProcessed ? (
@@ -326,8 +326,8 @@ export default function Faturamento() {
               </AnimatedCard>
 
               {/* Tabela */}
-              <AnimatedCard delay={220} className="flex flex-col">
-              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]" style={{ maxHeight: "min(320px, 45vw)", minHeight: 200 }}>
+              <AnimatedCard delay={220} className="flex flex-col h-full">
+              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full min-h-[260px]" style={{ maxHeight: "min(420px, 50vw)" }}>
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
                 {/* Tabela header */}
@@ -428,10 +428,10 @@ export default function Faturamento() {
                 return d;
               };
               return (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch">
                   {/* Gráfico 1 — Linha: Ano atual vs Ano anterior */}
-                  <AnimatedCard delay={280}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 380 }}>
+                  <AnimatedCard delay={280} className="h-full">
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px]">
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Faturamento Mensal — {anoAtual} vs {anoAnt}</span>
@@ -461,7 +461,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <svg viewBox="0 0 480 260" preserveAspectRatio="none" className="w-full h-48 sm:h-56 xl:h-72">
+                        <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[180px]">
                         <defs>
                           <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
@@ -485,8 +485,8 @@ export default function Faturamento() {
                     </div>
                   </AnimatedCard>
                   {/* Gráfico 2 — Barras: Evolução mensal */}
-                  <AnimatedCard delay={340}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 380 }}>
+                  <AnimatedCard delay={340} className="h-full">
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px]">
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
                       {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
@@ -505,7 +505,7 @@ export default function Faturamento() {
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-end gap-1.5 h-48 sm:h-56 xl:h-72 px-1 pt-4">
+                        <div className="flex items-end gap-1 sm:gap-1.5 flex-1 min-h-[180px] px-1 pt-4">
                           {faturamentoMensal.map((v, i) => {
                             const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
                             const isMax = v > 0 && v === Math.max(...faturamentoMensal);
