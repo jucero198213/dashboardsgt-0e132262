@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -1595,11 +1596,7 @@ const Index = () => {
                   <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
-                <button onClick={() => void handleUpdate()} disabled={isFetchingDw || isFetchingCharts}
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 font-bold hover:border-cyan-300/70 hover:bg-cyan-400/30 hover:shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:-translate-y-0.5 active:scale-95"} disabled:cursor-not-allowed`}>
-                  <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
-                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
-                </button>
+                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
               </div>
               <HomeButton />
             </div>
@@ -1653,11 +1650,7 @@ const Index = () => {
 
               {/* Linha 4: botão atualizar */}
               <div className="flex items-center gap-2">
-                <button onClick={() => void handleUpdate()} disabled={isFetchingDw || isFetchingCharts}
-                  className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-[12px] font-bold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/50 bg-cyan-500/20 text-cyan-100 hover:border-cyan-300/70 hover:bg-cyan-400/30 active:scale-95"} disabled:cursor-not-allowed`}>
-                  <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
-                </button>
+                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
               </div>
             </div>
 

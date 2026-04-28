@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { TrendingUp, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -160,11 +161,7 @@ export default function Faturamento() {
                 <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                 <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
               </Select>
-              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-bold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200" : "border-amber-400/50 bg-amber-500/15 text-amber-200 hover:border-amber-300/70 hover:bg-amber-400/25 hover:-translate-y-0.5 active:scale-95"} disabled:cursor-not-allowed`}>
-                <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? <span className="flex items-center gap-1">{loadingPhase}<span className="rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span> : "Atualizar"}
-              </button>
+              <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
             </div>
             <HomeButton />
           </div>
@@ -188,11 +185,7 @@ export default function Faturamento() {
             <div className="flex flex-wrap items-center gap-1.5">
               <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />
               <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Fim" />
-              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-bold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200" : "border-amber-400/50 bg-amber-500/15 text-amber-200 active:scale-95"} disabled:cursor-not-allowed`}>
-                <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? `${progress}%` : "Atualizar"}
-              </button>
+              <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
             </div>
           </div>
 

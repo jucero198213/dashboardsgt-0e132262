@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw, AlertCircle } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";

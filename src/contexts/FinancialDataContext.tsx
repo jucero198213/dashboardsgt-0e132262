@@ -127,8 +127,11 @@ interface FinancialDataState {
 }
 
 interface FinancialDataContextType extends FinancialDataState {
-  setDwFilter:   (key: keyof DwFilter, value: string | null) => void;
-  fetchFromDW:   () => Promise<void>;
+  setDwFilter:        (key: keyof DwFilter, value: string | null) => void;
+  fetchFromDW:        () => Promise<void>;
+  cooldownRemaining:  number;   // ms restantes de cooldown (0 = livre)
+  lastFetchedAt:      number;   // timestamp do último fetch
+  isAdmin:            boolean;  // admin ignora cooldown
 }
 
 const FinancialDataContext = createContext<FinancialDataContextType | null>(null);
@@ -202,39 +205,49 @@ interface CachedState {
   timestamp: number;
 }
 
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutos
+const CACHE_TTL_MS  = 60 * 60 * 1000; // 1 hora
+const COOLDOWN_MS   = 60 * 60 * 1000; // 1 hora de cooldown entre fetches
+const COOLDOWN_KEY  = "dw_last_fetch_ts";
 
 function saveCache(data: CachedState) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* ignora */ }
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* ignora */ }
 }
 
 function loadCache(): CachedState | null {
   try {
-    // Limpa versão antiga se existir
-    sessionStorage.removeItem("dw_financial_cache_v1");
-    sessionStorage.removeItem("dw_financial_cache_v2");
-    sessionStorage.removeItem("dw_financial_cache_v3");
-    sessionStorage.removeItem("dw_financial_cache_v4");
-    sessionStorage.removeItem("dw_financial_cache_v5");
-    sessionStorage.removeItem("dw_financial_cache_v6");
-    sessionStorage.removeItem("dw_financial_cache_v7");
-    sessionStorage.removeItem("dw_financial_cache_v8");
-    sessionStorage.removeItem("dw_financial_cache_v9");
+    // Limpa versões antigas
+    ["v1","v2","v3","v4","v5","v6","v7","v8","v9"].forEach(v =>
+      sessionStorage.removeItem(`dw_financial_cache_${v}`)
+    );
 
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const parsed: CachedState = JSON.parse(raw);
     if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
-      sessionStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_KEY);
       return null;
     }
-    // Garante que todos os campos de kpiExtra existem
     if (parsed.kpiExtra && typeof parsed.kpiExtra.realizacaoCR === "undefined") {
-      sessionStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_KEY);
       return null;
     }
     return parsed;
   } catch { return null; }
+}
+
+function getLastFetchTs(): number {
+  try { return parseInt(localStorage.getItem(COOLDOWN_KEY) ?? "0", 10); } catch { return 0; }
+}
+
+function saveLastFetchTs() {
+  try { localStorage.setItem(COOLDOWN_KEY, String(Date.now())); } catch { /* ignora */ }
+}
+
+function getCooldownRemaining(): number {
+  const last = getLastFetchTs();
+  if (!last) return 0;
+  const remaining = COOLDOWN_MS - (Date.now() - last);
+  return remaining > 0 ? remaining : 0;
 }
 
 // ─── Provider ────────────────────────────────────────────────────────────────
@@ -276,6 +289,29 @@ export function FinancialDataProvider({
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
   const abortRef = useRef<AbortController | null>(null);
 
+  // ── Cooldown state ────────────────────────────────────────────────────────
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(getCooldownRemaining());
+  const [lastFetchedAt, setLastFetchedAt]         = useState<number>(getLastFetchTs());
+
+  // Verifica papel do usuário — admin não tem cooldown
+  const isAdmin = (() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("sgt_user") ?? "{}");
+      return user?.role === "admin";
+    } catch { return false; }
+  })();
+
+  // Countdown tick — atualiza a cada segundo enquanto houver cooldown
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return;
+    const iv = window.setInterval(() => {
+      const rem = getCooldownRemaining();
+      setCooldownRemaining(rem);
+      if (rem <= 0) clearInterval(iv);
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [cooldownRemaining]);
+
   // ─── DW: atualiza um campo do filtro ───────────────────────────────────────
   const setDwFilter = useCallback(
     (key: keyof DwFilter, value: string | null) => {
@@ -311,7 +347,13 @@ export function FinancialDataProvider({
   };
 
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
-  const fetchFromDW = useCallback(async () => {
+  const fetchFromDW = useCallback(async (force = false) => {
+    // Verifica cooldown — admin e force ignoram
+    if (!force && !isAdmin && getCooldownRemaining() > 0) {
+      console.warn("[DW] Fetch bloqueado por cooldown de 1h");
+      return;
+    }
+
     // Cancela requisição anterior se ainda estiver em andamento
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
@@ -706,6 +748,10 @@ export function FinancialDataProvider({
           dwFilter: state.dwFilter,
           timestamp: Date.now(),
         });
+        // Salva timestamp do fetch para cooldown de 1h
+        saveLastFetchTs();
+        setLastFetchedAt(Date.now());
+        setCooldownRemaining(COOLDOWN_MS);
         return {
           ...prev,
           isFetchingDw: false,
@@ -714,7 +760,7 @@ export function FinancialDataProvider({
           chartPagar, chartReceber, kpiExtra,
           chartReceberFiltro, chartPagarFiltro,
           dwRawData: data,
-          dwChartData: prev.dwChartData,  // preserva dados anteriores — preenchido pelo background fetch
+          dwChartData: prev.dwChartData,
         };
       });
 
@@ -841,6 +887,9 @@ export function FinancialDataProvider({
         ...state,
         setDwFilter,
         fetchFromDW,
+        cooldownRemaining,
+        lastFetchedAt,
+        isAdmin,
       }}
     >
       {children}
