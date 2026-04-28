@@ -293,8 +293,8 @@ export default function Faturamento() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch">
 
               {/* Top 5 */}
-              <AnimatedCard delay={180}>
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3">
+              <AnimatedCard delay={180} className="h-full">
+                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full min-h-[260px]">
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
                   {!isProcessed ? (
@@ -326,8 +326,8 @@ export default function Faturamento() {
               </AnimatedCard>
 
               {/* Tabela */}
-              <AnimatedCard delay={220} className="flex flex-col">
-              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]" style={{ maxHeight: "min(320px, 45vw)", minHeight: 200 }}>
+              <AnimatedCard delay={220} className="flex flex-col h-full">
+              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full min-h-[260px]" style={{ maxHeight: "min(420px, 50vw)" }}>
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
                 {/* Tabela header */}
@@ -485,8 +485,8 @@ export default function Faturamento() {
                     </div>
                   </AnimatedCard>
                   {/* Gráfico 2 — Barras: Evolução mensal */}
-                  <AnimatedCard delay={340}>
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 380 }}>
+                  <AnimatedCard delay={340} className="h-full">
+                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px]">
                       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
                       {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
