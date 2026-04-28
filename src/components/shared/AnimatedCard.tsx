@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 
 interface AnimatedCardProps {
   children: React.ReactNode;
@@ -6,7 +6,10 @@ interface AnimatedCardProps {
   className?: string;
 }
 
-export function AnimatedCard({ children, delay = 0, className = "" }: AnimatedCardProps) {
+export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(function AnimatedCard(
+  { children, delay = 0, className = "" },
+  ref,
+) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -16,6 +19,7 @@ export function AnimatedCard({ children, delay = 0, className = "" }: AnimatedCa
 
   return (
     <div
+      ref={ref}
       className={`transition-all duration-500 ease-out ${
         visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
       } ${className}`}
@@ -23,4 +27,4 @@ export function AnimatedCard({ children, delay = 0, className = "" }: AnimatedCa
       {children}
     </div>
   );
-}
+});
