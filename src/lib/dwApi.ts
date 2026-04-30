@@ -13,7 +13,7 @@ const SUPABASE_ANON_KEY =
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
-const TUNNEL_URL = "https://postcards-contractors-very-rated.trycloudflare.com";
+const TUNNEL_URL = "https://use-citizenship-doctor-divide.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((
