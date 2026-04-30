@@ -143,9 +143,6 @@ export default function Frota() {
   const PAGE_SIZE = 50;
   const [page, setPage] = useState(1);
 
-  // Modal de validação
-  const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
-
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async () => {
     setProgress(0);
@@ -269,43 +266,6 @@ export default function Frota() {
     };
   }, [frotaFiltrada]);
 
-  // ── Validações Analíticas ──────────────────────────────────────────────────
-  const validacoes = useMemo(() => {
-    const custosComOrdem = frotaEnriquecida
-      .filter(v => v.situacao === "ATIVO" && v.qtdOrdens > 0)
-      .map(v => v.custoManut);
-    const media = custosComOrdem.length > 0 ? custosComOrdem.reduce((s, x) => s + x, 0) / custosComOrdem.length : 0;
-    const variancia = custosComOrdem.length > 0
-      ? custosComOrdem.reduce((s, x) => s + (x - media) ** 2, 0) / custosComOrdem.length
-      : 0;
-    const desvio = Math.sqrt(variancia);
-    const limite = media + 2 * desvio;
-
-    return {
-      semManutencao: frotaEnriquecida.filter(v => v.situacao === "ATIVO" && v.qtdOrdens === 0),
-      custoExcessivo: frotaEnriquecida.filter(v =>
-        v.situacao === "ATIVO" && v.qtdOrdens > 0 && v.custoManut > limite && limite > 0
-      ),
-      baixadosComManut: frotaEnriquecida.filter(v =>
-        v.situacao === "BAIXADO" && v.diasDesdeUltima !== null && v.diasDesdeUltima <= 90
-      ),
-      idadeAlta: frotaEnriquecida.filter(v =>
-        v.situacao === "ATIVO" && v.idade !== null && v.idade > 15
-      ),
-      anoInconsistente: frotaEnriquecida.filter(v =>
-        v.anofab && v.anomod && v.anomod < v.anofab
-      ),
-      semMunicipio: frotaEnriquecida.filter(v => v.situacao === "ATIVO" && !v.municipio),
-      ordensTravadas: manutencao.filter(m => {
-        if (m.situacao !== "ANDAMENTO" || !m.dataordem) return false;
-        const dias = Math.floor((Date.now() - new Date(m.dataordem).getTime()) / (1000 * 60 * 60 * 24));
-        return dias > 30;
-      }),
-      limiteCusto: limite,
-      mediaCusto: media,
-    };
-  }, [frotaEnriquecida, manutencao]);
-
   // ── Top 10 custo ───────────────────────────────────────────────────────────
   const top10Custo = useMemo(() => {
     return [...frotaEnriquecida]
@@ -403,20 +363,6 @@ export default function Frota() {
         : String(vb ?? "").localeCompare(String(va ?? ""));
     });
   }, [frotaFiltrada, sortCol, sortAsc]);
-
-  // Lista de veículos para o modal de validação aberta
-  const validacaoLista = useMemo(() => {
-    if (!validacaoAberta) return [];
-    const map: Record<string, VeiculoEnriquecido[]> = {
-      semManutencao:    validacoes.semManutencao,
-      custoExcessivo:   validacoes.custoExcessivo,
-      baixadosComManut: validacoes.baixadosComManut,
-      idadeAlta:        validacoes.idadeAlta,
-      anoInconsistente: validacoes.anoInconsistente,
-      semMunicipio:     validacoes.semMunicipio,
-    };
-    return map[validacaoAberta] ?? [];
-  }, [validacaoAberta, validacoes]);
 
   const COLS = [
     { key: "codvei",       label: "Código",        align: "left",   numeric: false, responsive: "" },
@@ -598,99 +544,6 @@ export default function Frota() {
                   </div>
                 </AnimatedCard>
               ))}
-            </div>
-
-            {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
-            <div className="rounded-[14px] border border-amber-400/15 bg-gradient-to-br from-amber-500/[0.04] to-rose-500/[0.02] p-3 sm:p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/[0.12] border border-amber-400/[0.2]">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-300" />
-                </div>
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.25em] text-amber-300">Validações Analíticas</h3>
-                <div className="flex-1" />
-                <span className="text-[10px] text-slate-500">Clique em qualquer alerta para detalhar</span>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
-                {[
-                  {
-                    key: "semManutencao",
-                    label: "Sem Manutenção",
-                    desc: "ativos sem ordens",
-                    qtd: validacoes.semManutencao.length,
-                    icon: AlertCircle,
-                    severity: validacoes.semManutencao.length > 5 ? "high" : "low",
-                  },
-                  {
-                    key: "custoExcessivo",
-                    label: "Custo Excessivo",
-                    desc: `> ${fmtK(validacoes.limiteCusto)} (μ+2σ)`,
-                    qtd: validacoes.custoExcessivo.length,
-                    icon: TrendingUp,
-                    severity: "high",
-                  },
-                  {
-                    key: "idadeAlta",
-                    label: "Idade > 15 anos",
-                    desc: "candidatos a renovação",
-                    qtd: validacoes.idadeAlta.length,
-                    icon: Calendar,
-                    severity: validacoes.idadeAlta.length > 10 ? "high" : "med",
-                  },
-                  {
-                    key: "baixadosComManut",
-                    label: "Baixados c/ Manut.",
-                    desc: "manutenção ≤ 90d",
-                    qtd: validacoes.baixadosComManut.length,
-                    icon: AlertTriangle,
-                    severity: validacoes.baixadosComManut.length > 0 ? "high" : "ok",
-                  },
-                  {
-                    key: "anoInconsistente",
-                    label: "Ano Inconsistente",
-                    desc: "modelo < fabricação",
-                    qtd: validacoes.anoInconsistente.length,
-                    icon: AlertCircle,
-                    severity: validacoes.anoInconsistente.length > 0 ? "med" : "ok",
-                  },
-                  {
-                    key: "semMunicipio",
-                    label: "Sem Município",
-                    desc: "cadastro incompleto",
-                    qtd: validacoes.semMunicipio.length,
-                    icon: MapPin,
-                    severity: validacoes.semMunicipio.length > 0 ? "med" : "ok",
-                  },
-                ].map((alert) => {
-                  const tone = alert.qtd === 0
-                    ? { ring: "ring-emerald-400/20", bg: "bg-emerald-500/[0.03]", text: "text-emerald-300", icon: "text-emerald-400/60", label: "text-emerald-300/80", num: "text-emerald-200" }
-                    : alert.severity === "high"
-                    ? { ring: "ring-rose-400/30", bg: "bg-rose-500/[0.06]", text: "text-rose-300", icon: "text-rose-400", label: "text-rose-300/90", num: "text-rose-200" }
-                    : alert.severity === "med"
-                    ? { ring: "ring-amber-400/30", bg: "bg-amber-500/[0.06]", text: "text-amber-300", icon: "text-amber-400", label: "text-amber-300/90", num: "text-amber-200" }
-                    : { ring: "ring-slate-400/20", bg: "bg-slate-500/[0.04]", text: "text-slate-300", icon: "text-slate-400", label: "text-slate-300/80", num: "text-slate-200" };
-                  return (
-                    <button
-                      key={alert.key}
-                      onClick={() => alert.qtd > 0 && setValidacaoAberta(alert.key)}
-                      disabled={alert.qtd === 0}
-                      className={`group flex flex-col rounded-lg ring-1 ${tone.ring} ${tone.bg} px-3 py-2.5 text-left transition-all hover:-translate-y-[1px] ${alert.qtd === 0 ? "cursor-default" : "cursor-pointer hover:ring-2"} disabled:opacity-70`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <alert.icon className={`h-3.5 w-3.5 ${tone.icon}`} />
-                        {alert.qtd === 0 && <CheckCircle2 className="h-3 w-3 text-emerald-400/70" />}
-                      </div>
-                      <p className={`mt-1.5 text-[18px] font-black leading-none tracking-tight ${tone.num}`}>
-                        {fmtNum(alert.qtd)}
-                      </p>
-                      <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] ${tone.label}`}>
-                        {alert.label}
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">{alert.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
@@ -999,79 +852,6 @@ export default function Frota() {
           </div>
         </section>
       </div>
-
-      {/* ════════ MODAL DE VALIDAÇÃO ════════ */}
-      {validacaoAberta && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
-          onClick={() => setValidacaoAberta(null)}
-        >
-          <div
-            className="relative max-w-3xl w-full max-h-[80vh] flex flex-col rounded-2xl border border-amber-400/20 bg-[var(--sgt-bg-section)] shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-[var(--sgt-border-subtle)]">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
-                <h2 className="text-[14px] font-bold text-white">
-                  {validacaoAberta === "semManutencao" && "Veículos ativos sem manutenção registrada"}
-                  {validacaoAberta === "custoExcessivo" && `Veículos com custo acima de ${fmtK(validacoes.limiteCusto)}`}
-                  {validacaoAberta === "idadeAlta" && "Veículos ativos com mais de 15 anos"}
-                  {validacaoAberta === "baixadosComManut" && "Veículos baixados com manutenção recente (≤ 90 dias)"}
-                  {validacaoAberta === "anoInconsistente" && "Veículos com ano modelo < ano fabricação"}
-                  {validacaoAberta === "semMunicipio" && "Veículos ativos sem município cadastrado"}
-                </h2>
-                <span className="text-[11px] text-slate-500 ml-2">{validacaoLista.length} encontrado(s)</span>
-              </div>
-              <button
-                onClick={() => setValidacaoAberta(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto p-3">
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className="text-slate-400 text-left">
-                    <th className="px-2 py-2">Código</th>
-                    <th className="px-2 py-2">Frota</th>
-                    <th className="px-2 py-2">Marca / Modelo</th>
-                    <th className="px-2 py-2 text-center">Ano</th>
-                    <th className="px-2 py-2 text-center">Idade</th>
-                    <th className="px-2 py-2 text-right">Custo Manut.</th>
-                    <th className="px-2 py-2 text-center">Última</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {validacaoLista.map(v => (
-                    <tr key={v.codvei} className="border-t border-[var(--sgt-border-subtle)]">
-                      <td className="px-2 py-2 font-mono font-semibold text-white">{v.codvei}</td>
-                      <td className="px-2 py-2 text-slate-300">{v.frota ?? "—"}</td>
-                      <td className="px-2 py-2 text-slate-300 truncate max-w-[200px]" title={`${v.marca} ${v.modelo}`}>
-                        {v.marca} {v.modelo}
-                      </td>
-                      <td className="px-2 py-2 text-center text-slate-400">{v.anofab ?? "—"}</td>
-                      <td className="px-2 py-2 text-center">
-                        {v.idade !== null
-                          ? <span className={v.idade > 15 ? "text-rose-300 font-semibold" : "text-slate-300"}>{v.idade}</span>
-                          : "—"}
-                      </td>
-                      <td className="px-2 py-2 text-right font-semibold text-rose-200">
-                        {v.custoManut > 0 ? fmtBRL(v.custoManut) : "—"}
-                      </td>
-                      <td className="px-2 py-2 text-center text-slate-400">{fmtData(v.ultimaManut)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {validacaoLista.length === 0 && (
-                <div className="text-center py-8 text-slate-500 text-[12px]">Nenhum item na lista.</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
