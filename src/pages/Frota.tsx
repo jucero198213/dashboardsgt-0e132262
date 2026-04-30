@@ -22,10 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
-import {
-  fetchFrota, fetchManutencao,
-  type FrotaRow, type ManutencaoRow
-} from "@/lib/dwApi";
+import { type FrotaRow, type ManutencaoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -129,17 +126,13 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
-  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const { dwFilter, setDwFilter, filiais, empresas, frota, manutencao, isFetchingDw, fetchFromDW } = useFinancialData();
   const frotaCooldown = useCooldown("dw_frota_fetch_ts");
   const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
-  // ── Estado ──────────────────────────────────────────────────────────────────
-  const [frota, setFrota] = useState<FrotaRow[]>([]);
-  const [manutencao, setManutencao] = useState<ManutencaoRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  // ── Estado local (UI apenas) ─────────────────────────────────────────────
+  const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const [filtroSituacao, setFiltroSituacao] = useState<"TODOS" | "ATIVO" | "BAIXADO" | "INATIVO">("ATIVO");
   const [filtroMarca, setFiltroMarca] = useState<string>("Todas");
@@ -158,11 +151,8 @@ export default function Frota() {
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
     if (!force && !frotaCooldown.canFetch) return;
-    setLoading(true);
-    setError(null);
     setProgress(0);
     setLoadingPhase("Conectando ao DW...");
-
     let cur = 0;
     const phases = [
       { at: 25, label: "Buscando cadastro da frota..." },
@@ -176,28 +166,15 @@ export default function Frota() {
       if (p) setLoadingPhase(p.label);
       setProgress(Math.round(cur));
     }, 120);
-
     try {
-      const [frRes, mnRes] = await Promise.all([
-        fetchFrota(),
-        fetchManutencao({
-          dataInicio: dwFilter.dataInicio,
-          dataFim: dwFilter.dataFim,
-          filial: dwFilter.filial ?? null,
-        }),
-      ]);
-      setFrota(frRes.data ?? []);
-      setManutencao(mnRes.data ?? []);
-      frotaCooldown.start(); // Inicia cooldown de 1h
-    } catch (err) {
-      setError((err as Error).message ?? "Erro ao carregar dados");
+      await fetchFromDW();
+      frotaCooldown.start();
     } finally {
       clearInterval(iv);
       setProgress(100);
       setLoadingPhase("");
-      setLoading(false);
     }
-  }, [dwFilter.dataInicio, dwFilter.dataFim, dwFilter.filial]);
+  }, [dwFilter, frotaCooldown, fetchFromDW]);
 
   useEffect(() => {
     carregarDados();
@@ -519,7 +496,7 @@ export default function Frota() {
                   <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
                 </Select>
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={frotaCooldown} />
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} cooldownOverride={frotaCooldown} />
               </div>
 
               <HomeButton />
@@ -536,7 +513,7 @@ export default function Frota() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={frotaCooldown} />
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={frotaCooldown} />
                 <HomeButton />
                 <MobileNav />
               </div>
@@ -544,15 +521,10 @@ export default function Frota() {
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-            {/* ════════ ERRO ════════ */}
-            {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-[12px] text-rose-200">
-                <strong>Erro:</strong> {error}
-              </div>
-            )}
+
 
             {/* ════════ LOADING PHASE ════════ */}
-            {loading && loadingPhase && (
+            {isFetchingDw && loadingPhase && (
               <div className="flex items-center gap-2 text-[11px] text-amber-300/80">
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-amber-400/10">
                   <div
@@ -932,7 +904,7 @@ export default function Frota() {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading ? (
+                  {isFetchingDw ? (
                     Array.from({ length: 8 }).map((_, i) => (
                       <tr key={i} className="border-t border-[var(--sgt-border-subtle)]">
                         {COLS.map((c, j) => (
@@ -994,7 +966,7 @@ export default function Frota() {
                   )}
                 </tbody>
               </table>
-              {!loading && tabelaOrdenada.length > 0 && (() => {
+              {!isFetchingDw && tabelaOrdenada.length > 0 && (() => {
                 const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
                 const curPage = Math.min(page, totalPages);
                 const from = (curPage - 1) * PAGE_SIZE + 1;
