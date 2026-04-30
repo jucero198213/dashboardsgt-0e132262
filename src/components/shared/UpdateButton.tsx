@@ -6,7 +6,9 @@ interface UpdateButtonProps {
   isFetching: boolean;
   loadingPhase?: string;
   progress?: number;
-  compact?: boolean; // mobile mode — só ícone + %
+  compact?: boolean;
+  // Override do cooldown do contexto global (para telas com fetch próprio)
+  cooldownOverride?: { canFetch: boolean; remaining: number; countdown: string };
 }
 
 function formatCountdown(ms: number): string {
@@ -22,9 +24,18 @@ export function UpdateButton({
   loadingPhase = "",
   progress = 0,
   compact = false,
+  cooldownOverride,
 }: UpdateButtonProps) {
   const { cooldownRemaining, isAdmin } = useFinancialData();
-  const inCooldown = !isAdmin && cooldownRemaining > 0;
+
+  // Se veio override (tela com fetch independente), usa ele; senão usa o global
+  const inCooldown = cooldownOverride
+    ? !cooldownOverride.canFetch
+    : (!isAdmin && cooldownRemaining > 0);
+  const countdown = cooldownOverride
+    ? cooldownOverride.countdown
+    : countdown;
+
   const disabled = isFetching || inCooldown;
 
   if (compact) {
@@ -32,7 +43,7 @@ export function UpdateButton({
       <button
         onClick={() => !disabled && void onClick()}
         disabled={disabled}
-        title={inCooldown ? `Disponível em ${formatCountdown(cooldownRemaining)}` : "Atualizar dados"}
+        title={inCooldown ? `Disponível em ${countdown}` : "Atualizar dados"}
         className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-bold transition-all
           ${isFetching
             ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200"
@@ -42,7 +53,7 @@ export function UpdateButton({
           } disabled:cursor-not-allowed`}
       >
         <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin" : ""}`} />
-        {isFetching ? `${progress}%` : inCooldown ? formatCountdown(cooldownRemaining) : "Atualizar"}
+        {isFetching ? `${progress}%` : inCooldown ? countdown : "Atualizar"}
       </button>
     );
   }
@@ -51,7 +62,7 @@ export function UpdateButton({
     <button
       onClick={() => !disabled && void onClick()}
       disabled={disabled}
-      title={inCooldown ? `Disponível em ${formatCountdown(cooldownRemaining)}` : "Atualizar dados"}
+      title={inCooldown ? `Disponível em ${countdown}` : "Atualizar dados"}
       className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-bold transition-all
         ${isFetching
           ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]"
@@ -69,7 +80,7 @@ export function UpdateButton({
         : inCooldown
         ? <span className="flex items-center gap-1.5">
             <span className="text-[10px]">Disponível em</span>
-            <span className="font-mono text-[11px] font-bold text-slate-300">{formatCountdown(cooldownRemaining)}</span>
+            <span className="font-mono text-[11px] font-bold text-slate-300">{countdown}</span>
           </span>
         : "Atualizar"
       }

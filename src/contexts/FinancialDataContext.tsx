@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import type {
   ContaPagar,
   ContaReceber,
@@ -289,17 +290,11 @@ export function FinancialDataProvider({
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
   const abortRef = useRef<AbortController | null>(null);
 
+  const { isAdmin } = useAuth();
+
   // ── Cooldown state ────────────────────────────────────────────────────────
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(getCooldownRemaining());
   const [lastFetchedAt, setLastFetchedAt]         = useState<number>(getLastFetchTs());
-
-  // Verifica papel do usuário — admin não tem cooldown
-  const isAdmin = (() => {
-    try {
-      const user = JSON.parse(localStorage.getItem("sgt_user") ?? "{}");
-      return user?.role === "admin";
-    } catch { return false; }
-  })();
 
   // Countdown tick — atualiza a cada segundo enquanto houver cooldown
   useEffect(() => {

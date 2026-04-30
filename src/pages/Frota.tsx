@@ -21,6 +21,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { useCooldown } from "@/hooks/useCooldown";
 import {
   fetchFrota, fetchManutencao,
   type FrotaRow, type ManutencaoRow
@@ -128,7 +129,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
-  const { dwFilter, setDwFilter, filiais, empresas, cooldownRemaining, isAdmin } = useFinancialData();
+  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const frotaCooldown = useCooldown("dw_frota_fetch_ts");
   const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
@@ -155,8 +157,7 @@ export default function Frota() {
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
-    // Respeita cooldown de 1h (admin ignora)
-    if (!force && !isAdmin && cooldownRemaining > 0) return;
+    if (!force && !frotaCooldown.canFetch) return;
     setLoading(true);
     setError(null);
     setProgress(0);
@@ -187,6 +188,7 @@ export default function Frota() {
       ]);
       setFrota(frRes.data ?? []);
       setManutencao(mnRes.data ?? []);
+      frotaCooldown.start(); // Inicia cooldown de 1h
     } catch (err) {
       setError((err as Error).message ?? "Erro ao carregar dados");
     } finally {
@@ -517,7 +519,7 @@ export default function Frota() {
                   <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
                 </Select>
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} />
+                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={frotaCooldown} />
               </div>
 
               <HomeButton />
@@ -534,7 +536,7 @@ export default function Frota() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact />
+                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={frotaCooldown} />
                 <HomeButton />
                 <MobileNav />
               </div>
