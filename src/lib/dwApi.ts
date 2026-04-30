@@ -21,7 +21,7 @@ const SUPABASE_ANON_KEY =
 // Para configurar permanentemente no Lovable (sem editar código):
 //   Project → Settings → Environment Variables → VITE_DW_API_URL = <tunnel url>
 
-const TUNNEL_URL = "https://visitors-fragrance-pork-views.trycloudflare.com";
+const TUNNEL_URL = "https://postcards-contractors-very-rated.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((
