@@ -64,6 +64,22 @@ function getMarcaColor(marca: string | null) {
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
 
+// ─── Paleta determinística (classificação, faixas etc.) ───────────────────────
+const PALETTE = [
+  "#22d3ee", "#a78bfa", "#fbbf24", "#f87171",
+  "#34d399", "#60a5fa", "#fb923c", "#f472b6",
+];
+const colorFor = (key: string, i: number) => PALETTE[i % PALETTE.length];
+
+// Cor por faixa de idade (verde → vermelho conforme envelhece)
+const IDADE_COLORS: Record<string, string> = {
+  "0-3":   "#34d399",
+  "4-7":   "#22d3ee",
+  "8-11":  "#fbbf24",
+  "12-15": "#fb923c",
+  "16+":   "#f87171",
+};
+
 // ─── Cores por Situação ───────────────────────────────────────────────────────
 const SITUACAO_STYLE: Record<string, { bg: string; text: string; ring: string }> = {
   ATIVO:    { bg: "bg-emerald-500/10", text: "text-emerald-300", ring: "ring-emerald-500/30" },
