@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
-  Calendar, MapPin, ChevronUp, ChevronDown, BarChart3,
-  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X,
+  Calendar, MapPin, ChevronUp, ChevronDown,
+  CheckCircle2, AlertCircle, DollarSign, Hash, X,
   ChevronLeft, ChevronRight
 } from "lucide-react";
 import {
@@ -549,81 +549,87 @@ export default function Frota() {
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
               {/* Top 10 custo */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="h-3.5 w-3.5 text-rose-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Top 10 — Custo de Manutenção</h3>
-                </div>
-                <div style={{ height: 280 }}>
-                  {top10Custo.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-[12px] text-slate-500">
-                      Sem dados de manutenção
-                    </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={top10Custo} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" horizontal={false} />
-                        <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                        <YAxis type="category" dataKey="nome" tick={{ fill: "#cbd5e1", fontSize: 10 }} width={150} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                        <Bar dataKey="custo" radius={[0, 4, 4, 0]}>
-                          {top10Custo.map((entry, idx) => (
-                            <Cell key={idx} fill={entry.fill} fillOpacity={0.85} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-2 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Top 10 · Custo de Manutenção
+                    </span>
+                  </div>
+                  <div style={{ height: 280 }}>
+                    {top10Custo.length === 0 ? (
+                      <div className="flex h-full items-center justify-center text-[12px] text-slate-500">
+                        Sem dados de manutenção
+                      </div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={top10Custo} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" horizontal={false} />
+                          <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
+                          <YAxis type="category" dataKey="nome" tick={{ fill: "#cbd5e1", fontSize: 10 }} width={150} />
+                          <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
+                          <Bar dataKey="custo" radius={[0, 4, 4, 0]}>
+                            {top10Custo.map((entry, idx) => (
+                              <Cell key={idx} fill={entry.fill} fillOpacity={0.85} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Distribuição por marca */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Truck className="h-3.5 w-3.5 text-cyan-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Distribuição por Marca</h3>
-                </div>
-                <div style={{ height: 280 }} className="flex items-center">
-                  {distMarca.length === 0 ? (
-                    <div className="flex w-full h-full items-center justify-center text-[12px] text-slate-500">
-                      Sem dados
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 w-full h-full items-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={distMarca}
-                            dataKey="qtd"
-                            nameKey="nome"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={90}
-                            paddingAngle={2}
-                            stroke="rgba(2,6,23,0.6)"
-                            strokeWidth={2}
-                          >
-                            {distMarca.map((d, i) => (
-                              <Cell key={i} fill={d.color} />
-                            ))}
-                          </Pie>
-                          <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => `${name}: ${fmtNum(v)} veíc.`} />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
-                        {distMarca.slice(0, 8).map((m) => (
-                          <div key={m.nome} className="flex items-center justify-between gap-2 text-[11px]">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color }} />
-                              <span className="truncate text-slate-300">{m.nome}</span>
-                            </div>
-                            <span className="font-semibold text-slate-200">{m.qtd}</span>
-                          </div>
-                        ))}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-2 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Distribuição por Marca
+                    </span>
+                  </div>
+                  <div style={{ height: 280 }} className="flex items-center">
+                    {distMarca.length === 0 ? (
+                      <div className="flex w-full h-full items-center justify-center text-[12px] text-slate-500">
+                        Sem dados
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="grid grid-cols-2 w-full h-full items-center">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={distMarca}
+                              dataKey="qtd"
+                              nameKey="nome"
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={50}
+                              outerRadius={90}
+                              paddingAngle={2}
+                              stroke="rgba(2,6,23,0.6)"
+                              strokeWidth={2}
+                            >
+                              {distMarca.map((d, i) => (
+                                <Cell key={i} fill={d.color} />
+                              ))}
+                            </Pie>
+                            <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => `${name}: ${fmtNum(v)} veíc.`} />} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
+                          {distMarca.slice(0, 8).map((m) => (
+                            <div key={m.nome} className="flex items-center justify-between gap-2 text-[11px]">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color }} />
+                                <span className="truncate text-slate-300">{m.nome}</span>
+                              </div>
+                              <span className="font-semibold text-slate-200">{m.qtd}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -631,54 +637,60 @@ export default function Frota() {
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="h-3.5 w-3.5 text-amber-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Custo de Manutenção / Mês</h3>
-                </div>
-                <div style={{ height: 240 }}>
-                  {custoPorMes.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-[12px] text-slate-500">Sem dados</div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={custoPorMes} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                        <defs>
-                          <linearGradient id="custoLine" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
-                            <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                        <XAxis dataKey="mes" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                        <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                        <Line type="monotone" dataKey="custo" stroke="#fbbf24" strokeWidth={2} dot={{ fill: "#fbbf24", r: 3 }} activeDot={{ r: 5 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  )}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-2 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Custo de Manutenção · Mensal
+                    </span>
+                  </div>
+                  <div style={{ height: 240 }}>
+                    {custoPorMes.length === 0 ? (
+                      <div className="flex h-full items-center justify-center text-[12px] text-slate-500">Sem dados</div>
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={custoPorMes} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="custoLine" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
+                              <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
+                          <XAxis dataKey="mes" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
+                          <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
+                          <Line type="monotone" dataKey="custo" stroke="#fbbf24" strokeWidth={2} dot={{ fill: "#fbbf24", r: 3 }} activeDot={{ r: 5 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Custo médio por idade */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-3.5 w-3.5 text-violet-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Custo Médio por Faixa de Idade</h3>
-                </div>
-                <div style={{ height: 240 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={custoPorIdade} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                      <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                      <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                      <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
-                      <Bar dataKey="medio" radius={[6, 6, 0, 0]} fillOpacity={0.9}>
-                        {custoPorIdade.map((d) => (
-                          <Cell key={d.faixa} fill={IDADE_COLORS[d.faixa] ?? "#a78bfa"} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-2 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Custo Médio · Faixa de Idade
+                    </span>
+                  </div>
+                  <div style={{ height: 240 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={custoPorIdade} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
+                        <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                        <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
+                        <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
+                        <Bar dataKey="medio" radius={[6, 6, 0, 0]} fillOpacity={0.9}>
+                          {custoPorIdade.map((d) => (
+                            <Cell key={d.faixa} fill={IDADE_COLORS[d.faixa] ?? "#a78bfa"} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </div>
