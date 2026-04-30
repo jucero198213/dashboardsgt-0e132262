@@ -836,6 +836,18 @@ export default function Frota() {
                 />
               </div>
 
+              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
+                <SelectTrigger className="h-9 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ATIVO">Ativos</SelectItem>
+                  <SelectItem value="BAIXADO">Baixados</SelectItem>
+                  <SelectItem value="INATIVO">Inativos</SelectItem>
+                  <SelectItem value="TODOS">Todos</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={filtroMarca} onValueChange={setFiltroMarca}>
                 <SelectTrigger className="h-9 w-[140px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
                   <SelectValue placeholder="Marca" />
