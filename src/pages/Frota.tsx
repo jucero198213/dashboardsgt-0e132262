@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
   Calendar, MapPin, ChevronUp, ChevronDown, BarChart3,
-  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X
+  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -14,9 +15,12 @@ import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 import {
   fetchFrota, fetchManutencao,
   type FrotaRow, type ManutencaoRow
@@ -60,6 +64,22 @@ function getMarcaColor(marca: string | null) {
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
 
+// ─── Paleta determinística (classificação, faixas etc.) ───────────────────────
+const PALETTE = [
+  "#22d3ee", "#a78bfa", "#fbbf24", "#f87171",
+  "#34d399", "#60a5fa", "#fb923c", "#f472b6",
+];
+const colorFor = (key: string, i: number) => PALETTE[i % PALETTE.length];
+
+// Cor por faixa de idade (verde → vermelho conforme envelhece)
+const IDADE_COLORS: Record<string, string> = {
+  "0-3":   "#34d399",
+  "4-7":   "#22d3ee",
+  "8-11":  "#fbbf24",
+  "12-15": "#fb923c",
+  "16+":   "#f87171",
+};
+
 // ─── Cores por Situação ───────────────────────────────────────────────────────
 const SITUACAO_STYLE: Record<string, { bg: string; text: string; ring: string }> = {
   ATIVO:    { bg: "bg-emerald-500/10", text: "text-emerald-300", ring: "ring-emerald-500/30" },
@@ -97,6 +117,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
+  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [frota, setFrota] = useState<FrotaRow[]>([]);
@@ -112,6 +134,10 @@ export default function Frota() {
   const [search, setSearch] = useState("");
   const [sortCol, setSortCol] = useState<keyof VeiculoEnriquecido>("custoManut");
   const [sortAsc, setSortAsc] = useState(false);
+
+  // Paginação tabela
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(1);
 
   // Modal de validação
   const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
@@ -140,7 +166,11 @@ export default function Frota() {
     try {
       const [frRes, mnRes] = await Promise.all([
         fetchFrota(),
-        fetchManutencao(),
+        fetchManutencao({
+          dataInicio: dwFilter.dataInicio,
+          dataFim: dwFilter.dataFim,
+          filial: dwFilter.filial ?? null,
+        }),
       ]);
       setFrota(frRes.data ?? []);
       setManutencao(mnRes.data ?? []);
@@ -152,11 +182,15 @@ export default function Frota() {
       setLoadingPhase("");
       setLoading(false);
     }
-  }, []);
+  }, [dwFilter.dataInicio, dwFilter.dataFim, dwFilter.filial]);
 
   useEffect(() => {
     carregarDados();
-  }, [carregarDados]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset página ao mudar filtros/busca
+  useEffect(() => { setPage(1); }, [filtroSituacao, filtroMarca, filtroFrota, search]);
 
   // ── Index manutenção por veículo ────────────────────────────────────────────
   const manutencaoPorVeiculo = useMemo(() => {
@@ -321,7 +355,8 @@ export default function Frota() {
     return Array.from(map.entries())
       .map(([nome, qtd]) => ({ nome, qtd }))
       .sort((a, b) => b.qtd - a.qtd)
-      .slice(0, 8);
+      .slice(0, 8)
+      .map((d, i) => ({ ...d, color: colorFor(d.nome, i) }));
   }, [frotaFiltrada]);
 
   // ── Custo por mês ──────────────────────────────────────────────────────────
@@ -448,29 +483,23 @@ export default function Frota() {
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">DW Conectado</span>
               </div>
 
-              <div className="flex-1" />
+              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Filtros desktop */}
-              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
-                <SelectTrigger className="h-8 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ATIVO">Ativos</SelectItem>
-                  <SelectItem value="BAIXADO">Baixados</SelectItem>
-                  <SelectItem value="INATIVO">Inativos</SelectItem>
-                  <SelectItem value="TODOS">Todos</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <button
-                onClick={carregarDados}
-                disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-medium transition-all border-amber-400/30 bg-amber-400/[0.12] text-amber-200 hover:border-amber-400/50 hover:bg-amber-400/[0.2] disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-                {loading ? `${progress}%` : "Atualizar"}
-              </button>
+              {/* Filtros padronizados (idênticos a Faturamento) */}
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} />
+              </div>
 
               <HomeButton />
             </div>
@@ -787,7 +816,11 @@ export default function Frota() {
                       <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
                       <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
                       <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
-                      <Bar dataKey="medio" fill="#a78bfa" radius={[6, 6, 0, 0]} fillOpacity={0.85} />
+                      <Bar dataKey="medio" radius={[6, 6, 0, 0]} fillOpacity={0.9}>
+                        {custoPorIdade.map((d) => (
+                          <Cell key={d.faixa} fill={IDADE_COLORS[d.faixa] ?? "#a78bfa"} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -806,6 +839,18 @@ export default function Frota() {
                   className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[12px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/40"
                 />
               </div>
+
+              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
+                <SelectTrigger className="h-9 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ATIVO">Ativos</SelectItem>
+                  <SelectItem value="BAIXADO">Baixados</SelectItem>
+                  <SelectItem value="INATIVO">Inativos</SelectItem>
+                  <SelectItem value="TODOS">Todos</SelectItem>
+                </SelectContent>
+              </Select>
 
               <Select value={filtroMarca} onValueChange={setFiltroMarca}>
                 <SelectTrigger className="h-9 w-[140px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
@@ -868,7 +913,7 @@ export default function Frota() {
                       </td>
                     </tr>
                   ) : (
-                    tabelaOrdenada.slice(0, 200).map((v) => {
+                    tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((v) => {
                       const sit = SITUACAO_STYLE[v.situacao] ?? SITUACAO_STYLE.INATIVO;
                       const marcaCor = getMarcaColor(v.marca);
                       return (
@@ -914,11 +959,38 @@ export default function Frota() {
                   )}
                 </tbody>
               </table>
-              {tabelaOrdenada.length > 200 && (
-                <div className="px-3 py-2 text-center text-[11px] text-slate-500 border-t border-[var(--sgt-border-subtle)]">
-                  Exibindo os primeiros 200 — refine os filtros para ver mais.
-                </div>
-              )}
+              {!loading && tabelaOrdenada.length > 0 && (() => {
+                const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
+                const curPage = Math.min(page, totalPages);
+                const from = (curPage - 1) * PAGE_SIZE + 1;
+                const to = Math.min(curPage * PAGE_SIZE, tabelaOrdenada.length);
+                return (
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-base)] text-[11px]">
+                    <span className="text-slate-500">
+                      Mostrando <span className="text-slate-300 font-semibold">{fmtNum(from)}–{fmtNum(to)}</span> de <span className="text-slate-300 font-semibold">{fmtNum(tabelaOrdenada.length)}</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={curPage <= 1}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="px-2 text-slate-400 tabular-nums">
+                        Página <span className="text-slate-200 font-semibold">{curPage}</span> / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={curPage >= totalPages}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
           </div>
