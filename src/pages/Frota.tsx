@@ -909,7 +909,7 @@ export default function Frota() {
                       </td>
                     </tr>
                   ) : (
-                    tabelaOrdenada.slice(0, 200).map((v) => {
+                    tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((v) => {
                       const sit = SITUACAO_STYLE[v.situacao] ?? SITUACAO_STYLE.INATIVO;
                       const marcaCor = getMarcaColor(v.marca);
                       return (
@@ -955,11 +955,38 @@ export default function Frota() {
                   )}
                 </tbody>
               </table>
-              {tabelaOrdenada.length > 200 && (
-                <div className="px-3 py-2 text-center text-[11px] text-slate-500 border-t border-[var(--sgt-border-subtle)]">
-                  Exibindo os primeiros 200 — refine os filtros para ver mais.
-                </div>
-              )}
+              {!loading && tabelaOrdenada.length > 0 && (() => {
+                const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
+                const curPage = Math.min(page, totalPages);
+                const from = (curPage - 1) * PAGE_SIZE + 1;
+                const to = Math.min(curPage * PAGE_SIZE, tabelaOrdenada.length);
+                return (
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-base)] text-[11px]">
+                    <span className="text-slate-500">
+                      Mostrando <span className="text-slate-300 font-semibold">{fmtNum(from)}–{fmtNum(to)}</span> de <span className="text-slate-300 font-semibold">{fmtNum(tabelaOrdenada.length)}</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={curPage <= 1}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="px-2 text-slate-400 tabular-nums">
+                        Página <span className="text-slate-200 font-semibold">{curPage}</span> / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={curPage >= totalPages}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
           </div>
