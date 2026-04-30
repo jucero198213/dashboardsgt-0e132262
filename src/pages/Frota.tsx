@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
   Calendar, MapPin, ChevronUp, ChevronDown, BarChart3,
-  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X
+  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -14,9 +15,12 @@ import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 import {
   fetchFrota, fetchManutencao,
   type FrotaRow, type ManutencaoRow
