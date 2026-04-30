@@ -816,7 +816,11 @@ export default function Frota() {
                       <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
                       <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
                       <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
-                      <Bar dataKey="medio" fill="#a78bfa" radius={[6, 6, 0, 0]} fillOpacity={0.85} />
+                      <Bar dataKey="medio" radius={[6, 6, 0, 0]} fillOpacity={0.9}>
+                        {custoPorIdade.map((d) => (
+                          <Cell key={d.faixa} fill={IDADE_COLORS[d.faixa] ?? "#a78bfa"} />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
