@@ -117,6 +117,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
+  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [frota, setFrota] = useState<FrotaRow[]>([]);
@@ -132,6 +134,10 @@ export default function Frota() {
   const [search, setSearch] = useState("");
   const [sortCol, setSortCol] = useState<keyof VeiculoEnriquecido>("custoManut");
   const [sortAsc, setSortAsc] = useState(false);
+
+  // Paginação tabela
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(1);
 
   // Modal de validação
   const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
@@ -160,7 +166,11 @@ export default function Frota() {
     try {
       const [frRes, mnRes] = await Promise.all([
         fetchFrota(),
-        fetchManutencao(),
+        fetchManutencao({
+          dataInicio: dwFilter.dataInicio,
+          dataFim: dwFilter.dataFim,
+          filial: dwFilter.filial ?? null,
+        }),
       ]);
       setFrota(frRes.data ?? []);
       setManutencao(mnRes.data ?? []);
@@ -172,11 +182,15 @@ export default function Frota() {
       setLoadingPhase("");
       setLoading(false);
     }
-  }, []);
+  }, [dwFilter.dataInicio, dwFilter.dataFim, dwFilter.filial]);
 
   useEffect(() => {
     carregarDados();
-  }, [carregarDados]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset página ao mudar filtros/busca
+  useEffect(() => { setPage(1); }, [filtroSituacao, filtroMarca, filtroFrota, search]);
 
   // ── Index manutenção por veículo ────────────────────────────────────────────
   const manutencaoPorVeiculo = useMemo(() => {
