@@ -128,7 +128,7 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
-  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const { dwFilter, setDwFilter, filiais, empresas, cooldownRemaining, isAdmin } = useFinancialData();
   const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
@@ -154,7 +154,9 @@ export default function Frota() {
   const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
-  const carregarDados = useCallback(async () => {
+  const carregarDados = useCallback(async (force = false) => {
+    // Respeita cooldown de 1h (admin ignora)
+    if (!force && !isAdmin && cooldownRemaining > 0) return;
     setLoading(true);
     setError(null);
     setProgress(0);
@@ -442,17 +444,17 @@ export default function Frota() {
   }, [validacaoAberta, validacoes]);
 
   const COLS = [
-    { key: "codvei",       label: "Código",     align: "left",   numeric: false },
-    { key: "frota",        label: "Frota",      align: "left",   numeric: false },
-    { key: "marca",        label: "Marca",      align: "left",   numeric: false },
-    { key: "modelo",       label: "Modelo",     align: "left",   numeric: false },
-    { key: "anofab",       label: "Ano",        align: "center", numeric: true  },
-    { key: "idade",        label: "Idade",      align: "center", numeric: true  },
-    { key: "municipio",    label: "Município",  align: "left",   numeric: false },
-    { key: "situacao",     label: "Situação",   align: "center", numeric: false },
-    { key: "qtdOrdens",    label: "Ordens",     align: "center", numeric: true  },
-    { key: "custoManut",   label: "Custo Manut.", align: "right",  numeric: true  },
-    { key: "ultimaManut",  label: "Última Manut.", align: "center", numeric: false },
+    { key: "codvei",       label: "Código",        align: "left",   numeric: false, responsive: "" },
+    { key: "frota",        label: "Frota",         align: "left",   numeric: false, responsive: "" },
+    { key: "marca",        label: "Marca",         align: "left",   numeric: false, responsive: "" },
+    { key: "modelo",       label: "Modelo",        align: "left",   numeric: false, responsive: "hidden md:table-cell" },
+    { key: "anofab",       label: "Ano",           align: "center", numeric: true,  responsive: "hidden sm:table-cell" },
+    { key: "idade",        label: "Idade",         align: "center", numeric: true,  responsive: "" },
+    { key: "municipio",    label: "Município",     align: "left",   numeric: false, responsive: "hidden lg:table-cell" },
+    { key: "situacao",     label: "Situação",      align: "center", numeric: false, responsive: "" },
+    { key: "qtdOrdens",    label: "Ordens",        align: "center", numeric: true,  responsive: "hidden sm:table-cell" },
+    { key: "custoManut",   label: "Custo Manut.",  align: "right",  numeric: true,  responsive: "" },
+    { key: "ultimaManut",  label: "Última Manut.", align: "center", numeric: false, responsive: "hidden sm:table-cell" },
   ] as const;
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -470,9 +472,15 @@ export default function Frota() {
 
       <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
+          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
         >
+          {/* Barra de progresso */}
+          <div className="h-[3px] w-full shrink-0 overflow-hidden rounded-t-[24px] bg-transparent">
+            <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%`, opacity: loading ? 1 : 0 }} />
+          </div>
+
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full">
 
             {/* ════════ NAVBAR ════════ */}
@@ -516,7 +524,21 @@ export default function Frota() {
             </div>
 
             {/* Mobile nav */}
-            <MobileNav />
+            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Gestão de Frota</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact />
+                <HomeButton />
+                <MobileNav />
+              </div>
+            </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
@@ -897,7 +919,7 @@ export default function Frota() {
                         onClick={() => handleSort(col.key as keyof VeiculoEnriquecido)}
                         className={`px-3 py-2.5 font-semibold text-slate-400 cursor-pointer select-none hover:text-amber-300 transition ${
                           col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
-                        }`}
+                        } ${col.responsive}`}
                       >
                         <span className="inline-flex items-center gap-1">
                           {col.label}
@@ -912,7 +934,7 @@ export default function Frota() {
                     Array.from({ length: 8 }).map((_, i) => (
                       <tr key={i} className="border-t border-[var(--sgt-border-subtle)]">
                         {COLS.map((c, j) => (
-                          <td key={j} className="px-3 py-2.5"><div className="h-3 w-full animate-pulse rounded bg-[var(--sgt-border-subtle)]" /></td>
+                          <td key={j} className={`px-3 py-2.5 ${c.responsive}`}><div className="h-3 w-full animate-pulse rounded bg-[var(--sgt-border-subtle)]" /></td>
                         ))}
                       </tr>
                     ))
@@ -937,20 +959,20 @@ export default function Frota() {
                               <span className="text-slate-200">{v.marca ?? "—"}</span>
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-slate-300 max-w-[200px] truncate" title={v.modelo ?? ""}>{v.modelo ?? "—"}</td>
-                          <td className="px-3 py-2 text-center text-slate-400">{v.anofab ?? "—"}</td>
+                          <td className="px-3 py-2 text-slate-300 max-w-[200px] truncate hidden md:table-cell" title={v.modelo ?? ""}>{v.modelo ?? "—"}</td>
+                          <td className="px-3 py-2 text-center text-slate-400 hidden sm:table-cell">{v.anofab ?? "—"}</td>
                           <td className="px-3 py-2 text-center">
                             {v.idade !== null
                               ? <span className={v.idade > 15 ? "text-rose-300 font-semibold" : "text-slate-300"}>{v.idade}</span>
                               : "—"}
                           </td>
-                          <td className="px-3 py-2 text-slate-400 max-w-[140px] truncate" title={v.municipio ?? ""}>{v.municipio ?? "—"}</td>
+                          <td className="px-3 py-2 text-slate-400 max-w-[140px] truncate hidden lg:table-cell" title={v.municipio ?? ""}>{v.municipio ?? "—"}</td>
                           <td className="px-3 py-2 text-center">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
                               {v.situacao}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-300">
+                          <td className="px-3 py-2 text-center text-slate-300 hidden sm:table-cell">
                             {v.qtdOrdens > 0 ? (
                               <span className="inline-flex items-center gap-1">
                                 {fmtNum(v.qtdOrdens)}
@@ -963,7 +985,7 @@ export default function Frota() {
                           <td className="px-3 py-2 text-right font-semibold text-rose-200">
                             {v.custoManut > 0 ? fmtBRL(v.custoManut) : <span className="text-slate-600">—</span>}
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-400 text-[11px]">{fmtData(v.ultimaManut)}</td>
+                          <td className="px-3 py-2 text-center text-slate-400 text-[11px] hidden sm:table-cell">{fmtData(v.ultimaManut)}</td>
                         </tr>
                       );
                     })
