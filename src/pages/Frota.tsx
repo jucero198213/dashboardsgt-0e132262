@@ -21,7 +21,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { useCooldown } from "@/hooks/useCooldown";
 import { type FrotaRow, type ManutencaoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 
@@ -127,7 +126,6 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 export default function Frota() {
   const navigate = useNavigate();
   const { dwFilter, setDwFilter, filiais, empresas, frota, manutencao, isFetchingDw, fetchFromDW } = useFinancialData();
-  const frotaCooldown = useCooldown("dw_frota_fetch_ts");
   const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Estado local (UI apenas) ─────────────────────────────────────────────
@@ -149,8 +147,7 @@ export default function Frota() {
   const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
-  const carregarDados = useCallback(async (force = false) => {
-    if (!force && !frotaCooldown.canFetch) return;
+  const carregarDados = useCallback(async () => {
     setProgress(0);
     setLoadingPhase("Conectando ao DW...");
     let cur = 0;
@@ -168,13 +165,12 @@ export default function Frota() {
     }, 120);
     try {
       await fetchFromDW();
-      frotaCooldown.start();
     } finally {
       clearInterval(iv);
       setProgress(100);
       setLoadingPhase("");
     }
-  }, [dwFilter, frotaCooldown, fetchFromDW]);
+  }, [fetchFromDW]);
 
   useEffect(() => {
     carregarDados();
@@ -496,7 +492,7 @@ export default function Frota() {
                   <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
                 </Select>
-                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} cooldownOverride={frotaCooldown} />
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
               </div>
 
               <HomeButton />
@@ -513,7 +509,7 @@ export default function Frota() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={frotaCooldown} />
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
                 <HomeButton />
                 <MobileNav />
               </div>
