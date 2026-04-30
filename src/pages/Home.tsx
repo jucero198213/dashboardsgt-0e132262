@@ -275,8 +275,8 @@ export default function Home() {
       icon: Wrench,
       title: "Manutenção",
       description: "Ordens de serviço, preventiva e corretiva de veículos e equipamentos.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/manutencao"),
+      cta: "Acessar",
+      onClick: () => navigate("/manutencao"),
       tone: "orange" as const,
     },
     {
