@@ -25,6 +25,7 @@ import {
   fetchFrota, fetchManutencao,
   type FrotaRow, type ManutencaoRow
 } from "@/lib/dwApi";
+import { RAW } from "@/lib/theme";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
