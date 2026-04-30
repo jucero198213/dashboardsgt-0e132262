@@ -34,7 +34,7 @@ export function UpdateButton({
     : (!isAdmin && cooldownRemaining > 0);
   const countdown = cooldownOverride
     ? cooldownOverride.countdown
-    : countdown;
+    : formatCountdown(cooldownRemaining);
 
   const disabled = isFetching || inCooldown;
 

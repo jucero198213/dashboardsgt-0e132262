@@ -457,7 +457,7 @@ export default function Frota() {
           {/* Barra de progresso */}
           <div className="h-[3px] w-full shrink-0 overflow-hidden rounded-t-[24px] bg-transparent">
             <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
-              style={{ width: `${progress}%`, opacity: loading ? 1 : 0 }} />
+              style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
           </div>
 
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full">
@@ -540,7 +540,7 @@ export default function Frota() {
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
               {[
                 {
-                  label: "Frota Ativa", value: loading ? "—" : fmtNum(kpis.ativos),
+                  label: "Frota Ativa", value: isFetchingDw ? "—" : fmtNum(kpis.ativos),
                   sub: `${fmtNum(kpis.total)} no recorte`,
                   icon: Truck, color: "cyan", rgb: "6,182,212",
                   stripe: "from-cyan-400/60 to-cyan-700/20",
@@ -551,7 +551,7 @@ export default function Frota() {
                   sub2: "text-cyan-500/80",
                 },
                 {
-                  label: "Idade Média", value: loading ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
+                  label: "Idade Média", value: isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
                   sub: "veículos ativos",
                   icon: Calendar, color: "violet", rgb: "139,92,246",
                   stripe: "from-violet-400/60 to-violet-700/20",
@@ -562,7 +562,7 @@ export default function Frota() {
                   sub2: "text-violet-500/80",
                 },
                 {
-                  label: "Custo de Manutenção", value: loading ? "—" : fmtK(kpis.custoTotal),
+                  label: "Custo de Manutenção", value: isFetchingDw ? "—" : fmtK(kpis.custoTotal),
                   sub: `${fmtNum(kpis.totalOrdens)} ordens`,
                   icon: Wrench, color: "rose", rgb: "244,63,94",
                   stripe: "from-rose-400/60 to-rose-700/20",
@@ -573,7 +573,7 @@ export default function Frota() {
                   sub2: "text-rose-500/80",
                 },
                 {
-                  label: "Custo Médio / Veículo", value: loading ? "—" : fmtK(kpis.custoMedio),
+                  label: "Custo Médio / Veículo", value: isFetchingDw ? "—" : fmtK(kpis.custoMedio),
                   sub: `${fmtNum(kpis.ordensAbertas)} ordens abertas`,
                   icon: DollarSign, color: "amber", rgb: "245,158,11",
                   stripe: "from-amber-400/60 to-amber-700/20",
