@@ -355,7 +355,8 @@ export default function Frota() {
     return Array.from(map.entries())
       .map(([nome, qtd]) => ({ nome, qtd }))
       .sort((a, b) => b.qtd - a.qtd)
-      .slice(0, 8);
+      .slice(0, 8)
+      .map((d, i) => ({ ...d, color: colorFor(d.nome, i) }));
   }, [frotaFiltrada]);
 
   // ── Custo por mês ──────────────────────────────────────────────────────────
