@@ -351,12 +351,6 @@ export function FinancialDataProvider({
 
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async (force = false) => {
-    // Verifica cooldown — admin e force ignoram
-    if (!force && !isAdmin && getCooldownRemaining() > 0) {
-      console.warn("[DW] Fetch bloqueado por cooldown de 1h");
-      return;
-    }
-
     // Cancela requisição anterior se ainda estiver em andamento
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
@@ -751,10 +745,7 @@ export function FinancialDataProvider({
           dwFilter: state.dwFilter,
           timestamp: Date.now(),
         });
-        // Salva timestamp do fetch para cooldown de 1h
-        saveLastFetchTs();
         setLastFetchedAt(Date.now());
-        setCooldownRemaining(COOLDOWN_MS);
         return {
           ...prev,
           isFetchingDw: false,
