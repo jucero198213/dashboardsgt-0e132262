@@ -298,7 +298,7 @@ export function FinancialDataProvider({
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
   const abortRef = useRef<AbortController | null>(null);
 
-  const { isAdmin } = useAuth();
+  const { isAdmin = false } = useAuth();
 
   // ── Cooldown state ────────────────────────────────────────────────────────
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(getCooldownRemaining());
