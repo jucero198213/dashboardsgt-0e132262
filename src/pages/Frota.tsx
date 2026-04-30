@@ -119,8 +119,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 const Top10MaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 560; const svgH = 280;
-  const padL = 140; const padR = 70; const padTop = 15; const padBot = 15;
+  const svgW = 520; const svgH = 220;
+  const padL = 130; const padR = 65; const padTop = 10; const padBot = 10;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -240,7 +240,7 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
     return { ...d, start, pct };
   });
   
-  const cx = 120, cy = 120, r = 75, rInner = 45;
+  const cx = 100, cy = 100, r = 65, rInner = 40;
   
   const getPath = (start: number, pct: number) => {
     const a1 = start * 2 * Math.PI - Math.PI / 2;
@@ -258,8 +258,8 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
   };
   
   return (
-    <div className="grid grid-cols-[240px_1fr] gap-4 h-full items-center">
-      <svg viewBox="0 0 240 240" className="w-full" onMouseLeave={() => setHoverIdx(null)}>
+    <div className="grid grid-cols-[200px_1fr] gap-3 h-full items-center">
+      <svg viewBox="0 0 200 200" className="w-full" onMouseLeave={() => setHoverIdx(null)}>
         <defs>
           {slices.map((s, i) => (
             <filter key={i} id={`glow-${i}`}>
@@ -289,8 +289,8 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
               />
               {isHover && (
                 <g>
-                  <text x={cx} y={cy - 3} fill="white" fontSize="18" fontWeight="700" textAnchor="middle">{s.qtd}</text>
-                  <text x={cx} y={cy + 10} fill="#94a3b8" fontSize="9" fontWeight="500" textAnchor="middle">{s.nome}</text>
+                  <text x={cx} y={cy - 2} fill="white" fontSize="16" fontWeight="700" textAnchor="middle">{s.qtd}</text>
+                  <text x={cx} y={cy + 9} fill="#94a3b8" fontSize="8" fontWeight="500" textAnchor="middle">{s.nome}</text>
                 </g>
               )}
             </g>
@@ -299,25 +299,25 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
         
         {hoverIdx === null && (
           <g>
-            <text x={cx} y={cy - 3} fill="white" fontSize="20" fontWeight="800" textAnchor="middle">{total}</text>
-            <text x={cx} y={cy + 10} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">VEÍCULOS</text>
+            <text x={cx} y={cy - 2} fill="white" fontSize="18" fontWeight="800" textAnchor="middle">{total}</text>
+            <text x={cx} y={cy + 9} fill="#64748b" fontSize="8" fontWeight="500" textAnchor="middle">VEÍCULOS</text>
           </g>
         )}
       </svg>
       
-      <div className="flex flex-col gap-1.5 max-h-[260px] overflow-auto pr-2">
+      <div className="flex flex-col gap-1 max-h-[200px] overflow-auto pr-2">
         {data.slice(0, 10).map((m, i) => (
           <div
             key={m.nome}
             onMouseEnter={() => setHoverIdx(i)}
             onMouseLeave={() => setHoverIdx(null)}
-            className="flex items-center justify-between gap-2 px-2 py-1 rounded transition-colors hover:bg-white/5 cursor-pointer"
+            className="flex items-center justify-between gap-2 px-1.5 py-0.5 rounded transition-colors hover:bg-white/5 cursor-pointer"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: m.color, boxShadow: hoverIdx === i ? `0 0 8px ${m.color}` : "none" }} />
-              <span className={`text-[11px] truncate ${hoverIdx === i ? "text-white font-semibold" : "text-slate-300"}`}>{m.nome}</span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color, boxShadow: hoverIdx === i ? `0 0 8px ${m.color}` : "none" }} />
+              <span className={`text-[10px] truncate ${hoverIdx === i ? "text-white font-semibold" : "text-slate-300"}`}>{m.nome}</span>
             </div>
-            <span className={`text-[11px] font-semibold ${hoverIdx === i ? "text-white" : "text-slate-200"}`}>{m.qtd}</span>
+            <span className={`text-[10px] font-semibold ${hoverIdx === i ? "text-white" : "text-slate-200"}`}>{m.qtd}</span>
           </div>
         ))}
       </div>
@@ -329,8 +329,8 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
 const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 500; const svgH = 240;
-  const padL = 45; const padR = 18; const padTop = 18; const padBot = 28;
+  const svgW = 480; const svgH = 200;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 25;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -447,8 +447,8 @@ const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: bool
 const AgeCostChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 500; const svgH = 240;
-  const padL = 45; const padR = 18; const padTop = 18; const padBot = 28;
+  const svgW = 480; const svgH = 200;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 25;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
