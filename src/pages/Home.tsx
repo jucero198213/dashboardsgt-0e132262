@@ -299,6 +299,7 @@ export default function Home() {
     },
     {
   key: "frota",
+  icon: Car,
   title: "Frota",
   description: "Cadastro de veículos, custo de manutenção por veículo, idade da frota e validações analíticas.",
   cta: "Acessar frota",
