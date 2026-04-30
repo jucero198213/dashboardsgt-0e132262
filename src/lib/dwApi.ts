@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// dwApi.ts  –  Client para a API de dados financeiros
+// dwApi.ts  –  Client para a API de dados financeiros + frota + manutenção
 //
 // Prioridade de URL:
 //   1. VITE_DW_API_URL  (variável de ambiente definida no .env do Lovable)
@@ -13,14 +13,6 @@ const SUPABASE_ANON_KEY =
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
-// Prioridade:
-//   1. VITE_DW_API_URL  (variável de ambiente Lovable — Project Settings → Env Vars)
-//   2. TUNNEL_URL       (Cloudflare Tunnel ativo — atualizar aqui quando reiniciar)
-//   3. Supabase Edge    (fallback — apenas se LOCAL_API_URL for null)
-//
-// Para configurar permanentemente no Lovable (sem editar código):
-//   Project → Settings → Environment Variables → VITE_DW_API_URL = <tunnel url>
-
 const TUNNEL_URL = "https://postcards-contractors-very-rated.trycloudflare.com";
 
 const LOCAL_API_URL =
@@ -33,13 +25,22 @@ const LOCAL_API_URL =
   ).env?.VITE_DW_API_URL ?? undefined) ||
   TUNNEL_URL;
 
-const ENDPOINT = LOCAL_API_URL
+// Endpoints
+const ENDPOINT_FINANCEIRO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-financeiro`
   : `${SUPABASE_URL}/functions/v1/dw-financeiro`;
 
+const ENDPOINT_FROTA = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-frota`
+  : `${SUPABASE_URL}/functions/v1/dw-frota`;
+
+const ENDPOINT_MANUTENCAO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-manutencao`
+  : `${SUPABASE_URL}/functions/v1/dw-manutencao`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
 
 export interface FilterOption {
   id: string;
@@ -66,19 +67,19 @@ export interface DwRow {
   SITUACAO: string | null;
   VLRDOC: number | null;
   VLR_LIQUIDO: number | null;
-  VLRJUR: number | null;    // juros
-  VLRDES: number | null;    // descontos
-  DESADT: number | null;    // adiantamento (DESADT — só em CR)
+  VLRJUR: number | null;
+  VLRDES: number | null;
+  DESADT: number | null;
   VLR_PAGO: number | null;
   VLR_PARCELA: number | null;
-  VLR_PAR_RAW: number | null;   // I.VLRPAR sem multiplicação de rateio (dedupe safe)
-  VLR_REC_RAW: number | null;   // I.VLRREC+I.DESADT sem rateio (CR) / I.VLRPAG (CP)
+  VLR_PAR_RAW: number | null;
+  VLR_REC_RAW: number | null;
   FILIAL: string | null;
   EMPRESA: string | null;
   CODCGA: string | null;
   CENTRO_GASTO: string | null;
-  CODCUS: string | null;     // código numérico do centro de custo (ex: "21", "3")
-  CENTRO_CUSTO: string | null; // descrição textual do centro de custo
+  CODCUS: string | null;
+  CENTRO_CUSTO: string | null;
   SINTETICA: string | null;
   ANALITICA: string | null;
 }
@@ -97,20 +98,93 @@ export interface FaturamentoResponse {
   data: FaturamentoRow[];
 }
 
+// ─── Tipos: FROTA ─────────────────────────────────────────────────────────────
+
+export interface FrotaRow {
+  codvei: string | number;
+  chassi: string | null;
+  tipvei: string | null;
+  codfro: string | number | null;
+  frota: string | null;
+  codmcv: string | number | null;
+  marca: string | null;
+  codmdv: string | number | null;
+  modelo: string | null;
+  codmun: string | number | null;
+  municipio: string | null;
+  situacao: "ATIVO" | "BAIXADO" | "INATIVO";
+  codcmo: string | number | null;
+  classificacao: string | null;
+  anofab: number | null;
+  anomod: number | null;
+  tipcar: string | null;
+  numeix: number | null;
+  altura: number | null;
+  largur: number | null;
+  compri: number | null;
+  qtdlit: number | null;
+  tarakg: number | null;
+  lotaca: number | null;
+  pesbru: number | null;
+  qtdpne: number | null;
+  propri: string | null;
+  datinc: string | null;
+}
+
+export interface FrotaResponse {
+  data: FrotaRow[];
+}
+
+// ─── Tipos: MANUTENCAO ────────────────────────────────────────────────────────
+
+export interface ManutencaoRow {
+  filial: string | null;
+  ordem: string | number | null;
+  tiposervico: "SERVICOEXTERNO" | "SERVICOINTERNO" | null;
+  situacao: "INCONSISTENTE" | "ANDAMENTO" | "CANCELADO" | "CONCLUIDO" | null;
+  motorista: string | null;
+  conjunto: string | null;
+  funcionario: string | null;
+  setor: string | null;
+  classificacao: string | null;
+  codigoprod: string | null;
+  tipoprod: "SERVICO" | "PRODUTO" | "PRODUTOGARANTIA" | "PLANOMANUTENCAO" | null;
+  produto: string | null;
+  subgrupo: string | null;
+  qtd: number | null;
+  custo: number | null;
+  baixa: string | null;
+  fornecedor: string | null;
+  solicitacao: string | null;
+  observacao: string | null;
+  veiculo: string | number | null; // CODVEI = chave de cruzamento com frota
+  dataordem: string | null;
+  valormo: number | null;
+  valormo2: number | null;
+  valorpc: number | null;
+  valorpc2: number | null;
+}
+
+export interface ManutencaoResponse {
+  data: ManutencaoRow[];
+}
+
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
-async function callEdge<T>(body: Record<string, unknown>): Promise<T> {
+async function callEdge<T>(
+  endpoint: string,
+  body: Record<string, unknown>
+): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  // Só envia auth header quando for Supabase (não necessário na API local)
   if (!IS_LOCAL) {
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
     headers["apikey"] = SUPABASE_ANON_KEY;
   }
 
-  const res = await fetch(ENDPOINT, {
+  const res = await fetch(endpoint, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
@@ -125,29 +199,58 @@ async function callEdge<T>(body: Record<string, unknown>): Promise<T> {
   return json as T;
 }
 
-// ─── Exports públicos ─────────────────────────────────────────────────────────
+// ─── Exports públicos: FINANCEIRO ─────────────────────────────────────────────
 
-/** Retorna as listas de empresas e filiais disponíveis no DW */
 export async function loadDwFilters(): Promise<DwFiltersResponse> {
-  return callEdge<DwFiltersResponse>({ action: "filters" });
+  return callEdge<DwFiltersResponse>(ENDPOINT_FINANCEIRO, { action: "filters" });
 }
 
-/** Executa a query principal dos 4 UNIONs com filtros */
 export async function fetchDwData(params: {
   dataInicio: string;
   dataFim: string;
   filial?: string | null;
   empresa?: string | null;
 }): Promise<DwFetchResponse> {
-  return callEdge<DwFetchResponse>({ action: "fetch", ...params });
+  return callEdge<DwFetchResponse>(ENDPOINT_FINANCEIRO, {
+    action: "fetch",
+    ...params,
+  });
 }
 
-/** Busca faturamento por grupo de cliente (VW_FAT_ICMS) */
 export async function fetchFaturamento(params: {
   dataInicio: string;
   dataFim: string;
   filial?: string | null;
   empresa?: string | null;
 }): Promise<FaturamentoResponse> {
-  return callEdge<FaturamentoResponse>({ action: "faturamento", ...params });
+  return callEdge<FaturamentoResponse>(ENDPOINT_FINANCEIRO, {
+    action: "faturamento",
+    ...params,
+  });
+}
+
+// ─── Exports públicos: FROTA ──────────────────────────────────────────────────
+
+/**
+ * Busca o cadastro completo de veículos da frota.
+ * Por padrão retorna todos. Use `situacao` para filtrar no servidor.
+ */
+export async function fetchFrota(params?: {
+  situacao?: "ATIVO" | "BAIXADO" | "INATIVO";
+}): Promise<FrotaResponse> {
+  return callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {});
+}
+
+// ─── Exports públicos: MANUTENCAO ─────────────────────────────────────────────
+
+/**
+ * Busca as ordens de manutenção do período.
+ * Defaults no servidor: dataInicio = 2024-01-01, dataFim = hoje.
+ */
+export async function fetchManutencao(params?: {
+  dataInicio?: string;
+  dataFim?: string;
+  filial?: string | null;
+}): Promise<ManutencaoResponse> {
+  return callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {});
 }

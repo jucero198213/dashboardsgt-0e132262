@@ -93,6 +93,11 @@ export function MobileNav() {
       bg: "bg-orange-400/10 border-orange-400/20",
       show: true,
     },
+    {
+      to: "/frota",
+      label: "Gestão de Frota",
+      icon: Truck, // já importado
+    },
   ];
 
   const initials = (user?.email ?? "U")[0].toUpperCase();
