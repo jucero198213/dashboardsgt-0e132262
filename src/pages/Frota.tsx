@@ -856,7 +856,7 @@ export default function Frota() {
                     Array.from({ length: 8 }).map((_, i) => (
                       <tr key={i} className="border-t border-[var(--sgt-border-subtle)]">
                         {COLS.map((c, j) => (
-                          <td key={j} className="px-3 py-2.5"><Skel h="h-3" /></td>
+                          <td key={j} className="px-3 py-2.5"><div className="h-3 w-full animate-pulse rounded bg-[var(--sgt-border-subtle)]" /></td>
                         ))}
                       </tr>
                     ))
