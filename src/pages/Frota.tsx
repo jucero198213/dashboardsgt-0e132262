@@ -25,6 +25,7 @@ import {
   fetchFrota, fetchManutencao,
   type FrotaRow, type ManutencaoRow
 } from "@/lib/dwApi";
+import { RAW } from "@/lib/theme";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -44,18 +45,24 @@ const fmtData = (s: string | null) => {
   return d.toLocaleDateString("pt-BR");
 };
 
-// ─── Cores por Marca ──────────────────────────────────────────────────────────
+// ─── Cores por Marca (alinhadas ao theme.ts) ─────────────────────────────────
+const hexToRgb = (hex: string) => {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+};
+
 const MARCA_COLORS: Record<string, { color: string; rgb: string }> = {
-  SCANIA:          { color: "#22d3ee", rgb: "34,211,238" },
-  VOLVO:           { color: "#a78bfa", rgb: "167,139,250" },
-  MERCEDES:        { color: "#94a3b8", rgb: "148,163,184" },
-  "MERCEDES-BENZ": { color: "#94a3b8", rgb: "148,163,184" },
-  VOLKSWAGEN:      { color: "#60a5fa", rgb: "96,165,250" },
-  VW:              { color: "#60a5fa", rgb: "96,165,250" },
-  FORD:            { color: "#3b82f6", rgb: "59,130,246" },
-  IVECO:           { color: "#f87171", rgb: "248,113,113" },
-  DAF:             { color: "#fbbf24", rgb: "251,191,36" },
-  MAN:             { color: "#fb923c", rgb: "251,146,60" },
+  SCANIA:          { color: RAW.accent.cyan,    rgb: hexToRgb(RAW.accent.cyan) },
+  VOLVO:           { color: RAW.accent.violet,  rgb: hexToRgb(RAW.accent.violet) },
+  MERCEDES:        { color: "#94a3b8",          rgb: "148,163,184" },
+  "MERCEDES-BENZ": { color: "#94a3b8",          rgb: "148,163,184" },
+  VOLKSWAGEN:      { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
+  VW:              { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
+  FORD:            { color: RAW.accent.rose,    rgb: hexToRgb(RAW.accent.rose) },
+  IVECO:           { color: RAW.accent.red,     rgb: hexToRgb(RAW.accent.red) },
+  DAF:             { color: RAW.accent.amber,   rgb: hexToRgb(RAW.accent.amber) },
+  MAN:             { color: "#fb923c",          rgb: "251,146,60" },
 };
 
 function getMarcaColor(marca: string | null) {
@@ -64,20 +71,24 @@ function getMarcaColor(marca: string | null) {
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
 
-// ─── Paleta determinística (classificação, faixas etc.) ───────────────────────
+// ─── Paleta determinística usando tokens do theme ─────────────────────────────
 const PALETTE = [
-  "#22d3ee", "#a78bfa", "#fbbf24", "#f87171",
-  "#34d399", "#60a5fa", "#fb923c", "#f472b6",
+  RAW.accent.cyan,
+  RAW.accent.violet,
+  RAW.accent.amber,
+  RAW.accent.emerald,
+  RAW.accent.rose,
+  RAW.accent.red,
 ];
-const colorFor = (key: string, i: number) => PALETTE[i % PALETTE.length];
+const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
 
-// Cor por faixa de idade (verde → vermelho conforme envelhece)
+// Cor por faixa de idade (verde → vermelho — semântica de envelhecimento)
 const IDADE_COLORS: Record<string, string> = {
-  "0-3":   "#34d399",
-  "4-7":   "#22d3ee",
-  "8-11":  "#fbbf24",
+  "0-3":   RAW.accent.emerald,
+  "4-7":   RAW.accent.cyan,
+  "8-11":  RAW.accent.amber,
   "12-15": "#fb923c",
-  "16+":   "#f87171",
+  "16+":   RAW.accent.red,
 };
 
 // ─── Cores por Situação ───────────────────────────────────────────────────────
