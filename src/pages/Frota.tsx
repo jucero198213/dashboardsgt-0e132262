@@ -6,11 +6,6 @@ import {
   CheckCircle2, AlertCircle, DollarSign, Hash, X,
   ChevronLeft, ChevronRight
 } from "lucide-react";
-import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  Tooltip as ReTooltip, CartesianGrid, LineChart, Line,
-  PieChart, Pie, Cell
-} from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -117,6 +112,432 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
         </p>
       ))}
     </div>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 1: Top 10 Barras Horizontais ────────────────────────────
+const Top10MaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 680; const svgH = 310;
+  const padL = 160; const padR = 80; const padTop = 20; const padBot = 20;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  const maxVal = data.length > 0 ? Math.max(...data.map(d => d.custo)) * 1.1 : 1;
+  const barH = data.length > 0 ? (chartH - (data.length - 1) * 8) / data.length : 0;
+  
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : fmtBRL(v);
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+          <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
+          </svg>
+        </div>
+        <p className="text-[11px] text-slate-500">Sem dados de manutenção</p>
+      </div>
+    );
+  }
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`bar-grad-${i}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={d.fill} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={d.fill} stopOpacity="0.75" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Grid vertical */}
+      {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => {
+        const x = padL + chartW * frac;
+        const val = maxVal * frac;
+        return (
+          <g key={i}>
+            <line x1={x} y1={padTop} x2={x} y2={svgH - padBot} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={x} y={svgH - padBot + 14} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">
+                {fmtK(val)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const y = padTop + i * (barH + 8);
+        const w = (d.custo / maxVal) * chartW;
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+            {/* Label esquerda */}
+            <text x={padL - 8} y={y + barH / 2 + 3} fill="#cbd5e1" fontSize="10" fontWeight="500" textAnchor="end">
+              {d.nome}
+            </text>
+            
+            {/* Barra */}
+            <rect
+              x={padL} y={y} width={w} height={barH} rx="3"
+              fill={`url(#bar-grad-${i})`}
+              opacity={isHover ? 1 : 0.88}
+              style={{ transition: "opacity 0.2s, transform 0.2s" }}
+            />
+            
+            {/* Valor direita */}
+            <text x={padL + w + 6} y={y + barH / 2 + 3} fill={d.fill} fontSize="10" fontWeight="600">
+              {fmtK(d.custo)}
+            </text>
+            
+            {/* Tooltip hover */}
+            {isHover && (
+              <g>
+                <rect x={padL + w / 2 - 70} y={y - 28} width="140" height="24" rx="4" fill="rgba(2,6,23,0.95)" stroke="rgba(251,191,36,0.3)" strokeWidth="1" />
+                <text x={padL + w / 2} y={y - 12} fill="#fbbf24" fontSize="9" fontWeight="600" textAnchor="middle">
+                  {fmtBRL(d.custo)} • {d.ordens} ordens
+                </text>
+              </g>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 2: Donut com Legenda ────────────────────────────────────
+const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 1 0 20" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const total = data.reduce((s, d) => s + d.qtd, 0);
+  let acc = 0;
+  const slices = data.map(d => {
+    const pct = d.qtd / total;
+    const start = acc;
+    acc += pct;
+    return { ...d, start, pct };
+  });
+  
+  const cx = 140, cy = 140, r = 90, rInner = 55;
+  
+  const getPath = (start: number, pct: number) => {
+    const a1 = start * 2 * Math.PI - Math.PI / 2;
+    const a2 = (start + pct) * 2 * Math.PI - Math.PI / 2;
+    const x1 = cx + r * Math.cos(a1);
+    const y1 = cy + r * Math.sin(a1);
+    const x2 = cx + r * Math.cos(a2);
+    const y2 = cy + r * Math.sin(a2);
+    const x3 = cx + rInner * Math.cos(a2);
+    const y3 = cy + rInner * Math.sin(a2);
+    const x4 = cx + rInner * Math.cos(a1);
+    const y4 = cy + rInner * Math.sin(a1);
+    const large = pct > 0.5 ? 1 : 0;
+    return `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${rInner},${rInner} 0 ${large},0 ${x4},${y4} Z`;
+  };
+  
+  return (
+    <div className="grid grid-cols-[280px_1fr] gap-4 h-full items-center">
+      <svg viewBox="0 0 280 280" className="w-full" onMouseLeave={() => setHoverIdx(null)}>
+        <defs>
+          {slices.map((s, i) => (
+            <filter key={i} id={`glow-${i}`}>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          ))}
+        </defs>
+        
+        {slices.map((s, i) => {
+          const isHover = hoverIdx === i;
+          const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
+          const offset = isHover ? 6 : 0;
+          const tx = offset * Math.cos(midAngle);
+          const ty = offset * Math.sin(midAngle);
+          
+          return (
+            <g key={i} transform={`translate(${tx},${ty})`} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+              <path
+                d={getPath(s.start, s.pct)}
+                fill={s.color}
+                opacity={isHover ? 1 : 0.85}
+                stroke="rgba(2,6,23,0.8)"
+                strokeWidth="2"
+                filter={isHover ? `url(#glow-${i})` : undefined}
+                style={{ transition: "all 0.25s" }}
+              />
+              {isHover && (
+                <g>
+                  <text x={cx} y={cy - 4} fill="white" fontSize="22" fontWeight="700" textAnchor="middle">{s.qtd}</text>
+                  <text x={cx} y={cy + 12} fill="#94a3b8" fontSize="10" fontWeight="500" textAnchor="middle">{s.nome}</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+        
+        {hoverIdx === null && (
+          <g>
+            <text x={cx} y={cy - 4} fill="white" fontSize="24" fontWeight="800" textAnchor="middle">{total}</text>
+            <text x={cx} y={cy + 12} fill="#64748b" fontSize="10" fontWeight="500" textAnchor="middle">VEÍCULOS</text>
+          </g>
+        )}
+      </svg>
+      
+      <div className="flex flex-col gap-1.5 max-h-[260px] overflow-auto pr-2">
+        {data.slice(0, 10).map((m, i) => (
+          <div
+            key={m.nome}
+            onMouseEnter={() => setHoverIdx(i)}
+            onMouseLeave={() => setHoverIdx(null)}
+            className="flex items-center justify-between gap-2 px-2 py-1 rounded transition-colors hover:bg-white/5 cursor-pointer"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: m.color, boxShadow: hoverIdx === i ? `0 0 8px ${m.color}` : "none" }} />
+              <span className={`text-[11px] truncate ${hoverIdx === i ? "text-white font-semibold" : "text-slate-300"}`}>{m.nome}</span>
+            </div>
+            <span className={`text-[11px] font-semibold ${hoverIdx === i ? "text-white" : "text-slate-200"}`}>{m.qtd}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 3: Linha Mensal com Área ────────────────────────────────
+const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 560; const svgH = 260;
+  const padL = 50; const padR = 20; const padTop = 20; const padBot = 30;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.custo)) * 1.15;
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const toX = (i: number) => padL + (i / Math.max(data.length - 1, 1)) * chartW;
+  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+  
+  const buildPath = () => {
+    if (data.length < 2) return "";
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
+  };
+  
+  const buildArea = () => {
+    if (data.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(data.length - 1)},${base} L${toX(0)},${base} Z`;
+    return d;
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      
+      {/* Grid */}
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        const val = maxVal * frac;
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmtK(val)}</text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Área */}
+      <path d={buildArea()} fill="url(#monthly-area)" />
+      
+      {/* Linha */}
+      <path d={buildPath()} stroke="#fbbf24" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      
+      {/* Labels meses */}
+      {data.map((d, i) => (
+        <text key={i} x={toX(i)} y={svgH - padBot + 18} fill="#94a3b8" fontSize="10" fontWeight="500" textAnchor="middle">
+          {d.mes}
+        </text>
+      ))}
+      
+      {/* Pontos hover */}
+      {data.map((d, i) => {
+        const x = toX(i);
+        const y = toY(d.custo);
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)}>
+            <circle cx={x} cy={y} r="12" fill="transparent" style={{ cursor: "pointer" }} />
+            {isHover && (
+              <>
+                <circle cx={x} cy={y} r="4" fill="#fbbf24" stroke="rgba(2,6,23,0.8)" strokeWidth="2" />
+                <circle cx={x} cy={y} r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.4" />
+                <rect x={x - 60} y={y - 38} width="120" height="28" rx="4" fill="rgba(2,6,23,0.95)" stroke="rgba(251,191,36,0.3)" strokeWidth="1" />
+                <text x={x} y={y - 24} fill="#fbbf24" fontSize="9" fontWeight="500" textAnchor="middle">{d.mes}</text>
+                <text x={x} y={y - 14} fill="white" fontSize="11" fontWeight="700" textAnchor="middle">{fmtBRL(d.custo)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 4: Barras Verticais por Idade ───────────────────────────
+const AgeCostChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 560; const svgH = 260;
+  const padL = 50; const padR = 20; const padTop = 20; const padBot = 30;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M3 3v18h18" /><rect x="7" y="10" width="3" height="7" /><rect x="14" y="5" width="3" height="12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.medio)) * 1.15;
+  const barW = (chartW - (data.length - 1) * 12) / data.length;
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const colors: Record<string, string> = {
+    "0-3": "#10b981",
+    "4-7": "#06b6d4",
+    "8-11": "#fbbf24",
+    "12-15": "#fb923c",
+    "16+": "#f43f5e",
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`age-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.7" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Grid */}
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        const val = maxVal * frac;
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmtK(val)}</text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const x = padL + i * (barW + 12);
+        const h = (d.medio / maxVal) * chartH;
+        const y = padTop + chartH - h;
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+            <rect
+              x={x} y={y} width={barW} height={h} rx="4"
+              fill={`url(#age-grad-${i})`}
+              opacity={isHover ? 1 : 0.88}
+              stroke={isHover ? colors[d.faixa] : "none"}
+              strokeWidth="2"
+              style={{ transition: "all 0.2s" }}
+            />
+            
+            <text x={x + barW / 2} y={svgH - padBot + 18} fill="#94a3b8" fontSize="10" fontWeight="600" textAnchor="middle">
+              {d.faixa}
+            </text>
+            
+            {isHover && (
+              <>
+                <rect x={x + barW / 2 - 60} y={y - 38} width="120" height="28" rx="4" fill="rgba(2,6,23,0.95)" stroke={`${colors[d.faixa]}60`} strokeWidth="1" />
+                <text x={x + barW / 2} y={y - 24} fill={colors[d.faixa]} fontSize="9" fontWeight="500" textAnchor="middle">{d.faixa} anos</text>
+                <text x={x + barW / 2} y={y - 14} fill="white" fontSize="11" fontWeight="700" textAnchor="middle">{fmtBRL(d.medio)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
   );
 };
 
@@ -550,85 +971,28 @@ export default function Frota() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
               {/* Top 10 custo */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3">
+                <div className="flex h-full flex-col p-3 overflow-hidden">
                   <div className="mb-2 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Top 10 · Custo de Manutenção
                     </span>
                   </div>
-                  <div style={{ height: 280 }}>
-                    {top10Custo.length === 0 ? (
-                      <div className="flex h-full items-center justify-center text-[12px] text-slate-500">
-                        Sem dados de manutenção
-                      </div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={top10Custo} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" horizontal={false} />
-                          <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                          <YAxis type="category" dataKey="nome" tick={{ fill: "#cbd5e1", fontSize: 10 }} width={150} />
-                          <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                          <Bar dataKey="custo" radius={[0, 4, 4, 0]}>
-                            {top10Custo.map((entry, idx) => (
-                              <Cell key={idx} fill={entry.fill} fillOpacity={0.85} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    )}
+                  <div className="flex-1 min-h-0">
+                    <Top10MaintenanceChart data={top10Custo} isEmpty={top10Custo.length === 0} />
                   </div>
                 </div>
               </div>
 
               {/* Distribuição por marca */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3">
+                <div className="flex h-full flex-col p-3 overflow-hidden">
                   <div className="mb-2 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Distribuição por Marca
                     </span>
                   </div>
-                  <div style={{ height: 280 }} className="flex items-center">
-                    {distMarca.length === 0 ? (
-                      <div className="flex w-full h-full items-center justify-center text-[12px] text-slate-500">
-                        Sem dados
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 w-full h-full items-center">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={distMarca}
-                              dataKey="qtd"
-                              nameKey="nome"
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={50}
-                              outerRadius={90}
-                              paddingAngle={2}
-                              stroke="rgba(2,6,23,0.6)"
-                              strokeWidth={2}
-                            >
-                              {distMarca.map((d, i) => (
-                                <Cell key={i} fill={d.color} />
-                              ))}
-                            </Pie>
-                            <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => `${name}: ${fmtNum(v)} veíc.`} />} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
-                          {distMarca.slice(0, 8).map((m) => (
-                            <div key={m.nome} className="flex items-center justify-between gap-2 text-[11px]">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color }} />
-                                <span className="truncate text-slate-300">{m.nome}</span>
-                              </div>
-                              <span className="font-semibold text-slate-200">{m.qtd}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex-1 min-h-0">
+                    <BrandDistributionChart data={distMarca} isEmpty={distMarca.length === 0} />
                   </div>
                 </div>
               </div>
@@ -638,58 +1002,28 @@ export default function Frota() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
               {/* Custo por mês */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3">
+                <div className="flex h-full flex-col p-3 overflow-hidden">
                   <div className="mb-2 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Custo de Manutenção · Mensal
                     </span>
                   </div>
-                  <div style={{ height: 240 }}>
-                    {custoPorMes.length === 0 ? (
-                      <div className="flex h-full items-center justify-center text-[12px] text-slate-500">Sem dados</div>
-                    ) : (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={custoPorMes} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                          <defs>
-                            <linearGradient id="custoLine" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
-                              <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                          <XAxis dataKey="mes" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                          <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                          <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                          <Line type="monotone" dataKey="custo" stroke="#fbbf24" strokeWidth={2} dot={{ fill: "#fbbf24", r: 3 }} activeDot={{ r: 5 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    )}
+                  <div className="flex-1 min-h-0">
+                    <MonthlyMaintenanceChart data={custoPorMes} isEmpty={custoPorMes.length === 0} />
                   </div>
                 </div>
               </div>
 
               {/* Custo médio por idade */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3">
+                <div className="flex h-full flex-col p-3 overflow-hidden">
                   <div className="mb-2 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Custo Médio · Faixa de Idade
                     </span>
                   </div>
-                  <div style={{ height: 240 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={custoPorIdade} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                        <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                        <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
-                        <Bar dataKey="medio" radius={[6, 6, 0, 0]} fillOpacity={0.9}>
-                          {custoPorIdade.map((d) => (
-                            <Cell key={d.faixa} fill={IDADE_COLORS[d.faixa] ?? "#a78bfa"} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="flex-1 min-h-0">
+                    <AgeCostChart data={custoPorIdade} isEmpty={false} />
                   </div>
                 </div>
               </div>
