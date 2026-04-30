@@ -483,29 +483,23 @@ export default function Frota() {
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">DW Conectado</span>
               </div>
 
-              <div className="flex-1" />
+              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Filtros desktop */}
-              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
-                <SelectTrigger className="h-8 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ATIVO">Ativos</SelectItem>
-                  <SelectItem value="BAIXADO">Baixados</SelectItem>
-                  <SelectItem value="INATIVO">Inativos</SelectItem>
-                  <SelectItem value="TODOS">Todos</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <button
-                onClick={carregarDados}
-                disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-medium transition-all border-amber-400/30 bg-amber-400/[0.12] text-amber-200 hover:border-amber-400/50 hover:bg-amber-400/[0.2] disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-                {loading ? `${progress}%` : "Atualizar"}
-              </button>
+              {/* Filtros padronizados (idênticos a Faturamento) */}
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} />
+              </div>
 
               <HomeButton />
             </div>
