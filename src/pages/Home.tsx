@@ -265,9 +265,9 @@ export default function Home() {
       key: "compras",
       icon: ShoppingCart,
       title: "Compras",
-      description: "Pedidos de compra, fornecedores, cotações e controle de estoque.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/compras"),
+      description: "Notas fiscais de entrada, fornecedores, grupos de produtos e centro de custo.",
+      cta: "Acessar compras",
+      onClick: () => navigate("/compras"),
       tone: "amber" as const,
     },
     {
