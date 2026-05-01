@@ -248,8 +248,8 @@ export default function Home() {
       icon: CreditCard,
       title: "Contas a Pagar",
       description: "Controle e gestão dos títulos a pagar, vencimentos e fluxo de caixa.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/contas-a-pagar"),
+      cta: "Acessar contas a pagar",
+      onClick: () => navigate("/contas-a-pagar"),
       tone: "rose" as const,
     },
     {
@@ -257,8 +257,8 @@ export default function Home() {
       icon: Receipt,
       title: "Contas a Receber",
       description: "Acompanhe títulos em aberto, recebimentos e inadimplência dos clientes.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/contas-a-receber"),
+      cta: "Acessar contas a receber",
+      onClick: () => navigate("/contas-a-receber"),
       tone: "emerald" as const,
     },
     {
