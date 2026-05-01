@@ -96,7 +96,10 @@ export function MobileNav() {
     {
       to: "/frota",
       label: "Gestão de Frota",
-      icon: Truck, // já importado
+      icon: Truck,
+      color: "text-cyan-300",
+      bg: "bg-cyan-400/10 border-cyan-400/20",
+      show: true,
     },
   ];
 
