@@ -21,6 +21,7 @@ import Faturamento from "./pages/Faturamento";
 import EmDesenvolvimento from "./pages/EmDesenvolvimento";
 import Frota from "./pages/Frota";
 import Manutencao from "./pages/Manutencao";
+import Compras from "./pages/Compras";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><EmDesenvolvimento /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
+              <Route path="/compras" element={<ProtectedRoute><Compras /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>
