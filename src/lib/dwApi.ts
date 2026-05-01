@@ -38,6 +38,10 @@ const ENDPOINT_MANUTENCAO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-manutencao`
   : `${SUPABASE_URL}/functions/v1/dw-manutencao`;
 
+const ENDPOINT_COMPRAS = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-compras`
+  : `${SUPABASE_URL}/functions/v1/dw-compras`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -169,6 +173,33 @@ export interface ManutencaoResponse {
   data: ManutencaoRow[];
 }
 
+// ─── Tipos: COMPRAS ───────────────────────────────────────────────────────────
+
+export interface ComprasRow {
+  sub_grupo:     string | null;
+  codsgp:        string | number | null;
+  tiponf:        string | null;
+  serie:         string | null;
+  data_compra:   string | null;
+  pedido:        string | number | null;
+  nota_fiscal:   string | number | null;
+  situac:        string | null;
+  codcus:        string | number | null;
+  centro_custo:  string | null;
+  codgpp:        string | number | null;
+  grupo:         string | null;
+  codprod:       string | number | null;
+  produto:       string | null;
+  quantidade:    number | null;
+  valor_un:      number | null;
+  codclifor:     string | number | null;
+  fornecedor:    string | null;
+}
+
+export interface ComprasResponse {
+  data: ComprasRow[];
+}
+
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 async function callEdge<T>(
@@ -253,4 +284,13 @@ export async function fetchManutencao(params?: {
   filial?: string | null;
 }): Promise<ManutencaoResponse> {
   return callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {});
+}
+
+// ─── Exports públicos: COMPRAS ────────────────────────────────────────────────
+
+export async function fetchCompras(params?: {
+  dataInicio?: string;
+  dataFim?: string;
+}): Promise<ComprasResponse> {
+  return callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {});
 }
