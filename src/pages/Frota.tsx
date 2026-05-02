@@ -124,8 +124,8 @@ const Top10Chart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   const isEmpty = data.length === 0;
   
-  const svgW = 560; const svgH = 290;
-  const padL = 150; const padR = 70; const padTop = 20; const padBot = 15;
+  const svgW = 560; const svgH = 320;
+  const padL = 150; const padR = 70; const padTop = 20; const padBot = 20;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -235,7 +235,7 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
     return { ...d, start, pct };
   });
   
-  const cx = 110, cy = 110, r = 72, rInner = 45;
+  const cx = 130, cy = 130, r = 85, rInner = 52;
   
   const getPath = (start: number, pct: number) => {
     const a1 = start * 2 * Math.PI - Math.PI / 2;
@@ -249,8 +249,8 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <div className="grid grid-cols-[220px_1fr] gap-3 h-full items-center">
-      <svg viewBox="0 0 220 220" className="w-full" onMouseLeave={() => setHover(null)}>
+    <div className="grid grid-cols-[260px_1fr] gap-3 h-full items-center">
+      <svg viewBox="0 0 260 260" className="w-full" onMouseLeave={() => setHover(null)}>
         {slices.map((s, i) => {
           const isHover = hover === i;
           const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
@@ -299,8 +299,8 @@ const MonthlyMaintenanceChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   const isEmpty = data.length === 0;
   
-  const svgW = 480; const svgH = 200;
-  const padL = 50; const padR = 18; const padTop = 18; const padBot = 26;
+  const svgW = 520; const svgH = 230;
+  const padL = 55; const padR = 20; const padTop = 20; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -402,8 +402,8 @@ const AgeCostChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   const isEmpty = data.length === 0;
   
-  const svgW = 480; const svgH = 200;
-  const padL = 50; const padR = 18; const padTop = 18; const padBot = 26;
+  const svgW = 520; const svgH = 230;
+  const padL = 55; const padR = 20; const padTop = 20; const padBot = 30;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -905,7 +905,7 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[310px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[340px]">
               {/* Top 10 custo */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
@@ -936,7 +936,7 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[220px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[250px]">
               {/* Custo por mês */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
