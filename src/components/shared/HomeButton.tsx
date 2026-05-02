@@ -205,7 +205,7 @@ export function HomeButton() {
               </p>
             </div>
 
-            <div className="max-h-[320px] overflow-y-auto px-2 pb-2">
+            <div className="px-2 pb-2">
               {visible.map((item) => {
                 const Icon = item.icon;
                 return (
