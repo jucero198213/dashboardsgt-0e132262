@@ -1675,7 +1675,7 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
                     {/* RECEBIDO */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                    <div onClick={() => navigate("/contas-a-receber")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_55%)]" />
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
@@ -1746,7 +1746,7 @@ const Index = () => {
                     </div>
 
                     {/* PAGO */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                    <div onClick={() => navigate("/contas-a-pagar")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.10),transparent_55%)]" />
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
