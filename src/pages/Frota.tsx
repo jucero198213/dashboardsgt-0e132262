@@ -119,8 +119,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 const Top10MaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 520; const svgH = 220;
-  const padL = 130; const padR = 65; const padTop = 10; const padBot = 10;
+  const svgW = 520; const svgH = 180;
+  const padL = 130; const padR = 60; const padTop = 8; const padBot = 8;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -329,8 +329,8 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
 const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 200;
-  const padL = 42; const padR = 16; const padTop = 15; const padBot = 25;
+  const svgW = 480; const svgH = 160;
+  const padL = 40; const padR = 15; const padTop = 12; const padBot = 22;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -447,8 +447,8 @@ const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: bool
 const AgeCostChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 200;
-  const padL = 42; const padR = 16; const padTop = 15; const padBot = 25;
+  const svgW = 480; const svgH = 160;
+  const padL = 40; const padR = 15; const padTop = 12; const padBot = 22;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -968,11 +968,11 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[200px]">
               {/* Top 10 custo */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3 overflow-hidden">
-                  <div className="mb-2 flex items-center shrink-0">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Top 10 · Custo de Manutenção
                     </span>
@@ -984,9 +984,9 @@ export default function Frota() {
               </div>
 
               {/* Distribuição por marca */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3 overflow-hidden">
-                  <div className="mb-2 flex items-center shrink-0">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Distribuição por Marca
                     </span>
@@ -999,11 +999,11 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[180px]">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3 overflow-hidden">
-                  <div className="mb-2 flex items-center shrink-0">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Custo de Manutenção · Mensal
                     </span>
@@ -1015,9 +1015,9 @@ export default function Frota() {
               </div>
 
               {/* Custo médio por idade */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
-                <div className="flex h-full flex-col p-3 overflow-hidden">
-                  <div className="mb-2 flex items-center shrink-0">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                       Custo Médio · Faixa de Idade
                     </span>
