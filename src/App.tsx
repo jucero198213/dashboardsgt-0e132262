@@ -46,6 +46,7 @@ const App = () => (
               <Route path="/financiamento-frota" element={<ProtectedRoute><FinanciamentoFrota /></ProtectedRoute>} />
               <Route path="/faturamento" element={<ProtectedRoute><Faturamento /></ProtectedRoute>} />
               <Route path="/frota" element={<ProtectedRoute><Frota /></ProtectedRoute>} />
+              <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
               <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><EmDesenvolvimento /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />

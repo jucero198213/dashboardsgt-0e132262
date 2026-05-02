@@ -2,25 +2,22 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
-  Calendar, MapPin, ChevronUp, ChevronDown, BarChart3,
-  CheckCircle2, AlertCircle, Activity, DollarSign, Hash, X
+  Calendar, MapPin, ChevronUp, ChevronDown,
+  CheckCircle2, AlertCircle, DollarSign, Hash, X,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
-import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  Tooltip as ReTooltip, CartesianGrid, LineChart, Line,
-  PieChart, Pie, Cell
-} from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import {
-  fetchFrota, fetchManutencao,
-  type FrotaRow, type ManutencaoRow
-} from "@/lib/dwApi";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { type FrotaRow, type ManutencaoRow } from "@/lib/dwApi";
+import { RAW } from "@/lib/theme";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -40,18 +37,24 @@ const fmtData = (s: string | null) => {
   return d.toLocaleDateString("pt-BR");
 };
 
-// ─── Cores por Marca ──────────────────────────────────────────────────────────
+// ─── Cores por Marca (alinhadas ao theme.ts) ─────────────────────────────────
+const hexToRgb = (hex: string) => {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+};
+
 const MARCA_COLORS: Record<string, { color: string; rgb: string }> = {
-  SCANIA:          { color: "#22d3ee", rgb: "34,211,238" },
-  VOLVO:           { color: "#a78bfa", rgb: "167,139,250" },
-  MERCEDES:        { color: "#94a3b8", rgb: "148,163,184" },
-  "MERCEDES-BENZ": { color: "#94a3b8", rgb: "148,163,184" },
-  VOLKSWAGEN:      { color: "#60a5fa", rgb: "96,165,250" },
-  VW:              { color: "#60a5fa", rgb: "96,165,250" },
-  FORD:            { color: "#3b82f6", rgb: "59,130,246" },
-  IVECO:           { color: "#f87171", rgb: "248,113,113" },
-  DAF:             { color: "#fbbf24", rgb: "251,191,36" },
-  MAN:             { color: "#fb923c", rgb: "251,146,60" },
+  SCANIA:          { color: RAW.accent.cyan,    rgb: hexToRgb(RAW.accent.cyan) },
+  VOLVO:           { color: RAW.accent.violet,  rgb: hexToRgb(RAW.accent.violet) },
+  MERCEDES:        { color: "#94a3b8",          rgb: "148,163,184" },
+  "MERCEDES-BENZ": { color: "#94a3b8",          rgb: "148,163,184" },
+  VOLKSWAGEN:      { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
+  VW:              { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
+  FORD:            { color: RAW.accent.rose,    rgb: hexToRgb(RAW.accent.rose) },
+  IVECO:           { color: RAW.accent.red,     rgb: hexToRgb(RAW.accent.red) },
+  DAF:             { color: RAW.accent.amber,   rgb: hexToRgb(RAW.accent.amber) },
+  MAN:             { color: "#fb923c",          rgb: "251,146,60" },
 };
 
 function getMarcaColor(marca: string | null) {
@@ -59,6 +62,26 @@ function getMarcaColor(marca: string | null) {
   const key = Object.keys(MARCA_COLORS).find(k => marca.toUpperCase().includes(k));
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
+
+// ─── Paleta determinística usando tokens do theme ─────────────────────────────
+const PALETTE = [
+  RAW.accent.cyan,
+  RAW.accent.violet,
+  RAW.accent.amber,
+  RAW.accent.emerald,
+  RAW.accent.rose,
+  RAW.accent.red,
+];
+const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
+
+// Cor por faixa de idade (verde → vermelho — semântica de envelhecimento)
+const IDADE_COLORS: Record<string, string> = {
+  "0-3":   RAW.accent.emerald,
+  "4-7":   RAW.accent.cyan,
+  "8-11":  RAW.accent.amber,
+  "12-15": "#fb923c",
+  "16+":   RAW.accent.red,
+};
 
 // ─── Cores por Situação ───────────────────────────────────────────────────────
 const SITUACAO_STYLE: Record<string, { bg: string; text: string; ring: string }> = {
@@ -92,19 +115,443 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
   );
 };
 
+// ─── GRÁFICO PREMIUM 1: Top 10 Barras Horizontais ────────────────────────────
+const Top10MaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 520; const svgH = 210;
+  const padL = 130; const padR = 65; const padTop = 10; const padBot = 10;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  const maxVal = data.length > 0 ? Math.max(...data.map(d => d.custo)) * 1.1 : 1;
+  const barH = data.length > 0 ? (chartH - (data.length - 1) * 8) / data.length : 0;
+  
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : fmtBRL(v);
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+          <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
+          </svg>
+        </div>
+        <p className="text-[11px] text-slate-500">Sem dados de manutenção</p>
+      </div>
+    );
+  }
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`bar-grad-${i}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={d.fill} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={d.fill} stopOpacity="0.75" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Grid vertical */}
+      {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => {
+        const x = padL + chartW * frac;
+        const val = maxVal * frac;
+        return (
+          <g key={i}>
+            <line x1={x} y1={padTop} x2={x} y2={svgH - padBot} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={x} y={svgH - padBot + 14} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">
+                {fmtK(val)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const y = padTop + i * (barH + 8);
+        const w = (d.custo / maxVal) * chartW;
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+            {/* Label esquerda */}
+            <text x={padL - 8} y={y + barH / 2 + 3} fill="#cbd5e1" fontSize="10" fontWeight="500" textAnchor="end">
+              {d.nome}
+            </text>
+            
+            {/* Barra */}
+            <rect
+              x={padL} y={y} width={w} height={barH} rx="3"
+              fill={`url(#bar-grad-${i})`}
+              opacity={isHover ? 1 : 0.88}
+              style={{ transition: "opacity 0.2s, transform 0.2s" }}
+            />
+            
+            {/* Valor direita */}
+            <text x={padL + w + 6} y={y + barH / 2 + 3} fill={d.fill} fontSize="10" fontWeight="600">
+              {fmtK(d.custo)}
+            </text>
+            
+            {/* Tooltip hover */}
+            {isHover && (
+              <g>
+                <rect x={padL + w / 2 - 70} y={y - 28} width="140" height="24" rx="4" fill="rgba(2,6,23,0.95)" stroke="rgba(251,191,36,0.3)" strokeWidth="1" />
+                <text x={padL + w / 2} y={y - 12} fill="#fbbf24" fontSize="9" fontWeight="600" textAnchor="middle">
+                  {fmtBRL(d.custo)} • {d.ordens} ordens
+                </text>
+              </g>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 2: Donut com Legenda ────────────────────────────────────
+const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 1 0 20" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const total = data.reduce((s, d) => s + d.qtd, 0);
+  let acc = 0;
+  const slices = data.map(d => {
+    const pct = d.qtd / total;
+    const start = acc;
+    acc += pct;
+    return { ...d, start, pct };
+  });
+  
+  const cx = 100, cy = 100, r = 65, rInner = 40;
+  
+  const getPath = (start: number, pct: number) => {
+    const a1 = start * 2 * Math.PI - Math.PI / 2;
+    const a2 = (start + pct) * 2 * Math.PI - Math.PI / 2;
+    const x1 = cx + r * Math.cos(a1);
+    const y1 = cy + r * Math.sin(a1);
+    const x2 = cx + r * Math.cos(a2);
+    const y2 = cy + r * Math.sin(a2);
+    const x3 = cx + rInner * Math.cos(a2);
+    const y3 = cy + rInner * Math.sin(a2);
+    const x4 = cx + rInner * Math.cos(a1);
+    const y4 = cy + rInner * Math.sin(a1);
+    const large = pct > 0.5 ? 1 : 0;
+    return `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${rInner},${rInner} 0 ${large},0 ${x4},${y4} Z`;
+  };
+  
+  return (
+    <div className="grid grid-cols-[200px_1fr] gap-3 h-full items-center">
+      <svg viewBox="0 0 200 200" className="w-full" onMouseLeave={() => setHoverIdx(null)}>
+        <defs>
+          {slices.map((s, i) => (
+            <filter key={i} id={`glow-${i}`}>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          ))}
+        </defs>
+        
+        {slices.map((s, i) => {
+          const isHover = hoverIdx === i;
+          const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
+          const offset = isHover ? 6 : 0;
+          const tx = offset * Math.cos(midAngle);
+          const ty = offset * Math.sin(midAngle);
+          
+          return (
+            <g key={i} transform={`translate(${tx},${ty})`} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+              <path
+                d={getPath(s.start, s.pct)}
+                fill={s.color}
+                opacity={isHover ? 1 : 0.85}
+                stroke="rgba(2,6,23,0.8)"
+                strokeWidth="2"
+                filter={isHover ? `url(#glow-${i})` : undefined}
+                style={{ transition: "all 0.25s" }}
+              />
+              {isHover && (
+                <g>
+                  <text x={cx} y={cy - 2} fill="white" fontSize="16" fontWeight="700" textAnchor="middle">{s.qtd}</text>
+                  <text x={cx} y={cy + 9} fill="#94a3b8" fontSize="8" fontWeight="500" textAnchor="middle">{s.nome}</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+        
+        {hoverIdx === null && (
+          <g>
+            <text x={cx} y={cy - 2} fill="white" fontSize="18" fontWeight="800" textAnchor="middle">{total}</text>
+            <text x={cx} y={cy + 9} fill="#64748b" fontSize="8" fontWeight="500" textAnchor="middle">VEÍCULOS</text>
+          </g>
+        )}
+      </svg>
+      
+      <div className="flex flex-col gap-1 max-h-[200px] overflow-auto pr-2">
+        {data.slice(0, 10).map((m, i) => (
+          <div
+            key={m.nome}
+            onMouseEnter={() => setHoverIdx(i)}
+            onMouseLeave={() => setHoverIdx(null)}
+            className="flex items-center justify-between gap-2 px-1.5 py-0.5 rounded transition-colors hover:bg-white/5 cursor-pointer"
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color, boxShadow: hoverIdx === i ? `0 0 8px ${m.color}` : "none" }} />
+              <span className={`text-[10px] truncate ${hoverIdx === i ? "text-white font-semibold" : "text-slate-300"}`}>{m.nome}</span>
+            </div>
+            <span className={`text-[10px] font-semibold ${hoverIdx === i ? "text-white" : "text-slate-200"}`}>{m.qtd}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 3: Linha Mensal com Área ────────────────────────────────
+const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 480; const svgH = 185;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 24;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.custo)) * 1.15;
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const toX = (i: number) => padL + (i / Math.max(data.length - 1, 1)) * chartW;
+  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+  
+  const buildPath = () => {
+    if (data.length < 2) return "";
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
+  };
+  
+  const buildArea = () => {
+    if (data.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(data.length - 1)},${base} L${toX(0)},${base} Z`;
+    return d;
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      
+      {/* Grid */}
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        const val = maxVal * frac;
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmtK(val)}</text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Área */}
+      <path d={buildArea()} fill="url(#monthly-area)" />
+      
+      {/* Linha */}
+      <path d={buildPath()} stroke="#fbbf24" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      
+      {/* Labels meses */}
+      {data.map((d, i) => (
+        <text key={i} x={toX(i)} y={svgH - padBot + 18} fill="#94a3b8" fontSize="10" fontWeight="500" textAnchor="middle">
+          {d.mes}
+        </text>
+      ))}
+      
+      {/* Pontos hover */}
+      {data.map((d, i) => {
+        const x = toX(i);
+        const y = toY(d.custo);
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)}>
+            <circle cx={x} cy={y} r="12" fill="transparent" style={{ cursor: "pointer" }} />
+            {isHover && (
+              <>
+                <circle cx={x} cy={y} r="4" fill="#fbbf24" stroke="rgba(2,6,23,0.8)" strokeWidth="2" />
+                <circle cx={x} cy={y} r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.4" />
+                <rect x={x - 60} y={y - 38} width="120" height="28" rx="4" fill="rgba(2,6,23,0.95)" stroke="rgba(251,191,36,0.3)" strokeWidth="1" />
+                <text x={x} y={y - 24} fill="#fbbf24" fontSize="9" fontWeight="500" textAnchor="middle">{d.mes}</text>
+                <text x={x} y={y - 14} fill="white" fontSize="11" fontWeight="700" textAnchor="middle">{fmtBRL(d.custo)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── GRÁFICO PREMIUM 4: Barras Verticais por Idade ───────────────────────────
+const AgeCostChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  
+  const svgW = 480; const svgH = 185;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 24;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty || data.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M3 3v18h18" /><rect x="7" y="10" width="3" height="7" /><rect x="14" y="5" width="3" height="12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.medio)) * 1.15;
+  const barW = (chartW - (data.length - 1) * 12) / data.length;
+  const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const colors: Record<string, string> = {
+    "0-3": "#10b981",
+    "4-7": "#06b6d4",
+    "8-11": "#fbbf24",
+    "12-15": "#fb923c",
+    "16+": "#f43f5e",
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHoverIdx(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`age-grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.7" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Grid */}
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        const val = maxVal * frac;
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmtK(val)}</text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const x = padL + i * (barW + 12);
+        const h = (d.medio / maxVal) * chartH;
+        const y = padTop + chartH - h;
+        const isHover = hoverIdx === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHoverIdx(i)} style={{ cursor: "pointer" }}>
+            <rect
+              x={x} y={y} width={barW} height={h} rx="4"
+              fill={`url(#age-grad-${i})`}
+              opacity={isHover ? 1 : 0.88}
+              stroke={isHover ? colors[d.faixa] : "none"}
+              strokeWidth="2"
+              style={{ transition: "all 0.2s" }}
+            />
+            
+            <text x={x + barW / 2} y={svgH - padBot + 18} fill="#94a3b8" fontSize="10" fontWeight="600" textAnchor="middle">
+              {d.faixa}
+            </text>
+            
+            {isHover && (
+              <>
+                <rect x={x + barW / 2 - 60} y={y - 38} width="120" height="28" rx="4" fill="rgba(2,6,23,0.95)" stroke={`${colors[d.faixa]}60`} strokeWidth="1" />
+                <text x={x + barW / 2} y={y - 24} fill={colors[d.faixa]} fontSize="9" fontWeight="500" textAnchor="middle">{d.faixa} anos</text>
+                <text x={x + barW / 2} y={y - 14} fill="white" fontSize="11" fontWeight="700" textAnchor="middle">{fmtBRL(d.medio)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Frota() {
   const navigate = useNavigate();
+  const { dwFilter, setDwFilter, filiais, empresas, frota, manutencao, isFetchingDw, fetchFromDW } = useFinancialData();
+  const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
-  // ── Estado ──────────────────────────────────────────────────────────────────
-  const [frota, setFrota] = useState<FrotaRow[]>([]);
-  const [manutencao, setManutencao] = useState<ManutencaoRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  // ── Estado local (UI apenas) ─────────────────────────────────────────────
+  const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const [filtroSituacao, setFiltroSituacao] = useState<"TODOS" | "ATIVO" | "BAIXADO" | "INATIVO">("ATIVO");
   const [filtroMarca, setFiltroMarca] = useState<string>("Todas");
@@ -113,16 +560,14 @@ export default function Frota() {
   const [sortCol, setSortCol] = useState<keyof VeiculoEnriquecido>("custoManut");
   const [sortAsc, setSortAsc] = useState(false);
 
-  // Modal de validação
-  const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
+  // Paginação tabela
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(1);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     setProgress(0);
     setLoadingPhase("Conectando ao DW...");
-
     let cur = 0;
     const phases = [
       { at: 25, label: "Buscando cadastro da frota..." },
@@ -136,27 +581,22 @@ export default function Frota() {
       if (p) setLoadingPhase(p.label);
       setProgress(Math.round(cur));
     }, 120);
-
     try {
-      const [frRes, mnRes] = await Promise.all([
-        fetchFrota(),
-        fetchManutencao(),
-      ]);
-      setFrota(frRes.data ?? []);
-      setManutencao(mnRes.data ?? []);
-    } catch (err) {
-      setError((err as Error).message ?? "Erro ao carregar dados");
+      await fetchFromDW();
     } finally {
       clearInterval(iv);
       setProgress(100);
       setLoadingPhase("");
-      setLoading(false);
     }
-  }, []);
+  }, [fetchFromDW]);
 
   useEffect(() => {
     carregarDados();
-  }, [carregarDados]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset página ao mudar filtros/busca
+  useEffect(() => { setPage(1); }, [filtroSituacao, filtroMarca, filtroFrota, search]);
 
   // ── Index manutenção por veículo ────────────────────────────────────────────
   const manutencaoPorVeiculo = useMemo(() => {
@@ -247,43 +687,6 @@ export default function Frota() {
     };
   }, [frotaFiltrada]);
 
-  // ── Validações Analíticas ──────────────────────────────────────────────────
-  const validacoes = useMemo(() => {
-    const custosComOrdem = frotaEnriquecida
-      .filter(v => v.situacao === "ATIVO" && v.qtdOrdens > 0)
-      .map(v => v.custoManut);
-    const media = custosComOrdem.length > 0 ? custosComOrdem.reduce((s, x) => s + x, 0) / custosComOrdem.length : 0;
-    const variancia = custosComOrdem.length > 0
-      ? custosComOrdem.reduce((s, x) => s + (x - media) ** 2, 0) / custosComOrdem.length
-      : 0;
-    const desvio = Math.sqrt(variancia);
-    const limite = media + 2 * desvio;
-
-    return {
-      semManutencao: frotaEnriquecida.filter(v => v.situacao === "ATIVO" && v.qtdOrdens === 0),
-      custoExcessivo: frotaEnriquecida.filter(v =>
-        v.situacao === "ATIVO" && v.qtdOrdens > 0 && v.custoManut > limite && limite > 0
-      ),
-      baixadosComManut: frotaEnriquecida.filter(v =>
-        v.situacao === "BAIXADO" && v.diasDesdeUltima !== null && v.diasDesdeUltima <= 90
-      ),
-      idadeAlta: frotaEnriquecida.filter(v =>
-        v.situacao === "ATIVO" && v.idade !== null && v.idade > 15
-      ),
-      anoInconsistente: frotaEnriquecida.filter(v =>
-        v.anofab && v.anomod && v.anomod < v.anofab
-      ),
-      semMunicipio: frotaEnriquecida.filter(v => v.situacao === "ATIVO" && !v.municipio),
-      ordensTravadas: manutencao.filter(m => {
-        if (m.situacao !== "ANDAMENTO" || !m.dataordem) return false;
-        const dias = Math.floor((Date.now() - new Date(m.dataordem).getTime()) / (1000 * 60 * 60 * 24));
-        return dias > 30;
-      }),
-      limiteCusto: limite,
-      mediaCusto: media,
-    };
-  }, [frotaEnriquecida, manutencao]);
-
   // ── Top 10 custo ───────────────────────────────────────────────────────────
   const top10Custo = useMemo(() => {
     return [...frotaEnriquecida]
@@ -321,7 +724,8 @@ export default function Frota() {
     return Array.from(map.entries())
       .map(([nome, qtd]) => ({ nome, qtd }))
       .sort((a, b) => b.qtd - a.qtd)
-      .slice(0, 8);
+      .slice(0, 8)
+      .map((d, i) => ({ ...d, color: colorFor(d.nome, i) }));
   }, [frotaFiltrada]);
 
   // ── Custo por mês ──────────────────────────────────────────────────────────
@@ -381,32 +785,18 @@ export default function Frota() {
     });
   }, [frotaFiltrada, sortCol, sortAsc]);
 
-  // Lista de veículos para o modal de validação aberta
-  const validacaoLista = useMemo(() => {
-    if (!validacaoAberta) return [];
-    const map: Record<string, VeiculoEnriquecido[]> = {
-      semManutencao:    validacoes.semManutencao,
-      custoExcessivo:   validacoes.custoExcessivo,
-      baixadosComManut: validacoes.baixadosComManut,
-      idadeAlta:        validacoes.idadeAlta,
-      anoInconsistente: validacoes.anoInconsistente,
-      semMunicipio:     validacoes.semMunicipio,
-    };
-    return map[validacaoAberta] ?? [];
-  }, [validacaoAberta, validacoes]);
-
   const COLS = [
-    { key: "codvei",       label: "Código",     align: "left",   numeric: false },
-    { key: "frota",        label: "Frota",      align: "left",   numeric: false },
-    { key: "marca",        label: "Marca",      align: "left",   numeric: false },
-    { key: "modelo",       label: "Modelo",     align: "left",   numeric: false },
-    { key: "anofab",       label: "Ano",        align: "center", numeric: true  },
-    { key: "idade",        label: "Idade",      align: "center", numeric: true  },
-    { key: "municipio",    label: "Município",  align: "left",   numeric: false },
-    { key: "situacao",     label: "Situação",   align: "center", numeric: false },
-    { key: "qtdOrdens",    label: "Ordens",     align: "center", numeric: true  },
-    { key: "custoManut",   label: "Custo Manut.", align: "right",  numeric: true  },
-    { key: "ultimaManut",  label: "Última Manut.", align: "center", numeric: false },
+    { key: "codvei",       label: "Código",        align: "left",   numeric: false, responsive: "" },
+    { key: "frota",        label: "Frota",         align: "left",   numeric: false, responsive: "" },
+    { key: "marca",        label: "Marca",         align: "left",   numeric: false, responsive: "" },
+    { key: "modelo",       label: "Modelo",        align: "left",   numeric: false, responsive: "hidden md:table-cell" },
+    { key: "anofab",       label: "Ano",           align: "center", numeric: true,  responsive: "hidden sm:table-cell" },
+    { key: "idade",        label: "Idade",         align: "center", numeric: true,  responsive: "" },
+    { key: "municipio",    label: "Município",     align: "left",   numeric: false, responsive: "hidden lg:table-cell" },
+    { key: "situacao",     label: "Situação",      align: "center", numeric: false, responsive: "" },
+    { key: "qtdOrdens",    label: "Ordens",        align: "center", numeric: true,  responsive: "hidden sm:table-cell" },
+    { key: "custoManut",   label: "Custo Manut.",  align: "right",  numeric: true,  responsive: "" },
+    { key: "ultimaManut",  label: "Última Manut.", align: "center", numeric: false, responsive: "hidden sm:table-cell" },
   ] as const;
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -424,9 +814,15 @@ export default function Frota() {
 
       <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
+          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
         >
+          {/* Barra de progresso */}
+          <div className="h-[3px] w-full shrink-0 overflow-hidden rounded-t-[24px] bg-transparent">
+            <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(251,191,36,0.5)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
+          </div>
+
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full">
 
             {/* ════════ NAVBAR ════════ */}
@@ -445,50 +841,53 @@ export default function Frota() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">DW Conectado</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
               </div>
 
-              <div className="flex-1" />
+              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              {/* Filtros desktop */}
-              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
-                <SelectTrigger className="h-8 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ATIVO">Ativos</SelectItem>
-                  <SelectItem value="BAIXADO">Baixados</SelectItem>
-                  <SelectItem value="INATIVO">Inativos</SelectItem>
-                  <SelectItem value="TODOS">Todos</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <button
-                onClick={carregarDados}
-                disabled={loading}
-                className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-[11px] font-medium transition-all border-amber-400/30 bg-amber-400/[0.12] text-amber-200 hover:border-amber-400/50 hover:bg-amber-400/[0.2] disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
-                {loading ? `${progress}%` : "Atualizar"}
-              </button>
+              {/* Filtros padronizados (idênticos a Faturamento) */}
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
+              </div>
 
               <HomeButton />
             </div>
 
             {/* Mobile nav */}
-            <MobileNav />
+            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Gestão de Frota</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
+                <HomeButton />
+                <MobileNav />
+              </div>
+            </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-            {/* ════════ ERRO ════════ */}
-            {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-[12px] text-rose-200">
-                <strong>Erro:</strong> {error}
-              </div>
-            )}
+
 
             {/* ════════ LOADING PHASE ════════ */}
-            {loading && loadingPhase && (
+            {isFetchingDw && loadingPhase && (
               <div className="flex items-center gap-2 text-[11px] text-amber-300/80">
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-amber-400/10">
                   <div
@@ -504,7 +903,7 @@ export default function Frota() {
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
               {[
                 {
-                  label: "Frota Ativa", value: loading ? "—" : fmtNum(kpis.ativos),
+                  label: "Frota Ativa", value: isFetchingDw ? "—" : fmtNum(kpis.ativos),
                   sub: `${fmtNum(kpis.total)} no recorte`,
                   icon: Truck, color: "cyan", rgb: "6,182,212",
                   stripe: "from-cyan-400/60 to-cyan-700/20",
@@ -515,7 +914,7 @@ export default function Frota() {
                   sub2: "text-cyan-500/80",
                 },
                 {
-                  label: "Idade Média", value: loading ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
+                  label: "Idade Média", value: isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
                   sub: "veículos ativos",
                   icon: Calendar, color: "violet", rgb: "139,92,246",
                   stripe: "from-violet-400/60 to-violet-700/20",
@@ -526,7 +925,7 @@ export default function Frota() {
                   sub2: "text-violet-500/80",
                 },
                 {
-                  label: "Custo de Manutenção", value: loading ? "—" : fmtK(kpis.custoTotal),
+                  label: "Custo de Manutenção", value: isFetchingDw ? "—" : fmtK(kpis.custoTotal),
                   sub: `${fmtNum(kpis.totalOrdens)} ordens`,
                   icon: Wrench, color: "rose", rgb: "244,63,94",
                   stripe: "from-rose-400/60 to-rose-700/20",
@@ -537,7 +936,7 @@ export default function Frota() {
                   sub2: "text-rose-500/80",
                 },
                 {
-                  label: "Custo Médio / Veículo", value: loading ? "—" : fmtK(kpis.custoMedio),
+                  label: "Custo Médio / Veículo", value: isFetchingDw ? "—" : fmtK(kpis.custoMedio),
                   sub: `${fmtNum(kpis.ordensAbertas)} ordens abertas`,
                   icon: DollarSign, color: "amber", rgb: "245,158,11",
                   stripe: "from-amber-400/60 to-amber-700/20",
@@ -568,228 +967,64 @@ export default function Frota() {
               ))}
             </div>
 
-            {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
-            <div className="rounded-[14px] border border-amber-400/15 bg-gradient-to-br from-amber-500/[0.04] to-rose-500/[0.02] p-3 sm:p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/[0.12] border border-amber-400/[0.2]">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-300" />
-                </div>
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.25em] text-amber-300">Validações Analíticas</h3>
-                <div className="flex-1" />
-                <span className="text-[10px] text-slate-500">Clique em qualquer alerta para detalhar</span>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
-                {[
-                  {
-                    key: "semManutencao",
-                    label: "Sem Manutenção",
-                    desc: "ativos sem ordens",
-                    qtd: validacoes.semManutencao.length,
-                    icon: AlertCircle,
-                    severity: validacoes.semManutencao.length > 5 ? "high" : "low",
-                  },
-                  {
-                    key: "custoExcessivo",
-                    label: "Custo Excessivo",
-                    desc: `> ${fmtK(validacoes.limiteCusto)} (μ+2σ)`,
-                    qtd: validacoes.custoExcessivo.length,
-                    icon: TrendingUp,
-                    severity: "high",
-                  },
-                  {
-                    key: "idadeAlta",
-                    label: "Idade > 15 anos",
-                    desc: "candidatos a renovação",
-                    qtd: validacoes.idadeAlta.length,
-                    icon: Calendar,
-                    severity: validacoes.idadeAlta.length > 10 ? "high" : "med",
-                  },
-                  {
-                    key: "baixadosComManut",
-                    label: "Baixados c/ Manut.",
-                    desc: "manutenção ≤ 90d",
-                    qtd: validacoes.baixadosComManut.length,
-                    icon: AlertTriangle,
-                    severity: validacoes.baixadosComManut.length > 0 ? "high" : "ok",
-                  },
-                  {
-                    key: "anoInconsistente",
-                    label: "Ano Inconsistente",
-                    desc: "modelo < fabricação",
-                    qtd: validacoes.anoInconsistente.length,
-                    icon: AlertCircle,
-                    severity: validacoes.anoInconsistente.length > 0 ? "med" : "ok",
-                  },
-                  {
-                    key: "semMunicipio",
-                    label: "Sem Município",
-                    desc: "cadastro incompleto",
-                    qtd: validacoes.semMunicipio.length,
-                    icon: MapPin,
-                    severity: validacoes.semMunicipio.length > 0 ? "med" : "ok",
-                  },
-                ].map((alert) => {
-                  const tone = alert.qtd === 0
-                    ? { ring: "ring-emerald-400/20", bg: "bg-emerald-500/[0.03]", text: "text-emerald-300", icon: "text-emerald-400/60", label: "text-emerald-300/80", num: "text-emerald-200" }
-                    : alert.severity === "high"
-                    ? { ring: "ring-rose-400/30", bg: "bg-rose-500/[0.06]", text: "text-rose-300", icon: "text-rose-400", label: "text-rose-300/90", num: "text-rose-200" }
-                    : alert.severity === "med"
-                    ? { ring: "ring-amber-400/30", bg: "bg-amber-500/[0.06]", text: "text-amber-300", icon: "text-amber-400", label: "text-amber-300/90", num: "text-amber-200" }
-                    : { ring: "ring-slate-400/20", bg: "bg-slate-500/[0.04]", text: "text-slate-300", icon: "text-slate-400", label: "text-slate-300/80", num: "text-slate-200" };
-                  return (
-                    <button
-                      key={alert.key}
-                      onClick={() => alert.qtd > 0 && setValidacaoAberta(alert.key)}
-                      disabled={alert.qtd === 0}
-                      className={`group flex flex-col rounded-lg ring-1 ${tone.ring} ${tone.bg} px-3 py-2.5 text-left transition-all hover:-translate-y-[1px] ${alert.qtd === 0 ? "cursor-default" : "cursor-pointer hover:ring-2"} disabled:opacity-70`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <alert.icon className={`h-3.5 w-3.5 ${tone.icon}`} />
-                        {alert.qtd === 0 && <CheckCircle2 className="h-3 w-3 text-emerald-400/70" />}
-                      </div>
-                      <p className={`mt-1.5 text-[18px] font-black leading-none tracking-tight ${tone.num}`}>
-                        {fmtNum(alert.qtd)}
-                      </p>
-                      <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.15em] ${tone.label}`}>
-                        {alert.label}
-                      </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">{alert.desc}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[230px]">
               {/* Top 10 custo */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="h-3.5 w-3.5 text-rose-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Top 10 — Custo de Manutenção</h3>
-                </div>
-                <div style={{ height: 280 }}>
-                  {top10Custo.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-[12px] text-slate-500">
-                      Sem dados de manutenção
-                    </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={top10Custo} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" horizontal={false} />
-                        <XAxis type="number" tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                        <YAxis type="category" dataKey="nome" tick={{ fill: "#cbd5e1", fontSize: 10 }} width={150} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                        <Bar dataKey="custo" radius={[0, 4, 4, 0]}>
-                          {top10Custo.map((entry, idx) => (
-                            <Cell key={idx} fill={entry.fill} fillOpacity={0.85} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Top 10 · Custo de Manutenção
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <Top10MaintenanceChart data={top10Custo} isEmpty={top10Custo.length === 0} />
+                  </div>
                 </div>
               </div>
 
               {/* Distribuição por marca */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Truck className="h-3.5 w-3.5 text-cyan-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Distribuição por Marca</h3>
-                </div>
-                <div style={{ height: 280 }} className="flex items-center">
-                  {distMarca.length === 0 ? (
-                    <div className="flex w-full h-full items-center justify-center text-[12px] text-slate-500">
-                      Sem dados
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 w-full h-full items-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={distMarca}
-                            dataKey="qtd"
-                            nameKey="nome"
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={90}
-                            paddingAngle={2}
-                            stroke="rgba(2,6,23,0.6)"
-                            strokeWidth={2}
-                          >
-                            {distMarca.map((d, i) => (
-                              <Cell key={i} fill={d.color} />
-                            ))}
-                          </Pie>
-                          <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => `${name}: ${fmtNum(v)} veíc.`} />} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
-                        {distMarca.slice(0, 8).map((m) => (
-                          <div key={m.nome} className="flex items-center justify-between gap-2 text-[11px]">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color }} />
-                              <span className="truncate text-slate-300">{m.nome}</span>
-                            </div>
-                            <span className="font-semibold text-slate-200">{m.qtd}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Distribuição por Marca
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <BrandDistributionChart data={distMarca} isEmpty={distMarca.length === 0} />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[205px]">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Activity className="h-3.5 w-3.5 text-amber-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Custo de Manutenção / Mês</h3>
-                </div>
-                <div style={{ height: 240 }}>
-                  {custoPorMes.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-[12px] text-slate-500">Sem dados</div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={custoPorMes} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                        <defs>
-                          <linearGradient id="custoLine" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4} />
-                            <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                        <XAxis dataKey="mes" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                        <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number) => fmtBRL(v)} />} />
-                        <Line type="monotone" dataKey="custo" stroke="#fbbf24" strokeWidth={2} dot={{ fill: "#fbbf24", r: 3 }} activeDot={{ r: 5 }} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  )}
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Custo de Manutenção · Mensal
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <MonthlyMaintenanceChart data={custoPorMes} isEmpty={custoPorMes.length === 0} />
+                  </div>
                 </div>
               </div>
 
               {/* Custo médio por idade */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="h-3.5 w-3.5 text-violet-400" />
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-300">Custo Médio por Faixa de Idade</h3>
-                </div>
-                <div style={{ height: 240 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={custoPorIdade} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.1)" />
-                      <XAxis dataKey="faixa" tick={{ fill: "#94a3b8", fontSize: 10 }} />
-                      <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} tickFormatter={(v) => fmtK(v)} />
-                      <ReTooltip content={<DarkTooltip formatter={(v: number, name: string) => name === "medio" ? `Custo médio: ${fmtBRL(v)}` : `${name}: ${v}`} />} />
-                      <Bar dataKey="medio" fill="#a78bfa" radius={[6, 6, 0, 0]} fillOpacity={0.85} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+                <div className="flex h-full flex-col p-3">
+                  <div className="mb-1.5 flex items-center shrink-0">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Custo Médio · Faixa de Idade
+                    </span>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <AgeCostChart data={custoPorIdade} isEmpty={false} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -806,6 +1041,18 @@ export default function Frota() {
                   className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[12px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/40"
                 />
               </div>
+
+              <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
+                <SelectTrigger className="h-9 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ATIVO">Ativos</SelectItem>
+                  <SelectItem value="BAIXADO">Baixados</SelectItem>
+                  <SelectItem value="INATIVO">Inativos</SelectItem>
+                  <SelectItem value="TODOS">Todos</SelectItem>
+                </SelectContent>
+              </Select>
 
               <Select value={filtroMarca} onValueChange={setFiltroMarca}>
                 <SelectTrigger className="h-9 w-[140px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
@@ -841,7 +1088,7 @@ export default function Frota() {
                         onClick={() => handleSort(col.key as keyof VeiculoEnriquecido)}
                         className={`px-3 py-2.5 font-semibold text-slate-400 cursor-pointer select-none hover:text-amber-300 transition ${
                           col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"
-                        }`}
+                        } ${col.responsive}`}
                       >
                         <span className="inline-flex items-center gap-1">
                           {col.label}
@@ -852,11 +1099,11 @@ export default function Frota() {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading ? (
+                  {isFetchingDw ? (
                     Array.from({ length: 8 }).map((_, i) => (
                       <tr key={i} className="border-t border-[var(--sgt-border-subtle)]">
                         {COLS.map((c, j) => (
-                          <td key={j} className="px-3 py-2.5"><Skel h="h-3" /></td>
+                          <td key={j} className={`px-3 py-2.5 ${c.responsive}`}><div className="h-3 w-full animate-pulse rounded bg-[var(--sgt-border-subtle)]" /></td>
                         ))}
                       </tr>
                     ))
@@ -868,7 +1115,7 @@ export default function Frota() {
                       </td>
                     </tr>
                   ) : (
-                    tabelaOrdenada.slice(0, 200).map((v) => {
+                    tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((v) => {
                       const sit = SITUACAO_STYLE[v.situacao] ?? SITUACAO_STYLE.INATIVO;
                       const marcaCor = getMarcaColor(v.marca);
                       return (
@@ -881,20 +1128,20 @@ export default function Frota() {
                               <span className="text-slate-200">{v.marca ?? "—"}</span>
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-slate-300 max-w-[200px] truncate" title={v.modelo ?? ""}>{v.modelo ?? "—"}</td>
-                          <td className="px-3 py-2 text-center text-slate-400">{v.anofab ?? "—"}</td>
+                          <td className="px-3 py-2 text-slate-300 max-w-[200px] truncate hidden md:table-cell" title={v.modelo ?? ""}>{v.modelo ?? "—"}</td>
+                          <td className="px-3 py-2 text-center text-slate-400 hidden sm:table-cell">{v.anofab ?? "—"}</td>
                           <td className="px-3 py-2 text-center">
                             {v.idade !== null
                               ? <span className={v.idade > 15 ? "text-rose-300 font-semibold" : "text-slate-300"}>{v.idade}</span>
                               : "—"}
                           </td>
-                          <td className="px-3 py-2 text-slate-400 max-w-[140px] truncate" title={v.municipio ?? ""}>{v.municipio ?? "—"}</td>
+                          <td className="px-3 py-2 text-slate-400 max-w-[140px] truncate hidden lg:table-cell" title={v.municipio ?? ""}>{v.municipio ?? "—"}</td>
                           <td className="px-3 py-2 text-center">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
                               {v.situacao}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-300">
+                          <td className="px-3 py-2 text-center text-slate-300 hidden sm:table-cell">
                             {v.qtdOrdens > 0 ? (
                               <span className="inline-flex items-center gap-1">
                                 {fmtNum(v.qtdOrdens)}
@@ -907,96 +1154,50 @@ export default function Frota() {
                           <td className="px-3 py-2 text-right font-semibold text-rose-200">
                             {v.custoManut > 0 ? fmtBRL(v.custoManut) : <span className="text-slate-600">—</span>}
                           </td>
-                          <td className="px-3 py-2 text-center text-slate-400 text-[11px]">{fmtData(v.ultimaManut)}</td>
+                          <td className="px-3 py-2 text-center text-slate-400 text-[11px] hidden sm:table-cell">{fmtData(v.ultimaManut)}</td>
                         </tr>
                       );
                     })
                   )}
                 </tbody>
               </table>
-              {tabelaOrdenada.length > 200 && (
-                <div className="px-3 py-2 text-center text-[11px] text-slate-500 border-t border-[var(--sgt-border-subtle)]">
-                  Exibindo os primeiros 200 — refine os filtros para ver mais.
-                </div>
-              )}
+              {!isFetchingDw && tabelaOrdenada.length > 0 && (() => {
+                const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
+                const curPage = Math.min(page, totalPages);
+                const from = (curPage - 1) * PAGE_SIZE + 1;
+                const to = Math.min(curPage * PAGE_SIZE, tabelaOrdenada.length);
+                return (
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 border-t border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-base)] text-[11px]">
+                    <span className="text-slate-500">
+                      Mostrando <span className="text-slate-300 font-semibold">{fmtNum(from)}–{fmtNum(to)}</span> de <span className="text-slate-300 font-semibold">{fmtNum(tabelaOrdenada.length)}</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={curPage <= 1}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="px-2 text-slate-400 tabular-nums">
+                        Página <span className="text-slate-200 font-semibold">{curPage}</span> / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={curPage >= totalPages}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-300 hover:bg-amber-400/10 hover:text-amber-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
           </div>
         </section>
       </div>
-
-      {/* ════════ MODAL DE VALIDAÇÃO ════════ */}
-      {validacaoAberta && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
-          onClick={() => setValidacaoAberta(null)}
-        >
-          <div
-            className="relative max-w-3xl w-full max-h-[80vh] flex flex-col rounded-2xl border border-amber-400/20 bg-[var(--sgt-bg-section)] shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-[var(--sgt-border-subtle)]">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
-                <h2 className="text-[14px] font-bold text-white">
-                  {validacaoAberta === "semManutencao" && "Veículos ativos sem manutenção registrada"}
-                  {validacaoAberta === "custoExcessivo" && `Veículos com custo acima de ${fmtK(validacoes.limiteCusto)}`}
-                  {validacaoAberta === "idadeAlta" && "Veículos ativos com mais de 15 anos"}
-                  {validacaoAberta === "baixadosComManut" && "Veículos baixados com manutenção recente (≤ 90 dias)"}
-                  {validacaoAberta === "anoInconsistente" && "Veículos com ano modelo < ano fabricação"}
-                  {validacaoAberta === "semMunicipio" && "Veículos ativos sem município cadastrado"}
-                </h2>
-                <span className="text-[11px] text-slate-500 ml-2">{validacaoLista.length} encontrado(s)</span>
-              </div>
-              <button
-                onClick={() => setValidacaoAberta(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto p-3">
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className="text-slate-400 text-left">
-                    <th className="px-2 py-2">Código</th>
-                    <th className="px-2 py-2">Frota</th>
-                    <th className="px-2 py-2">Marca / Modelo</th>
-                    <th className="px-2 py-2 text-center">Ano</th>
-                    <th className="px-2 py-2 text-center">Idade</th>
-                    <th className="px-2 py-2 text-right">Custo Manut.</th>
-                    <th className="px-2 py-2 text-center">Última</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {validacaoLista.map(v => (
-                    <tr key={v.codvei} className="border-t border-[var(--sgt-border-subtle)]">
-                      <td className="px-2 py-2 font-mono font-semibold text-white">{v.codvei}</td>
-                      <td className="px-2 py-2 text-slate-300">{v.frota ?? "—"}</td>
-                      <td className="px-2 py-2 text-slate-300 truncate max-w-[200px]" title={`${v.marca} ${v.modelo}`}>
-                        {v.marca} {v.modelo}
-                      </td>
-                      <td className="px-2 py-2 text-center text-slate-400">{v.anofab ?? "—"}</td>
-                      <td className="px-2 py-2 text-center">
-                        {v.idade !== null
-                          ? <span className={v.idade > 15 ? "text-rose-300 font-semibold" : "text-slate-300"}>{v.idade}</span>
-                          : "—"}
-                      </td>
-                      <td className="px-2 py-2 text-right font-semibold text-rose-200">
-                        {v.custoManut > 0 ? fmtBRL(v.custoManut) : "—"}
-                      </td>
-                      <td className="px-2 py-2 text-center text-slate-400">{fmtData(v.ultimaManut)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {validacaoLista.length === 0 && (
-                <div className="text-center py-8 text-slate-500 text-[12px]">Nenhum item na lista.</div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

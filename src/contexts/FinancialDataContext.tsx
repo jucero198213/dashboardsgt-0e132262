@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import type {
   ContaPagar,
   ContaReceber,
@@ -8,9 +9,13 @@ import {
   loadDwFilters,
   fetchDwData,
   fetchFaturamento,
+  fetchFrota,
+  fetchManutencao,
   type FilterOption,
   type DwRow,
   type FaturamentoRow,
+  type FrotaRow,
+  type ManutencaoRow,
 } from "@/lib/dwApi";
 
 export interface IndicadorComparativo {
@@ -124,6 +129,8 @@ interface FinancialDataState {
   faturamento:              FaturamentoRow[];
   faturamentoMensal:        number[];  // jan-dez ano atual
   faturamentoMensalAnterior: number[]; // jan-dez ano anterior
+  frota:                    FrotaRow[];
+  manutencao:               ManutencaoRow[];
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -284,22 +291,18 @@ export function FinancialDataProvider({
     faturamento:               cached?.faturamento ?? [],
     faturamentoMensal:         new Array(12).fill(0),
     faturamentoMensalAnterior: new Array(12).fill(0),
+    frota:                     [],
+    manutencao:                [],
   });
 
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
   const abortRef = useRef<AbortController | null>(null);
 
+  const { isAdmin = false } = useAuth();
+
   // ── Cooldown state ────────────────────────────────────────────────────────
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(getCooldownRemaining());
   const [lastFetchedAt, setLastFetchedAt]         = useState<number>(getLastFetchTs());
-
-  // Verifica papel do usuário — admin não tem cooldown
-  const isAdmin = (() => {
-    try {
-      const user = JSON.parse(localStorage.getItem("sgt_user") ?? "{}");
-      return user?.role === "admin";
-    } catch { return false; }
-  })();
 
   // Countdown tick — atualiza a cada segundo enquanto houver cooldown
   useEffect(() => {
@@ -348,12 +351,6 @@ export function FinancialDataProvider({
 
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async (force = false) => {
-    // Verifica cooldown — admin e force ignoram
-    if (!force && !isAdmin && getCooldownRemaining() > 0) {
-      console.warn("[DW] Fetch bloqueado por cooldown de 1h");
-      return;
-    }
-
     // Cancela requisição anterior se ainda estiver em andamento
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
@@ -748,10 +745,7 @@ export function FinancialDataProvider({
           dwFilter: state.dwFilter,
           timestamp: Date.now(),
         });
-        // Salva timestamp do fetch para cooldown de 1h
-        saveLastFetchTs();
         setLastFetchedAt(Date.now());
-        setCooldownRemaining(COOLDOWN_MS);
         return {
           ...prev,
           isFetchingDw: false,
@@ -771,6 +765,14 @@ export function FinancialDataProvider({
       const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const anoAnterior = String(parseInt(anoFiltro) - 1);
       const chartSnapAnterior = { dataInicio: `${anoAnterior}-01-01`, dataFim: `${anoAnterior}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
+
+      // Busca frota e manutenção em paralelo (não bloqueiam os KPIs)
+      Promise.all([
+        fetchFrota().catch(() => ({ data: [] })),
+        fetchManutencao({ dataInicio: fatSnap.dataInicio, dataFim: fatSnap.dataFim, filial: fatSnap.filial ?? null }).catch(() => ({ data: [] })),
+      ]).then(([frotaRes, manutRes]) => {
+        setState(prev => ({ ...prev, frota: frotaRes.data ?? [], manutencao: manutRes.data ?? [] }));
+      }).catch(err => console.warn("[DW] Frota/manutenção erro:", err?.message ?? err));
 
       fetchFaturamento(fatSnap)
         .then(({ data: fatData }) => {
