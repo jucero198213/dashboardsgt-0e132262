@@ -206,6 +206,278 @@ const Top10Chart = ({ data }: { data: any[] }) => {
   );
 };
 
+// ─── Donut Premium com Legenda ────────────────────────────────────────────────
+const BrandDistributionChart = ({ data }: { data: any[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  const isEmpty = data.length === 0;
+  
+  if (isEmpty) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 1 0 20" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const total = data.reduce((s, d) => s + d.qtd, 0);
+  let acc = 0;
+  const slices = data.map(d => {
+    const pct = d.qtd / total;
+    const start = acc;
+    acc += pct;
+    return { ...d, start, pct };
+  });
+  
+  const cx = 110, cy = 110, r = 72, rInner = 45;
+  
+  const getPath = (start: number, pct: number) => {
+    const a1 = start * 2 * Math.PI - Math.PI / 2;
+    const a2 = (start + pct) * 2 * Math.PI - Math.PI / 2;
+    const x1 = cx + r * Math.cos(a1); const y1 = cy + r * Math.sin(a1);
+    const x2 = cx + r * Math.cos(a2); const y2 = cy + r * Math.sin(a2);
+    const x3 = cx + rInner * Math.cos(a2); const y3 = cy + rInner * Math.sin(a2);
+    const x4 = cx + rInner * Math.cos(a1); const y4 = cy + rInner * Math.sin(a1);
+    const large = pct > 0.5 ? 1 : 0;
+    return `M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${rInner},${rInner} 0 ${large},0 ${x4},${y4} Z`;
+  };
+  
+  return (
+    <div className="grid grid-cols-[220px_1fr] gap-3 h-full items-center">
+      <svg viewBox="0 0 220 220" className="w-full" onMouseLeave={() => setHover(null)}>
+        {slices.map((s, i) => {
+          const isHover = hover === i;
+          const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
+          const offset = isHover ? 5 : 0;
+          const tx = offset * Math.cos(midAngle); const ty = offset * Math.sin(midAngle);
+          
+          return (
+            <g key={i} transform={`translate(${tx},${ty})`} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
+              <path d={getPath(s.start, s.pct)} fill={s.color} opacity={isHover ? 1 : 0.88}
+                stroke="rgba(2,6,23,0.8)" strokeWidth="2" style={{ transition: "all 0.2s" }} />
+              {isHover && (
+                <g>
+                  <text x={cx} y={cy - 3} fill="white" fontSize="18" fontWeight="700" textAnchor="middle">{s.qtd}</text>
+                  <text x={cx} y={cy + 10} fill="#94a3b8" fontSize="9" fontWeight="500" textAnchor="middle">{s.nome}</text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+        {hover === null && (
+          <g>
+            <text x={cx} y={cy - 3} fill="white" fontSize="20" fontWeight="800" textAnchor="middle">{total}</text>
+            <text x={cx} y={cy + 10} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">VEÍCULOS</text>
+          </g>
+        )}
+      </svg>
+      
+      <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
+        {data.slice(0, 10).map((m, i) => (
+          <div key={m.nome} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+            className="flex items-center justify-between gap-2 px-1.5 py-0.5 rounded transition-colors hover:bg-white/5 cursor-pointer">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="h-2 w-2 rounded-full shrink-0" style={{ background: m.color }} />
+              <span className={`text-[10px] truncate ${hover === i ? "text-white font-semibold" : "text-slate-300"}`}>{m.nome}</span>
+            </div>
+            <span className={`text-[10px] font-semibold ${hover === i ? "text-white" : "text-slate-200"}`}>{m.qtd}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─── Linha Mensal Premium ─────────────────────────────────────────────────────
+const MonthlyMaintenanceChart = ({ data }: { data: any[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  const isEmpty = data.length === 0;
+  
+  const svgW = 480; const svgH = 200;
+  const padL = 50; const padR = 18; const padTop = 18; const padBot = 26;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.custo)) * 1.12;
+  const fmt = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const toX = (i: number) => padL + (i / Math.max(data.length - 1, 1)) * chartW;
+  const toY = (v: number) => padTop + chartH - (v / maxVal) * chartH;
+  
+  const buildPath = () => {
+    if (data.length < 2) return "";
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return d;
+  };
+  
+  const buildArea = () => {
+    if (data.length < 2) return "";
+    const base = padTop + chartH;
+    let d = `M${toX(0)},${toY(data[0].custo)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = toX(i - 1), y0 = toY(data[i - 1].custo);
+      const x1 = toX(i), y1 = toY(data[i].custo);
+      const t = 0.28;
+      d += ` C${(x0 + (x1 - x0) * t).toFixed(1)},${y0.toFixed(1)} ${(x1 - (x1 - x0) * t).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    d += ` L${toX(data.length - 1)},${base} L${toX(0)},${base} Z`;
+    return d;
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+      <defs>
+        <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {frac > 0 && <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmt(maxVal * frac)}</text>}
+          </g>
+        );
+      })}
+      
+      <path d={buildArea()} fill="url(#monthly-area)" />
+      <path d={buildPath()} stroke="#fbbf24" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      
+      {data.map((d, i) => {
+        const x = toX(i), y = toY(d.custo);
+        const isHover = hover === i;
+        return (
+          <g key={i} onMouseEnter={() => setHover(i)}>
+            <circle cx={x} cy={y} r="12" fill="transparent" style={{ cursor: "pointer" }} />
+            <text x={x} y={svgH - padBot + 18} fill="#94a3b8" fontSize="9" fontWeight="500" textAnchor="middle">{d.mes}</text>
+            {isHover && (
+              <>
+                <circle cx={x} cy={y} r="4" fill="#fbbf24" stroke="rgba(2,6,23,0.8)" strokeWidth="2" />
+                <circle cx={x} cy={y} r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.3" />
+                <rect x={x - 60} y={y - 36} width="120" height="26" rx="4" fill="rgba(2,6,23,0.96)" stroke="rgba(251,191,36,0.35)" strokeWidth="1" />
+                <text x={x} y={y - 22} fill="#fbbf24" fontSize="8" fontWeight="500" textAnchor="middle">{d.mes}</text>
+                <text x={x} y={y - 13} fill="white" fontSize="10" fontWeight="700" textAnchor="middle">{fmtFull(d.custo)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── Barras Verticais Premium ─────────────────────────────────────────────────
+const AgeCostChart = ({ data }: { data: any[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  const isEmpty = data.length === 0;
+  
+  const svgW = 480; const svgH = 200;
+  const padL = 50; const padR = 18; const padTop = 18; const padBot = 26;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  if (isEmpty) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-500/20 bg-slate-500/8">
+            <svg className="h-5 w-5 text-slate-500/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M3 3v18h18" /><rect x="7" y="10" width="3" height="7" /><rect x="14" y="5" width="3" height="12" />
+            </svg>
+          </div>
+          <p className="text-[11px] text-slate-500">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const maxVal = Math.max(...data.map(d => d.medio)) * 1.12;
+  const barW = (chartW - (data.length - 1) * 14) / data.length;
+  const fmt = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : `R$ ${v.toFixed(0)}`;
+  const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  
+  const colors: Record<string, string> = {
+    "0-3": "#10b981", "4-7": "#06b6d4", "8-11": "#fbbf24", "12-15": "#fb923c", "16+": "#f43f5e",
+  };
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`age-g-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.92" />
+            <stop offset="100%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.7" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {[0, 0.33, 0.66, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            {frac > 0 && <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">{fmt(maxVal * frac)}</text>}
+          </g>
+        );
+      })}
+      
+      {data.map((d, i) => {
+        const x = padL + i * (barW + 14);
+        const h = (d.medio / maxVal) * chartH;
+        const y = padTop + chartH - h;
+        const isHover = hover === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
+            <rect x={x} y={y} width={barW} height={h} rx="4" fill={`url(#age-g-${i})`}
+              opacity={isHover ? 1 : 0.88} stroke={isHover ? colors[d.faixa] : "none"}
+              strokeWidth="2" style={{ transition: "all 0.2s" }} />
+            <text x={x + barW / 2} y={svgH - padBot + 18} fill="#94a3b8" fontSize="10" fontWeight="600" textAnchor="middle">{d.faixa}</text>
+            {isHover && (
+              <>
+                <rect x={x + barW / 2 - 60} y={y - 36} width="120" height="26" rx="4" fill="rgba(2,6,23,0.96)" stroke={`${colors[d.faixa]}60`} strokeWidth="1" />
+                <text x={x + barW / 2} y={y - 22} fill={colors[d.faixa]} fontSize="8" fontWeight="500" textAnchor="middle">{d.faixa} anos</text>
+                <text x={x + barW / 2} y={y - 13} fill="white" fontSize="10" fontWeight="700" textAnchor="middle">{fmtFull(d.medio)}</text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -657,7 +929,7 @@ export default function Frota() {
                     </span>
                   </div>
                   <div className="flex-1 min-h-0">
-                    <BrandDistributionChart data={distMarca} isEmpty={distMarca.length === 0} />
+                    <BrandDistributionChart data={distMarca} />
                   </div>
                 </div>
               </div>
@@ -674,7 +946,7 @@ export default function Frota() {
                     </span>
                   </div>
                   <div className="flex-1 min-h-0">
-                    <MonthlyMaintenanceChart data={custoPorMes} isEmpty={custoPorMes.length === 0} />
+                    <MonthlyMaintenanceChart data={custoPorMes} />
                   </div>
                 </div>
               </div>
@@ -688,7 +960,7 @@ export default function Frota() {
                     </span>
                   </div>
                   <div className="flex-1 min-h-0">
-                    <AgeCostChart data={custoPorIdade} isEmpty={false} />
+                    <AgeCostChart data={custoPorIdade} />
                   </div>
                 </div>
               </div>
