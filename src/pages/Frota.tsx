@@ -119,8 +119,8 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 const Top10MaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 520; const svgH = 180;
-  const padL = 130; const padR = 60; const padTop = 8; const padBot = 8;
+  const svgW = 520; const svgH = 210;
+  const padL = 130; const padR = 65; const padTop = 10; const padBot = 10;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -329,8 +329,8 @@ const BrandDistributionChart = ({ data, isEmpty }: { data: any[]; isEmpty: boole
 const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 160;
-  const padL = 40; const padR = 15; const padTop = 12; const padBot = 22;
+  const svgW = 480; const svgH = 185;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 24;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -447,8 +447,8 @@ const MonthlyMaintenanceChart = ({ data, isEmpty }: { data: any[]; isEmpty: bool
 const AgeCostChart = ({ data, isEmpty }: { data: any[]; isEmpty: boolean }) => {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 160;
-  const padL = 40; const padR = 15; const padTop = 12; const padBot = 22;
+  const svgW = 480; const svgH = 185;
+  const padL = 42; const padR = 16; const padTop = 15; const padBot = 24;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -968,7 +968,7 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[200px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[230px]">
               {/* Top 10 custo */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
@@ -999,7 +999,7 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[180px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[205px]">
               {/* Custo por mês */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
