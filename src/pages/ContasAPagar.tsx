@@ -33,8 +33,8 @@ const PAGE_SIZE = 50;
 const AgingChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   
-  const svgW = 420; const svgH = 200;
-  const padL = 50; const padR = 20; const padTop = 20; const padBot = 30;
+  const svgW = 480; const svgH = 260;
+  const padL = 55; const padR = 22; const padTop = 22; const padBot = 35;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -108,8 +108,8 @@ const AgingChart = ({ data }: { data: any[] }) => {
 const TopFornecedoresChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   
-  const svgW = 420; const svgH = 200;
-  const padL = 120; const padR = 60; const padTop = 15; const padBot = 15;
+  const svgW = 480; const svgH = 260;
+  const padL = 140; const padR: 70; const padTop = 18; const padBot = 18;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -404,7 +404,7 @@ export default function ContasAPagar() {
                 Aging · Títulos Vencidos
               </p>
             </div>
-            <div className="h-[200px]">
+            <div className="h-[280px]">
               <AgingChart data={aging} />
             </div>
           </div>
@@ -416,7 +416,7 @@ export default function ContasAPagar() {
                 Top 5 · Maiores Fornecedores
               </p>
             </div>
-            <div className="h-[200px]">
+            <div className="h-[280px]">
               <TopFornecedoresChart data={topFornecedores} />
             </div>
           </div>
