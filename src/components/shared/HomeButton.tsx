@@ -36,24 +36,6 @@ export function HomeButton() {
   const location = useLocation();
   const { canAccess } = usePagePermissions();
   const [open, setOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-    }
-  }, []);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimer.current = setTimeout(() => setOpen(false), 150);
-  }, [cancelClose]);
-
-  const openNow = useCallback(() => {
-    cancelClose();
-    setOpen(true);
-  }, [cancelClose]);
 
   const items: NavItem[] = [
     {
@@ -130,9 +112,6 @@ export function HomeButton() {
         <button
           type="button"
           title="Navegação rápida"
-          onMouseEnter={openNow}
-          onMouseLeave={scheduleClose}
-          onFocus={openNow}
           className="group relative inline-flex h-9 items-center gap-2 overflow-hidden rounded-xl border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/[0.18] via-amber-400/[0.10] to-amber-500/[0.18] px-2.5 sm:px-3.5 text-[12px] font-bold uppercase tracking-[0.08em] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_2px_8px_rgba(245,158,11,0.12)] transition-all duration-150 hover:border-amber-400 hover:from-amber-500/25 hover:to-amber-400/20 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)] data-[state=open]:border-amber-400 data-[state=open]:from-amber-500/25 data-[state=open]:to-amber-400/20 data-[state=open]:text-white data-[state=open]:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)]"
         >
           <Home
@@ -146,9 +125,6 @@ export function HomeButton() {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        onMouseEnter={openNow}
-        onMouseLeave={scheduleClose}
-        onCloseAutoFocus={(e) => e.preventDefault()}
         className="w-[280px] overflow-hidden rounded-2xl border p-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]"
         style={{
           background: "var(--sgt-menu-bg, hsl(var(--popover)))",
