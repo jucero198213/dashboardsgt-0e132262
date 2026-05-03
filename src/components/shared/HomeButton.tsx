@@ -135,11 +135,6 @@ export function HomeButton() {
           onFocus={openNow}
           className="group relative inline-flex h-9 items-center gap-2 overflow-hidden rounded-xl border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/[0.18] via-amber-400/[0.10] to-amber-500/[0.18] px-2.5 sm:px-3.5 text-[12px] font-bold uppercase tracking-[0.08em] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_2px_8px_rgba(245,158,11,0.12)] transition-all duration-150 hover:border-amber-400 hover:from-amber-500/25 hover:to-amber-400/20 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)] data-[state=open]:border-amber-400 data-[state=open]:from-amber-500/25 data-[state=open]:to-amber-400/20 data-[state=open]:text-white data-[state=open]:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)]"
         >
-          {/* Sheen effect on hover */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-amber-200/20 to-transparent opacity-0 transition-all duration-700 group-hover:translate-x-full group-hover:opacity-100"
-          />
           <Home
             className="relative h-3.5 w-3.5 shrink-0 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] transition-transform duration-200 group-hover:scale-110 group-hover:text-amber-200"
           />
