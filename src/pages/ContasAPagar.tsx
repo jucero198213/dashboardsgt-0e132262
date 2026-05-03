@@ -26,6 +26,154 @@ const fmtData = (d: string | null | undefined) => d ? new Date(d).toLocaleDateSt
 const PAGE_SIZE = 50;
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  GRÁFICOS PREMIUM
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Aging de Vencidos (Barras Verticais) ─────────────────────────────────────
+const AgingChart = ({ data }: { data: any[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  
+  const svgW = 420; const svgH = 200;
+  const padL = 50; const padR = 20; const padTop = 20; const padBot = 30;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  const maxVal = Math.max(...data.map(d => d.value), 1) * 1.15;
+  const barW = (chartW - (data.length - 1) * 16) / data.length;
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+      <defs>
+        {data.map((d, i) => (
+          <linearGradient key={i} id={`aging-g-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={d.color} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={d.color} stopOpacity="0.7" />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {/* Grid */}
+      {[0, 0.5, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {frac > 0 && (
+              <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">
+                {fmtK(maxVal * frac)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const x = padL + i * (barW + 16);
+        const h = (d.value / maxVal) * chartH;
+        const y = padTop + chartH - h;
+        const isHover = hover === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
+            <rect x={x} y={y} width={barW} height={h} rx="4"
+              fill={`url(#aging-g-${i})`} opacity={isHover ? 1 : 0.88}
+              stroke={isHover ? d.color : "none"} strokeWidth="2"
+              style={{ transition: "all 0.2s" }} />
+            
+            <text x={x + barW / 2} y={svgH - padBot + 18} fill="#94a3b8" fontSize="9" fontWeight="600" textAnchor="middle">
+              {d.label}
+            </text>
+            
+            {isHover && (
+              <>
+                <rect x={x + barW / 2 - 50} y={y - 34} width="100" height="24" rx="4"
+                  fill="rgba(2,6,23,0.96)" stroke={`${d.color}60`} strokeWidth="1" />
+                <text x={x + barW / 2} y={y - 20} fill={d.color} fontSize="8" fontWeight="500" textAnchor="middle">
+                  {d.count} docs
+                </text>
+                <text x={x + barW / 2} y={y - 12} fill="white" fontSize="10" fontWeight="700" textAnchor="middle">
+                  {fmtBRL(d.value)}
+                </text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ─── Top Fornecedores (Barras Horizontais) ────────────────────────────────────
+const TopFornecedoresChart = ({ data }: { data: any[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+  
+  const svgW = 420; const svgH = 200;
+  const padL = 120; const padR = 60; const padTop = 15; const padBot = 15;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+  
+  const maxVal = Math.max(...data.map(d => d.valor), 1) * 1.08;
+  const barH = (chartH - (data.length - 1) * 8) / data.length;
+  
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+      <defs>
+        <linearGradient id="forn-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.92" />
+          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.7" />
+        </linearGradient>
+      </defs>
+      
+      {/* Grid */}
+      {[0.5, 1].map(frac => {
+        const x = padL + chartW * frac;
+        return (
+          <g key={frac}>
+            <line x1={x} y1={padTop} x2={x} y2={svgH - padBot} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+            <text x={x} y={svgH - padBot + 12} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">
+              {fmtK(maxVal * frac)}
+            </text>
+          </g>
+        );
+      })}
+      
+      {/* Barras */}
+      {data.map((d, i) => {
+        const y = padTop + i * (barH + 8);
+        const w = (d.valor / maxVal) * chartW;
+        const isHover = hover === i;
+        
+        return (
+          <g key={i} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
+            <text x={padL - 6} y={y + barH / 2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="500" textAnchor="end">
+              {d.nome.length > 18 ? d.nome.substring(0, 17) + "..." : d.nome}
+            </text>
+            
+            <rect x={padL} y={y} width={w} height={barH} rx="3"
+              fill="url(#forn-grad)" opacity={isHover ? 1 : 0.88} />
+            
+            <text x={padL + w + 5} y={y + barH / 2 + 3} fill="#06b6d4" fontSize="9" fontWeight="600">
+              {fmtK(d.valor)}
+            </text>
+            
+            {isHover && (
+              <g>
+                <rect x={padL + w / 2 - 60} y={y - 22} width="120" height="18" rx="4"
+                  fill="rgba(2,6,23,0.96)" stroke="rgba(6,182,212,0.4)" strokeWidth="1" />
+                <text x={padL + w / 2} y={y - 9} fill="#06b6d4" fontSize="9" fontWeight="600" textAnchor="middle">
+                  {fmtBRL(d.valor)}
+                </text>
+              </g>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -107,6 +255,33 @@ export default function ContasAPagar() {
       icon: AlertTriangle, color: "rose", rgb: "244,63,94",
     },
   ];
+
+  // ── Dados para gráficos ────────────────────────────────────────────────────
+  const aging = useMemo(() => {
+    const today = new Date();
+    const buckets = [
+      { label: "1-30 dias", value: 0, count: 0, color: "#fbbf24" },
+      { label: "31-60 dias", value: 0, count: 0, color: "#fb923c" },
+      { label: "61-90 dias", value: 0, count: 0, color: "#f87171" },
+      { label: "+90 dias", value: 0, count: 0, color: "#ef4444" },
+    ];
+    contasPagar.filter(c => c.status === "Vencido").forEach(c => {
+      const days = Math.floor((today.getTime() - new Date(c.vencimento).getTime()) / 86_400_000);
+      const idx = days <= 30 ? 0 : days <= 60 ? 1 : days <= 90 ? 2 : 3;
+      buckets[idx].value += c.valor;
+      buckets[idx].count += 1;
+    });
+    return buckets;
+  }, [contasPagar]);
+
+  const topFornecedores = useMemo(() => {
+    const map = new Map<string, number>();
+    contasPagar.forEach(c => map.set(c.fornecedor, (map.get(c.fornecedor) ?? 0) + c.valor));
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([nome, valor]) => ({ nome, valor, fill: "#06b6d4" }));
+  }, [contasPagar]);
 
   return (
     <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 [background:var(--sgt-bg-base)]">
@@ -209,6 +384,33 @@ export default function ContasAPagar() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Aging de Vencidos */}
+          <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
+            <div className="mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Aging · Títulos Vencidos
+              </p>
+            </div>
+            <div className="h-[200px]">
+              <AgingChart data={aging} />
+            </div>
+          </div>
+
+          {/* Top 5 Fornecedores */}
+          <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
+            <div className="mb-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Top 5 · Maiores Fornecedores
+              </p>
+            </div>
+            <div className="h-[200px]">
+              <TopFornecedoresChart data={topFornecedores} />
+            </div>
+          </div>
         </div>
 
         {/* ════════ FILTROS ════════ */}
