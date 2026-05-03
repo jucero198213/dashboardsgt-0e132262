@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -33,8 +34,8 @@ const PAGE_SIZE = 50;
 const AgingChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 260;
-  const padL = 55; const padR = 22; const padTop = 22; const padBot = 35;
+  const svgW = 520; const svgH = 300;
+  const padL = 60; const padR = 25; const padTop = 25; const padBot = 38;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -108,8 +109,8 @@ const AgingChart = ({ data }: { data: any[] }) => {
 const TopFornecedoresChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   
-  const svgW = 480; const svgH = 260;
-  const padL = 140; const padR: 70; const padTop = 18; const padBot = 18;
+  const svgW = 520; const svgH = 300;
+  const padL = 150; const padR = 75; const padTop = 20; const padBot = 20;
   const chartW = svgW - padL - padR;
   const chartH = svgH - padTop - padBot;
   
@@ -247,21 +248,45 @@ export default function ContasAPagar() {
   const kpis = [
     {
       label: "Valor Previsto", value: fmtK(resumoPagar.valorAPagar),
-      subtitle: "Total a pagar", icon: DollarSign, color: "cyan", rgb: "6,182,212",
+      sub: "Total a pagar", icon: DollarSign, color: "cyan", rgb: "6,182,212",
+      stripe: "from-cyan-400/60 to-cyan-700/20",
+      border: "border-cyan-400/[0.12]",
+      glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
+      iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
+      iconTxt: "text-cyan-300",
+      sub2: "text-cyan-500/80",
     },
     {
       label: "Valor Pago", value: fmtK(resumoPagar.valorPago),
-      subtitle: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`,
+      sub: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`,
       icon: CheckCircle, color: "emerald", rgb: "16,185,129",
+      stripe: "from-emerald-400/60 to-emerald-700/20",
+      border: "border-emerald-400/[0.12]",
+      glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
+      iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
+      iconTxt: "text-emerald-300",
+      sub2: "text-emerald-500/80",
     },
     {
       label: "Saldo em Aberto", value: fmtK(resumoPagar.saldoAPagar),
-      subtitle: "Pendente", icon: Clock, color: "amber", rgb: "251,191,36",
+      sub: "Pendente", icon: Clock, color: "amber", rgb: "251,191,36",
+      stripe: "from-amber-400/60 to-amber-700/20",
+      border: "border-amber-400/[0.12]",
+      glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
+      iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
+      iconTxt: "text-amber-300",
+      sub2: "text-amber-500/80",
     },
     {
       label: "Vencidos", value: fmtK(totalVencido),
-      subtitle: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`,
+      sub: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`,
       icon: AlertTriangle, color: "rose", rgb: "244,63,94",
+      stripe: "from-rose-400/60 to-rose-700/20",
+      border: "border-rose-400/[0.12]",
+      glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
+      iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
+      iconTxt: "text-rose-300",
+      sub2: "text-rose-500/80",
     },
   ];
 
@@ -367,31 +392,24 @@ export default function ContasAPagar() {
 
         {/* ════════ KPIs ════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {kpis.map((kpi, i) => (
-            <div key={i} className="group relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 transition-all hover:border-[var(--sgt-border-medium)]">
-              <div className="absolute inset-0 opacity-[0.03] transition-opacity group-hover:opacity-[0.06]"
-                style={{ background: `radial-gradient(circle at 70% 30%, rgb(${kpi.rgb}), transparent 70%)` }} />
-              
-              <div className="relative">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg bg-${kpi.color}-500/10 border border-${kpi.color}-400/20`}>
-                      <kpi.icon className={`h-4 w-4 text-${kpi.color}-400`} />
+          {kpis.map((k, i) => (
+            <AnimatedCard key={k.label} delay={i * 60}>
+              <div className={`group relative flex min-h-[100px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
+                <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
+                  style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
+                <div className="relative flex h-full flex-col">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+                      <k.icon className="h-3.5 w-3.5" />
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    {kpi.label}
-                  </p>
-                  <p className="mt-1 text-[28px] font-black leading-none tracking-tight text-white">
-                    {kpi.value}
-                  </p>
-                  <p className="mt-1.5 text-[11px] text-slate-400">{kpi.subtitle}</p>
+                  <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1rem,2vw,1.6rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
+                  <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${k.sub2}`}>{k.sub}</p>
                 </div>
               </div>
-            </div>
+            </AnimatedCard>
           ))}
         </div>
 
@@ -404,7 +422,7 @@ export default function ContasAPagar() {
                 Aging · Títulos Vencidos
               </p>
             </div>
-            <div className="h-[280px]">
+            <div className="h-[320px]">
               <AgingChart data={aging} />
             </div>
           </div>
@@ -416,7 +434,7 @@ export default function ContasAPagar() {
                 Top 5 · Maiores Fornecedores
               </p>
             </div>
-            <div className="h-[280px]">
+            <div className="h-[320px]">
               <TopFornecedoresChart data={topFornecedores} />
             </div>
           </div>
