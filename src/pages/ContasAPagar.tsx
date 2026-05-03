@@ -109,32 +109,43 @@ export default function ContasAPagar() {
       <div className="relative mx-auto max-w-[1920px] space-y-4 sm:space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         
         {/* ════════ HEADER ════════ */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="hidden sm:flex items-center gap-2 md:gap-3">
           <div className="flex items-center gap-3">
             <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
-            <div className="h-6 w-px bg-white/10" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-[clamp(1.25rem,3vw,1.75rem)] font-bold tracking-tight text-white">
-                  Contas a Pagar
-                </h1>
-                <div className="flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2 py-0.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
-                </div>
-              </div>
-              <p className="mt-0.5 text-[13px] text-slate-400">Gestão de pagamentos e fornecedores</p>
+            <div className="h-6 w-px bg-[var(--sgt-border-medium)]" />
+            <div className="flex flex-col leading-none">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+              <span className="text-[17px] font-black tracking-[-0.03em] text-white">Contas a Pagar</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} />
+          <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+          </div>
+
+          <div className="ml-auto flex items-center gap-2">
+            <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} />
+            <HomeButton />
+          </div>
+        </div>
+
+        {/* Mobile header */}
+        <div className="flex sm:hidden items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
+            <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
+            <div className="flex flex-col leading-none min-w-0">
+              <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+              <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Contas a Pagar</span>
             </div>
-            <div className="hidden sm:block"><HomeButton /></div>
-            <div className="sm:hidden">
-              <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
-            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
+            <HomeButton />
             <MobileNav />
           </div>
         </div>
