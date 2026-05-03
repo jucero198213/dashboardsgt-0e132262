@@ -179,7 +179,7 @@ const TopFornecedoresChart = ({ data }: { data: any[] }) => {
 
 export default function ContasAPagar() {
   const navigate = useNavigate();
-  const { contasPagar, resumo, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW } = useFinancialData();
+  const { contasPagar, resumo, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW, loadingPhase, progress } = useFinancialData();
   const { contasPagar: resumoPagar } = resumo;
 
   const [search, setSearch] = useState("");
@@ -342,7 +342,7 @@ export default function ContasAPagar() {
                 {filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}
               </SelectContent>
             </Select>
-            <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} progress={0} />
+            <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} progress={progress} loadingPhase={loadingPhase} />
           </div>
 
           <HomeButton />

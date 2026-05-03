@@ -131,6 +131,8 @@ interface FinancialDataState {
   faturamentoMensalAnterior: number[]; // jan-dez ano anterior
   frota:                    FrotaRow[];
   manutencao:               ManutencaoRow[];
+  loadingPhase:             string;    // fase atual do carregamento
+  progress:                 number;    // 0-100
 }
 
 interface FinancialDataContextType extends FinancialDataState {
@@ -293,6 +295,8 @@ export function FinancialDataProvider({
     faturamentoMensalAnterior: new Array(12).fill(0),
     frota:                     [],
     manutencao:                [],
+    loadingPhase:              "",
+    progress:                  0,
   });
 
   // ── Ref para cancelar fetch anterior quando filtros mudam rapidamente ─────
@@ -356,10 +360,11 @@ export function FinancialDataProvider({
     abortRef.current = new AbortController();
 
     // INCREMENTAL: apenas marca isFetchingDw=true, MANTÉM dados anteriores visíveis
-    setState((prev) => ({ ...prev, isFetchingDw: true, isFetchingCharts: true, dwError: null }));
+    setState((prev) => ({ ...prev, isFetchingDw: true, isFetchingCharts: true, dwError: null, loadingPhase: "Iniciando...", progress: 0 }));
 
     try {
       // ── 1. Fetch principal — KPI cards (prioridade máxima) ─────────────────
+      setState((prev) => ({ ...prev, loadingPhase: "Buscando dados financeiros...", progress: 10 }));
       const { data } = await fetchDwData({
         dataInicio: state.dwFilter.dataInicio,
         dataFim:    state.dwFilter.dataFim,
@@ -755,23 +760,27 @@ export function FinancialDataProvider({
           chartReceberFiltro, chartPagarFiltro,
           dwRawData: data,
           dwChartData: prev.dwChartData,
+          loadingPhase: "Concluído",
+          progress: 100,
         };
       });
 
       // ── 2. Queries secundárias em cadeia (sequencial, não bloqueiam a UI) ──
       //    Ordem: faturamento → gráfico anual
       //    Cada uma dispara só quando a anterior terminar, evitando concorrência no pool.
+      setState((prev) => ({ ...prev, loadingPhase: "Buscando faturamento...", progress: 50 }));
       const fatSnap = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const anoAnterior = String(parseInt(anoFiltro) - 1);
       const chartSnapAnterior = { dataInicio: `${anoAnterior}-01-01`, dataFim: `${anoAnterior}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
 
       // Busca frota e manutenção em paralelo (não bloqueiam os KPIs)
+      setState((prev) => ({ ...prev, loadingPhase: "Buscando frota e manutenção...", progress: 70 }));
       Promise.all([
         fetchFrota().catch(() => ({ data: [] })),
         fetchManutencao({ dataInicio: fatSnap.dataInicio, dataFim: fatSnap.dataFim, filial: fatSnap.filial ?? null }).catch(() => ({ data: [] })),
       ]).then(([frotaRes, manutRes]) => {
-        setState(prev => ({ ...prev, frota: frotaRes.data ?? [], manutencao: manutRes.data ?? [] }));
+        setState(prev => ({ ...prev, frota: frotaRes.data ?? [], manutencao: manutRes.data ?? [], loadingPhase: "Finalizando...", progress: 90 }));
       }).catch(err => console.warn("[DW] Frota/manutenção erro:", err?.message ?? err));
 
       fetchFaturamento(fatSnap)
