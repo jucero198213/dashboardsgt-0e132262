@@ -9,6 +9,10 @@ import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -27,7 +31,7 @@ const PAGE_SIZE = 50;
 
 export default function ContasAPagar() {
   const navigate = useNavigate();
-  const { contasPagar, resumo, isFetchingDw } = useFinancialData();
+  const { contasPagar, resumo, isFetchingDw, dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
   const { contasPagar: resumoPagar } = resumo;
 
   const [search, setSearch] = useState("");
@@ -35,6 +39,8 @@ export default function ContasAPagar() {
   const [page, setPage] = useState(1);
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
+
+  const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
   // ── Filtros e ordenação ────────────────────────────────────────────────────
   const contasFiltradas = useMemo(() => {
@@ -127,10 +133,35 @@ export default function ContasAPagar() {
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
+
+          {/* Filtros */}
+          <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+            <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+            <DatePickerInput value={dwFilter.dataFim} onChange={v => setDwFilter("dataFim", v)} placeholder="Data fim" />
+            <div className="h-4 w-px shrink-0 bg-[var(--sgt-divider)]" />
+            <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+              <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
+                <SelectValue placeholder="Empresa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas</SelectItem>
+                {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+              <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px] transition-all">
+                <SelectValue placeholder="Filial" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todas</SelectItem>
+                {filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} />
-            <HomeButton />
           </div>
+
+          <HomeButton />
         </div>
 
         {/* Mobile header */}
