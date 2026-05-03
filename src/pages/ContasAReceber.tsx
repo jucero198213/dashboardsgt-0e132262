@@ -148,7 +148,7 @@ const TopClientesChart = ({ data }: { data: any[] }) => {
         return (
           <g key={i} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
             <text x={padL - 6} y={y + barH / 2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="500" textAnchor="end">
-              {d.nome.length > 18 ? d.nome.substring(0, 17) + "..." : d.nome}
+              {d.nome}
             </text>
             
             <rect x={padL} y={y} width={w} height={barH} rx="3"
