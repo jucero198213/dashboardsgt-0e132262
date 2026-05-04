@@ -11,6 +11,8 @@ import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
@@ -34,12 +36,17 @@ const PAGE_SIZE = 50;
 export default function Compras() {
   const navigate = useNavigate();
   
-  const [dataInicio, setDataInicio] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d.toISOString().split('T')[0];
-  });
-  const [dataFim, setDataFim] = useState(() => new Date().toISOString().split('T')[0]);
+  // Context com filtros, empresa/filial, progress
+  const {
+    dwFilter,
+    setDwFilter,
+    empresas,
+    filiais,
+    isFetchingDw,
+    fetchFromDW,
+    loadingPhase,
+    progress,
+  } = useFinancialData();
   
   const [search, setSearch] = useState("");
   const [filtroGrupo, setFiltroGrupo] = useState("todos");
@@ -47,10 +54,13 @@ export default function Compras() {
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
 
-  // ── Fetch dados ─────────────────────────────────────────────────────────────
+  // ── Fetch dados usando filtros do contexto ─────────────────────────────────
   const { data: comprasResp, isLoading } = useQuery({
-    queryKey: ["compras", dataInicio, dataFim],
-    queryFn: () => fetchCompras({ dataInicio, dataFim }),
+    queryKey: ["compras", dwFilter.dataInicio, dwFilter.dataFim],
+    queryFn: () => fetchCompras({ 
+      dataInicio: dwFilter.dataInicio, 
+      dataFim: dwFilter.dataFim 
+    }),
   });
   const compras: ComprasRow[] = useMemo(() => {
     const r: any = comprasResp;
@@ -166,6 +176,18 @@ export default function Compras() {
     <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 [background:var(--sgt-bg-base)]">
       <BackgroundEffects />
 
+      {/* ════════ BARRA DE PROGRESSO TOPO ════════ */}
+      {isFetchingDw && (
+        <div className="fixed inset-x-0 top-0 z-50">
+          <div className="h-[3px] w-full overflow-hidden bg-transparent">
+            <div
+              className="h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-violet-400 shadow-[0_0_12px_rgba(99,102,241,0.6)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <section
         className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
@@ -176,7 +198,7 @@ export default function Compras() {
       >
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8 animate-[fadeSlideIn_0.5s_ease-out]">
         
-          {/* ════════ HEADER ════════ */}
+          {/* ════════ HEADER DESKTOP ════════ */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-3">
               <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
@@ -199,14 +221,59 @@ export default function Compras() {
 
             {/* Filtros */}
             <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
-              <DatePickerInput value={dataInicio} onChange={setDataInicio} placeholder="Data início" />
-              <DatePickerInput value={dataFim} onChange={setDataFim} placeholder="Data fim" />
+              <DatePickerInput 
+                value={dwFilter.dataInicio} 
+                onChange={(v) => setDwFilter("dataInicio", v)} 
+                placeholder="Data início" 
+              />
+              <DatePickerInput 
+                value={dwFilter.dataFim} 
+                onChange={(v) => setDwFilter("dataFim", v)} 
+                placeholder="Data fim" 
+              />
+              
+              <Select 
+                value={dwFilter.empresa ?? "__all__"} 
+                onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}
+              >
+                <SelectTrigger className="h-8 w-full min-w-[100px] max-w-[140px] rounded-lg text-[12px]">
+                  <SelectValue placeholder="Empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  {empresas.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select 
+                value={dwFilter.filial ?? "__all__"} 
+                onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}
+              >
+                <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px]">
+                  <SelectValue placeholder="Filial" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  {filiais.filter(f => !dwFilter.empresa || f.empresaId === dwFilter.empresa).map((f) => (
+                    <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <UpdateButton 
+                onClick={fetchFromDW} 
+                isFetching={isFetchingDw} 
+                loadingPhase={loadingPhase} 
+                progress={progress} 
+              />
             </div>
 
             <HomeButton />
           </div>
 
-          {/* Mobile header */}
+          {/* ════════ HEADER MOBILE ════════ */}
           <div className="flex sm:hidden items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
@@ -217,6 +284,13 @@ export default function Compras() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <UpdateButton 
+                onClick={fetchFromDW} 
+                isFetching={isFetchingDw} 
+                loadingPhase={loadingPhase} 
+                progress={progress}
+                compact
+              />
               <HomeButton />
               <MobileNav />
             </div>
