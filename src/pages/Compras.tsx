@@ -443,87 +443,115 @@ export default function Compras() {
           </div>
 
           {/* ════════ GRÁFICOS ════════ */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            
-            {/* Gráfico 1: Compras Mensais (Barras) */}
-            <AnimatedCard delay={500}>
-              <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
-                <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Compras Mensais</h3>
-                {dadosGraficos.dadosMensais.length > 0 ? (
-                  <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style={{stopColor: 'rgb(99,102,241)', stopOpacity: 1}} />
-                        <stop offset="100%" style={{stopColor: 'rgb(79,70,229)', stopOpacity: 1}} />
-                      </linearGradient>
-                    </defs>
-                    {(() => {
-                      const maxVal = Math.max(...dadosGraficos.dadosMensais.map(d => d.valor), 1);
-                      const barWidth = 35;
-                      const gap = 8;
-                      const padL = 10;
-                      const padR = 10;
-                      const padT = 10;
-                      const padB = 30;
-                      const chartH = 260 - padT - padB;
-                      const totalWidth = dadosGraficos.dadosMensais.length * (barWidth + gap) - gap;
-                      const startX = padL + (520 - padL - padR - totalWidth) / 2;
-                      
-                      return dadosGraficos.dadosMensais.map((d, i) => {
-                        const x = startX + i * (barWidth + gap);
-                        const h = (d.valor / maxVal) * chartH;
-                        const y = padT + chartH - h;
-                        return (
-                          <g key={d.mes}>
-                            <rect x={x} y={y} width={barWidth} height={h} fill="url(#barGrad)" rx="3" />
-                            <text x={x + barWidth/2} y={padT + chartH + 15} fill="#94a3b8" fontSize="9" textAnchor="middle">{d.mesLabel}</text>
-                            <text x={x + barWidth/2} y={y - 5} fill="#cbd5e1" fontSize="8" fontWeight="600" textAnchor="middle">{fmtK(d.valor)}</text>
-                          </g>
-                        );
-                      });
-                    })()}
-                  </svg>
-                ) : (
-                  <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Sem dados</div>
-                )}
-              </div>
-            </AnimatedCard>
+          {(() => {
+            const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+            const anoAtual = new Date().getFullYear();
+            const anoAnt = anoAtual - 1;
+            const valoresAtual = dadosGraficos.comparativoAnual.map(m => m.anoAtual);
+            const valoresAnt = dadosGraficos.comparativoAnual.map(m => m.anoAnterior);
+            const maxVal = Math.max(...valoresAtual, ...valoresAnt, 1);
+            const fmtY = (v: number) => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}k` : `${v.toFixed(0)}`;
 
-            {/* Gráfico 2: Top 5 Fornecedores */}
-            <AnimatedCard delay={550}>
-              <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
-                <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Top 5 Fornecedores</h3>
-                {dadosGraficos.top5Fornecedores.length > 0 ? (
-                  <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
-                    {(() => {
-                      const maxVal = Math.max(...dadosGraficos.top5Fornecedores.map(d => d.valor), 1);
-                      const barH = 35;
-                      const gap = 12;
-                      const padL = 160;
-                      const padR = 80;
-                      const padT = 10;
-                      const chartW = 520 - padL - padR;
-                      
-                      return dadosGraficos.top5Fornecedores.map((d, i) => {
-                        const y = padT + i * (barH + gap);
-                        const w = (d.valor / maxVal) * chartW;
-                        return (
-                          <g key={d.nome}>
-                            <rect x={padL} y={y} width={w} height={barH} fill="rgb(99,102,241)" opacity="0.9" rx="4" />
-                            <text x={padL - 6} y={y + barH/2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="500" textAnchor="end">{d.nome}</text>
-                            <text x={padL + w + 6} y={y + barH/2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="600">{fmtK(d.valor)}</text>
-                          </g>
-                        );
-                      });
-                    })()}
-                  </svg>
-                ) : (
-                  <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Sem dados</div>
-                )}
-              </div>
-            </AnimatedCard>
+            const buildPath = (vals: number[], w: number, h: number, padL: number, padR: number, padT: number, padB: number) => {
+              const innerW = w - padL - padR;
+              const innerH = h - padT - padB;
+              if (vals.length === 0) return "";
+              return vals.map((v, i) => {
+                const x = padL + (i / (vals.length - 1)) * innerW;
+                const y = padT + innerH * (1 - v / maxVal);
+                return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+              }).join(" ");
+            };
 
-          </div>
+            const temDados = valoresAtual.some(v => v > 0) || valoresAnt.some(v => v > 0);
+            const top5 = dadosGraficos.top5Fornecedores;
+            const maxFornec = Math.max(...top5.map(f => f.valor), 1);
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch">
+                {/* Gráfico 1 — Linha: Compras mensais ano atual vs anterior */}
+                <AnimatedCard delay={500} className="h-full">
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px]">
+                    <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Compras Mensais — {anoAtual} vs {anoAnt}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-[2px] w-4 rounded-full bg-amber-400 inline-block" />
+                          <span className="text-[9px] font-semibold text-amber-400">{anoAtual}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,3"/></svg>
+                          <span className="text-[9px] font-semibold text-slate-400">{anoAnt}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {!temDados ? (
+                      <div className="flex flex-1 items-center justify-center text-[12px] text-slate-500">Sem dados no período</div>
+                    ) : (
+                      <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[180px]">
+                        <defs>
+                          <linearGradient id="comprasGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
+                            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                        {[0.25,0.5,0.75,1].map(f => (
+                          <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
+                        ))}
+                        {[0.25,0.5,0.75,1].map(f => (
+                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                        ))}
+                        <path d={`${buildPath(valoresAtual,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#comprasGrad)"/>
+                        <path d={buildPath(valoresAnt,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
+                        <path d={buildPath(valoresAtual,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
+                        {months.map((m,i) => (
+                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                        ))}
+                      </svg>
+                    )}
+                  </div>
+                </AnimatedCard>
+
+                {/* Gráfico 2 — Barras: Top 5 Fornecedores */}
+                <AnimatedCard delay={560} className="h-full">
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px]">
+                    <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 Fornecedores</span>
+                    {top5.length === 0 ? (
+                      <div className="flex flex-1 items-center justify-center text-[12px] text-slate-500">Sem dados no período</div>
+                    ) : (
+                      <div className="flex flex-col gap-2.5 flex-1 justify-center pt-2">
+                        {top5.map((f, i) => {
+                          const pct = (f.valor / maxFornec) * 100;
+                          const isMax = i === 0;
+                          return (
+                            <div key={f.nome} className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-medium truncate" style={{ color: "var(--sgt-text-secondary)" }}>{f.nome}</span>
+                                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: isMax ? "#22d3ee" : "var(--sgt-text-secondary)" }}>{fmtK(f.valor)}</span>
+                              </div>
+                              <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{
+                                    width: `${Math.max(pct, 2)}%`,
+                                    background: isMax ? "linear-gradient(90deg,#22d3ee,#0891b2)" : "linear-gradient(90deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))",
+                                    boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none",
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </AnimatedCard>
+              </div>
+            );
+          })()}
+
 
           {/* ════════ TABELA ════════ */}
           {isLoading ? (
