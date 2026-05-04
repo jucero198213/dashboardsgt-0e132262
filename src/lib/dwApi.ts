@@ -50,6 +50,10 @@ const ENDPOINT_RH = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-rh`
   : `${SUPABASE_URL}/functions/v1/dw-rh`;
 
+const ENDPOINT_OPERACIONAL = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-operacional`
+  : `${SUPABASE_URL}/functions/v1/dw-operacional`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -388,4 +392,60 @@ export async function fetchRh(params?: {
   situacao?: string | null;
 }): Promise<RhResponse> {
   return callEdge<RhResponse>(ENDPOINT_RH, params ?? {});
+}
+
+// ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
+
+export interface OperacionalRow {
+  id:                       string | number | null;
+  codcli:                   string | number | null;
+  cli_nomeab:               string | null;
+  codmot:                   string | number | null;
+  motorista:                string | null;
+  veiculo:                  string | null;
+  latitude:                 number | string | null;
+  longitude:                number | string | null;
+  referencia:               string | null;
+  veiculo2:                 string | null;
+  veiculo3:                 string | null;
+  tipo_documento:           string | null;
+  codigo_documento:         string | number | null;
+  serie_documento:          string | null;
+  filial_documento:         string | null;
+  cod_remetente:            string | number | null;
+  remetente:                string | null;
+  cod_destinatario:         string | number | null;
+  destinatario:             string | null;
+  data_saida_original:      string | null;
+  data_saida_real:          string | null;
+  percentual_completo:      number | null;
+  previsao_chegada:         string | null;
+  situacao_viagem:          string | null;
+  descricao_documento:      string | null;
+  descricao_situacao:       string | null;
+  descricao_origem:         string | null;
+  descricao_destino:        string | null;
+  latitude_remetente:       number | string | null;
+  longitude_remetente:      number | string | null;
+  latitude_destinatario:    number | string | null;
+  longitude_destinatario:   number | string | null;
+  total_itens:              number | null;
+  itens_real:               number | null;
+  classificacao_veiculo:    string | null;
+  situacao_veiculo:         string | null;
+  em_manutencao:            string | boolean | null;
+}
+
+export interface OperacionalResponse {
+  data: OperacionalRow[];
+}
+
+// ─── Exports públicos: OPERACIONAL ────────────────────────────────────────────
+
+/**
+ * Busca o estado atual de todos os veículos monitorados (VRMON_VEICULO).
+ * Sem filtro de período — retorna o snapshot em tempo real.
+ */
+export async function fetchOperacional(): Promise<OperacionalResponse> {
+  return callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {});
 }

@@ -25,6 +25,7 @@ import Manutencao from "./pages/Manutencao";
 import Compras from "./pages/Compras";
 import Abastecimento from "./pages/Abastecimento";
 import Rh from "./pages/Rh";
+import Operacional from "./pages/Operacional";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/compras" element={<ProtectedRoute><Compras /></ProtectedRoute>} />
               <Route path="/abastecimento" element={<ProtectedRoute><Abastecimento /></ProtectedRoute>} />
               <Route path="/rh" element={<ProtectedRoute><Rh /></ProtectedRoute>} />
+              <Route path="/operacional" element={<ProtectedRoute><Operacional /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>

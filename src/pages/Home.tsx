@@ -284,8 +284,8 @@ export default function Home() {
       icon: Settings,
       title: "Operacional",
       description: "Gestão de rotas, viagens, motoristas e desempenho operacional.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/operacional"),
+      cta: "Acessar operacional",
+      onClick: () => navigate("/operacional"),
       tone: "cyan" as const,
     },
     {
