@@ -583,8 +583,9 @@ export default function ContasAPagar() {
               </div>
             </div>
           )}
-          </div>
-        </section>
+        </div>
+        </div>
+      </section>
       </div>
     </div>
   );
