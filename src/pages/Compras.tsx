@@ -321,9 +321,9 @@ export default function Compras() {
         </div>
       )}
 
-      <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden w-full">
+      <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
+          className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
           style={{
             background: "var(--sgt-bg-section)",
             border: "1px solid rgba(148, 163, 184, 0.08)",
