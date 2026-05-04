@@ -374,7 +374,6 @@ export default function Compras() {
             </div>
           )}
         </div>
-        </div>
       </section>
     </div>
   );
