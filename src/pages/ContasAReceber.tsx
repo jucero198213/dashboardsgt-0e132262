@@ -534,7 +534,7 @@ export default function ContasAReceber() {
                     <td className="px-4 py-3 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
-                        conta.status === "Recebido" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
+                        (conta.status as string) === "Recebido" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
                         conta.status === "Vencido" ? "bg-rose-500/10 text-rose-300 border border-rose-400/20" :
                         conta.status === "Parcial" ? "bg-amber-500/10 text-amber-300 border border-amber-400/20" :
                         "bg-cyan-500/10 text-cyan-300 border border-cyan-400/20"
