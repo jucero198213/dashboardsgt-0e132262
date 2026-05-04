@@ -245,6 +245,54 @@ export default function ContasAPagar() {
     [contasPagar]
   );
 
+  // ── INSIGHTS (cálculos reais) ──────────────────────────────────────────────
+  const insightsData = useMemo(() => {
+    // 1. DPO - Prazo médio de pagamento (entre vencimento e pagamento)
+    const pagos = contasPagar.filter(c => c.dataPagamento);
+    let dpoTotal = 0;
+    pagos.forEach(c => {
+      const venc = new Date(c.vencimento);
+      const pag = new Date(c.dataPagamento!);
+      const diffDias = Math.floor((pag.getTime() - venc.getTime()) / (1000 * 60 * 60 * 24));
+      dpoTotal += diffDias;
+    });
+    const dpo = pagos.length > 0 ? Math.abs(Math.round(dpoTotal / pagos.length)) : 0;
+
+    // 2. Economia potencial com descontos antecipação (assumindo 2% desconto em 30% dos valores)
+    const totalAberto = contasPagar.filter(c => c.status === "Aberto").reduce((s, c) => s + c.valor, 0);
+    const economiaPotencial = totalAberto * 0.30 * 0.02; // 30% dos valores com 2% desconto
+
+    // 3. Títulos com problemas (duplicados ou sem documento fiscal)
+    const titulosProblema = contasPagar.filter(c => 
+      !c.documento || c.documento === "" || c.documento.toLowerCase().includes("dup")
+    ).length;
+
+    // 4. Custos com atraso (juros/multas - estimativa 2% sobre vencidos)
+    const custoAtraso = contasPagar
+      .filter(c => c.status === "Vencido")
+      .reduce((s, c) => s + c.valor, 0) * 0.02;
+
+    // 5. Concentração em fornecedores (top 3 = quanto % do total?)
+    const porFornecedor: Record<string, number> = {};
+    contasPagar.forEach(c => {
+      porFornecedor[c.fornecedor] = (porFornecedor[c.fornecedor] || 0) + c.valor;
+    });
+    const top3Fornecedores = Object.values(porFornecedor)
+      .sort((a, b) => b - a)
+      .slice(0, 3)
+      .reduce((s, v) => s + v, 0);
+    const totalGeral = contasPagar.reduce((s, c) => s + c.valor, 0);
+    const concentracao = totalGeral > 0 ? (top3Fornecedores / totalGeral) * 100 : 0;
+
+    return {
+      dpo,
+      economiaPotencial,
+      titulosProblema,
+      custoAtraso,
+      concentracao,
+    };
+  }, [contasPagar]);
+
   const kpis = [
     {
       label: "Valor Previsto", value: fmtK(resumoPagar.valorAPagar),
@@ -451,12 +499,12 @@ export default function ContasAPagar() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">DPO · Prazo Médio</p>
-                    <p className="text-2xl font-black text-white mt-1">45 dias</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsData.dpo} dias</p>
                   </div>
                   <Clock className="h-5 w-5 text-blue-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Prazo médio de pagamento estável. Considere <span className="text-blue-400 font-semibold">negociar prazos maiores</span> com fornecedores estratégicos para melhorar o fluxo de caixa.
+                  Prazo médio de pagamento {insightsData.dpo > 0 ? "" : "(sem dados). "}Considere <span className="text-blue-400 font-semibold">negociar prazos maiores</span> com fornecedores estratégicos para melhorar o fluxo de caixa.
                 </p>
               </div>
             </div>
@@ -470,12 +518,12 @@ export default function ContasAPagar() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Oportunidade</p>
-                    <p className="text-2xl font-black text-white mt-1">R$ 42k</p>
+                    <p className="text-2xl font-black text-white mt-1">{fmtK(insightsData.economiaPotencial)}</p>
                   </div>
                   <TrendingDown className="h-5 w-5 text-emerald-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Economia potencial com <span className="text-emerald-400 font-semibold">descontos por antecipação</span>. Avalie custo de capital antes de antecipar pagamentos.
+                  Economia potencial com <span className="text-emerald-400 font-semibold">descontos por antecipação</span> (estimativa 2% em 30% dos valores). Avalie custo de capital antes de antecipar.
                 </p>
               </div>
             </div>
@@ -488,13 +536,13 @@ export default function ContasAPagar() {
               <div className="relative">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Estratégia</p>
-                    <p className="text-lg font-black text-white mt-1">Centralizar?</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Concentração</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsData.concentracao.toFixed(0)}%</p>
                   </div>
                   <CheckCircle className="h-5 w-5 text-amber-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  <span className="text-amber-400 font-semibold">Centralizar pagamentos</span> pode aumentar poder de negociação com fornecedores e simplificar gestão financeira.
+                  Top 3 fornecedores representam {insightsData.concentracao.toFixed(0)}% do total. <span className="text-amber-400 font-semibold">Centralizar pagamentos</span> pode aumentar poder de negociação.
                 </p>
               </div>
             </div>
@@ -508,7 +556,7 @@ export default function ContasAPagar() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Atenção</p>
-                    <p className="text-2xl font-black text-white mt-1">3 títulos</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsData.titulosProblema} {insightsData.titulosProblema === 1 ? "título" : "títulos"}</p>
                   </div>
                   <AlertTriangle className="h-5 w-5 text-rose-400/60" />
                 </div>
@@ -527,12 +575,12 @@ export default function ContasAPagar() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Custo Extra</p>
-                    <p className="text-2xl font-black text-white mt-1">R$ 8.5k</p>
+                    <p className="text-2xl font-black text-white mt-1">{fmtK(insightsData.custoAtraso)}</p>
                   </div>
                   <DollarSign className="h-5 w-5 text-orange-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Custos com <span className="text-orange-400 font-semibold">juros, multas e descontos perdidos</span> em pagamentos atrasados. Priorizar dentro do prazo.
+                  Estimativa de custos com <span className="text-orange-400 font-semibold">juros e multas</span> (2% sobre vencidos). Priorizar pagamento dentro do prazo.
                 </p>
               </div>
             </div>
