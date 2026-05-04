@@ -139,31 +139,39 @@ export default function Compras() {
 
   // ── Dados para gráficos ─────────────────────────────────────────────────────
   const dadosGraficos = useMemo(() => {
-    // Criar array de 12 meses (sempre, mesmo sem dados)
     const hoje = new Date();
-    const ultimos12Meses = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      const mesKey = d.toISOString().substring(0, 7);
-      ultimos12Meses.push({
-        mes: mesKey,
-        mesLabel: d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
-        valor: 0,
+    const anoAtual = hoje.getFullYear();
+    const anoAnterior = anoAtual - 1;
+    
+    // Criar 12 meses para ANO ATUAL e ANO ANTERIOR
+    const comparativoAnual = [];
+    for (let mes = 0; mes < 12; mes++) {
+      const mesAtual = `${anoAtual}-${String(mes + 1).padStart(2, '0')}`;
+      const mesAnterior = `${anoAnterior}-${String(mes + 1).padStart(2, '0')}`;
+      const mesLabel = new Date(anoAtual, mes, 1).toLocaleDateString("pt-BR", { month: "short" });
+      
+      comparativoAnual.push({
+        mes: mesLabel,
+        anoAtual: 0,
+        anoAnterior: 0,
+        mesKeyAtual: mesAtual,
+        mesKeyAnterior: mesAnterior,
       });
     }
     
-    // Agrupar compras por mês
+    // Agrupar compras por mês/ano
     const porMes: Record<string, number> = {};
     compras.forEach(c => {
       if (!c.data_compra) return;
-      const mes = c.data_compra.substring(0, 7);
+      const mes = c.data_compra.substring(0, 7); // YYYY-MM
       const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
       porMes[mes] = (porMes[mes] || 0) + valor;
     });
     
-    // Preencher valores nos meses correspondentes
-    ultimos12Meses.forEach(m => {
-      if (porMes[m.mes]) m.valor = porMes[m.mes];
+    // Preencher valores no comparativo
+    comparativoAnual.forEach(m => {
+      if (porMes[m.mesKeyAtual]) m.anoAtual = porMes[m.mesKeyAtual];
+      if (porMes[m.mesKeyAnterior]) m.anoAnterior = porMes[m.mesKeyAnterior];
     });
 
     // Top 5 fornecedores
@@ -178,7 +186,7 @@ export default function Compras() {
       .slice(0, 5)
       .map(([nome, valor]) => ({ nome, valor }));
 
-    return { dadosMensais: ultimos12Meses, top5Fornecedores };
+    return { comparativoAnual, top5Fornecedores };
   }, [compras]);
 
   // ── Filtros e ordenação ─────────────────────────────────────────────────────
