@@ -341,7 +341,7 @@ export default function ContasAPagar() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8 animate-[fadeSlideIn_0.5s_ease-out]">
+        <div className="space-y-4 sm:space-y-6 p-2 sm:p-3 lg:p-4 animate-[fadeSlideIn_0.5s_ease-out]">
         
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
