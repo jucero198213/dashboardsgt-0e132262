@@ -329,7 +329,7 @@ export default function Compras() {
                       return (
                         <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
                           <td className="px-4 py-3 text-[13px] text-slate-400">{fmtData(compra.data_compra)}</td>
-                          <td className="px-4 py-3 text-[13px] font-medium text-white">{compra.nf}</td>
+                          <td className="px-4 py-3 text-[13px] font-medium text-white">{(compra as any).nf}</td>
                           <td className="px-4 py-3 text-[13px] text-slate-300">{compra.fornecedor}</td>
                           <td className="px-4 py-3 text-[13px] text-slate-300">{compra.produto}</td>
                           <td className="px-4 py-3 text-[11px] text-slate-500">{compra.grupo}</td>
