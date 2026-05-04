@@ -48,10 +48,13 @@ export default function Compras() {
   const [sortAsc, setSortAsc] = useState(true);
 
   // ── Fetch dados ─────────────────────────────────────────────────────────────
-  const { data: compras = [], isLoading } = useQuery({
+  const { data: comprasResp, isLoading } = useQuery({
     queryKey: ["compras", dataInicio, dataFim],
     queryFn: () => fetchCompras({ dataInicio, dataFim }),
   });
+  const compras: ComprasRow[] = Array.isArray(comprasResp)
+    ? comprasResp
+    : Array.isArray(comprasResp?.data) ? comprasResp.data : [];
 
   // ── KPIs ────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
