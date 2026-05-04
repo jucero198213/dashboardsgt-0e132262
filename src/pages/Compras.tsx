@@ -139,22 +139,32 @@ export default function Compras() {
 
   // ── Dados para gráficos ─────────────────────────────────────────────────────
   const dadosGraficos = useMemo(() => {
-    // Agrupar por mês
+    // Criar array de 12 meses (sempre, mesmo sem dados)
+    const hoje = new Date();
+    const ultimos12Meses = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const mesKey = d.toISOString().substring(0, 7);
+      ultimos12Meses.push({
+        mes: mesKey,
+        mesLabel: d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+        valor: 0,
+      });
+    }
+    
+    // Agrupar compras por mês
     const porMes: Record<string, number> = {};
     compras.forEach(c => {
       if (!c.data_compra) return;
-      const mes = c.data_compra.substring(0, 7); // YYYY-MM
+      const mes = c.data_compra.substring(0, 7);
       const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
       porMes[mes] = (porMes[mes] || 0) + valor;
     });
-
-    // Últimos 12 meses ordenados
-    const mesesOrdenados = Object.keys(porMes).sort().slice(-12);
-    const dadosMensais = mesesOrdenados.map(m => ({
-      mes: m,
-      mesLabel: new Date(m + "-01").toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
-      valor: porMes[m],
-    }));
+    
+    // Preencher valores nos meses correspondentes
+    ultimos12Meses.forEach(m => {
+      if (porMes[m.mes]) m.valor = porMes[m.mes];
+    });
 
     // Top 5 fornecedores
     const porFornecedor: Record<string, number> = {};
@@ -168,19 +178,7 @@ export default function Compras() {
       .slice(0, 5)
       .map(([nome, valor]) => ({ nome, valor }));
 
-    // Top 5 grupos
-    const porGrupo: Record<string, number> = {};
-    compras.forEach(c => {
-      if (!c.grupo) return;
-      const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
-      porGrupo[c.grupo] = (porGrupo[c.grupo] || 0) + valor;
-    });
-    const top5Grupos = Object.entries(porGrupo)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([nome, valor]) => ({ nome, valor }));
-
-    return { dadosMensais, top5Fornecedores, top5Grupos };
+    return { dadosMensais: ultimos12Meses, top5Fornecedores };
   }, [compras]);
 
   // ── Filtros e ordenação ─────────────────────────────────────────────────────
@@ -511,57 +509,6 @@ export default function Compras() {
             </AnimatedCard>
 
           </div>
-
-          {/* Gráfico 3: Evolução Temporal (Linha) - Full Width */}
-          <AnimatedCard delay={600}>
-            <div className="flex h-[300px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
-              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Evolução Temporal</h3>
-              {dadosGraficos.dadosMensais.length > 1 ? (
-                <svg viewBox="0 0 1000 220" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{stopColor: 'rgb(20,184,166)', stopOpacity: 0.3}} />
-                      <stop offset="100%" style={{stopColor: 'rgb(20,184,166)', stopOpacity: 0}} />
-                    </linearGradient>
-                  </defs>
-                  {(() => {
-                    const maxVal = Math.max(...dadosGraficos.dadosMensais.map(d => d.valor), 1);
-                    const padL = 40;
-                    const padR = 40;
-                    const padT = 20;
-                    const padB = 30;
-                    const chartW = 1000 - padL - padR;
-                    const chartH = 220 - padT - padB;
-                    const stepX = chartW / (dadosGraficos.dadosMensais.length - 1);
-                    
-                    const pontos = dadosGraficos.dadosMensais.map((d, i) => {
-                      const x = padL + i * stepX;
-                      const y = padT + chartH - (d.valor / maxVal) * chartH;
-                      return { x, y, d };
-                    });
-
-                    const linhaPath = pontos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-                    const areaPath = `${linhaPath} L ${pontos[pontos.length-1].x} ${padT + chartH} L ${padL} ${padT + chartH} Z`;
-                    
-                    return (
-                      <>
-                        <path d={areaPath} fill="url(#areaGrad)" />
-                        <path d={linhaPath} fill="none" stroke="rgb(20,184,166)" strokeWidth="2.5" />
-                        {pontos.map((p, i) => (
-                          <g key={i}>
-                            <circle cx={p.x} cy={p.y} r="4" fill="rgb(20,184,166)" stroke="#fff" strokeWidth="2" />
-                            <text x={p.x} y={padT + chartH + 20} fill="#94a3b8" fontSize="9" textAnchor="middle">{p.d.mesLabel}</text>
-                          </g>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </svg>
-              ) : (
-                <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Dados insuficientes</div>
-              )}
-            </div>
-          </AnimatedCard>
 
           {/* ════════ TABELA ════════ */}
           {isLoading ? (
