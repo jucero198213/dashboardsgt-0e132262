@@ -25,6 +25,23 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         skipWaiting: true,
         clientsClaim: true,
+        // Cache busting - força reload em mudanças
+        cleanupOutdatedCaches: true,
+        // Estratégia: Network First (sempre tenta buscar novo, fallback cache)
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.lovable\.app\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'lovable-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5, // 5 minutos - cache curto!
+              },
+              networkTimeoutSeconds: 3,
+            },
+          },
+        ],
       },
       manifest: {
         name: "Workspace SGT",
