@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ShoppingCart, FileText, Users, Package,
   Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+  ReceiptText, AlertCircle, TrendingUp,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
@@ -119,6 +120,67 @@ export default function Compras() {
         sub2: "text-violet-500/80",
       },
     ];
+  }, [compras]);
+
+  // ── Mini-cards (insights) ───────────────────────────────────────────────────
+  const miniCards = useMemo(() => {
+    const pedidosUnicos = new Set(compras.filter(c => c.pedido).map(c => String(c.pedido))).size;
+    const pedidosSemLancamento = compras.filter(c => !c.pedido || c.pedido === null).length;
+    
+    const valorTotal = compras.reduce((s, c) => s + ((c.quantidade ?? 0) * (c.valor_un ?? 0)), 0);
+    const valorMedioPedido = pedidosUnicos > 0 ? valorTotal / pedidosUnicos : 0;
+
+    return [
+      { label: "Total Pedidos", value: fmtNum(pedidosUnicos), icon: ReceiptText, color: "sky" },
+      { label: "Sem Lançamento", value: fmtNum(pedidosSemLancamento), icon: AlertCircle, color: "orange" },
+      { label: "Valor Médio/Pedido", value: fmtK(valorMedioPedido), icon: TrendingUp, color: "teal" },
+    ];
+  }, [compras]);
+
+  // ── Dados para gráficos ─────────────────────────────────────────────────────
+  const dadosGraficos = useMemo(() => {
+    // Agrupar por mês
+    const porMes: Record<string, number> = {};
+    compras.forEach(c => {
+      if (!c.data_compra) return;
+      const mes = c.data_compra.substring(0, 7); // YYYY-MM
+      const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
+      porMes[mes] = (porMes[mes] || 0) + valor;
+    });
+
+    // Últimos 12 meses ordenados
+    const mesesOrdenados = Object.keys(porMes).sort().slice(-12);
+    const dadosMensais = mesesOrdenados.map(m => ({
+      mes: m,
+      mesLabel: new Date(m + "-01").toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+      valor: porMes[m],
+    }));
+
+    // Top 5 fornecedores
+    const porFornecedor: Record<string, number> = {};
+    compras.forEach(c => {
+      if (!c.fornecedor) return;
+      const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
+      porFornecedor[c.fornecedor] = (porFornecedor[c.fornecedor] || 0) + valor;
+    });
+    const top5Fornecedores = Object.entries(porFornecedor)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([nome, valor]) => ({ nome, valor }));
+
+    // Top 5 grupos
+    const porGrupo: Record<string, number> = {};
+    compras.forEach(c => {
+      if (!c.grupo) return;
+      const valor = (c.quantidade ?? 0) * (c.valor_un ?? 0);
+      porGrupo[c.grupo] = (porGrupo[c.grupo] || 0) + valor;
+    });
+    const top5Grupos = Object.entries(porGrupo)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([nome, valor]) => ({ nome, valor }));
+
+    return { dadosMensais, top5Fornecedores, top5Grupos };
   }, [compras]);
 
   // ── Filtros e ordenação ─────────────────────────────────────────────────────
@@ -323,6 +385,23 @@ export default function Compras() {
             ))}
           </div>
 
+          {/* ════════ MINI-CARDS (Insights) ════════ */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {miniCards.map((mc, i) => (
+              <AnimatedCard key={mc.label} delay={300 + i * 50}>
+                <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-slate-700/30 bg-[var(--sgt-bg-card)] p-3 transition-all duration-200 hover:border-slate-600/40">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-${mc.color}-400/10 border border-${mc.color}-400/20`}>
+                    <mc.icon className={`h-5 w-5 text-${mc.color}-400`} />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-500">{mc.label}</p>
+                    <p className="text-[18px] font-black leading-none text-white">{mc.value}</p>
+                  </div>
+                </div>
+              </AnimatedCard>
+            ))}
+          </div>
+
           {/* ════════ FILTROS ════════ */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -346,6 +425,140 @@ export default function Compras() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* ════════ GRÁFICOS ════════ */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* Gráfico 1: Compras Mensais (Barras) */}
+            <AnimatedCard delay={500}>
+              <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
+                <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Compras Mensais</h3>
+                {dadosGraficos.dadosMensais.length > 0 ? (
+                  <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style={{stopColor: 'rgb(99,102,241)', stopOpacity: 1}} />
+                        <stop offset="100%" style={{stopColor: 'rgb(79,70,229)', stopOpacity: 1}} />
+                      </linearGradient>
+                    </defs>
+                    {(() => {
+                      const maxVal = Math.max(...dadosGraficos.dadosMensais.map(d => d.valor), 1);
+                      const barWidth = 35;
+                      const gap = 8;
+                      const padL = 10;
+                      const padR = 10;
+                      const padT = 10;
+                      const padB = 30;
+                      const chartH = 260 - padT - padB;
+                      const totalWidth = dadosGraficos.dadosMensais.length * (barWidth + gap) - gap;
+                      const startX = padL + (520 - padL - padR - totalWidth) / 2;
+                      
+                      return dadosGraficos.dadosMensais.map((d, i) => {
+                        const x = startX + i * (barWidth + gap);
+                        const h = (d.valor / maxVal) * chartH;
+                        const y = padT + chartH - h;
+                        return (
+                          <g key={d.mes}>
+                            <rect x={x} y={y} width={barWidth} height={h} fill="url(#barGrad)" rx="3" />
+                            <text x={x + barWidth/2} y={padT + chartH + 15} fill="#94a3b8" fontSize="9" textAnchor="middle">{d.mesLabel}</text>
+                            <text x={x + barWidth/2} y={y - 5} fill="#cbd5e1" fontSize="8" fontWeight="600" textAnchor="middle">{fmtK(d.valor)}</text>
+                          </g>
+                        );
+                      });
+                    })()}
+                  </svg>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Sem dados</div>
+                )}
+              </div>
+            </AnimatedCard>
+
+            {/* Gráfico 2: Top 5 Fornecedores */}
+            <AnimatedCard delay={550}>
+              <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
+                <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Top 5 Fornecedores</h3>
+                {dadosGraficos.top5Fornecedores.length > 0 ? (
+                  <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
+                    {(() => {
+                      const maxVal = Math.max(...dadosGraficos.top5Fornecedores.map(d => d.valor), 1);
+                      const barH = 35;
+                      const gap = 12;
+                      const padL = 160;
+                      const padR = 80;
+                      const padT = 10;
+                      const chartW = 520 - padL - padR;
+                      
+                      return dadosGraficos.top5Fornecedores.map((d, i) => {
+                        const y = padT + i * (barH + gap);
+                        const w = (d.valor / maxVal) * chartW;
+                        return (
+                          <g key={d.nome}>
+                            <rect x={padL} y={y} width={w} height={barH} fill="rgb(99,102,241)" opacity="0.9" rx="4" />
+                            <text x={padL - 6} y={y + barH/2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="500" textAnchor="end">{d.nome}</text>
+                            <text x={padL + w + 6} y={y + barH/2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="600">{fmtK(d.valor)}</text>
+                          </g>
+                        );
+                      });
+                    })()}
+                  </svg>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Sem dados</div>
+                )}
+              </div>
+            </AnimatedCard>
+
+          </div>
+
+          {/* Gráfico 3: Evolução Temporal (Linha) - Full Width */}
+          <AnimatedCard delay={600}>
+            <div className="flex h-[300px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
+              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Evolução Temporal</h3>
+              {dadosGraficos.dadosMensais.length > 1 ? (
+                <svg viewBox="0 0 1000 220" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" style={{stopColor: 'rgb(20,184,166)', stopOpacity: 0.3}} />
+                      <stop offset="100%" style={{stopColor: 'rgb(20,184,166)', stopOpacity: 0}} />
+                    </linearGradient>
+                  </defs>
+                  {(() => {
+                    const maxVal = Math.max(...dadosGraficos.dadosMensais.map(d => d.valor), 1);
+                    const padL = 40;
+                    const padR = 40;
+                    const padT = 20;
+                    const padB = 30;
+                    const chartW = 1000 - padL - padR;
+                    const chartH = 220 - padT - padB;
+                    const stepX = chartW / (dadosGraficos.dadosMensais.length - 1);
+                    
+                    const pontos = dadosGraficos.dadosMensais.map((d, i) => {
+                      const x = padL + i * stepX;
+                      const y = padT + chartH - (d.valor / maxVal) * chartH;
+                      return { x, y, d };
+                    });
+
+                    const linhaPath = pontos.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                    const areaPath = `${linhaPath} L ${pontos[pontos.length-1].x} ${padT + chartH} L ${padL} ${padT + chartH} Z`;
+                    
+                    return (
+                      <>
+                        <path d={areaPath} fill="url(#areaGrad)" />
+                        <path d={linhaPath} fill="none" stroke="rgb(20,184,166)" strokeWidth="2.5" />
+                        {pontos.map((p, i) => (
+                          <g key={i}>
+                            <circle cx={p.x} cy={p.y} r="4" fill="rgb(20,184,166)" stroke="#fff" strokeWidth="2" />
+                            <text x={p.x} y={padT + chartH + 20} fill="#94a3b8" fontSize="9" textAnchor="middle">{p.d.mesLabel}</text>
+                          </g>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </svg>
+              ) : (
+                <div className="flex flex-1 items-center justify-center text-slate-600 text-sm">Dados insuficientes</div>
+              )}
+            </div>
+          </AnimatedCard>
 
           {/* ════════ TABELA ════════ */}
           {isLoading ? (
