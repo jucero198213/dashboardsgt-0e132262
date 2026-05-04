@@ -334,10 +334,10 @@ export default function ContasAReceber() {
       )}
 
       <section
-        className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] border overflow-auto"
+        className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
           background: "var(--sgt-bg-section)",
-          borderColor: "var(--sgt-border-subtle)",
+          border: "1px solid rgba(148, 163, 184, 0.08)",
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
