@@ -318,7 +318,10 @@ export default function ContasAReceber() {
   }, [contasReceber]);
 
   return (
-    <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 [background:var(--sgt-bg-base)]">
+    <div 
+      className="flex flex-col min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
+    >
       <BackgroundEffects />
 
       {/* ════════ BARRA DE PROGRESSO TOPO ════════ */}
@@ -333,15 +336,16 @@ export default function ContasAReceber() {
         </div>
       )}
 
-      <section
-        className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
-        style={{
-          background: "var(--sgt-bg-section)",
-          border: "1px solid rgba(148, 163, 184, 0.08)",
-          boxShadow: "var(--sgt-section-shadow)",
-        }}
-      >
-        <div className="space-y-4 sm:space-y-6 p-2 sm:p-3 lg:p-4 animate-[fadeSlideIn_0.5s_ease-out]">
+      <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden w-full">
+        <section
+          className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
+          style={{
+            background: "var(--sgt-bg-section)",
+            border: "1px solid rgba(148, 163, 184, 0.08)",
+            boxShadow: "var(--sgt-section-shadow)",
+          }}
+        >
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
         
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
@@ -579,9 +583,9 @@ export default function ContasAReceber() {
               </div>
             </div>
           )}
-        </div>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
