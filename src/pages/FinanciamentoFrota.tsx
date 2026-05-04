@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { InsightsSection } from "@/components/shared/InsightsSection";
+import { SectionDivider } from "@/components/shared/SectionDivider";
 import { HomeButton } from "@/components/shared/HomeButton";
 
 interface Financiamento {
@@ -251,6 +253,33 @@ export default function FinanciamentoFrota() {
                     </AnimatedCard>
                   ))}
                 </div>
+
+                {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
+                <SectionDivider
+                  numero={2}
+                  titulo="Insights por IA"
+                  subtitulo="Análise inteligente dos financiamentos — recomendações acionáveis geradas por IA"
+                  color="violet"
+                />
+                <InsightsSection
+                  setor="financiamento_frota"
+                  dados={{
+                    totalContratos,
+                    saldoDevedor: Math.round(saldoDevedor),
+                    totalParcelas,
+                    valorMensalTotal: Math.round(valorMensal),
+                    qtdBancos: bancos.length - 1,
+                  }}
+                  periodo="Planilha carregada"
+                />
+
+                {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
+                <SectionDivider
+                  numero={3}
+                  titulo="Detalhamento"
+                  subtitulo="Contratos de financiamento e parcelas pendentes"
+                  color="blue"
+                />
 
                 {/* Gráfico por banco + filtros + tabela */}
                 <div className="flex flex-1 min-h-0 gap-3">

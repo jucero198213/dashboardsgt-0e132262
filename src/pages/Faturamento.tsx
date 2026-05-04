@@ -7,6 +7,8 @@ import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { InsightsSection } from "@/components/shared/InsightsSection";
+import { SectionDivider } from "@/components/shared/SectionDivider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 
@@ -289,8 +291,28 @@ export default function Faturamento() {
 
             </div>
 
-            {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
+            <SectionDivider
+              numero={2}
+              titulo="Insights por IA"
+              subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
+              color="violet"
+            />
+            <InsightsSection
+              setor="faturamento"
+              dados={{
+                totalFaturado,
+                mediaDiaUtil: Math.round(mediaDiaUtil),
+                provisao: Math.round(provisao),
+                diasUteis,
+                diasUteisRestantes,
+                qtdClientes: rows.length,
+                top5Clientes: top5.map(r => ({ nome: r.descri, valor: Math.round(r.total), percentual: parseFloat(r.pct.toFixed(1)) })),
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+            />
+            {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
+            <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               
               {/* Insight 1: Ticket Médio */}
               <AnimatedCard delay={180}>
@@ -407,6 +429,14 @@ export default function Faturamento() {
               </AnimatedCard>
 
             </div>
+
+            {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
+            <SectionDivider
+              numero={3}
+              titulo="Detalhamento"
+              subtitulo="Documentos e registros que compõem os dados do período"
+              color="blue"
+            />
 
             {/* Top 5 + Tabela lado a lado */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch xl:min-h-0">

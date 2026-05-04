@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
+import { InsightsSection } from "@/components/shared/InsightsSection";
+import { SectionDivider } from "@/components/shared/SectionDivider";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -489,8 +491,31 @@ export default function ContasAPagar() {
           ))}
         </div>
 
-        {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
+        <SectionDivider
+          numero={2}
+          titulo="Insights por IA"
+          subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
+          color="violet"
+        />
+        <InsightsSection
+          setor="contas_a_pagar"
+          dados={{
+            totalAPagar: resumoPagar.valorAPagar,
+            totalPago: resumoPagar.valorPago,
+            totalVencido: resumoPagar.valorVencido,
+            totalAberto: resumoPagar.valorAberto,
+            qtdTitulos: contasPagar.length,
+            dpo: insightsData.dpo,
+            economiaPotencial: Math.round(insightsData.economiaPotencial),
+            titulosProblema: insightsData.titulosProblema,
+            custoAtraso: Math.round(insightsData.custoAtraso),
+            concentracaoTop3Fornecedores: Math.round(insightsData.concentracao),
+          }}
+          periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+        />
+        {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
+        <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           
           {/* Insight 1: DPO e Tendência */}
           <AnimatedCard delay={300}>
@@ -614,6 +639,14 @@ export default function ContasAPagar() {
           </AnimatedCard>
 
         </div>
+
+        {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
+        <SectionDivider
+          numero={3}
+          titulo="Detalhamento"
+          subtitulo="Documentos e títulos que compõem os dados do período"
+          color="blue"
+        />
 
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">

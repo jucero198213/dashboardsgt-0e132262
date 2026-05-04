@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
+import { InsightsSection } from "@/components/shared/InsightsSection";
+import { SectionDivider } from "@/components/shared/SectionDivider";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -490,8 +492,30 @@ export default function ContasAReceber() {
           ))}
         </div>
 
-        {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
+        <SectionDivider
+          numero={2}
+          titulo="Insights por IA"
+          subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
+          color="violet"
+        />
+        <InsightsSection
+          setor="contas_a_receber"
+          dados={{
+            totalAReceber: resumoReceber.valorAReceber,
+            totalRecebido: resumoReceber.valorRecebido,
+            totalVencido: resumoReceber.valorVencido,
+            totalAberto: resumoReceber.valorAberto,
+            qtdTitulos: contasReceber.length,
+            dso: insightsDataReceber.dso,
+            concentracaoTop3Clientes: Math.round(insightsDataReceber.concentracaoClientes),
+            glosaPercentual: parseFloat(insightsDataReceber.glosa.toFixed(1)),
+            clientesInadimplentes: insightsDataReceber.clientesInadimplentes,
+          }}
+          periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+        />
+        {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
+        <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           
           {/* Insight 1: DSO - Prazo Médio de Recebimento */}
           <AnimatedCard delay={300}>
@@ -608,6 +632,14 @@ export default function ContasAReceber() {
           </AnimatedCard>
 
         </div>
+
+        {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
+        <SectionDivider
+          numero={3}
+          titulo="Detalhamento"
+          subtitulo="Documentos e títulos que compõem os dados do período"
+          color="blue"
+        />
 
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">

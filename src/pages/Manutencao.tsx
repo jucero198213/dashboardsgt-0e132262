@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { InsightsSection } from "@/components/shared/InsightsSection";
+import { SectionDivider } from "@/components/shared/SectionDivider";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -787,8 +789,30 @@ export default function Manutencao() {
               })}
             </div>
 
-            {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
+            <SectionDivider
+              numero={2}
+              titulo="Insights por IA"
+              subtitulo="Análise inteligente da manutenção — recomendações acionáveis geradas por IA"
+              color="violet"
+            />
+            <InsightsSection
+              setor="manutencao"
+              dados={{
+                totalOrdens: kpis.totalOS,
+                ordensAbertas: kpis.abertas,
+                custoTotal: Math.round(kpis.totalCusto),
+                custoMedioOrdem: Math.round(kpis.custoMedioOS),
+                custoTotalPecas: Math.round(kpis.totalPecas),
+                custoTotalMaoDeObra: Math.round(kpis.totalMO),
+                ordensExternas: kpis.externas,
+                ordensInternas: kpis.internas,
+                top5Veiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: v.codvei, custo: Math.round(v.custo), ordens: v.qtd })),
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+            />
+            {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
+            <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               
               {/* Insight 1: CPK - Custo por KM */}
               <AnimatedCard delay={300}>
@@ -905,6 +929,14 @@ export default function Manutencao() {
               </AnimatedCard>
 
             </div>
+
+            {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
+            <SectionDivider
+              numero={3}
+              titulo="Detalhamento"
+              subtitulo="Ordens de serviço e registros que compõem os dados do período"
+              color="blue"
+            />
 
             {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
             <AnimatedCard delay={280}>
