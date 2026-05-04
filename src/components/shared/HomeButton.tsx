@@ -11,6 +11,7 @@ import {
   Wrench,
   LineChart,
   Car,
+  ShoppingCart,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -100,6 +101,14 @@ export function HomeButton() {
       icon: Wrench,
       color: "text-fuchsia-300",
       bg: "bg-fuchsia-400/10 border-fuchsia-400/25",
+      show: true,
+    },
+    {
+      to: "/compras",
+      label: "Compras",
+      icon: ShoppingCart,
+      color: "text-indigo-300",
+      bg: "bg-indigo-400/10 border-indigo-400/25",
       show: true,
     },
   ];
