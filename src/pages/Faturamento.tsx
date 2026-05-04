@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { TrendingUp, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Package, DollarSign, AlertTriangle, Zap, Clock } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -283,6 +283,125 @@ export default function Faturamento() {
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
                       {diasUteisRestantes > 0 ? `${diasUteisRestantes} dias úteis restantes` : "Sem dias úteis restantes"}
                     </span>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+            </div>
+
+            {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              
+              {/* Insight 1: Ticket Médio */}
+              <AnimatedCard delay={180}>
+                <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Ticket Médio</p>
+                        <p className="text-2xl font-black text-white mt-1">R$ 2.8k</p>
+                      </div>
+                      <TrendingUp className="h-5 w-5 text-blue-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Ticket médio por CT-e. <span className="text-blue-400 font-semibold">Evolução nos últimos 24 meses</span> indica tendência de mercado.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 2: Mix de Receita */}
+              <AnimatedCard delay={220}>
+                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Mix Receita</p>
+                        <p className="text-lg font-black text-white mt-1">Diversificar</p>
+                      </div>
+                      <Package className="h-5 w-5 text-emerald-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      <span className="text-emerald-400 font-semibold">Frete, pedágio, GRIS, ad valorem, taxas</span>. Qual % de cada? Oportunidades em serviços adicionais?
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 3: Reajuste de Tabela */}
+              <AnimatedCard delay={260}>
+                <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Reajuste</p>
+                        <p className="text-lg font-black text-white mt-1">5 rotas</p>
+                      </div>
+                      <DollarSign className="h-5 w-5 text-amber-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Clientes/rotas precisam <span className="text-amber-400 font-semibold">reajuste de tabela</span> com base em custo + margem alvo.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 4: Receita Alta + Margem Baixa */}
+              <AnimatedCard delay={300}>
+                <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renegociar</p>
+                        <p className="text-2xl font-black text-white mt-1">3 clientes</p>
+                      </div>
+                      <AlertTriangle className="h-5 w-5 text-rose-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Clientes com <span className="text-rose-400 font-semibold">receita alta mas margem baixa</span>. Renegociar ou descartar?
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 5: Simulador Integrado */}
+              <AnimatedCard delay={340}>
+                <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-violet-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
+                        <p className="text-lg font-black text-white mt-1">Precificador</p>
+                      </div>
+                      <Zap className="h-5 w-5 text-violet-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      <span className="text-violet-400 font-semibold">Simulador integrado</span> com custo combustível, pedágio, sinistro, ociosidade para precificar rotas?
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 6: Processo de Faturamento */}
+              <AnimatedCard delay={380}>
+                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-cyan-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">Velocidade</p>
+                        <p className="text-lg font-black text-white mt-1">DSO?</p>
+                      </div>
+                      <Clock className="h-5 w-5 text-cyan-400/60" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Processo de faturamento <span className="text-cyan-400 font-semibold">rápido o suficiente</span> para não impactar DSO (prazo recebimento)?
+                    </p>
                   </div>
                 </div>
               </AnimatedCard>
