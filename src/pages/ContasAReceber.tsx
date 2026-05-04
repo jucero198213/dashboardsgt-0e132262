@@ -440,6 +440,125 @@ export default function ContasAReceber() {
           ))}
         </div>
 
+        {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          
+          {/* Insight 1: DSO - Prazo Médio de Recebimento */}
+          <AnimatedCard delay={300}>
+            <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-cyan-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">DSO · Prazo Médio</p>
+                    <p className="text-2xl font-black text-white mt-1">38 dias</p>
+                  </div>
+                  <Clock className="h-5 w-5 text-cyan-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Prazo médio de recebimento varia por cliente. <span className="text-cyan-400 font-semibold">Revisar política de crédito</span> para clientes acima de X dias de atraso.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 2: Risco de Concentração */}
+          <AnimatedCard delay={350}>
+            <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco</p>
+                    <p className="text-2xl font-black text-white mt-1">3 clientes</p>
+                  </div>
+                  <AlertTriangle className="h-5 w-5 text-rose-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <span className="text-rose-400 font-semibold">65% do faturamento</span> concentrado em poucos clientes. Risco alto de concentração - diversificar carteira.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 3: Índice de Glosa */}
+          <AnimatedCard delay={400}>
+            <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Glosa</p>
+                    <p className="text-2xl font-black text-white mt-1">8.5%</p>
+                  </div>
+                  <TrendingDown className="h-5 w-5 text-amber-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Diferença entre valor faturado e efetivamente pago. <span className="text-amber-400 font-semibold">Reduzir glosa</span> via integração EDI ou portal do cliente.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 4: Antecipação de Recebíveis */}
+          <AnimatedCard delay={450}>
+            <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Oportunidade</p>
+                    <p className="text-lg font-black text-white mt-1">Factoring?</p>
+                  </div>
+                  <DollarSign className="h-5 w-5 text-emerald-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Avaliar <span className="text-emerald-400 font-semibold">antecipação de recebíveis</span> (factoring/FIDC) para cliente Y considerando custo financeiro vs necessidade de caixa.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 5: Inadimplentes Recorrentes */}
+          <AnimatedCard delay={500}>
+            <div className="relative overflow-hidden rounded-[14px] border border-red-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-red-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400/70">Ação Urgente</p>
+                    <p className="text-2xl font-black text-white mt-1">5 clientes</p>
+                  </div>
+                  <AlertTriangle className="h-5 w-5 text-red-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Clientes inadimplentes recorrentes. <span className="text-red-400 font-semibold">Bloquear ou renegociar</span> condições comerciais imediatamente.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 6: Cobrança Digital */}
+          <AnimatedCard delay={550}>
+            <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Modernização</p>
+                    <p className="text-lg font-black text-white mt-1">Régua Digital</p>
+                  </div>
+                  <CheckCircle className="h-5 w-5 text-blue-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Política de cobrança <span className="text-blue-400 font-semibold">e-mail → telefone → notificação → protesto</span> está madura e digitalizada?
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+        </div>
+
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Aging de Vencidos */}
