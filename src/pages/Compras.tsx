@@ -4,6 +4,7 @@ import {
   ShoppingCart, FileText, Users, Package,
   Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
   ReceiptText, AlertCircle, TrendingUp,
+  Clock, CheckCircle, DollarSign, TrendingDown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
@@ -416,6 +417,125 @@ export default function Compras() {
                 </div>
               </AnimatedCard>
             ))}
+          </div>
+
+          {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            
+            {/* Insight 1: Concentração de Fornecedores */}
+            <AnimatedCard delay={500}>
+              <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco</p>
+                      <p className="text-lg font-black text-white mt-1">Fornecedor Único</p>
+                    </div>
+                    <AlertTriangle className="h-5 w-5 text-rose-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <span className="text-rose-400 font-semibold">Alto risco de dependência</span> em itens críticos. Avaliar fornecedores alternativos para reduzir exposição.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
+            {/* Insight 2: Contrato vs Spot */}
+            <AnimatedCard delay={550}>
+              <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
+                      <p className="text-lg font-black text-white mt-1">Contratos?</p>
+                    </div>
+                    <CheckCircle className="h-5 w-5 text-blue-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Vale <span className="text-blue-400 font-semibold">contratos anuais com desconto</span> por volume vs compras spot? Analisar padrão de consumo.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
+            {/* Insight 3: Lead Time Crítico */}
+            <AnimatedCard delay={600}>
+              <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Lead Time</p>
+                      <p className="text-2xl font-black text-white mt-1">12 dias</p>
+                    </div>
+                    <Clock className="h-5 w-5 text-amber-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Prazo médio entre requisição e recebimento. <span className="text-amber-400 font-semibold">Categorias críticas</span> precisam estoque mínimo automatizado.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
+            {/* Insight 4: Pedidos Emergenciais */}
+            <AnimatedCard delay={650}>
+              <div className="relative overflow-hidden rounded-[14px] border border-orange-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-orange-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Custo Extra</p>
+                      <p className="text-2xl font-black text-white mt-1">R$ 18k</p>
+                    </div>
+                    <DollarSign className="h-5 w-5 text-orange-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Gasto adicional com <span className="text-orange-400 font-semibold">pedidos emergenciais</span> fora do planejamento. Melhorar previsibilidade de demanda.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
+            {/* Insight 5: Centralização de Compras */}
+            <AnimatedCard delay={700}>
+              <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-violet-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Debate</p>
+                      <p className="text-lg font-black text-white mt-1">Centralizar?</p>
+                    </div>
+                    <TrendingDown className="h-5 w-5 text-violet-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <span className="text-violet-400 font-semibold">Centralizar compras na matriz</span> vs autonomia das filiais? Avaliar economia de escala vs agilidade local.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
+            {/* Insight 6: Central Compartilhada */}
+            <AnimatedCard delay={750}>
+              <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Inovação</p>
+                      <p className="text-lg font-black text-white mt-1">Pool?</p>
+                    </div>
+                    <Users className="h-5 w-5 text-emerald-400/60" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Criar <span className="text-emerald-400 font-semibold">central compartilhada</span> com transportadoras parceiras? Maior poder de negociação em commodities.
+                  </p>
+                </div>
+              </div>
+            </AnimatedCard>
+
           </div>
 
           {/* ════════ FILTROS ════════ */}
