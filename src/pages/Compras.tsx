@@ -338,7 +338,7 @@ export default function Compras() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Todas</SelectItem>
-                  {filiais.filter(f => !dwFilter.empresa || f.empresaId === dwFilter.empresa).map((f) => (
+                  {filiais.filter(f => !dwFilter.empresa || (f as any).empresaId === dwFilter.empresa).map((f) => (
                     <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>
                   ))}
                 </SelectContent>
