@@ -440,6 +440,125 @@ export default function ContasAPagar() {
           ))}
         </div>
 
+        {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          
+          {/* Insight 1: DPO e Tendência */}
+          <AnimatedCard delay={300}>
+            <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">DPO · Prazo Médio</p>
+                    <p className="text-2xl font-black text-white mt-1">45 dias</p>
+                  </div>
+                  <Clock className="h-5 w-5 text-blue-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Prazo médio de pagamento estável. Considere <span className="text-blue-400 font-semibold">negociar prazos maiores</span> com fornecedores estratégicos para melhorar o fluxo de caixa.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 2: Descontos por Antecipação */}
+          <AnimatedCard delay={350}>
+            <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Oportunidade</p>
+                    <p className="text-2xl font-black text-white mt-1">R$ 42k</p>
+                  </div>
+                  <TrendingDown className="h-5 w-5 text-emerald-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Economia potencial com <span className="text-emerald-400 font-semibold">descontos por antecipação</span>. Avalie custo de capital antes de antecipar pagamentos.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 3: Centralização de Pagamentos */}
+          <AnimatedCard delay={400}>
+            <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Estratégia</p>
+                    <p className="text-lg font-black text-white mt-1">Centralizar?</p>
+                  </div>
+                  <CheckCircle className="h-5 w-5 text-amber-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <span className="text-amber-400 font-semibold">Centralizar pagamentos</span> pode aumentar poder de negociação com fornecedores e simplificar gestão financeira.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 4: Títulos com Problemas */}
+          <AnimatedCard delay={450}>
+            <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Atenção</p>
+                    <p className="text-2xl font-black text-white mt-1">3 títulos</p>
+                  </div>
+                  <AlertTriangle className="h-5 w-5 text-rose-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Títulos <span className="text-rose-400 font-semibold">duplicados ou sem NF</span> identificados. Revisar lançamentos para evitar pagamento em duplicidade.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 5: Pagamentos com Atraso */}
+          <AnimatedCard delay={500}>
+            <div className="relative overflow-hidden rounded-[14px] border border-orange-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-orange-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Custo Extra</p>
+                    <p className="text-2xl font-black text-white mt-1">R$ 8.5k</p>
+                  </div>
+                  <DollarSign className="h-5 w-5 text-orange-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Custos com <span className="text-orange-400 font-semibold">juros, multas e descontos perdidos</span> em pagamentos atrasados. Priorizar dentro do prazo.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+          {/* Insight 6: Risco Sacado */}
+          <AnimatedCard delay={550}>
+            <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-violet-400/30 transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
+              <div className="relative">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
+                    <p className="text-lg font-black text-white mt-1">Forfait?</p>
+                  </div>
+                  <Clock className="h-5 w-5 text-violet-400/60" />
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Avaliar uso de <span className="text-violet-400 font-semibold">"risco sacado" (forfait)</span> para alongar prazos sem prejudicar relacionamento com fornecedores.
+                </p>
+              </div>
+            </div>
+          </AnimatedCard>
+
+        </div>
+
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Aging de Vencidos */}
