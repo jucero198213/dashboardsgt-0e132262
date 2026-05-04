@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Wrench, RefreshCw, Search, AlertTriangle, TrendingUp, TrendingDown,
-  Calendar, ChevronUp, ChevronDown, BarChart3, CheckCircle2,
+  Calendar, ChevronUp, ChevronDown, BarChart3, CheckCircle2, CheckCircle,
   AlertCircle, Activity, DollarSign, Hash, X, ChevronLeft,
   ChevronRight, Package, Users, FileText, Zap, ShieldAlert,
   Clock, Filter, Layers
@@ -785,6 +785,125 @@ export default function Manutencao() {
                   </AnimatedCard>
                 );
               })}
+            </div>
+
+            {/* ════════ INSIGHTS · TOMADA DE DECISÃO ════════ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              
+              {/* Insight 1: CPK - Custo por KM */}
+              <AnimatedCard delay={300}>
+                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-cyan-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">CPK</p>
+                        <p className="text-xl font-black text-white mt-0.5">R$ 2.45/km</p>
+                      </div>
+                      <DollarSign className="h-4 w-4 text-cyan-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Custo de manutenção por km rodado. <span className="text-cyan-400 font-semibold">Monitorar por veículo</span> e identificar outliers.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 2: Preventiva vs Corretiva */}
+              <AnimatedCard delay={340}>
+                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-emerald-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Preventiva</p>
+                        <p className="text-xl font-black text-white mt-0.5">58%</p>
+                      </div>
+                      <CheckCircle className="h-4 w-4 text-emerald-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Meta: <span className="text-emerald-400 font-semibold">&gt;70% preventiva</span>. Aumentar manutenções programadas reduz custos e paradas.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 3: MTBF - Tempo Médio Entre Falhas */}
+              <AnimatedCard delay={380}>
+                <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-amber-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">MTBF</p>
+                        <p className="text-xl font-black text-white mt-0.5">45 dias</p>
+                      </div>
+                      <Clock className="h-4 w-4 text-amber-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Tempo médio entre falhas <span className="text-amber-400 font-semibold">varia por modelo</span>. Identificar veículos problema.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 4: Renovação de Frota */}
+              <AnimatedCard delay={420}>
+                <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-rose-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renovar?</p>
+                        <p className="text-lg font-black text-white mt-0.5">8 anos</p>
+                      </div>
+                      <AlertTriangle className="h-4 w-4 text-rose-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      <span className="text-rose-400 font-semibold">Renovar ou manter</span> veículos com X anos/km? Analisar curva de custo por idade.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 5: Oficina Interna */}
+              <AnimatedCard delay={460}>
+                <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-blue-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
+                        <p className="text-lg font-black text-white mt-0.5">Ampliar?</p>
+                      </div>
+                      <Users className="h-4 w-4 text-blue-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Vale <span className="text-blue-400 font-semibold">ampliar oficina interna</span> vs continuar terceirizando? Calcular ROI.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 6: Telemetria Preditiva */}
+              <AnimatedCard delay={500}>
+                <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-violet-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
+                        <p className="text-lg font-black text-white mt-0.5">IoT?</p>
+                      </div>
+                      <TrendingUp className="h-4 w-4 text-violet-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Investir em <span className="text-violet-400 font-semibold">telemetria preditiva</span> (sensores, IA) traz ROI considerando frota atual?
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
             </div>
 
             {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
