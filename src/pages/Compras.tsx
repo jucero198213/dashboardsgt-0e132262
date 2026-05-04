@@ -262,7 +262,7 @@ export default function Compras() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-auto w-full">
         
           {/* ════════ HEADER DESKTOP ════════ */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3">
