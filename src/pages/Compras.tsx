@@ -321,19 +321,16 @@ export default function Compras() {
         </div>
       )}
 
-      <div className="relative flex flex-col flex-1 min-h-0 w-full">
+      <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
+          className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
           style={{
             background: "var(--sgt-bg-section)",
             border: "1px solid rgba(148, 163, 184, 0.08)",
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
-            
-            {/* Container com scroll */}
-            <div className="flex flex-col flex-1 min-h-0 gap-4 sm:gap-6 overflow-y-auto overflow-x-hidden">
+          <div className="flex flex-col flex-1 min-h-0 gap-4 sm:gap-6 overflow-y-auto overflow-x-hidden p-2 sm:p-3 lg:p-4">
         
           {/* ════════ HEADER DESKTOP ════════ */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3">
@@ -840,7 +837,6 @@ export default function Compras() {
           )}
           
           </div> {/* Fecha container com scroll */}
-          </div> {/* Fecha div principal */}
         </section>
       </div>
     </div>
