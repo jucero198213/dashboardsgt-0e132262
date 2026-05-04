@@ -138,6 +138,60 @@ export default function Compras() {
     ];
   }, [compras]);
 
+  // ── INSIGHTS (cálculos reais) ──────────────────────────────────────────────
+  const insightsCompras = useMemo(() => {
+    // 1. Concentração em fornecedor único (produtos com apenas 1 fornecedor)
+    const porProduto: Record<string, Set<string>> = {};
+    compras.forEach(c => {
+      if (!porProduto[c.produto]) porProduto[c.produto] = new Set();
+      porProduto[c.produto].add(c.fornecedor);
+    });
+    const produtosUnicoFornecedor = Object.values(porProduto).filter(f => f.size === 1).length;
+    const totalProdutos = Object.keys(porProduto).length;
+    const percRiscoUnico = totalProdutos > 0 ? (produtosUnicoFornecedor / totalProdutos) * 100 : 0;
+
+    // 2. Lead time médio (diferença entre data pedido e data entrada)
+    const comprasComDatas = compras.filter(c => c.data_pedido && c.data_entrada);
+    let leadTimeTotal = 0;
+    comprasComDatas.forEach(c => {
+      const pedido = new Date(c.data_pedido!);
+      const entrada = new Date(c.data_entrada!);
+      const diffDias = Math.floor((entrada.getTime() - pedido.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDias >= 0) leadTimeTotal += diffDias;
+    });
+    const leadTimeMedio = comprasComDatas.length > 0 ? Math.round(leadTimeTotal / comprasComDatas.length) : 0;
+
+    // 3. Pedidos emergenciais (assumindo pedidos com lead time < 3 dias)
+    const emergenciais = comprasComDatas.filter(c => {
+      const pedido = new Date(c.data_pedido!);
+      const entrada = new Date(c.data_entrada!);
+      const diffDias = Math.floor((entrada.getTime() - pedido.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDias >= 0 && diffDias < 3;
+    });
+    const custoEmergencial = emergenciais.reduce((s, c) => s + ((c.quantidade ?? 0) * (c.valor_un ?? 0)), 0);
+
+    // 4. Análise de contratos (verificar se há campo de tipo de compra)
+    // Como não temos campo de contrato vs spot, vamos contar grupos com compras recorrentes
+    const porGrupo: Record<string, number> = {};
+    compras.forEach(c => {
+      porGrupo[c.grupo] = (porGrupo[c.grupo] || 0) + 1;
+    });
+    const gruposRecorrentes = Object.entries(porGrupo).filter(([_, count]) => count > 5).length;
+    const totalGrupos = Object.keys(porGrupo).length;
+    const percRecorrente = totalGrupos > 0 ? (gruposRecorrentes / totalGrupos) * 100 : 0;
+
+    return {
+      percRiscoUnico,
+      produtosUnicoFornecedor,
+      totalProdutos,
+      leadTimeMedio,
+      custoEmergencial,
+      numEmergenciais: emergenciais.length,
+      percRecorrente,
+      gruposRecorrentes,
+    };
+  }, [compras]);
+
   // ── Dados para gráficos ─────────────────────────────────────────────────────
   const dadosGraficos = useMemo(() => {
     const hoje = new Date();
@@ -429,13 +483,13 @@ export default function Compras() {
                 <div className="relative">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco</p>
-                      <p className="text-lg font-black text-white mt-1">Fornecedor Único</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco Único</p>
+                      <p className="text-2xl font-black text-white mt-1">{insightsCompras.percRiscoUnico.toFixed(0)}%</p>
                     </div>
                     <AlertTriangle className="h-5 w-5 text-rose-400/60" />
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    <span className="text-rose-400 font-semibold">Alto risco de dependência</span> em itens críticos. Avaliar fornecedores alternativos para reduzir exposição.
+                    <span className="text-rose-400 font-semibold">{insightsCompras.produtosUnicoFornecedor} produtos</span> com apenas 1 fornecedor. Avaliar alternativas para reduzir exposição.
                   </p>
                 </div>
               </div>
@@ -448,13 +502,13 @@ export default function Compras() {
                 <div className="relative">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
-                      <p className="text-lg font-black text-white mt-1">Contratos?</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Recorrência</p>
+                      <p className="text-2xl font-black text-white mt-1">{insightsCompras.percRecorrente.toFixed(0)}%</p>
                     </div>
                     <CheckCircle className="h-5 w-5 text-blue-400/60" />
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Vale <span className="text-blue-400 font-semibold">contratos anuais com desconto</span> por volume vs compras spot? Analisar padrão de consumo.
+                    <span className="text-blue-400 font-semibold">{insightsCompras.gruposRecorrentes} grupos</span> com compras recorrentes. Vale contratos anuais com desconto vs spot?
                   </p>
                 </div>
               </div>
@@ -468,12 +522,12 @@ export default function Compras() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Lead Time</p>
-                      <p className="text-2xl font-black text-white mt-1">12 dias</p>
+                      <p className="text-2xl font-black text-white mt-1">{insightsCompras.leadTimeMedio} dias</p>
                     </div>
                     <Clock className="h-5 w-5 text-amber-400/60" />
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Prazo médio entre requisição e recebimento. <span className="text-amber-400 font-semibold">Categorias críticas</span> precisam estoque mínimo automatizado.
+                    Prazo médio entre pedido e entrada. <span className="text-amber-400 font-semibold">Categorias críticas</span> precisam estoque mínimo automatizado.
                   </p>
                 </div>
               </div>
@@ -486,13 +540,13 @@ export default function Compras() {
                 <div className="relative">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Custo Extra</p>
-                      <p className="text-2xl font-black text-white mt-1">R$ 18k</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Emergencial</p>
+                      <p className="text-2xl font-black text-white mt-1">{fmtK(insightsCompras.custoEmergencial)}</p>
                     </div>
                     <DollarSign className="h-5 w-5 text-orange-400/60" />
                   </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Gasto adicional com <span className="text-orange-400 font-semibold">pedidos emergenciais</span> fora do planejamento. Melhorar previsibilidade de demanda.
+                    <span className="text-orange-400 font-semibold">{insightsCompras.numEmergenciais} pedidos</span> urgentes (lead time &lt;3 dias). Melhorar previsibilidade.
                   </p>
                 </div>
               </div>
