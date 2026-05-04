@@ -345,7 +345,10 @@ export default function ContasAPagar() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-auto w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+            
+            {/* Container com scroll */}
+            <div className="flex flex-col flex-1 min-h-0 gap-4 sm:gap-6 overflow-auto">
         
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
@@ -583,6 +586,8 @@ export default function ContasAPagar() {
               </div>
             </div>
           )}
+          
+          </div> {/* Fecha container com scroll */}
         </div>
         </div>
       </section>
