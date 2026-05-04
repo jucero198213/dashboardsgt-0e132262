@@ -330,7 +330,10 @@ export default function Compras() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          <div className="flex flex-col flex-1 min-h-0 gap-4 sm:gap-6 overflow-y-auto overflow-x-hidden p-2 sm:p-3 lg:p-4">
+          <div className="relative flex flex-col flex-1 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
+            
+            {/* Container com scroll */}
+            <div className="flex flex-col flex-1 min-h-0 gap-4 sm:gap-6 overflow-y-auto overflow-x-hidden">
         
           {/* ════════ HEADER DESKTOP ════════ */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3">
@@ -837,6 +840,7 @@ export default function Compras() {
           )}
           
           </div> {/* Fecha container com scroll */}
+          </div> {/* Fecha padding wrapper */}
         </section>
       </div>
     </div>
