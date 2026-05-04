@@ -479,7 +479,7 @@ export default function Indicadores() {
                       ) : faturamento.length === 0 ? (
                         <p className="text-[12px] dark:text-slate-600 text-slate-400 italic">Sem dados no período</p>
                       ) : (
-                        <div className="flex flex-col justify-between flex-1 min-h-0">
+                        <div className="flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700/50 scrollbar-track-transparent hover:scrollbar-thumb-slate-600/50">
                           {faturamento.map((row, idx) => {
                             const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
                             const color = BAR_COLORS[idx % BAR_COLORS.length];
