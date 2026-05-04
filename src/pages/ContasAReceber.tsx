@@ -333,7 +333,15 @@ export default function ContasAReceber() {
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[1920px] space-y-4 sm:space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
+      <section
+        className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] border overflow-auto"
+        style={{
+          background: "var(--sgt-bg-section)",
+          borderColor: "var(--sgt-border-subtle)",
+          boxShadow: "var(--sgt-section-shadow)",
+        }}
+      >
+        <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8 animate-[fadeSlideIn_0.5s_ease-out]">
         
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
@@ -572,7 +580,8 @@ export default function ContasAReceber() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
