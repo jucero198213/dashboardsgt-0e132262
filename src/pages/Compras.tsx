@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ShoppingCart, FileText, Users, Package,
   Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
-  ReceiptText, AlertCircle, TrendingUp,
+  ReceiptText, AlertCircle, TrendingUp, AlertTriangle,
   Clock, CheckCircle, DollarSign, TrendingDown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
