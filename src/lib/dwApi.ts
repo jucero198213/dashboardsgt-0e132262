@@ -46,6 +46,10 @@ const ENDPOINT_ABASTECIMENTO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-abastecimento`
   : `${SUPABASE_URL}/functions/v1/dw-abastecimento`;
 
+const ENDPOINT_RH = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-rh`
+  : `${SUPABASE_URL}/functions/v1/dw-rh`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -340,4 +344,48 @@ export async function fetchAbastecimento(params?: {
   dataFim?: string;
 }): Promise<AbastecimentoResponse> {
   return callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {});
+}
+// ─── Tipos: RH ────────────────────────────────────────────────────────────────
+
+export interface RhRow {
+  codmot:                string | number | null;
+  motorista:             string | null;
+  data_nascimento:       string | null;
+  nacionalidade:         string | null;
+  estado:                string | null;
+  endereco:              string | null;
+  bairro:                string | null;
+  habilitacao:           string | null;
+  uf_habilitacao:        string | null;
+  categoria_habilitacao: string | null;
+  validade_habilitacao:  string | null;
+  numero_rg:             string | null;
+  data_emissao_rg:       string | null;
+  numero_cpf:            string | null;
+  empregado:             string | null;
+  codigo_folha:          string | number | null;
+  codigo_filial:         string | number | null;
+  data_admissao:         string | null;
+  data_demissao:         string | null;
+  motivo_demissao:       string | null;
+  situacao:              string | null;
+  funcao:                string | null;
+  tipo_funcionario:      string | null;
+  sexo:                  string | null;
+}
+
+export interface RhResponse {
+  data: RhRow[];
+}
+
+// ─── Exports públicos: RH ─────────────────────────────────────────────────────
+
+/**
+ * Busca todos os colaboradores da RODMOT.
+ * Passe situacao: null para retornar ATIVO e INATIVO (necessário para turnover).
+ */
+export async function fetchRh(params?: {
+  situacao?: string | null;
+}): Promise<RhResponse> {
+  return callEdge<RhResponse>(ENDPOINT_RH, params ?? {});
 }

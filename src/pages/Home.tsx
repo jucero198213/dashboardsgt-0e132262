@@ -239,8 +239,8 @@ export default function Home() {
       icon: Users,
       title: "RH",
       description: "Gestão de colaboradores, folha de pagamento, admissões e desligamentos.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/rh"),
+      cta: "Acessar RH",
+      onClick: () => navigate("/rh"),
       tone: "violet" as const,
     },
     {
