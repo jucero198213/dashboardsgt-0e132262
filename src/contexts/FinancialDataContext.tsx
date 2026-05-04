@@ -371,11 +371,18 @@ export function FinancialDataProvider({
         filial:     state.dwFilter.filial,
         empresa:    state.dwFilter.empresa,
       });
+      
+      // Progresso incremental - dados recebidos
+      setState((prev) => ({ ...prev, progress: 20 }));
+      
       const faturamento: import("@/lib/dwApi").FaturamentoRow[] = [];  // será preenchido após o fetch principal
 
       const n = (v: number | null | undefined) => v ?? 0;
       const isoDate = (v: string | null) => (v ? v.split("T")[0] : toIsoDate(hoje));
       const round2 = (v: number) => Math.round(v * 100) / 100;
+
+      // Progresso - preparando processamento
+      setState((prev) => ({ ...prev, loadingPhase: "Processando dados...", progress: 25 }));
 
       // ── Helpers de filtro ───────────────────────────────────────────────────
       const sit    = (r: DwRow) => (r.SITUACAO ?? "").trim().toUpperCase();
@@ -394,6 +401,9 @@ export function FinancialDataProvider({
       // ── Todos os registros por origem ───────────────────────────────────────
       const allCP = data.filter((r) => r.ORIGEM === "CP");
       const allCR = data.filter((r) => r.ORIGEM === "CR");
+      
+      // Progresso - separando origens
+      setState((prev) => ({ ...prev, progress: 30 }));
 
       // ─────────────────────────────────────────────────────────────────────────
       // 1. A PAGAR (card topo)
@@ -432,6 +442,9 @@ export function FinancialDataProvider({
         inRange(r.DATA_VENCIMENTO, di, df)
       );
 
+      // Progresso - A Pagar calculado
+      setState((prev) => ({ ...prev, progress: 35 }));
+
       // ─────────────────────────────────────────────────────────────────────────
       // 2. A RECEBER (card topo)
       //    → CR | SITUACAO L/P/D | DATA_VENCIMENTO no período | VLR_PARCELA
@@ -446,6 +459,9 @@ export function FinancialDataProvider({
       // 3. PAGO → CP já definido acima como cpPago
       // ─────────────────────────────────────────────────────────────────────────
 
+      // Progresso - A Receber calculado
+      setState((prev) => ({ ...prev, progress: 40 }));
+
       // ─────────────────────────────────────────────────────────────────────────
       // 4. RECEBIDO (card topo)
       //    → CR | SITUACAO L/P | DATA_VENCIMENTO no período | VLR_PAGO
@@ -458,6 +474,9 @@ export function FinancialDataProvider({
         hasPag(r) &&
         inRange(r.DATA_VENCIMENTO, di, df)   // ← era DATA_PAGAMENTO
       );
+      
+      // Progresso - Recebido calculado
+      setState((prev) => ({ ...prev, progress: 45 }));
 
       // ─────────────────────────────────────────────────────────────────────────
       // 5. SUB-CARD CONTAS A RECEBER (saldo pendente)
@@ -732,6 +751,9 @@ export function FinancialDataProvider({
 
       const kpiExtra: KpiExtra = { saldoLiquido, inadimplencia, inadimplenciaDocs, inadimplenciaPerc, realizacaoCP, realizacaoCR };
 
+      // Progresso - KPIs calculados
+      setState((prev) => ({ ...prev, progress: 50 }));
+
       // Arrays mensais do ANO TODO para cálculo MoM nos cards
       // CR: agrupa por DATA_VENCIMENTO (mesma lógica do card RECEBIDO)
       // CP: agrupa por DATA_PAGAMENTO (mesma lógica do card PAGO)
@@ -739,6 +761,10 @@ export function FinancialDataProvider({
       const cpPagoMoM     = allCP.filter((r) => (sit(r) === "L" || sit(r) === "P") && hasPag(r));
       const chartReceberFiltro = groupByMonth(crRecebidoMoM, "VLR_PAGO", "DATA_VENCIMENTO");
       const chartPagarFiltro   = groupByMonth(cpPagoMoM,     "VLR_PAGO", "DATA_PAGAMENTO");
+      
+      // Progresso - Gráficos preparados
+      setState((prev) => ({ ...prev, progress: 60 }));
+      
       // Faturamento: preserva o que o background fetch já preencheu (ou o cache anterior)
       setState((prev) => {
         const fatAtual = prev.faturamento;
@@ -760,27 +786,27 @@ export function FinancialDataProvider({
           chartReceberFiltro, chartPagarFiltro,
           dwRawData: data,
           dwChartData: prev.dwChartData,
-          loadingPhase: "Concluído",
-          progress: 100,
+          loadingPhase: "Processamento concluído",
+          progress: 65,
         };
       });
 
       // ── 2. Queries secundárias em cadeia (sequencial, não bloqueiam a UI) ──
       //    Ordem: faturamento → gráfico anual
       //    Cada uma dispara só quando a anterior terminar, evitando concorrência no pool.
-      setState((prev) => ({ ...prev, loadingPhase: "Buscando faturamento...", progress: 50 }));
+      setState((prev) => ({ ...prev, loadingPhase: "Buscando faturamento...", progress: 70 }));
       const fatSnap = { dataInicio: state.dwFilter.dataInicio, dataFim: state.dwFilter.dataFim, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const chartSnap  = { dataInicio: `${anoFiltro}-01-01`, dataFim: `${anoFiltro}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
       const anoAnterior = String(parseInt(anoFiltro) - 1);
       const chartSnapAnterior = { dataInicio: `${anoAnterior}-01-01`, dataFim: `${anoAnterior}-12-31`, filial: state.dwFilter.filial, empresa: state.dwFilter.empresa };
 
       // Busca frota e manutenção em paralelo (não bloqueiam os KPIs)
-      setState((prev) => ({ ...prev, loadingPhase: "Buscando frota e manutenção...", progress: 70 }));
+      setState((prev) => ({ ...prev, loadingPhase: "Buscando frota e manutenção...", progress: 80 }));
       Promise.all([
         fetchFrota().catch(() => ({ data: [] })),
         fetchManutencao({ dataInicio: fatSnap.dataInicio, dataFim: fatSnap.dataFim, filial: fatSnap.filial ?? null }).catch(() => ({ data: [] })),
       ]).then(([frotaRes, manutRes]) => {
-        setState(prev => ({ ...prev, frota: frotaRes.data ?? [], manutencao: manutRes.data ?? [], loadingPhase: "Finalizando...", progress: 90 }));
+        setState(prev => ({ ...prev, frota: frotaRes.data ?? [], manutencao: manutRes.data ?? [], loadingPhase: "Finalizando...", progress: 95 }));
       }).catch(err => console.warn("[DW] Frota/manutenção erro:", err?.message ?? err));
 
       fetchFaturamento(fatSnap)
@@ -865,13 +891,13 @@ export function FinancialDataProvider({
                 })
                 .catch((err) => console.warn("[DW] Gráfico ano anterior erro (não crítico):", err?.message ?? err))
                 .finally(() => {
-                  setState((prev) => ({ ...prev, isFetchingCharts: false }));
+                  setState((prev) => ({ ...prev, isFetchingCharts: false, loadingPhase: "Concluído", progress: 100 }));
                 });
             })
             .catch((err) => {
               console.warn("[DW] Gráfico anual erro (não crítico):", err?.message ?? err);
               // Se o fetch do ano atual falhou, o do ano anterior nem dispara — libera a flag aqui
-              setState((prev) => ({ ...prev, isFetchingCharts: false }));
+              setState((prev) => ({ ...prev, isFetchingCharts: false, loadingPhase: "Concluído", progress: 100 }));
             });
         });
 
