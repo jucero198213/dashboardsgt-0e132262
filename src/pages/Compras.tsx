@@ -186,7 +186,14 @@ export default function Compras() {
       .slice(0, 5)
       .map(([nome, valor]) => ({ nome, valor }));
 
-    return { comparativoAnual, top5Fornecedores };
+    // Criar dadosMensais para compatibilidade (apenas ano atual)
+    const dadosMensais = comparativoAnual.map(m => ({
+      mes: m.mesKeyAtual,
+      mesLabel: m.mes,
+      valor: m.anoAtual,
+    }));
+
+    return { comparativoAnual, dadosMensais, top5Fornecedores };
   }, [compras]);
 
   // ── Filtros e ordenação ─────────────────────────────────────────────────────
@@ -442,7 +449,7 @@ export default function Compras() {
             <AnimatedCard delay={500}>
               <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
                 <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Compras Mensais</h3>
-                {dadosGraficos?.dadosMensais?.length > 0 ? (
+                {dadosGraficos.dadosMensais.length > 0 ? (
                   <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                       <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -451,7 +458,7 @@ export default function Compras() {
                       </linearGradient>
                     </defs>
                     {(() => {
-                      const maxVal = Math.max(...(dadosGraficos?.dadosMensais?.map(d => d.valor) || [1]), 1);
+                      const maxVal = Math.max(...dadosGraficos.dadosMensais.map(d => d.valor), 1);
                       const barWidth = 35;
                       const gap = 8;
                       const padL = 10;
@@ -459,10 +466,10 @@ export default function Compras() {
                       const padT = 10;
                       const padB = 30;
                       const chartH = 260 - padT - padB;
-                      const totalWidth = (dadosGraficos?.dadosMensais?.length || 0) * (barWidth + gap) - gap;
+                      const totalWidth = dadosGraficos.dadosMensais.length * (barWidth + gap) - gap;
                       const startX = padL + (520 - padL - padR - totalWidth) / 2;
                       
-                      return (dadosGraficos?.dadosMensais || []).map((d, i) => {
+                      return dadosGraficos.dadosMensais.map((d, i) => {
                         const x = startX + i * (barWidth + gap);
                         const h = (d.valor / maxVal) * chartH;
                         const y = padT + chartH - h;
@@ -486,10 +493,10 @@ export default function Compras() {
             <AnimatedCard delay={550}>
               <div className="flex h-[340px] flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
                 <h3 className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Top 5 Fornecedores</h3>
-                {dadosGraficos?.top5Fornecedores?.length > 0 ? (
+                {dadosGraficos.top5Fornecedores.length > 0 ? (
                   <svg viewBox="0 0 520 260" className="w-full flex-1" xmlns="http://www.w3.org/2000/svg">
                     {(() => {
-                      const maxVal = Math.max(...(dadosGraficos?.top5Fornecedores?.map(d => d.valor) || [1]), 1);
+                      const maxVal = Math.max(...dadosGraficos.top5Fornecedores.map(d => d.valor), 1);
                       const barH = 35;
                       const gap = 12;
                       const padL = 160;
@@ -497,7 +504,7 @@ export default function Compras() {
                       const padT = 10;
                       const chartW = 520 - padL - padR;
                       
-                      return (dadosGraficos?.top5Fornecedores || []).map((d, i) => {
+                      return dadosGraficos.top5Fornecedores.map((d, i) => {
                         const y = padT + i * (barH + gap);
                         const w = (d.valor / maxVal) * chartW;
                         return (
