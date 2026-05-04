@@ -52,9 +52,13 @@ export default function Compras() {
     queryKey: ["compras", dataInicio, dataFim],
     queryFn: () => fetchCompras({ dataInicio, dataFim }),
   });
-  const compras: ComprasRow[] = Array.isArray(comprasResp)
-    ? comprasResp
-    : Array.isArray(comprasResp?.data) ? comprasResp.data : [];
+  const compras: ComprasRow[] = useMemo(() => {
+    const r: any = comprasResp;
+    if (Array.isArray(r)) return r;
+    if (r && Array.isArray(r.data)) return r.data;
+    if (r && Array.isArray(r.rows)) return r.rows;
+    return [];
+  }, [comprasResp]);
 
   // ── KPIs ────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
