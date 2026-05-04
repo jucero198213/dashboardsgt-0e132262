@@ -59,7 +59,7 @@ export default function Compras() {
   // ── KPIs ────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
     const total = compras.reduce((s, c) => s + ((c.quantidade ?? 0) * (c.valor_un ?? 0)), 0);
-    const notas = new Set(compras.map(c => c.nf)).size;
+    const notas = new Set(compras.map((c: any) => c.nf)).size;
     const fornecedores = new Set(compras.map(c => c.fornecedor)).size;
     const produtos = new Set(compras.map(c => c.produto)).size;
 
@@ -122,7 +122,7 @@ export default function Compras() {
     
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(c =>
+      list = list.filter((c: any) =>
         c.produto?.toLowerCase().includes(q) ||
         c.fornecedor?.toLowerCase().includes(q) ||
         c.nf?.toLowerCase().includes(q)
