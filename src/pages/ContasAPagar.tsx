@@ -256,7 +256,8 @@ export default function ContasAPagar() {
       const diffDias = Math.floor((pag.getTime() - venc.getTime()) / (1000 * 60 * 60 * 24));
       dpoTotal += diffDias;
     });
-    const dpo = pagos.length > 0 ? Math.abs(Math.round(dpoTotal / pagos.length)) : 0;
+    const dpo = pagos.length > 0 ? Math.round(dpoTotal / pagos.length) : 0;
+    // Positivo = paga após vencimento, Negativo = paga antes do vencimento
 
     // 2. Economia potencial com descontos antecipação (assumindo 2% desconto em 30% dos valores)
     const totalAberto = contasPagar.filter(c => c.status === "Aberto").reduce((s, c) => s + c.valor, 0);
@@ -499,12 +500,19 @@ export default function ContasAPagar() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">DPO · Prazo Médio</p>
-                    <p className="text-2xl font-black text-white mt-1">{insightsData.dpo} dias</p>
+                    <p className="text-2xl font-black text-white mt-1">
+                      {insightsData.dpo === 0 ? "—" : Math.abs(insightsData.dpo)} dias
+                      {insightsData.dpo < 0 && <span className="text-[14px] text-emerald-400 ml-1">↑</span>}
+                      {insightsData.dpo > 0 && <span className="text-[14px] text-amber-400 ml-1">↓</span>}
+                    </p>
                   </div>
                   <Clock className="h-5 w-5 text-blue-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Prazo médio de pagamento {insightsData.dpo > 0 ? "" : "(sem dados). "}Considere <span className="text-blue-400 font-semibold">negociar prazos maiores</span> com fornecedores estratégicos para melhorar o fluxo de caixa.
+                  {insightsData.dpo === 0 ? "Sem dados de pagamento. " : 
+                   insightsData.dpo < 0 ? `Pagando em média ${Math.abs(insightsData.dpo)} dias ANTES do vencimento. ` :
+                   `Pagando em média ${insightsData.dpo} dias APÓS vencimento. `}
+                  <span className="text-blue-400 font-semibold">Negociar prazos maiores</span> pode melhorar fluxo de caixa.
                 </p>
               </div>
             </div>
