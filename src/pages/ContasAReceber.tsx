@@ -245,6 +245,56 @@ export default function ContasAReceber() {
     [contasReceber]
   );
 
+  // ── INSIGHTS (cálculos reais) ──────────────────────────────────────────────
+  const insightsDataReceber = useMemo(() => {
+    // 1. DSO - Prazo médio de recebimento (entre emissão e recebimento)
+    const recebidos = contasReceber.filter(c => c.dataRecebimento);
+    let dsoTotal = 0;
+    recebidos.forEach(c => {
+      const emissao = new Date(c.emissao);
+      const receb = new Date(c.dataRecebimento!);
+      const diffDias = Math.floor((receb.getTime() - emissao.getTime()) / (1000 * 60 * 60 * 24));
+      dsoTotal += diffDias;
+    });
+    const dso = recebidos.length > 0 ? Math.round(dsoTotal / recebidos.length) : 0;
+
+    // 2. Concentração em clientes (top 3 = quanto % do total?)
+    const porCliente: Record<string, number> = {};
+    contasReceber.forEach(c => {
+      porCliente[c.cliente] = (porCliente[c.cliente] || 0) + c.valor;
+    });
+    const top3Clientes = Object.values(porCliente)
+      .sort((a, b) => b - a)
+      .slice(0, 3)
+      .reduce((s, v) => s + v, 0);
+    const totalGeralReceber = contasReceber.reduce((s, c) => s + c.valor, 0);
+    const concentracaoClientes = totalGeralReceber > 0 ? (top3Clientes / totalGeralReceber) * 100 : 0;
+    const numClientesTop3 = Object.entries(porCliente).sort((a, b) => b[1] - a[1]).slice(0, 3).length;
+
+    // 3. Índice de glosa (assumindo 8-10% de diferença entre faturado e pago)
+    const totalRecebido = contasReceber.filter(c => c.status === "Recebido").reduce((s, c) => s + c.valor, 0);
+    const totalFaturado = contasReceber.reduce((s, c) => s + c.valor, 0);
+    const glosa = totalFaturado > 0 ? ((totalFaturado - totalRecebido) / totalFaturado) * 100 : 0;
+
+    // 4. Clientes inadimplentes recorrentes (vencidos há mais de 30 dias)
+    const hoje = new Date();
+    const inadimplentesRecorrentes = contasReceber.filter(c => {
+      if (c.status !== "Vencido") return false;
+      const venc = new Date(c.vencimento);
+      const diasAtraso = Math.floor((hoje.getTime() - venc.getTime()) / (1000 * 60 * 60 * 24));
+      return diasAtraso > 30;
+    });
+    const clientesInadimplentes = new Set(inadimplentesRecorrentes.map(c => c.cliente)).size;
+
+    return {
+      dso,
+      concentracaoClientes,
+      numClientesTop3,
+      glosa,
+      clientesInadimplentes,
+    };
+  }, [contasReceber]);
+
   const kpis = [
     {
       label: "Valor Previsto", value: fmtK(resumoReceber.valorAReceber),
@@ -451,12 +501,12 @@ export default function ContasAReceber() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">DSO · Prazo Médio</p>
-                    <p className="text-2xl font-black text-white mt-1">38 dias</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.dso} dias</p>
                   </div>
                   <Clock className="h-5 w-5 text-cyan-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Prazo médio de recebimento varia por cliente. <span className="text-cyan-400 font-semibold">Revisar política de crédito</span> para clientes acima de X dias de atraso.
+                  Prazo médio de recebimento {insightsDataReceber.dso > 0 ? "" : "(sem dados). "}<span className="text-cyan-400 font-semibold">Revisar política de crédito</span> para clientes com atraso recorrente.
                 </p>
               </div>
             </div>
@@ -470,12 +520,12 @@ export default function ContasAReceber() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco</p>
-                    <p className="text-2xl font-black text-white mt-1">3 clientes</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.numClientesTop3} {insightsDataReceber.numClientesTop3 === 1 ? "cliente" : "clientes"}</p>
                   </div>
                   <AlertTriangle className="h-5 w-5 text-rose-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  <span className="text-rose-400 font-semibold">65% do faturamento</span> concentrado em poucos clientes. Risco alto de concentração - diversificar carteira.
+                  Top {insightsDataReceber.numClientesTop3} = <span className="text-rose-400 font-semibold">{insightsDataReceber.concentracaoClientes.toFixed(0)}% do faturamento</span>. Risco de concentração - diversificar carteira.
                 </p>
               </div>
             </div>
@@ -489,12 +539,12 @@ export default function ContasAReceber() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Glosa</p>
-                    <p className="text-2xl font-black text-white mt-1">8.5%</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.glosa.toFixed(1)}%</p>
                   </div>
                   <TrendingDown className="h-5 w-5 text-amber-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Diferença entre valor faturado e efetivamente pago. <span className="text-amber-400 font-semibold">Reduzir glosa</span> via integração EDI ou portal do cliente.
+                  Diferença entre faturado e pago. <span className="text-amber-400 font-semibold">Reduzir glosa</span> via integração EDI ou portal do cliente.
                 </p>
               </div>
             </div>
@@ -513,7 +563,7 @@ export default function ContasAReceber() {
                   <DollarSign className="h-5 w-5 text-emerald-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Avaliar <span className="text-emerald-400 font-semibold">antecipação de recebíveis</span> (factoring/FIDC) para cliente Y considerando custo financeiro vs necessidade de caixa.
+                  Avaliar <span className="text-emerald-400 font-semibold">antecipação de recebíveis</span> (factoring/FIDC) considerando custo financeiro vs necessidade de caixa.
                 </p>
               </div>
             </div>
@@ -527,12 +577,12 @@ export default function ContasAReceber() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400/70">Ação Urgente</p>
-                    <p className="text-2xl font-black text-white mt-1">5 clientes</p>
+                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.clientesInadimplentes} {insightsDataReceber.clientesInadimplentes === 1 ? "cliente" : "clientes"}</p>
                   </div>
                   <AlertTriangle className="h-5 w-5 text-red-400/60" />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Clientes inadimplentes recorrentes. <span className="text-red-400 font-semibold">Bloquear ou renegociar</span> condições comerciais imediatamente.
+                  Inadimplentes há mais de 30 dias. <span className="text-red-400 font-semibold">Bloquear ou renegociar</span> condições comerciais imediatamente.
                 </p>
               </div>
             </div>
