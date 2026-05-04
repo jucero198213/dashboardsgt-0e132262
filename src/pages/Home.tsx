@@ -293,8 +293,8 @@ export default function Home() {
       icon: Fuel,
       title: "Abastecimento",
       description: "Controle de combustível, consumo por veículo e custo operacional.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/abastecimento"),
+      cta: "Acessar abastecimento",
+      onClick: () => navigate("/abastecimento"),
       tone: "orange" as const,
     },
     {

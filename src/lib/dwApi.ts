@@ -42,6 +42,10 @@ const ENDPOINT_COMPRAS = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-compras`
   : `${SUPABASE_URL}/functions/v1/dw-compras`;
 
+const ENDPOINT_ABASTECIMENTO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-abastecimento`
+  : `${SUPABASE_URL}/functions/v1/dw-abastecimento`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -200,6 +204,36 @@ export interface ComprasResponse {
   data: ComprasRow[];
 }
 
+// ─── Tipos: ABASTECIMENTO ─────────────────────────────────────────────────────
+
+export interface AbastecimentoRow {
+  codaba:             string | number | null;
+  motorista:          string | null;
+  posto:              string | null;
+  estado:             string | null;
+  vlrtot:             number | null;
+  quanti:             number | null;
+  datref:             string | null;
+  numdoc:             string | number | null;
+  veiculo:            string | null;
+  marca:              string | null;
+  modelo:             string | null;
+  linha:              string | number | null;
+  media:              number | null;
+  ultkmt:             number | null;
+  atukmt:             number | null;
+  medfab:             number | null;
+  odohor:             string | null;
+  frota:              string | null;
+  codigo_combustivel: string | number | null;
+  tipo_combustivel:   string | null;
+  nota_fiscal:        string | number | null;
+}
+
+export interface AbastecimentoResponse {
+  data: AbastecimentoRow[];
+}
+
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 async function callEdge<T>(
@@ -293,4 +327,17 @@ export async function fetchCompras(params?: {
   dataFim?: string;
 }): Promise<ComprasResponse> {
   return callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {});
+}
+
+// ─── Exports públicos: ABASTECIMENTO ─────────────────────────────────────────
+
+/**
+ * Busca os registros de abastecimento do período.
+ * Filtra por DATA_REF >= dataInicio e DATA_REF <= dataFim.
+ */
+export async function fetchAbastecimento(params?: {
+  dataInicio?: string;
+  dataFim?: string;
+}): Promise<AbastecimentoResponse> {
+  return callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {});
 }

@@ -23,6 +23,7 @@ import EmDesenvolvimento from "./pages/EmDesenvolvimento";
 import Frota from "./pages/Frota";
 import Manutencao from "./pages/Manutencao";
 import Compras from "./pages/Compras";
+import Abastecimento from "./pages/Abastecimento";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
               <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
               <Route path="/compras" element={<ProtectedRoute><Compras /></ProtectedRoute>} />
+              <Route path="/abastecimento" element={<ProtectedRoute><Abastecimento /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>
