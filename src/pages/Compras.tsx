@@ -1,667 +1,379 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ShoppingCart,
-  FileText,
-  Users,
-  Package,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Download,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
+  ShoppingCart, FileText, Users, Package,
+  Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCompras, ComprasRow } from "@/lib/dwApi";
-import { UserMenu } from "@/components/auth/UserMenu";
+import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
+import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import sgtLogo from "@/assets/sgt-logo.png";
 
-// ─── Utilitários ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
 
-function fmt(n: number | null | undefined) {
-  if (n == null) return "R$ 0,00";
-  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const fmtK = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : fmtBRL(v);
+const fmtNum = (v: number) => v.toLocaleString("pt-BR");
+const fmtData = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString("pt-BR") : "—";
 
-function fmtQtd(n: number | null | undefined) {
-  if (n == null) return "0";
-  return n.toLocaleString("pt-BR", { maximumFractionDigits: 3 });
-}
+const PAGE_SIZE = 50;
 
-function fmtDate(s: string | null | undefined) {
-  if (!s) return "—";
-  const d = new Date(s);
-  if (isNaN(d.getTime())) return s;
-  return d.toLocaleDateString("pt-BR");
-}
-
-function totalRow(r: ComprasRow) {
-  return (r.quantidade ?? 0) * (r.valor_un ?? 0);
-}
-
-// ─── Paginação ────────────────────────────────────────────────────────────────
-
-function CompactPagination({
-  page,
-  total,
-  perPage,
-  onChange,
-}: {
-  page: number;
-  total: number;
-  perPage: number;
-  onChange: (p: number) => void;
-}) {
-  const pages = Math.max(1, Math.ceil(total / perPage));
-  if (pages <= 1) return null;
-  return (
-    <div className="flex items-center gap-2 text-[12px] text-[var(--sgt-text-muted)]">
-      <button
-        onClick={() => onChange(page - 1)}
-        disabled={page === 1}
-        className="rounded-lg border border-[var(--sgt-border)] p-1.5 disabled:opacity-30 hover:border-amber-400/40 transition-colors"
-      >
-        <ChevronLeft className="h-3.5 w-3.5" />
-      </button>
-      <span>
-        {page} / {pages}
-      </span>
-      <button
-        onClick={() => onChange(page + 1)}
-        disabled={page === pages}
-        className="rounded-lg border border-[var(--sgt-border)] p-1.5 disabled:opacity-30 hover:border-amber-400/40 transition-colors"
-      >
-        <ChevronRight className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-}
-
-// ─── Tipos de ordenação ───────────────────────────────────────────────────────
-
-type SortDir = "asc" | "desc";
-type SortCol =
-  | "data_compra"
-  | "fornecedor"
-  | "produto"
-  | "grupo"
-  | "quantidade"
-  | "valor_un"
-  | "total";
-
-function SortIcon({ col, active, dir }: { col: string; active: string; dir: SortDir }) {
-  if (col !== active) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
-  return dir === "asc"
-    ? <ArrowUp className="h-3 w-3 text-amber-400" />
-    : <ArrowDown className="h-3 w-3 text-amber-400" />;
-}
-
-const thBtn = "flex items-center gap-1 whitespace-nowrap hover:text-amber-300 transition-colors cursor-pointer select-none";
-
-// ─── KPI card ────────────────────────────────────────────────────────────────
-
-function KpiCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  sub?: string;
-  tone: "amber" | "cyan" | "violet" | "emerald";
-}) {
-  const palettes = {
-    amber:   { border: "border-amber-400/20",   iconBg: "bg-amber-400/10 border-amber-400/20",   iconTxt: "text-amber-300",   glow: "rgba(245,158,11,0.12)"   },
-    cyan:    { border: "border-cyan-400/20",    iconBg: "bg-cyan-400/10 border-cyan-400/20",    iconTxt: "text-cyan-300",    glow: "rgba(6,182,212,0.12)"    },
-    violet:  { border: "border-violet-400/20",  iconBg: "bg-violet-400/10 border-violet-400/20",  iconTxt: "text-violet-300",  glow: "rgba(139,92,246,0.12)"  },
-    emerald: { border: "border-emerald-400/20", iconBg: "bg-emerald-400/10 border-emerald-400/20", iconTxt: "text-emerald-300", glow: "rgba(16,185,129,0.12)" },
-  };
-  const p = palettes[tone];
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border ${p.border} p-5 flex flex-col gap-3`}
-      style={{
-        background: "var(--sgt-bg-card)",
-        boxShadow: `0 0 24px ${p.glow}`,
-      }}
-    >
-      <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${p.iconBg} ${p.iconTxt}`}>
-        <Icon className="h-4.5 w-4.5" />
-      </div>
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)]">{label}</p>
-        <p className="mt-1 text-[22px] font-black tracking-tight sgt-text">{value}</p>
-        {sub && <p className="mt-0.5 text-[11px] text-[var(--sgt-text-faint)]">{sub}</p>}
-      </div>
-    </div>
-  );
-}
-
-// ─── Progress bar item ────────────────────────────────────────────────────────
-
-function BarItem({ label, value, max, pct }: { label: string; value: number; max: number; pct: number }) {
-  return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-[12px]">
-        <span className="truncate max-w-[55%] text-[var(--sgt-text-primary)]">{label || "—"}</span>
-        <span className="text-[var(--sgt-text-muted)]">{fmt(value)}</span>
-      </div>
-      <div className="h-1.5 w-full rounded-full bg-[var(--sgt-border)]">
-        <div
-          className="h-1.5 rounded-full bg-amber-400/70"
-          style={{ width: `${Math.round((value / max) * 100)}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-// ─── Página principal ─────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 20;
-const today = new Date();
-const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-const iso = (d: Date) => d.toISOString().slice(0, 10);
+// ═══════════════════════════════════════════════════════════════════════════════
+//  COMPONENTE PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export default function Compras() {
   const navigate = useNavigate();
-
-  const [dataInicio, setDataInicio] = useState(iso(firstOfMonth));
-  const [dataFim, setDataFim] = useState(iso(today));
-  const [busca, setBusca] = useState("");
-  const [filtroGrupo, setFiltroGrupo] = useState("TODOS");
-  const [filtroFornecedor, setFiltroFornecedor] = useState("TODOS");
-  const [sortCol, setSortCol] = useState<SortCol>("data_compra");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  
+  const [dataInicio, setDataInicio] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    return d.toISOString().split('T')[0];
+  });
+  const [dataFim, setDataFim] = useState(() => new Date().toISOString().split('T')[0]);
+  
+  const [search, setSearch] = useState("");
+  const [filtroGrupo, setFiltroGrupo] = useState("todos");
   const [page, setPage] = useState(1);
+  const [sortCol, setSortCol] = useState<string | null>(null);
+  const [sortAsc, setSortAsc] = useState(true);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  // ── Fetch dados ─────────────────────────────────────────────────────────────
+  const { data: compras = [], isLoading } = useQuery({
     queryKey: ["compras", dataInicio, dataFim],
     queryFn: () => fetchCompras({ dataInicio, dataFim }),
-    staleTime: 5 * 60_000,
   });
 
-  const rows: ComprasRow[] = data?.data ?? [];
-
-  // ── Opções de filtro ──
-  const grupos = useMemo(() => {
-    const s = new Set(rows.map((r) => r.grupo ?? "—"));
-    return ["TODOS", ...Array.from(s).sort()];
-  }, [rows]);
-
-  const fornecedores = useMemo(() => {
-    const s = new Set(rows.map((r) => r.fornecedor ?? "—"));
-    return ["TODOS", ...Array.from(s).sort()];
-  }, [rows]);
-
-  // ── Filtragem e ordenação ──
-  const filtered = useMemo(() => {
-    const q = busca.toLowerCase();
-    return rows
-      .filter((r) => {
-        const matchBusca =
-          !q ||
-          (r.produto ?? "").toLowerCase().includes(q) ||
-          (r.fornecedor ?? "").toLowerCase().includes(q) ||
-          String(r.nota_fiscal ?? "").toLowerCase().includes(q) ||
-          String(r.pedido ?? "").toLowerCase().includes(q);
-        const matchGrupo = filtroGrupo === "TODOS" || (r.grupo ?? "—") === filtroGrupo;
-        const matchFornecedor = filtroFornecedor === "TODOS" || (r.fornecedor ?? "—") === filtroFornecedor;
-        return matchBusca && matchGrupo && matchFornecedor;
-      })
-      .sort((a, b) => {
-        let va: string | number = 0;
-        let vb: string | number = 0;
-        if (sortCol === "data_compra") { va = a.data_compra ?? ""; vb = b.data_compra ?? ""; }
-        else if (sortCol === "fornecedor") { va = a.fornecedor ?? ""; vb = b.fornecedor ?? ""; }
-        else if (sortCol === "produto") { va = a.produto ?? ""; vb = b.produto ?? ""; }
-        else if (sortCol === "grupo") { va = a.grupo ?? ""; vb = b.grupo ?? ""; }
-        else if (sortCol === "quantidade") { va = a.quantidade ?? 0; vb = b.quantidade ?? 0; }
-        else if (sortCol === "valor_un") { va = a.valor_un ?? 0; vb = b.valor_un ?? 0; }
-        else if (sortCol === "total") { va = totalRow(a); vb = totalRow(b); }
-        const cmp = typeof va === "string" ? va.localeCompare(vb as string, "pt-BR") : (va as number) - (vb as number);
-        return sortDir === "asc" ? cmp : -cmp;
-      });
-  }, [rows, busca, filtroGrupo, filtroFornecedor, sortCol, sortDir]);
-
-  // ── KPIs ──
+  // ── KPIs ────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
-    const totalValor = filtered.reduce((s, r) => s + totalRow(r), 0);
-    const totalNFs = new Set(filtered.map((r) => String(r.nota_fiscal ?? ""))).size;
-    const totalFornecedores = new Set(filtered.map((r) => r.fornecedor ?? "")).size;
-    const totalProdutos = new Set(filtered.map((r) => String(r.codprod ?? ""))).size;
-    return { totalValor, totalNFs, totalFornecedores, totalProdutos };
-  }, [filtered]);
+    const total = compras.reduce((s, c) => s + ((c.quantidade ?? 0) * (c.valor_un ?? 0)), 0);
+    const notas = new Set(compras.map(c => c.nf)).size;
+    const fornecedores = new Set(compras.map(c => c.fornecedor)).size;
+    const produtos = new Set(compras.map(c => c.produto)).size;
 
-  // ── Top Grupos ──
-  const topGrupos = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((r) => {
-      const k = r.grupo ?? "—";
-      map.set(k, (map.get(k) ?? 0) + totalRow(r));
-    });
-    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6);
-    const max = sorted[0]?.[1] ?? 1;
-    return sorted.map(([label, value]) => ({ label, value, max, pct: value / max }));
-  }, [filtered]);
+    return [
+      {
+        label: "Total Comprado", value: fmtK(total),
+        sub: "No período", icon: ShoppingCart, color: "cyan", rgb: "6,182,212",
+        stripe: "from-cyan-400/60 to-cyan-700/20",
+        border: "border-cyan-400/[0.12]",
+        glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
+        iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
+        iconTxt: "text-cyan-300",
+        sub2: "text-cyan-500/80",
+      },
+      {
+        label: "Notas Fiscais", value: fmtNum(notas),
+        sub: "NFs distintas", icon: FileText, color: "emerald", rgb: "16,185,129",
+        stripe: "from-emerald-400/60 to-emerald-700/20",
+        border: "border-emerald-400/[0.12]",
+        glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
+        iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
+        iconTxt: "text-emerald-300",
+        sub2: "text-emerald-500/80",
+      },
+      {
+        label: "Fornecedores", value: fmtNum(fornecedores),
+        sub: "Fornecedores ativos", icon: Users, color: "amber", rgb: "251,191,36",
+        stripe: "from-amber-400/60 to-amber-700/20",
+        border: "border-amber-400/[0.12]",
+        glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
+        iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
+        iconTxt: "text-amber-300",
+        sub2: "text-amber-500/80",
+      },
+      {
+        label: "Produtos", value: fmtNum(produtos),
+        sub: "SKUs distintos", icon: Package, color: "violet", rgb: "139,92,246",
+        stripe: "from-violet-400/60 to-violet-700/20",
+        border: "border-violet-400/[0.12]",
+        glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
+        iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
+        iconTxt: "text-violet-300",
+        sub2: "text-violet-500/80",
+      },
+    ];
+  }, [compras]);
 
-  // ── Top Fornecedores ──
-  const topFornecedores = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((r) => {
-      const k = r.fornecedor ?? "—";
-      map.set(k, (map.get(k) ?? 0) + totalRow(r));
-    });
-    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const max = sorted[0]?.[1] ?? 1;
-    return sorted.map(([label, value]) => ({ label, value, max, pct: value / max }));
-  }, [filtered]);
+  // ── Filtros e ordenação ─────────────────────────────────────────────────────
+  const grupos = useMemo(() => {
+    const set = new Set(compras.map(c => c.grupo).filter(Boolean));
+    return Array.from(set).sort();
+  }, [compras]);
 
-  // ── Top Centro de Custo ──
-  const topCentros = useMemo(() => {
-    const map = new Map<string, number>();
-    filtered.forEach((r) => {
-      const k = r.centro_custo ?? "—";
-      map.set(k, (map.get(k) ?? 0) + totalRow(r));
-    });
-    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const max = sorted[0]?.[1] ?? 1;
-    return sorted.map(([label, value]) => ({ label, value, max, pct: value / max }));
-  }, [filtered]);
+  const comprasFiltradas = useMemo(() => {
+    let list = compras;
+    
+    if (filtroGrupo !== "todos") {
+      list = list.filter(c => c.grupo === filtroGrupo);
+    }
+    
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c =>
+        c.produto?.toLowerCase().includes(q) ||
+        c.fornecedor?.toLowerCase().includes(q) ||
+        c.nf?.toLowerCase().includes(q)
+      );
+    }
+    
+    if (sortCol) {
+      list = [...list].sort((a, b) => {
+        let va: any = (a as any)[sortCol];
+        let vb: any = (b as any)[sortCol];
+        
+        if (sortCol === "total") {
+          va = (a.quantidade ?? 0) * (a.valor_un ?? 0);
+          vb = (b.quantidade ?? 0) * (b.valor_un ?? 0);
+        }
+        
+        const cmp = typeof va === "number" && typeof vb === "number"
+          ? va - vb
+          : String(va ?? "").localeCompare(String(vb ?? ""), "pt-BR");
+        return sortAsc ? cmp : -cmp;
+      });
+    }
+    
+    return list;
+  }, [compras, filtroGrupo, search, sortCol, sortAsc]);
 
-  // ── Paginação ──
-  const paginated = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
-  );
+  const totalPaginas = Math.max(1, Math.ceil(comprasFiltradas.length / PAGE_SIZE));
+  const inicio = (page - 1) * PAGE_SIZE;
+  const paginados = comprasFiltradas.slice(inicio, inicio + PAGE_SIZE);
 
-  // ── Sort handler ──
-  function handleSort(col: SortCol) {
-    if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortCol(col); setSortDir("asc"); }
-    setPage(1);
+  function toggleSort(col: string) {
+    if (sortCol === col) setSortAsc(!sortAsc);
+    else { setSortCol(col); setSortAsc(true); }
   }
-
-  // ── CSV export ──
-  function exportCSV() {
-    const headers = ["Data", "NF", "Pedido", "Fornecedor", "Produto", "Grupo", "Sub-grupo", "Centro de Custo", "Qtd", "Vlr Unit", "Total"];
-    const lines = filtered.map((r) => [
-      fmtDate(r.data_compra),
-      r.nota_fiscal ?? "",
-      r.pedido ?? "",
-      r.fornecedor ?? "",
-      r.produto ?? "",
-      r.grupo ?? "",
-      r.sub_grupo ?? "",
-      r.centro_custo ?? "",
-      fmtQtd(r.quantidade),
-      (r.valor_un ?? 0).toFixed(2).replace(".", ","),
-      totalRow(r).toFixed(2).replace(".", ","),
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"));
-    const bom = "﻿";
-    const csv = bom + [headers.join(";"), ...lines].join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    a.download = "compras.csv";
-    a.click();
-  }
-
-  // ── Aplica filtro de período ──
-  function aplicar() {
-    setPage(1);
-    refetch();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <div
-      className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
-      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
-    >
-      {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.20),transparent_58%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_50%_at_85%_110%,rgba(139,92,246,0.07),transparent_60%)]" />
+    <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 [background:var(--sgt-bg-base)]">
+      <BackgroundEffects />
 
       <section
-        className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
+        className="relative mx-auto max-w-[1920px] min-h-[calc(100vh-4rem)] flex flex-col rounded-[16px] sm:rounded-[20px] md:rounded-[24px] border overflow-auto"
         style={{
           background: "var(--sgt-bg-section)",
           borderColor: "var(--sgt-border-subtle)",
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        <div className="relative flex flex-col flex-1 min-h-0 gap-4 p-3 sm:p-4 lg:p-5 w-full">
-
-          {/* ── Header ── */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8 animate-[fadeSlideIn_0.5s_ease-out]">
+        
+          {/* ════════ HEADER ════════ */}
+          <div className="hidden sm:flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)] hover:text-amber-300 transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Voltar
-              </button>
-              <div className="h-4 w-px bg-[var(--sgt-border)]" />
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                  <ShoppingCart className="h-4 w-4" />
-                </div>
-                <div>
-                  <h1 className="text-[16px] font-black tracking-tight sgt-text leading-tight">Compras</h1>
-                  <p className="text-[11px] text-[var(--sgt-text-muted)]">Notas fiscais de entrada por período</p>
-                </div>
+              <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
+              <div className="h-6 w-px bg-[var(--sgt-border-medium)]" />
+              <div className="flex flex-col leading-none">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                <span className="text-[17px] font-black tracking-[-0.03em] text-white">Compras</span>
               </div>
             </div>
-            <UserMenu />
+
+            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-indigo-400/20 bg-indigo-500/[0.08] px-3">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-300">Tempo real</span>
+            </div>
+
+            <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
+
+            {/* Filtros */}
+            <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+              <DatePickerInput value={dataInicio} onChange={setDataInicio} placeholder="Data início" />
+              <DatePickerInput value={dataFim} onChange={setDataFim} placeholder="Data fim" />
+            </div>
+
+            <HomeButton />
           </div>
 
-          {/* ── Filtros de período ── */}
-          <div
-            className="flex flex-wrap items-end gap-3 rounded-xl border border-[var(--sgt-border)] p-3"
-            style={{ background: "var(--sgt-bg-card)" }}
-          >
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)]">De</label>
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={(e) => setDataInicio(e.target.value)}
-                className="rounded-lg border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[13px] sgt-text focus:outline-none focus:border-amber-400/50"
-              />
+          {/* Mobile header */}
+          <div className="flex sm:hidden items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
+              <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
+              <div className="flex flex-col leading-none min-w-0">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Compras</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)]">Até</label>
-              <input
-                type="date"
-                value={dataFim}
-                onChange={(e) => setDataFim(e.target.value)}
-                className="rounded-lg border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[13px] sgt-text focus:outline-none focus:border-amber-400/50"
-              />
+            <div className="flex items-center gap-2 shrink-0">
+              <HomeButton />
+              <MobileNav />
             </div>
-            <button
-              onClick={aplicar}
-              className="h-[34px] rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-amber-300 hover:bg-amber-400/20 transition-colors"
-            >
-              Aplicar
-            </button>
           </div>
 
-          {/* ── Estado de loading / erro ── */}
-          {isLoading && (
-            <div className="flex flex-1 items-center justify-center gap-3 py-20 text-[var(--sgt-text-muted)]">
-              <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
-              <span className="text-[13px]">Carregando dados de compras…</span>
+          {/* ════════ KPIs ════════ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {kpis.map((k, i) => (
+              <AnimatedCard key={k.label} delay={i * 60}>
+                <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
+                  <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
+                  <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
+                    style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
+                  <div className="relative flex h-full flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+                        <k.icon className="h-3.5 w-3.5" />
+                      </div>
+                    </div>
+                    <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
+                    <p className={`mt-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${k.sub2}`}>{k.sub}</p>
+                  </div>
+                </div>
+              </AnimatedCard>
+            ))}
+          </div>
+
+          {/* ════════ FILTROS ════════ */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Buscar por produto, fornecedor ou NF..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-9 w-full rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[13px] text-white placeholder-slate-500 transition-all focus:border-[var(--sgt-border-medium)] focus:bg-[var(--sgt-input-hover)] focus:outline-none"
+              />
             </div>
-          )}
 
-          {isError && (
-            <div className="flex flex-1 items-center justify-center gap-3 py-20 text-rose-400">
-              <AlertCircle className="h-5 w-5" />
-              <span className="text-[13px]">Falha ao carregar dados. Verifique a conexão com a API.</span>
+            <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
+              <SelectTrigger className="h-9 w-full sm:w-[200px] rounded-lg text-[12px]">
+                <SelectValue placeholder="Grupo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os grupos</SelectItem>
+                {grupos.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* ════════ TABELA ════════ */}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-slate-400">Carregando...</div>
             </div>
-          )}
-
-          {!isLoading && !isError && (
-            <>
-              {/* ── KPIs ── */}
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <KpiCard
-                  icon={ShoppingCart}
-                  label="Total comprado"
-                  value={fmt(kpis.totalValor)}
-                  sub={`${filtered.length} itens no período`}
-                  tone="amber"
-                />
-                <KpiCard
-                  icon={FileText}
-                  label="Notas fiscais"
-                  value={String(kpis.totalNFs)}
-                  sub="NFs distintas"
-                  tone="cyan"
-                />
-                <KpiCard
-                  icon={Users}
-                  label="Fornecedores"
-                  value={String(kpis.totalFornecedores)}
-                  sub="fornecedores ativos"
-                  tone="violet"
-                />
-                <KpiCard
-                  icon={Package}
-                  label="Produtos"
-                  value={String(kpis.totalProdutos)}
-                  sub="SKUs distintos"
-                  tone="emerald"
-                />
-              </div>
-
-              {/* ── Analytics — 3 colunas ── */}
-              <div className="grid gap-4 lg:grid-cols-3">
-                {/* Top Grupos */}
-                <div
-                  className="rounded-2xl border border-[var(--sgt-border)] p-4 space-y-3"
-                  style={{ background: "var(--sgt-bg-card)" }}
-                >
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/80">Top grupos</p>
-                  {topGrupos.length === 0
-                    ? <p className="text-[12px] text-[var(--sgt-text-faint)]">Sem dados</p>
-                    : topGrupos.map((g) => (
-                      <BarItem key={g.label} label={g.label} value={g.value} max={g.max} pct={g.pct} />
-                    ))
-                  }
-                </div>
-
-                {/* Top Fornecedores */}
-                <div
-                  className="rounded-2xl border border-[var(--sgt-border)] p-4 space-y-3"
-                  style={{ background: "var(--sgt-bg-card)" }}
-                >
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/80">Top fornecedores</p>
-                  {topFornecedores.length === 0
-                    ? <p className="text-[12px] text-[var(--sgt-text-faint)]">Sem dados</p>
-                    : topFornecedores.map((f) => (
-                      <BarItem key={f.label} label={f.label} value={f.value} max={f.max} pct={f.pct} />
-                    ))
-                  }
-                </div>
-
-                {/* Top Centro de Custo */}
-                <div
-                  className="rounded-2xl border border-[var(--sgt-border)] p-4 space-y-3"
-                  style={{ background: "var(--sgt-bg-card)" }}
-                >
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/80">Top centro de custo</p>
-                  {topCentros.length === 0
-                    ? <p className="text-[12px] text-[var(--sgt-text-faint)]">Sem dados</p>
-                    : topCentros.map((c) => (
-                      <BarItem key={c.label} label={c.label} value={c.value} max={c.max} pct={c.pct} />
-                    ))
-                  }
-                </div>
-              </div>
-
-              {/* ── Controles da tabela ── */}
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Busca */}
-                <div className="relative flex-1 min-w-[200px] max-w-[360px]">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
-                  <input
-                    type="text"
-                    placeholder="Buscar produto, fornecedor, NF, pedido…"
-                    value={busca}
-                    onChange={(e) => { setBusca(e.target.value); setPage(1); }}
-                    className="w-full rounded-xl border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] py-2 pl-8 pr-3 text-[13px] sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-amber-400/50"
-                  />
-                </div>
-
-                {/* Filtro grupo */}
-                <select
-                  value={filtroGrupo}
-                  onChange={(e) => { setFiltroGrupo(e.target.value); setPage(1); }}
-                  className="rounded-xl border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-[12px] sgt-text focus:outline-none focus:border-amber-400/50"
-                >
-                  {grupos.map((g) => (
-                    <option key={g} value={g}>{g === "TODOS" ? "Todos os grupos" : g}</option>
-                  ))}
-                </select>
-
-                {/* Filtro fornecedor */}
-                <select
-                  value={filtroFornecedor}
-                  onChange={(e) => { setFiltroFornecedor(e.target.value); setPage(1); }}
-                  className="rounded-xl border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-[12px] sgt-text focus:outline-none focus:border-amber-400/50 max-w-[220px]"
-                >
-                  {fornecedores.map((f) => (
-                    <option key={f} value={f}>{f === "TODOS" ? "Todos os fornecedores" : f}</option>
-                  ))}
-                </select>
-
-                <div className="ml-auto flex items-center gap-3">
-                  <span className="text-[11px] text-[var(--sgt-text-muted)]">
-                    {filtered.length} {filtered.length === 1 ? "item" : "itens"}
-                  </span>
-                  <button
-                    onClick={exportCSV}
-                    className="flex items-center gap-1.5 rounded-xl border border-[var(--sgt-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--sgt-text-muted)] hover:border-amber-400/40 hover:text-amber-300 transition-colors"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    Exportar
-                  </button>
-                </div>
-              </div>
-
-              {/* ── Tabela ── */}
-              <div
-                className="rounded-2xl border border-[var(--sgt-border)] overflow-hidden"
-                style={{ background: "var(--sgt-bg-card)" }}
-              >
-                <div className="overflow-x-auto">
-                  <table className="w-full text-[12px]">
-                    <thead>
-                      <tr
-                        className="border-b border-[var(--sgt-border)] text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sgt-text-muted)]"
-                        style={{ background: "var(--sgt-bg-table-header)" }}
-                      >
-                        <th className="px-4 py-3 text-left">
-                          <button className={thBtn} onClick={() => handleSort("data_compra")}>
-                            Data <SortIcon col="data_compra" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-left">NF</th>
-                        <th className="px-4 py-3 text-left">Pedido</th>
-                        <th className="px-4 py-3 text-left">
-                          <button className={thBtn} onClick={() => handleSort("fornecedor")}>
-                            Fornecedor <SortIcon col="fornecedor" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-left">
-                          <button className={thBtn} onClick={() => handleSort("produto")}>
-                            Produto <SortIcon col="produto" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-left">
-                          <button className={thBtn} onClick={() => handleSort("grupo")}>
-                            Grupo <SortIcon col="grupo" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-left">Sub-grupo</th>
-                        <th className="px-4 py-3 text-left">C. Custo</th>
-                        <th className="px-4 py-3 text-right">
-                          <button className={thBtn + " ml-auto"} onClick={() => handleSort("quantidade")}>
-                            Qtd <SortIcon col="quantidade" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-right">
-                          <button className={thBtn + " ml-auto"} onClick={() => handleSort("valor_un")}>
-                            Vlr Unit <SortIcon col="valor_un" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                        <th className="px-4 py-3 text-right">
-                          <button className={thBtn + " ml-auto"} onClick={() => handleSort("total")}>
-                            Total <SortIcon col="total" active={sortCol} dir={sortDir} />
-                          </button>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginated.length === 0 ? (
-                        <tr>
-                          <td colSpan={11} className="px-4 py-12 text-center text-[var(--sgt-text-faint)]">
-                            Nenhum item encontrado para os filtros aplicados.
-                          </td>
+          ) : (
+            <div className="overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[var(--sgt-border-subtle)]">
+                      <th className="px-4 py-3 text-left">
+                        <button onClick={() => toggleSort("data_compra")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Data
+                          {sortCol === "data_compra" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <button onClick={() => toggleSort("nf")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          NF
+                          {sortCol === "nf" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <button onClick={() => toggleSort("fornecedor")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Fornecedor
+                          {sortCol === "fornecedor" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <button onClick={() => toggleSort("produto")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Produto
+                          {sortCol === "produto" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-left">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Grupo</span>
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <button onClick={() => toggleSort("quantidade")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Qtd
+                          {sortCol === "quantidade" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <button onClick={() => toggleSort("valor_un")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Vlr Unit
+                          {sortCol === "valor_un" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                      <th className="px-4 py-3 text-right">
+                        <button onClick={() => toggleSort("total")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
+                          Total
+                          {sortCol === "total" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginados.map((compra, i) => {
+                      const total = (compra.quantidade ?? 0) * (compra.valor_un ?? 0);
+                      return (
+                        <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
+                          <td className="px-4 py-3 text-[13px] text-slate-400">{fmtData(compra.data_compra)}</td>
+                          <td className="px-4 py-3 text-[13px] font-medium text-white">{compra.nf}</td>
+                          <td className="px-4 py-3 text-[13px] text-slate-300">{compra.fornecedor}</td>
+                          <td className="px-4 py-3 text-[13px] text-slate-300">{compra.produto}</td>
+                          <td className="px-4 py-3 text-[11px] text-slate-500">{compra.grupo}</td>
+                          <td className="px-4 py-3 text-right text-[13px] text-slate-400">{fmtNum(compra.quantidade ?? 0)}</td>
+                          <td className="px-4 py-3 text-right text-[13px] text-slate-400">{fmtBRL(compra.valor_un ?? 0)}</td>
+                          <td className="px-4 py-3 text-right text-[13px] font-semibold text-white">{fmtBRL(total)}</td>
                         </tr>
-                      ) : (
-                        paginated.map((r, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-[var(--sgt-border-subtle)] hover:bg-amber-400/[0.03] transition-colors"
-                          >
-                            <td className="px-4 py-2.5 text-[var(--sgt-text-muted)] whitespace-nowrap">
-                              {fmtDate(r.data_compra)}
-                            </td>
-                            <td className="px-4 py-2.5 font-mono text-[var(--sgt-text-primary)]">
-                              {r.nota_fiscal ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 text-[var(--sgt-text-muted)]">
-                              {r.pedido ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 max-w-[180px] truncate sgt-text font-medium">
-                              {r.fornecedor ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 max-w-[200px] truncate text-[var(--sgt-text-primary)]">
-                              {r.produto ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 text-[var(--sgt-text-muted)]">
-                              {r.grupo ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 text-[var(--sgt-text-muted)]">
-                              {r.sub_grupo ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 max-w-[140px] truncate text-[var(--sgt-text-muted)]">
-                              {r.centro_custo ?? "—"}
-                            </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums text-[var(--sgt-text-primary)]">
-                              {fmtQtd(r.quantidade)}
-                            </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums text-[var(--sgt-text-muted)]">
-                              {fmt(r.valor_un)}
-                            </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-amber-300">
-                              {fmt(totalRow(r))}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Footer da tabela */}
-                <div className="flex items-center justify-between gap-4 border-t border-[var(--sgt-border)] px-4 py-3">
-                  <p className="text-[11px] text-[var(--sgt-text-muted)]">
-                    Exibindo {paginated.length} de {filtered.length} itens
-                  </p>
-                  <CompactPagination
-                    page={page}
-                    total={filtered.length}
-                    perPage={PAGE_SIZE}
-                    onChange={setPage}
-                  />
-                  <p className="text-[12px] font-semibold text-amber-300 tabular-nums">
-                    {fmt(filtered.reduce((s, r) => s + totalRow(r), 0))}
-                  </p>
-                </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            </>
+
+              {/* Paginação */}
+              {totalPaginas > 1 && (
+                <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-4 py-3">
+                  <div className="text-[11px] text-slate-500">
+                    Mostrando {inicio + 1} a {Math.min(inicio + PAGE_SIZE, comprasFiltradas.length)} de {comprasFiltradas.length}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      disabled={page === 1}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                    
+                    <div className="flex items-center gap-1 px-3 text-[12px] text-slate-300">
+                      <span className="font-semibold text-white">{page}</span>
+                      <span className="text-slate-500">/</span>
+                      <span>{totalPaginas}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setPage(Math.min(totalPaginas, page + 1))}
+                      disabled={page === totalPaginas}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
+        </div>
         </div>
       </section>
     </div>
