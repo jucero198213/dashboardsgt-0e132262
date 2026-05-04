@@ -321,6 +321,18 @@ export default function ContasAPagar() {
     <div className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8 lg:py-8 [background:var(--sgt-bg-base)]">
       <BackgroundEffects />
 
+      {/* ════════ BARRA DE PROGRESSO TOPO ════════ */}
+      {isFetchingDw && (
+        <div className="fixed inset-x-0 top-0 z-50">
+          <div className="h-[3px] w-full overflow-hidden bg-transparent">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-emerald-400 shadow-[0_0_12px_rgba(6,182,212,0.6)] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="relative mx-auto max-w-[1920px] space-y-4 sm:space-y-6 animate-[fadeSlideIn_0.5s_ease-out]">
         
         {/* ════════ HEADER ════════ */}
