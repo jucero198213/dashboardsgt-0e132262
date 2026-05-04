@@ -48,15 +48,18 @@ export default function Compras() {
   const [sortAsc, setSortAsc] = useState(true);
 
   // ── Fetch dados ─────────────────────────────────────────────────────────────
-  const { data: compras = [], isLoading } = useQuery({
+  const { data: comprasResp, isLoading } = useQuery({
     queryKey: ["compras", dataInicio, dataFim],
     queryFn: () => fetchCompras({ dataInicio, dataFim }),
   });
+  const compras: ComprasRow[] = Array.isArray(comprasResp)
+    ? comprasResp
+    : Array.isArray(comprasResp?.data) ? comprasResp.data : [];
 
   // ── KPIs ────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
     const total = compras.reduce((s, c) => s + ((c.quantidade ?? 0) * (c.valor_un ?? 0)), 0);
-    const notas = new Set(compras.map(c => c.nf)).size;
+    const notas = new Set(compras.map((c: any) => c.nf)).size;
     const fornecedores = new Set(compras.map(c => c.fornecedor)).size;
     const produtos = new Set(compras.map(c => c.produto)).size;
 
@@ -119,7 +122,7 @@ export default function Compras() {
     
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(c =>
+      list = list.filter((c: any) =>
         c.produto?.toLowerCase().includes(q) ||
         c.fornecedor?.toLowerCase().includes(q) ||
         c.nf?.toLowerCase().includes(q)
@@ -326,7 +329,7 @@ export default function Compras() {
                       return (
                         <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
                           <td className="px-4 py-3 text-[13px] text-slate-400">{fmtData(compra.data_compra)}</td>
-                          <td className="px-4 py-3 text-[13px] font-medium text-white">{compra.nf}</td>
+                          <td className="px-4 py-3 text-[13px] font-medium text-white">{(compra as any).nf}</td>
                           <td className="px-4 py-3 text-[13px] text-slate-300">{compra.fornecedor}</td>
                           <td className="px-4 py-3 text-[13px] text-slate-300">{compra.produto}</td>
                           <td className="px-4 py-3 text-[11px] text-slate-500">{compra.grupo}</td>
