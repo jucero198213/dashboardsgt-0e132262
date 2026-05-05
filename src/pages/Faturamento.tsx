@@ -422,101 +422,24 @@ export default function Faturamento() {
 
             </div>
 
-            {/* Tabela completa */}
-            <div className="grid grid-cols-1 gap-3">
 
-              {/* Tabela */}
-              <AnimatedCard delay={180} className="flex flex-col h-full min-h-0">
-              <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full min-h-[260px] xl:min-h-0">
-                <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/30 to-transparent" />
-
-                {/* Tabela header */}
-                <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] mr-auto" style={{ color: "var(--sgt-text-muted)" }}>
-                    Faturamento por cliente / grupo
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="h-7 rounded-lg border px-2.5 text-[11px] outline-none transition-all w-36"
-                    style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)", color: "var(--sgt-text-primary)" }}
-                  />
-                  <button onClick={() => setSortDir(d => d === "desc" ? "asc" : "desc")}
-                    className="inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[10px] font-semibold transition-all hover:opacity-80"
-                    style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-secondary)", background: "var(--sgt-input-bg)" }}>
-                    {sortDir === "desc" ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
-                    {sortDir === "desc" ? "Maior" : "Menor"}
-                  </button>
-                </div>
-
-                {/* Cabeçalho colunas */}
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(7.5rem,9rem)_3.75rem] gap-3 px-4 py-2 shrink-0 text-[9px] font-bold uppercase tracking-[0.22em]"
-                  style={{ color: "var(--sgt-text-faint)", borderBottom: "1px solid var(--sgt-divider)" }}>
-                  <span>Cliente / Grupo</span>
-                  <span className="text-right">Faturamento</span>
-                  <span className="text-right">Part. %</span>
-                </div>
-
-                {/* Linhas */}
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  {!isProcessed ? (
-                    <div className="flex flex-col gap-2 p-4">
-                      {[...Array(8)].map((_,i) => <Skel key={i} h="h-8" />)}
-                    </div>
-                  ) : rows.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-3 py-12">
-                      <TrendingUp className="h-10 w-10 text-amber-400/30" />
-                      <p className="text-[13px]" style={{ color: "var(--sgt-text-muted)" }}>Sem dados no período selecionado</p>
-                      <p className="text-[11px]" style={{ color: "var(--sgt-text-faint)" }}>Selecione um período e clique em Atualizar</p>
-                    </div>
-                  ) : (
-                    rows.map((r, i) => (
-                      <div key={`${r.descri}-${i}`}
-                        className="grid grid-cols-[minmax(0,1fr)_minmax(7.5rem,9rem)_3.75rem] gap-3 px-4 py-2.5 items-center transition-colors"
-                        style={{
-                          borderBottom: "1px solid var(--sgt-divider)",
-                          background: i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent",
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
-                        onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-[10px] font-bold shrink-0 w-5 text-right tabular-nums" style={{ color: "var(--sgt-text-faint)" }}>{i+1}</span>
-                          <span className="text-[12px] font-medium min-w-0 flex-[0_1_42%] truncate" style={{ color: "var(--sgt-text-primary)" }}>{r.descri}</span>
-                          <div className="flex-1 h-1.5 overflow-hidden rounded-full mx-1 min-w-[36px]" style={{ background: "var(--sgt-progress-track)" }}>
-                            <div className="h-full rounded-full bg-amber-400/70 transition-all duration-700" style={{ width: `${Math.min(r.pct, 100)}%` }} />
-                          </div>
-                        </div>
-                        <span className="text-[12px] font-bold tabular-nums text-right dark:text-amber-200 text-amber-700">{fmtBRL(r.total)}</span>
-                        <span className="text-[11px] font-bold tabular-nums text-right dark:text-slate-300 text-slate-600">{r.pct.toFixed(1)}%</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Rodapé */}
-                {rows.length > 0 && (
-                  <div className="flex items-center justify-between px-4 py-2 shrink-0"
-                    style={{ borderTop: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
-                    <span className="text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>{rows.length} clientes/grupos</span>
-                    <span className="text-[11px] font-bold dark:text-amber-200 text-amber-700">{fmtBRL(totalFaturado)}</span>
-                  </div>
-                )}
-              </div>
-            </AnimatedCard>
-
-
-            </div>
-
-            {/* Gráficos mensais */}
+            {/* Gráfico acumulado */}
             {(() => {
               const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
               const anoAtual = dwFilter.dataFim ? new Date(dwFilter.dataFim).getFullYear() : new Date().getFullYear();
               const anoAnt   = anoAtual - 1;
-              const maxVal   = Math.max(...faturamentoMensal, ...faturamentoMensalAnterior, 1);
+
+              // Calcula acumulado mês a mês
+              const acumular = (data: number[]) => {
+                let soma = 0;
+                return data.map(v => { soma += v; return soma; });
+              };
+              const acumAtual = acumular(faturamentoMensal);
+              const acumAnt   = acumular(faturamentoMensalAnterior);
+
+              const maxVal = Math.max(...acumAtual, ...acumAnt, 1);
               const fmtY = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : "0";
+
               const buildPath = (data: number[], w: number, h: number, padL: number, padR: number, padT: number, padB: number) => {
                 const toX = (i: number) => padL + (i / 11) * (w - padL - padR);
                 const toY = (v: number) => padT + (h - padT - padB) - (v / maxVal) * (h - padT - padB);
@@ -527,102 +450,67 @@ export default function Faturamento() {
                 }
                 return d;
               };
+
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch xl:min-h-0 xl:h-full">
-                  {/* Gráfico 1 — Linha: Ano atual vs Ano anterior */}
-                  <AnimatedCard delay={280} className="h-full">
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px] xl:min-h-0">
-                      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Faturamento Mensal — {anoAtual} vs {anoAnt}</span>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1.5">
-                            <span className="h-[2px] w-4 rounded-full bg-amber-400 inline-block" />
-                            <span className="text-[9px] font-semibold text-amber-400">{anoAtual}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,3"/></svg>
-                            <span className="text-[9px] font-semibold text-slate-400">{anoAnt}</span>
-                          </div>
+                <AnimatedCard delay={280}>
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 320 }}>
+                    <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
+                        Faturamento Acumulado — {anoAtual} vs {anoAnt}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-[2px] w-4 rounded-full bg-amber-400 inline-block" />
+                          <span className="text-[9px] font-semibold text-amber-400">{anoAtual}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,3"/></svg>
+                          <span className="text-[9px] font-semibold text-slate-400">{anoAnt}</span>
                         </div>
                       </div>
-                      {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
-                        <div className="flex flex-col gap-2 flex-1 justify-center py-4">
-                          {isFetchingCharts ? (
-                            <>
-                              <Skel h="h-28" />
-                              <div className="flex justify-center gap-1">
-                                {[...Array(3)].map((_,i) => <div key={i} className="h-1.5 w-1.5 rounded-full animate-pulse bg-amber-400/50" style={{ animationDelay: `${i*150}ms` }} />)}
-                              </div>
-                              <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
-                            </>
-                          ) : (
-                            <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
-                          )}
-                        </div>
-                      ) : (
-                        <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[180px]">
+                    </div>
+                    {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
+                      <div className="flex flex-col gap-2 flex-1 justify-center py-4">
+                        {isFetchingCharts ? (
+                          <>
+                            <Skel h="h-40" />
+                            <div className="flex justify-center gap-1">
+                              {[...Array(3)].map((_,i) => <div key={i} className="h-1.5 w-1.5 rounded-full animate-pulse bg-amber-400/50" style={{ animationDelay: `${i*150}ms` }} />)}
+                            </div>
+                            <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
+                          </>
+                        ) : (
+                          <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
+                        )}
+                      </div>
+                    ) : (
+                      <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[220px]">
                         <defs>
-                          <linearGradient id="fatGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.25"/>
+                          <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2"/>
                             <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
                           </linearGradient>
                         </defs>
                         {[0.25,0.5,0.75,1].map(f => (
-                          <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
+                          <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)}
+                            stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end"
+                            fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
                         ))}
-                        <path d={`${buildPath(faturamentoMensal,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#fatGrad)"/>
-                        <path d={buildPath(faturamentoMensalAnterior,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
-                        <path d={buildPath(faturamentoMensal,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
+                        <path d={`${buildPath(acumAtual,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#fatGradAcum)"/>
+                        <path d={buildPath(acumAnt,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
+                        <path d={buildPath(acumAtual,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle"
+                            fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
                         ))}
                       </svg>
-                      )}
-                    </div>
-                  </AnimatedCard>
-                  {/* Gráfico 2 — Barras: Evolução mensal */}
-                  <AnimatedCard delay={340} className="h-full">
-                    <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px] xl:min-h-0">
-                      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
-                      {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
-                        <div className="flex flex-col gap-2 flex-1 justify-center py-4">
-                          {isFetchingCharts ? (
-                            <>
-                              <div className="flex items-end gap-1.5 h-24 px-1">
-                                {[...Array(12)].map((_,i) => (
-                                  <div key={i} className="flex-1 rounded-t-sm animate-pulse" style={{ height: `${20+Math.random()*60}%`, background: "var(--sgt-skeleton-bg)", animationDelay: `${i*50}ms` }} />
-                                ))}
-                              </div>
-                              <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
-                            </>
-                          ) : (
-                            <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex items-end gap-1 sm:gap-1.5 flex-1 min-h-[180px] px-1 pt-4">
-                          {faturamentoMensal.map((v, i) => {
-                            const pct = maxVal > 0 ? (v / maxVal) * 100 : 0;
-                            const isMax = v > 0 && v === Math.max(...faturamentoMensal);
-                            return (
-                              <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                                <span className="text-[7px] font-bold tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#22d3ee" }}>{fmtY(v)}</span>
-                                <div className="w-full rounded-t-[3px] transition-all duration-700"
-                                  style={{ height: `${Math.max(pct, v > 0 ? 2 : 0)}%`, background: isMax ? "linear-gradient(180deg,#22d3ee,#0891b2)" : "linear-gradient(180deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))", boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none" }} />
-                                <span className="text-[7.5px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>{months[i]}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </AnimatedCard>
-                </div>
+                    )}
+                  </div>
+                </AnimatedCard>
               );
             })()}
 
