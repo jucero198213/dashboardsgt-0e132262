@@ -178,7 +178,7 @@ export default function Rh() {
     const ns = (v: string | null | undefined) => (v ?? "").trim();
     return dados.map(d => {
       const sit = ns(d.situacao).toUpperCase();
-      const isAtivo = sit === "ATIVO";
+      const isAtivo = sit === "A";
       return {
         codmot:        String(d.codmot ?? "").trim(),
         nome:          ns(d.motorista) || "—",
@@ -563,14 +563,14 @@ export default function Rh() {
                 <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
                 {[
-                  { label: "Situação",  value: filtroSituacao,  set: setFiltroSituacao,  items: ["Todos","ATIVO","INATIVO"] },
+                  { label: "Situação",  value: filtroSituacao,  set: setFiltroSituacao,  items: ["Todos","A","I"] },
                 ].map(({ label, value, set, items }) => (
                   <Select key={label} value={value} onValueChange={v => { set(v); setPage(1); }}>
                     <SelectTrigger className="h-7 min-w-[80px] max-w-[110px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-emerald-500/30 focus:outline-none">
                       <SelectValue placeholder={label} />
                     </SelectTrigger>
                     <SelectContent>
-                      {items.map(i => <SelectItem key={i} value={i}>{i === "Todos" ? label : i}</SelectItem>)}
+                      {items.map(i => <SelectItem key={i} value={i}>{i === "Todos" ? label : i === "A" ? "Ativo" : i === "I" ? "Inativo" : i}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 ))}
@@ -627,7 +627,7 @@ export default function Rh() {
             {/* KPI Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               {[
-                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos),    sub: "SITUAC = ATIVO",                Icon: UserCheck, tone: "emerald" as const, delay: 80  },
+                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos),    sub: "SITUAC = \"A\"",                Icon: UserCheck, tone: "emerald" as const, delay: 80  },
                 { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes), sub: "DATADM no intervalo",            Icon: UserPlus,  tone: "cyan"    as const, delay: 120 },
                 { label: "Demissões no Período", value: loading ? "—" : fmtNum(kpis.demissoes), sub: `Turnover: ${fmtPct(kpis.turnover)}`, Icon: UserMinus, tone: "rose" as const, delay: 160 },
                 { label: "CNH a Vencer (30d)",   value: loading ? "—" : fmtNum(kpis.cnh30),    sub: "VENCHA ≤ hoje + 30 dias",        Icon: ShieldAlert, tone: "amber" as const, delay: 200 },
@@ -1050,11 +1050,11 @@ export default function Rh() {
                             </td>
                             <td className="px-3 py-2.5 text-center">
                               <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] ring-1 ${
-                                c.situacao === "ATIVO"
+                                c.situacao === "A"
                                   ? "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30"
                                   : "bg-rose-500/10 text-rose-300 ring-rose-500/30"
                               }`}>
-                                {c.situacao ?? "—"}
+                                {c.situacao === "A" ? "Ativo" : c.situacao === "I" ? "Inativo" : c.situacao ?? "—"}
                               </span>
                             </td>
                           </tr>
