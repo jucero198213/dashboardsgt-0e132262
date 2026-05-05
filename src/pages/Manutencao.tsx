@@ -807,7 +807,7 @@ export default function Manutencao() {
                 custoTotalMaoDeObra: Math.round(kpis.totalMO),
                 ordensExternas: kpis.externas,
                 ordensInternas: kpis.internas,
-                top5Veiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: v.codvei, custo: Math.round(v.custo), ordens: v.qtd })),
+                top5Veiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: (v as any).codvei ?? (v as any).veiculo, custo: Math.round(v.custo), ordens: (v as any).qtd ?? 0 })),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
             />
