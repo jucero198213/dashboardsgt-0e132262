@@ -8,7 +8,6 @@ import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
-import { SectionDivider } from "@/components/shared/SectionDivider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 
@@ -290,14 +289,6 @@ export default function Faturamento() {
               </AnimatedCard>
 
             </div>
-
-            {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
-            <SectionDivider
-              numero={2}
-              titulo="Insights por IA"
-              subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-              color="amber"
-            />
             <InsightsSection
               setor="faturamento"
               dados={{
@@ -429,14 +420,6 @@ export default function Faturamento() {
               </AnimatedCard>
 
             </div>
-
-            {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
-            <SectionDivider
-              numero={3}
-              titulo="Detalhamento"
-              subtitulo="Documentos e registros que compõem os dados do período"
-              color="violet"
-            />
 
             {/* Top 5 + Tabela lado a lado */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch xl:min-h-0">

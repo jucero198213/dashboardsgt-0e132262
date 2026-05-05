@@ -15,7 +15,6 @@ import {
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
-import { SectionDivider } from "@/components/shared/SectionDivider";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -788,14 +787,6 @@ export default function Manutencao() {
                 );
               })}
             </div>
-
-            {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
-            <SectionDivider
-              numero={2}
-              titulo="Insights por IA"
-              subtitulo="Análise inteligente da manutenção — recomendações acionáveis geradas por IA"
-              color="violet"
-            />
             <InsightsSection
               setor="manutencao"
               dados={{
@@ -929,14 +920,6 @@ export default function Manutencao() {
               </AnimatedCard>
 
             </div>
-
-            {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
-            <SectionDivider
-              numero={3}
-              titulo="Detalhamento"
-              subtitulo="Ordens de serviço e registros que compõem os dados do período"
-              color="blue"
-            />
 
             {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
             <AnimatedCard delay={280}>

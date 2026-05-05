@@ -9,7 +9,6 @@ import {
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
-import { SectionDivider } from "@/components/shared/SectionDivider";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -967,14 +966,6 @@ export default function Frota() {
                 </div>
               </div>
             </div>
-
-            {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
-            <SectionDivider
-              numero={2}
-              titulo="Insights por IA"
-              subtitulo="Análise inteligente da frota — recomendações acionáveis geradas por IA"
-              color="amber"
-            />
             <InsightsSection
               setor="frota"
               dados={{
@@ -988,14 +979,6 @@ export default function Frota() {
                 top5MaioresGastos: top10Custo.slice(0, 5).map(v => ({ nome: v.nome, custo: Math.round(v.custo), ordens: v.ordens })),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-            />
-
-            {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
-            <SectionDivider
-              numero={3}
-              titulo="Detalhamento"
-              subtitulo="Veículos e ordens que compõem os dados do período"
-              color="violet"
             />
 
             {/* ════════ FILTROS DA TABELA ════════ */}

@@ -10,7 +10,6 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
-import { SectionDivider } from "@/components/shared/SectionDivider";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -639,27 +638,10 @@ export default function Compras() {
               </div>
             );
           })()}
-
-          {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
-          <SectionDivider
-            numero={2}
-            titulo="Insights por IA"
-            subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-            color="amber"
-          />
           <InsightsSection
             setor="compras"
             dados={dadosParaIA}
             periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-          />
-
-
-          {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
-          <SectionDivider
-            numero={3}
-            titulo="Detalhamento"
-            subtitulo="Documentos e registros que compõem os dados do período"
-            color="violet"
           />
 
           {/* ════════ TABELA ════════ */}

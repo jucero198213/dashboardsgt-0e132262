@@ -7,7 +7,6 @@ import {
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
-import { SectionDivider } from "@/components/shared/SectionDivider";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -490,14 +489,6 @@ export default function ContasAPagar() {
             </AnimatedCard>
           ))}
         </div>
-
-        {/* ════════ SESSÃO 2 — INSIGHTS POR IA ════════ */}
-        <SectionDivider
-          numero={2}
-          titulo="Insights por IA"
-          subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-          color="amber"
-        />
         <InsightsSection
           setor="contas_a_pagar"
           dados={{
@@ -639,14 +630,6 @@ export default function ContasAPagar() {
           </AnimatedCard>
 
         </div>
-
-        {/* ════════ SESSÃO 3 — DETALHAMENTO ════════ */}
-        <SectionDivider
-          numero={3}
-          titulo="Detalhamento"
-          subtitulo="Documentos e títulos que compõem os dados do período"
-          color="violet"
-        />
 
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
