@@ -91,46 +91,42 @@ export default function PainelAdministrativo() {
   const currentItem = NAV_ITEMS.find((n) => n.id === screen);
 
   return (
-    <div className="min-h-screen sgt-bg-base sgt-text px-4 py-6 lg:px-8 lg:py-8">
-      {/* Background effects */}
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),transparent_26%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.06),transparent_24%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:88px_88px]" />
+    <div
+      className="flex flex-col min-h-[100dvh] transition-all duration-300 px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
+    >
+      {/* Atmosfera */}
+      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(59,130,246,0.18),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(239,68,68,0.07),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 dark:opacity-100" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.72) 100%)" }} />
 
-      <div className="relative w-full space-y-6">
+      <div className="relative flex flex-col flex-1 min-h-0 w-full">
+        <section
+          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
+          style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
+        >
+          <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm sgt-text-2">
-            <button onClick={() => navigate("/home")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Início</button>
-            <ChevronRight className="h-3.5 w-3.5" />
-            {screen === "home" ? (
-              <span className="sgt-text">Administração</span>
-            ) : (
-              <>
-                <button onClick={() => setScreen("home")} className="transition-colors hover:text-[var(--sgt-text-primary)]">Administração</button>
-                <ChevronRight className="h-3.5 w-3.5" />
-                <span className="sgt-text">{currentItem?.label}</span>
-              </>
-            )}
-          </div>
-          <UserMenu />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          {screen !== "home" && (
-            <button
-              onClick={() => setScreen("home")}
-              className="mt-1 flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-          )}
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-red-400/20 bg-red-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-red-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-                Área Administrativa
+            {/* Navbar desktop */}
+            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-400/20 bg-red-400/[0.08]">
+                  <Shield className="h-4 w-4 text-red-400" />
+                </div>
+                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-red-400/70">Workspace</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">
+                    {screen === "home" ? "Painel Administrativo" : currentItem?.label}
+                  </span>
+                </div>
+              </div>
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-red-400/20 bg-red-500/[0.08] px-3">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-400" />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-red-300">Área restrita</span>
               </div>
               {isAdmin && (
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
@@ -138,17 +134,55 @@ export default function PainelAdministrativo() {
                   Admin
                 </div>
               )}
+              <div className="flex-1" />
+              {screen !== "home" && (
+                <button
+                  onClick={() => setScreen("home")}
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)]"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <UserMenu />
             </div>
-            <h1 className="text-[22px] font-bold tracking-tight sgt-text">
-              {screen === "home" ? "Painel Administrativo" : currentItem?.label}
-            </h1>
-            <p className="mt-2 text-[12px] sgt-text-2">
-              {screen === "home"
-                ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
-                : currentItem?.desc}
-            </p>
-          </div>
-        </div>
+
+            {/* Navbar mobile */}
+            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-400/20 bg-red-400/[0.08] shrink-0">
+                  <Shield className="h-3.5 w-3.5 text-red-400" />
+                </div>
+                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-red-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">
+                    {screen === "home" ? "Admin" : currentItem?.label}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {screen !== "home" && (
+                  <button onClick={() => setScreen("home")} className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                <UserMenu />
+              </div>
+            </div>
+
+            <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+
+            {/* Page subtitle */}
+            <div>
+              <p className="text-[12px] text-[var(--sgt-text-muted)]">
+                {screen === "home"
+                  ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
+                  : currentItem?.desc}
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="flex flex-col gap-6">
 
         {/* Home — navigation grid */}
         {screen === "home" && (
@@ -220,6 +254,9 @@ export default function PainelAdministrativo() {
           </div>
         )}
 
+            </div> {/* Content */}
+          </div>
+        </section>
       </div>
     </div>
   );
