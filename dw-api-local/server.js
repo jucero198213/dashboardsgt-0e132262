@@ -794,8 +794,6 @@ OPTION (RECOMPILE)
 // ─────────────────────────────────────────────────────────────────────────────
 
 app.post("/dw-rh", async (req, res) => {
-  const { situacao } = req.body ?? {};
-
   const query = `
     SELECT
       CODMOT                  AS codmot,
@@ -823,16 +821,12 @@ app.post("/dw-rh", async (req, res) => {
       TIPMOT                  AS tipo_funcionario,
       SEXO                    AS sexo
     FROM RODMOT WITH (NOLOCK)
-    WHERE (@situacao IS NULL OR SITUAC = @situacao)
     OPTION (RECOMPILE)
   `;
 
   try {
-    const pool = await getPool();
-    const request = pool.request();
-    request.input("situacao", sql.NVarChar(10), situacao || null);
-
-    const result = await request.query(query);
+    const pool   = await getPool();
+    const result = await pool.request().query(query);
     return res.json({ data: result.recordset });
   } catch (err) {
     console.error("[dw-rh] Erro:", err.message);
