@@ -759,6 +759,13 @@ export default function ContasAPagar() {
                     </td>
                   </tr>
                 ))}
+                {paginados.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-[12px] text-slate-600">
+                      Nenhum registro encontrado
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

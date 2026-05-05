@@ -162,12 +162,12 @@ export default function Indicadores() {
               </div>
 
               {/* Badge tempo real */}
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
               </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -186,9 +186,9 @@ export default function Indicadores() {
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
                 <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-[color,background-color,border-color,box-shadow,transform] ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25 hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:-translate-y-0.5"} disabled:cursor-not-allowed`}>
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3.5 text-[12px] font-semibold transition-[color,background-color,border-color,box-shadow,transform] ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.15)]" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:-translate-y-0.5"} disabled:cursor-not-allowed`}>
                   <RefreshCw className={`h-3 w-3 ${isFetchingDw ? "animate-spin" : ""}`} />
-                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+                  {isFetchingDw ? (<span className="flex items-center gap-1.5"><span className="inline">{loadingPhase}</span><span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span>) : ("Atualizar")}
                 </button>
               </div>
               <HomeButton />
@@ -213,12 +213,12 @@ export default function Indicadores() {
 
               {/* Linha 2: badge tempo real */}
               <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
+                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                   </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-cyan-300">Tempo real</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
                 </div>
               </div>
 
@@ -242,9 +242,9 @@ export default function Indicadores() {
 
               {/* Linha 5: botão atualizar */}
               <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-cyan-400/40 bg-cyan-500/20 text-cyan-200 shadow-[0_0_16px_rgba(34,211,238,0.15)]" : "border-cyan-400/35 bg-cyan-500/15 text-cyan-200 hover:border-cyan-300/50 hover:bg-cyan-400/25"} disabled:cursor-not-allowed`}>
+                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.15)]" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25"} disabled:cursor-not-allowed`}>
                 <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>Atualizando…</span><span className="inline-flex items-center gap-1 rounded-full bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold text-cyan-200">{progress}%</span></span>) : ("Atualizar")}
+                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>Atualizando…</span><span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span>) : ("Atualizar")}
               </button>
             </div>
 

@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 import { Construction } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 
@@ -35,24 +36,42 @@ export default function EmDesenvolvimento() {
           className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
         >
-          {/* Navbar */}
-          <div className="hidden sm:flex items-center gap-2 md:gap-3 p-2 sm:p-3 lg:p-4 py-3">
-            <div className="flex items-center gap-3">
-              <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-              <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">{label}</span>
+          <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
+
+            {/* Navbar desktop */}
+            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
+              <div className="flex items-center gap-3">
+                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
+                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">{label}</span>
+                </div>
+              </div>
+              <div className="flex-1" />
+              <HomeButton />
+            </div>
+
+            {/* Navbar mobile */}
+            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">{label}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <HomeButton />
+                <MobileNav />
               </div>
             </div>
-            <div className="flex-1" />
-            <HomeButton />
-          </div>
 
-          <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+            <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-          {/* Conteúdo */}
-          <div className="flex flex-1 items-center justify-center p-8">
+            {/* Conteúdo */}
+            <div className="flex flex-1 items-center justify-center p-8">
             <div className="flex flex-col items-center gap-6 text-center max-w-md">
 
               {/* Ícone animado */}
@@ -90,7 +109,8 @@ export default function EmDesenvolvimento() {
                 Voltar ao Workspace
               </button>
             </div>
-          </div>
+            </div> {/* flex-1 center */}
+          </div> {/* p-2 wrapper */}
 
         </section>
       </div>

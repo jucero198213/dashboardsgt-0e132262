@@ -912,7 +912,7 @@ export default function Frota() {
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
                       Top 10 · Custo de Manutenção
                     </span>
                   </div>
@@ -926,7 +926,7 @@ export default function Frota() {
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
                       Distribuição por Marca
                     </span>
                   </div>
@@ -943,7 +943,7 @@ export default function Frota() {
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
                       Custo de Manutenção · Mensal
                     </span>
                   </div>
@@ -957,7 +957,7 @@ export default function Frota() {
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
                       Custo Médio · Faixa de Idade
                     </span>
                   </div>
