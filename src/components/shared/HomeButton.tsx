@@ -12,6 +12,9 @@ import {
   LineChart,
   Car,
   ShoppingCart,
+  Users,
+  Map,
+  Fuel,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -109,6 +112,30 @@ export function HomeButton() {
       icon: ShoppingCart,
       color: "text-indigo-300",
       bg: "bg-indigo-400/10 border-indigo-400/25",
+      show: true,
+    },
+    {
+      to: "/rh",
+      label: "RH",
+      icon: Users,
+      color: "text-pink-300",
+      bg: "bg-pink-400/10 border-pink-400/25",
+      show: true,
+    },
+    {
+      to: "/operacional",
+      label: "Operacional",
+      icon: Map,
+      color: "text-sky-300",
+      bg: "bg-sky-400/10 border-sky-400/25",
+      show: true,
+    },
+    {
+      to: "/abastecimento",
+      label: "Abastecimento",
+      icon: Fuel,
+      color: "text-lime-300",
+      bg: "bg-lime-400/10 border-lime-400/25",
       show: true,
     },
   ];
