@@ -422,44 +422,11 @@ export default function Faturamento() {
 
             </div>
 
-            {/* Top 5 + Tabela lado a lado */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 auto-rows-fr items-stretch xl:min-h-0">
-
-              {/* Top 5 */}
-              <AnimatedCard delay={180} className="h-full">
-                <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full min-h-[260px] xl:min-h-0">
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/40 to-transparent" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
-                  {!isProcessed ? (
-                    <div className="flex flex-col gap-2">{[...Array(5)].map((_,i) => <Skel key={i} h="h-6" />)}</div>
-                  ) : top5.length === 0 ? (
-                    <p className="text-[12px] text-slate-500 my-auto">Sem dados no período</p>
-                  ) : (
-                    <div className="flex flex-col gap-2.5 flex-1 justify-around">
-                      {top5.map((r, i) => (
-                        <div key={r.descri} className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold shrink-0 w-4 text-right" style={{ color: COLORS[i] }}>{i+1}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-0.5">
-                              <span className="text-[11px] font-semibold truncate dark:text-slate-200 text-slate-700">{r.descri}</span>
-                              <span className="text-[10px] font-bold shrink-0 dark:text-slate-300 text-slate-600">{fmtK(r.total)}</span>
-                            </div>
-                            <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(r.total/maxTotal)*100}%`, background: COLORS[i] }} />
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold shrink-0 w-10 text-right" style={{ color: COLORS[i] }}>{r.pct.toFixed(1)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-
-              </AnimatedCard>
+            {/* Tabela completa */}
+            <div className="grid grid-cols-1 gap-3">
 
               {/* Tabela */}
-              <AnimatedCard delay={220} className="flex flex-col h-full min-h-0">
+              <AnimatedCard delay={180} className="flex flex-col h-full min-h-0">
               <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full min-h-[260px] xl:min-h-0">
                 <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
