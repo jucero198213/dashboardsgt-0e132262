@@ -637,19 +637,19 @@ export default function Rh() {
                 const t = TC[tone];
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
                       <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
-                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
-                          <p className={`text-[10px] font-medium mt-1.5 ${t.sub}`}>{sub}</p>
-                        </div>
-                        <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-4 h-4 ${t.icon}`} />
-                        </div>
-                      </div>
                       <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                      <div className="relative flex h-full flex-col">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
+                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
+                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
+                          </div>
+                        </div>
+                        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
+                        <p className={`mt-1.5 text-[10px] font-medium ${t.sub}`}>{sub}</p>
+                      </div>
                     </div>
                   </AnimatedCard>
                 );
@@ -666,7 +666,7 @@ export default function Rh() {
             </div>
 
             {/* Row 1: Função | Categoria CNH | Tipo+Sexo */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 items-start">
 
               {/* Por Função */}
               <AnimatedCard delay={300}>
@@ -766,7 +766,7 @@ export default function Rh() {
             </div>
 
             {/* Row 2: Tempo de Casa | Alertas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
 
               {/* Tempo de Casa */}
               <AnimatedCard delay={390}>
@@ -838,19 +838,19 @@ export default function Rh() {
                 const t = TC[tone];
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
                       <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
-                          <p className={`text-[18px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
-                          <p className={`text-[10px] font-medium mt-1.5 ${t.sub}`}>{sub}</p>
-                        </div>
-                        <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-4 h-4 ${t.icon}`} />
-                        </div>
-                      </div>
                       <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                      <div className="relative flex h-full flex-col">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
+                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
+                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
+                          </div>
+                        </div>
+                        <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""}`}>{value}</p>
+                        <p className={`mt-1.5 text-[10px] font-medium ${t.sub}`}>{sub}</p>
+                      </div>
                     </div>
                   </AnimatedCard>
                 );
@@ -858,11 +858,11 @@ export default function Rh() {
             </div>
 
             {/* Evolução Mensal + Motivo Demissão */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:h-[220px]">
 
               {/* Evolução Mensal — 2 cols */}
-              <AnimatedCard delay={540} className="lg:col-span-2">
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              <AnimatedCard delay={540} className="lg:col-span-2 h-full">
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] lg:h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-emerald-400" />
@@ -891,8 +891,8 @@ export default function Rh() {
               </AnimatedCard>
 
               {/* Motivo Demissão */}
-              <AnimatedCard delay={560}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              <AnimatedCard delay={560} className="h-full">
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] lg:h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <FileText className="w-3.5 h-3.5 text-rose-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Motivo de Demissão</span>
