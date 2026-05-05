@@ -775,12 +775,12 @@ export default function Frota() {
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
               </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -973,7 +973,7 @@ export default function Frota() {
               numero={2}
               titulo="Insights por IA"
               subtitulo="Análise inteligente da frota — recomendações acionáveis geradas por IA"
-              color="violet"
+              color="amber"
             />
             <InsightsSection
               setor="frota"
@@ -995,7 +995,7 @@ export default function Frota() {
               numero={3}
               titulo="Detalhamento"
               subtitulo="Veículos e ordens que compõem os dados do período"
-              color="blue"
+              color="violet"
             />
 
             {/* ════════ FILTROS DA TABELA ════════ */}
@@ -1049,7 +1049,7 @@ export default function Frota() {
             {/* ════════ TABELA ════════ */}
             <div className="flex-1 min-h-[400px] overflow-auto rounded-lg border border-[var(--sgt-border-subtle)]">
               <table className="w-full text-[12px]">
-                <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-bg-base)" }}>
+                <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
                   <tr>
                     {COLS.map(col => (
                       <th

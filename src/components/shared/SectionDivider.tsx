@@ -6,7 +6,7 @@ interface SectionDividerProps {
   titulo: string;
   subtitulo?: string;
   icon?: React.ElementType;
-  color?: "violet" | "blue";
+  color?: "violet" | "blue" | "amber" | "cyan" | "emerald";
 }
 
 const COLOR_MAP = {
@@ -24,6 +24,27 @@ const COLOR_MAP = {
     line: "from-transparent via-blue-500/30 to-transparent",
     badge: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   },
+  amber: {
+    border: "border-amber-500/20",
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    line: "from-transparent via-amber-500/30 to-transparent",
+    badge: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+  },
+  cyan: {
+    border: "border-cyan-500/20",
+    bg: "bg-cyan-500/10",
+    text: "text-cyan-400",
+    line: "from-transparent via-cyan-500/30 to-transparent",
+    badge: "bg-cyan-500/10 border-cyan-500/20 text-cyan-400",
+  },
+  emerald: {
+    border: "border-emerald-500/20",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-400",
+    line: "from-transparent via-emerald-500/30 to-transparent",
+    badge: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+  },
 };
 
 export function SectionDivider({
@@ -31,7 +52,7 @@ export function SectionDivider({
   titulo,
   subtitulo,
   icon: Icon,
-  color = "violet",
+  color = "amber",
 }: SectionDividerProps) {
   const c = COLOR_MAP[color];
 

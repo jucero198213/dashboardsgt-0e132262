@@ -381,7 +381,7 @@ export default function ContasAReceber() {
         <div className="fixed inset-x-0 top-0 z-50">
           <div className="h-[3px] w-full overflow-hidden bg-transparent">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-400 shadow-[0_0_12px_rgba(16,185,129,0.6)] transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -393,7 +393,7 @@ export default function ContasAReceber() {
           className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
           style={{
             background: "var(--sgt-bg-section)",
-            border: "1px solid rgba(148, 163, 184, 0.08)",
+            borderColor: "var(--sgt-border-subtle)",
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
@@ -413,12 +413,12 @@ export default function ContasAReceber() {
             </div>
           </div>
 
-          <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+          <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
           </div>
 
           <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
@@ -497,7 +497,7 @@ export default function ContasAReceber() {
           numero={2}
           titulo="Insights por IA"
           subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-          color="violet"
+          color="amber"
         />
         <InsightsSection
           setor="contas_a_receber"
@@ -638,7 +638,7 @@ export default function ContasAReceber() {
           numero={3}
           titulo="Detalhamento"
           subtitulo="Documentos e títulos que compõem os dados do período"
-          color="blue"
+          color="violet"
         />
 
         {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
@@ -703,32 +703,32 @@ export default function ContasAReceber() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[var(--sgt-border-subtle)]">
-                  <th className="px-4 py-3 text-left">
+                <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
+                  <th className="px-3 py-2 text-left">
                     <button onClick={() => toggleSort("documento")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Documento
                       {sortCol === "documento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left">
+                  <th className="px-3 py-2 text-left">
                     <button onClick={() => toggleSort("cliente")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Cliente
                       {sortCol === "cliente" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left">
+                  <th className="px-3 py-2 text-left">
                     <button onClick={() => toggleSort("vencimento")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Vencimento
                       {sortCol === "vencimento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-right">
+                  <th className="px-3 py-2 text-right">
                     <button onClick={() => toggleSort("valor")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Valor
                       {sortCol === "valor" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-center">
+                  <th className="px-3 py-2 text-center">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Status</span>
                   </th>
                 </tr>
@@ -740,7 +740,7 @@ export default function ContasAReceber() {
                     <td className="px-4 py-3 text-[13px] text-slate-300">{conta.cliente}</td>
                     <td className="px-4 py-3 text-[13px] text-slate-400">{fmtData(conta.vencimento)}</td>
                     <td className="px-4 py-3 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-3 py-2 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
                         (conta.status as string) === "Recebido" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
                         conta.status === "Vencido" ? "bg-rose-500/10 text-rose-300 border border-rose-400/20" :
@@ -766,21 +766,30 @@ export default function ContasAReceber() {
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
-                
-                <div className="flex items-center gap-1 px-3 text-[12px] text-slate-300">
-                  <span className="font-semibold text-white">{page}</span>
-                  <span className="text-slate-500">/</span>
-                  <span>{totalPaginas}</span>
-                </div>
-
+                {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
+                  let p: number;
+                  if (totalPaginas <= 5) p = i + 1;
+                  else if (page <= 3) p = i + 1;
+                  else if (page >= totalPaginas - 2) p = totalPaginas - 4 + i;
+                  else p = page - 2 + i;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${page === p ? "border border-amber-400/40 bg-amber-500/[0.15] text-amber-300" : "border border-white/[0.06] text-slate-500 hover:border-amber-400/20 hover:text-amber-300"}`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
                 <button
                   onClick={() => setPage(Math.min(totalPaginas, page + 1))}
                   disabled={page === totalPaginas}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>

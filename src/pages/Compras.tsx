@@ -347,7 +347,7 @@ export default function Compras() {
         <div className="fixed inset-x-0 top-0 z-50">
           <div className="h-[3px] w-full overflow-hidden bg-transparent">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-violet-400 shadow-[0_0_12px_rgba(99,102,241,0.6)] transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -359,7 +359,7 @@ export default function Compras() {
           className="relative flex-1 min-h-0 flex flex-col border rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
           style={{
             background: "var(--sgt-bg-section)",
-            border: "1px solid rgba(148, 163, 184, 0.08)",
+            borderColor: "var(--sgt-border-subtle)",
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
@@ -379,12 +379,12 @@ export default function Compras() {
               </div>
             </div>
 
-            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-indigo-400/20 bg-indigo-500/[0.08] px-3">
+            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-300">Tempo real</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
             </div>
 
             <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
@@ -645,7 +645,7 @@ export default function Compras() {
             numero={2}
             titulo="Insights por IA"
             subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-            color="violet"
+            color="amber"
           />
           <InsightsSection
             setor="compras"
@@ -659,7 +659,7 @@ export default function Compras() {
             numero={3}
             titulo="Detalhamento"
             subtitulo="Documentos e registros que compõem os dados do período"
-            color="blue"
+            color="violet"
           />
 
           {/* ════════ TABELA ════════ */}
@@ -672,47 +672,47 @@ export default function Compras() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[var(--sgt-border-subtle)]">
-                      <th className="px-4 py-3 text-left">
+                    <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
+                      <th className="px-3 py-2 text-left">
                         <button onClick={() => toggleSort("data_compra")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Data
                           {sortCol === "data_compra" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-3 py-2 text-left">
                         <button onClick={() => toggleSort("nf")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           NF
                           {sortCol === "nf" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-3 py-2 text-left">
                         <button onClick={() => toggleSort("fornecedor")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Fornecedor
                           {sortCol === "fornecedor" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-3 py-2 text-left">
                         <button onClick={() => toggleSort("produto")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Produto
                           {sortCol === "produto" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-3 py-2 text-left">
                         <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Grupo</span>
                       </th>
-                      <th className="px-4 py-3 text-right">
+                      <th className="px-3 py-2 text-right">
                         <button onClick={() => toggleSort("quantidade")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Qtd
                           {sortCol === "quantidade" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-right">
+                      <th className="px-3 py-2 text-right">
                         <button onClick={() => toggleSort("valor_un")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Vlr Unit
                           {sortCol === "valor_un" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                         </button>
                       </th>
-                      <th className="px-4 py-3 text-right">
+                      <th className="px-3 py-2 text-right">
                         <button onClick={() => toggleSort("total")} className="flex items-center gap-1 ml-auto text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                           Total
                           {sortCol === "total" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
@@ -750,21 +750,30 @@ export default function Compras() {
                     <button
                       onClick={() => setPage(Math.max(1, page - 1))}
                       disabled={page === 1}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <ChevronLeft className="h-3.5 w-3.5" />
                     </button>
-                    
-                    <div className="flex items-center gap-1 px-3 text-[12px] text-slate-300">
-                      <span className="font-semibold text-white">{page}</span>
-                      <span className="text-slate-500">/</span>
-                      <span>{totalPaginas}</span>
-                    </div>
-
+                    {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
+                      let p: number;
+                      if (totalPaginas <= 5) p = i + 1;
+                      else if (page <= 3) p = i + 1;
+                      else if (page >= totalPaginas - 2) p = totalPaginas - 4 + i;
+                      else p = page - 2 + i;
+                      return (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${page === p ? "border border-amber-400/40 bg-amber-500/[0.15] text-amber-300" : "border border-white/[0.06] text-slate-500 hover:border-amber-400/20 hover:text-amber-300"}`}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
                     <button
                       onClick={() => setPage(Math.min(totalPaginas, page + 1))}
                       disabled={page === totalPaginas}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 transition-all hover:border-[var(--sgt-border-medium)] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <ChevronRight className="h-3.5 w-3.5" />
                     </button>

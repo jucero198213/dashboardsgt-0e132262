@@ -129,7 +129,7 @@ export default function Faturamento() {
           </div>
 
           {/* ── NAVBAR DESKTOP ── */}
-          <div className="hidden sm:flex items-center gap-2 md:gap-3 p-3 lg:p-4 py-3">
+          <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
             <div className="flex shrink-0 items-center gap-3">
               <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
               <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
@@ -169,7 +169,7 @@ export default function Faturamento() {
           </div>
 
           {/* ── NAVBAR MOBILE ── */}
-          <div className="flex sm:hidden flex-col gap-2 p-3 py-2">
+          <div className="flex sm:hidden flex-col gap-2 py-1">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
@@ -296,7 +296,7 @@ export default function Faturamento() {
               numero={2}
               titulo="Insights por IA"
               subtitulo="Análise inteligente dos dados do período — recomendações acionáveis geradas por IA"
-              color="violet"
+              color="amber"
             />
             <InsightsSection
               setor="faturamento"
@@ -435,7 +435,7 @@ export default function Faturamento() {
               numero={3}
               titulo="Detalhamento"
               subtitulo="Documentos e registros que compõem os dados do período"
-              color="blue"
+              color="violet"
             />
 
             {/* Top 5 + Tabela lado a lado */}

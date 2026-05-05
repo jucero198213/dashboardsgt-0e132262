@@ -11,6 +11,7 @@ import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { SectionDivider } from "@/components/shared/SectionDivider";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 
 interface Financiamento {
   "N CONTRATO": string | number;
@@ -162,12 +163,12 @@ export default function FinanciamentoFrota() {
               </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
               </div>
 
               <div className="flex-1" />
@@ -184,6 +185,22 @@ export default function FinanciamentoFrota() {
               )}
 
               <HomeButton />
+            </div>
+
+            {/* Mobile nav */}
+            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fin. Frota</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <HomeButton />
+                <MobileNav />
+              </div>
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -259,7 +276,7 @@ export default function FinanciamentoFrota() {
                   numero={2}
                   titulo="Insights por IA"
                   subtitulo="Análise inteligente dos financiamentos — recomendações acionáveis geradas por IA"
-                  color="violet"
+                  color="amber"
                 />
                 <InsightsSection
                   setor="financiamento_frota"
@@ -278,7 +295,7 @@ export default function FinanciamentoFrota() {
                   numero={3}
                   titulo="Detalhamento"
                   subtitulo="Contratos de financiamento e parcelas pendentes"
-                  color="blue"
+                  color="violet"
                 />
 
                 {/* Gráfico por banco + filtros + tabela */}

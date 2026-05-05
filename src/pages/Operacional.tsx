@@ -535,7 +535,10 @@ export default function Operacional() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white truncate">Operacional</span>
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Operacional</span>
+                </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
