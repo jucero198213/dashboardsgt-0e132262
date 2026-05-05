@@ -15,6 +15,7 @@ import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -173,27 +174,33 @@ export default function Rh() {
 
   // ── Normalização enriquecida ────────────────────────────────────────────────
   const colaboradores = useMemo<Colaborador[]>(() => {
-    return dados.map(d => ({
-      codmot:        String(d.codmot ?? ""),
-      nome:          d.motorista ?? "—",
-      funcao:        d.funcao,
-      tipoFunc:      d.tipo_funcionario,
-      situacao:      d.situacao,
-      sexo:          d.sexo,
-      codFilial:     d.codigo_filial ? String(d.codigo_filial) : null,
-      datAdm:        d.data_admissao,
-      datDem:        d.data_demissao,
-      motivoDem:     d.motivo_demissao,
-      catCnh:        d.categoria_habilitacao,
-      validadeCnh:   d.validade_habilitacao,
-      ufCnh:         d.uf_habilitacao,
-      numeroCpf:     d.numero_cpf ? String(d.numero_cpf) : null,
-      temCpf:        !!d.numero_cpf,
-      temCnh:        !!d.habilitacao,
-      anosEmpresa:   d.situacao === "ATIVO" ? calcAnos(d.data_admissao) : null,
-      diasCnhVencer: diasAteCnhVencer(d.validade_habilitacao),
-      ativo:         d.situacao === "ATIVO",
-    }));
+    const n = (v: string | null | undefined) => (v ?? "").trim() || null;
+    const ns = (v: string | null | undefined) => (v ?? "").trim();
+    return dados.map(d => {
+      const sit = ns(d.situacao).toUpperCase();
+      const isAtivo = sit === "ATIVO";
+      return {
+        codmot:        String(d.codmot ?? "").trim(),
+        nome:          ns(d.motorista) || "—",
+        funcao:        n(d.funcao),
+        tipoFunc:      n(d.tipo_funcionario),
+        situacao:      sit || null,
+        sexo:          n(d.sexo),
+        codFilial:     d.codigo_filial ? String(d.codigo_filial).trim() : null,
+        datAdm:        d.data_admissao,
+        datDem:        d.data_demissao,
+        motivoDem:     n(d.motivo_demissao),
+        catCnh:        n(d.categoria_habilitacao),
+        validadeCnh:   d.validade_habilitacao,
+        ufCnh:         n(d.uf_habilitacao),
+        numeroCpf:     d.numero_cpf ? String(d.numero_cpf).trim() : null,
+        temCpf:        !!(d.numero_cpf && String(d.numero_cpf).trim()),
+        temCnh:        !!(d.habilitacao && String(d.habilitacao).trim()),
+        anosEmpresa:   isAtivo ? calcAnos(d.data_admissao) : null,
+        diasCnhVencer: diasAteCnhVencer(d.validade_habilitacao),
+        ativo:         isAtivo,
+      };
+    });
   }, [dados]);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
@@ -507,6 +514,8 @@ export default function Rh() {
               </div>
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               </div>
               <HomeButton />
