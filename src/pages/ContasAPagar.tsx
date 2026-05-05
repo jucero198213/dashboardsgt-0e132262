@@ -504,6 +504,7 @@ export default function ContasAPagar() {
             concentracaoTop3Fornecedores: Math.round(insightsData.concentracao),
           }}
           periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+          autoGenerate={true}
         />
         {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
         <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

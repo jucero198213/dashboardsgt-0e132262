@@ -642,7 +642,8 @@ export default function Compras() {
             setor="compras"
             dados={dadosParaIA}
             periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-          />
+            autoGenerate={true}
+        />
 
           {/* ════════ TABELA ════════ */}
           {isLoading ? (

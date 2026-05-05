@@ -21,6 +21,7 @@ import {
 import { useCooldown } from "@/hooks/useCooldown";
 import { fetchOperacional, type OperacionalRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { InsightsSection } from "@/components/shared/InsightsSection";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -921,6 +922,26 @@ export default function Operacional() {
                 </div>
               </AnimatedCard>
             )}
+
+            {/* ════════════════════════════════════════════════════════
+                INSIGHTS POR IA
+            ════════════════════════════════════════════════════════ */}
+            <InsightsSection
+              setor="operacional"
+              dados={{
+                viagensEmAndamento: kpis.emAndamento,
+                viagensEmRota: kpis.emRota,
+                emManutencao: kpis.emManutencao,
+                comAtraso: kpis.comAtraso,
+                percMedioCompleto: Math.round(kpis.avgPerc),
+                atrasados: alertas.atrasados,
+                prevUltrapassada: alertas.prevUltrapassada,
+                itensDivergentes: alertas.itensDiverg,
+                semGps: alertas.semGps,
+                totalViagens: filtrados.length,
+              }}
+              autoGenerate={true}
+            />
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 3 — DETALHAMENTO DE VIAGENS

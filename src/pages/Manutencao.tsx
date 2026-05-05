@@ -801,7 +801,8 @@ export default function Manutencao() {
                 top5Veiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: (v as any).codvei ?? (v as any).veiculo, custo: Math.round(v.custo), ordens: (v as any).qtd ?? 0 })),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-            />
+              autoGenerate={true}
+        />
             {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
             <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               

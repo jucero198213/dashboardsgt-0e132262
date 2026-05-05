@@ -23,6 +23,7 @@ import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
 import { fetchRh, type RhRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { InsightsSection } from "@/components/shared/InsightsSection";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -954,6 +955,27 @@ export default function Rh() {
                 )}
               </div>
             </AnimatedCard>
+
+            {/* ════════════════════════════════════════════════════════
+                INSIGHTS POR IA
+            ════════════════════════════════════════════════════════ */}
+            <InsightsSection
+              setor="rh"
+              dados={{
+                colaboradoresAtivos: kpis.ativos,
+                admissoesNoPeriodo: kpis.admissoes,
+                demissoesNoPeriodo: kpis.demissoes,
+                taxaTurnover: Math.round(kpis.turnover * 10) / 10,
+                mediaTempoCasa: Math.round(kpis.mediaAnos * 10) / 10,
+                cnhVencendo30d: kpis.cnh30,
+                cnhVencidas: alertas.cnhVencida,
+                semCpf: alertas.semCpf,
+                saldoLiquido: kpisTurnover.saldo,
+                topMotivoDemissao: kpisTurnover.topMotivo,
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+              autoGenerate={true}
+            />
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 4 — DETALHAMENTO

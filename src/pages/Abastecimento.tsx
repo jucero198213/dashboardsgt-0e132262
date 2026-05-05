@@ -25,6 +25,7 @@ import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
 import { fetchAbastecimento, type AbastecimentoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { InsightsSection } from "@/components/shared/InsightsSection";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -834,6 +835,27 @@ export default function Abastecimento() {
                 </div>
               </AnimatedCard>
             )}
+
+            {/* ════════════════════════════════════════════════════════════════
+                INSIGHTS POR IA
+            ════════════════════════════════════════════════════════════════ */}
+            <InsightsSection
+              setor="abastecimento"
+              dados={{
+                custoTotal: Math.round(kpis.totalCusto),
+                volumeTotalLitros: Math.round(kpis.totalLitros),
+                qtdAbastecimentos: kpis.qtdAbast,
+                mediaConsumoKmL: Math.round((kpis.mediaConsumo ?? 0) * 10) / 10,
+                mediaFabricaKmL: Math.round((kpis.mediaFabrica ?? 0) * 10) / 10,
+                deltaConsumo: kpis.deltaMedia !== null ? Math.round(kpis.deltaMedia * 10) / 10 : null,
+                kmRodados: Math.round(kpis.totalKm),
+                precoMedioLitro: Math.round(kpis.precoMedio * 100) / 100,
+                topVeiculoCusto: rankingVeiculo[0]?.placa ?? null,
+                topMotoristaCusto: rankingMotorista[0]?.motorista ?? null,
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+              autoGenerate={true}
+            />
 
             {/* ════════════════════════════════════════════════════════════════
                 SEÇÃO 2 — DETALHAMENTO

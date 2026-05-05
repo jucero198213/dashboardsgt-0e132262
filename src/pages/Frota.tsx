@@ -979,7 +979,8 @@ export default function Frota() {
                 top5MaioresGastos: top10Custo.slice(0, 5).map(v => ({ nome: v.nome, custo: Math.round(v.custo), ordens: v.ordens })),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-            />
+              autoGenerate={true}
+        />
 
             {/* ════════ FILTROS DA TABELA ════════ */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">

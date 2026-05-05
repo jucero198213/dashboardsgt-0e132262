@@ -279,7 +279,8 @@ export default function FinanciamentoFrota() {
                     qtdBancos: bancos.length - 1,
                   }}
                   periodo="Planilha carregada"
-                />
+                  autoGenerate={true}
+        />
 
                 {/* Gráfico por banco + filtros + tabela */}
                 <div className="flex flex-1 min-h-0 gap-3">
