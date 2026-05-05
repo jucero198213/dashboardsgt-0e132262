@@ -169,7 +169,7 @@ export default function Rh() {
     }
   }, []);
 
-  useEffect(() => { carregarDados(); }, []);
+  useEffect(() => { if (cooldown.canFetch) carregarDados(); }, [cooldown.canFetch]);
 
   // ── Normalização enriquecida ────────────────────────────────────────────────
   const colaboradores = useMemo<Colaborador[]>(() => {
