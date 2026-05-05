@@ -199,7 +199,7 @@ export default function Operacional() {
     }
   }, []);
 
-  useEffect(() => { carregarDados(); }, []);
+  useEffect(() => { if (cooldown.canFetch) carregarDados(); }, [cooldown.canFetch]);
 
   // ── Normalização enriquecida ────────────────────────────────────────────────
   const viagens = useMemo<Viagem[]>(() => {
