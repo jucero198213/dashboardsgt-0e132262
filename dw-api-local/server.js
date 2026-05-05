@@ -830,7 +830,7 @@ app.post("/dw-rh", async (req, res) => {
   try {
     const pool = await getPool();
     const request = pool.request();
-    request.input("situacao", situacao ?? null);
+    request.input("situacao", sql.NVarChar(10), situacao || null);
 
     const result = await request.query(query);
     return res.json({ data: result.recordset });
@@ -964,8 +964,8 @@ app.post("/dw-abastecimento", async (req, res) => {
   try {
     const pool = await getPool();
     const request = pool.request();
-    request.input("dataInicio", dataInicio ?? null);
-    request.input("dataFim",    dataFim    ?? null);
+    request.input("dataInicio", sql.Date, dataInicio ? new Date(dataInicio) : null);
+    request.input("dataFim",    sql.Date, dataFim    ? new Date(dataFim)    : null);
 
     const result = await request.query(query);
     return res.json({ data: result.recordset });
