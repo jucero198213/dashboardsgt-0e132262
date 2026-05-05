@@ -13,7 +13,6 @@ import type { ComponentType } from "react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
-import sgtLogo from "@/assets/sgt-logo.png";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   Tooltip, CartesianGrid, ReferenceLine,
@@ -132,9 +131,6 @@ function KpiCardPremium({ label, value, subtitle, Icon, tone }: {
         <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${t.sub}`}>
           {subtitle}
         </p>
-            </div> {/* inner gap wrapper */}
-          </div>
-        </section>
       </div>
     </div>
   );
@@ -276,9 +272,6 @@ function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; 
             <p className="mt-2.5 text-sm text-slate-500">{subtitle}</p>
           </div>
         </div>
-            </div> {/* inner gap wrapper */}
-          </div>
-        </section>
       </div>
     </div>
   );
@@ -397,86 +390,47 @@ export default function IndicadorDetalhe() {
   };
 
   if (!indicador) return (
-    <div className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2" style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}>
-      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(180,110,4,0.22),transparent_60%)]" />
-      <div className="relative flex flex-col flex-1 min-h-0 w-full">
-        <section className="relative flex-1 min-h-0 flex items-center justify-center border rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
-          style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}>
-          <div className="text-center space-y-3">
-            <p className="text-lg font-medium dark:text-slate-200 text-slate-700">Indicador não encontrado</p>
-            <button onClick={() => navigate("/indicadores")} className="inline-flex items-center gap-2 rounded-xl border border-amber-400/20 bg-amber-500/[0.08] px-4 py-2 text-sm text-amber-300 hover:bg-amber-400/12 transition-all">
-              <ArrowLeft className="h-3.5 w-3.5" /> Voltar aos indicadores
-            </button>
-          </div>
-        </section>
+    <div className="flex min-h-screen items-center justify-center sgt-bg-base sgt-text">
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(circle_at_50%_30%,rgba(59,130,246,0.18),transparent_60%)]" />
+      <div className="relative text-center space-y-3">
+        <p className="text-lg font-medium sgt-text">Indicador não encontrado</p>
+        <button onClick={() => navigate("/indicadores")} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 hover:bg-cyan-500/20 transition-all">
+          <ArrowLeft className="h-3.5 w-3.5" /> Voltar aos indicadores
+        </button>
       </div>
     </div>
   );
 
   return (
-    <div
-      className="flex flex-col min-h-[100dvh] transition-all duration-300 px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
-      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
-    >
-      {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(180,110,4,0.22),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 dark:opacity-100" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.72) 100%)" }} />
+    <div className="min-h-screen sgt-bg-base sgt-text">
 
-      <div className="relative flex flex-col flex-1 min-h-0 w-full">
-        <section
-          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
-          style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
-        >
-          {/* Progress bar */}
-          <div className="h-[3px] w-full shrink-0 overflow-hidden rounded-t-[24px] bg-transparent">
-            <div
-              className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_12px_rgba(245,158,11,0.5)] transition-all duration-500 ease-out"
-              style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }}
-            />
-          </div>
+      {/* ── Atmosfera ── */}
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_45%_at_50%_-10%,rgba(180,110,4,0.28),transparent_58%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(6,182,212,0.08),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background:"radial-gradient(ellipse 115% 115% at 50% 50%, transparent 12%, rgba(2,3,12,0.72) 100%)" }} />
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
+      {/* Progress bar — âmbar coerente com tema */}
+      {isFetchingDw && (
+        <div className="fixed inset-x-0 top-0 z-50 h-[2px] overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-cyan-400 shadow-[0_0_14px_rgba(251,191,36,0.55)] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+        </div>
+      )}
 
-            {/* Navbar desktop */}
-            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
-              <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
-                <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate max-w-[260px]">{indicador.nome}</span>
-                </div>
-              </div>
-              <nav className="flex items-center gap-1.5 text-[12px] text-slate-500">
-                <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200">Indicadores</button>
-                <ChevronRight className="h-3 w-3 opacity-40" />
-                <span className="text-slate-300 truncate max-w-[140px]">{indicador.nome}</span>
-              </nav>
-              <div className="flex-1" />
+      <div className="relative w-full px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
+
+          {/* ── Breadcrumb ── */}
+          <div className="flex items-center justify-between">
+            <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
+              <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200">Indicadores</button>
+              <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
+              <span className="truncate text-slate-300">{indicador.nome}</span>
+            </nav>
+            <div className="hidden sm:flex items-center gap-2">
               <HomeButton />
               <UserMenu />
             </div>
-
-            {/* Navbar mobile */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">{indicador.nome}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <HomeButton />
-                <MobileNav />
-              </div>
-            </div>
-
-            <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
-            <div className="flex flex-col gap-3 sm:gap-4">
+            <MobileNav />
+          </div>
 
           {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
           {indicador.nome === "Óleo Diesel" ? (
@@ -803,9 +757,8 @@ export default function IndicadorDetalhe() {
                 <p className="text-[11px] [color:var(--sgt-text-muted)]">{rowsFiltrados.length} documento(s)</p>
               </div>
             )}
-            </div> {/* inner gap wrapper */}
           </div>
-        </section>
+
       </div>
     </div>
   );
