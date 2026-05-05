@@ -153,11 +153,11 @@ export default function Compras() {
     const percRiscoUnico = totalProdutos > 0 ? (produtosUnicoFornecedor / totalProdutos) * 100 : 0;
 
     // 2. Lead time médio (diferença entre data pedido e data entrada)
-    const comprasComDatas = compras.filter(c => c.data_pedido && c.data_entrada);
+    const comprasComDatas = compras.filter(c => (c as any).data_pedido && (c as any).data_entrada);
     let leadTimeTotal = 0;
     comprasComDatas.forEach(c => {
-      const pedido = new Date(c.data_pedido!);
-      const entrada = new Date(c.data_entrada!);
+      const pedido = new Date((c as any).data_pedido!);
+      const entrada = new Date((c as any).data_entrada!);
       const diffDias = Math.floor((entrada.getTime() - pedido.getTime()) / (1000 * 60 * 60 * 24));
       if (diffDias >= 0) leadTimeTotal += diffDias;
     });
@@ -165,8 +165,8 @@ export default function Compras() {
 
     // 3. Pedidos emergenciais (assumindo pedidos com lead time < 3 dias)
     const emergenciais = comprasComDatas.filter(c => {
-      const pedido = new Date(c.data_pedido!);
-      const entrada = new Date(c.data_entrada!);
+      const pedido = new Date((c as any).data_pedido!);
+      const entrada = new Date((c as any).data_entrada!);
       const diffDias = Math.floor((entrada.getTime() - pedido.getTime()) / (1000 * 60 * 60 * 24));
       return diffDias >= 0 && diffDias < 3;
     });

@@ -262,7 +262,7 @@ export default function ContasAPagar() {
     // Positivo = paga após vencimento, Negativo = paga antes do vencimento
 
     // 2. Economia potencial com descontos antecipação (assumindo 2% desconto em 30% dos valores)
-    const totalAberto = contasPagar.filter(c => c.status === "Aberto").reduce((s, c) => s + c.valor, 0);
+    const totalAberto = contasPagar.filter(c => (c.status as string) === "Aberto").reduce((s, c) => s + c.valor, 0);
     const economiaPotencial = totalAberto * 0.30 * 0.02; // 30% dos valores com 2% desconto
 
     // 3. Títulos com problemas (duplicados ou sem documento fiscal)
@@ -503,8 +503,8 @@ export default function ContasAPagar() {
           dados={{
             totalAPagar: resumoPagar.valorAPagar,
             totalPago: resumoPagar.valorPago,
-            totalVencido: resumoPagar.valorVencido,
-            totalAberto: resumoPagar.valorAberto,
+            totalVencido: (resumoPagar as any).valorVencido ?? 0,
+            totalAberto: (resumoPagar as any).valorAberto ?? 0,
             qtdTitulos: contasPagar.length,
             dpo: insightsData.dpo,
             economiaPotencial: Math.round(insightsData.economiaPotencial),
