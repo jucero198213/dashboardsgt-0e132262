@@ -168,7 +168,7 @@ export default function Abastecimento() {
     }
   }, [dwFilter.dataInicio, dwFilter.dataFim]);
 
-  useEffect(() => { carregarDados(); }, []);
+  useEffect(() => { if (cooldown.canFetch) carregarDados(); }, [cooldown.canFetch]);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
