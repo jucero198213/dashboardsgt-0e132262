@@ -665,12 +665,12 @@ export default function Rh() {
               <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
             </div>
 
-            {/* Row 1: Função | Categoria CNH | Tipo+Sexo */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 items-start">
+            {/* Row 1: Função (esq) | CNH + Tipo+Sexo (dir em col) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
-              {/* Por Função */}
-              <AnimatedCard delay={300}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              {/* Por Função — coluna esquerda */}
+              <AnimatedCard delay={300} className="h-full">
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Hash className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Por Função / Cargo</span>
@@ -701,122 +701,134 @@ export default function Rh() {
                 </div>
               </AnimatedCard>
 
-              {/* Categoria CNH */}
-              <AnimatedCard delay={330}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <ShieldAlert className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Categoria de CNH</span>
-                  </div>
-                  {distCatCnh.length === 0
-                    ? <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
-                    : <div className="space-y-2">
-                        {distCatCnh.map(r => {
-                          const total = distCatCnh.reduce((s, x) => s + x.qtd, 0);
-                          return (
-                            <div key={r.cat} className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full shrink-0" style={{ background: r.fill }} />
-                              <span className="text-[10px] text-slate-300 flex-1">{r.cat}</span>
-                              <span className="text-[9px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : "—"}</span>
-                              <span className="text-[10px] font-bold w-8 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                  }
-                </div>
-              </AnimatedCard>
+              {/* Coluna direita: CNH + Tipo+Sexo empilhados */}
+              <div className="flex flex-col gap-2">
 
-              {/* Tipo + Sexo */}
-              <AnimatedCard delay={360}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tipo de Funcionário</span>
-                  </div>
-                  <div className="space-y-1.5 mb-3">
-                    {distTipo.map(r => {
-                      const total = distTipo.reduce((s, x) => s + x.qtd, 0);
-                      return (
-                        <div key={r.nome} className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.fill }} />
-                          <span className="text-[10px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                          <span className="text-[10px] font-bold" style={{ color: r.fill }}>{r.qtd} <span className="text-slate-500 font-normal">({total > 0 ? ((r.qtd / total) * 100).toFixed(0) : 0}%)</span></span>
+                {/* Categoria CNH */}
+                <AnimatedCard delay={330}>
+                  <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShieldAlert className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Categoria de CNH</span>
+                    </div>
+                    {distCatCnh.length === 0
+                      ? <div className="flex h-10 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
+                      : <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                          {distCatCnh.map(r => {
+                            const total = distCatCnh.reduce((s, x) => s + x.qtd, 0);
+                            return (
+                              <div key={r.cat} className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.fill }} />
+                                <span className="text-[10px] text-slate-300 flex-1">{r.cat}</span>
+                                <span className="text-[9px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : "—"}</span>
+                                <span className="text-[10px] font-bold w-6 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                    }
                   </div>
-                  <div className="border-t pt-2.5" style={{ borderColor: RAW.borderDefault }}>
-                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 block mb-2">Sexo</span>
+                </AnimatedCard>
+
+                {/* Tipo + Sexo */}
+                <AnimatedCard delay={360}>
+                  <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2.5">
+                          <Users className="w-3.5 h-3.5 text-violet-400" />
+                          <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tipo</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {distTipo.map(r => {
+                            const total = distTipo.reduce((s, x) => s + x.qtd, 0);
+                            return (
+                              <div key={r.nome} className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                                <span className="text-[10px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                                <span className="text-[10px] font-bold shrink-0" style={{ color: r.fill }}>{r.qtd}</span>
+                                <span className="text-[9px] text-slate-500 shrink-0">({total > 0 ? ((r.qtd / total) * 100).toFixed(0) : 0}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2.5">
+                          <Users className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Sexo</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {distSexo.map(r => {
+                            const total = distSexo.reduce((s, x) => s + x.qtd, 0);
+                            return (
+                              <div key={r.nome} className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                                <span className="text-[10px] text-slate-300 flex-1">{r.nome}</span>
+                                <span className="text-[10px] font-bold shrink-0" style={{ color: r.fill }}>{r.qtd}</span>
+                                <span className="text-[9px] text-slate-500 shrink-0">({total > 0 ? ((r.qtd / total) * 100).toFixed(0) : 0}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </AnimatedCard>
+
+                {/* Tempo de Casa */}
+                <AnimatedCard delay={390}>
+                  <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tempo de Casa — Faixas</span>
+                    </div>
                     <div className="space-y-1.5">
-                      {distSexo.map(r => {
-                        const total = distSexo.reduce((s, x) => s + x.qtd, 0);
+                      {distTempoCasa.map(r => {
+                        const max = Math.max(...distTempoCasa.map(x => x.qtd), 1);
                         return (
-                          <div key={r.nome} className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.fill }} />
-                            <span className="text-[10px] text-slate-300 flex-1">{r.nome}</span>
-                            <span className="text-[10px] font-bold" style={{ color: r.fill }}>{r.qtd} <span className="text-slate-500 font-normal">({total > 0 ? ((r.qtd / total) * 100).toFixed(0) : 0}%)</span></span>
+                          <div key={r.faixa} className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-400 w-[72px] shrink-0">{r.faixa}</span>
+                            <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill }} />
+                            </div>
+                            <span className="text-[10px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                </div>
-              </AnimatedCard>
+                </AnimatedCard>
+
+              </div>{/* fim coluna direita */}
             </div>
 
-            {/* Row 2: Tempo de Casa | Alertas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
-
-              {/* Tempo de Casa */}
-              <AnimatedCard delay={390}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tempo de Casa — Faixas (Ativos)</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {distTempoCasa.map(r => {
-                      const max = Math.max(...distTempoCasa.map(x => x.qtd), 1);
-                      return (
-                        <div key={r.faixa} className="flex items-center gap-2">
-                          <span className="text-[10px] text-slate-400 w-[80px] shrink-0">{r.faixa}</span>
-                          <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill }} />
-                          </div>
-                          <span className="text-[10px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+            {/* Alertas Operacionais — linha completa */}
+            <AnimatedCard delay={420}>
+              <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas Operacionais</span>
                 </div>
-              </AnimatedCard>
-
-              {/* Alertas CNH */}
-              <AnimatedCard delay={420}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas Operacionais</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {[
-                      { label: "CNH vencida",           count: alertas.cnhVencida, cls: "bg-rose-500/10 border-rose-500/20 text-rose-300", dotCls: "bg-rose-400", severity: true  },
-                      { label: "CNH vence em 30 dias",  count: alertas.cnh30,      cls: "bg-amber-500/10 border-amber-500/20 text-amber-300", dotCls: "bg-amber-400", severity: alertas.cnh30 > 0 },
-                      { label: "CNH vence em 60 dias",  count: alertas.cnh60,      cls: "bg-yellow-500/10 border-yellow-500/20 text-yellow-300", dotCls: "bg-yellow-400", severity: false },
-                      { label: "Sem CNH cadastrada",    count: alertas.semCnh,     cls: "bg-cyan-500/10 border-cyan-500/20 text-cyan-300", dotCls: "bg-cyan-400", severity: false },
-                      { label: "Sem CPF cadastrado",    count: alertas.semCpf,     cls: "bg-slate-500/10 border-slate-500/20 text-slate-300", dotCls: "bg-slate-400", severity: false },
-                    ].map(({ label, count, cls, dotCls, severity }) => (
-                      <div key={label} className={`flex items-center gap-2 rounded-[10px] border px-2.5 py-1.5 ${cls}`}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {[
+                    { label: "CNH vencida",          count: alertas.cnhVencida, cls: "bg-rose-500/10 border-rose-500/20",   dotCls: "bg-rose-400",   txtCls: "text-rose-300",   valCls: "text-rose-300",   severity: true  },
+                    { label: "CNH vence em 30 dias", count: alertas.cnh30,      cls: "bg-amber-500/10 border-amber-500/20", dotCls: "bg-amber-400",  txtCls: "text-amber-300",  valCls: "text-amber-300",  severity: alertas.cnh30 > 0 },
+                    { label: "CNH vence em 60 dias", count: alertas.cnh60,      cls: "bg-yellow-500/10 border-yellow-500/20", dotCls: "bg-yellow-400", txtCls: "text-yellow-300", valCls: "text-yellow-300", severity: false },
+                    { label: "Sem CNH cadastrada",   count: alertas.semCnh,     cls: "bg-cyan-500/10 border-cyan-500/20",   dotCls: "bg-cyan-400",   txtCls: "text-cyan-300",   valCls: "text-cyan-300",   severity: false },
+                    { label: "Sem CPF cadastrado",   count: alertas.semCpf,     cls: "bg-slate-500/10 border-slate-500/20", dotCls: "bg-slate-400",  txtCls: "text-slate-300",  valCls: "text-slate-300",  severity: false },
+                  ].map(({ label, count, cls, dotCls, txtCls, valCls, severity }) => (
+                    <div key={label} className={`flex flex-col gap-1 rounded-[12px] border px-3 py-2.5 ${cls}`}>
+                      <div className="flex items-center gap-1.5">
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotCls} ${severity && count > 0 ? "animate-pulse" : ""}`} />
-                        <span className="text-[10px] flex-1">{label}</span>
-                        <span className="text-[12px] font-black">{loading ? "—" : count}</span>
+                        <span className={`text-[9px] font-semibold uppercase tracking-[0.15em] ${txtCls} opacity-70`}>{label}</span>
                       </div>
-                    ))}
-                  </div>
+                      <span className={`text-[22px] font-black leading-none ${valCls}`}>{loading ? "—" : count}</span>
+                    </div>
+                  ))}
                 </div>
-              </AnimatedCard>
-            </div>
+              </div>
+            </AnimatedCard>
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 3 — TURNOVER
