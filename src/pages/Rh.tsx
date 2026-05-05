@@ -648,7 +648,7 @@ export default function Rh() {
                           </div>
                         </div>
                         <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
-                        <p className={`mt-1.5 text-[10px] font-medium ${t.sub}`}>{sub}</p>
+                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
                       </div>
                     </div>
                   </AnimatedCard>
@@ -861,7 +861,7 @@ export default function Rh() {
                           </div>
                         </div>
                         <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""}`}>{value}</p>
-                        <p className={`mt-1.5 text-[10px] font-medium ${t.sub}`}>{sub}</p>
+                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
                       </div>
                     </div>
                   </AnimatedCard>

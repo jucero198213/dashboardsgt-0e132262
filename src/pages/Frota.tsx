@@ -849,7 +849,7 @@ export default function Frota() {
                   glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
                   iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
                   iconTxt: "text-cyan-300",
-                  sub2: "text-cyan-500/80",
+                  sub2: "text-slate-500",
                 },
                 {
                   label: "Idade Média", value: isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
@@ -860,7 +860,7 @@ export default function Frota() {
                   glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
                   iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
                   iconTxt: "text-violet-300",
-                  sub2: "text-violet-500/80",
+                  sub2: "text-slate-500",
                 },
                 {
                   label: "Custo de Manutenção", value: isFetchingDw ? "—" : fmtK(kpis.custoTotal),
@@ -871,7 +871,7 @@ export default function Frota() {
                   glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
                   iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
                   iconTxt: "text-rose-300",
-                  sub2: "text-rose-500/80",
+                  sub2: "text-slate-500",
                 },
                 {
                   label: "Custo Médio / Veículo", value: isFetchingDw ? "—" : fmtK(kpis.custoMedio),
@@ -882,7 +882,7 @@ export default function Frota() {
                   glow: "hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",
                   iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
                   iconTxt: "text-amber-300",
-                  sub2: "text-amber-500/80",
+                  sub2: "text-slate-500",
                 },
               ].map((k, i) => (
                 <AnimatedCard key={k.label} delay={i * 60}>
@@ -898,7 +898,7 @@ export default function Frota() {
                         </div>
                       </div>
                       <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1rem,2vw,1.6rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
-                      <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] ${k.sub2}`}>{k.sub}</p>
+                      <p className={`mt-2 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
                     </div>
                   </div>
                 </AnimatedCard>

@@ -773,7 +773,7 @@ export default function Manutencao() {
                           <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>
                             {value}
                           </p>
-                          <p className={`text-[10px] font-medium mt-1.5 ${t.sub}`}>{sub}</p>
+                          <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
                         </div>
                         <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
                           <Icon className={`w-4 h-4 ${t.icon}`} />

@@ -213,7 +213,7 @@ export default function Faturamento() {
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(245,158,11,0.10), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-amber-400">Faturamento Total</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">Faturamento Total</span>
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/[0.08] border border-amber-400/[0.15]">
                       <TrendingUp className="h-3 w-3 text-amber-300" />
                     </div>
@@ -223,7 +223,7 @@ export default function Faturamento() {
                       {fmtBRL(totalFaturado)}
                     </p>
                   )}
-                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-amber-500/80 font-semibold">Receita consolidada</p>
+                  <p className="relative text-[10px] uppercase tracking-[0.15em] text-slate-500 font-medium">Receita consolidada</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative flex items-center justify-between">
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">{diasUteis} dias úteis no período</span>
@@ -240,7 +240,7 @@ export default function Faturamento() {
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-cyan-400">Média / Dia Útil</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">Média / Dia Útil</span>
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-400/[0.08] border border-cyan-400/[0.15]">
                       <ArrowUp className="h-3 w-3 text-cyan-300" />
                     </div>
@@ -250,7 +250,7 @@ export default function Faturamento() {
                       {mediaDiaUtil > 0 ? fmtK(mediaDiaUtil) : "—"}
                     </p>
                   )}
-                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-cyan-500/80 font-semibold">Por dia útil (sáb. incluso)</p>
+                  <p className="relative text-[10px] uppercase tracking-[0.15em] text-slate-500 font-medium">Por dia útil (sáb. incluso)</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative">
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
@@ -268,7 +268,7 @@ export default function Faturamento() {
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-emerald-400">Faturamento Projetado</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">Faturamento Projetado</span>
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-400/[0.08] border border-emerald-400/[0.15]">
                       <TrendingUp className="h-3 w-3 text-emerald-300" />
                     </div>
@@ -278,7 +278,7 @@ export default function Faturamento() {
                       {provisao > 0 ? fmtBRL(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
                     </p>
                   )}
-                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-emerald-500/80 font-semibold">Projeção até fim do mês</p>
+                  <p className="relative text-[10px] uppercase tracking-[0.15em] text-slate-500 font-medium">Projeção até fim do mês</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative">
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">

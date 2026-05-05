@@ -305,7 +305,7 @@ export default function ContasAReceber() {
       glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
       iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
       iconTxt: "text-cyan-300",
-      sub2: "text-cyan-500/80",
+      sub2: "text-slate-500",
     },
     {
       label: "Valor Recebido", value: fmtK(resumoReceber.valorRecebido),
@@ -316,7 +316,7 @@ export default function ContasAReceber() {
       glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
       iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
       iconTxt: "text-emerald-300",
-      sub2: "text-emerald-500/80",
+      sub2: "text-slate-500",
     },
     {
       label: "Saldo a Receber", value: fmtK(resumoReceber.saldoAReceber),
@@ -326,7 +326,7 @@ export default function ContasAReceber() {
       glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
       iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
       iconTxt: "text-amber-300",
-      sub2: "text-amber-500/80",
+      sub2: "text-slate-500",
     },
     {
       label: "Inadimplência", value: fmtK(totalInadimplente),
@@ -337,7 +337,7 @@ export default function ContasAReceber() {
       glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
       iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
       iconTxt: "text-rose-300",
-      sub2: "text-rose-500/80",
+      sub2: "text-slate-500",
     },
   ];
 
@@ -484,7 +484,7 @@ export default function ContasAReceber() {
                     </div>
                   </div>
                   <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
-                  <p className={`mt-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${k.sub2}`}>{k.sub}</p>
+                  <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
                 </div>
               </div>
             </AnimatedCard>

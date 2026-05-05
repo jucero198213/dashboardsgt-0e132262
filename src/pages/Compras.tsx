@@ -89,7 +89,7 @@ export default function Compras() {
         glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
         iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
         iconTxt: "text-cyan-300",
-        sub2: "text-cyan-500/80",
+        sub2: "text-slate-500",
       },
       {
         label: "Notas Fiscais", value: fmtNum(notas),
@@ -99,7 +99,7 @@ export default function Compras() {
         glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
         iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
         iconTxt: "text-emerald-300",
-        sub2: "text-emerald-500/80",
+        sub2: "text-slate-500",
       },
       {
         label: "Fornecedores", value: fmtNum(fornecedores),
@@ -109,7 +109,7 @@ export default function Compras() {
         glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
         iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
         iconTxt: "text-amber-300",
-        sub2: "text-amber-500/80",
+        sub2: "text-slate-500",
       },
       {
         label: "Produtos", value: fmtNum(produtos),
@@ -119,7 +119,7 @@ export default function Compras() {
         glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
         iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
         iconTxt: "text-violet-300",
-        sub2: "text-violet-500/80",
+        sub2: "text-slate-500",
       },
     ];
   }, [compras]);
@@ -475,13 +475,13 @@ export default function Compras() {
                     style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
                   <div className="relative flex h-full flex-col">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 leading-tight">{k.label}</p>
                       <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
                         <k.icon className="h-3.5 w-3.5" />
                       </div>
                     </div>
                     <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
-                    <p className={`mt-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${k.sub2}`}>{k.sub}</p>
+                    <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
                   </div>
                 </div>
               </AnimatedCard>
