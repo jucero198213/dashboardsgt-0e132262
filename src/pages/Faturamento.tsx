@@ -201,7 +201,7 @@ export default function Faturamento() {
           )}
 
           {/* ── CONTEÚDO ── */}
-          <div className="flex flex-col flex-1 min-h-0 gap-3 p-3 xl:p-4 overflow-auto xl:overflow-hidden xl:grid xl:grid-rows-[auto_minmax(0,1fr)_minmax(0,1.1fr)]">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
 
             {/* KPIs linha 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch">
@@ -210,7 +210,7 @@ export default function Faturamento() {
               <AnimatedCard delay={0}>
                 <div className="relative overflow-hidden rounded-[14px] border border-amber-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.10),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
+                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(245,158,11,0.10), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -237,7 +237,7 @@ export default function Faturamento() {
               <AnimatedCard delay={60}>
                 <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
+                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -265,7 +265,7 @@ export default function Faturamento() {
               <AnimatedCard delay={120}>
                 <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -444,7 +444,7 @@ export default function Faturamento() {
               {/* Top 5 */}
               <AnimatedCard delay={180} className="h-full">
                 <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full min-h-[260px] xl:min-h-0">
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/40 to-transparent" />
+                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/40 to-transparent" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Top 5 clientes</span>
                   {!isProcessed ? (
                     <div className="flex flex-col gap-2">{[...Array(5)].map((_,i) => <Skel key={i} h="h-6" />)}</div>
@@ -477,7 +477,7 @@ export default function Faturamento() {
               {/* Tabela */}
               <AnimatedCard delay={220} className="flex flex-col h-full min-h-0">
               <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full min-h-[260px] xl:min-h-0">
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/30 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/30 to-transparent" />
 
                 {/* Tabela header */}
                 <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
@@ -581,7 +581,7 @@ export default function Faturamento() {
                   {/* Gráfico 1 — Linha: Ano atual vs Ano anterior */}
                   <AnimatedCard delay={280} className="h-full">
                     <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px] xl:min-h-0">
-                      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                       <div className="flex items-center justify-between">
                         <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Faturamento Mensal — {anoAtual} vs {anoAnt}</span>
                         <div className="flex items-center gap-3">
@@ -636,7 +636,7 @@ export default function Faturamento() {
                   {/* Gráfico 2 — Barras: Evolução mensal */}
                   <AnimatedCard delay={340} className="h-full">
                     <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full min-h-[320px] xl:min-h-0">
-                      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/50 to-transparent" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>Evolução Mensal — {anoAtual}</span>
                       {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
                         <div className="flex flex-col gap-2 flex-1 justify-center py-4">

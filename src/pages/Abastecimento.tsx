@@ -421,7 +421,7 @@ export default function Abastecimento() {
             />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
 
             {/* ════════ NAVBAR DESKTOP ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
@@ -615,10 +615,10 @@ export default function Abastecimento() {
                 return (
                   <AnimatedCard key={label} delay={delay}>
                     <div
-                      className={`relative overflow-hidden rounded-[18px] border p-3.5 transition-all duration-300 hover:border-white/[0.11] ${t.border}`}
-                      style={{ background: RAW.surfacePrimary }}
+                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`}
+                      style={{ background: "var(--sgt-bg-card)" }}
                     >
-                      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
+                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
@@ -631,7 +631,7 @@ export default function Abastecimento() {
                           <Icon className={`w-4 h-4 ${t.icon}`} />
                         </div>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[18px]"
+                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]"
                         style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
                     </div>
                   </AnimatedCard>
@@ -644,7 +644,7 @@ export default function Abastecimento() {
 
               {/* Evolução de Custo Diário — 2 colunas */}
               <AnimatedCard delay={300} className="lg:col-span-2">
-                <div className="rounded-[18px] border p-3 h-[220px] flex flex-col" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
@@ -691,7 +691,7 @@ export default function Abastecimento() {
 
               {/* Distribuição por Combustível */}
               <AnimatedCard delay={320}>
-                <div className="rounded-[18px] border p-3 h-[220px] flex flex-col" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Layers className="w-3.5 h-3.5 text-amber-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Por Combustível</span>
@@ -730,7 +730,7 @@ export default function Abastecimento() {
 
               {/* Ranking Veículos */}
               <AnimatedCard delay={360}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Car className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Veículos por Custo</span>
@@ -767,7 +767,7 @@ export default function Abastecimento() {
 
               {/* Ranking Motoristas */}
               <AnimatedCard delay={400}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-violet-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Motoristas por Custo</span>
@@ -806,7 +806,7 @@ export default function Abastecimento() {
             {/* ── Gráfico: Comparativo Média Real vs Fábrica por Frota ── */}
             {comparativoFrota.length > 0 && (
               <AnimatedCard delay={440}>
-                <div className="rounded-[18px] border p-3 h-[220px] flex flex-col" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Gauge className="w-3.5 h-3.5 text-violet-400" />
@@ -846,7 +846,7 @@ export default function Abastecimento() {
 
             {/* ════════ TABELA ════════ */}
             <AnimatedCard delay={500}>
-              <div className="rounded-[18px] border" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+              <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
 
                 {/* Header tabela */}
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>

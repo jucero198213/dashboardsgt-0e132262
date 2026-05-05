@@ -368,7 +368,7 @@ export default function FinanciamentoFrota() {
                             {COLS.map(c => (
                               <th key={c.key}
                                 onClick={() => handleSort(c.key)}
-                                className="px-3 py-2.5 text-left font-bold uppercase tracking-[0.15em] text-slate-500 cursor-pointer hover:text-slate-300 transition-colors select-none whitespace-nowrap"
+                                className="px-3 py-2.5 text-left font-bold uppercase tracking-[0.2em] text-slate-500 cursor-pointer hover:text-slate-300 transition-colors select-none whitespace-nowrap"
                               >
                                 <div className="flex items-center gap-1">
                                   {c.label}

@@ -4,7 +4,7 @@ import {
   ChevronUp, ChevronDown, X, ChevronLeft, ChevronRight,
   Filter, AlertTriangle, FileText, Activity,
   UserCheck, UserMinus, UserPlus, Clock, ShieldAlert,
-  BarChart3, Hash, Calendar, Eye,
+  BarChart3, Hash, Calendar,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -19,9 +19,6 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
 import { fetchRh, type RhRow } from "@/lib/dwApi";
@@ -130,14 +127,6 @@ export default function Rh() {
   const [filtroCatCnh,    setFiltroCatCnh]    = useState("Todos");
   const [filtroTipo,      setFiltroTipo]      = useState("Todos");
   const [search,          setSearch]          = useState("");
-  // Filtro rápido Ativo/Inativo na tabela de detalhamento
-  const [tabelaSituacao,  setTabelaSituacao]  = useState<"Todos" | "A" | "I">("Todos");
-
-  // Modais popup
-  const [modalAdm,      setModalAdm]      = useState(false);
-  const [modalDem,      setModalDem]      = useState(false);
-  const [modalCnh30,    setModalCnh30]    = useState(false);
-  const [modalAlertas,  setModalAlertas]  = useState(false);
 
   // Tabela
   const [sortCol, setSortCol] = useState<keyof Colaborador>("datAdm");
@@ -425,46 +414,16 @@ export default function Rh() {
   }, [kpis, distMotivoDem]);
 
   // ── Tabela ─────────────────────────────────────────────────────────────────
-  // ── Dados dos modais ──────────────────────────────────────────────────────
-  const listaAdmissoes = useMemo(() =>
-    filtrados.filter(c => noPeríodo(c.datAdm))
-      .sort((a, b) => (b.datAdm ?? "").localeCompare(a.datAdm ?? ""))
-  , [filtrados, noPeríodo]);
-
-  const listaDemissoes = useMemo(() =>
-    filtrados.filter(c => noPeríodo(c.datDem))
-      .sort((a, b) => (b.datDem ?? "").localeCompare(a.datDem ?? ""))
-  , [filtrados, noPeríodo]);
-
-  const listaCnh30 = useMemo(() =>
-    filtrados.filter(c => c.ativo && c.diasCnhVencer !== null && c.diasCnhVencer <= 30)
-      .sort((a, b) => (a.diasCnhVencer ?? 999) - (b.diasCnhVencer ?? 999))
-  , [filtrados]);
-
-  const listaAlertas = useMemo(() => ({
-    cnhVencida:  filtrados.filter(c => c.ativo && c.temCnh && c.diasCnhVencer !== null && c.diasCnhVencer < 0)
-                          .sort((a, b) => (a.diasCnhVencer ?? 0) - (b.diasCnhVencer ?? 0)),
-    cnh30:       filtrados.filter(c => c.ativo && c.diasCnhVencer !== null && c.diasCnhVencer >= 0 && c.diasCnhVencer <= 30)
-                          .sort((a, b) => (a.diasCnhVencer ?? 999) - (b.diasCnhVencer ?? 999)),
-    cnh60:       filtrados.filter(c => c.ativo && c.diasCnhVencer !== null && c.diasCnhVencer > 30 && c.diasCnhVencer <= 60)
-                          .sort((a, b) => (a.diasCnhVencer ?? 999) - (b.diasCnhVencer ?? 999)),
-    semCnh:      filtrados.filter(c => c.ativo && !c.temCnh),
-    semCpf:      filtrados.filter(c => c.ativo && !c.temCpf),
-  }), [filtrados]);
-
   const tabelaBuscada = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return filtrados.filter(c => {
-      if (tabelaSituacao !== "Todos" && c.situacao !== tabelaSituacao) return false;
-      if (!q) return true;
-      return (
-        c.nome.toLowerCase().includes(q) ||
-        c.codmot.toLowerCase().includes(q) ||
-        (c.funcao ?? "").toLowerCase().includes(q) ||
-        (c.codFilial ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [filtrados, search, tabelaSituacao]);
+    if (!q) return filtrados;
+    return filtrados.filter(c =>
+      c.nome.toLowerCase().includes(q) ||
+      c.codmot.toLowerCase().includes(q) ||
+      (c.funcao ?? "").toLowerCase().includes(q) ||
+      (c.codFilial ?? "").toLowerCase().includes(q)
+    );
+  }, [filtrados, search]);
 
   const handleSort = (col: keyof Colaborador) => {
     if (sortCol === col) setSortAsc(a => !a);
@@ -534,7 +493,7 @@ export default function Rh() {
             />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
 
             {/* ════ NAVBAR DESKTOP ════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
@@ -668,47 +627,28 @@ export default function Rh() {
             {/* KPI Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               {[
-                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos),      sub: "SITUAC = \"A\"",                   Icon: UserCheck,  tone: "emerald" as const, delay: 80,  modal: null             },
-                { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes),   sub: "DATADM no intervalo",              Icon: UserPlus,   tone: "cyan"    as const, delay: 120, modal: "adm"            },
-                { label: "Demissões no Período", value: loading ? "—" : fmtNum(kpis.demissoes),   sub: `Turnover: ${fmtPct(kpis.turnover)}`, Icon: UserMinus, tone: "rose"    as const, delay: 160, modal: "dem"            },
-                { label: "CNH a Vencer (30d)",   value: loading ? "—" : fmtNum(kpis.cnh30),       sub: "VENCHA ≤ hoje + 30 dias",          Icon: ShieldAlert, tone: "amber"  as const, delay: 200, modal: "cnh30"          },
-                { label: "Tempo Médio de Casa",  value: loading ? "—" : fmtAnos(kpis.mediaAnos),  sub: "AVG(hoje − DATADM) ativos",        Icon: Clock,      tone: "violet"  as const, delay: 240, modal: null             },
-              ].map(({ label, value, sub, Icon, tone, delay, modal }) => {
+                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos),    sub: "SITUAC = \"A\"",                Icon: UserCheck, tone: "emerald" as const, delay: 80  },
+                { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes), sub: "DATADM no intervalo",            Icon: UserPlus,  tone: "cyan"    as const, delay: 120 },
+                { label: "Demissões no Período", value: loading ? "—" : fmtNum(kpis.demissoes), sub: `Turnover: ${fmtPct(kpis.turnover)}`, Icon: UserMinus, tone: "rose" as const, delay: 160 },
+                { label: "CNH a Vencer (30d)",   value: loading ? "—" : fmtNum(kpis.cnh30),    sub: "VENCHA ≤ hoje + 30 dias",        Icon: ShieldAlert, tone: "amber" as const, delay: 200 },
+                { label: "Tempo Médio de Casa",  value: loading ? "—" : fmtAnos(kpis.mediaAnos), sub: "AVG(hoje − DATADM) ativos",    Icon: Clock,     tone: "violet"  as const, delay: 240 },
+              ].map(({ label, value, sub, Icon, tone, delay }) => {
                 const t = TC[tone];
-                const hasModal = !!modal && !loading;
-                const handleClick = () => {
-                  if (!hasModal) return;
-                  if (modal === "adm")   setModalAdm(true);
-                  if (modal === "dem")   setModalDem(true);
-                  if (modal === "cnh30") setModalCnh30(true);
-                };
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div
-                      className={`relative overflow-hidden rounded-[18px] border p-3.5 transition-all duration-300 hover:border-white/[0.11] ${t.border} ${hasModal ? "cursor-pointer" : ""}`}
-                      style={{ background: RAW.surfacePrimary }}
-                      onClick={handleClick}
-                    >
-                      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
+                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
                           <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
                           <p className={`text-[10px] font-medium mt-1.5 ${t.sub}`}>{sub}</p>
                         </div>
-                        <div className="flex flex-col items-end gap-1.5">
-                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
-                            <Icon className={`w-4 h-4 ${t.icon}`} />
-                          </div>
-                          {hasModal && (
-                            <div className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[8px] font-semibold border ${t.border} ${t.bg} ${t.icon}`}>
-                              <Eye className="w-2.5 h-2.5" />
-                              <span>Ver</span>
-                            </div>
-                          )}
+                        <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
+                          <Icon className={`w-4 h-4 ${t.icon}`} />
                         </div>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[18px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
                     </div>
                   </AnimatedCard>
                 );
@@ -729,7 +669,7 @@ export default function Rh() {
 
               {/* Por Função */}
               <AnimatedCard delay={300}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Hash className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Por Função / Cargo</span>
@@ -762,7 +702,7 @@ export default function Rh() {
 
               {/* Categoria CNH */}
               <AnimatedCard delay={330}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <ShieldAlert className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Categoria de CNH</span>
@@ -788,7 +728,7 @@ export default function Rh() {
 
               {/* Tipo + Sexo */}
               <AnimatedCard delay={360}>
-                <div className="rounded-[18px] border p-3 h-full" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-violet-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tipo de Funcionário</span>
@@ -829,7 +769,7 @@ export default function Rh() {
 
               {/* Tempo de Casa */}
               <AnimatedCard delay={390}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Clock className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tempo de Casa — Faixas (Ativos)</span>
@@ -853,16 +793,10 @@ export default function Rh() {
 
               {/* Alertas CNH */}
               <AnimatedCard delay={420}>
-                <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas Operacionais</span>
-                    <button
-                      onClick={() => setModalAlertas(true)}
-                      className="ml-auto flex items-center gap-0.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-1.5 py-0.5 text-[8px] font-semibold text-amber-300 hover:bg-amber-400/12 transition-all"
-                    >
-                      <Eye className="w-2.5 h-2.5" /><span>Ver</span>
-                    </button>
                   </div>
                   <div className="space-y-1.5">
                     {[
@@ -903,8 +837,8 @@ export default function Rh() {
                 const t = TC[tone];
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`relative overflow-hidden rounded-[18px] border p-3.5 transition-all duration-300 hover:border-white/[0.11] ${t.border}`} style={{ background: RAW.surfacePrimary }}>
-                      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
+                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
@@ -915,7 +849,7 @@ export default function Rh() {
                           <Icon className={`w-4 h-4 ${t.icon}`} />
                         </div>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[18px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
                     </div>
                   </AnimatedCard>
                 );
@@ -927,7 +861,7 @@ export default function Rh() {
 
               {/* Evolução Mensal — 2 cols */}
               <AnimatedCard delay={540} className="lg:col-span-2">
-                <div className="rounded-[18px] border p-3 h-[220px] flex flex-col" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-emerald-400" />
@@ -957,7 +891,7 @@ export default function Rh() {
 
               {/* Motivo Demissão */}
               <AnimatedCard delay={560}>
-                <div className="rounded-[18px] border p-3 h-[220px] flex flex-col" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <FileText className="w-3.5 h-3.5 text-rose-400" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Motivo de Demissão</span>
@@ -989,7 +923,7 @@ export default function Rh() {
 
             {/* Turnover por Filial */}
             <AnimatedCard delay={580}>
-              <div className="rounded-[18px] border p-3" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+              <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 className="w-3.5 h-3.5 text-rose-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Turnover por Filial</span>
@@ -1032,7 +966,7 @@ export default function Rh() {
 
             {/* Tabela */}
             <AnimatedCard delay={620}>
-              <div className="rounded-[18px] border" style={{ background: RAW.surfacePrimary, borderColor: RAW.borderDefault }}>
+              <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
 
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <Users className="w-3.5 h-3.5 text-emerald-400" />
@@ -1040,26 +974,6 @@ export default function Rh() {
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
-                  {/* Botões rápidos Ativo / Inativo */}
-                  <div className="flex items-center gap-1 ml-1">
-                    {(["Todos", "A", "I"] as const).map(v => (
-                      <button
-                        key={v}
-                        onClick={() => { setTabelaSituacao(v); setPage(1); }}
-                        className={`h-6 rounded-lg px-2 text-[9px] font-semibold transition-all border ${
-                          tabelaSituacao === v
-                            ? v === "A"
-                              ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-300"
-                              : v === "I"
-                              ? "bg-rose-500/20 border-rose-400/40 text-rose-300"
-                              : "bg-white/[0.08] border-white/[0.15] text-slate-200"
-                            : "bg-transparent border-white/[0.06] text-slate-500 hover:border-white/[0.12] hover:text-slate-300"
-                        }`}
-                      >
-                        {v === "Todos" ? "Todos" : v === "A" ? "Ativos" : "Inativos"}
-                      </button>
-                    ))}
-                  </div>
                   <div className="ml-auto relative">
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
                     <input
@@ -1184,229 +1098,6 @@ export default function Rh() {
           </div>
         </section>
       </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          MODAL — ADMISSÕES NO PERÍODO
-      ═══════════════════════════════════════════════════════════ */}
-      <Dialog open={modalAdm} onOpenChange={setModalAdm}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col" style={{ background: "var(--sgt-bg-section)", borderColor: RAW.borderDefault }}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[13px] font-bold text-slate-200">
-              <UserPlus className="w-4 h-4 text-cyan-400" />
-              Admissões no Período
-              <span className="ml-auto rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-cyan-300">
-                {listaAdmissoes.length} admissões
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="overflow-auto flex-1 mt-2">
-            {listaAdmissoes.length === 0 ? (
-              <div className="flex h-24 items-center justify-center text-[12px] text-slate-600">Nenhuma admissão no período selecionado</div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
-                    {["Matríc.", "Nome", "Função", "Filial", "Admissão", "Situação"].map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {listaAdmissoes.map((c, i) => (
-                    <tr key={i} className="hover:bg-white/[0.02] transition-colors" style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                      <td className="px-3 py-2 font-mono text-[10px] text-cyan-300">{c.codmot}</td>
-                      <td className="px-3 py-2 text-[11px] font-medium text-slate-200">{c.nome}</td>
-                      <td className="px-3 py-2 text-[10px] text-slate-400">{c.funcao ?? "—"}</td>
-                      <td className="px-3 py-2 text-[10px] text-slate-400">{c.codFilial ?? "—"}</td>
-                      <td className="px-3 py-2 text-[10px] text-emerald-300 font-medium">{fmtData(c.datAdm)}</td>
-                      <td className="px-3 py-2">
-                        <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[8px] font-semibold ring-1 ${c.situacao === "A" ? "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30" : "bg-rose-500/10 text-rose-300 ring-rose-500/30"}`}>
-                          {c.situacao === "A" ? "Ativo" : "Inativo"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ═══════════════════════════════════════════════════════════
-          MODAL — DEMISSÕES NO PERÍODO
-      ═══════════════════════════════════════════════════════════ */}
-      <Dialog open={modalDem} onOpenChange={setModalDem}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col" style={{ background: "var(--sgt-bg-section)", borderColor: RAW.borderDefault }}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[13px] font-bold text-slate-200">
-              <UserMinus className="w-4 h-4 text-rose-400" />
-              Demissões no Período
-              <span className="ml-auto rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-rose-300">
-                {listaDemissoes.length} demissões
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="overflow-auto flex-1 mt-2">
-            {listaDemissoes.length === 0 ? (
-              <div className="flex h-24 items-center justify-center text-[12px] text-slate-600">Nenhuma demissão no período selecionado</div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
-                    {["Matríc.", "Nome", "Função", "Filial", "Demissão", "Motivo"].map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {listaDemissoes.map((c, i) => (
-                    <tr key={i} className="hover:bg-white/[0.02] transition-colors" style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                      <td className="px-3 py-2 font-mono text-[10px] text-rose-300">{c.codmot}</td>
-                      <td className="px-3 py-2 text-[11px] font-medium text-slate-200">{c.nome}</td>
-                      <td className="px-3 py-2 text-[10px] text-slate-400">{c.funcao ?? "—"}</td>
-                      <td className="px-3 py-2 text-[10px] text-slate-400">{c.codFilial ?? "—"}</td>
-                      <td className="px-3 py-2 text-[10px] text-rose-300 font-medium">{fmtData(c.datDem)}</td>
-                      <td className="px-3 py-2 text-[10px] text-slate-400 max-w-[140px] truncate">{c.motivoDem ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ═══════════════════════════════════════════════════════════
-          MODAL — CNH A VENCER (30 dias)
-      ═══════════════════════════════════════════════════════════ */}
-      <Dialog open={modalCnh30} onOpenChange={setModalCnh30}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col" style={{ background: "var(--sgt-bg-section)", borderColor: RAW.borderDefault }}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[13px] font-bold text-slate-200">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
-              CNH a Vencer — próximos 30 dias
-              <span className="ml-auto rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-amber-300">
-                {listaCnh30.length} motoristas
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="overflow-auto flex-1 mt-2">
-            {listaCnh30.length === 0 ? (
-              <div className="flex h-24 items-center justify-center text-[12px] text-slate-600">Nenhuma CNH vencendo nos próximos 30 dias</div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
-                    {["Matríc.", "Nome", "Função", "Filial", "Cat.", "Vencimento", "Dias Restantes"].map(h => (
-                      <th key={h} className="px-3 py-2 text-left text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {listaCnh30.map((c, i) => {
-                    const dias = c.diasCnhVencer ?? 0;
-                    const cor  = dias < 0 ? "text-rose-300" : dias <= 10 ? "text-rose-300" : dias <= 20 ? "text-amber-300" : "text-yellow-300";
-                    return (
-                      <tr key={i} className="hover:bg-white/[0.02] transition-colors" style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                        <td className="px-3 py-2 font-mono text-[10px] text-amber-300">{c.codmot}</td>
-                        <td className="px-3 py-2 text-[11px] font-medium text-slate-200">{c.nome}</td>
-                        <td className="px-3 py-2 text-[10px] text-slate-400">{c.funcao ?? "—"}</td>
-                        <td className="px-3 py-2 text-[10px] text-slate-400">{c.codFilial ?? "—"}</td>
-                        <td className="px-3 py-2">
-                          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">{c.catCnh ?? "—"}</span>
-                        </td>
-                        <td className="px-3 py-2 text-[10px] text-slate-300">{fmtData(c.validadeCnh)}</td>
-                        <td className="px-3 py-2">
-                          <span className={`text-[11px] font-black ${cor}`}>
-                            {dias < 0 ? `${Math.abs(dias)}d vencida` : dias === 0 ? "HOJE" : `${dias}d`}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ═══════════════════════════════════════════════════════════
-          MODAL — ALERTAS OPERACIONAIS
-      ═══════════════════════════════════════════════════════════ */}
-      <Dialog open={modalAlertas} onOpenChange={setModalAlertas}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col" style={{ background: "var(--sgt-bg-section)", borderColor: RAW.borderDefault }}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[13px] font-bold text-slate-200">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              Alertas Operacionais — Detalhamento
-            </DialogTitle>
-          </DialogHeader>
-          <div className="overflow-auto flex-1 mt-2 space-y-4">
-            {([
-              { titulo: "CNH Vencida",         lista: listaAlertas.cnhVencida, cor: "rose",   campo: "diasCnhVencer" as const, label: (c: Colaborador) => `${Math.abs(c.diasCnhVencer ?? 0)}d vencida`  },
-              { titulo: "CNH vence em 30 dias", lista: listaAlertas.cnh30,     cor: "amber",  campo: "diasCnhVencer" as const, label: (c: Colaborador) => `${c.diasCnhVencer ?? 0}d restantes`           },
-              { titulo: "CNH vence em 60 dias", lista: listaAlertas.cnh60,     cor: "yellow", campo: "diasCnhVencer" as const, label: (c: Colaborador) => `${c.diasCnhVencer ?? 0}d restantes`           },
-              { titulo: "Sem CNH cadastrada",   lista: listaAlertas.semCnh,    cor: "cyan",   campo: null,                     label: (_: Colaborador) => "Sem CNH"                                       },
-              { titulo: "Sem CPF cadastrado",   lista: listaAlertas.semCpf,    cor: "slate",  campo: null,                     label: (_: Colaborador) => "Sem CPF"                                       },
-            ] as const).filter(g => g.lista.length > 0).map(({ titulo, lista, cor, label }) => (
-              <div key={titulo}>
-                <div className={`flex items-center gap-2 mb-2 px-1`}>
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                    cor === "rose" ? "bg-rose-400" : cor === "amber" ? "bg-amber-400" :
-                    cor === "yellow" ? "bg-yellow-400" : cor === "cyan" ? "bg-cyan-400" : "bg-slate-400"
-                  }`} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{titulo}</span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-semibold ring-1 ${
-                    cor === "rose" ? "bg-rose-500/10 text-rose-300 ring-rose-500/30" :
-                    cor === "amber" ? "bg-amber-500/10 text-amber-300 ring-amber-500/30" :
-                    cor === "yellow" ? "bg-yellow-500/10 text-yellow-300 ring-yellow-500/30" :
-                    cor === "cyan" ? "bg-cyan-500/10 text-cyan-300 ring-cyan-500/30" : "bg-slate-500/10 text-slate-300 ring-slate-500/20"
-                  }`}>{lista.length}</span>
-                </div>
-                <div className="rounded-[12px] border overflow-hidden" style={{ borderColor: RAW.borderDefault }}>
-                  <table className="w-full">
-                    <thead>
-                      <tr style={{ background: RAW.surfaceInset, borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                        {["Matríc.", "Nome", "Função", "Filial", "Cat. CNH", "Validade", "Status"].map(h => (
-                          <th key={h} className="px-3 py-1.5 text-left text-[8px] font-bold uppercase tracking-[0.15em] text-slate-500">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lista.map((c, i) => (
-                        <tr key={i} className="hover:bg-white/[0.02]" style={{ borderBottom: i < lista.length - 1 ? `1px solid ${RAW.borderDefault}` : "none" }}>
-                          <td className="px-3 py-2 font-mono text-[10px] text-amber-300">{c.codmot}</td>
-                          <td className="px-3 py-2 text-[11px] font-medium text-slate-200">{c.nome}</td>
-                          <td className="px-3 py-2 text-[10px] text-slate-400">{c.funcao ?? "—"}</td>
-                          <td className="px-3 py-2 text-[10px] text-slate-400">{c.codFilial ?? "—"}</td>
-                          <td className="px-3 py-2">
-                            {c.catCnh
-                              ? <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">{c.catCnh}</span>
-                              : <span className="text-[10px] text-slate-600">—</span>}
-                          </td>
-                          <td className="px-3 py-2 text-[10px] text-slate-300">{fmtData(c.validadeCnh)}</td>
-                          <td className="px-3 py-2">
-                            <span className={`text-[10px] font-bold ${
-                              cor === "rose" ? "text-rose-300" : cor === "amber" ? "text-amber-300" :
-                              cor === "yellow" ? "text-yellow-300" : "text-slate-400"
-                            }`}>{label(c)}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-            {Object.values(listaAlertas).every(l => l.length === 0) && (
-              <div className="flex h-24 items-center justify-center text-[12px] text-slate-600">Nenhum alerta no momento</div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
     </div>
   );
 }
