@@ -736,10 +736,10 @@ export default function ContasAReceber() {
               <tbody>
                 {paginados.map((conta, i) => (
                   <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
-                    <td className="px-4 py-3 text-[13px] font-medium text-white">{conta.documento}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-300">{conta.cliente}</td>
-                    <td className="px-4 py-3 text-[13px] text-slate-400">{fmtData(conta.vencimento)}</td>
-                    <td className="px-4 py-3 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
+                    <td className="px-3 py-2.5 text-[13px] font-medium text-white">{conta.documento}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-300">{conta.cliente}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-400">{fmtData(conta.vencimento)}</td>
+                    <td className="px-3 py-2.5 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
                     <td className="px-3 py-2 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
                         (conta.status as string) === "Recebido" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
