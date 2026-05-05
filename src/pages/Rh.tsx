@@ -511,7 +511,7 @@ export default function Rh() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">DW Conectado</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">Tempo real</span>
               </div>
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
@@ -1011,7 +1011,7 @@ export default function Rh() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
+                      <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
                         {([
                           { key: "codmot",     label: "Matríc.",     align: "left",   resp: "" },
                           { key: "nome",       label: "Nome",        align: "left",   resp: "" },
@@ -1027,7 +1027,7 @@ export default function Rh() {
                           <th
                             key={c.key}
                             onClick={() => handleSort(c.key)}
-                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
+                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
                             style={{ textAlign: c.align as any }}
                           >
                             <span className="inline-flex items-center gap-0.5">{c.label}<SortIcon col={c.key} /></span>

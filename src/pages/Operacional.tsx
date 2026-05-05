@@ -976,7 +976,7 @@ export default function Operacional() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
+                      <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
                         {([
                           { key: "veiculo",       label: "Veículo",       align: "left",   resp: "" },
                           { key: "motorista",     label: "Motorista",     align: "left",   resp: "hidden md:table-cell" },
@@ -991,7 +991,7 @@ export default function Operacional() {
                           <th
                             key={c.key}
                             onClick={() => handleSort(c.key)}
-                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
+                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
                             style={{ textAlign: c.align as any }}
                           >
                             <span className="inline-flex items-center gap-0.5">{c.label}<SortIcon col={c.key} /></span>
