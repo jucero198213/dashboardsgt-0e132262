@@ -4,10 +4,11 @@ interface AnimatedCardProps {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  hover?: boolean; // habilita hover lift + shimmer sweep
 }
 
 export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(function AnimatedCard(
-  { children, delay = 0, className = "" },
+  { children, delay = 0, className = "", hover = true },
   ref,
 ) {
   const [visible, setVisible] = useState(false);
@@ -20,9 +21,9 @@ export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(functi
   return (
     <div
       ref={ref}
-      className={`transition-all duration-500 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-      } ${className}`}
+      className={`relative overflow-hidden transition-all duration-500 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+      } ${hover ? "sgt-hover-lift sgt-shimmer-sweep" : ""} ${className}`}
     >
       {children}
     </div>

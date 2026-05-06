@@ -410,3 +410,149 @@ button:focus-visible, a:focus-visible {
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMAÇÕES SGT
+═══════════════════════════════════════════════════════ */
+
+/* Fade + slide up — entrada de elementos */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sgt-fade-up {
+  animation: fadeSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Fade in simples */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.sgt-fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+
+/* Contador — números sobem ao aparecer */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sgt-count-up {
+  animation: countUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Brilho sweep — passa uma luz diagonal sobre o card */
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(250%) skewX(-12deg); }
+}
+.sgt-shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+  transform: translateX(-100%) skewX(-12deg);
+  pointer-events: none;
+}
+.sgt-shimmer-sweep:hover::after {
+  animation: shimmerSweep 0.6s ease forwards;
+}
+
+/* Hover lift — card sobe suavemente */
+.sgt-hover-lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease;
+}
+.sgt-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Pulse suave — para valores destacados */
+@keyframes pulseGlow {
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+}
+.sgt-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Stagger — usado com delay inline para entrada em cascata */
+.sgt-stagger > * {
+  animation: fadeSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sgt-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.sgt-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.sgt-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.sgt-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.sgt-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.sgt-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.sgt-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.sgt-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* Border glow no hover — para cards com accent color */
+.sgt-hover-glow-amber {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sgt-hover-glow-amber:hover {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.1), 0 8px 32px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+/* Linha de progresso animada na entrada */
+@keyframes growWidth {
+  from { width: 0%; }
+}
+.sgt-grow-width {
+  animation: growWidth 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Dot pulsante mais suave */
+@keyframes dotBreath {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.8); }
+}
+.sgt-dot-breath {
+  animation: dotBreath 2s ease-in-out infinite;
+}
+
+/* Section card global hover — borda acende suavemente */
+section.sgt-section-card {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+section.sgt-section-card:hover {
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Navbar items fade in from top */
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sgt-navbar-item {
+  animation: fadeSlideDown 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sgt-navbar-item:nth-child(1) { animation-delay: 0ms; }
+.sgt-navbar-item:nth-child(2) { animation-delay: 50ms; }
+.sgt-navbar-item:nth-child(3) { animation-delay: 100ms; }
+.sgt-navbar-item:nth-child(4) { animation-delay: 150ms; }
+
+/* KPI card inner value focus */
+.sgt-kpi-card {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sgt-kpi-card:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4) !important;
+}
+
+/* Table row hover — slide right */
+.sgt-tr-hover {
+  transition: background 0.15s ease, padding-left 0.15s ease;
+}
+.sgt-tr-hover:hover {
+  padding-left: 2px;
+}

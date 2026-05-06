@@ -838,7 +838,7 @@ export default function Frota() {
             )}
 
             {/* ════════ KPI ROW (4 cards) ════════ */}
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0 sgt-stagger">
               {[
                 {
                   label: "Frota Ativa", value: isFetchingDw ? "—" : fmtNum(kpis.ativos),
