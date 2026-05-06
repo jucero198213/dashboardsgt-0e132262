@@ -89,7 +89,7 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
         ...(diasRestantes > 0 ? [{ rotulo: "Perda estimada até fim do mês", valor: fmtBRL(receitaPotencialPerdida), obs: `${diasRestantes} dias úteis restantes` }] : []),
         ...(osCusto > 0 ? [{ rotulo: "Custo previsto nas OS abertas", valor: fmtBRL(osCusto) }] : []),
       ],
-      contexto: `Caminhões com OS na situação "A" (Andamento) estão imobilizados na oficina e não geram receita enquanto aguardam manutenção. A receita diária em risco foi calculada dividindo o faturamento médio por dia útil (${fmtBRL(media)}) pelo número de clientes ativos (${qtdClientes}), multiplicado pelos veículos parados — representa a fatia proporcional de capacidade operacional perdida.`,
+      contexto: `Caminhões com OS na situação "A" (Andamento) estão imobilizados e não geram receita. Cálculo: (veículos parados ÷ total de veículos ativos na frota) × receita média diária. Representa a proporção real da capacidade ociosa sobre o faturamento do dia.`,
       itens: osVeiculosList.map(v => `${v.veiculo}${v.ordens > 1 ? ` (${v.ordens} OS)` : ""}`),
     });
   }
