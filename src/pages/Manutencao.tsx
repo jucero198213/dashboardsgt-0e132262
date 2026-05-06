@@ -770,7 +770,7 @@ export default function Manutencao() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
-                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>
+                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>
                             {value}
                           </p>
                           <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
@@ -958,7 +958,7 @@ export default function Manutencao() {
                           <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
                             <Icon className={`w-3 h-3 ${t.icon}`} />
                           </div>
-                          <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"}`}>
+                          <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
                             {loading ? "—" : fmtNum(count)}
                           </span>
                         </div>

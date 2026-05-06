@@ -647,7 +647,7 @@ export default function Rh() {
                             <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
                           </div>
                         </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""}`}>{value}</p>
+                        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
                         <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
                       </div>
                     </div>
@@ -823,7 +823,7 @@ export default function Rh() {
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotCls} ${severity && count > 0 ? "animate-pulse" : ""}`} />
                         <span className={`text-[9px] font-semibold uppercase tracking-[0.15em] ${txtCls} opacity-70`}>{label}</span>
                       </div>
-                      <span className={`text-[22px] font-black leading-none ${valCls}`}>{loading ? "—" : count}</span>
+                      <span className={`text-[22px] font-black leading-none ${valCls} sgt-count-up`}>{loading ? "—" : count}</span>
                     </div>
                   ))}
                 </div>
@@ -860,7 +860,7 @@ export default function Rh() {
                             <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
                           </div>
                         </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""}`}>{value}</p>
+                        <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
                         <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
                       </div>
                     </div>
