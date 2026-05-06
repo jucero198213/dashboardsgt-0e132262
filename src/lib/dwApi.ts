@@ -439,7 +439,8 @@ export interface RhResponse {
 export async function fetchRh(params?: {
   situacao?: string | null;
 }): Promise<RhResponse> {
-  return callEdge<RhResponse>(ENDPOINT_RH, params ?? {});
+  const key = `rh:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<RhResponse>(ENDPOINT_RH, params ?? {}));
 }
 
 // ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
