@@ -344,6 +344,9 @@ export default function Faturamento() {
               style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
           </div>
 
+          {/* ── CONTEÚDO PRINCIPAL ── */}
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
+
           {/* ── NAVBAR DESKTOP ── */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
             <div className="flex shrink-0 items-center gap-3">
@@ -417,7 +420,7 @@ export default function Faturamento() {
           )}
 
           {/* ── CONTEÚDO ── */}
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
+          <div className="flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 w-full">
 
             {/* KPIs linha 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch sgt-stagger">
@@ -646,7 +649,8 @@ export default function Faturamento() {
               autoGenerate={true}
             />
 
-          </div>
+          </div> {/* conteúdo */}
+          </div> {/* p-2 wrapper */}
         </section>
       </div>
     </div>
