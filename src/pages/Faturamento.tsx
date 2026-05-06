@@ -426,12 +426,6 @@ export default function Faturamento() {
               isFetchingCharts={isFetchingCharts}
               dataFim={dwFilter.dataFim}
             />
-                      </svg>
-                    )}
-                  </div>
-                </AnimatedCard>
-              );
-            })()}
 
             </div> {/* fim grid linha 2 */}
 
