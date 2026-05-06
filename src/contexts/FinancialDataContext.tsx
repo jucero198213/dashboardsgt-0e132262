@@ -11,6 +11,7 @@ import {
   fetchFaturamento,
   fetchFrota,
   fetchManutencao,
+  clearDwCache,
   type FilterOption,
   type DwRow,
   type FaturamentoRow,
