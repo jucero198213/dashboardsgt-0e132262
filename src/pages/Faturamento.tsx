@@ -295,11 +295,11 @@ export default function Faturamento() {
             </div>
 
             {/* ── LINHA 2: Grupo de Cliente | Gráfico Acumulado ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
 
             {/* ── CARD: Faturamento por Grupo de Cliente ── */}
             <AnimatedCard delay={160}>
-              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col">
+              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full">
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
 
                 {/* Header */}
@@ -325,7 +325,7 @@ export default function Faturamento() {
                 )}
 
                 {/* Rows */}
-                <div className="flex flex-col min-h-0">
+                <div className="flex flex-col overflow-y-auto" style={{ maxHeight: 360 }}>
                   {!isProcessed ? (
                     <div className="flex flex-col gap-2 p-4">
                       {[...Array(5)].map((_, i) => <Skel key={i} h="h-9" />)}
@@ -425,7 +425,7 @@ export default function Faturamento() {
 
               return (
                 <AnimatedCard delay={280}>
-                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ height: "100%" }}>
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-3 h-full">
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
@@ -457,7 +457,7 @@ export default function Faturamento() {
                         )}
                       </div>
                     ) : (
-                      <svg viewBox="0 0 480 220" preserveAspectRatio="xMidYMid meet" className="w-full" style={{ height: 200 }}>
+                      <svg viewBox="0 0 480 220" preserveAspectRatio="xMidYMid meet" className="w-full flex-1" style={{ minHeight: 160 }}>
                         <defs>
                           <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2"/>
