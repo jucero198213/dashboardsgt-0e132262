@@ -139,22 +139,30 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
     }
   }
 
-  // Ritmo vs projeção
+  // Ritmo vs projeção — sempre gera
   if (provisao > 0 && total > 0 && diasUteis > 0 && diasUteisMes > 0) {
     const percRealizadoDoMes = (diasUteis / diasUteisMes) * 100;
     const percFaturadoDoTotal = (total / provisao) * 100;
     const eficiencia = percFaturadoDoTotal / percRealizadoDoMes * 100;
-    if (eficiencia < 70) {
-      ins.push({ id: 0, tipo: "atencao", titulo: "Ritmo de faturamento abaixo do esperado",
-        descricao: `${fmtPct(percRealizadoDoMes)} dos dias úteis passaram, mas apenas ${fmtPct(percFaturadoDoTotal)} da projeção foi realizado.`,
-        impacto: "Tendência de não atingir a meta mensal se o ritmo não aumentar",
-        acao: "Investigar notas represadas, pendências operacionais ou atrasos no faturamento" });
-    } else if (eficiencia >= 110) {
-      ins.push({ id: 0, tipo: "positivo", titulo: "Faturamento acima do ritmo previsto",
-        descricao: `Com ${diasUteis} de ${diasUteisMes} dias úteis, já realizou ${fmtPct(percFaturadoDoTotal)} da projeção mensal.`,
-        impacto: `Meta mensal de ${fmtBRL(provisao)} com alta probabilidade de ser superada`,
-        acao: "Garantir capacidade operacional para manter o ritmo até o fechamento" });
-    }
+    const tipo: InsightTipo = eficiencia < 70 ? "atencao" : eficiencia >= 110 ? "positivo" : "oportunidade";
+    ins.push({ id: 0, tipo,
+      titulo: eficiencia < 70
+        ? "Ritmo de faturamento abaixo do esperado"
+        : eficiencia >= 110
+          ? "Faturamento acima do ritmo previsto"
+          : `Ritmo no prazo — ${fmtPct(percFaturadoDoTotal)} da projeção realizado`,
+      descricao: `${fmtPct(percRealizadoDoMes)} dos dias úteis do mês já passaram e ${fmtPct(percFaturadoDoTotal)} da projeção de ${fmtBRL(provisao)} foi realizado (${fmtBRL(total)}).`,
+      impacto: eficiencia < 70
+        ? "Tendência de não atingir a meta mensal se o ritmo não aumentar"
+        : eficiencia >= 110
+          ? `Meta mensal com alta probabilidade de ser superada`
+          : "Ritmo consistente com a projeção do período",
+      acao: eficiencia < 70
+        ? "Investigar notas represadas, pendências operacionais ou atrasos no faturamento"
+        : eficiencia >= 110
+          ? "Garantir capacidade operacional para manter o ritmo até o fechamento"
+          : "Manter ritmo atual e monitorar diariamente para não perder o passo",
+    });
   }
 
   // Potencial da cauda da carteira
