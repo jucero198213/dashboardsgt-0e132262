@@ -426,18 +426,6 @@ export default function Indicadores() {
                     className="w-full lg:w-[360px] xl:w-[420px] shrink-0 rounded-[20px] border flex flex-col p-5 gap-3"
                     style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
                   >
-                    {/* Cabeçalho */}
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] dark:text-slate-500 text-slate-500 mb-1">
-                        Visão geral
-                      </p>
-                      <p className="text-[24px] font-extrabold tracking-[-0.04em] dark:bg-gradient-to-r dark:from-white dark:from-40% dark:via-slate-200 dark:via-70% dark:to-slate-500 dark:bg-clip-text dark:text-transparent text-slate-800">
-                        Faturamento
-                      </p>
-                    </div>
-
-                    <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
-
                     {/* Card Faturamento do Mês */}
                     <div
                       className="flex flex-col gap-2 rounded-[12px] border p-4"
