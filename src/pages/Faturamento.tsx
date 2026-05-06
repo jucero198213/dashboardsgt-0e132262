@@ -289,6 +289,103 @@ export default function Faturamento() {
               </AnimatedCard>
 
             </div>
+
+            {/* ── CARD: Faturamento por Grupo de Cliente ── */}
+            <AnimatedCard delay={160}>
+              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col">
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
+
+                {/* Header */}
+                <div className="flex items-center justify-between gap-3 px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]"
+                  style={{ background: "var(--sgt-table-head)" }}>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
+                    Faturamento por Grupo de Cliente
+                  </span>
+                  {isProcessed && rows.length > 0 && (
+                    <span className="text-[10px] font-medium text-slate-500">
+                      {rows.length} {rows.length === 1 ? "grupo" : "grupos"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Column headers */}
+                {isProcessed && rows.length > 0 && (
+                  <div className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)]">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600">Grupo</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Faturamento</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Part. %</span>
+                  </div>
+                )}
+
+                {/* Rows */}
+                <div className="flex flex-col min-h-0">
+                  {!isProcessed ? (
+                    <div className="flex flex-col gap-2 p-4">
+                      {[...Array(5)].map((_, i) => <Skel key={i} h="h-9" />)}
+                    </div>
+                  ) : rows.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12">
+                      <TrendingUp className="h-8 w-8 text-amber-400/25" />
+                      <p className="text-[12px] text-slate-500">Sem dados no período selecionado</p>
+                      <p className="text-[11px] text-slate-600">Selecione um período e clique em Atualizar</p>
+                    </div>
+                  ) : (
+                    rows.map((r, i) => {
+                      const barW = totalFaturado > 0 ? Math.min((r.total / totalFaturado) * 100, 100) : 0;
+                      const STRIPE_COLORS = ["#f59e0b","#22d3ee","#a78bfa","#34d399","#f87171","#fb923c","#60a5fa","#e879f9"];
+                      const color = STRIPE_COLORS[i % STRIPE_COLORS.length];
+                      return (
+                        <div
+                          key={`${r.descri}-${i}`}
+                          className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2.5 items-center transition-colors border-b border-[var(--sgt-divider)] last:border-0"
+                          style={{ background: i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
+                          onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}
+                        >
+                          {/* Rank + nome + barra */}
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="text-[10px] font-bold shrink-0 w-4 text-right tabular-nums" style={{ color: "var(--sgt-text-faint)" }}>
+                              {i + 1}
+                            </span>
+                            <div className="flex flex-col gap-1 min-w-0 flex-1">
+                              <span className="text-[12px] font-semibold truncate" style={{ color: "var(--sgt-text-primary)" }}>
+                                {r.descri}
+                              </span>
+                              <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{ width: `${barW}%`, background: color }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Valor */}
+                          <span className="text-[12px] font-bold tabular-nums text-right" style={{ color }}>
+                            {fmtBRL(r.total)}
+                          </span>
+
+                          {/* Participação */}
+                          <span className="text-[11px] font-bold tabular-nums text-right text-slate-400">
+                            {r.pct.toFixed(1)}%
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Footer */}
+                {isProcessed && rows.length > 0 && (
+                  <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--sgt-border-subtle)]"
+                    style={{ background: "var(--sgt-table-head)" }}>
+                    <span className="text-[10px] text-slate-500">{rows.length} {rows.length === 1 ? "grupo" : "grupos"}</span>
+                    <span className="text-[12px] font-bold text-amber-300 tabular-nums">{fmtBRL(totalFaturado)}</span>
+                  </div>
+                )}
+              </div>
+            </AnimatedCard>
+
             <InsightsSection
               setor="faturamento"
               dados={{
