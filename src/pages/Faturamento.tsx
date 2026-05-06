@@ -46,7 +46,7 @@ function parseDate(str: string): Date | null {
 
 export default function Faturamento() {
   const navigate = useNavigate();
-  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError, manutencao } = useFinancialData();
+  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError, manutencao, frota } = useFinancialData();
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
   const [sortDir, setSortDir]           = useState<"desc" | "asc">("desc");
@@ -425,33 +425,79 @@ export default function Faturamento() {
               const anoAtual = dwFilter.dataFim ? new Date(dwFilter.dataFim).getFullYear() : new Date().getFullYear();
               const anoAnt   = anoAtual - 1;
 
-              // Calcula acumulado mês a mês
-              const acumular = (data: number[]) => {
-                let soma = 0;
-                return data.map(v => { soma += v; return soma; });
-              };
-              const acumAtual = acumular(faturamentoMensal);
-              const acumAnt   = acumular(faturamentoMensalAnterior);
+              // Mês máximo do filtro (0-based) — 2026 para no mês filtrado
+              const mesFiltro = dwFilter.dataFim ? new Date(dwFilter.dataFim).getMonth() : 11;
 
-              const maxVal = Math.max(...acumAtual, ...acumAnt, 1);
-              const fmtY = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : "0";
+              // Acumulado 2026 para nos dados até mesFiltro, restante fica null
+              const acumAtual: (number | null)[] = [];
+              let soma = 0;
+              for (let i = 0; i < 12; i++) {
+                if (i <= mesFiltro) {
+                  soma += faturamentoMensal[i] ?? 0;
+                  acumAtual.push(soma);
+                } else {
+                  acumAtual.push(null);
+                }
+              }
 
-              const buildPath = (data: number[], w: number, h: number, padL: number, padR: number, padT: number, padB: number) => {
-                const toX = (i: number) => padL + (i / 11) * (w - padL - padR);
-                const toY = (v: number) => padT + (h - padT - padB) - (v / maxVal) * (h - padT - padB);
-                let d = `M${toX(0)},${toY(data[0])}`;
-                for (let i = 1; i < 12; i++) {
-                  const x0 = toX(i-1), y0 = toY(data[i-1]), x1 = toX(i), y1 = toY(data[i]);
-                  d += ` C${x0+(x1-x0)*0.3},${y0} ${x1-(x1-x0)*0.3},${y1} ${x1},${y1}`;
+              // Acumulado 2025 — ano inteiro
+              const acumAnt: number[] = [];
+              let somaAnt = 0;
+              for (let i = 0; i < 12; i++) {
+                somaAnt += faturamentoMensalAnterior[i] ?? 0;
+                acumAnt.push(somaAnt);
+              }
+
+              const validAtual = acumAtual.filter((v): v is number => v !== null);
+              const maxVal = Math.max(...validAtual, ...acumAnt, 1);
+
+              const W = 480, H = 220, padL = 52, padR = 8, padT = 16, padB = 28;
+              const toX = (i: number) => padL + (i / 11) * (W - padL - padR);
+              const toY = (v: number) => padT + (H - padT - padB) - (v / maxVal) * (H - padT - padB);
+              const fmtY = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : "R$ 0";
+              const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+              // Build smooth path somente para os meses com dado (não null)
+              const buildPath = (data: (number | null)[]) => {
+                const pts = data.map((v, i) => v !== null ? { x: toX(i), y: toY(v) } : null);
+                const valid = pts.filter((p): p is { x: number; y: number } => p !== null);
+                if (valid.length === 0) return "";
+                let d = `M${valid[0].x},${valid[0].y}`;
+                for (let i = 1; i < valid.length; i++) {
+                  const p0 = valid[i-1], p1 = valid[i];
+                  d += ` C${p0.x+(p1.x-p0.x)*0.3},${p0.y} ${p1.x-(p1.x-p0.x)*0.3},${p1.y} ${p1.x},${p1.y}`;
                 }
                 return d;
+              };
+
+              const pathAtual = buildPath(acumAtual);
+              const pathAnt   = buildPath(acumAnt);
+
+              // Área fill — fecha no último ponto válido de 2026
+              const lastValidIdx = mesFiltro;
+              const lastX = toX(lastValidIdx);
+              const areaPath = pathAtual ? `${pathAtual} L${lastX},${toY(0)} L${toX(0)},${toY(0)} Z` : "";
+
+              // Tooltip state
+              const [hover, setHover] = React.useState<{ x: number; y: number; idx: number } | null>(null);
+
+              const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const px = (e.clientX - rect.left) / rect.width * W;
+                // Snap para o mês mais próximo
+                const raw = (px - padL) / (W - padL - padR) * 11;
+                const idx = Math.max(0, Math.min(11, Math.round(raw)));
+                const cx = toX(idx);
+                const cy = acumAtual[idx] !== null ? toY(acumAtual[idx] as number) : (acumAnt[idx] ? toY(acumAnt[idx]) : H/2);
+                setHover({ x: cx, y: cy, idx });
               };
 
               return (
                 <AnimatedCard delay={280}>
                   <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-3 h-full">
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
-                    <div className="flex items-center justify-between">
+                    {/* Header */}
+                    <div className="flex items-center justify-between shrink-0">
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
                         Faturamento Acumulado — {anoAtual} vs {anoAnt}
                       </span>
@@ -466,6 +512,7 @@ export default function Faturamento() {
                         </div>
                       </div>
                     </div>
+
                     {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
                       <div className="flex flex-col gap-2 flex-1 justify-center py-4">
                         {isFetchingCharts ? (
@@ -481,28 +528,114 @@ export default function Faturamento() {
                         )}
                       </div>
                     ) : (
-                      <svg viewBox="0 0 480 220" preserveAspectRatio="xMidYMid meet" className="w-full flex-1" style={{ minHeight: 160 }}>
+                      <svg
+                        viewBox={`0 0 ${W} ${H}`}
+                        preserveAspectRatio="xMidYMid meet"
+                        className="w-full flex-1 cursor-crosshair"
+                        style={{ minHeight: 160 }}
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={() => setHover(null)}
+                      >
                         <defs>
                           <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2"/>
+                            <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.18"/>
                             <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
                           </linearGradient>
+                          <clipPath id="yc-clip"><rect x={padL} y={padT} width={W-padL-padR} height={H-padT-padB}/></clipPath>
                         </defs>
+
+                        {/* Grid */}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <line key={f} x1={48} y1={16+(220-16-28)*(1-f)} x2={472} y2={16+(220-16-28)*(1-f)}
+                          <line key={f} x1={padL} y1={toY(maxVal*f)} x2={W-padR} y2={toY(maxVal*f)}
                             stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
+                        {/* Labels eixo Y */}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(220-16-28)*(1-f)+4} textAnchor="end"
-                            fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                          <text key={f} x={padL-4} y={toY(maxVal*f)+3} textAnchor="end"
+                            fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
                         ))}
-                        <path d={`${buildPath(acumAtual,480,220,48,8,16,28)} L472,192 L48,192 Z`} fill="url(#fatGradAcum)"/>
-                        <path d={buildPath(acumAnt,480,220,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
-                        <path d={buildPath(acumAtual,480,220,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
+
+                        {/* Área 2026 */}
+                        {areaPath && <path d={areaPath} fill="url(#fatGradAcum)" clipPath="url(#yc-clip)"/>}
+
+                        {/* Linha 2025 */}
+                        <path d={pathAnt} fill="none" stroke="#64748b" strokeWidth={1.2} strokeDasharray="5,4" opacity={0.4} clipPath="url(#yc-clip)"/>
+
+                        {/* Linha 2026 */}
+                        <path d={pathAtual} fill="none" stroke="#fbbf24" strokeWidth={2} clipPath="url(#yc-clip)"/>
+
+                        {/* Ponto final 2026 */}
+                        {acumAtual[mesFiltro] !== null && (
+                          <circle cx={toX(mesFiltro)} cy={toY(acumAtual[mesFiltro] as number)}
+                            r={3.5} fill="#fbbf24" stroke="var(--sgt-bg-card)" strokeWidth={1.5}/>
+                        )}
+
+                        {/* Labels meses */}
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={215} textAnchor="middle"
-                            fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                          <text key={m} x={toX(i)} y={H-4} textAnchor="middle"
+                            fontSize={8} fill={i === mesFiltro ? "#fbbf24" : "var(--sgt-text-muted)"}
+                            fontWeight={i === mesFiltro ? "700" : "400"}
+                            fontFamily="system-ui">{m}</text>
                         ))}
+
+                        {/* Linha vertical de hover */}
+                        {hover && (
+                          <line x1={hover.x} y1={padT} x2={hover.x} y2={H-padB}
+                            stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+                        )}
+
+                        {/* Dots de hover */}
+                        {hover && acumAtual[hover.idx] !== null && (
+                          <circle cx={hover.x} cy={toY(acumAtual[hover.idx] as number)}
+                            r={4} fill="#fbbf24" stroke="var(--sgt-bg-card)" strokeWidth={1.5}/>
+                        )}
+                        {hover && (
+                          <circle cx={hover.x} cy={toY(acumAnt[hover.idx])}
+                            r={3} fill="#94a3b8" stroke="var(--sgt-bg-card)" strokeWidth={1.5} opacity={0.6}/>
+                        )}
+
+                        {/* Tooltip */}
+                        {hover && (() => {
+                          const vAtual = acumAtual[hover.idx];
+                          const vAnt   = acumAnt[hover.idx];
+                          const delta  = vAtual !== null && vAnt > 0 ? ((vAtual - vAnt) / vAnt) * 100 : null;
+                          const tw = 148, th = vAtual !== null ? 70 : 52;
+                          const tx = hover.x + 10 + tw > W ? hover.x - tw - 10 : hover.x + 10;
+                          const ty = Math.max(padT, Math.min(hover.y - 20, H - padB - th));
+                          return (
+                            <g>
+                              <rect x={tx} y={ty} width={tw} height={th} rx={6}
+                                fill="var(--sgt-bg-section)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.5}/>
+                              {/* Mês */}
+                              <text x={tx+10} y={ty+14} fontSize={8.5} fontWeight="700"
+                                fill="rgba(255,255,255,0.9)" fontFamily="system-ui">
+                                {months[hover.idx]}
+                              </text>
+                              {/* 2026 */}
+                              {vAtual !== null && (
+                                <>
+                                  <circle cx={tx+10} cy={ty+27} r={3} fill="#fbbf24"/>
+                                  <text x={tx+17} y={ty+31} fontSize={9} fill="#fbbf24" fontFamily="system-ui" fontWeight="600">
+                                    {anoAtual}: {fmtFull(vAtual)}
+                                  </text>
+                                </>
+                              )}
+                              {/* 2025 */}
+                              <circle cx={tx+10} cy={ty+(vAtual !== null ? 45 : 30)} r={2.5} fill="#94a3b8" opacity={0.6}/>
+                              <text x={tx+17} y={ty+(vAtual !== null ? 49 : 34)} fontSize={9}
+                                fill="rgba(148,163,184,0.65)" fontFamily="system-ui">
+                                {anoAnt}: {fmtFull(vAnt)}
+                              </text>
+                              {/* Delta */}
+                              {delta !== null && vAtual !== null && (
+                                <text x={tx+tw-8} y={ty+14} textAnchor="end" fontSize={8} fontWeight="700"
+                                  fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="system-ui">
+                                  {delta >= 0 ? "+" : ""}{delta.toFixed(1)}%
+                                </text>
+                              )}
+                            </g>
+                          );
+                        })()}
                       </svg>
                     )}
                   </div>
@@ -528,9 +661,13 @@ export default function Faturamento() {
                 osAndamento_totalVeiculos: osEmAndamento.totalVeiculos,
                 osAndamento_custoPrevisto: Math.round(osEmAndamento.custoPrevisto),
                 osAndamento_veiculos: osEmAndamento.veiculos,
-                osAndamento_receitaDiariaPerdida: osEmAndamento.totalVeiculos > 0 && mediaDiaUtil > 0 && rows.length > 0
-                  ? Math.round((mediaDiaUtil / rows.length) * osEmAndamento.totalVeiculos)
-                  : 0,
+                osAndamento_totalVeiculosAtivos: frota.filter(v => v.situacao === "ATIVO").length,
+                osAndamento_receitaDiariaPerdida: (() => {
+                  const veiculosAtivos = frota.filter(v => v.situacao === "ATIVO").length;
+                  if (osEmAndamento.totalVeiculos === 0 || mediaDiaUtil === 0 || veiculosAtivos === 0) return 0;
+                  // Receita perdida = proporção da frota parada × receita diária total
+                  return Math.round((osEmAndamento.totalVeiculos / veiculosAtivos) * mediaDiaUtil);
+                })(),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
