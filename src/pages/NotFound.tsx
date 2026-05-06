@@ -11,12 +11,18 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center sgt-bg-base px-4 sgt-text">
+    <div
+      className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
+    >
+      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(180,110,4,0.18),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 dark:opacity-100" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
 
-      {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(180,110,4,0.18),transparent_55%)] sgt-atmosphere" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background:"radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
-
+      <div className="relative flex flex-col flex-1 min-h-0 w-full">
+        <section
+          className="relative flex-1 min-h-0 flex items-center justify-center border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
+          style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
+        >
       <div className="relative animate-[fadeSlideIn_0.5s_ease-out] text-center">
 
         {/* Ícone */}
@@ -44,6 +50,8 @@ const NotFound = () => {
           <Home className="h-4 w-4" />
           Voltar ao Dashboard
         </button>
+      </div>
+        </section>
       </div>
     </div>
   );

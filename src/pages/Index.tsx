@@ -1576,12 +1576,12 @@ const Index = () => {
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Dashboard</span>
                 </div>
               </div>
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
               </div>
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
@@ -1621,12 +1621,12 @@ const Index = () => {
 
               {/* Linha 2: badge tempo real */}
               <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-2.5">
+                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                   </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-cyan-300">Tempo real</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
                 </div>
               </div>
 
