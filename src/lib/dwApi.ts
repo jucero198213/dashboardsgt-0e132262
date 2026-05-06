@@ -317,7 +317,9 @@ export function clearDwCache(prefix?: string): void {
 // ─── Exports públicos: FINANCEIRO ─────────────────────────────────────────────
 
 export async function loadDwFilters(): Promise<DwFiltersResponse> {
-  return callEdge<DwFiltersResponse>(ENDPOINT_FINANCEIRO, { action: "filters" });
+  return cached("financeiro:filters", () =>
+    callEdge<DwFiltersResponse>(ENDPOINT_FINANCEIRO, { action: "filters" }),
+  );
 }
 
 export async function fetchDwData(params: {
@@ -326,10 +328,10 @@ export async function fetchDwData(params: {
   filial?: string | null;
   empresa?: string | null;
 }): Promise<DwFetchResponse> {
-  return callEdge<DwFetchResponse>(ENDPOINT_FINANCEIRO, {
-    action: "fetch",
-    ...params,
-  });
+  const key = `financeiro:fetch:${JSON.stringify(params)}`;
+  return cached(key, () =>
+    callEdge<DwFetchResponse>(ENDPOINT_FINANCEIRO, { action: "fetch", ...params }),
+  );
 }
 
 export async function fetchFaturamento(params: {
@@ -338,10 +340,10 @@ export async function fetchFaturamento(params: {
   filial?: string | null;
   empresa?: string | null;
 }): Promise<FaturamentoResponse> {
-  return callEdge<FaturamentoResponse>(ENDPOINT_FINANCEIRO, {
-    action: "faturamento",
-    ...params,
-  });
+  const key = `financeiro:faturamento:${JSON.stringify(params)}`;
+  return cached(key, () =>
+    callEdge<FaturamentoResponse>(ENDPOINT_FINANCEIRO, { action: "faturamento", ...params }),
+  );
 }
 
 // ─── Exports públicos: FROTA ──────────────────────────────────────────────────
