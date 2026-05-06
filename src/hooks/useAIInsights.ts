@@ -2,6 +2,12 @@ import { useState, useCallback } from "react";
 
 export type InsightTipo = "alerta" | "oportunidade" | "atencao" | "positivo";
 
+export interface InsightDetalhe {
+  rotulo: string;   // ex: "Veículos parados", "Receita em risco"
+  valor: string;    // ex: "5 caminhões", "R$ 82.000"
+  obs?: string;     // ex: "nos 18 dias úteis restantes"
+}
+
 export interface AIInsight {
   id: number;
   tipo: InsightTipo;
@@ -9,6 +15,12 @@ export interface AIInsight {
   descricao: string;
   impacto: string;
   acao: string;
+  /** Dados detalhados para o modal — opcional */
+  detalhes?: InsightDetalhe[];
+  /** Contexto adicional longo para o modal */
+  contexto?: string;
+  /** Lista de itens (ex: nomes de veículos, clientes) para o modal */
+  itens?: string[];
 }
 
 interface UseAIInsightsReturn {
@@ -63,13 +75,22 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
     const topVeis = osVeiculosList.slice(0, 3).map(v => v.veiculo).join(", ");
 
     ins.push({ id: 0,
-      tipo: osVeiculos >= 5 ? "alerta" : osVeiculos >= 2 ? "atencao" : "atencao",
+      tipo: osVeiculos >= 5 ? "alerta" : "atencao",
       titulo: `${osVeiculos} caminhão(ões) imobilizado(s) em manutenção`,
       descricao: `${osTotal} OS abertas (situação A) em ${osVeiculos} veículo(s) parado(s): ${topVeis}${osVeiculosList.length > 3 ? " e outros" : ""}. Cada dia parado é receita não gerada.`,
       impacto: diasRestantes > 0
         ? `Estimativa de ${fmtBRL(receitaPotencialPerdida)} de receita não gerada nos ${diasRestantes} dias úteis restantes`
         : `${fmtBRL(osReceitaPerdida)}/dia útil de capacidade ociosa`,
       acao: `Priorizar liberação dos veículos parados — cada dia conta ${fmtBRL(osReceitaPerdida)} em receita potencial`,
+      detalhes: [
+        { rotulo: "Veículos parados", valor: `${osVeiculos} caminhão(ões)` },
+        { rotulo: "OS em aberto (sit. A)", valor: `${osTotal} ordens` },
+        { rotulo: "Receita diária em risco", valor: fmtBRL(osReceitaPerdida), obs: "estimativa por veículo parado" },
+        ...(diasRestantes > 0 ? [{ rotulo: "Perda estimada até fim do mês", valor: fmtBRL(receitaPotencialPerdida), obs: `${diasRestantes} dias úteis restantes` }] : []),
+        ...(osCusto > 0 ? [{ rotulo: "Custo previsto nas OS abertas", valor: fmtBRL(osCusto) }] : []),
+      ],
+      contexto: `Caminhões com OS na situação "A" (Andamento) estão imobilizados na oficina e não geram receita enquanto aguardam manutenção. A receita diária em risco foi calculada dividindo o faturamento médio por dia útil (${fmtBRL(media)}) pelo número de clientes ativos (${qtdClientes}), multiplicado pelos veículos parados — representa a fatia proporcional de capacidade operacional perdida.`,
+      itens: osVeiculosList.map(v => `${v.veiculo}${v.ordens > 1 ? ` (${v.ordens} OS)` : ""}`),
     });
   }
 
@@ -81,12 +102,29 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
       ins.push({ id: 0, tipo, titulo: `${top1.nome} concentra ${fmtPct(top1.percentual)} da receita`,
         descricao: `${fmtBRL(top1.valor)} de ${fmtBRL(total)} total. ${top1.percentual >= 60 ? "Dependência crítica de um único cliente." : "Nível de concentração relevante."}`,
         impacto: "Perda desse contrato comprometeria a operação financeira",
-        acao: "Acelerar prospecção e crescimento dos demais clientes para diluir dependência" });
+        acao: "Acelerar prospecção e crescimento dos demais clientes para diluir dependência",
+        detalhes: [
+          { rotulo: "Cliente", valor: top1.nome },
+          { rotulo: "Faturamento", valor: fmtBRL(top1.valor), obs: `${fmtPct(top1.percentual)} do total` },
+          { rotulo: "Total da carteira", valor: fmtBRL(total), obs: `${qtdClientes} clientes ativos` },
+          { rotulo: "Receita em risco", valor: fmtBRL(top1.valor), obs: "em caso de perda do contrato" },
+          ...(top5.length > 1 ? [{ rotulo: "2º maior cliente", valor: top5[1].nome, obs: `${fmtPct(top5[1].percentual)} — ${fmtBRL(top5[1].valor)}` }] : []),
+        ],
+        contexto: `Concentração acima de ${top1.percentual >= 60 ? "60%" : "40%"} em um único cliente representa risco crítico de receita. Qualquer renegociação, inadimplência ou perda desse contrato impacta diretamente a capacidade operacional da empresa. O ideal é que nenhum cliente represente mais de 30% da receita total.`,
+        itens: top5.map(c => `${c.nome}: ${fmtBRL(c.valor)} (${fmtPct(c.percentual)})`),
+      });
     } else {
       ins.push({ id: 0, tipo: "positivo", titulo: "Carteira bem distribuída",
         descricao: `${top1.nome} responde por apenas ${fmtPct(top1.percentual)} com ${qtdClientes} clientes ativos. Boa diversificação.`,
         impacto: "Risco de receita concentrada sob controle",
-        acao: "Manter política de diversificação e nutrir clientes de menor porte" });
+        acao: "Manter política de diversificação e nutrir clientes de menor porte",
+        detalhes: [
+          { rotulo: "Maior cliente", valor: top1.nome, obs: `${fmtPct(top1.percentual)} da receita` },
+          { rotulo: "Total clientes", valor: `${qtdClientes} ativos` },
+          { rotulo: "Faturamento total", valor: fmtBRL(total) },
+        ],
+        itens: top5.map(c => `${c.nome}: ${fmtBRL(c.valor)} (${fmtPct(c.percentual)})`),
+      });
     }
   }
 
