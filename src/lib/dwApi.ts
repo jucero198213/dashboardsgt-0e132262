@@ -496,5 +496,7 @@ export interface OperacionalResponse {
  * Sem filtro de período — retorna o snapshot em tempo real.
  */
 export async function fetchOperacional(): Promise<OperacionalResponse> {
-  return callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {});
+  return cached("operacional:all", () =>
+    callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {}),
+  );
 }
