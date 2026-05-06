@@ -241,17 +241,20 @@ function calcPeriodoAnterior(dataInicio: string, dataFim: string): { inicio: str
   if (isNaN(ini.getTime()) || isNaN(fim.getTime())) return null;
 
   const subMes = (d: Date): Date => {
-    const r = new Date(d);
-    const mesAnt = r.getMonth() === 0 ? 11 : r.getMonth() - 1;
-    const anoAnt = r.getMonth() === 0 ? r.getFullYear() - 1 : r.getFullYear();
+    // Calcular mês e ano anteriores
+    const mesAnt = d.getMonth() === 0 ? 11 : d.getMonth() - 1;
+    const anoAnt = d.getMonth() === 0 ? d.getFullYear() - 1 : d.getFullYear();
+    // Último dia do mês anterior
     const ultimoDia = new Date(anoAnt, mesAnt + 1, 0).getDate();
-    r.setFullYear(anoAnt);
-    r.setMonth(mesAnt);
-    r.setDate(Math.min(r.getDate(), ultimoDia));
-    return r;
+    // Clamp o dia ao último dia disponível no mês anterior
+    const dia = Math.min(d.getDate(), ultimoDia);
+    // Criar data diretamente sem usar setMonth (evita overflow)
+    return new Date(anoAnt, mesAnt, dia);
   };
 
-  const fmt = (d: Date) => d.toISOString().split("T")[0];
+  const fmt = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
   return { inicio: fmt(subMes(ini)), fim: fmt(subMes(fim)) };
 }
 
@@ -264,16 +267,18 @@ function fmtBRLShort(v: number): string {
 function MiniKpiComp({ valorAtual, valorAnterior, isLoading, labelAnterior }: {
   valorAtual: number; valorAnterior: number | null; isLoading: boolean; labelAnterior: string;
 }) {
-  if (isLoading) return <div className="h-3.5 w-32 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />;
-  if (!valorAnterior) return <span className="text-[10px] text-slate-600 italic">Sem dados do período anterior</span>;
+  if (isLoading) return <div className="h-4 w-36 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />;
+  if (!valorAnterior) return <span className="text-[11px] text-slate-600 italic">Sem dados do período anterior</span>;
   const delta = ((valorAtual - valorAnterior) / valorAnterior) * 100;
   const pos = delta >= 0;
   return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold tabular-nums ${pos ? "text-emerald-400" : "text-red-400"}`}>
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className={`inline-flex items-center gap-1 text-[13px] font-bold tabular-nums ${pos ? "text-emerald-400" : "text-red-400"}`}>
         {pos ? "▲" : "▼"} {pos ? "+" : ""}{delta.toFixed(1)}%
       </span>
-      <span className="text-[10px] text-slate-500">vs {labelAnterior}: {fmtBRLShort(valorAnterior)}</span>
+      <span className="text-[11px] text-slate-400">
+        vs {labelAnterior}: {fmtBRLShort(valorAnterior)}
+      </span>
     </div>
   );
 }
@@ -283,7 +288,7 @@ function MiniDelta({ valorAtual, valorAnterior }: { valorAtual: number; valorAnt
   const delta = ((valorAtual - valorAnterior) / valorAnterior) * 100;
   const pos = delta >= 0;
   return (
-    <span className={`text-[9px] font-bold tabular-nums shrink-0 ${pos ? "text-emerald-400" : "text-red-400"}`}>
+    <span className={`text-[10px] font-bold tabular-nums shrink-0 ${pos ? "text-emerald-400" : "text-red-400"}`}>
       {pos ? "+" : ""}{delta.toFixed(1)}%
     </span>
   );
