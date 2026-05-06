@@ -94,13 +94,35 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
     }
   }
 
-  // Média por dia útil
-  if (media > 0) {
-    ins.push({ id: 0, tipo: media >= 300000 ? "positivo" : "oportunidade",
-      titulo: `Ticket diário: ${fmtBRL(media)}/dia útil`,
-      descricao: `Ritmo atual projetaria ${fmtBRL(media * 22)} ao mês em 22 dias úteis. ${media >= 300000 ? "Resultado sólido." : "Há potencial de crescimento."}`,
-      impacto: `Cada R$ 10k de aumento na média diária gera R$ ${(10000 * 22).toLocaleString("pt-BR")} a mais/mês`,
-      acao: media >= 300000 ? "Sustentar ritmo e buscar contratos adicionais" : "Identificar gargalos operacionais que limitam o volume diário" });
+  // Potencial da cauda da carteira
+  if (top5.length >= 3 && total > 0) {
+    const top1valor = top5[0].valor;
+    const menores = top5.slice(2); // clientes 3º em diante
+    const valorMenores = menores.reduce((s, c) => s + c.valor, 0);
+    const percMenores = (valorMenores / total) * 100;
+    const ticketMedio = qtdClientes > 0 ? total / qtdClientes : 0;
+    const ticketTop1 = top1valor;
+    const multiplicador = ticketMedio > 0 ? parseFloat((ticketTop1 / ticketMedio).toFixed(1)) : 0;
+
+    if (multiplicador >= 3 && qtdClientes > 3) {
+      ins.push({ id: 0, tipo: "oportunidade",
+        titulo: `${top5[0].nome} fatura ${multiplicador}x a média dos demais`,
+        descricao: `Ticket médio geral: ${fmtBRL(ticketMedio)}. O maior cliente fatura ${fmtBRL(ticketTop1)}. Os ${qtdClientes - 1} outros clientes representam apenas ${fmtPct(100 - top5[0].percentual)} da receita.`,
+        impacto: `Dobrar o ticket de 3 clientes menores geraria +${fmtBRL(ticketMedio * 3)}/mês`,
+        acao: "Identificar os 3 clientes com maior potencial de upsell e abrir conversa comercial ativa" });
+    } else if (percMenores > 0 && diasUteis > 0) {
+      // Insight de sazonalidade/concentração de dias
+      const mediaUltDias = media;
+      const diasRestantes = diasUteisMes - diasUteis;
+      const receitaRestanteEstimada = mediaUltDias * diasRestantes;
+      if (diasRestantes > 0 && receitaRestanteEstimada > 0) {
+        ins.push({ id: 0, tipo: "oportunidade",
+          titulo: `Estimativa: +${fmtBRL(receitaRestanteEstimada)} nos ${diasRestantes} dias úteis restantes`,
+          descricao: `Mantendo a média atual de ${fmtBRL(media)}/dia útil, o mês deve fechar em ${fmtBRL(total + receitaRestanteEstimada)} — ${fmtPct(((total + receitaRestanteEstimada) / provisao) * 100)} da projeção de ${fmtBRL(provisao)}.`,
+          impacto: "Monitorar ritmo diário é crítico para garantir o fechamento do mês",
+          acao: "Antecipar faturamento de serviços já executados para garantir emissão nos dias úteis restantes" });
+      }
+    }
   }
 
   return pick(ins);
