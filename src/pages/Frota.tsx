@@ -971,12 +971,22 @@ export default function Frota() {
               dados={{
                 totalVeiculos: kpis.total,
                 veiculosAtivos: kpis.ativos,
+                veiculosInativos: kpis.total - kpis.ativos,
+                percAtivos: kpis.total > 0 ? parseFloat(((kpis.ativos / kpis.total) * 100).toFixed(1)) : 0,
                 idadeMediaAnos: parseFloat(kpis.idadeMedia.toFixed(1)),
                 custoTotalManutencao: Math.round(kpis.custoTotal),
                 custoMedioPorVeiculo: Math.round(kpis.custoMedio),
                 totalOrdens: kpis.totalOrdens,
                 ordensAbertas: kpis.ordensAbertas,
-                top5MaioresGastos: top10Custo.slice(0, 5).map(v => ({ nome: v.nome, custo: Math.round(v.custo), ordens: v.ordens })),
+                top10MaioresGastos: top10Custo.map(v => ({
+                  nome: v.nome, custo: Math.round(v.custo),
+                  ordens: v.ordens, marca: v.marca,
+                  multiplo: kpis.custoMedio > 0 ? parseFloat((v.custo / kpis.custoMedio).toFixed(1)) : 0,
+                })),
+                distMarca: distMarca.slice(0, 6).map(m => ({ marca: m.nome, qtd: m.qtd })),
+                distClassificacao: distClassif.slice(0, 6).map(c => ({ classificacao: c.nome, qtd: c.qtd })),
+                veiculosMaiores10Anos: frotaFiltrada.filter(v => v.situacao === "ATIVO" && v.idade !== null && v.idade >= 10).length,
+                veiculosMaiores15Anos: frotaFiltrada.filter(v => v.situacao === "ATIVO" && v.idade !== null && v.idade >= 15).length,
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
