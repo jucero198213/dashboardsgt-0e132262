@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Package, DollarSign, AlertTriangle, Zap, Clock } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
+import { fetchFaturamento } from "@/lib/dwApi";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -233,6 +234,61 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
   );
 }
 
+// ─── Período anterior — mesmo intervalo, mês anterior ────────────────────────
+function calcPeriodoAnterior(dataInicio: string, dataFim: string): { inicio: string; fim: string } | null {
+  const ini = new Date(dataInicio + "T00:00:00");
+  const fim = new Date(dataFim + "T00:00:00");
+  if (isNaN(ini.getTime()) || isNaN(fim.getTime())) return null;
+
+  const subMes = (d: Date): Date => {
+    const r = new Date(d);
+    const mesAnt = r.getMonth() === 0 ? 11 : r.getMonth() - 1;
+    const anoAnt = r.getMonth() === 0 ? r.getFullYear() - 1 : r.getFullYear();
+    const ultimoDia = new Date(anoAnt, mesAnt + 1, 0).getDate();
+    r.setFullYear(anoAnt);
+    r.setMonth(mesAnt);
+    r.setDate(Math.min(r.getDate(), ultimoDia));
+    return r;
+  };
+
+  const fmt = (d: Date) => d.toISOString().split("T")[0];
+  return { inicio: fmt(subMes(ini)), fim: fmt(subMes(fim)) };
+}
+
+function fmtBRLShort(v: number): string {
+  if (v >= 1e6) return `R$ ${(v / 1e6).toFixed(1).replace(".", ",")}M`;
+  if (v >= 1e3) return `R$ ${(v / 1e3).toFixed(0)}k`;
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+}
+
+function MiniKpiComp({ valorAtual, valorAnterior, isLoading, labelAnterior }: {
+  valorAtual: number; valorAnterior: number | null; isLoading: boolean; labelAnterior: string;
+}) {
+  if (isLoading) return <div className="h-3.5 w-32 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />;
+  if (!valorAnterior) return <span className="text-[10px] text-slate-600 italic">Sem dados do período anterior</span>;
+  const delta = ((valorAtual - valorAnterior) / valorAnterior) * 100;
+  const pos = delta >= 0;
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold tabular-nums ${pos ? "text-emerald-400" : "text-red-400"}`}>
+        {pos ? "▲" : "▼"} {pos ? "+" : ""}{delta.toFixed(1)}%
+      </span>
+      <span className="text-[10px] text-slate-500">vs {labelAnterior}: {fmtBRLShort(valorAnterior)}</span>
+    </div>
+  );
+}
+
+function MiniDelta({ valorAtual, valorAnterior }: { valorAtual: number; valorAnterior: number | null }) {
+  if (!valorAnterior) return null;
+  const delta = ((valorAtual - valorAnterior) / valorAnterior) * 100;
+  const pos = delta >= 0;
+  return (
+    <span className={`text-[9px] font-bold tabular-nums shrink-0 ${pos ? "text-emerald-400" : "text-red-400"}`}>
+      {pos ? "+" : ""}{delta.toFixed(1)}%
+    </span>
+  );
+}
+
 export default function Faturamento() {
   const navigate = useNavigate();
   const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError, manutencao, frota } = useFinancialData();
@@ -302,6 +358,67 @@ export default function Faturamento() {
   const top5 = useMemo(() => [...rows].sort((a,b) => b.total - a.total).slice(0, 5), [rows]);
 
   // ── OS em ANDAMENTO (situação "A" no banco) ───────────────────────────────
+  // ── Período anterior e dados comparativos ────────────────────────────────
+  const [fatAnterior, setFatAnterior] = useState<{ FRETE_TOTAL: number; DESCRI: string | null }[]>([]);
+  const [loadingAnterior, setLoadingAnterior] = useState(false);
+
+  const periodoAnt = useMemo(() =>
+    dwFilter.dataInicio && dwFilter.dataFim
+      ? calcPeriodoAnterior(dwFilter.dataInicio, dwFilter.dataFim)
+      : null,
+  [dwFilter.dataInicio, dwFilter.dataFim]);
+
+  const labelAnterior = useMemo(() => {
+    if (!periodoAnt) return "";
+    const d = new Date(periodoAnt.fim + "T00:00:00");
+    return d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }).replace(".", "");
+  }, [periodoAnt]);
+
+  const fetchAnterior = useCallback(async () => {
+    if (!periodoAnt || !isProcessed) return;
+    setLoadingAnterior(true);
+    try {
+      const { data } = await fetchFaturamento({
+        dataInicio: periodoAnt.inicio,
+        dataFim: periodoAnt.fim,
+        filial: dwFilter.filial ?? null,
+        empresa: dwFilter.empresa ?? null,
+      });
+      setFatAnterior(data);
+    } catch { setFatAnterior([]); }
+    finally { setLoadingAnterior(false); }
+  }, [periodoAnt, isProcessed, dwFilter.filial, dwFilter.empresa]);
+
+  useEffect(() => { fetchAnterior(); }, [fetchAnterior]);
+
+  const totalAnterior = useMemo(() =>
+    fatAnterior.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0), [fatAnterior]);
+
+  const mediaAnt = useMemo(() => {
+    if (!periodoAnt || totalAnterior === 0) return 0;
+    const ini = new Date(periodoAnt.inicio + "T00:00:00");
+    const fim = new Date(periodoAnt.fim + "T00:00:00");
+    return totalAnterior > 0 ? totalAnterior / countWorkdays(ini, fim) : 0;
+  }, [periodoAnt, totalAnterior]);
+
+  const provisaoAnt = useMemo(() => {
+    if (mediaAnt === 0 || !periodoAnt) return 0;
+    const fim = new Date(periodoAnt.fim + "T00:00:00");
+    const primeiroDia = new Date(fim.getFullYear(), fim.getMonth(), 1);
+    const ultimoDia   = new Date(fim.getFullYear(), fim.getMonth() + 1, 0);
+    return mediaAnt * countWorkdays(primeiroDia, ultimoDia);
+  }, [mediaAnt, periodoAnt]);
+
+  // Mapa grupo → total anterior
+  const mapaAnterior = useMemo(() => {
+    const m = new Map<string, number>();
+    fatAnterior.forEach(r => {
+      const k = r.DESCRI ?? "Sem grupo";
+      m.set(k, (m.get(k) ?? 0) + (r.FRETE_TOTAL ?? 0));
+    });
+    return m;
+  }, [fatAnterior]);
+
   const osEmAndamento = useMemo(() => {
     const abertas = manutencao.filter(o => o.situacao === "ANDAMENTO");
     // Agrupa por veículo — cada veículo com pelo menos 1 OS aberta está imobilizado
@@ -449,6 +566,7 @@ export default function Faturamento() {
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">{diasUteis} dias úteis no período</span>
                     <span className="text-[13px] font-extrabold dark:text-white text-slate-700">{faturamento.length} clientes</span>
                   </div>
+                  <MiniKpiComp valorAtual={totalFaturado} valorAnterior={totalAnterior || null} isLoading={loadingAnterior} labelAnterior={labelAnterior} />
                 </div>
               </AnimatedCard>
 
@@ -477,6 +595,7 @@ export default function Faturamento() {
                       {fmtBRL(totalFaturado)} ÷ {diasUteis} dias úteis
                     </span>
                   </div>
+                  <MiniKpiComp valorAtual={mediaDiaUtil} valorAnterior={mediaAnt || null} isLoading={loadingAnterior} labelAnterior={labelAnterior} />
                 </div>
               </AnimatedCard>
 
@@ -505,6 +624,7 @@ export default function Faturamento() {
                       {mediaDiaUtil > 0 && diasUteisMes > 0 ? `Média/dia × ${diasUteisMes} dias úteis no mês` : "Sem dados suficientes"}
                     </span>
                   </div>
+                  <MiniKpiComp valorAtual={provisao} valorAnterior={provisaoAnt || null} isLoading={loadingAnterior} labelAnterior={labelAnterior} />
                 </div>
               </AnimatedCard>
 
@@ -584,8 +704,9 @@ export default function Faturamento() {
                           </div>
 
                           {/* Valor */}
-                          <span className="text-[12px] font-bold tabular-nums text-right" style={{ color }}>
+                          <span className="text-[12px] font-bold tabular-nums text-right flex items-center justify-end gap-1" style={{ color }}>
                             {fmtBRL(r.total)}
+                            <MiniDelta valorAtual={r.total} valorAnterior={mapaAnterior.get(r.descri) ?? null} />
                           </span>
 
                           {/* Participação */}
