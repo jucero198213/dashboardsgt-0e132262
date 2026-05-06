@@ -355,6 +355,8 @@ export function FinancialDataProvider({
 
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async (force = false) => {
+    // Sempre limpa o cache para garantir dados frescos ao atualizar
+    clearDwCache();
     // Cancela requisição anterior se ainda estiver em andamento
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
