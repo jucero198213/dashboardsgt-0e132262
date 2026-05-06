@@ -28,18 +28,15 @@ export default defineConfig(({ mode }) => ({
         clientsClaim: true,
         // Cache busting - força reload em mudanças
         cleanupOutdatedCaches: true,
-        // Estratégia: Network First (sempre tenta buscar novo, fallback cache)
+        // HTML/navegação: SEMPRE rede primeiro, sem cache longo
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/.*\.lovable\.app\/.*/i,
-            handler: 'NetworkFirst',
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
             options: {
-              cacheName: 'lovable-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutos - cache curto!
-              },
+              cacheName: "html-cache",
               networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 }, // 1 min
             },
           },
         ],
