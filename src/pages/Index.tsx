@@ -559,8 +559,8 @@ const YearComparisonChart = ({
         </div>
         {/* CR anterior */}
         <div className="flex items-center gap-1.5">
-          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
-          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#94a3b8", opacity: 0.55 }}>CR {anoAnterior}</span>
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="rgba(45,212,191,0.45)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(45,212,191,0.5)" }}>CR {anoAnterior}</span>
         </div>
         {/* CP atual */}
         <div className="flex items-center gap-1.5">
@@ -569,8 +569,8 @@ const YearComparisonChart = ({
         </div>
         {/* CP anterior */}
         <div className="flex items-center gap-1.5">
-          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#64748b" strokeWidth="1.2" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
-          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#64748b", opacity: 0.6 }}>CP {anoAnterior}</span>
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="rgba(248,113,113,0.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(248,113,113,0.45)" }}>CP {anoAnterior}</span>
         </div>
       </div>
 
@@ -628,16 +628,12 @@ const YearComparisonChart = ({
             })}
 
             {/* Linhas histórico (ano anterior) — fantasma; acendem com toggle/hover */}
-            <path d={buildSmooth(cpP)} fill="none" stroke="#64748b"
+            <path d={buildSmooth(cpP)} fill="none" stroke="rgba(248,113,113,0.28)"
               strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
-              opacity={0.35}
-              strokeDasharray="5,4"
               style={{ transition: "opacity 220ms ease" }}
               clipPath="url(#yc-clip)"/>
-            <path d={buildSmooth(crP)} fill="none" stroke="#94a3b8"
+            <path d={buildSmooth(crP)} fill="none" stroke="rgba(45,212,191,0.28)"
               strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
-              opacity={0.4}
-              strokeDasharray="5,4"
               style={{ transition: "opacity 220ms ease" }}
               clipPath="url(#yc-clip)"/>
 
@@ -667,11 +663,11 @@ const YearComparisonChart = ({
                   r={3} fill="rgba(248,113,113,0.85)" stroke="#0b1023" strokeWidth={1.5}/>
                 {(showHistory || hoverIndex !== null) && crP[hoverIndex] > 0 && (
                   <circle cx={toX(hoverIndex)} cy={toY(crP[hoverIndex])}
-                    r={2} fill="rgba(148,163,184,0.5)" stroke="#0b1023" strokeWidth={1}/>
+                    r={2} fill="rgba(45,212,191,0.35)" stroke="#0b1023" strokeWidth={1}/>
                 )}
                 {(showHistory || hoverIndex !== null) && cpP[hoverIndex] > 0 && (
                   <circle cx={toX(hoverIndex)} cy={toY(cpP[hoverIndex])}
-                    r={2} fill="rgba(100,116,139,0.5)" stroke="#0b1023" strokeWidth={1}/>
+                    r={2} fill="rgba(248,113,113,0.3)" stroke="#0b1023" strokeWidth={1}/>
                 )}
               </>
             )}
@@ -707,7 +703,7 @@ const YearComparisonChart = ({
                   <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CP {anoAtual}: {formatFull(cpA)}
                   </text>
-                  <text x={tx+18} y={ty+77} fill="rgba(100,116,139,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.45)" fontSize={9} fontFamily="system-ui,sans-serif">
                     {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
                   </text>
                   <line x1={tx+10} y1={ty+86} x2={tx+178} y2={ty+86} stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
