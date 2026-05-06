@@ -147,7 +147,7 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
     const diasRestantes = diasUteisMes - diasUteis;
     const faltaParaMeta = provisao - total;
     const ritmoNecessario = diasRestantes > 0 ? faltaParaMeta / diasRestantes : 0;
-    const ritmoAtual = mediaDiaUtil;
+    const ritmoAtual = media;
     const diffRitmo = ritmoNecessario - ritmoAtual;
 
     const tipo: InsightTipo = eficiencia < 70 ? "alerta" : eficiencia >= 110 ? "positivo" : "oportunidade";
