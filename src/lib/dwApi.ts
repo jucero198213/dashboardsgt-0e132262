@@ -13,7 +13,7 @@ const SUPABASE_ANON_KEY =
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
-const TUNNEL_URL = "https://honest-pam-break-asked.trycloudflare.com";
+const TUNNEL_URL = "https://exhibitions-meeting-enhancements-techno.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((
@@ -188,24 +188,24 @@ export interface ManutencaoResponse {
 // ─── Tipos: COMPRAS ───────────────────────────────────────────────────────────
 
 export interface ComprasRow {
-  sub_grupo:     string | null;
-  codsgp:        string | number | null;
-  tiponf:        string | null;
-  serie:         string | null;
-  data_compra:   string | null;
-  pedido:        string | number | null;
-  nota_fiscal:   string | number | null;
-  situac:        string | null;
-  codcus:        string | number | null;
-  centro_custo:  string | null;
-  codgpp:        string | number | null;
-  grupo:         string | null;
-  codprod:       string | number | null;
-  produto:       string | null;
-  quantidade:    number | null;
-  valor_un:      number | null;
-  codclifor:     string | number | null;
-  fornecedor:    string | null;
+  sub_grupo: string | null;
+  codsgp: string | number | null;
+  tiponf: string | null;
+  serie: string | null;
+  data_compra: string | null;
+  pedido: string | number | null;
+  nota_fiscal: string | number | null;
+  situac: string | null;
+  codcus: string | number | null;
+  centro_custo: string | null;
+  codgpp: string | number | null;
+  grupo: string | null;
+  codprod: string | number | null;
+  produto: string | null;
+  quantidade: number | null;
+  valor_un: number | null;
+  codclifor: string | number | null;
+  fornecedor: string | null;
 }
 
 export interface ComprasResponse {
@@ -215,27 +215,27 @@ export interface ComprasResponse {
 // ─── Tipos: ABASTECIMENTO ─────────────────────────────────────────────────────
 
 export interface AbastecimentoRow {
-  codaba:             string | number | null;
-  motorista:          string | null;
-  posto:              string | null;
-  estado:             string | null;
-  vlrtot:             number | null;
-  quanti:             number | null;
-  datref:             string | null;
-  numdoc:             string | number | null;
-  veiculo:            string | null;
-  marca:              string | null;
-  modelo:             string | null;
-  linha:              string | number | null;
-  media:              number | null;
-  ultkmt:             number | null;
-  atukmt:             number | null;
-  medfab:             number | null;
-  odohor:             string | null;
-  frota:              string | null;
+  codaba: string | number | null;
+  motorista: string | null;
+  posto: string | null;
+  estado: string | null;
+  vlrtot: number | null;
+  quanti: number | null;
+  datref: string | null;
+  numdoc: string | number | null;
+  veiculo: string | null;
+  marca: string | null;
+  modelo: string | null;
+  linha: string | number | null;
+  media: number | null;
+  ultkmt: number | null;
+  atukmt: number | null;
+  medfab: number | null;
+  odohor: string | null;
+  frota: string | null;
   codigo_combustivel: string | number | null;
-  tipo_combustivel:   string | null;
-  nota_fiscal:        string | number | null;
+  tipo_combustivel: string | null;
+  nota_fiscal: string | number | null;
 }
 
 export interface AbastecimentoResponse {
@@ -279,12 +279,12 @@ async function callEdge<T>(
 // - Dados financeiros/operacionais mudam com frequência → 2 min
 // - Dados de frota/RH são mais estáticos → 10 min
 // - Filtros (filiais/empresas) raramente mudam → 30 min
-const TTL_FINANCEIRO  = 2  * 60 * 1000;   // faturamento, contas, compras
-const TTL_OPERACIONAL = 2  * 60 * 1000;   // snapshot em tempo real
-const TTL_FROTA       = 10 * 60 * 1000;   // frota, manutenção, abastecimento
-const TTL_RH          = 10 * 60 * 1000;   // RH
-const TTL_FILTROS     = 30 * 60 * 1000;   // filiais, empresas
-const DEFAULT_TTL_MS  = TTL_FINANCEIRO;   // fallback
+const TTL_FINANCEIRO = 2 * 60 * 1000;   // faturamento, contas, compras
+const TTL_OPERACIONAL = 2 * 60 * 1000;   // snapshot em tempo real
+const TTL_FROTA = 10 * 60 * 1000;   // frota, manutenção, abastecimento
+const TTL_RH = 10 * 60 * 1000;   // RH
+const TTL_FILTROS = 30 * 60 * 1000;   // filiais, empresas
+const DEFAULT_TTL_MS = TTL_FINANCEIRO;   // fallback
 
 interface CacheEntry<T> {
   expiresAt: number;
@@ -409,30 +409,30 @@ export async function fetchAbastecimento(params?: {
 // ─── Tipos: RH ────────────────────────────────────────────────────────────────
 
 export interface RhRow {
-  codmot:                string | number | null;
-  motorista:             string | null;
-  data_nascimento:       string | null;
-  nacionalidade:         string | null;
-  estado:                string | null;
-  endereco:              string | null;
-  bairro:                string | null;
-  habilitacao:           string | null;
-  uf_habilitacao:        string | null;
+  codmot: string | number | null;
+  motorista: string | null;
+  data_nascimento: string | null;
+  nacionalidade: string | null;
+  estado: string | null;
+  endereco: string | null;
+  bairro: string | null;
+  habilitacao: string | null;
+  uf_habilitacao: string | null;
   categoria_habilitacao: string | null;
-  validade_habilitacao:  string | null;
-  numero_rg:             string | null;
-  data_emissao_rg:       string | null;
-  numero_cpf:            string | null;
-  empregado:             string | null;
-  codigo_folha:          string | number | null;
-  codigo_filial:         string | number | null;
-  data_admissao:         string | null;
-  data_demissao:         string | null;
-  motivo_demissao:       string | null;
-  situacao:              string | null;
-  funcao:                string | null;
-  tipo_funcionario:      string | null;
-  sexo:                  string | null;
+  validade_habilitacao: string | null;
+  numero_rg: string | null;
+  data_emissao_rg: string | null;
+  numero_cpf: string | null;
+  empregado: string | null;
+  codigo_folha: string | number | null;
+  codigo_filial: string | number | null;
+  data_admissao: string | null;
+  data_demissao: string | null;
+  motivo_demissao: string | null;
+  situacao: string | null;
+  funcao: string | null;
+  tipo_funcionario: string | null;
+  sexo: string | null;
 }
 
 export interface RhResponse {
@@ -455,43 +455,43 @@ export async function fetchRh(params?: {
 // ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
 
 export interface OperacionalRow {
-  id:                       string | number | null;
-  codcli:                   string | number | null;
-  cli_nomeab:               string | null;
-  codmot:                   string | number | null;
-  motorista:                string | null;
-  veiculo:                  string | null;
-  latitude:                 number | string | null;
-  longitude:                number | string | null;
-  referencia:               string | null;
-  veiculo2:                 string | null;
-  veiculo3:                 string | null;
-  tipo_documento:           string | null;
-  codigo_documento:         string | number | null;
-  serie_documento:          string | null;
-  filial_documento:         string | null;
-  cod_remetente:            string | number | null;
-  remetente:                string | null;
-  cod_destinatario:         string | number | null;
-  destinatario:             string | null;
-  data_saida_original:      string | null;
-  data_saida_real:          string | null;
-  percentual_completo:      number | null;
-  previsao_chegada:         string | null;
-  situacao_viagem:          string | null;
-  descricao_documento:      string | null;
-  descricao_situacao:       string | null;
-  descricao_origem:         string | null;
-  descricao_destino:        string | null;
-  latitude_remetente:       number | string | null;
-  longitude_remetente:      number | string | null;
-  latitude_destinatario:    number | string | null;
-  longitude_destinatario:   number | string | null;
-  total_itens:              number | null;
-  itens_real:               number | null;
-  classificacao_veiculo:    string | null;
-  situacao_veiculo:         string | null;
-  em_manutencao:            string | boolean | null;
+  id: string | number | null;
+  codcli: string | number | null;
+  cli_nomeab: string | null;
+  codmot: string | number | null;
+  motorista: string | null;
+  veiculo: string | null;
+  latitude: number | string | null;
+  longitude: number | string | null;
+  referencia: string | null;
+  veiculo2: string | null;
+  veiculo3: string | null;
+  tipo_documento: string | null;
+  codigo_documento: string | number | null;
+  serie_documento: string | null;
+  filial_documento: string | null;
+  cod_remetente: string | number | null;
+  remetente: string | null;
+  cod_destinatario: string | number | null;
+  destinatario: string | null;
+  data_saida_original: string | null;
+  data_saida_real: string | null;
+  percentual_completo: number | null;
+  previsao_chegada: string | null;
+  situacao_viagem: string | null;
+  descricao_documento: string | null;
+  descricao_situacao: string | null;
+  descricao_origem: string | null;
+  descricao_destino: string | null;
+  latitude_remetente: number | string | null;
+  longitude_remetente: number | string | null;
+  latitude_destinatario: number | string | null;
+  longitude_destinatario: number | string | null;
+  total_itens: number | null;
+  itens_real: number | null;
+  classificacao_veiculo: string | null;
+  situacao_veiculo: string | null;
+  em_manutencao: string | boolean | null;
 }
 
 export interface OperacionalResponse {
