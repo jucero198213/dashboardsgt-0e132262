@@ -933,12 +933,19 @@ export default function Operacional() {
                 viagensEmRota: kpis.emRota,
                 emManutencao: kpis.emManutencao,
                 comAtraso: kpis.comAtraso,
-                percMedioCompleto: Math.round(kpis.avgPerc),
+                percMedioCompleto: parseFloat(kpis.avgPerc.toFixed(1)),
+                percAtraso: kpis.emAndamento > 0 ? parseFloat(((kpis.comAtraso / kpis.emAndamento) * 100).toFixed(1)) : 0,
                 atrasados: alertas.atrasados,
                 prevUltrapassada: alertas.prevUltrapassada,
                 itensDivergentes: alertas.itensDiverg,
                 semGps: alertas.semGps,
                 totalViagens: filtrados.length,
+                distSituacao: distSituacao.slice(0, 6).map(s => ({ situacao: s.nome, qtd: s.qtd })),
+                distClassificacao: distClassi.slice(0, 6).map(c => ({ classificacao: c.nome, qtd: c.qtd })),
+                qtdMotoristas: new Set(filtrados.map(v => v.motorista).filter(Boolean)).size,
+                qtdClientes: new Set(filtrados.map(v => v.cliNomeab).filter(Boolean)).size,
+                viagensCompletas: filtrados.filter(v => v.percCompleto >= 100).length,
+                viagensNaoIniciadas: filtrados.filter(v => v.percCompleto === 0 && !v.emManutencao).length,
               }}
               autoGenerate={true}
             />

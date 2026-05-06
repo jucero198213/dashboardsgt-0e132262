@@ -798,7 +798,18 @@ export default function Manutencao() {
                 custoTotalMaoDeObra: Math.round(kpis.totalMO),
                 ordensExternas: kpis.externas,
                 ordensInternas: kpis.internas,
-                top5Veiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: (v as any).codvei ?? (v as any).veiculo, custo: Math.round(v.custo), ordens: (v as any).qtd ?? 0 })),
+                rankingVeiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: String(v.veiculo), custo: Math.round(v.custo) })),
+                rankingFornecedores: rankingFornecedor.slice(0, 5).map(f => ({ fornecedor: f.fornecedorFull, custo: Math.round(f.custo) })),
+                distClassificacao: distClassif.map(d => ({ classificacao: d.nome, custo: Math.round(d.custo) })),
+                outliersCusto: validacoes.outliersCusto.length,
+                ordensTravadas30d: validacoes.ordensTravadas.length,
+                semFornecedor: validacoes.semFornecedor.length,
+                concentracaoTopVeiculo: parseFloat((validacoes.concentracaoVeiculo * 100).toFixed(1)),
+                topVeiculoNome: validacoes.topVeiculoNome ?? null,
+                ratioCorretivaPercent: parseFloat((validacoes.ratioCorretiva * 100).toFixed(1)),
+                ordensCorretivasQtd: validacoes.corretivas,
+                semMaoDeObra: validacoes.semMO.length,
+                mediaCustoOrdem: Math.round(validacoes.mediaCusto),
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}

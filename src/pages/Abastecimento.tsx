@@ -845,13 +845,31 @@ export default function Abastecimento() {
                 custoTotal: Math.round(kpis.totalCusto),
                 volumeTotalLitros: Math.round(kpis.totalLitros),
                 qtdAbastecimentos: kpis.qtdAbast,
-                mediaConsumoKmL: Math.round((kpis.mediaConsumo ?? 0) * 10) / 10,
-                mediaFabricaKmL: Math.round((kpis.mediaFabrica ?? 0) * 10) / 10,
-                deltaConsumo: kpis.deltaMedia !== null ? Math.round(kpis.deltaMedia * 10) / 10 : null,
+                mediaConsumoKmL: parseFloat((kpis.mediaConsumo ?? 0).toFixed(2)),
+                mediaFabricaKmL: parseFloat((kpis.mediaFabrica ?? 0).toFixed(2)),
+                deltaConsumoPercent: kpis.deltaMedia !== null ? parseFloat(kpis.deltaMedia.toFixed(1)) : null,
                 kmRodados: Math.round(kpis.totalKm),
-                precoMedioLitro: Math.round(kpis.precoMedio * 100) / 100,
-                topVeiculoCusto: rankingVeiculo[0]?.placa ?? null,
-                topMotoristaCusto: rankingMotorista[0]?.motorista ?? null,
+                precoMedioLitro: parseFloat(kpis.precoMedio.toFixed(3)),
+                custoPorKm: kpis.totalKm > 0 ? parseFloat((kpis.totalCusto / kpis.totalKm).toFixed(3)) : 0,
+                rankingVeiculos: rankingVeiculo.slice(0, 5).map(r => ({
+                  veiculo: r.veiculo, custo: Math.round(r.custo),
+                  litros: Math.round(r.litros), km: Math.round(r.km), qtd: r.qtd,
+                  consumo: r.km > 0 ? parseFloat((r.litros > 0 ? r.km / r.litros : 0).toFixed(2)) : 0,
+                })),
+                rankingMotoristas: rankingMotorista.slice(0, 5).map(r => ({
+                  motorista: r.motorista, custo: Math.round(r.custo),
+                  litros: Math.round(r.litros), qtd: r.qtd,
+                })),
+                distCombustivel: distCombustivel.map(d => ({
+                  tipo: d.nome, custo: Math.round(d.custo),
+                  litros: Math.round(d.litros), qtd: d.qtd,
+                })),
+                comparativoFrota: comparativoFrota.slice(0, 5).map(f => ({
+                  frota: f.frota, consumoReal: f.real, consumoFabrica: f.fabrica,
+                  desvioPercent: f.fabrica > 0 ? parseFloat(((f.real - f.fabrica) / f.fabrica * 100).toFixed(1)) : 0,
+                })),
+                qtdPostos: new Set(registros.map(r => r.posto).filter(Boolean)).size,
+                qtdEstados: new Set(registros.map(r => r.estado).filter(Boolean)).size,
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
