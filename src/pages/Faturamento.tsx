@@ -44,6 +44,195 @@ function parseDate(str: string): Date | null {
   return null;
 }
 
+// ─── Gráfico Acumulado ────────────────────────────────────────────────────────
+interface GraficoAcumuladoProps {
+  faturamentoMensal: number[];
+  faturamentoMensalAnterior: number[];
+  isFetchingCharts: boolean;
+  dataFim: string | null;
+}
+
+function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetchingCharts, dataFim }: GraficoAcumuladoProps) {
+  const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
+
+  const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const anoAtual = dataFim ? new Date(dataFim).getFullYear() : new Date().getFullYear();
+  const anoAnt   = anoAtual - 1;
+  const mesFiltro = dataFim ? new Date(dataFim).getMonth() : 11;
+
+  const acumAtual = useMemo<(number | null)[]>(() => {
+    const arr: (number | null)[] = [];
+    let soma = 0;
+    for (let i = 0; i < 12; i++) {
+      if (i <= mesFiltro) { soma += faturamentoMensal[i] ?? 0; arr.push(soma); }
+      else arr.push(null);
+    }
+    return arr;
+  }, [faturamentoMensal, mesFiltro]);
+
+  const acumAnt = useMemo<number[]>(() => {
+    const arr: number[] = [];
+    let soma = 0;
+    for (let i = 0; i < 12; i++) { soma += faturamentoMensalAnterior[i] ?? 0; arr.push(soma); }
+    return arr;
+  }, [faturamentoMensalAnterior]);
+
+  const W = 480, H = 220, padL = 52, padR = 8, padT = 16, padB = 28;
+  const validAtual = acumAtual.filter((v): v is number => v !== null);
+  const maxVal = Math.max(...validAtual, ...acumAnt, 1);
+
+  const toX = (i: number) => padL + (i / 11) * (W - padL - padR);
+  const toY = (v: number) => padT + (H - padT - padB) - (v / maxVal) * (H - padT - padB);
+  const fmtY    = (v: number) => v >= 1e6 ? `R$ ${(v/1e6).toFixed(1).replace(".",",")}M` : v >= 1e3 ? `R$ ${(v/1e3).toFixed(0)}k` : "R$ 0";
+  const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+  const buildPath = (data: (number | null)[]) => {
+    const pts = data.map((v, i) => v !== null ? { x: toX(i), y: toY(v) } : null);
+    const valid = pts.filter((p): p is { x: number; y: number } => p !== null);
+    if (valid.length === 0) return "";
+    let d = `M${valid[0].x},${valid[0].y}`;
+    for (let i = 1; i < valid.length; i++) {
+      const p0 = valid[i-1], p1 = valid[i];
+      d += ` C${p0.x+(p1.x-p0.x)*0.3},${p0.y} ${p1.x-(p1.x-p0.x)*0.3},${p1.y} ${p1.x},${p1.y}`;
+    }
+    return d;
+  };
+
+  const pathAtual = buildPath(acumAtual);
+  const pathAnt   = buildPath(acumAnt);
+  const areaPath  = pathAtual ? `${pathAtual} L${toX(mesFiltro)},${toY(0)} L${toX(0)},${toY(0)} Z` : "";
+
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width * W;
+    const raw = (px - padL) / (W - padL - padR) * 11;
+    const idx = Math.max(0, Math.min(11, Math.round(raw)));
+    setHover({ x: toX(idx), idx });
+  };
+
+  return (
+    <AnimatedCard delay={280}>
+      <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-3 h-full">
+        <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
+        <div className="flex items-center justify-between shrink-0">
+          <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
+            Faturamento Acumulado — {anoAtual} vs {anoAnt}
+          </span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="h-[2px] w-4 rounded-full bg-amber-400 inline-block" />
+              <span className="text-[9px] font-semibold text-amber-400">{anoAtual}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4,3"/></svg>
+              <span className="text-[9px] font-semibold text-slate-400">{anoAnt}</span>
+            </div>
+          </div>
+        </div>
+
+        {isFetchingCharts || faturamentoMensal.every(v => v === 0) ? (
+          <div className="flex flex-col gap-2 flex-1 justify-center py-4">
+            {isFetchingCharts ? (
+              <>
+                <div className="h-40 w-full rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                <p className="text-[10px] text-center text-slate-500">Carregando dados mensais...</p>
+              </>
+            ) : (
+              <p className="text-[12px] text-center text-slate-500 py-8">Sem dados — clique em Atualizar</p>
+            )}
+          </div>
+        ) : (
+          <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet"
+            className="w-full flex-1 cursor-crosshair" style={{ minHeight: 160 }}
+            onMouseMove={handleMouseMove} onMouseLeave={() => setHover(null)}>
+            <defs>
+              <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.18"/>
+                <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
+              </linearGradient>
+              <clipPath id="yc-clip"><rect x={padL} y={padT} width={W-padL-padR} height={H-padT-padB}/></clipPath>
+            </defs>
+
+            {[0.25,0.5,0.75,1].map(f => (
+              <line key={f} x1={padL} y1={toY(maxVal*f)} x2={W-padR} y2={toY(maxVal*f)}
+                stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
+            ))}
+            {[0.25,0.5,0.75,1].map(f => (
+              <text key={f} x={padL-4} y={toY(maxVal*f)+3} textAnchor="end"
+                fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+            ))}
+
+            {areaPath && <path d={areaPath} fill="url(#fatGradAcum)" clipPath="url(#yc-clip)"/>}
+            <path d={pathAnt}   fill="none" stroke="#64748b" strokeWidth={1.2} strokeDasharray="5,4" opacity={0.4} clipPath="url(#yc-clip)"/>
+            <path d={pathAtual} fill="none" stroke="#fbbf24" strokeWidth={2}   clipPath="url(#yc-clip)"/>
+
+            {acumAtual[mesFiltro] !== null && (
+              <circle cx={toX(mesFiltro)} cy={toY(acumAtual[mesFiltro] as number)}
+                r={3.5} fill="#fbbf24" stroke="var(--sgt-bg-card)" strokeWidth={1.5}/>
+            )}
+
+            {months.map((m,i) => (
+              <text key={m} x={toX(i)} y={H-4} textAnchor="middle" fontSize={8}
+                fill={i === mesFiltro ? "#fbbf24" : "var(--sgt-text-muted)"}
+                fontWeight={i === mesFiltro ? "700" : "400"}
+                fontFamily="system-ui">{m}</text>
+            ))}
+
+            {hover && (
+              <line x1={hover.x} y1={padT} x2={hover.x} y2={H-padB}
+                stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3,3"/>
+            )}
+            {hover && acumAtual[hover.idx] !== null && (
+              <circle cx={hover.x} cy={toY(acumAtual[hover.idx] as number)}
+                r={4} fill="#fbbf24" stroke="var(--sgt-bg-card)" strokeWidth={1.5}/>
+            )}
+            {hover && (
+              <circle cx={hover.x} cy={toY(acumAnt[hover.idx])}
+                r={3} fill="#94a3b8" stroke="var(--sgt-bg-card)" strokeWidth={1.5} opacity={0.6}/>
+            )}
+
+            {hover && (() => {
+              const vAtual = acumAtual[hover.idx];
+              const vAnt   = acumAnt[hover.idx];
+              const delta  = vAtual !== null && vAnt > 0 ? ((vAtual - vAnt) / vAnt) * 100 : null;
+              const tw = 160, th = vAtual !== null ? 70 : 52;
+              const tx = hover.x + 10 + tw > W - padR ? hover.x - tw - 10 : hover.x + 10;
+              const ty = padT + 8;
+              return (
+                <g>
+                  <rect x={tx} y={ty} width={tw} height={th} rx={6}
+                    fill="var(--sgt-bg-section)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.5}/>
+                  <text x={tx+10} y={ty+14} fontSize={9} fontWeight="700"
+                    fill="rgba(255,255,255,0.9)" fontFamily="system-ui">{months[hover.idx]}</text>
+                  {delta !== null && (
+                    <text x={tx+tw-8} y={ty+14} textAnchor="end" fontSize={8} fontWeight="700"
+                      fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="system-ui">
+                      {delta >= 0 ? "+" : ""}{delta.toFixed(1)}%
+                    </text>
+                  )}
+                  {vAtual !== null && (
+                    <>
+                      <circle cx={tx+9} cy={ty+27} r={3} fill="#fbbf24"/>
+                      <text x={tx+17} y={ty+31} fontSize={8.5} fill="#fbbf24" fontFamily="system-ui" fontWeight="600">
+                        {anoAtual}: {fmtFull(vAtual)}
+                      </text>
+                    </>
+                  )}
+                  <circle cx={tx+9} cy={ty+(vAtual !== null ? 45 : 28)} r={2.5} fill="#94a3b8" opacity={0.6}/>
+                  <text x={tx+17} y={ty+(vAtual !== null ? 49 : 32)} fontSize={8.5}
+                    fill="rgba(148,163,184,0.6)" fontFamily="system-ui">
+                    {anoAnt}: {fmtFull(vAnt)}
+                  </text>
+                </g>
+              );
+            })()}
+          </svg>
+        )}
+      </div>
+    </AnimatedCard>
+  );
+}
+
 export default function Faturamento() {
   const navigate = useNavigate();
   const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError, manutencao, frota } = useFinancialData();
