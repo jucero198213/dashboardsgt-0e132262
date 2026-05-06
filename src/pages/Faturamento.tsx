@@ -538,7 +538,7 @@ export default function Faturamento() {
                 )}
 
                 {/* Rows */}
-                <div className="flex flex-col overflow-y-auto sgt-stagger" style={{ maxHeight: 360 }}>
+                <div className="flex flex-col flex-1 min-h-0 overflow-y-auto sgt-stagger">
                   {!isProcessed ? (
                     <div className="flex flex-col gap-2 p-4">
                       {[...Array(5)].map((_, i) => <Skel key={i} h="h-9" />)}
