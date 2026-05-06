@@ -204,7 +204,7 @@ export default function Faturamento() {
           )}
 
           {/* ── CONTEÚDO ── */}
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
 
             {/* KPIs linha 1 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch">
@@ -295,11 +295,11 @@ export default function Faturamento() {
             </div>
 
             {/* ── LINHA 2: Grupo de Cliente | Gráfico Acumulado ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
 
             {/* ── CARD: Faturamento por Grupo de Cliente ── */}
             <AnimatedCard delay={160}>
-              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full">
+              <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col">
                 <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/50 to-transparent" />
 
                 {/* Header */}
@@ -425,7 +425,7 @@ export default function Faturamento() {
 
               return (
                 <AnimatedCard delay={280}>
-                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2 h-full" style={{ minHeight: 220 }}>
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ height: "100%" }}>
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
@@ -457,7 +457,7 @@ export default function Faturamento() {
                         )}
                       </div>
                     ) : (
-                      <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[140px]">
+                      <svg viewBox="0 0 480 220" preserveAspectRatio="xMidYMid meet" className="w-full" style={{ height: 200 }}>
                         <defs>
                           <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2"/>
@@ -465,18 +465,18 @@ export default function Faturamento() {
                           </linearGradient>
                         </defs>
                         {[0.25,0.5,0.75,1].map(f => (
-                          <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)}
+                          <line key={f} x1={48} y1={16+(220-16-28)*(1-f)} x2={472} y2={16+(220-16-28)*(1-f)}
                             stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end"
+                          <text key={f} x={44} y={16+(220-16-28)*(1-f)+4} textAnchor="end"
                             fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
                         ))}
-                        <path d={`${buildPath(acumAtual,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#fatGradAcum)"/>
-                        <path d={buildPath(acumAnt,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
-                        <path d={buildPath(acumAtual,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
+                        <path d={`${buildPath(acumAtual,480,220,48,8,16,28)} L472,192 L48,192 Z`} fill="url(#fatGradAcum)"/>
+                        <path d={buildPath(acumAnt,480,220,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
+                        <path d={buildPath(acumAtual,480,220,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle"
+                          <text key={m} x={48+(i/11)*424} y={215} textAnchor="middle"
                             fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
                         ))}
                       </svg>
