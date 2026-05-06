@@ -20,14 +20,14 @@ const INDICATOR_IDENTITY: Record<string, {
   bgColor: string;     // fundo do ícone
   label: string;       // descrição curta
 }> = {
-  "Compra de Ativo": {
+  "PMT": {
     icon: Package,
     color: "#60a5fa",
     colorRgb: "96,165,250",
     bgColor: "rgba(96,165,250,0.12)",
     label: "Investimentos",
   },
-  "Óleo Diesel": {
+  "Diesel": {
     icon: Fuel,
     color: "#fbbf24",
     colorRgb: "251,191,36",

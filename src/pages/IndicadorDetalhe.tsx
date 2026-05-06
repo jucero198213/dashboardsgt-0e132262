@@ -20,8 +20,8 @@ import {
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 const INDICATOR_CODCUS: Record<string, string[]> = {
-  "Compra de Ativo": ["26"],
-  "Óleo Diesel":     ["21"],
+  "PMT": ["26"],
+  "Diesel":     ["21"],
   "Folha":           ["9"],
   "Imposto":         ["23"],
   "Pedágio":         ["24"],
@@ -31,8 +31,8 @@ const INDICATOR_CODCUS: Record<string, string[]> = {
 };
 
 const SUBTITLES: Record<string, string> = {
-  "Compra de Ativo": "Investimentos em ativos fixos e equipamentos da empresa",
-  "Óleo Diesel":     "Gastos com combustível diesel para operação da frota",
+  "PMT": "Investimentos em ativos fixos e equipamentos da empresa",
+  "Diesel":     "Gastos com combustível diesel para operação da frota",
   "Folha":           "Despesas com pessoal, salários e encargos trabalhistas",
   "Imposto":         "Tributos, impostos e contribuições fiscais do período",
   "Pedágio":         "Custos com pedágios nas rotas operacionais",
@@ -152,7 +152,7 @@ interface HeaderCfg {
 }
 
 const HEADER_CFG: Record<string, HeaderCfg> = {
-  "Compra de Ativo": {
+  "PMT": {
     veilRgba: "rgba(139,92,246,0.16)",
     stripe: "from-violet-400/60 to-violet-700/20",
     border: "border-violet-400/[0.12]",
@@ -220,7 +220,7 @@ const HEADER_CFG: Record<string, HeaderCfg> = {
   },
 };
 
-// ─── Header contextual genérico (todos exceto Óleo Diesel) ───────────────────
+// ─── Header contextual genérico (todos exceto Diesel) ───────────────────
 function ContextualHeader({ indicador, navigate }: { indicador: { nome: string; percentualEsperado: number; percentualReal: number }; navigate: (p: string) => void }) {
   const cfg = HEADER_CFG[indicador.nome];
   const subtitle = SUBTITLES[indicador.nome] ?? "Detalhamento do indicador estratégico";
@@ -293,8 +293,8 @@ export default function IndicadorDetalhe() {
   const di = dwFilter.dataInicio;
   const df = dwFilter.dataFim;
 
-  // Compra de Ativo (CODCUS 26): usa DATA_VENCIMENTO; demais: DATA_EMISSAO
-  const usaVencimento = indicador?.nome === "Compra de Ativo";
+  // PMT (CODCUS 26): usa DATA_VENCIMENTO; demais: DATA_EMISSAO
+  const usaVencimento = indicador?.nome === "PMT";
 
   const handleUpdate = useCallback(async () => {
     setProgress(0); setLoadingPhase("Conectando...");
@@ -315,7 +315,7 @@ export default function IndicadorDetalhe() {
     return dwRawData.filter((r) => {
       if (r.ORIGEM !== "CP") return false;
       if (!codcusList.includes(String(r.CODCUS ?? "").trim())) return false;
-      if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em Compra de Ativo
+      if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em PMT
       const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
       const dt = dateField ? String(dateField).split("T")[0] : null;
       return dt ? dt >= di && dt <= df : false;
@@ -341,7 +341,7 @@ export default function IndicadorDetalhe() {
       const m: Record<string, number> = {};
       src.forEach((r) => {
         if (r.ORIGEM !== "CP" || !codcusList.includes(String(r.CODCUS ?? "").trim())) return;
-        if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return;  // NFE não entra em Compra de Ativo
+        if (usaVencimento && r.TIPO_DOCUMENTO === "NFE") return;  // NFE não entra em PMT
         const dateField = usaVencimento ? r.DATA_VENCIMENTO : r.DATA_EMISSAO;
         const dt = dateField ? String(dateField).split("T")[0] : null;
         if (!dt || !dt.startsWith(pfx)) return;
@@ -432,8 +432,8 @@ export default function IndicadorDetalhe() {
             <MobileNav />
           </div>
 
-          {/* ── Header — Óleo Diesel: A+C+D / demais: padrão ── */}
-          {indicador.nome === "Óleo Diesel" ? (
+          {/* ── Header — Diesel: A+C+D / demais: padrão ── */}
+          {indicador.nome === "Diesel" ? (
             <div className="relative overflow-hidden rounded-[16px] sm:rounded-[20px] border border-amber-400/[0.12] bg-[linear-gradient(150deg,rgba(10,16,36,0.98)_0%,rgba(5,9,20,1)_100%)] shadow-[0_0_0_1px_rgba(201,162,39,0.06),0_20px_60px_rgba(0,0,0,0.5)]">
 
               {/* C — véu âmbar à direita */}
