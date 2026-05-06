@@ -355,7 +355,8 @@ export async function fetchFaturamento(params: {
 export async function fetchFrota(params?: {
   situacao?: "ATIVO" | "BAIXADO" | "INATIVO";
 }): Promise<FrotaResponse> {
-  return callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {});
+  const key = `frota:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {}));
 }
 
 // ─── Exports públicos: MANUTENCAO ─────────────────────────────────────────────
