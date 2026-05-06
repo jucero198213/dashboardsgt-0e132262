@@ -73,11 +73,11 @@ export default function Faturamento() {
   const totalFaturado = useMemo(() => faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0), [faturamento]);
 
   // ── Dias úteis, média e provisão ──
-  const { diasUteis, mediaDiaUtil, diasUteisRestantes, provisao } = useMemo(() => {
+  const { diasUteis, mediaDiaUtil, diasUteisRestantes, diasUteisMes, provisao } = useMemo(() => {
     const inicio = parseDate(dwFilter.dataInicio);
     const fim    = parseDate(dwFilter.dataFim);
     if (!inicio || !fim || totalFaturado === 0) {
-      return { diasUteis: 0, mediaDiaUtil: 0, diasUteisRestantes: 0, provisao: 0 };
+      return { diasUteis: 0, mediaDiaUtil: 0, diasUteisRestantes: 0, diasUteisMes: 0, provisao: 0 };
     }
 
     // Dias úteis no período filtrado
@@ -87,15 +87,19 @@ export default function Faturamento() {
     const mediaDiaUtil = diasUteis > 0 ? totalFaturado / diasUteis : 0;
 
     // Dias úteis restantes: do dia seguinte ao fim do filtro até o último dia do mês de fim
-    const ultimoDiaMes = new Date(fim.getFullYear(), fim.getMonth() + 1, 0); // último dia do mês
+    const ultimoDiaMes = new Date(fim.getFullYear(), fim.getMonth() + 1, 0);
     const amanha = new Date(fim);
     amanha.setDate(amanha.getDate() + 1);
     const diasUteisRestantes = amanha <= ultimoDiaMes ? countWorkdays(amanha, ultimoDiaMes) : 0;
 
-    // Provisão = média × dias úteis restantes
-    const provisao = mediaDiaUtil * diasUteisRestantes;
+    // Total de dias úteis do mês inteiro (do dia 1 ao último dia do mês de fim)
+    const primeiroDiaMes = new Date(fim.getFullYear(), fim.getMonth(), 1);
+    const diasUteisMes = countWorkdays(primeiroDiaMes, ultimoDiaMes);
 
-    return { diasUteis, mediaDiaUtil, diasUteisRestantes, provisao };
+    // Projeção = média/dia útil × total de dias úteis do mês
+    const provisao = mediaDiaUtil * diasUteisMes;
+
+    return { diasUteis, mediaDiaUtil, diasUteisRestantes, diasUteisMes, provisao };
   }, [dwFilter.dataInicio, dwFilter.dataFim, totalFaturado]);
 
   const rows = useMemo(() => {
@@ -275,14 +279,14 @@ export default function Faturamento() {
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
                     <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
-                      {provisao > 0 ? fmtBRL(provisao) : diasUteisRestantes === 0 ? "Mês completo" : "—"}
+                      {provisao > 0 ? fmtBRL(provisao) : diasUteisMes === 0 ? "—" : "—"}
                     </p>
                   )}
                   <p className="relative text-[10px] uppercase tracking-[0.15em] text-slate-500 font-medium">Projeção até fim do mês</p>
                   <div className="h-px relative" style={{ background: "var(--sgt-divider)" }} />
                   <div className="relative">
                     <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                      {diasUteisRestantes > 0 ? `${diasUteisRestantes} dias úteis restantes` : "Sem dias úteis restantes"}
+                      {mediaDiaUtil > 0 && diasUteisMes > 0 ? `Média/dia × ${diasUteisMes} dias úteis no mês` : "Sem dados suficientes"}
                     </span>
                   </div>
                 </div>
