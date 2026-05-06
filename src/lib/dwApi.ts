@@ -275,7 +275,16 @@ async function callEdge<T>(
 // ─── Cache em memória (TTL) ───────────────────────────────────────────────────
 // Cacheia respostas de fetch enquanto o usuário navega entre telas.
 // Padrão: 5 minutos. Após esse tempo a próxima chamada refaz o request.
-const DEFAULT_TTL_MS = 5 * 60 * 1000;
+// TTL por tipo de dado:
+// - Dados financeiros/operacionais mudam com frequência → 2 min
+// - Dados de frota/RH são mais estáticos → 10 min
+// - Filtros (filiais/empresas) raramente mudam → 30 min
+const TTL_FINANCEIRO  = 2  * 60 * 1000;   // faturamento, contas, compras
+const TTL_OPERACIONAL = 2  * 60 * 1000;   // snapshot em tempo real
+const TTL_FROTA       = 10 * 60 * 1000;   // frota, manutenção, abastecimento
+const TTL_RH          = 10 * 60 * 1000;   // RH
+const TTL_FILTROS     = 30 * 60 * 1000;   // filiais, empresas
+const DEFAULT_TTL_MS  = TTL_FINANCEIRO;   // fallback
 
 interface CacheEntry<T> {
   expiresAt: number;
@@ -356,7 +365,7 @@ export async function fetchFrota(params?: {
   situacao?: "ATIVO" | "BAIXADO" | "INATIVO";
 }): Promise<FrotaResponse> {
   const key = `frota:${JSON.stringify(params ?? {})}`;
-  return cached(key, () => callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {}));
+  return cached(key, () => callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {}), TTL_FROTA);
 }
 
 // ─── Exports públicos: MANUTENCAO ─────────────────────────────────────────────
@@ -371,7 +380,7 @@ export async function fetchManutencao(params?: {
   filial?: string | null;
 }): Promise<ManutencaoResponse> {
   const key = `manutencao:${JSON.stringify(params ?? {})}`;
-  return cached(key, () => callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {}));
+  return cached(key, () => callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {}), TTL_FROTA);
 }
 
 // ─── Exports públicos: COMPRAS ────────────────────────────────────────────────
@@ -395,7 +404,7 @@ export async function fetchAbastecimento(params?: {
   dataFim?: string;
 }): Promise<AbastecimentoResponse> {
   const key = `abastecimento:${JSON.stringify(params ?? {})}`;
-  return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}));
+  return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}), TTL_FROTA);
 }
 // ─── Tipos: RH ────────────────────────────────────────────────────────────────
 
@@ -440,7 +449,7 @@ export async function fetchRh(params?: {
   situacao?: string | null;
 }): Promise<RhResponse> {
   const key = `rh:${JSON.stringify(params ?? {})}`;
-  return cached(key, () => callEdge<RhResponse>(ENDPOINT_RH, params ?? {}));
+  return cached(key, () => callEdge<RhResponse>(ENDPOINT_RH, params ?? {}), TTL_RH);
 }
 
 // ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
@@ -498,5 +507,6 @@ export interface OperacionalResponse {
 export async function fetchOperacional(): Promise<OperacionalResponse> {
   return cached("operacional:all", () =>
     callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {}),
+    TTL_OPERACIONAL,
   );
 }
