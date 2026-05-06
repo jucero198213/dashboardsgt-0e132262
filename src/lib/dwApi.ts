@@ -370,7 +370,8 @@ export async function fetchManutencao(params?: {
   dataFim?: string;
   filial?: string | null;
 }): Promise<ManutencaoResponse> {
-  return callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {});
+  const key = `manutencao:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {}));
 }
 
 // ─── Exports públicos: COMPRAS ────────────────────────────────────────────────
@@ -379,7 +380,8 @@ export async function fetchCompras(params?: {
   dataInicio?: string;
   dataFim?: string;
 }): Promise<ComprasResponse> {
-  return callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {});
+  const key = `compras:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {}));
 }
 
 // ─── Exports públicos: ABASTECIMENTO ─────────────────────────────────────────
@@ -392,7 +394,8 @@ export async function fetchAbastecimento(params?: {
   dataInicio?: string;
   dataFim?: string;
 }): Promise<AbastecimentoResponse> {
-  return callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {});
+  const key = `abastecimento:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}));
 }
 // ─── Tipos: RH ────────────────────────────────────────────────────────────────
 
