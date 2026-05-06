@@ -386,138 +386,6 @@ export default function Faturamento() {
               </div>
             </AnimatedCard>
 
-            <InsightsSection
-              setor="faturamento"
-              dados={{
-                totalFaturado,
-                mediaDiaUtil: Math.round(mediaDiaUtil),
-                provisao: Math.round(provisao),
-                diasUteis,
-                diasUteisRestantes,
-                qtdClientes: rows.length,
-                top5Clientes: top5.map(r => ({ nome: r.descri, valor: Math.round(r.total), percentual: parseFloat(r.pct.toFixed(1)) })),
-              }}
-              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-              autoGenerate={true}
-        />
-            {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
-            <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              
-              {/* Insight 1: Ticket Médio */}
-              <AnimatedCard delay={180}>
-                <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Ticket Médio</p>
-                        <p className="text-2xl font-black text-white mt-1">R$ 2.8k</p>
-                      </div>
-                      <TrendingUp className="h-5 w-5 text-blue-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Ticket médio por CT-e. <span className="text-blue-400 font-semibold">Evolução nos últimos 24 meses</span> indica tendência de mercado.
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-              {/* Insight 2: Mix de Receita */}
-              <AnimatedCard delay={220}>
-                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Mix Receita</p>
-                        <p className="text-lg font-black text-white mt-1">Diversificar</p>
-                      </div>
-                      <Package className="h-5 w-5 text-emerald-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      <span className="text-emerald-400 font-semibold">Frete, pedágio, GRIS, ad valorem, taxas</span>. Qual % de cada? Oportunidades em serviços adicionais?
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-              {/* Insight 3: Reajuste de Tabela */}
-              <AnimatedCard delay={260}>
-                <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Reajuste</p>
-                        <p className="text-lg font-black text-white mt-1">5 rotas</p>
-                      </div>
-                      <DollarSign className="h-5 w-5 text-amber-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Clientes/rotas precisam <span className="text-amber-400 font-semibold">reajuste de tabela</span> com base em custo + margem alvo.
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-              {/* Insight 4: Receita Alta + Margem Baixa */}
-              <AnimatedCard delay={300}>
-                <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renegociar</p>
-                        <p className="text-2xl font-black text-white mt-1">3 clientes</p>
-                      </div>
-                      <AlertTriangle className="h-5 w-5 text-rose-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Clientes com <span className="text-rose-400 font-semibold">receita alta mas margem baixa</span>. Renegociar ou descartar?
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-              {/* Insight 5: Simulador Integrado */}
-              <AnimatedCard delay={340}>
-                <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-violet-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
-                        <p className="text-lg font-black text-white mt-1">Precificador</p>
-                      </div>
-                      <Zap className="h-5 w-5 text-violet-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      <span className="text-violet-400 font-semibold">Simulador integrado</span> com custo combustível, pedágio, sinistro, ociosidade para precificar rotas?
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-              {/* Insight 6: Processo de Faturamento */}
-              <AnimatedCard delay={380}>
-                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-cyan-400/30 transition-all">
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">Velocidade</p>
-                        <p className="text-lg font-black text-white mt-1">DSO?</p>
-                      </div>
-                      <Clock className="h-5 w-5 text-cyan-400/60" />
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Processo de faturamento <span className="text-cyan-400 font-semibold">rápido o suficiente</span> para não impactar DSO (prazo recebimento)?
-                    </p>
-                  </div>
-                </div>
-              </AnimatedCard>
-
-            </div>
 
 
             {/* Gráfico acumulado */}
@@ -550,7 +418,7 @@ export default function Faturamento() {
 
               return (
                 <AnimatedCard delay={280}>
-                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 320 }}>
+                  <div className="relative overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 flex flex-col gap-2" style={{ minHeight: 180 }}>
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/50 to-transparent" />
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em]" style={{ color: "var(--sgt-text-muted)" }}>
@@ -582,7 +450,7 @@ export default function Faturamento() {
                         )}
                       </div>
                     ) : (
-                      <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[220px]">
+                      <svg viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet" className="w-full flex-1 min-h-[140px]">
                         <defs>
                           <linearGradient id="fatGradAcum" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.2"/>
@@ -610,6 +478,21 @@ export default function Faturamento() {
                 </AnimatedCard>
               );
             })()}
+
+            <InsightsSection
+              setor="faturamento"
+              dados={{
+                totalFaturado,
+                mediaDiaUtil: Math.round(mediaDiaUtil),
+                provisao: Math.round(provisao),
+                diasUteis,
+                diasUteisRestantes,
+                qtdClientes: rows.length,
+                top5Clientes: top5.map(r => ({ nome: r.descri, valor: Math.round(r.total), percentual: parseFloat(r.pct.toFixed(1)) })),
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+              autoGenerate={true}
+            />
 
           </div>
         </section>
