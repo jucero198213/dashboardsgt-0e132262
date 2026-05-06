@@ -540,9 +540,6 @@ const YearComparisonChart = ({
   const gridFracs = [0, 0.33, 0.66, 1];
   const getTooltipX = (i: number) => toX(i) + 188 > svgW ? toX(i) - 194 : toX(i) + 12;
 
-  // Linhas do ano anterior sempre visíveis com boa opacidade
-  const histOpacity = 0.55;
-
   return (
     <div className="flex h-full flex-col p-3 overflow-hidden"
       style={{
@@ -562,8 +559,8 @@ const YearComparisonChart = ({
         </div>
         {/* CR anterior */}
         <div className="flex items-center gap-1.5">
-          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#2dd4bf" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.6"/></svg>
-          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#2dd4bf", opacity: 0.6 }}>CR {anoAnterior}</span>
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#94a3b8", opacity: 0.55 }}>CR {anoAnterior}</span>
         </div>
         {/* CP atual */}
         <div className="flex items-center gap-1.5">
@@ -572,8 +569,8 @@ const YearComparisonChart = ({
         </div>
         {/* CP anterior */}
         <div className="flex items-center gap-1.5">
-          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#f87171" strokeWidth="1.5" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
-          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#f87171", opacity: 0.5 }}>CP {anoAnterior}</span>
+          <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#64748b" strokeWidth="1.2" strokeDasharray="4,3" strokeLinecap="round" opacity="0.5"/></svg>
+          <span className="text-[10px] font-medium tracking-wide" style={{ color: "#64748b", opacity: 0.6 }}>CP {anoAnterior}</span>
         </div>
       </div>
 
@@ -631,14 +628,16 @@ const YearComparisonChart = ({
             })}
 
             {/* Linhas histórico (ano anterior) — fantasma; acendem com toggle/hover */}
-            <path d={buildSmooth(cpP)} fill="none" stroke="#f87171"
-              strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"
-              opacity={histOpacity * 0.85}
+            <path d={buildSmooth(cpP)} fill="none" stroke="#64748b"
+              strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
+              opacity={0.35}
+              strokeDasharray="5,4"
               style={{ transition: "opacity 220ms ease" }}
               clipPath="url(#yc-clip)"/>
-            <path d={buildSmooth(crP)} fill="none" stroke="#2dd4bf"
-              strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"
-              opacity={histOpacity}
+            <path d={buildSmooth(crP)} fill="none" stroke="#94a3b8"
+              strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
+              opacity={0.4}
+              strokeDasharray="5,4"
               style={{ transition: "opacity 220ms ease" }}
               clipPath="url(#yc-clip)"/>
 
@@ -668,11 +667,11 @@ const YearComparisonChart = ({
                   r={3} fill="rgba(248,113,113,0.85)" stroke="#0b1023" strokeWidth={1.5}/>
                 {(showHistory || hoverIndex !== null) && crP[hoverIndex] > 0 && (
                   <circle cx={toX(hoverIndex)} cy={toY(crP[hoverIndex])}
-                    r={2.5} fill="rgba(45,212,191,0.6)" stroke="#0b1023" strokeWidth={1}/>
+                    r={2} fill="rgba(148,163,184,0.5)" stroke="#0b1023" strokeWidth={1}/>
                 )}
                 {(showHistory || hoverIndex !== null) && cpP[hoverIndex] > 0 && (
                   <circle cx={toX(hoverIndex)} cy={toY(cpP[hoverIndex])}
-                    r={2.5} fill="rgba(248,113,113,0.5)" stroke="#0b1023" strokeWidth={1}/>
+                    r={2} fill="rgba(100,116,139,0.5)" stroke="#0b1023" strokeWidth={1}/>
                 )}
               </>
             )}
@@ -700,7 +699,7 @@ const YearComparisonChart = ({
                   <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CR {anoAtual}: {formatFull(crA)}
                   </text>
-                  <text x={tx+18} y={ty+45} fill="rgba(45,212,191,0.55)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+45} fill="rgba(148,163,184,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
                     {anoAnterior}: {formatFull(crB)}{crDiff !== null ? `  (${crDiff >= 0 ? "+" : ""}${crDiff.toFixed(1)}%)` : ""}
                   </text>
                   {/* CP */}
@@ -708,7 +707,7 @@ const YearComparisonChart = ({
                   <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
                     CP {anoAtual}: {formatFull(cpA)}
                   </text>
-                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+77} fill="rgba(100,116,139,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
                     {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
                   </text>
                   <line x1={tx+10} y1={ty+86} x2={tx+178} y2={ty+86} stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
