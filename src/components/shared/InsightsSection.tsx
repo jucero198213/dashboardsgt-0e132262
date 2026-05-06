@@ -56,7 +56,7 @@ const TIPO_CONFIG: Record<InsightTipo, {
 // ─── Skeleton de loading ──────────────────────────────────────────────────────
 function InsightSkeleton() {
   return (
-    <div className="rounded-[14px] border border-white/[0.06] bg-white/[0.02] p-3.5 animate-pulse flex flex-col gap-2.5">
+    <div className="rounded-[14px] border border-white/[0.06] bg-white/[0.02] p-4 animate-pulse flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <div className="h-5 w-5 rounded-lg bg-white/[0.05]" />
         <div className="h-3 w-20 rounded bg-white/[0.05]" />
@@ -76,33 +76,33 @@ function InsightCard({ insight }: { insight: AIInsight }) {
   const Icon = cfg.icon;
 
   return (
-    <div className={`relative rounded-[14px] border ${cfg.border} ${cfg.bg} p-3.5 flex flex-col gap-2.5 transition-all duration-200 hover:brightness-105 group overflow-hidden`}>
+    <div className={`relative rounded-[14px] border ${cfg.border} ${cfg.bg} p-4 flex flex-col gap-3 transition-all duration-200 hover:brightness-105 group overflow-hidden`}>
       {/* Header */}
       <div className="flex items-start gap-2 relative z-10">
-        <div className={`flex-shrink-0 h-5 w-5 rounded-md flex items-center justify-center ${cfg.bg} border ${cfg.border} mt-0.5`}>
-          <Icon className={`h-3 w-3 ${cfg.badgeText}`} />
+        <div className={`flex-shrink-0 h-6 w-6 rounded-lg flex items-center justify-center ${cfg.bg} border ${cfg.border} mt-0.5`}>
+          <Icon className={`h-3.5 w-3.5 ${cfg.badgeText}`} />
         </div>
-        <p className="text-[12px] font-semibold text-white/85 leading-tight flex-1">{insight.titulo}</p>
+        <p className="text-[13px] font-semibold text-white/90 leading-snug flex-1">{insight.titulo}</p>
         <span className={`flex-shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.badge} uppercase tracking-[0.1em]`}>
           {cfg.label}
         </span>
       </div>
 
       {/* Descrição */}
-      <p className="text-[11px] text-white/50 leading-relaxed relative z-10">
+      <p className="text-[12px] text-white/55 leading-relaxed relative z-10">
         {insight.descricao}
       </p>
 
       {/* Impacto */}
       <div className="flex items-center gap-1.5 relative z-10">
         <Zap className="h-2.5 w-2.5 text-white/25 flex-shrink-0" />
-        <p className="text-[10px] text-white/35 italic">{insight.impacto}</p>
+        <p className="text-[11px] text-white/40 italic">{insight.impacto}</p>
       </div>
 
       {/* Ação recomendada */}
-      <div className={`flex items-center gap-1.5 rounded-[10px] px-2.5 py-1.5 border ${cfg.border} ${cfg.bg} relative z-10`}>
+      <div className={`flex items-center gap-1.5 rounded-[10px] px-3 py-2 border ${cfg.border} ${cfg.bg} relative z-10`}>
         <ChevronRight className={`h-3 w-3 flex-shrink-0 ${cfg.badgeText} opacity-70`} />
-        <p className={`text-[10px] font-medium ${cfg.badgeText}`}>{insight.acao}</p>
+        <p className={`text-[11px] font-medium ${cfg.badgeText}`}>{insight.acao}</p>
       </div>
     </div>
   );
@@ -171,14 +171,14 @@ export function InsightsSection({
 
       {/* Estado: loading */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => <InsightSkeleton key={i} />)}
         </div>
       )}
 
       {/* Estado: insights carregados */}
       {!loading && insights.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {insights.map(insight => (
             <InsightCard key={insight.id} insight={insight} />
           ))}
