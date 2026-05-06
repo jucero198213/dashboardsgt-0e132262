@@ -139,29 +139,38 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
     }
   }
 
-  // Ritmo vs projeção — sempre gera
+  // Ritmo vs projeção — sempre gera com dado útil
   if (provisao > 0 && total > 0 && diasUteis > 0 && diasUteisMes > 0) {
     const percRealizadoDoMes = (diasUteis / diasUteisMes) * 100;
     const percFaturadoDoTotal = (total / provisao) * 100;
     const eficiencia = percFaturadoDoTotal / percRealizadoDoMes * 100;
-    const tipo: InsightTipo = eficiencia < 70 ? "atencao" : eficiencia >= 110 ? "positivo" : "oportunidade";
+    const diasRestantes = diasUteisMes - diasUteis;
+    const faltaParaMeta = provisao - total;
+    const ritmoNecessario = diasRestantes > 0 ? faltaParaMeta / diasRestantes : 0;
+    const ritmoAtual = mediaDiaUtil;
+    const diffRitmo = ritmoNecessario - ritmoAtual;
+
+    const tipo: InsightTipo = eficiencia < 70 ? "alerta" : eficiencia >= 110 ? "positivo" : "oportunidade";
+
     ins.push({ id: 0, tipo,
       titulo: eficiencia < 70
-        ? "Ritmo de faturamento abaixo do esperado"
+        ? `Falta ${fmtBRL(faltaParaMeta)} para a meta — ritmo insuficiente`
         : eficiencia >= 110
-          ? "Faturamento acima do ritmo previsto"
-          : `Ritmo no prazo — ${fmtPct(percFaturadoDoTotal)} da projeção realizado`,
-      descricao: `${fmtPct(percRealizadoDoMes)} dos dias úteis do mês já passaram e ${fmtPct(percFaturadoDoTotal)} da projeção de ${fmtBRL(provisao)} foi realizado (${fmtBRL(total)}).`,
-      impacto: eficiencia < 70
-        ? "Tendência de não atingir a meta mensal se o ritmo não aumentar"
-        : eficiencia >= 110
-          ? `Meta mensal com alta probabilidade de ser superada`
-          : "Ritmo consistente com a projeção do período",
+          ? `Projeção quase batida com ${diasRestantes} dias úteis sobrando`
+          : `Precisa de ${fmtBRL(ritmoNecessario)}/dia útil para fechar a meta`,
+      descricao: diasRestantes > 0
+        ? `Realizado: ${fmtBRL(total)} de ${fmtBRL(provisao)}. Faltam ${fmtBRL(faltaParaMeta)} em ${diasRestantes} dias úteis. Ritmo necessário: ${fmtBRL(ritmoNecessario)}/dia vs ritmo atual: ${fmtBRL(ritmoAtual)}/dia (${diffRitmo > 0 ? "+" : ""}${fmtBRL(diffRitmo)} de diferença).`
+        : `Mês encerrado. Realizado ${fmtPct(percFaturadoDoTotal)} da projeção (${fmtBRL(total)} de ${fmtBRL(provisao)}).`,
+      impacto: diffRitmo > 0
+        ? `Precisa acelerar ${fmtBRL(diffRitmo)}/dia útil para bater a meta`
+        : `Ritmo atual é suficiente — folga de ${fmtBRL(Math.abs(diffRitmo))}/dia útil`,
       acao: eficiencia < 70
-        ? "Investigar notas represadas, pendências operacionais ou atrasos no faturamento"
+        ? `Identificar e antecipar emissão de notas para recuperar ritmo nos próximos ${diasRestantes} dias`
         : eficiencia >= 110
-          ? "Garantir capacidade operacional para manter o ritmo até o fechamento"
-          : "Manter ritmo atual e monitorar diariamente para não perder o passo",
+          ? "Garantir que os serviços dos dias restantes sejam faturados sem atraso"
+          : diffRitmo > 0
+            ? `Focar em antecipar faturamentos para cobrir a diferença de ${fmtBRL(diffRitmo)}/dia`
+            : "Manter ritmo — meta praticamente garantida no fechamento",
     });
   }
 
