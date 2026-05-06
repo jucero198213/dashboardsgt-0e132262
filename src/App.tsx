@@ -7,7 +7,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { registerSWUpdateHandler } from "@/utils/serviceWorkerUpdate";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -30,7 +29,6 @@ import Operacional from "./pages/Operacional";
 const queryClient = new QueryClient();
 
 // Registra handler de atualização automática do Service Worker
-registerSWUpdateHandler();
 
 const App = () => (
   <ThemeProvider>
