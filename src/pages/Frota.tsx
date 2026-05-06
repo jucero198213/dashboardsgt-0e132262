@@ -897,7 +897,7 @@ export default function Frota() {
                           <k.icon className="h-3.5 w-3.5" />
                         </div>
                       </div>
-                      <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1rem,2vw,1.6rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
+                      <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1rem,2vw,1.6rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
                       <p className={`mt-2 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
                     </div>
                   </div>

@@ -480,7 +480,7 @@ export default function Compras() {
                         <k.icon className="h-3.5 w-3.5" />
                       </div>
                     </div>
-                    <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
+                    <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
                     <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export default function Compras() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-500">{mc.label}</p>
-                    <p className="text-[18px] font-black leading-none text-white">{mc.value}</p>
+                    <p className="text-[18px] font-black leading-none text-white sgt-count-up">{mc.value}</p>
                   </div>
                 </div>
               </AnimatedCard>
