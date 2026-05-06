@@ -49,14 +49,14 @@ const defaultDwFilter: DwFilter = {
 type FinanceStatus = "Em Aberto" | "Vencido" | "Parcial";
 
 const EXPECTED_INDICATORS: Record<string, number> = {
-  "Compra de Ativo":  33,
-  "Óleo Diesel":      26,
+  "PMT":  33,
+  "Diesel":      26,
   "Folha":            21,
   "Imposto":           5,
   "Pedágio":           5,
   "Administrativo":    5,
   "Manutenção":       15,
-  "Pneu":              5,
+  "Pneu":              2,
 };
 
 const defaultKpiExtra: KpiExtra = {
@@ -341,8 +341,8 @@ export function FinancialDataProvider({
       .join(" ");
 
     const rules: Record<string, string[]> = {
-      "Compra de Ativo": ["ativo", "invest", "imobil"],
-      "Óleo Diesel":     ["diesel", "oleo diesel", "combustivel"],
+      "PMT": ["ativo", "invest", "imobil"],
+      "Diesel":     ["diesel", "oleo diesel", "combustivel"],
       Folha:             ["folha", "pagto", "salarial", "rh"],
       Imposto:           ["imposto", "tribut", "fiscal", "taxa"],
       Pedágio:           ["pedagio", "pedágio"],
@@ -628,12 +628,12 @@ export function FinancialDataProvider({
       // Base: todos os CP (sem filtro de situação)
       // ─────────────────────────────────────────────────────────────────────────
       const indicadorRules: Record<string, string[]> = {
-        "Óleo Diesel":     ["21"],
+        "Diesel":     ["21"],
         "Imposto":         ["23"],
         "Administrativo":  ["3"],
         "Pedágio":         ["24"],
         "Manutenção":      ["4", "5", "6", "7", "25"],
-        "Compra de Ativo": ["26"],
+        "PMT": ["26"],
         "Folha":           ["9"],
         "Pneu":            ["28"],
       };
@@ -650,12 +650,12 @@ export function FinancialDataProvider({
         ([nome, percentualEsperado], index) => {
           const codcusList = indicadorRules[nome] ?? [];
 
-          // Compra de Ativo (CODCUS 26): filtra por DATA_VENCIMENTO
+          // PMT (CODCUS 26): filtra por DATA_VENCIMENTO
           // Demais indicadores: filtra por DATA_EMISSAO (baseIndicadores já filtrado)
-          const usaVencimento = nome === "Compra de Ativo";
+          const usaVencimento = nome === "PMT";
           const pool = usaVencimento
             ? allCP.filter((r) => {
-                if (r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em Compra de Ativo
+                if (r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em PMT
                 const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
                 return ven ? ven >= di && ven <= df : false;
               })
