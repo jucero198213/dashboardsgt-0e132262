@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # Environment variables
-.env
+# .env — contains only public Supabase keys, safe to commit
+# .env
 .env.local
 .env.production
