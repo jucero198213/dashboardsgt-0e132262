@@ -272,6 +272,48 @@ async function callEdge<T>(
   return json as T;
 }
 
+// ─── Cache em memória (TTL) ───────────────────────────────────────────────────
+// Cacheia respostas de fetch enquanto o usuário navega entre telas.
+// Padrão: 5 minutos. Após esse tempo a próxima chamada refaz o request.
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
+
+interface CacheEntry<T> {
+  expiresAt: number;
+  value: Promise<T>;
+}
+
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+
+async function cached<T>(
+  key: string,
+  loader: () => Promise<T>,
+  ttlMs: number = DEFAULT_TTL_MS,
+): Promise<T> {
+  const now = Date.now();
+  const hit = memoryCache.get(key) as CacheEntry<T> | undefined;
+  if (hit && hit.expiresAt > now) {
+    return hit.value;
+  }
+  const promise = loader().catch((err) => {
+    // Em caso de erro, invalida para permitir nova tentativa imediata
+    memoryCache.delete(key);
+    throw err;
+  });
+  memoryCache.set(key, { expiresAt: now + ttlMs, value: promise });
+  return promise;
+}
+
+/** Invalida todo o cache em memória (use após uma ação que altera dados). */
+export function clearDwCache(prefix?: string): void {
+  if (!prefix) {
+    memoryCache.clear();
+    return;
+  }
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith(prefix)) memoryCache.delete(key);
+  }
+}
+
 // ─── Exports públicos: FINANCEIRO ─────────────────────────────────────────────
 
 export async function loadDwFilters(): Promise<DwFiltersResponse> {
