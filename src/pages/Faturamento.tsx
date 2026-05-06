@@ -420,11 +420,11 @@ export default function Faturamento() {
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch sgt-stagger">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
-                <div className="relative overflow-hidden rounded-[14px] border border-amber-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-amber-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.10),transparent_55%)]" />
                   <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
@@ -436,7 +436,7 @@ export default function Faturamento() {
                     </div>
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
-                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.3rem, 2.4vw, 2rem)" }}>
+                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800 sgt-count-up sgt-pulse-glow" style={{ fontSize: "clamp(1.3rem, 2.4vw, 2rem)" }}>
                       {fmtBRL(totalFaturado)}
                     </p>
                   )}
@@ -451,7 +451,7 @@ export default function Faturamento() {
 
               {/* Média por dia útil */}
               <AnimatedCard delay={60}>
-                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_55%)]" />
                   <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
@@ -463,7 +463,7 @@ export default function Faturamento() {
                     </div>
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
-                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
+                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800 sgt-count-up" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
                       {mediaDiaUtil > 0 ? fmtK(mediaDiaUtil) : "—"}
                     </p>
                   )}
@@ -479,7 +479,7 @@ export default function Faturamento() {
 
               {/* Provisão */}
               <AnimatedCard delay={120}>
-                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_55%)]" />
                   <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
@@ -491,7 +491,7 @@ export default function Faturamento() {
                     </div>
                   </div>
                   {!isProcessed ? <Skel h="h-9" w="w-3/4" /> : (
-                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
+                    <p className="relative font-black leading-none tracking-[-0.05em] dark:text-white text-slate-800 sgt-count-up" style={{ fontSize: "clamp(1.1rem, 2vw, 1.7rem)" }}>
                       {provisao > 0 ? fmtBRL(provisao) : diasUteisMes === 0 ? "—" : "—"}
                     </p>
                   )}
@@ -538,7 +538,7 @@ export default function Faturamento() {
                 )}
 
                 {/* Rows */}
-                <div className="flex flex-col overflow-y-auto" style={{ maxHeight: 360 }}>
+                <div className="flex flex-col overflow-y-auto sgt-stagger" style={{ maxHeight: 360 }}>
                   {!isProcessed ? (
                     <div className="flex flex-col gap-2 p-4">
                       {[...Array(5)].map((_, i) => <Skel key={i} h="h-9" />)}
