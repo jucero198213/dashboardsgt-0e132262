@@ -58,6 +58,11 @@ export function useAIInsights(): UseAIInsightsReturn {
     if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
 
+    if (!ANTHROPIC_API_KEY) {
+      setError("Chave da API não configurada. Adicione VITE_ANTHROPIC_API_KEY no .env.local e reinicie o servidor.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -135,7 +140,13 @@ Tipos:
 
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Erro ao gerar insights");
+      let msg = err instanceof Error ? err.message : "Erro ao gerar insights";
+      // Tenta extrair mensagem legível de erros JSON da API
+      try {
+        const parsed = JSON.parse(msg.replace(/^API error: /, ""));
+        if (parsed?.error?.message) msg = parsed.error.message;
+      } catch { /* não era JSON, mantém msg original */ }
+      setError(msg);
     } finally {
       setLoading(false);
     }
