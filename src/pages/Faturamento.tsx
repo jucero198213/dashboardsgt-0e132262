@@ -46,7 +46,7 @@ function parseDate(str: string): Date | null {
 
 export default function Faturamento() {
   const navigate = useNavigate();
-  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
+  const { faturamento, faturamentoMensal, faturamentoMensalAnterior, isFetchingDw, isFetchingCharts, isProcessed, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError, manutencao } = useFinancialData();
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
   const [sortDir, setSortDir]           = useState<"desc" | "asc">("desc");
@@ -111,6 +111,30 @@ export default function Faturamento() {
   }, [faturamento, sortDir, search]);
 
   const top5 = useMemo(() => [...rows].sort((a,b) => b.total - a.total).slice(0, 5), [rows]);
+
+  // ── OS em ANDAMENTO (situação "A" no banco) ───────────────────────────────
+  const osEmAndamento = useMemo(() => {
+    const abertas = manutencao.filter(o => o.situacao === "ANDAMENTO");
+    // Agrupa por veículo — cada veículo com pelo menos 1 OS aberta está imobilizado
+    const veiculosMap = new Map<string, { ordens: number; custo: number; classificacoes: Set<string> }>();
+    for (const o of abertas) {
+      const vei = String(o.veiculo ?? "Indefinido");
+      if (!veiculosMap.has(vei)) veiculosMap.set(vei, { ordens: 0, custo: 0, classificacoes: new Set() });
+      const entry = veiculosMap.get(vei)!;
+      entry.ordens += 1;
+      entry.custo += (o.valorpc ?? 0) + (o.valorpc2 ?? 0) + (o.valormo ?? 0) + (o.valormo2 ?? 0);
+      if (o.classificacao) entry.classificacoes.add(o.classificacao);
+    }
+    const veiculos = Array.from(veiculosMap.entries())
+      .map(([veiculo, v]) => ({ veiculo, ordens: v.ordens, custo: v.custo, classificacoes: [...v.classificacoes] }))
+      .sort((a, b) => b.ordens - a.ordens);
+    return {
+      totalOS: abertas.length,
+      totalVeiculos: veiculos.length,
+      custoPrevisto: abertas.reduce((s, o) => s + (o.valorpc ?? 0) + (o.valorpc2 ?? 0) + (o.valormo ?? 0) + (o.valormo2 ?? 0), 0),
+      veiculos: veiculos.slice(0, 5),
+    };
+  }, [manutencao]);
   const maxTotal = top5[0]?.total ?? 1;
   const COLORS = ["#2dd4bf","#f87171","#a78bfa","#fbbf24","#34d399","#94a3b8"];
 
@@ -496,8 +520,17 @@ export default function Faturamento() {
                 provisao: Math.round(provisao),
                 diasUteis,
                 diasUteisRestantes,
+                diasUteisMes,
                 qtdClientes: rows.length,
                 top5Clientes: top5.map(r => ({ nome: r.descri, valor: Math.round(r.total), percentual: parseFloat(r.pct.toFixed(1)) })),
+                // OS em andamento (situação A) — caminhões imobilizados
+                osAndamento_totalOS: osEmAndamento.totalOS,
+                osAndamento_totalVeiculos: osEmAndamento.totalVeiculos,
+                osAndamento_custoPrevisto: Math.round(osEmAndamento.custoPrevisto),
+                osAndamento_veiculos: osEmAndamento.veiculos,
+                osAndamento_receitaDiariaPerdida: osEmAndamento.totalVeiculos > 0 && mediaDiaUtil > 0 && rows.length > 0
+                  ? Math.round((mediaDiaUtil / rows.length) * osEmAndamento.totalVeiculos)
+                  : 0,
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}

@@ -46,7 +46,32 @@ function gerarFaturamento(d: Record<string, unknown>): AIInsight[] {
   const diasUteisMes = n(d.diasUteisMes);
   const qtdClientes = n(d.qtdClientes);
   const top5 = (d.top5Clientes as { nome: string; valor: number; percentual: number }[]) ?? [];
+
+  // OS em andamento — caminhões imobilizados
+  const osTotal = n(d.osAndamento_totalOS);
+  const osVeiculos = n(d.osAndamento_totalVeiculos);
+  const osCusto = n(d.osAndamento_custoPrevisto);
+  const osReceitaPerdida = n(d.osAndamento_receitaDiariaPerdida);
+  const osVeiculosList = (d.osAndamento_veiculos as { veiculo: string; ordens: number }[]) ?? [];
+
   const ins: AIInsight[] = [];
+
+  // ── OS em andamento — impacto direto no faturamento ────────────────────────
+  if (osVeiculos > 0) {
+    const diasRestantes = diasUteisMes - diasUteis;
+    const receitaPotencialPerdida = osReceitaPerdida * diasRestantes;
+    const topVeis = osVeiculosList.slice(0, 3).map(v => v.veiculo).join(", ");
+
+    ins.push({ id: 0,
+      tipo: osVeiculos >= 5 ? "alerta" : osVeiculos >= 2 ? "atencao" : "atencao",
+      titulo: `${osVeiculos} caminhão(ões) imobilizado(s) em manutenção`,
+      descricao: `${osTotal} OS abertas (situação A) em ${osVeiculos} veículo(s) parado(s): ${topVeis}${osVeiculosList.length > 3 ? " e outros" : ""}. Cada dia parado é receita não gerada.`,
+      impacto: diasRestantes > 0
+        ? `Estimativa de ${fmtBRL(receitaPotencialPerdida)} de receita não gerada nos ${diasRestantes} dias úteis restantes`
+        : `${fmtBRL(osReceitaPerdida)}/dia útil de capacidade ociosa`,
+      acao: `Priorizar liberação dos veículos parados — cada dia conta ${fmtBRL(osReceitaPerdida)} em receita potencial`,
+    });
+  }
 
   // Concentração top 1
   if (top5.length > 0) {
