@@ -272,10 +272,54 @@ async function callEdge<T>(
   return json as T;
 }
 
+// ─── Cache em memória (TTL) ───────────────────────────────────────────────────
+// Cacheia respostas de fetch enquanto o usuário navega entre telas.
+// Padrão: 5 minutos. Após esse tempo a próxima chamada refaz o request.
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
+
+interface CacheEntry<T> {
+  expiresAt: number;
+  value: Promise<T>;
+}
+
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+
+async function cached<T>(
+  key: string,
+  loader: () => Promise<T>,
+  ttlMs: number = DEFAULT_TTL_MS,
+): Promise<T> {
+  const now = Date.now();
+  const hit = memoryCache.get(key) as CacheEntry<T> | undefined;
+  if (hit && hit.expiresAt > now) {
+    return hit.value;
+  }
+  const promise = loader().catch((err) => {
+    // Em caso de erro, invalida para permitir nova tentativa imediata
+    memoryCache.delete(key);
+    throw err;
+  });
+  memoryCache.set(key, { expiresAt: now + ttlMs, value: promise });
+  return promise;
+}
+
+/** Invalida todo o cache em memória (use após uma ação que altera dados). */
+export function clearDwCache(prefix?: string): void {
+  if (!prefix) {
+    memoryCache.clear();
+    return;
+  }
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith(prefix)) memoryCache.delete(key);
+  }
+}
+
 // ─── Exports públicos: FINANCEIRO ─────────────────────────────────────────────
 
 export async function loadDwFilters(): Promise<DwFiltersResponse> {
-  return callEdge<DwFiltersResponse>(ENDPOINT_FINANCEIRO, { action: "filters" });
+  return cached("financeiro:filters", () =>
+    callEdge<DwFiltersResponse>(ENDPOINT_FINANCEIRO, { action: "filters" }),
+  );
 }
 
 export async function fetchDwData(params: {
@@ -284,10 +328,10 @@ export async function fetchDwData(params: {
   filial?: string | null;
   empresa?: string | null;
 }): Promise<DwFetchResponse> {
-  return callEdge<DwFetchResponse>(ENDPOINT_FINANCEIRO, {
-    action: "fetch",
-    ...params,
-  });
+  const key = `financeiro:fetch:${JSON.stringify(params)}`;
+  return cached(key, () =>
+    callEdge<DwFetchResponse>(ENDPOINT_FINANCEIRO, { action: "fetch", ...params }),
+  );
 }
 
 export async function fetchFaturamento(params: {
@@ -296,10 +340,10 @@ export async function fetchFaturamento(params: {
   filial?: string | null;
   empresa?: string | null;
 }): Promise<FaturamentoResponse> {
-  return callEdge<FaturamentoResponse>(ENDPOINT_FINANCEIRO, {
-    action: "faturamento",
-    ...params,
-  });
+  const key = `financeiro:faturamento:${JSON.stringify(params)}`;
+  return cached(key, () =>
+    callEdge<FaturamentoResponse>(ENDPOINT_FINANCEIRO, { action: "faturamento", ...params }),
+  );
 }
 
 // ─── Exports públicos: FROTA ──────────────────────────────────────────────────
@@ -311,7 +355,8 @@ export async function fetchFaturamento(params: {
 export async function fetchFrota(params?: {
   situacao?: "ATIVO" | "BAIXADO" | "INATIVO";
 }): Promise<FrotaResponse> {
-  return callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {});
+  const key = `frota:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<FrotaResponse>(ENDPOINT_FROTA, params ?? {}));
 }
 
 // ─── Exports públicos: MANUTENCAO ─────────────────────────────────────────────
@@ -325,7 +370,8 @@ export async function fetchManutencao(params?: {
   dataFim?: string;
   filial?: string | null;
 }): Promise<ManutencaoResponse> {
-  return callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {});
+  const key = `manutencao:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {}));
 }
 
 // ─── Exports públicos: COMPRAS ────────────────────────────────────────────────
@@ -334,7 +380,8 @@ export async function fetchCompras(params?: {
   dataInicio?: string;
   dataFim?: string;
 }): Promise<ComprasResponse> {
-  return callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {});
+  const key = `compras:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<ComprasResponse>(ENDPOINT_COMPRAS, params ?? {}));
 }
 
 // ─── Exports públicos: ABASTECIMENTO ─────────────────────────────────────────
@@ -347,7 +394,8 @@ export async function fetchAbastecimento(params?: {
   dataInicio?: string;
   dataFim?: string;
 }): Promise<AbastecimentoResponse> {
-  return callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {});
+  const key = `abastecimento:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}));
 }
 // ─── Tipos: RH ────────────────────────────────────────────────────────────────
 
@@ -391,7 +439,8 @@ export interface RhResponse {
 export async function fetchRh(params?: {
   situacao?: string | null;
 }): Promise<RhResponse> {
-  return callEdge<RhResponse>(ENDPOINT_RH, params ?? {});
+  const key = `rh:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<RhResponse>(ENDPOINT_RH, params ?? {}));
 }
 
 // ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
@@ -447,5 +496,7 @@ export interface OperacionalResponse {
  * Sem filtro de período — retorna o snapshot em tempo real.
  */
 export async function fetchOperacional(): Promise<OperacionalResponse> {
-  return callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {});
+  return cached("operacional:all", () =>
+    callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {}),
+  );
 }
