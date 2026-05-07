@@ -566,6 +566,8 @@ export default function Operacional() {
                   </button>
                 )}
 
+                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
+
                 {lastUpdate && (
                   <span className="text-[10px] text-slate-500 shrink-0 ml-1 hidden xl:block">
                     {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
@@ -573,7 +575,6 @@ export default function Operacional() {
                 )}
               </div>
 
-              <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               <HomeButton />
             </div>
 
