@@ -1075,6 +1075,30 @@ export default function Operacional() {
           </div>
         </section>
       </div>
+
+      {/* Dialog de detalhamento dos KPIs */}
+      <ViagensDialog
+        open={kpiDialog !== null}
+        onOpenChange={(o) => !o && setKpiDialog(null)}
+        title={
+          kpiDialog === "andamento"  ? "Viagens em Andamento" :
+          kpiDialog === "rota"       ? "Veículos em Rota" :
+          kpiDialog === "manutencao" ? "Veículos em Manutenção" :
+          kpiDialog === "atraso"     ? "Saídas com Atraso" : ""
+        }
+        subtitle={
+          kpiDialog === "andamento"  ? "0% < % concluído < 100% e fora de manutenção" :
+          kpiDialog === "rota"       ? "Fora de manutenção e não finalizadas" :
+          kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
+          kpiDialog === "atraso"     ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
+        }
+        rows={
+          kpiDialog === "andamento"  ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
+          kpiDialog === "rota"       ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
+          kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
+          kpiDialog === "atraso"     ? filtrados.filter(v => v.temAtraso) : []
+        }
+      />
     </div>
   );
 }
