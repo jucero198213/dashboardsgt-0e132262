@@ -898,7 +898,7 @@ export default function Operacional() {
                 distSituacao: distSituacao.slice(0, 6).map(s => ({ situacao: s.nome, qtd: s.qtd })),
                 distClassificacao: distClassi.slice(0, 6).map(c => ({ classificacao: c.nome, qtd: c.qtd })),
                 qtdMotoristas: new Set(filtrados.map(v => v.motorista).filter(Boolean)).size,
-                qtdClientes: new Set(filtrados.map(v => v.cliNomeab).filter(Boolean)).size,
+                qtdClientes: new Set(filtrados.map(v => v.destinatario).filter(Boolean)).size,
                 viagensCompletas: filtrados.filter(v => v.percCompleto >= 100).length,
                 viagensNaoIniciadas: filtrados.filter(v => v.percCompleto === 0 && !v.emManutencao).length,
               }}
