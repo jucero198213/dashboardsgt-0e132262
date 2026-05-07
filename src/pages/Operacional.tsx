@@ -682,54 +682,34 @@ export default function Operacional() {
                     </div>
                   </div>
 
-                  {/* SVG Mapa — altura maior */}
+                  {/* Mapa Leaflet — interativo com zoom */}
                   <div
                     className="relative rounded-[12px] overflow-hidden flex-1"
-                    style={{ minHeight: 340, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
+                    style={{ minHeight: 420, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
                   >
-                    <svg width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-                      <defs>
-                        <pattern id="mapgrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(6,182,212,0.06)" strokeWidth="0.5" />
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill="url(#mapgrid)" />
-                    </svg>
-
                     {loading ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">Carregando posições...</div>
-                    ) : mapaDots.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">
-                        Sem coordenadas GPS disponíveis
-                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600 z-[500]">Carregando posições...</div>
                     ) : (
-                      mapaDots.map((d, i) => (
-                        <div
-                          key={i}
-                          className="absolute group"
-                          style={{ left: `${d.x}%`, top: `${d.y}%`, transform: "translate(-50%,-50%)" }}
-                          title={`${d.vei} — ${d.mot} (${d.perc}%)`}
-                        >
-                          <div
-                            className="w-3.5 h-3.5 rounded-full border border-white/40 cursor-pointer transition-transform hover:scale-150"
-                            style={{ background: mapaDotColor(d), boxShadow: `0 0 8px ${mapaDotColor(d)}` }}
-                          />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
-                            <div className="rounded-md border border-white/10 bg-slate-950/95 px-2.5 py-1.5 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
-                              <div className="font-mono font-bold" style={{ color: mapaDotColor(d) }}>{d.vei}</div>
-                              <div className="text-slate-400">{d.mot}</div>
-                              <div className="text-slate-400">{d.perc}% concluído</div>
-                            </div>
-                            <div className="w-1.5 h-1.5 rotate-45 border-r border-b border-white/10 bg-slate-950 -mt-0.5" />
-                          </div>
-                        </div>
-                      ))
+                      <VeiculosMap
+                        veiculos={filtrados
+                          .filter(v => v.latitude != null && v.longitude != null)
+                          .map(v => ({
+                            veiculo: v.veiculo,
+                            motorista: v.motorista,
+                            latitude: v.latitude!,
+                            longitude: v.longitude!,
+                            perc: v.percCompleto,
+                            rota: v.rota,
+                            emManutencao: v.emManutencao,
+                            temAtraso: v.temAtraso,
+                            descSituacao: v.descSituacao,
+                          }))}
+                      />
                     )}
 
-                    <div className="absolute top-3 left-3 text-[12px] font-semibold text-cyan-400/70">
-                      {mapaDots.length} veículos com GPS
+                    <div className="absolute top-3 left-3 text-[12px] font-semibold text-cyan-400/90 bg-slate-950/70 px-2 py-1 rounded backdrop-blur z-[500] pointer-events-none">
+                      {filtrados.filter(v => v.latitude && v.longitude).length} veículos com GPS
                     </div>
-                    <div className="absolute bottom-2 right-2 text-[9px] text-slate-600">VEI_LATITU · VEI_LONGIT</div>
                   </div>
                 </div>
               </AnimatedCard>
