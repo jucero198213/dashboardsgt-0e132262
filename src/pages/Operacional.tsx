@@ -22,6 +22,8 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { fetchOperacional, type OperacionalRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
+import { VeiculosMap } from "@/components/operacional/VeiculosMap";
+import { ViagensDialog } from "@/components/operacional/ViagensDialog";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -162,6 +164,9 @@ export default function Operacional() {
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+
+  // Dialog de detalhamento dos KPIs
+  const [kpiDialog, setKpiDialog] = useState<null | "andamento" | "rota" | "manutencao" | "atraso">(null);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -616,22 +621,27 @@ export default function Operacional() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
-                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%",       Icon: Navigation, tone: "cyan"    as const, delay: 80  },
-                { label: "Veículos em Rota",      value: loading ? "—" : fmtNum(kpis.emRota),      sub: "Fora de manutenção",     Icon: Truck,      tone: "emerald" as const, delay: 120 },
-                { label: "Em Manutenção",          value: loading ? "—" : fmtNum(kpis.emManutencao),sub: "EM_MANUTENCAO = S",      Icon: Wrench,     tone: "amber"   as const, delay: 160 },
-                { label: "Com Atraso na Saída",    value: loading ? "—" : fmtNum(kpis.comAtraso),  sub: "SAIDA_REAL > ORIGINAL",  Icon: AlertCircle,tone: "rose"    as const, delay: 200 },
-                { label: "Conclusão Média",        value: loading ? "—" : fmtPct(kpis.avgPerc),    sub: "AVG(PERC_COMPLETO)",     Icon: TrendingUp, tone: "violet"  as const, delay: 240 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
+                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%",       Icon: Navigation, tone: "cyan"    as const, delay: 80,  dialog: "andamento" as const  },
+                { label: "Veículos em Rota",      value: loading ? "—" : fmtNum(kpis.emRota),      sub: "Fora de manutenção",     Icon: Truck,      tone: "emerald" as const, delay: 120, dialog: "rota" as const       },
+                { label: "Em Manutenção",          value: loading ? "—" : fmtNum(kpis.emManutencao),sub: "EM_MANUTENCAO = S",      Icon: Wrench,     tone: "amber"   as const, delay: 160, dialog: "manutencao" as const },
+                { label: "Com Atraso na Saída",    value: loading ? "—" : fmtNum(kpis.comAtraso),  sub: "SAIDA_REAL > ORIGINAL",  Icon: AlertCircle,tone: "rose"    as const, delay: 200, dialog: "atraso" as const     },
+                { label: "Conclusão Média",        value: loading ? "—" : fmtPct(kpis.avgPerc),    sub: "AVG(PERC_COMPLETO)",     Icon: TrendingUp, tone: "violet"  as const, delay: 240, dialog: null                  },
+              ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
                 const t = TC[tone];
+                const clickable = !!dialog;
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                    <div
+                      onClick={() => clickable && setKpiDialog(dialog)}
+                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border} ${clickable ? "cursor-pointer" : ""}`}
+                      style={{ background: "var(--sgt-bg-card)" }}
+                    >
                       <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 mb-2">{label}</p>
                           <p className={`text-[28px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}</p>
+                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}{clickable && " · clique p/ detalhes"}</p>
                         </div>
                         <div className={`shrink-0 rounded-xl p-2.5 ${t.bg} border ${t.border}`}>
                           <Icon className={`w-5 h-5 ${t.icon}`} />
@@ -672,54 +682,34 @@ export default function Operacional() {
                     </div>
                   </div>
 
-                  {/* SVG Mapa — altura maior */}
+                  {/* Mapa Leaflet — interativo com zoom */}
                   <div
                     className="relative rounded-[12px] overflow-hidden flex-1"
-                    style={{ minHeight: 340, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
+                    style={{ minHeight: 420, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
                   >
-                    <svg width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-                      <defs>
-                        <pattern id="mapgrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(6,182,212,0.06)" strokeWidth="0.5" />
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill="url(#mapgrid)" />
-                    </svg>
-
                     {loading ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">Carregando posições...</div>
-                    ) : mapaDots.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">
-                        Sem coordenadas GPS disponíveis
-                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600 z-[500]">Carregando posições...</div>
                     ) : (
-                      mapaDots.map((d, i) => (
-                        <div
-                          key={i}
-                          className="absolute group"
-                          style={{ left: `${d.x}%`, top: `${d.y}%`, transform: "translate(-50%,-50%)" }}
-                          title={`${d.vei} — ${d.mot} (${d.perc}%)`}
-                        >
-                          <div
-                            className="w-3.5 h-3.5 rounded-full border border-white/40 cursor-pointer transition-transform hover:scale-150"
-                            style={{ background: mapaDotColor(d), boxShadow: `0 0 8px ${mapaDotColor(d)}` }}
-                          />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
-                            <div className="rounded-md border border-white/10 bg-slate-950/95 px-2.5 py-1.5 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
-                              <div className="font-mono font-bold" style={{ color: mapaDotColor(d) }}>{d.vei}</div>
-                              <div className="text-slate-400">{d.mot}</div>
-                              <div className="text-slate-400">{d.perc}% concluído</div>
-                            </div>
-                            <div className="w-1.5 h-1.5 rotate-45 border-r border-b border-white/10 bg-slate-950 -mt-0.5" />
-                          </div>
-                        </div>
-                      ))
+                      <VeiculosMap
+                        veiculos={filtrados
+                          .filter(v => v.latitude != null && v.longitude != null)
+                          .map(v => ({
+                            veiculo: v.veiculo,
+                            motorista: v.motorista,
+                            latitude: v.latitude!,
+                            longitude: v.longitude!,
+                            perc: v.percCompleto,
+                            rota: v.rota,
+                            emManutencao: v.emManutencao,
+                            temAtraso: v.temAtraso,
+                            descSituacao: v.descSituacao,
+                          }))}
+                      />
                     )}
 
-                    <div className="absolute top-3 left-3 text-[12px] font-semibold text-cyan-400/70">
-                      {mapaDots.length} veículos com GPS
+                    <div className="absolute top-3 left-3 text-[12px] font-semibold text-cyan-400/90 bg-slate-950/70 px-2 py-1 rounded backdrop-blur z-[500] pointer-events-none">
+                      {filtrados.filter(v => v.latitude && v.longitude).length} veículos com GPS
                     </div>
-                    <div className="absolute bottom-2 right-2 text-[9px] text-slate-600">VEI_LATITU · VEI_LONGIT</div>
                   </div>
                 </div>
               </AnimatedCard>
@@ -1085,6 +1075,30 @@ export default function Operacional() {
           </div>
         </section>
       </div>
+
+      {/* Dialog de detalhamento dos KPIs */}
+      <ViagensDialog
+        open={kpiDialog !== null}
+        onOpenChange={(o) => !o && setKpiDialog(null)}
+        title={
+          kpiDialog === "andamento"  ? "Viagens em Andamento" :
+          kpiDialog === "rota"       ? "Veículos em Rota" :
+          kpiDialog === "manutencao" ? "Veículos em Manutenção" :
+          kpiDialog === "atraso"     ? "Saídas com Atraso" : ""
+        }
+        subtitle={
+          kpiDialog === "andamento"  ? "0% < % concluído < 100% e fora de manutenção" :
+          kpiDialog === "rota"       ? "Fora de manutenção e não finalizadas" :
+          kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
+          kpiDialog === "atraso"     ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
+        }
+        rows={
+          kpiDialog === "andamento"  ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
+          kpiDialog === "rota"       ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
+          kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
+          kpiDialog === "atraso"     ? filtrados.filter(v => v.temAtraso) : []
+        }
+      />
     </div>
   );
 }
