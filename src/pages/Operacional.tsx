@@ -612,14 +612,6 @@ export default function Operacional() {
 
 
 
-            {/* ════════════════════════════════════════════════════════
-                SEÇÃO 1 — INDICADORES OPERACIONAIS
-            ════════════════════════════════════════════════════════ */}
-            <div className="flex items-center gap-2 mt-2">
-              <Radio className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Indicadores Operacionais</span>
-              <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
-            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
@@ -651,14 +643,6 @@ export default function Operacional() {
               })}
             </div>
 
-            {/* ════════════════════════════════════════════════════════
-                SEÇÃO 2 — ANÁLISE OPERACIONAL
-            ════════════════════════════════════════════════════════ */}
-            <div className="flex items-center gap-2 mt-2">
-              <BarChart3 className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Análise Operacional</span>
-              <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
-            </div>
 
             {/* Row 1: Mapa SVG + Situação + Classificação */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -947,14 +931,6 @@ export default function Operacional() {
               autoGenerate={true}
             />
 
-            {/* ════════════════════════════════════════════════════════
-                SEÇÃO 3 — DETALHAMENTO DE VIAGENS
-            ════════════════════════════════════════════════════════ */}
-            <div className="flex items-center gap-2 mt-2">
-              <FileText className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Detalhamento de Viagens</span>
-              <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
-            </div>
 
             <AnimatedCard delay={500}>
               <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
