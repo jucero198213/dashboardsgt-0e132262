@@ -500,7 +500,8 @@ export default function Operacional() {
 
             {/* ════ NAVBAR DESKTOP ════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
-              <div className="flex items-center gap-3">
+              {/* Logo + título */}
+              <div className="flex items-center gap-3 shrink-0">
                 <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
                 <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
@@ -509,7 +510,7 @@ export default function Operacional() {
                 </div>
               </div>
 
-              {/* Badge LIVE pulsante */}
+              {/* Badge LIVE */}
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
@@ -518,16 +519,61 @@ export default function Operacional() {
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Tempo real</span>
               </div>
 
-              {lastUpdate && (
-                <span className="text-[10px] text-slate-500">
-                  Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                </span>
-              )}
+              <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
-                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
+              {/* Filtros inline na navbar */}
+              <div className="flex flex-1 items-center gap-1.5 min-w-0 overflow-hidden">
+                <Filter className="w-3 h-3 text-cyan-400/50 shrink-0" />
+
+                <Select value={filtroSituacao} onValueChange={v => { setFiltroSituacao(v); setPage(1); }}>
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[12px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                    <SelectValue placeholder="Situação" />
+                  </SelectTrigger>
+                  <SelectContent>{situacoes.map(s => <SelectItem key={s} value={s}>{s === "Todos" ? "Situação" : s}</SelectItem>)}</SelectContent>
+                </Select>
+
+                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[160px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[12px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                    <SelectValue placeholder="Motorista" />
+                  </SelectTrigger>
+                  <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
+                </Select>
+
+                <Select value={filtroClassi} onValueChange={v => { setFiltroClassi(v); setPage(1); }}>
+                  <SelectTrigger className="h-7 min-w-[80px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[12px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                    <SelectValue placeholder="Classif." />
+                  </SelectTrigger>
+                  <SelectContent>{classificacoes.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Classificação" : c}</SelectItem>)}</SelectContent>
+                </Select>
+
+                <Select value={filtroManut} onValueChange={v => { setFiltroManut(v); setPage(1); }}>
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[130px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[12px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                    <SelectValue placeholder="Manutenção" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todos">Manutenção</SelectItem>
+                    <SelectItem value="Sim">Em manutenção</SelectItem>
+                    <SelectItem value="Não">Sem manutenção</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {(filtroSituacao !== "Todos" || filtroMotorista !== "Todos" || filtroClassi !== "Todos" || filtroManut !== "Todos") && (
+                  <button
+                    onClick={() => { setFiltroSituacao("Todos"); setFiltroMotorista("Todos"); setFiltroClassi("Todos"); setFiltroManut("Todos"); setPage(1); }}
+                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all shrink-0"
+                  >
+                    <X className="w-2.5 h-2.5" /> Limpar
+                  </button>
+                )}
+
+                {lastUpdate && (
+                  <span className="text-[10px] text-slate-500 shrink-0 ml-1 hidden xl:block">
+                    {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                )}
               </div>
+
+              <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               <HomeButton />
             </div>
 
@@ -564,56 +610,7 @@ export default function Operacional() {
               </div>
             )}
 
-            {/* ════ FILTROS ════ */}
-            <AnimatedCard delay={60}>
-              <div className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2" style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
-                <Filter className="w-3.5 h-3.5 text-cyan-400/60 shrink-0" />
-                <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 shrink-0">Filtros</span>
-                <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
-                <Select value={filtroSituacao} onValueChange={v => { setFiltroSituacao(v); setPage(1); }}>
-                  <SelectTrigger className="h-9 min-w-[100px] max-w-[160px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
-                    <SelectValue placeholder="Situação" />
-                  </SelectTrigger>
-                  <SelectContent>{situacoes.map(s => <SelectItem key={s} value={s}>{s === "Todos" ? "Situação" : s}</SelectItem>)}</SelectContent>
-                </Select>
-
-                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
-                  <SelectTrigger className="h-9 min-w-[110px] max-w-[190px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
-                    <SelectValue placeholder="Motorista" />
-                  </SelectTrigger>
-                  <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
-                </Select>
-
-                <Select value={filtroClassi} onValueChange={v => { setFiltroClassi(v); setPage(1); }}>
-                  <SelectTrigger className="h-9 min-w-[100px] max-w-[150px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
-                    <SelectValue placeholder="Classif." />
-                  </SelectTrigger>
-                  <SelectContent>{classificacoes.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Classificação" : c}</SelectItem>)}</SelectContent>
-                </Select>
-
-                <Select value={filtroManut} onValueChange={v => { setFiltroManut(v); setPage(1); }}>
-                  <SelectTrigger className="h-9 min-w-[100px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
-                    <SelectValue placeholder="Manutenção" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Todos">Manutenção</SelectItem>
-                    <SelectItem value="Sim">Em manutenção</SelectItem>
-                    <SelectItem value="Não">Sem manutenção</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {(filtroSituacao !== "Todos" || filtroMotorista !== "Todos" || filtroClassi !== "Todos" || filtroManut !== "Todos") && (
-                  <button
-                    onClick={() => { setFiltroSituacao("Todos"); setFiltroMotorista("Todos"); setFiltroClassi("Todos"); setFiltroManut("Todos"); setPage(1); }}
-                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
-                  >
-                    <X className="w-2.5 h-2.5" /> Limpar
-                  </button>
-                )}
-                <div className="ml-auto text-[13px] text-slate-500">{fmtNum(filtrados.length)} registros</div>
-              </div>
-            </AnimatedCard>
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 1 — INDICADORES OPERACIONAIS
