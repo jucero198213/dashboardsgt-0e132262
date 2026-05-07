@@ -165,6 +165,9 @@ export default function Operacional() {
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
 
+  // Dialog de detalhamento dos KPIs
+  const [kpiDialog, setKpiDialog] = useState<null | "andamento" | "rota" | "manutencao" | "atraso">(null);
+
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
     if (!force && !cooldown.canFetch) return;
