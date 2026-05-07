@@ -876,36 +876,7 @@ export default function Operacional() {
               </AnimatedCard>
             </div>
 
-            {/* Pontualidade por Filial */}
-            {pontualFilial.length > 0 && (
-              <AnimatedCard delay={450}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Pontualidade de Saída por Filial</span>
-                    <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">SAIDA_REAL vs SAIDA_ORIGINAL</span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {pontualFilial.map(r => {
-                      const cor = r.pct >= 80 ? RAW.accent.emerald : r.pct >= 60 ? RAW.accent.amber : RAW.accent.rose;
-                      return (
-                        <div key={r.filial} className="flex flex-col gap-1.5">
-                          <span className="text-[13px] font-semibold text-slate-200">{r.filial}</span>
-                          <div className="flex justify-between text-[11px] text-slate-500">
-                            <span style={{ color: RAW.accent.emerald }}>+{r.pontual}</span>
-                            <span style={{ color: RAW.accent.rose }}>−{r.atrasado}</span>
-                          </div>
-                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${r.pct}%`, background: cor }} />
-                          </div>
-                          <span className="text-[20px] font-black" style={{ color: cor }}>{fmtPct(r.pct)}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </AnimatedCard>
-            )}
+
 
             {/* ════════════════════════════════════════════════════════
                 INSIGHTS POR IA
