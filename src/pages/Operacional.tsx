@@ -753,54 +753,58 @@ export default function Operacional() {
               </AnimatedCard>
             </div>
 
-            {/* ── LINHA 3: Situação + Classificação + Top Rotas + Top Motoristas ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* ── LINHA 3: Situação+Classificação + Top Rotas + Top Motoristas ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-              {/* Situação das Viagens */}
+              {/* Situação das Viagens + Classificação Veículo — unificados */}
               <AnimatedCard delay={360}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Situação das Viagens</span>
-                  </div>
-                  {distSituacao.length === 0
-                    ? <div className="text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
-                    : <div className="space-y-2">
-                        {distSituacao.map(r => {
-                          const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
-                          return (
-                            <div key={r.nome} className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                              <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                              <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
-                              <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                  }
-                </div>
-              </AnimatedCard>
-
-              {/* Classificação Veículo */}
-              <AnimatedCard delay={390}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Truck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Classificação Veículo</span>
-                  </div>
-                  <div className="space-y-2">
-                    {distClassi.slice(0, 6).map(r => {
-                      const total = distClassi.reduce((s, x) => s + x.qtd, 0);
-                      return (
-                        <div key={r.nome} className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                          <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                          <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
-                          <span className="text-[14px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col gap-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  {/* Situação */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Situação das Viagens</span>
+                    </div>
+                    {distSituacao.length === 0
+                      ? <div className="text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
+                      : <div className="space-y-2">
+                          {distSituacao.map(r => {
+                            const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
+                            return (
+                              <div key={r.nome} className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                                <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                                <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                                <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                    }
+                  </div>
+
+                  {/* Divisor */}
+                  <div className="h-px shrink-0" style={{ background: RAW.borderDefault }} />
+
+                  {/* Classificação */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Classificação Veículo</span>
+                    </div>
+                    <div className="space-y-2">
+                      {distClassi.slice(0, 6).map(r => {
+                        const total = distClassi.reduce((s, x) => s + x.qtd, 0);
+                        return (
+                          <div key={r.nome} className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                            <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                            <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                            <span className="text-[14px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </AnimatedCard>
