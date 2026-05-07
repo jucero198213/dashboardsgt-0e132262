@@ -645,38 +645,38 @@ export default function Operacional() {
             </div>
 
 
-            {/* Row 1: Mapa SVG + Situação + Classificação */}
+
+            {/* ── LINHA 2: Mapa grande (2/3) + Alertas (1/3) ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
 
-              {/* Mapa de posições */}
+              {/* Mapa de posições — ocupa 2/3 */}
               <AnimatedCard delay={300} className="lg:col-span-2">
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center justify-between mb-2">
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center justify-between mb-3 shrink-0">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Posições em Tempo Real</span>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px]">
+                    <div className="flex items-center gap-4 text-[11px]">
                       {[
                         { label: "Em rota",    color: RAW.accent.cyan    },
                         { label: "Aguardando", color: RAW.accent.amber   },
                         { label: "Atrasado",   color: RAW.accent.rose    },
                         { label: "Manutenção", color: RAW.accent.violet  },
                       ].map(l => (
-                        <span key={l.label} className="flex items-center gap-1" style={{ color: l.color }}>
-                          <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: l.color }} />
+                        <span key={l.label} className="flex items-center gap-1.5" style={{ color: l.color }}>
+                          <span className="inline-block w-2 h-2 rounded-full" style={{ background: l.color }} />
                           {l.label}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* SVG Mapa */}
+                  {/* SVG Mapa — altura maior */}
                   <div
-                    className="relative rounded-[12px] overflow-hidden"
-                    style={{ height: 200, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
+                    className="relative rounded-[12px] overflow-hidden flex-1"
+                    style={{ minHeight: 340, background: "#060d1a", border: `0.5px solid ${RAW.borderDefault}` }}
                   >
-                    {/* Grid de fundo */}
                     <svg width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
                       <defs>
                         <pattern id="mapgrid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -686,11 +686,10 @@ export default function Operacional() {
                       <rect width="100%" height="100%" fill="url(#mapgrid)" />
                     </svg>
 
-                    {/* Dots dos veículos */}
                     {loading ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[11px] text-slate-600">Carregando posições...</div>
+                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">Carregando posições...</div>
                     ) : mapaDots.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-[11px] text-slate-600">
+                      <div className="absolute inset-0 flex items-center justify-center text-[13px] text-slate-600">
                         Sem coordenadas GPS disponíveis
                       </div>
                     ) : (
@@ -702,12 +701,11 @@ export default function Operacional() {
                           title={`${d.vei} — ${d.mot} (${d.perc}%)`}
                         >
                           <div
-                            className="w-2.5 h-2.5 rounded-full border border-white/40 cursor-pointer transition-transform hover:scale-150"
-                            style={{ background: mapaDotColor(d), boxShadow: `0 0 5px ${mapaDotColor(d)}` }}
+                            className="w-3.5 h-3.5 rounded-full border border-white/40 cursor-pointer transition-transform hover:scale-150"
+                            style={{ background: mapaDotColor(d), boxShadow: `0 0 8px ${mapaDotColor(d)}` }}
                           />
-                          {/* Tooltip hover */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
-                            <div className="rounded-md border border-white/10 bg-slate-950/95 px-2 py-1 text-[9px] text-slate-200 whitespace-nowrap shadow-xl">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-10 pointer-events-none">
+                            <div className="rounded-md border border-white/10 bg-slate-950/95 px-2.5 py-1.5 text-[11px] text-slate-200 whitespace-nowrap shadow-xl">
                               <div className="font-mono font-bold" style={{ color: mapaDotColor(d) }}>{d.vei}</div>
                               <div className="text-slate-400">{d.mot}</div>
                               <div className="text-slate-400">{d.perc}% concluído</div>
@@ -718,77 +716,105 @@ export default function Operacional() {
                       ))
                     )}
 
-                    {/* Contador canto */}
-                    <div className="absolute top-2 left-2 text-[11px] font-semibold text-cyan-400/70">
+                    <div className="absolute top-3 left-3 text-[12px] font-semibold text-cyan-400/70">
                       {mapaDots.length} veículos com GPS
                     </div>
-                    <div className="absolute bottom-2 right-2 text-[8px] text-slate-600">VEI_LATITU · VEI_LONGIT</div>
+                    <div className="absolute bottom-2 right-2 text-[9px] text-slate-600">VEI_LATITU · VEI_LONGIT</div>
                   </div>
                 </div>
               </AnimatedCard>
 
-              {/* Situação das Viagens + Veículos */}
+              {/* Alertas Operacionais — 1/3, ao lado do mapa */}
               <AnimatedCard delay={320}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col gap-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Situação das Viagens</span>
-                    </div>
-                    {distSituacao.length === 0
-                      ? <div className="text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
-                      : <div className="space-y-2">
-                          {distSituacao.map(r => {
-                            const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
-                            return (
-                              <div key={r.nome} className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                                <span className="text-[14px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                                <span className="text-[12px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
-                                <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                    }
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center gap-2 mb-4 shrink-0">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Alertas Operacionais</span>
                   </div>
-
-                  <div className="border-t pt-2.5" style={{ borderColor: RAW.borderDefault }}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Truck className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Classificação Veículo</span>
-                    </div>
-                    <div className="space-y-2">
-                      {distClassi.slice(0, 4).map(r => {
-                        const total = distClassi.reduce((s, x) => s + x.qtd, 0);
-                        return (
-                          <div key={r.nome} className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                            <span className="text-[14px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                            <span className="text-[14px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <div className="flex flex-col gap-3 flex-1">
+                    {[
+                      { label: "Saída com atraso",        count: alertas.atrasados,        cls: "bg-rose-500/10 border-rose-500/20",    dot: RAW.accent.rose,   txtCls: "text-rose-300",   pulse: true  },
+                      { label: "Em manutenção",            count: alertas.emManutencao,     cls: "bg-violet-500/10 border-violet-500/20", dot: RAW.accent.violet, txtCls: "text-violet-300", pulse: true  },
+                      { label: "Previsão ultrapassada",    count: alertas.prevUltrapassada, cls: "bg-amber-500/10 border-amber-500/20",   dot: RAW.accent.amber,  txtCls: "text-amber-300",  pulse: alertas.prevUltrapassada > 0 },
+                      { label: "Itens divergentes",        count: alertas.itensDiverg,      cls: "bg-amber-500/10 border-amber-500/20",   dot: "#f59e0b",         txtCls: "text-yellow-300", pulse: false },
+                      { label: "Sem GPS / referência",     count: alertas.semGps,           cls: "bg-cyan-500/10 border-cyan-500/20",     dot: RAW.accent.cyan,   txtCls: "text-cyan-300",   pulse: false },
+                    ].map(({ label, count, cls, dot, txtCls, pulse }) => (
+                      <div key={label} className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 flex-1 ${cls}`}>
+                        <span className="relative flex w-2 h-2 shrink-0">
+                          {pulse && count > 0 && <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ background: dot }} />}
+                          <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: dot }} />
+                        </span>
+                        <span className="text-[13px] text-slate-400 flex-1 leading-tight">{label}</span>
+                        <span className={`text-[28px] font-black tabular-nums ${txtCls}`}>{loading ? "—" : count}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </AnimatedCard>
             </div>
 
-            {/* Row 2: Top Rotas + Top Motoristas + Alertas */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            {/* ── LINHA 3: Situação + Classificação + Top Rotas + Top Motoristas ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+              {/* Situação das Viagens */}
+              <AnimatedCard delay={360}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Situação das Viagens</span>
+                  </div>
+                  {distSituacao.length === 0
+                    ? <div className="text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
+                    : <div className="space-y-2">
+                        {distSituacao.map(r => {
+                          const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
+                          return (
+                            <div key={r.nome} className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                              <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                              <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                              <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                  }
+                </div>
+              </AnimatedCard>
+
+              {/* Classificação Veículo */}
+              <AnimatedCard delay={390}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Classificação Veículo</span>
+                  </div>
+                  <div className="space-y-2">
+                    {distClassi.slice(0, 6).map(r => {
+                      const total = distClassi.reduce((s, x) => s + x.qtd, 0);
+                      return (
+                        <div key={r.nome} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                          <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                          <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                          <span className="text-[14px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </AnimatedCard>
 
               {/* Top Rotas */}
-              <AnimatedCard delay={360}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              <AnimatedCard delay={420}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Navigation className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Rotas</span>
-                    <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">Origem → Destino</span>
+                    <span className="ml-auto text-[10px] text-slate-600 uppercase tracking-[0.12em]">Origem → Destino</span>
                   </div>
                   {topRotas.length === 0
-                    ? <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
+                    ? <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                     : <div className="space-y-2">
                         {topRotas.map((r, i) => {
                           const max = topRotas[0].qtd;
@@ -797,8 +823,8 @@ export default function Operacional() {
                               <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[13px] text-slate-300 truncate">{r.rota}</span>
-                                  <span className="text-[14px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                                  <span className="text-[12px] text-slate-300 truncate">{r.rota}</span>
+                                  <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
                                 </div>
                                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                   <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
@@ -813,15 +839,15 @@ export default function Operacional() {
               </AnimatedCard>
 
               {/* Top Motoristas */}
-              <AnimatedCard delay={390}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              <AnimatedCard delay={450}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Motoristas em Rota</span>
-                    <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">Top 8</span>
+                    <span className="ml-auto text-[10px] text-slate-600 uppercase tracking-[0.12em]">Top 8</span>
                   </div>
                   {topMotoristas.length === 0
-                    ? <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
+                    ? <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                     : <div className="space-y-2">
                         {topMotoristas.map((r, i) => {
                           const max = topMotoristas[0].qtd;
@@ -830,8 +856,8 @@ export default function Operacional() {
                               <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[14px] text-slate-300 truncate">{r.nome}</span>
-                                  <span className="text-[14px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                                  <span className="text-[13px] text-slate-300 truncate">{r.nome}</span>
+                                  <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
                                 </div>
                                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                   <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
@@ -842,34 +868,6 @@ export default function Operacional() {
                         })}
                       </div>
                   }
-                </div>
-              </AnimatedCard>
-
-              {/* Alertas Operacionais */}
-              <AnimatedCard delay={420}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Alertas Operacionais</span>
-                  </div>
-                  <div className="space-y-2">
-                    {[
-                      { label: "Saída com atraso",        count: alertas.atrasados,        cls: "bg-rose-500/10 border-rose-500/20",   dot: RAW.accent.rose,    txtCls: "text-rose-300",   pulse: true  },
-                      { label: "Em manutenção",            count: alertas.emManutencao,     cls: "bg-violet-500/10 border-violet-500/20",dot: RAW.accent.violet,  txtCls: "text-violet-300", pulse: true  },
-                      { label: "Previsão ultrapassada",    count: alertas.prevUltrapassada, cls: "bg-amber-500/10 border-amber-500/20",  dot: RAW.accent.amber,   txtCls: "text-amber-300",  pulse: alertas.prevUltrapassada > 0 },
-                      { label: "Itens divergentes",        count: alertas.itensDiverg,      cls: "bg-amber-500/10 border-amber-500/20",  dot: "#f59e0b",          txtCls: "text-yellow-300", pulse: false },
-                      { label: "Sem GPS / referência",     count: alertas.semGps,           cls: "bg-cyan-500/10 border-cyan-500/20",    dot: RAW.accent.cyan,    txtCls: "text-cyan-300",   pulse: false },
-                    ].map(({ label, count, cls, dot, txtCls, pulse }) => (
-                      <div key={label} className={`flex items-center gap-3 rounded-[10px] border px-3.5 py-2.5 ${cls}`}>
-                        <span className="relative flex w-1.5 h-1.5 shrink-0">
-                          {pulse && count > 0 && <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ background: dot }} />}
-                          <span className="relative inline-flex w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
-                        </span>
-                        <span className="text-[14px] text-slate-400 flex-1">{label}</span>
-                        <span className={`text-[20px] font-black ${txtCls}`}>{loading ? "—" : count}</span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </AnimatedCard>
             </div>
