@@ -621,22 +621,27 @@ export default function Operacional() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
-                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%",       Icon: Navigation, tone: "cyan"    as const, delay: 80  },
-                { label: "Veículos em Rota",      value: loading ? "—" : fmtNum(kpis.emRota),      sub: "Fora de manutenção",     Icon: Truck,      tone: "emerald" as const, delay: 120 },
-                { label: "Em Manutenção",          value: loading ? "—" : fmtNum(kpis.emManutencao),sub: "EM_MANUTENCAO = S",      Icon: Wrench,     tone: "amber"   as const, delay: 160 },
-                { label: "Com Atraso na Saída",    value: loading ? "—" : fmtNum(kpis.comAtraso),  sub: "SAIDA_REAL > ORIGINAL",  Icon: AlertCircle,tone: "rose"    as const, delay: 200 },
-                { label: "Conclusão Média",        value: loading ? "—" : fmtPct(kpis.avgPerc),    sub: "AVG(PERC_COMPLETO)",     Icon: TrendingUp, tone: "violet"  as const, delay: 240 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
+                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%",       Icon: Navigation, tone: "cyan"    as const, delay: 80,  dialog: "andamento" as const  },
+                { label: "Veículos em Rota",      value: loading ? "—" : fmtNum(kpis.emRota),      sub: "Fora de manutenção",     Icon: Truck,      tone: "emerald" as const, delay: 120, dialog: "rota" as const       },
+                { label: "Em Manutenção",          value: loading ? "—" : fmtNum(kpis.emManutencao),sub: "EM_MANUTENCAO = S",      Icon: Wrench,     tone: "amber"   as const, delay: 160, dialog: "manutencao" as const },
+                { label: "Com Atraso na Saída",    value: loading ? "—" : fmtNum(kpis.comAtraso),  sub: "SAIDA_REAL > ORIGINAL",  Icon: AlertCircle,tone: "rose"    as const, delay: 200, dialog: "atraso" as const     },
+                { label: "Conclusão Média",        value: loading ? "—" : fmtPct(kpis.avgPerc),    sub: "AVG(PERC_COMPLETO)",     Icon: TrendingUp, tone: "violet"  as const, delay: 240, dialog: null                  },
+              ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
                 const t = TC[tone];
+                const clickable = !!dialog;
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
+                    <div
+                      onClick={() => clickable && setKpiDialog(dialog)}
+                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border} ${clickable ? "cursor-pointer" : ""}`}
+                      style={{ background: "var(--sgt-bg-card)" }}
+                    >
                       <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 mb-2">{label}</p>
                           <p className={`text-[28px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}</p>
+                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}{clickable && " · clique p/ detalhes"}</p>
                         </div>
                         <div className={`shrink-0 rounded-xl p-2.5 ${t.bg} border ${t.border}`}>
                           <Icon className={`w-5 h-5 ${t.icon}`} />
