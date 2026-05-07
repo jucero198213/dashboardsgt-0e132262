@@ -15,14 +15,6 @@ export interface MapVeiculo {
   descSituacao: string | null;
 }
 
-const corDe = (v: MapVeiculo) => {
-  if (v.emManutencao) return RAW.accent.violet;
-  if (v.temAtraso) return RAW.accent.rose;
-  if (v.percCompleto === 0) return RAW.accent.amber;
-  return RAW.accent.cyan;
-};
-
-// ↑ truque: percCompleto não está no tipo, então simplificamos:
 const cor = (v: MapVeiculo) => {
   if (v.emManutencao) return RAW.accent.violet;
   if (v.temAtraso) return RAW.accent.rose;
