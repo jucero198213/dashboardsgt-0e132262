@@ -1,9 +1,7 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { RAW } from "@/lib/theme";
-import cavaloSgt from "@/assets/cavalo_sgt.png";
 
 export interface MapVeiculo {
   veiculo: string;
@@ -23,17 +21,6 @@ const cor = (v: MapVeiculo) => {
   if (v.perc === 0) return RAW.accent.amber;
   return RAW.accent.cyan;
 };
-
-// Única mudança em relação à versão original: ícone do caminhão SGT
-function criarIcone(color: string): L.Icon {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="52" height="32" viewBox="0 0 52 32"><defs><filter id="g"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${color}" flood-opacity="0.9"/><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="${color}" flood-opacity="0.5"/></filter></defs><image href="${cavaloSgt}" x="0" y="0" width="52" height="32" filter="url(#g)"/></svg>`;
-  return L.icon({
-    iconUrl: `data:image/svg+xml;base64,${btoa(svg)}`,
-    iconSize: [52, 32],
-    iconAnchor: [26, 16],
-    popupAnchor: [0, -20],
-  });
-}
 
 function FitBounds({ pontos }: { pontos: MapVeiculo[] }) {
   const map = useMap();
@@ -65,10 +52,11 @@ export function VeiculosMap({ veiculos }: { veiculos: MapVeiculo[] }) {
       {veiculos.map((v, i) => {
         const c = cor(v);
         return (
-          <Marker
+          <CircleMarker
             key={i}
-            position={[v.latitude, v.longitude]}
-            icon={criarIcone(c)}
+            center={[v.latitude, v.longitude]}
+            radius={7}
+            pathOptions={{ color: "#ffffff66", weight: 1, fillColor: c, fillOpacity: 0.9 }}
           >
             <Popup>
               <div style={{ fontFamily: "ui-sans-serif, system-ui", minWidth: 180 }}>
@@ -87,7 +75,7 @@ export function VeiculosMap({ veiculos }: { veiculos: MapVeiculo[] }) {
                 )}
               </div>
             </Popup>
-          </Marker>
+          </CircleMarker>
         );
       })}
     </MapContainer>
