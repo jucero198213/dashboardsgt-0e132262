@@ -82,9 +82,9 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
         {/* Valor — protagonista */}
         <p className="mt-auto pt-2 sm:pt-3 md:pt-4 text-[16px] sm:text-[20px] md:text-[28px] lg:text-[30px] font-black leading-none tracking-[-0.05em] [color:var(--sgt-text-primary)] break-words">
           {rawValue !== undefined && isCurrency ? (
-            <CountUp value={rawValue} format="currency" />
+            <CountUp value={rawValue} format="brl" />
           ) : rawValue !== undefined && isPercent ? (
-            <CountUp value={rawValue} format="percent" />
+            <CountUp value={rawValue} format="pct" />
           ) : (
             value
           )}
