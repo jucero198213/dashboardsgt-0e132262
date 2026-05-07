@@ -538,7 +538,7 @@ export default function Operacional() {
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
                   <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-400/70">Workspace</span>
-                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Operacional</span>
+                  <span className="text-[20px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Operacional</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -568,32 +568,32 @@ export default function Operacional() {
             <AnimatedCard delay={60}>
               <div className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2" style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
                 <Filter className="w-3.5 h-3.5 text-cyan-400/60 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 shrink-0">Filtros</span>
+                <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 shrink-0">Filtros</span>
                 <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
                 <Select value={filtroSituacao} onValueChange={v => { setFiltroSituacao(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[150px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                  <SelectTrigger className="h-9 min-w-[100px] max-w-[160px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
                     <SelectValue placeholder="Situação" />
                   </SelectTrigger>
                   <SelectContent>{situacoes.map(s => <SelectItem key={s} value={s}>{s === "Todos" ? "Situação" : s}</SelectItem>)}</SelectContent>
                 </Select>
 
                 <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[100px] max-w-[180px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                  <SelectTrigger className="h-9 min-w-[110px] max-w-[190px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
                     <SelectValue placeholder="Motorista" />
                   </SelectTrigger>
                   <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
                 </Select>
 
                 <Select value={filtroClassi} onValueChange={v => { setFiltroClassi(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                  <SelectTrigger className="h-9 min-w-[100px] max-w-[150px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
                     <SelectValue placeholder="Classif." />
                   </SelectTrigger>
                   <SelectContent>{classificacoes.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Classificação" : c}</SelectItem>)}</SelectContent>
                 </Select>
 
                 <Select value={filtroManut} onValueChange={v => { setFiltroManut(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[130px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
+                  <SelectTrigger className="h-9 min-w-[100px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-cyan-500/30 focus:outline-none">
                     <SelectValue placeholder="Manutenção" />
                   </SelectTrigger>
                   <SelectContent>
@@ -611,7 +611,7 @@ export default function Operacional() {
                     <X className="w-2.5 h-2.5" /> Limpar
                   </button>
                 )}
-                <div className="ml-auto text-[10px] text-slate-500">{fmtNum(filtrados.length)} registros</div>
+                <div className="ml-auto text-[13px] text-slate-500">{fmtNum(filtrados.length)} registros</div>
               </div>
             </AnimatedCard>
 
@@ -620,7 +620,7 @@ export default function Operacional() {
             ════════════════════════════════════════════════════════ */}
             <div className="flex items-center gap-2 mt-2">
               <Radio className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Indicadores Operacionais</span>
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Indicadores Operacionais</span>
               <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
             </div>
 
@@ -639,9 +639,9 @@ export default function Operacional() {
                       <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 mb-1.5">{label}</p>
-                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                          <p className="text-[11px] font-medium mt-2 text-slate-500">{sub}</p>
+                          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 mb-2">{label}</p>
+                          <p className={`text-[28px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
+                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}</p>
                         </div>
                         <div className={`shrink-0 rounded-xl p-2.5 ${t.bg} border ${t.border}`}>
                           <Icon className={`w-5 h-5 ${t.icon}`} />
@@ -659,7 +659,7 @@ export default function Operacional() {
             ════════════════════════════════════════════════════════ */}
             <div className="flex items-center gap-2 mt-2">
               <BarChart3 className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Análise Operacional</span>
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Análise Operacional</span>
               <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
             </div>
 
@@ -672,9 +672,9 @@ export default function Operacional() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Posições em Tempo Real</span>
+                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Posições em Tempo Real</span>
                     </div>
-                    <div className="flex items-center gap-3 text-[9px]">
+                    <div className="flex items-center gap-3 text-[11px]">
                       {[
                         { label: "Em rota",    color: RAW.accent.cyan    },
                         { label: "Aguardando", color: RAW.accent.amber   },
@@ -737,7 +737,7 @@ export default function Operacional() {
                     )}
 
                     {/* Contador canto */}
-                    <div className="absolute top-2 left-2 text-[9px] font-semibold text-cyan-400/70">
+                    <div className="absolute top-2 left-2 text-[11px] font-semibold text-cyan-400/70">
                       {mapaDots.length} veículos com GPS
                     </div>
                     <div className="absolute bottom-2 right-2 text-[8px] text-slate-600">VEI_LATITU · VEI_LONGIT</div>
@@ -752,7 +752,7 @@ export default function Operacional() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Situação das Viagens</span>
+                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Situação das Viagens</span>
                     </div>
                     {distSituacao.length === 0
                       ? <div className="text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
@@ -762,9 +762,9 @@ export default function Operacional() {
                             return (
                               <div key={r.nome} className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                                <span className="text-[12px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                                <span className="text-[10px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
-                                <span className="text-[12px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                                <span className="text-[14px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                                <span className="text-[12px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                                <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
                               </div>
                             );
                           })}
@@ -775,7 +775,7 @@ export default function Operacional() {
                   <div className="border-t pt-2.5" style={{ borderColor: RAW.borderDefault }}>
                     <div className="flex items-center gap-2 mb-3">
                       <Truck className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Classificação Veículo</span>
+                      <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Classificação Veículo</span>
                     </div>
                     <div className="space-y-2">
                       {distClassi.slice(0, 4).map(r => {
@@ -783,8 +783,8 @@ export default function Operacional() {
                         return (
                           <div key={r.nome} className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                            <span className="text-[12px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                            <span className="text-[12px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
+                            <span className="text-[14px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                            <span className="text-[14px] font-bold" style={{ color: r.fill }}>{r.qtd}</span>
                           </div>
                         );
                       })}
@@ -802,7 +802,7 @@ export default function Operacional() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Navigation className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Top Rotas</span>
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Rotas</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">Origem → Destino</span>
                   </div>
                   {topRotas.length === 0
@@ -812,11 +812,11 @@ export default function Operacional() {
                           const max = topRotas[0].qtd;
                           return (
                             <div key={r.rota} className="flex items-center gap-2">
-                              <span className="w-4 text-[10px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                              <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[11px] text-slate-300 truncate">{r.rota}</span>
-                                  <span className="text-[12px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                                  <span className="text-[13px] text-slate-300 truncate">{r.rota}</span>
+                                  <span className="text-[14px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
                                 </div>
                                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                   <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
@@ -835,7 +835,7 @@ export default function Operacional() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Motoristas em Rota</span>
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Motoristas em Rota</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">Top 8</span>
                   </div>
                   {topMotoristas.length === 0
@@ -845,11 +845,11 @@ export default function Operacional() {
                           const max = topMotoristas[0].qtd;
                           return (
                             <div key={r.nome} className="flex items-center gap-2">
-                              <span className="w-4 text-[10px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                              <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[12px] text-slate-300 truncate">{r.nome}</span>
-                                  <span className="text-[12px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                                  <span className="text-[14px] text-slate-300 truncate">{r.nome}</span>
+                                  <span className="text-[14px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
                                 </div>
                                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                   <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
@@ -868,7 +868,7 @@ export default function Operacional() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Alertas Operacionais</span>
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Alertas Operacionais</span>
                   </div>
                   <div className="space-y-2">
                     {[
@@ -878,13 +878,13 @@ export default function Operacional() {
                       { label: "Itens divergentes",        count: alertas.itensDiverg,      cls: "bg-amber-500/10 border-amber-500/20",  dot: "#f59e0b",          txtCls: "text-yellow-300", pulse: false },
                       { label: "Sem GPS / referência",     count: alertas.semGps,           cls: "bg-cyan-500/10 border-cyan-500/20",    dot: RAW.accent.cyan,    txtCls: "text-cyan-300",   pulse: false },
                     ].map(({ label, count, cls, dot, txtCls, pulse }) => (
-                      <div key={label} className={`flex items-center gap-2.5 rounded-[10px] border px-3 py-2 ${cls}`}>
+                      <div key={label} className={`flex items-center gap-3 rounded-[10px] border px-3.5 py-2.5 ${cls}`}>
                         <span className="relative flex w-1.5 h-1.5 shrink-0">
                           {pulse && count > 0 && <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ background: dot }} />}
                           <span className="relative inline-flex w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
                         </span>
-                        <span className="text-[12px] text-slate-400 flex-1">{label}</span>
-                        <span className={`text-[15px] font-black ${txtCls}`}>{loading ? "—" : count}</span>
+                        <span className="text-[14px] text-slate-400 flex-1">{label}</span>
+                        <span className={`text-[20px] font-black ${txtCls}`}>{loading ? "—" : count}</span>
                       </div>
                     ))}
                   </div>
@@ -898,7 +898,7 @@ export default function Operacional() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Pontualidade de Saída por Filial</span>
+                    <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Pontualidade de Saída por Filial</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.15em]">SAIDA_REAL vs SAIDA_ORIGINAL</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -906,15 +906,15 @@ export default function Operacional() {
                       const cor = r.pct >= 80 ? RAW.accent.emerald : r.pct >= 60 ? RAW.accent.amber : RAW.accent.rose;
                       return (
                         <div key={r.filial} className="flex flex-col gap-1.5">
-                          <span className="text-[10px] font-semibold text-slate-200">{r.filial}</span>
-                          <div className="flex justify-between text-[9px] text-slate-500">
+                          <span className="text-[13px] font-semibold text-slate-200">{r.filial}</span>
+                          <div className="flex justify-between text-[11px] text-slate-500">
                             <span style={{ color: RAW.accent.emerald }}>+{r.pontual}</span>
                             <span style={{ color: RAW.accent.rose }}>−{r.atrasado}</span>
                           </div>
                           <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                             <div className="h-full rounded-full transition-all duration-500" style={{ width: `${r.pct}%`, background: cor }} />
                           </div>
-                          <span className="text-[15px] font-black" style={{ color: cor }}>{fmtPct(r.pct)}</span>
+                          <span className="text-[20px] font-black" style={{ color: cor }}>{fmtPct(r.pct)}</span>
                         </div>
                       );
                     })}
@@ -955,7 +955,7 @@ export default function Operacional() {
             ════════════════════════════════════════════════════════ */}
             <div className="flex items-center gap-2 mt-2">
               <FileText className="w-3.5 h-3.5 text-cyan-400/60" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Detalhamento de Viagens</span>
+              <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-500">Detalhamento de Viagens</span>
               <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
             </div>
 
@@ -964,7 +964,7 @@ export default function Operacional() {
 
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <Radio className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Viagens em Andamento</span>
+                  <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Viagens em Andamento</span>
                   <span className="rounded-full border border-cyan-400/20 bg-cyan-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-cyan-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
@@ -975,7 +975,7 @@ export default function Operacional() {
                       value={search}
                       onChange={e => { setSearch(e.target.value); setPage(1); }}
                       placeholder="Buscar veículo, motorista, rota..."
-                      className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
+                      className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
                     />
                   </div>
                 </div>
@@ -998,7 +998,7 @@ export default function Operacional() {
                           <th
                             key={c.key}
                             onClick={() => handleSort(c.key)}
-                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
+                            className={`px-3 py-2 cursor-pointer select-none text-[12px] font-bold uppercase tracking-[0.15em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
                             style={{ textAlign: c.align as any }}
                           >
                             <span className="inline-flex items-center gap-0.5">{c.label}<SortIcon col={c.key} /></span>
@@ -1011,7 +1011,7 @@ export default function Operacional() {
                         Array.from({ length: 6 }).map((_, i) => (
                           <tr key={i} style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
                             {Array.from({ length: 9 }).map((_, j) => (
-                              <td key={j} className="px-3 py-2.5">
+                              <td key={j} className="px-4 py-3">
                                 <div className="h-2 rounded-full bg-white/[0.04] animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
                               </td>
                             ))}
@@ -1028,26 +1028,26 @@ export default function Operacional() {
                           return (
                             <tr key={`${v.id}-${i}`} className="transition-colors hover:bg-white/[0.02]" style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
                               {/* Veículo */}
-                              <td className="px-3 py-2.5">
+                              <td className="px-4 py-3">
                                 <div>
-                                  <span className="font-mono text-[11px] font-semibold text-cyan-300">{v.veiculo}</span>
+                                  <span className="font-mono text-[14px] font-semibold text-cyan-300">{v.veiculo}</span>
                                   {v.veiculo2 && <span className="text-[9px] text-slate-600 block">+{v.veiculo2}</span>}
                                 </div>
                               </td>
                               {/* Motorista */}
-                              <td className="px-3 py-2.5 hidden md:table-cell">
-                                <span className="text-[12px] text-slate-300 truncate max-w-[130px] block">{v.motorista ?? "—"}</span>
+                              <td className="px-4 py-3 hidden md:table-cell">
+                                <span className="text-[14px] text-slate-300 truncate max-w-[130px] block">{v.motorista ?? "—"}</span>
                               </td>
                               {/* Rota */}
-                              <td className="px-3 py-2.5 hidden sm:table-cell">
+                              <td className="px-4 py-3 hidden sm:table-cell">
                                 <span className="text-[10px] text-slate-400 block max-w-[200px] truncate">{v.rota}</span>
                               </td>
                               {/* Saída Prev */}
-                              <td className="px-3 py-2.5 hidden lg:table-cell text-center">
+                              <td className="px-4 py-3 hidden lg:table-cell text-center">
                                 <span className="text-[10px] text-slate-400">{fmtHora(v.datSaiOriginal)}</span>
                               </td>
                               {/* Saída Real */}
-                              <td className="px-3 py-2.5 hidden lg:table-cell text-center">
+                              <td className="px-4 py-3 hidden lg:table-cell text-center">
                                 {v.datSaiReal
                                   ? <div className="inline-flex flex-col items-center">
                                       <span className={`text-[10px] font-medium ${v.temAtraso ? "text-rose-300" : "text-emerald-300"}`}>{fmtHora(v.datSaiReal)}</span>
@@ -1061,7 +1061,7 @@ export default function Operacional() {
                                 }
                               </td>
                               {/* % Concluído */}
-                              <td className="px-3 py-2.5">
+                              <td className="px-4 py-3">
                                 <div className="flex items-center gap-2 min-w-[80px]">
                                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                     <div className="h-full rounded-full transition-all duration-500" style={{ width: `${v.percCompleto}%`, background: progCor }} />
