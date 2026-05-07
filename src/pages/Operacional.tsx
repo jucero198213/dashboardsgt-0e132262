@@ -22,6 +22,8 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { fetchOperacional, type OperacionalRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
+import { VeiculosMap } from "@/components/operacional/VeiculosMap";
+import { ViagensDialog } from "@/components/operacional/ViagensDialog";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
