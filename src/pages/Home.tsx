@@ -463,7 +463,65 @@ export default function Home() {
           </section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
-          <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
+          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 text-center"
+            >
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
+                Módulos principais
+              </p>
+              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
+                Acessos do Workspace SGT
+              </h2>
+            </motion.div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {modules.map((m, i) => (
+                <ModuleCard key={m.key} data={m} index={i} />
+              ))}
+            </div>
+          </section>
+
+          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
+
+        </div>
+      </section>
+    </div>
+  );
+}          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 text-center"
+            >
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
+                Módulos principais
+              </p>
+              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
+                Acessos do Workspace SGT
+              </h2>
+            </motion.div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {modules.map((m, i) => (
+                <ModuleCard key={m.key} data={m} index={i} />
+              ))}
+            </div>
+          </section>
+
+          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
+
+        </div>
+      </section>
+    </div>
+  );
+}          <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -562,33 +620,4 @@ export default function Home() {
             </p>
           </section>
 
-          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
-              className="mb-10 text-center"
-            >
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
-                Módulos principais
-              </p>
-              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
-                Acessos do Workspace SGT
-              </h2>
-            </motion.div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {modules.map((m, i) => (
-                <ModuleCard key={m.key} data={m} index={i} />
-              ))}
-            </div>
-          </section>
-
-          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
-
-        </div>
-      </section>
-    </div>
-  );
-}
