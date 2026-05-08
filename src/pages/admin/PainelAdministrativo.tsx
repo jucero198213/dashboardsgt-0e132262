@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, Settings, Database, Activity, Shield,
-  ChevronRight, Lock, Server, Zap,
+  ChevronRight, Lock, Server, Zap, ClipboardList,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -12,7 +12,7 @@ import BancoDados from "./BancoDados";
 import Monitoramento from "./Monitoramento";
 import Seguranca from "./Seguranca";
 
-type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca";
+type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca" | "chamados";
 
 const NAV_ITEMS = [
   {
