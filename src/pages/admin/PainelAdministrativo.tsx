@@ -70,6 +70,18 @@ const NAV_ITEMS = [
     icon_color: "text-red-400",
     badge_bg: "bg-red-500/15",
   },
+  {
+    id: "chamados" as Screen,
+    label: "Agenda de Chamados",
+    desc: "Calendário, criação e acompanhamento de chamados",
+    icon: ClipboardList,
+    accent: "amber",
+    border: "border-amber-500/20",
+    bg: "bg-amber-500/8",
+    icon_color: "text-amber-400",
+    badge_bg: "bg-amber-500/15",
+    route: "/admin/chamados",
+  },
 ];
 
 export default function PainelAdministrativo() {
