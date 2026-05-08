@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
+import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
 import sgtLogo from "@/assets/sgt-logo.png";
 
 /* ---------------------------------------------------------------- */
@@ -372,6 +373,7 @@ export default function Home() {
           <div className="flex items-center justify-end py-1">
             <UserMenu showAdmin />
           </div>
+          <TodayTicketsPopup />
 
           {/* ── HERO ── */}
           <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-12 pb-8 text-center sm:pt-16 sm:pb-12 lg:px-10 lg:pt-20 lg:pb-16">
