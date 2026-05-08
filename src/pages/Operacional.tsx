@@ -26,8 +26,8 @@ import { VeiculosMap } from "@/components/operacional/VeiculosMap";
 import { ViagensDialog } from "@/components/operacional/ViagensDialog";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
-const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-const fmtPct  = (v: number) => `${v.toFixed(0)}%`;
+const fmtNum = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+const fmtPct = (v: number) => `${v.toFixed(0)}%`;
 
 const fmtHora = (s: string | null) => {
   if (!s) return "—";
@@ -60,18 +60,18 @@ const minPrevisao = (previsao: string | null): number | null => {
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const PALETTE = [
   RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet,
-  RAW.accent.amber, RAW.accent.rose,   "#fb923c", "#94a3b8",
+  RAW.accent.amber, RAW.accent.rose, "#fb923c", "#94a3b8",
 ];
 const colorFor = (_: string, i: number) => PALETTE[i % PALETTE.length];
 
 // ─── Situação → estilo ────────────────────────────────────────────────────────
 const SITUAC_STYLE: Record<string, { bg: string; text: string; ring: string; label: string }> = {
-  EM_ROTA:      { bg: "bg-cyan-500/10",    text: "text-cyan-300",    ring: "ring-cyan-500/30",    label: "Em rota"      },
-  ENTREGUE:     { bg: "bg-emerald-500/10", text: "text-emerald-300", ring: "ring-emerald-500/30", label: "Entregue"     },
-  AGUARDANDO:   { bg: "bg-amber-500/10",   text: "text-amber-300",   ring: "ring-amber-500/30",   label: "Aguardando"   },
-  ATRASADO:     { bg: "bg-rose-500/10",    text: "text-rose-300",    ring: "ring-rose-500/30",    label: "Atrasado"     },
-  MANUTENCAO:   { bg: "bg-violet-500/10",  text: "text-violet-300",  ring: "ring-violet-500/30",  label: "Manutenção"   },
-  CANCELADO:    { bg: "bg-slate-500/10",   text: "text-slate-400",   ring: "ring-slate-500/20",   label: "Cancelado"    },
+  EM_ROTA: { bg: "bg-cyan-500/10", text: "text-cyan-300", ring: "ring-cyan-500/30", label: "Em rota" },
+  ENTREGUE: { bg: "bg-emerald-500/10", text: "text-emerald-300", ring: "ring-emerald-500/30", label: "Entregue" },
+  AGUARDANDO: { bg: "bg-amber-500/10", text: "text-amber-300", ring: "ring-amber-500/30", label: "Aguardando" },
+  ATRASADO: { bg: "bg-rose-500/10", text: "text-rose-300", ring: "ring-rose-500/30", label: "Atrasado" },
+  MANUTENCAO: { bg: "bg-violet-500/10", text: "text-violet-300", ring: "ring-violet-500/30", label: "Manutenção" },
+  CANCELADO: { bg: "bg-slate-500/10", text: "text-slate-400", ring: "ring-slate-500/20", label: "Cancelado" },
 };
 const getSituacStyle = (raw: string | null) => {
   if (!raw) return SITUAC_STYLE["AGUARDANDO"];
@@ -100,44 +100,44 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 
 // ─── Tipo local enriquecido ────────────────────────────────────────────────────
 interface Viagem {
-  id:               string;
-  veiculo:          string;
-  veiculo2:         string | null;
-  veiculo3:         string | null;
-  motorista:        string | null;
-  latitude:         number | null;
-  longitude:        number | null;
-  referencia:       string | null;
-  tipoDoc:          string | null;
-  codDoc:           string | null;
-  filialDoc:        string | null;
-  remetente:        string | null;
-  destinatario:     string | null;
-  datSaiOriginal:   string | null;
-  datSaiReal:       string | null;
-  percCompleto:     number;
-  prevChegada:      string | null;
-  situacaoViagem:   string | null;
-  descSituacao:     string | null;
-  descOrigem:       string | null;
-  descDestino:      string | null;
-  latRemetente:     number | null;
-  longRemetente:    number | null;
-  latDestinatario:  number | null;
+  id: string;
+  veiculo: string;
+  veiculo2: string | null;
+  veiculo3: string | null;
+  motorista: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  referencia: string | null;
+  tipoDoc: string | null;
+  codDoc: string | null;
+  filialDoc: string | null;
+  remetente: string | null;
+  destinatario: string | null;
+  datSaiOriginal: string | null;
+  datSaiReal: string | null;
+  percCompleto: number;
+  prevChegada: string | null;
+  situacaoViagem: string | null;
+  descSituacao: string | null;
+  descOrigem: string | null;
+  descDestino: string | null;
+  latRemetente: number | null;
+  longRemetente: number | null;
+  latDestinatario: number | null;
   longDestinatario: number | null;
-  totalItens:       number;
-  itensReal:        number;
-  classiVei:        string | null;
-  situacVei:        string | null;
-  emManutencao:     boolean;
+  totalItens: number;
+  itensReal: number;
+  classiVei: string | null;
+  situacVei: string | null;
+  emManutencao: boolean;
   // calculados
-  minAtrasoSaida:   number | null;
-  minParaChegar:    number | null;
-  temAtraso:        boolean;
+  minAtrasoSaida: number | null;
+  minParaChegar: number | null;
+  temAtraso: boolean;
   prevUltrapassada: boolean;
   itensDivergentes: boolean;
-  semGps:           boolean;
-  rota:             string;
+  semGps: boolean;
+  rota: string;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -145,19 +145,19 @@ export default function Operacional() {
   const cooldown = useCooldown("dw_operacional_fetch_ts");
 
   // ── Estado ──────────────────────────────────────────────────────────────────
-  const [dados,        setDados]        = useState<OperacionalRow[]>([]);
-  const [loading,      setLoading]      = useState(false);
-  const [progress,     setProgress]     = useState(0);
+  const [dados, setDados] = useState<OperacionalRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
-  const [error,        setError]        = useState<string | null>(null);
-  const [lastUpdate,   setLastUpdate]   = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // Filtros locais
-  const [filtroSituacao,  setFiltroSituacao]  = useState("Todos");
+  const [filtroSituacao, setFiltroSituacao] = useState("Todos");
   const [filtroMotorista, setFiltroMotorista] = useState("Todos");
-  const [filtroClassi,    setFiltroClassi]    = useState("Todos");
-  const [filtroManut,     setFiltroManut]     = useState("Todos");
-  const [search,          setSearch]          = useState("");
+  const [filtroClassi, setFiltroClassi] = useState("Todos");
+  const [filtroManut, setFiltroManut] = useState("Todos");
+  const [search, setSearch] = useState("");
 
   // Tabela
   const [sortCol, setSortCol] = useState<keyof Viagem>("percCompleto");
@@ -210,55 +210,55 @@ export default function Operacional() {
   // ── Normalização enriquecida ────────────────────────────────────────────────
   const viagens = useMemo<Viagem[]>(() => {
     return dados.map(d => {
-      const atraso   = minAtraso(d.data_saida_original, d.data_saida_real);
-      const paraCh   = minPrevisao(d.previsao_chegada);
-      const perc     = d.percentual_completo ?? 0;
-      const totalIt  = d.total_itens ?? 0;
-      const realIt   = d.itens_real  ?? 0;
-      const manut    = String(d.em_manutencao ?? "").toUpperCase() === "S" || d.em_manutencao === true;
-      const semGps   = !d.latitude && !d.longitude;
-      const orig     = d.descricao_origem   ?? d.remetente   ?? "—";
-      const dest     = d.descricao_destino  ?? d.destinatario ?? "—";
+      const atraso = minAtraso(d.data_saida_original, d.data_saida_real);
+      const paraCh = minPrevisao(d.previsao_chegada);
+      const perc = d.percentual_completo ?? 0;
+      const totalIt = d.total_itens ?? 0;
+      const realIt = d.itens_real ?? 0;
+      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S" || d.em_manutencao === true;
+      const semGps = !d.latitude && !d.longitude;
+      const orig = d.descricao_origem ?? d.remetente ?? "—";
+      const dest = d.descricao_destino ?? d.destinatario ?? "—";
       const origCurta = orig.length > 18 ? orig.slice(0, 18) + "…" : orig;
       const destCurta = dest.length > 18 ? dest.slice(0, 18) + "…" : dest;
       return {
-        id:               String(d.id ?? ""),
-        veiculo:          String(d.veiculo ?? "—"),
-        veiculo2:         d.veiculo2 ? String(d.veiculo2) : null,
-        veiculo3:         d.veiculo3 ? String(d.veiculo3) : null,
-        motorista:        d.motorista,
-        latitude:         d.latitude  ? Number(d.latitude)  : null,
-        longitude:        d.longitude ? Number(d.longitude) : null,
-        referencia:       d.referencia,
-        tipoDoc:          d.tipo_documento,
-        codDoc:           d.codigo_documento ? String(d.codigo_documento) : null,
-        filialDoc:        d.filial_documento ? String(d.filial_documento) : null,
-        remetente:        d.remetente,
-        destinatario:     d.destinatario,
-        datSaiOriginal:   d.data_saida_original,
-        datSaiReal:       d.data_saida_real,
-        percCompleto:     perc,
-        prevChegada:      d.previsao_chegada,
-        situacaoViagem:   d.situacao_viagem,
-        descSituacao:     d.descricao_situacao,
-        descOrigem:       orig,
-        descDestino:      dest,
-        latRemetente:     d.latitude_remetente  ? Number(d.latitude_remetente)  : null,
-        longRemetente:    d.longitude_remetente ? Number(d.longitude_remetente) : null,
-        latDestinatario:  d.latitude_destinatario  ? Number(d.latitude_destinatario)  : null,
+        id: String(d.id ?? ""),
+        veiculo: String(d.veiculo ?? "—"),
+        veiculo2: d.veiculo2 ? String(d.veiculo2) : null,
+        veiculo3: d.veiculo3 ? String(d.veiculo3) : null,
+        motorista: d.motorista,
+        latitude: d.latitude ? Number(d.latitude) : null,
+        longitude: d.longitude ? Number(d.longitude) : null,
+        referencia: d.referencia,
+        tipoDoc: d.tipo_documento,
+        codDoc: d.codigo_documento ? String(d.codigo_documento) : null,
+        filialDoc: d.filial_documento ? String(d.filial_documento) : null,
+        remetente: d.remetente,
+        destinatario: d.destinatario,
+        datSaiOriginal: d.data_saida_original,
+        datSaiReal: d.data_saida_real,
+        percCompleto: perc,
+        prevChegada: d.previsao_chegada,
+        situacaoViagem: d.situacao_viagem,
+        descSituacao: d.descricao_situacao,
+        descOrigem: orig,
+        descDestino: dest,
+        latRemetente: d.latitude_remetente ? Number(d.latitude_remetente) : null,
+        longRemetente: d.longitude_remetente ? Number(d.longitude_remetente) : null,
+        latDestinatario: d.latitude_destinatario ? Number(d.latitude_destinatario) : null,
         longDestinatario: d.longitude_destinatario ? Number(d.longitude_destinatario) : null,
-        totalItens:       totalIt,
-        itensReal:        realIt,
-        classiVei:        d.classificacao_veiculo,
-        situacVei:        d.situacao_veiculo,
-        emManutencao:     manut,
-        minAtrasoSaida:   atraso,
-        minParaChegar:    paraCh,
-        temAtraso:        atraso !== null && atraso > 0,
+        totalItens: totalIt,
+        itensReal: realIt,
+        classiVei: d.classificacao_veiculo,
+        situacVei: d.situacao_veiculo,
+        emManutencao: manut,
+        minAtrasoSaida: atraso,
+        minParaChegar: paraCh,
+        temAtraso: atraso !== null && atraso > 0,
         prevUltrapassada: paraCh !== null && paraCh < 0 && perc < 100,
         itensDivergentes: totalIt > 0 && realIt > 0 && realIt !== totalIt,
-        semGps:           semGps,
-        rota:             `${origCurta} → ${destCurta}`,
+        semGps: semGps,
+        rota: `${origCurta} → ${destCurta}`,
       };
     });
   }, [dados]);
@@ -285,33 +285,33 @@ export default function Operacional() {
   // ── Filtros ─────────────────────────────────────────────────────────────────
   const filtrados = useMemo(() => {
     return viagens.filter(v => {
-      if (filtroSituacao  !== "Todos" && v.descSituacao !== filtroSituacao) return false;
-      if (filtroMotorista !== "Todos" && v.motorista    !== filtroMotorista) return false;
-      if (filtroClassi    !== "Todos" && v.classiVei    !== filtroClassi)   return false;
-      if (filtroManut     === "Sim"   && !v.emManutencao)                   return false;
-      if (filtroManut     === "Não"   &&  v.emManutencao)                   return false;
+      if (filtroSituacao !== "Todos" && v.descSituacao !== filtroSituacao) return false;
+      if (filtroMotorista !== "Todos" && v.motorista !== filtroMotorista) return false;
+      if (filtroClassi !== "Todos" && v.classiVei !== filtroClassi) return false;
+      if (filtroManut === "Sim" && !v.emManutencao) return false;
+      if (filtroManut === "Não" && v.emManutencao) return false;
       return true;
     });
   }, [viagens, filtroSituacao, filtroMotorista, filtroClassi, filtroManut]);
 
   // ── KPIs ─────────────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
-    const emAndamento    = filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao);
-    const emRota         = filtrados.filter(v => !v.emManutencao && v.percCompleto < 100);
-    const emManutencao   = filtrados.filter(v => v.emManutencao);
-    const comAtraso      = filtrados.filter(v => v.temAtraso);
-    const avgPerc        = filtrados.length > 0
+    const emAndamento = filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao);
+    const emRota = filtrados.filter(v => !v.emManutencao && v.percCompleto < 100);
+    const emManutencao = filtrados.filter(v => v.emManutencao);
+    const comAtraso = filtrados.filter(v => v.temAtraso);
+    const avgPerc = filtrados.length > 0
       ? filtrados.reduce((s, v) => s + v.percCompleto, 0) / filtrados.length : 0;
     return { emAndamento: emAndamento.length, emRota: emRota.length, emManutencao: emManutencao.length, comAtraso: comAtraso.length, avgPerc };
   }, [filtrados]);
 
   // ── Alertas ───────────────────────────────────────────────────────────────
   const alertas = useMemo(() => ({
-    atrasados:       filtrados.filter(v => v.temAtraso).length,
-    emManutencao:    filtrados.filter(v => v.emManutencao).length,
-    prevUltrapassada:filtrados.filter(v => v.prevUltrapassada).length,
-    itensDiverg:     filtrados.filter(v => v.itensDivergentes).length,
-    semGps:          filtrados.filter(v => v.semGps && !v.emManutencao).length,
+    atrasados: filtrados.filter(v => v.temAtraso).length,
+    emManutencao: filtrados.filter(v => v.emManutencao).length,
+    prevUltrapassada: filtrados.filter(v => v.prevUltrapassada).length,
+    itensDiverg: filtrados.filter(v => v.itensDivergentes).length,
+    semGps: filtrados.filter(v => v.semGps && !v.emManutencao).length,
   }), [filtrados]);
 
   // ── Distribuição por situação ─────────────────────────────────────────────
@@ -393,7 +393,7 @@ export default function Operacional() {
       .filter(([, v]) => v.pontual + v.atrasado > 0)
       .map(([filial, v]) => {
         const total = v.pontual + v.atrasado;
-        const pct   = total > 0 ? (v.pontual / total) * 100 : 0;
+        const pct = total > 0 ? (v.pontual / total) * 100 : 0;
         return { filial, ...v, pct };
       })
       .sort((a, b) => b.pct - a.pct);
@@ -404,15 +404,15 @@ export default function Operacional() {
   const mapaDots = useMemo(() => {
     const comGps = filtrados.filter(v => v.latitude && v.longitude);
     if (!comGps.length) return [];
-    const lats  = comGps.map(v => v.latitude!);
+    const lats = comGps.map(v => v.latitude!);
     const longs = comGps.map(v => v.longitude!);
     const minLat = Math.min(...lats), maxLat = Math.max(...lats);
     const minLng = Math.min(...longs), maxLng = Math.max(...longs);
     const ranLat = maxLat - minLat || 1;
     const ranLng = maxLng - minLng || 1;
     return comGps.map(v => ({
-      x:  ((v.longitude! - minLng) / ranLng) * 90 + 5,   // 5–95%
-      y:  100 - ((v.latitude!  - minLat) / ranLat) * 90 - 5, // 5–95% invertido
+      x: ((v.longitude! - minLng) / ranLng) * 90 + 5,   // 5–95%
+      y: 100 - ((v.latitude! - minLat) / ranLat) * 90 - 5, // 5–95% invertido
       sit: v.descSituacao ?? "",
       vei: v.veiculo,
       mot: v.motorista ?? "",
@@ -463,16 +463,16 @@ export default function Operacional() {
     });
   }, [tabelaBuscada, sortCol, sortAsc]);
 
-  const totalPages   = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // ── TONE_COLORS ─────────────────────────────────────────────────────────────
   const TC = {
-    cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
+    cyan: { border: "border-cyan-400/20", icon: "text-cyan-300", bg: "bg-cyan-400/[0.08]", glow: RAW.accent.cyan, sub: "text-cyan-400" },
     emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-    amber:   { border: "border-amber-400/20",   icon: "text-amber-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
-    rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
-    violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
+    amber: { border: "border-amber-400/20", icon: "text-amber-300", bg: "bg-amber-400/[0.08]", glow: RAW.accent.amber, sub: "text-amber-400" },
+    rose: { border: "border-rose-400/20", icon: "text-rose-300", bg: "bg-rose-400/[0.08]", glow: RAW.accent.rose, sub: "text-rose-400" },
+    violet: { border: "border-violet-400/20", icon: "text-violet-300", bg: "bg-violet-400/[0.08]", glow: RAW.accent.violet, sub: "text-violet-400" },
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -621,11 +621,11 @@ export default function Operacional() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
-                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%",       Icon: Navigation, tone: "cyan"    as const, delay: 80,  dialog: "andamento" as const  },
-                { label: "Veículos em Rota",      value: loading ? "—" : fmtNum(kpis.emRota),      sub: "Fora de manutenção",     Icon: Truck,      tone: "emerald" as const, delay: 120, dialog: "rota" as const       },
-                { label: "Em Manutenção",          value: loading ? "—" : fmtNum(kpis.emManutencao),sub: "EM_MANUTENCAO = S",      Icon: Wrench,     tone: "amber"   as const, delay: 160, dialog: "manutencao" as const },
-                { label: "Com Atraso na Saída",    value: loading ? "—" : fmtNum(kpis.comAtraso),  sub: "SAIDA_REAL > ORIGINAL",  Icon: AlertCircle,tone: "rose"    as const, delay: 200, dialog: "atraso" as const     },
-                { label: "Conclusão Média",        value: loading ? "—" : fmtPct(kpis.avgPerc),    sub: "AVG(PERC_COMPLETO)",     Icon: TrendingUp, tone: "violet"  as const, delay: 240, dialog: null                  },
+                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%", Icon: Navigation, tone: "cyan" as const, delay: 80, dialog: "andamento" as const },
+                { label: "Veículos em Rota", value: loading ? "—" : fmtNum(kpis.emRota), sub: "Fora de manutenção", Icon: Truck, tone: "emerald" as const, delay: 120, dialog: "rota" as const },
+                { label: "Em Manutenção", value: loading ? "—" : fmtNum(kpis.emManutencao), sub: "EM_MANUTENCAO = S", Icon: Wrench, tone: "amber" as const, delay: 160, dialog: "manutencao" as const },
+                { label: "Com Atraso na Saída", value: loading ? "—" : fmtNum(kpis.comAtraso), sub: "SAIDA_REAL > ORIGINAL", Icon: AlertCircle, tone: "rose" as const, delay: 200, dialog: "atraso" as const },
+                { label: "Conclusão Média", value: loading ? "—" : fmtPct(kpis.avgPerc), sub: "AVG(PERC_COMPLETO)", Icon: TrendingUp, tone: "violet" as const, delay: 240, dialog: null },
               ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
                 const t = TC[tone];
                 const clickable = !!dialog;
@@ -669,10 +669,10 @@ export default function Operacional() {
                     </div>
                     <div className="flex items-center gap-4 text-[11px]">
                       {[
-                        { label: "Em rota",    color: RAW.accent.cyan    },
-                        { label: "Aguardando", color: RAW.accent.amber   },
-                        { label: "Atrasado",   color: RAW.accent.rose    },
-                        { label: "Manutenção", color: RAW.accent.violet  },
+                        { label: "Em rota", color: RAW.accent.cyan },
+                        { label: "Aguardando", color: RAW.accent.amber },
+                        { label: "Atrasado", color: RAW.accent.rose },
+                        { label: "Manutenção", color: RAW.accent.violet },
                       ].map(l => (
                         <span key={l.label} className="flex items-center gap-1.5" style={{ color: l.color }}>
                           <span className="inline-block w-2 h-2 rounded-full" style={{ background: l.color }} />
@@ -723,11 +723,11 @@ export default function Operacional() {
                   </div>
                   <div className="flex flex-col gap-3 flex-1">
                     {[
-                      { label: "Saída com atraso",        count: alertas.atrasados,        cls: "bg-rose-500/10 border-rose-500/20",    dot: RAW.accent.rose,   txtCls: "text-rose-300",   pulse: true  },
-                      { label: "Em manutenção",            count: alertas.emManutencao,     cls: "bg-violet-500/10 border-violet-500/20", dot: RAW.accent.violet, txtCls: "text-violet-300", pulse: true  },
-                      { label: "Previsão ultrapassada",    count: alertas.prevUltrapassada, cls: "bg-amber-500/10 border-amber-500/20",   dot: RAW.accent.amber,  txtCls: "text-amber-300",  pulse: alertas.prevUltrapassada > 0 },
-                      { label: "Itens divergentes",        count: alertas.itensDiverg,      cls: "bg-amber-500/10 border-amber-500/20",   dot: "#f59e0b",         txtCls: "text-yellow-300", pulse: false },
-                      { label: "Sem GPS / referência",     count: alertas.semGps,           cls: "bg-cyan-500/10 border-cyan-500/20",     dot: RAW.accent.cyan,   txtCls: "text-cyan-300",   pulse: false },
+                      { label: "Saída com atraso", count: alertas.atrasados, cls: "bg-rose-500/10 border-rose-500/20", dot: RAW.accent.rose, txtCls: "text-rose-300", pulse: true },
+                      { label: "Em manutenção", count: alertas.emManutencao, cls: "bg-violet-500/10 border-violet-500/20", dot: RAW.accent.violet, txtCls: "text-violet-300", pulse: true },
+                      { label: "Previsão ultrapassada", count: alertas.prevUltrapassada, cls: "bg-amber-500/10 border-amber-500/20", dot: RAW.accent.amber, txtCls: "text-amber-300", pulse: alertas.prevUltrapassada > 0 },
+                      { label: "Itens divergentes", count: alertas.itensDiverg, cls: "bg-amber-500/10 border-amber-500/20", dot: "#f59e0b", txtCls: "text-yellow-300", pulse: false },
+                      { label: "Sem GPS / referência", count: alertas.semGps, cls: "bg-cyan-500/10 border-cyan-500/20", dot: RAW.accent.cyan, txtCls: "text-cyan-300", pulse: false },
                     ].map(({ label, count, cls, dot, txtCls, pulse }) => (
                       <div key={label} className={`flex items-center gap-3 rounded-[12px] border px-4 py-3 flex-1 ${cls}`}>
                         <span className="relative flex w-2 h-2 shrink-0">
@@ -758,18 +758,18 @@ export default function Operacional() {
                     {distSituacao.length === 0
                       ? <div className="text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                       : <div className="space-y-2">
-                          {distSituacao.map(r => {
-                            const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
-                            return (
-                              <div key={r.nome} className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
-                                <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
-                                <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
-                                <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        {distSituacao.map(r => {
+                          const total = distSituacao.reduce((s, x) => s + x.qtd, 0);
+                          return (
+                            <div key={r.nome} className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: r.fill }} />
+                              <span className="text-[13px] text-slate-300 flex-1 truncate">{r.nome}</span>
+                              <span className="text-[11px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : ""}</span>
+                              <span className="text-[14px] font-bold w-7 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     }
                   </div>
 
@@ -810,24 +810,24 @@ export default function Operacional() {
                   {topRotas.length === 0
                     ? <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                     : <div className="space-y-2">
-                        {topRotas.map((r, i) => {
-                          const max = topRotas[0].qtd;
-                          return (
-                            <div key={r.rota} className="flex items-center gap-2">
-                              <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[12px] text-slate-300 truncate">{r.rota}</span>
-                                  <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
-                                </div>
-                                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                  <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
-                                </div>
+                      {topRotas.map((r, i) => {
+                        const max = topRotas[0].qtd;
+                        return (
+                          <div key={r.rota} className="flex items-center gap-2">
+                            <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[12px] text-slate-300 truncate">{r.rota}</span>
+                                <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                              </div>
+                              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   }
                 </div>
               </AnimatedCard>
@@ -843,24 +843,24 @@ export default function Operacional() {
                   {topMotoristas.length === 0
                     ? <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                     : <div className="space-y-2">
-                        {topMotoristas.map((r, i) => {
-                          const max = topMotoristas[0].qtd;
-                          return (
-                            <div key={r.nome} className="flex items-center gap-2">
-                              <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[13px] text-slate-300 truncate">{r.nome}</span>
-                                  <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
-                                </div>
-                                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                  <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
-                                </div>
+                      {topMotoristas.map((r, i) => {
+                        const max = topMotoristas[0].qtd;
+                        return (
+                          <div key={r.nome} className="flex items-center gap-2">
+                            <span className="w-4 text-[12px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[13px] text-slate-300 truncate">{r.nome}</span>
+                                <span className="text-[13px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                              </div>
+                              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   }
                 </div>
               </AnimatedCard>
@@ -922,15 +922,15 @@ export default function Operacional() {
                     <thead>
                       <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
                         {([
-                          { key: "veiculo",       label: "Veículo",       align: "left",   resp: "" },
-                          { key: "motorista",     label: "Motorista",     align: "left",   resp: "hidden md:table-cell" },
-                          { key: "rota",          label: "Origem → Destino", align: "left", resp: "hidden sm:table-cell" },
-                          { key: "datSaiOriginal",label: "Saída Prev.",   align: "center", resp: "hidden lg:table-cell" },
-                          { key: "datSaiReal",    label: "Saída Real",    align: "center", resp: "hidden lg:table-cell" },
-                          { key: "percCompleto",  label: "% Concluído",   align: "left",   resp: "" },
-                          { key: "prevChegada",   label: "Prev. Chegada", align: "center", resp: "hidden xl:table-cell" },
-                          { key: "descSituacao",  label: "Situação",      align: "center", resp: "" },
-                          { key: "emManutencao",  label: "Manut.",        align: "center", resp: "hidden md:table-cell" },
+                          { key: "veiculo", label: "Veículo", align: "left", resp: "" },
+                          { key: "motorista", label: "Motorista", align: "left", resp: "hidden md:table-cell" },
+                          { key: "rota", label: "Origem → Destino", align: "left", resp: "hidden sm:table-cell" },
+                          { key: "datSaiOriginal", label: "Saída Prev.", align: "center", resp: "hidden lg:table-cell" },
+                          { key: "datSaiReal", label: "Saída Real", align: "center", resp: "hidden lg:table-cell" },
+                          { key: "percCompleto", label: "% Concluído", align: "left", resp: "" },
+                          { key: "prevChegada", label: "Prev. Chegada", align: "center", resp: "hidden xl:table-cell" },
+                          { key: "descSituacao", label: "Situação", align: "center", resp: "" },
+                          { key: "emManutencao", label: "Manut.", align: "center", resp: "hidden md:table-cell" },
                         ] as { key: keyof Viagem; label: string; align: string; resp: string }[]).map(c => (
                           <th
                             key={c.key}
@@ -958,8 +958,8 @@ export default function Operacional() {
                         <tr><td colSpan={9} className="py-8 text-center text-[12px] text-slate-600">Nenhum registro encontrado</td></tr>
                       ) : (
                         tabelaPagina.map((v, i) => {
-                          const sit    = getSituacStyle(v.descSituacao);
-                          const atMin  = v.minAtrasoSaida;
+                          const sit = getSituacStyle(v.descSituacao);
+                          const atMin = v.minAtrasoSaida;
                           const chegMin = v.minParaChegar;
                           const progCor = v.emManutencao ? RAW.accent.violet : v.percCompleto >= 80 ? RAW.accent.cyan : v.percCompleto >= 40 ? RAW.accent.emerald : RAW.accent.amber;
                           return (
@@ -987,13 +987,13 @@ export default function Operacional() {
                               <td className="px-4 py-3 hidden lg:table-cell text-center">
                                 {v.datSaiReal
                                   ? <div className="inline-flex flex-col items-center">
-                                      <span className={`text-[10px] font-medium ${v.temAtraso ? "text-rose-300" : "text-emerald-300"}`}>{fmtHora(v.datSaiReal)}</span>
-                                      {atMin !== null && atMin !== 0 && (
-                                        <span className={`text-[8px] font-bold ${atMin > 0 ? "text-rose-400" : "text-emerald-400"}`}>
-                                          {atMin > 0 ? `+${atMin}min` : `${atMin}min`}
-                                        </span>
-                                      )}
-                                    </div>
+                                    <span className={`text-[10px] font-medium ${v.temAtraso ? "text-rose-300" : "text-emerald-300"}`}>{fmtHora(v.datSaiReal)}</span>
+                                    {atMin !== null && atMin !== 0 && (
+                                      <span className={`text-[8px] font-bold ${atMin > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                                        {atMin > 0 ? `+${atMin}min` : `${atMin}min`}
+                                      </span>
+                                    )}
+                                  </div>
                                   : <span className="text-[10px] text-slate-600">—</span>
                                 }
                               </td>
@@ -1010,13 +1010,13 @@ export default function Operacional() {
                               <td className="px-3 py-2.5 hidden xl:table-cell text-center">
                                 {v.prevChegada
                                   ? <div className="inline-flex flex-col items-center">
-                                      <span className="text-[10px] text-slate-400">{fmtHora(v.prevChegada)}</span>
-                                      {chegMin !== null && (
-                                        <span className={`text-[8px] font-bold ${chegMin < 0 ? "text-rose-400" : chegMin < 60 ? "text-amber-400" : "text-slate-500"}`}>
-                                          {chegMin < 0 ? `${Math.abs(chegMin)}min atrás` : chegMin < 60 ? `${chegMin}min` : `${Math.floor(chegMin / 60)}h`}
-                                        </span>
-                                      )}
-                                    </div>
+                                    <span className="text-[10px] text-slate-400">{fmtHora(v.prevChegada)}</span>
+                                    {chegMin !== null && (
+                                      <span className={`text-[8px] font-bold ${chegMin < 0 ? "text-rose-400" : chegMin < 60 ? "text-amber-400" : "text-slate-500"}`}>
+                                        {chegMin < 0 ? `${Math.abs(chegMin)}min atrás` : chegMin < 60 ? `${chegMin}min` : `${Math.floor(chegMin / 60)}h`}
+                                      </span>
+                                    )}
+                                  </div>
                                   : <span className="text-[10px] text-slate-600">—</span>
                                 }
                               </td>
@@ -1081,24 +1081,24 @@ export default function Operacional() {
         open={kpiDialog !== null}
         onOpenChange={(o) => !o && setKpiDialog(null)}
         title={
-          kpiDialog === "andamento"  ? "Viagens em Andamento" :
-          kpiDialog === "rota"       ? "Veículos em Rota" :
-          kpiDialog === "manutencao" ? "Veículos em Manutenção" :
-          kpiDialog === "atraso"     ? "Saídas com Atraso" : ""
+          kpiDialog === "andamento" ? "Viagens em Andamento" :
+            kpiDialog === "rota" ? "Veículos em Rota" :
+              kpiDialog === "manutencao" ? "Veículos em Manutenção" :
+                kpiDialog === "atraso" ? "Saídas com Atraso" : ""
         }
         subtitle={
-          kpiDialog === "andamento"  ? "0% < % concluído < 100% e fora de manutenção" :
-          kpiDialog === "rota"       ? "Fora de manutenção e não finalizadas" :
-          kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
-          kpiDialog === "atraso"     ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
+          kpiDialog === "andamento" ? "0% < % concluído < 100% e fora de manutenção" :
+            kpiDialog === "rota" ? "Fora de manutenção e não finalizadas" :
+              kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
+                kpiDialog === "atraso" ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
         }
         rows={
-          kpiDialog === "andamento"  ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
-          kpiDialog === "rota"       ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
-          kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
-          kpiDialog === "atraso"     ? filtrados.filter(v => v.temAtraso) : []
+          kpiDialog === "andamento" ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
+            kpiDialog === "rota" ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
+              kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
+                kpiDialog === "atraso" ? filtrados.filter(v => v.temAtraso) : []
         }
       />
-    </div>
+    </div> = pog
   );
 }
