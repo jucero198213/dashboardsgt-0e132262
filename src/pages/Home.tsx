@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ChevronDown,
   ExternalLink,
+  Globe,
   Truck,
   Users,
   CreditCard,
@@ -462,30 +463,6 @@ export default function Home() {
           </section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
-          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
-              className="mb-10 text-center"
-            >
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
-                Módulos principais
-              </p>
-              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
-                Acessos do Workspace SGT
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {modules.map((m, i) => (
-                <ModuleCard key={m.key} data={m} index={i} />
-              ))}
-            </div>
-          </section>
-
-          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
           <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 20 }}
@@ -553,12 +530,63 @@ export default function Home() {
                   </p>
                 </div>
               </motion.a>
+
+              <motion.a
+                href="https://webcloud2.datapardc.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={reduce ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.55, delay: 0.2 }}
+                whileHover={{ y: -3 }}
+                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-amber-400/30 hover:bg-[var(--sgt-input-hover)]/60"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
+                  <Globe className="h-4.5 w-4.5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[15px] font-bold sgt-text">WebCloud2</h3>
+                    <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-amber-300" />
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
+                    Portal de gestão e monitoramento complementar ao ecossistema Workspace SGT.
+                  </p>
+                </div>
+              </motion.a>
             </div>
 
             <p className="mt-12 text-center text-[10px] tracking-[0.2em] text-[var(--sgt-text-faint)]">
               © 2026 SGT Log · Workspace Corporativo
             </p>
           </section>
+
+          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 text-center"
+            >
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
+                Módulos principais
+              </p>
+              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
+                Acessos do Workspace SGT
+              </h2>
+            </motion.div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {modules.map((m, i) => (
+                <ModuleCard key={m.key} data={m} index={i} />
+              ))}
+            </div>
+          </section>
+
+          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
+
         </div>
       </section>
     </div>
