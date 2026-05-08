@@ -238,11 +238,11 @@ export default function PainelAdministrativo() {
                 </button>
               ))}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {NAV_ITEMS.slice(3).map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setScreen(item.id)}
+                  onClick={() => (item as any).route ? navigate((item as any).route) : setScreen(item.id)}
                   className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
                 >
                   <div className="flex items-start justify-between mb-4">
