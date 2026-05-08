@@ -26,8 +26,6 @@ import sgtLogo from "@/assets/sgt-logo.png";
 
 /* ---------------------------------------------------------------- */
 /*  Logo SGT oficial — PNG vetorizado com fundo transparente.        */
-/*  Para trocar futuramente, basta substituir o arquivo em            */
-/*  src/assets/sgt-logo.png mantendo o mesmo nome.                    */
 /* ---------------------------------------------------------------- */
 function SgtLogoSlot({ className = "" }: { className?: string }) {
   return (
@@ -300,13 +298,13 @@ export default function Home() {
       tone: "orange" as const,
     },
     {
-  key: "frota",
-  icon: Car,
-  title: "Frota",
-  description: "Cadastro de veículos, custo de manutenção por veículo, idade da frota e validações analíticas.",
-  cta: "Acessar frota",
-  onClick: () => navigate("/frota"),
-  tone: "cyan" as const,
+      key: "frota",
+      icon: Car,
+      title: "Frota",
+      description: "Cadastro de veículos, custo de manutenção por veículo, idade da frota e validações analíticas.",
+      cta: "Acessar frota",
+      onClick: () => navigate("/frota"),
+      tone: "cyan" as const,
     },
     {
       key: "executivo",
@@ -331,12 +329,12 @@ export default function Home() {
       className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
-      {/* Atmosfera dark — mesmo padrão das outras telas */}
+      {/* Atmosfera dark */}
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.22),transparent_58%)]" />
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_50%_at_85%_110%,rgba(139,92,246,0.08),transparent_60%)]" />
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_45%_at_15%_110%,rgba(6,182,212,0.06),transparent_60%)]" />
 
-      {/* Section envolvente — mesmo padrão Dashboard / Indicadores */}
+      {/* Section envolvente */}
       <section
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
@@ -345,7 +343,7 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Background sutil — malha logística de pontos e linhas finas */}
+        {/* Background sutil */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -361,16 +359,17 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Luz central suave — ilumina o hero */}
+        {/* Luzes de fundo */}
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
         <div className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
+
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
-          {/* Top bar minimalista — apenas UserMenu à direita */}
+          {/* Top bar */}
           <div className="flex items-center justify-end py-1">
             <UserMenu showAdmin />
           </div>
@@ -487,41 +486,7 @@ export default function Home() {
           </section>
 
           {/* ── FERRAMENTAS COMPLEMENTARES ── */}
-
-        </div>
-      </section>
-    </div>
-  );
-}          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
-              className="mb-10 text-center"
-            >
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
-                Módulos principais
-              </p>
-              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
-                Acessos do Workspace SGT
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {modules.map((m, i) => (
-                <ModuleCard key={m.key} data={m} index={i} />
-              ))}
-            </div>
-          </section>
-
-          {/* ── FERRAMENTAS COMPLEMENTARES ── */}
-
-        </div>
-      </section>
-    </div>
-  );
-}          <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
+          <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -550,7 +515,7 @@ export default function Home() {
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-cyan-400/30 hover:bg-[var(--sgt-input-hover)]/60"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-300">
-                  <Sparkles className="h-4.5 w-4.5" />
+                  <Sparkles className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -558,8 +523,7 @@ export default function Home() {
                     <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-cyan-300" />
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Ferramenta complementar para apoiar rotinas e processos vinculados ao
-                    ecossistema Workspace SGT.
+                    Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.
                   </p>
                 </div>
               </motion.a>
@@ -576,7 +540,7 @@ export default function Home() {
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-violet-400/30 hover:bg-[var(--sgt-input-hover)]/60"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-400/10 text-violet-300">
-                  <BarChart3 className="h-4.5 w-4.5" />
+                  <BarChart3 className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -601,7 +565,7 @@ export default function Home() {
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-amber-400/30 hover:bg-[var(--sgt-input-hover)]/60"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                  <Globe className="h-4.5 w-4.5" />
+                  <Globe className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -620,4 +584,8 @@ export default function Home() {
             </p>
           </section>
 
-
+        </div>
+      </section>
+    </div>
+  );
+}
