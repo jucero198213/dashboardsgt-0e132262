@@ -479,7 +479,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            <div className="mx-auto max-w-[640px] flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-[1100px] mx-auto">
               <motion.a
                 href="https://receitaflow.lovable.app"
                 target="_blank"
