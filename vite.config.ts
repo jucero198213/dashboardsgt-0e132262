@@ -27,10 +27,13 @@ self.addEventListener("fetch", () => {});
         fs.writeFileSync(swPath, killSwitch);
       }
       // Neutraliza o workbox
-      const workboxFiles = fs.readdirSync(path.resolve(__dirname, "dist")).filter(f => f.startsWith("workbox-"));
-      workboxFiles.forEach(f => {
-        fs.writeFileSync(path.resolve(__dirname, "dist", f), "// disabled");
-      });
+      const distDir = path.resolve(__dirname, "dist");
+      if (fs.existsSync(distDir)) {
+        const workboxFiles = fs.readdirSync(distDir).filter(f => f.startsWith("workbox-"));
+        workboxFiles.forEach(f => {
+          fs.writeFileSync(path.resolve(distDir, f), "// disabled");
+        });
+      }
       // Neutraliza o registerSW.js para não registrar nada
       const regPath = path.resolve(__dirname, "dist/registerSW.js");
       if (fs.existsSync(regPath)) {
