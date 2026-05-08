@@ -2,17 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, Settings, Database, Activity, Shield,
-  ChevronRight, Lock, Server, Zap,
+  ChevronRight, Lock, Server, Zap, ClipboardList,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HomeButton } from "@/components/shared/HomeButton";
 import GestaoUsuarios from "./GestaoUsuarios";
 import Configuracoes from "./Configuracoes";
 import BancoDados from "./BancoDados";
 import Monitoramento from "./Monitoramento";
 import Seguranca from "./Seguranca";
 
-type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca";
+type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca" | "chamados";
 
 const NAV_ITEMS = [
   {
@@ -69,6 +70,18 @@ const NAV_ITEMS = [
     bg: "bg-red-500/8",
     icon_color: "text-red-400",
     badge_bg: "bg-red-500/15",
+  },
+  {
+    id: "chamados" as Screen,
+    label: "Agenda de Chamados",
+    desc: "Calendário, criação e acompanhamento de chamados",
+    icon: ClipboardList,
+    accent: "amber",
+    border: "border-amber-500/20",
+    bg: "bg-amber-500/8",
+    icon_color: "text-amber-400",
+    badge_bg: "bg-amber-500/15",
+    route: "/admin/chamados",
   },
 ];
 
@@ -143,6 +156,7 @@ export default function PainelAdministrativo() {
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               )}
+              <HomeButton />
               <UserMenu />
             </div>
 
@@ -166,6 +180,7 @@ export default function PainelAdministrativo() {
                     <ArrowLeft className="h-3.5 w-3.5" />
                   </button>
                 )}
+                <HomeButton />
                 <UserMenu />
               </div>
             </div>
@@ -226,11 +241,11 @@ export default function PainelAdministrativo() {
                 </button>
               ))}
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {NAV_ITEMS.slice(3).map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setScreen(item.id)}
+                  onClick={() => (item as any).route ? navigate((item as any).route) : setScreen(item.id)}
                   className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
                 >
                   <div className="flex items-start justify-between mb-4">
