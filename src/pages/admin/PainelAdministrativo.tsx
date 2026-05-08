@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HomeButton } from "@/components/shared/HomeButton";
 import GestaoUsuarios from "./GestaoUsuarios";
 import Configuracoes from "./Configuracoes";
 import BancoDados from "./BancoDados";
@@ -155,6 +156,7 @@ export default function PainelAdministrativo() {
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               )}
+              <HomeButton />
               <UserMenu />
             </div>
 
@@ -178,6 +180,7 @@ export default function PainelAdministrativo() {
                     <ArrowLeft className="h-3.5 w-3.5" />
                   </button>
                 )}
+                <HomeButton />
                 <UserMenu />
               </div>
             </div>
