@@ -59,6 +59,54 @@ export type Database = {
         }
         Relationships: []
       }
+      tickets: {
+        Row: {
+          cliente_setor: string | null
+          created_at: string
+          created_by: string | null
+          data_chamado: string
+          descricao: string | null
+          horario_chamado: string | null
+          id: string
+          observacoes: string | null
+          prioridade: string
+          responsavel: string | null
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          cliente_setor?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_chamado: string
+          descricao?: string | null
+          horario_chamado?: string | null
+          id?: string
+          observacoes?: string | null
+          prioridade?: string
+          responsavel?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          cliente_setor?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_chamado?: string
+          descricao?: string | null
+          horario_chamado?: string | null
+          id?: string
+          observacoes?: string | null
+          prioridade?: string
+          responsavel?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
