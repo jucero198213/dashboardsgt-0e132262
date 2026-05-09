@@ -449,10 +449,11 @@ export default function Operacional() {
     setPage(1);
   };
 
-  const SortIcon = ({ col }: { col: keyof Viagem }) =>
-    sortCol !== col
-      ? <ChevronUp className="w-2.5 h-2.5 opacity-20" />
-      : sortAsc ? <ChevronUp className="w-2.5 h-2.5 text-cyan-400" /> : <ChevronDown className="w-2.5 h-2.5 text-cyan-400" />;
+  const SortIcon = ({ col }: { col: keyof Viagem }) => {
+    if (sortCol !== col) return <ChevronUp className="w-2.5 h-2.5 opacity-20" />;
+    if (sortAsc) return <ChevronUp className="w-2.5 h-2.5 text-cyan-400" />;
+    return <ChevronDown className="w-2.5 h-2.5 text-cyan-400" />;
+  };
 
   const tabelaOrdenada = useMemo(() => {
     return [...tabelaBuscada].sort((a, b) => {
@@ -1099,6 +1100,6 @@ export default function Operacional() {
                 kpiDialog === "atraso" ? filtrados.filter(v => v.temAtraso) : []
         }
       />
-    </div> = pog
+    </div>
   );
 }
