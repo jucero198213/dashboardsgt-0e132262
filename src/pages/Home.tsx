@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ExternalLink,
   Globe,
+  Pin,
   Truck,
   Users,
   CreditCard,
@@ -76,8 +77,10 @@ interface ModuleCardData {
   description: string;
   cta: string;
   onClick?: () => void;
+  href?: string;
   tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange";
   disabled?: boolean;
+  pinned?: boolean;
 }
 
 const TONE: Record<
@@ -140,10 +143,15 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
   const Icon = data.icon;
   const reduce = useReducedMotion();
 
+  const handleClick = () => {
+    if (data.href) { window.open(data.href, "_blank", "noopener,noreferrer"); return; }
+    data.onClick?.();
+  };
+
   return (
     <motion.button
       type="button"
-      onClick={data.onClick}
+      onClick={handleClick}
       disabled={data.disabled}
       initial={reduce ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -160,6 +168,14 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       <div
         className={`pointer-events-none absolute -top-20 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-gradient-to-b ${tone.glow} to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100`}
       />
+
+      {/* Badge fixado */}
+      {data.pinned && (
+        <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5">
+          <Pin className="h-2.5 w-2.5 text-amber-400" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-400">Fixado</span>
+        </div>
+      )}
 
       {/* Ícone */}
       <div
@@ -180,7 +196,9 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       <div className={`flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] ${tone.cta}`}>
         {data.cta}
         {!data.disabled && (
-          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          data.href
+            ? <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+            : <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         )}
       </div>
     </motion.button>
@@ -196,6 +214,16 @@ export default function Home() {
   const reduce = useReducedMotion();
 
   const modules: ModuleCardData[] = [
+    {
+      key: "visual-rodopar",
+      icon: Globe,
+      title: "Visual Rodopar",
+      description: "Portal de gestão e monitoramento complementar ao ecossistema Workspace SGT.",
+      cta: "Acessar portal",
+      href: "https://webcloud2.datapardc.com/",
+      tone: "amber" as const,
+      pinned: true,
+    },
     canAccess("dashboard") && {
       key: "dashboard",
       icon: BarChart3,
@@ -549,31 +577,6 @@ export default function Home() {
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
                     Plataforma de análise e inteligência de dados para apoiar a tomada de decisão no ecossistema SGT.
-                  </p>
-                </div>
-              </motion.a>
-
-              <motion.a
-                href="https://webcloud2.datapardc.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: 0.2 }}
-                whileHover={{ y: -3 }}
-                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-amber-400/30 hover:bg-[var(--sgt-input-hover)]/60"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
-                  <Globe className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-[15px] font-bold sgt-text">WebCloud2</h3>
-                    <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-amber-300" />
-                  </div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Portal de gestão e monitoramento complementar ao ecossistema Workspace SGT.
                   </p>
                 </div>
               </motion.a>
