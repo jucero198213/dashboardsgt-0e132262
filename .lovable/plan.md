@@ -1,46 +1,44 @@
+# Sistema de Chamados — Usuários + Admins
 
-# DETALHAMENTO - FEVEREIRO: Dashboard Financeiro Premium
+## Objetivo
+Hoje a tela `/admin/chamados` é exclusiva para admins. Vamos transformar em um fluxo de duas pontas:
+- **Usuário comum**: abre chamados, acompanha status, vê histórico próprio e troca mensagens (opcional).
+- **Admin**: continua vendo todos os chamados, atribui responsável, muda status (aberto, em andamento, pendente, concluído, cancelado) e responde.
 
-## Visão Geral
-Dashboard financeiro executivo com tema dark SaaS premium, projetado para apresentações de diretoria. Três telas: dashboard principal, detalhamento de contas a receber e detalhamento de contas a pagar.
+## Alterações no banco
+1. Adicionar coluna `aberto_por uuid` em `tickets` (id do usuário que abriu). Backfill com `created_by`.
+2. Adicionar status `pendente` à lista de status válidos (já é texto, basta atualizar app).
+3. Atualizar **RLS de `tickets`**:
+   - SELECT: admin vê tudo; usuário vê apenas onde `aberto_por = auth.uid()`.
+   - INSERT: qualquer usuário autenticado pode inserir, desde que `aberto_por = auth.uid()` e `status = 'aberto'`.
+   - UPDATE: apenas admin (usuário não edita após abrir; pode cancelar o próprio — opcional, ver pergunta).
+   - DELETE: apenas admin.
+4. Nova tabela opcional `ticket_messages` (id, ticket_id, autor_id, mensagem, created_at) para conversa entre usuário e admin. RLS: ambos os lados envolvidos no chamado podem ler/escrever.
 
-## Design System
-- Tema dark com fundo principal `#0B0E14`, cards em `#12161F` e `#161B26`
-- Accent verde-esmeralda para receitas, âmbar/laranja para despesas, azul para saldos
-- Tipografia com pesos variados para hierarquia clara
-- Cards com bordas sutis, sombras suaves, cantos arredondados (12px)
-- Microinterações: hover com brilho sutil, transições de 200ms, cards clicáveis com glow
+## Alterações no frontend
 
-## Estrutura de Páginas
+### Nova rota de usuário: `/chamados`
+- Acessível a qualquer usuário autenticado (sem `requiredPage`).
+- Lista os chamados do usuário com badge de status e prioridade.
+- Botão "Abrir novo chamado" → modal com título, descrição, prioridade.
+- Clicar em um chamado abre painel/modal somente-leitura com status atual, responsável, observações do admin e (se habilitado) thread de mensagens.
 
-### 1. Dashboard Principal (`/`)
-- **Header**: Título "DETALHAMENTO - FEVEREIRO", subtítulo descritivo, placeholders visuais para filtros futuros (mês, ano, empresa)
-- **Seção Contas a Receber**: 3 cards (Valor a Receber, Valor Recebido, Saldo a Receber — clicável → `/contas-a-receber`)
-- **Seção Contas a Pagar**: 3 cards (Valor a Pagar, Valor Pago, Saldo a Pagar — clicável → `/contas-a-pagar`)
-- **Seção Indicadores**: 7 cards com barras de progresso circulares mostrando % do gasto total (ex: Folha de Pagamento, Impostos, Fornecedores, Logística, Marketing, Infraestrutura, Outros). Layout 4+3 em desktop, responsivo em mobile.
+### Item de menu
+- Adicionar "Chamados" no menu/portal `/home` para todos os usuários.
+- Admin continua com "Agenda de Chamados" no Painel Administrativo.
 
-### 2. Detalhamento Contas a Receber (`/contas-a-receber`)
-- Breadcrumb + botão voltar
-- Tabela elegante com colunas: Documento, Cliente, Vencimento, Valor, Status
-- Dados mockados (8-10 registros), paginação visual preparada, estado vazio estilizado
+### Tela admin (`/admin/chamados`)
+- Mostrar coluna "Aberto por" (nome/email) na lista e no modal.
+- Adicionar status **Pendente** ao seletor.
+- (Se mensagens habilitadas) painel de respostas no `TicketModal`.
 
-### 3. Detalhamento Contas a Pagar (`/contas-a-pagar`)
-- Mesma estrutura da tela acima, adaptada para fornecedores/despesas
+### `ticketsApi.ts`
+- Atualizar tipos: novo status `pendente`, novo campo `aberto_por`.
+- Funções novas: `fetchMyTickets()`, `createUserTicket(payload)` que força `aberto_por = user.id` e `status = 'aberto'`.
 
-## Componentes Reutilizáveis
-- `FinancialCard` — card de valor monetário com variantes (receita/despesa/saldo/clicável)
-- `IndicatorCard` — card de indicador com anel de progresso e percentual
-- `SectionHeader` — título de seção com ícone
-- `DataTable` — tabela executiva com status badges
-- `DashboardHeader` — header com título e área de filtros
-- `PageLayout` — layout base dark com navegação
+## Perguntas em aberto
+- Usuário pode **cancelar** o próprio chamado antes de ser tratado? (sugestão: sim)
+- Quer **thread de mensagens** entre usuário e admin agora, ou só status + observações por enquanto?
+- Notificação ao admin quando um chamado é aberto (toast no `/home`, badge no menu)?
 
-## Dados Mockados
-- Estrutura separada em `src/data/mockData.ts` com tipos TypeScript bem definidos
-- Preparado para substituição futura por dados de planilhas de contas a pagar e a receber
-- Interfaces claras: `ContaReceber`, `ContaPagar`, `Indicador`, `ResumoFinanceiro`
-
-## Responsividade
-- Desktop: layout em grid com cards lado a lado, indicadores 4+3
-- Tablet/Notebook: adaptação fluida mantendo legibilidade
-- Mobile: cards empilhados verticalmente
+Confirme essas três decisões e eu implemento.
