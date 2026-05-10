@@ -82,6 +82,7 @@ interface ModuleCardData {
   tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange";
   disabled?: boolean;
   pinned?: boolean;
+  featured?: boolean;
 }
 
 const TONE: Record<
@@ -149,6 +150,61 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
     data.onClick?.();
   };
 
+  if (data.featured) {
+    return (
+      <motion.button
+        type="button"
+        onClick={handleClick}
+        initial={reduce ? false : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+        whileHover={{ y: -6, scale: 1.01 }}
+        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer
+          border-amber-400/40 bg-gradient-to-br from-amber-400/[0.08] via-amber-400/[0.04] to-transparent
+          hover:border-amber-400/70 hover:shadow-[0_0_40px_rgba(251,191,36,0.15),0_8px_32px_rgba(0,0,0,0.2)]`}
+      >
+        {/* Glow sempre visível, intensifica no hover */}
+        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-400/10 via-transparent to-transparent opacity-100" />
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[90%] -translate-x-1/2 rounded-full bg-gradient-to-b from-amber-400/25 to-transparent blur-3xl transition-opacity duration-500 opacity-60 group-hover:opacity-100" />
+
+        {/* Linha decorativa superior */}
+        <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+
+        {/* Badges */}
+        <div className="absolute top-5 right-5 flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 py-1">
+            <Pin className="h-2.5 w-2.5 text-amber-300" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">Fixado</span>
+          </div>
+          <div className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1">
+            <ExternalLink className="h-2.5 w-2.5 text-amber-400/70" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-400/70">Externo</span>
+          </div>
+        </div>
+
+        {/* Ícone maior */}
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/15 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+          <Icon className="h-6 w-6" />
+        </div>
+
+        {/* Título e descrição */}
+        <div className="flex-1 space-y-2 relative z-10">
+          <h3 className="text-[20px] font-black tracking-tight sgt-text">{data.title}</h3>
+          <p className="text-[13.5px] leading-relaxed text-[var(--sgt-text-muted)]">
+            {data.description}
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-amber-300 relative z-10">
+          {data.cta}
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1.5" />
+        </div>
+      </motion.button>
+    );
+  }
+
   return (
     <motion.button
       type="button"
@@ -171,10 +227,11 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       />
 
       {/* Badge fixado */}
-      {data.pinned && (
-        <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5">
-          <Pin className="h-2.5 w-2.5 text-amber-400" />
-          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-400">Fixado</span>
+      {data.pinned && !data.featured && (
+        <div className={`absolute top-4 right-4 flex items-center gap-1 rounded-full border px-2 py-0.5 ${tone.iconBg} ${tone.iconText}`}
+          style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+          <Pin className="h-2.5 w-2.5" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em]">Fixado</span>
         </div>
       )}
 
@@ -224,6 +281,7 @@ export default function Home() {
       href: "https://webcloud2.datapardc.com/",
       tone: "amber" as const,
       pinned: true,
+      featured: true,
     },
     {
       key: "chamados",
