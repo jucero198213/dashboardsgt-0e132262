@@ -61,6 +61,7 @@ export type Database = {
       }
       tickets: {
         Row: {
+          aberto_por: string | null
           cliente_setor: string | null
           created_at: string
           created_by: string | null
@@ -76,6 +77,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aberto_por?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
@@ -91,6 +93,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aberto_por?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
