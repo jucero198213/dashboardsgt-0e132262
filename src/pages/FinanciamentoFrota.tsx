@@ -16,6 +16,7 @@ import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -98,7 +99,16 @@ interface Contrato {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function FinanciamentoFrota() {
-  const { isFetchingDw, fetchFromDW, loadingPhase, progress } = useFinancialData();
+  const {
+    dwFilter,
+    setDwFilter,
+    empresas,
+    filiais,
+    isFetchingDw,
+    fetchFromDW,
+    loadingPhase,
+    progress,
+  } = useFinancialData();
 
   const [search, setSearch]             = useState("");
   const [filtroBanco, setFiltroBanco]   = useState("__all__");
@@ -110,8 +120,12 @@ export default function FinanciamentoFrota() {
 
   // ── Query ──────────────────────────────────────────────────────────────────
   const { data: resp, isLoading, refetch } = useQuery({
-    queryKey: ["financiamento-frota"],
-    queryFn: () => fetchFinanciamentoFrota(),
+    queryKey: ["financiamento-frota", dwFilter.dataInicio, dwFilter.dataFim, dwFilter.filial, dwFilter.empresa],
+    queryFn: () => fetchFinanciamentoFrota({
+      dataInicio: dwFilter.dataInicio,
+      dataFim:    dwFilter.dataFim,
+      filial:     dwFilter.filial,
+    }),
     staleTime: 10 * 60_000,
   });
 
@@ -294,15 +308,51 @@ export default function FinanciamentoFrota() {
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              <div className="flex flex-1 items-center justify-end gap-2">
+              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                <DatePickerInput
+                  value={dwFilter.dataInicio}
+                  onChange={(v) => setDwFilter("dataInicio", v)}
+                  placeholder="Data início"
+                />
+                <DatePickerInput
+                  value={dwFilter.dataFim}
+                  onChange={(v) => setDwFilter("dataFim", v)}
+                  placeholder="Data fim"
+                />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                <Select
+                  value={dwFilter.empresa ?? "__all__"}
+                  onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}
+                >
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px]">
+                    <SelectValue placeholder="Empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {empresas.map((e) => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={dwFilter.filial ?? "__all__"}
+                  onValueChange={(v) => setDwFilter("filial", v === "__all__" ? null : v)}
+                >
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px]">
+                    <SelectValue placeholder="Filial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {filiais.map((f) => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}
+                  </SelectContent>
+                </Select>
                 <UpdateButton
                   onClick={() => { fetchFromDW(); refetch(); }}
                   isFetching={anyLoading}
                   loadingPhase={loadingPhase}
                   progress={progress}
                 />
-                <HomeButton />
               </div>
+
+              <HomeButton />
             </div>
 
             {/* ════════ NAVBAR MOBILE ════════ */}
