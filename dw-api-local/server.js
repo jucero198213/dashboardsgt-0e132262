@@ -1054,6 +1054,94 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-financiamento-frota
+//  Parâmetros opcionais (body JSON):
+//    filial   : string | null
+//    banco    : string | null
+//    situacao : string | null   ex: "A" (aberto) | "L" (liquidado)
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-financiamento-frota", async (req, res) => {
+  const { filial, banco, situacao } = req.body ?? {};
+
+  try {
+    const p     = await getPool();
+    const dbReq = p.request();
+
+    dbReq.input("filial",   sql.VarChar(20), filial   || null);
+    dbReq.input("banco",    sql.VarChar(80), banco    || null);
+    dbReq.input("situacao", sql.VarChar(5),  situacao || null);
+
+    const query = `
+WITH FINANCIAMENTOS AS (
+    SELECT
+        P.NUMCON                                                                        AS contrato,
+        B.NOTFIS                                                                        AS nota,
+        B.VLRBRU                                                                        AS valor_aquisicao,
+        TRY_CAST(RIGHT(I.NUMDOC, 2) AS INT)                                             AS parcela_atual,
+        TRY_CAST(MAX(RIGHT(I.NUMDOC, 2)) OVER (PARTITION BY I.NUMCTF) AS INT)           AS total_parcelas,
+        I.TIPDOC                                                                        AS tipo,
+        I.CODFIL                                                                        AS filial,
+        O.DESCRI                                                                        AS banco,
+        V.CODVEI                                                                        AS veiculo,
+        F.DESCRI                                                                        AS frota,
+        V.ANOMOD                                                                        AS anomod,
+        V.ANOFAB                                                                        AS anofab,
+        V.CHASSI                                                                        AS chassi,
+        I.SITUAC                                                                        AS situacao,
+        I.VLRDOC                                                                        AS valor_parcela,
+        I.VLRJUR                                                                        AS juros,
+        I.VLRDES                                                                        AS valor_desconto,
+        I.VLRLIQ                                                                        AS vlrliq,
+        I.VLRPAG                                                                        AS valor_pago
+    FROM pagdoc I WITH (NOLOCK)
+    INNER JOIN PATBAT B WITH (NOLOCK) ON I.NUMCTF = B.NUMCON
+    INNER JOIN RODBCO O WITH (NOLOCK) ON I.CODBCO = O.CODBCO
+    INNER JOIN RODVEI V WITH (NOLOCK) ON B.CODVEI = V.CODVEI
+    LEFT  JOIN PAGCON P WITH (NOLOCK) ON B.NUMCON = P.CODIGO
+    INNER JOIN RODFRO F WITH (NOLOCK) ON V.CODFRO = F.CODFRO
+    WHERE ISNULL(I.NUMCTF, '') <> ''
+      AND (@filial   IS NULL OR I.CODFIL  = @filial)
+      AND (@banco    IS NULL OR O.DESCRI  LIKE '%' + @banco + '%')
+      AND (@situacao IS NULL OR I.SITUAC  = @situacao)
+)
+SELECT
+    contrato,
+    nota,
+    valor_aquisicao,
+    parcela_atual,
+    total_parcelas,
+    tipo,
+    filial,
+    banco,
+    veiculo,
+    frota,
+    anomod,
+    anofab,
+    chassi,
+    situacao,
+    valor_parcela,
+    juros,
+    valor_desconto,
+    vlrliq,
+    valor_pago
+FROM FINANCIAMENTOS
+ORDER BY banco, veiculo, parcela_atual
+OPTION (RECOMPILE)
+    `;
+
+    const result = await dbReq.query(query);
+    return res.json({ data: result.recordset });
+
+  } catch (err) {
+    console.error("❌ Erro /dw-financiamento-frota:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
+});
+
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");
