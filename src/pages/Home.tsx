@@ -158,7 +158,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         initial={reduce ? false : { opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-40px" }}
-        transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.25, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
         whileHover={{ y: -6, scale: 1.01 }}
         className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer
           border-amber-400/40 bg-gradient-to-br from-amber-400/[0.08] via-amber-400/[0.04] to-transparent
@@ -177,10 +177,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
             <Pin className="h-2.5 w-2.5 text-amber-300" />
             <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">Fixado</span>
           </div>
-          <div className="flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1">
-            <ExternalLink className="h-2.5 w-2.5 text-amber-400/70" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-400/70">Externo</span>
-          </div>
+
         </div>
 
         {/* Ícone maior */}
