@@ -574,25 +574,26 @@ export async function fetchFaturamentoResumo(): Promise<FaturamentoResumoRespons
 // ─── Tipos: FINANCIAMENTO FROTA ───────────────────────────────────────────────
 
 export interface FinanciamentoFrotaRow {
-  contrato:         string | number | null;
-  nota:             string | number | null;
-  valor_aquisicao:  number | null;
-  parcela_atual:    number | null;
-  total_parcelas:   number | null;
-  tipo:             string | null;
-  filial:           string | null;
-  banco:            string | null;
-  veiculo:          string | null;
-  frota:            string | null;
-  anomod:           number | null;
-  anofab:           number | null;
-  chassi:           string | null;
-  situacao:         string | null;
-  valor_parcela:    number | null;
-  juros:            number | null;
-  valor_desconto:   number | null;
-  vlrliq:           number | null;
-  valor_pago:       number | null;
+  contrato:          string | number | null;
+  nota:              string | number | null;
+  valor_aquisicao:   number | null;
+  parcela_atual:     number | null;
+  total_parcelas:    number | null;
+  tipo:              string | null;
+  filial:            string | null;
+  banco:             string | null;
+  veiculo:           string | null;
+  frota:             string | null;
+  anomod:            number | null;
+  anofab:            number | null;
+  chassi:            string | null;
+  situacao:          string | null;
+  data_vencimento:   string | null;
+  valor_parcela:     number | null;
+  juros:             number | null;
+  valor_desconto:    number | null;
+  vlrliq:            number | null;
+  valor_pago:        number | null;
 }
 
 export interface FinanciamentoFrotaResponse {
@@ -602,9 +603,11 @@ export interface FinanciamentoFrotaResponse {
 // ─── Exports públicos: FINANCIAMENTO FROTA ───────────────────────────────────
 
 export async function fetchFinanciamentoFrota(params?: {
-  filial?:   string | null;
-  banco?:    string | null;
-  situacao?: string | null;
+  dataInicio?: string | null;
+  dataFim?:    string | null;
+  filial?:     string | null;
+  banco?:      string | null;
+  situacao?:   string | null;
 }): Promise<FinanciamentoFrotaResponse> {
   const key = `financiamento-frota:${JSON.stringify(params ?? {})}`;
   return cached(key, () =>
