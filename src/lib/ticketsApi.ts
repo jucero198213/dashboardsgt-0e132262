@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type TicketPrioridade = "baixa" | "media" | "alta" | "urgente";
-export type TicketStatus = "aberto" | "em_andamento" | "concluido" | "cancelado";
+export type TicketStatus = "aberto" | "em_andamento" | "pendente" | "concluido" | "cancelado";
 
 export interface Ticket {
   id: string;
@@ -15,11 +15,12 @@ export interface Ticket {
   status: TicketStatus;
   observacoes: string | null;
   created_by: string | null;
+  aberto_por: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type TicketInput = Omit<Ticket, "id" | "created_at" | "updated_at" | "created_by">;
+export type TicketInput = Omit<Ticket, "id" | "created_at" | "updated_at" | "created_by" | "aberto_por">;
 
 export async function fetchTickets(): Promise<Ticket[]> {
   const { data, error } = await supabase
@@ -43,13 +44,27 @@ export async function fetchTicketsByDate(date: string): Promise<Ticket[]> {
 
 export async function createTicket(payload: TicketInput): Promise<Ticket> {
   const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id ?? null;
   const { data, error } = await supabase
     .from("tickets")
-    .insert({ ...payload, created_by: userData.user?.id ?? null })
+    .insert({ ...payload, created_by: uid, aberto_por: uid })
     .select()
     .single();
   if (error) throw error;
   return data as Ticket;
+}
+
+export async function fetchMyTickets(): Promise<Ticket[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) return [];
+  const { data, error } = await supabase
+    .from("tickets")
+    .select("*")
+    .eq("aberto_por", uid)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Ticket[];
 }
 
 export async function updateTicket(id: string, payload: Partial<TicketInput>): Promise<Ticket> {
@@ -78,6 +93,7 @@ export const PRIORIDADE_LABEL: Record<TicketPrioridade, string> = {
 export const STATUS_LABEL: Record<TicketStatus, string> = {
   aberto: "Aberto",
   em_andamento: "Em andamento",
+  pendente: "Pendente",
   concluido: "Concluído",
   cancelado: "Cancelado",
 };
@@ -92,6 +108,7 @@ export const PRIORIDADE_COLOR: Record<TicketPrioridade, { bg: string; text: stri
 export const STATUS_COLOR: Record<TicketStatus, { bg: string; text: string; border: string }> = {
   aberto: { bg: "bg-blue-500/10", text: "text-blue-300", border: "border-blue-500/30" },
   em_andamento: { bg: "bg-violet-500/10", text: "text-violet-300", border: "border-violet-500/30" },
+  pendente: { bg: "bg-amber-500/10", text: "text-amber-300", border: "border-amber-500/30" },
   concluido: { bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/30" },
   cancelado: { bg: "bg-slate-500/10", text: "text-slate-400", border: "border-slate-500/30" },
 };
