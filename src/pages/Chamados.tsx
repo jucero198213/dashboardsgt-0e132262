@@ -1,31 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Plus, Filter, CalendarDays, Loader2, ClipboardList,
-  AlertCircle, Clock, CheckCircle2, XCircle,
+  ArrowLeft, Plus, Loader2, ClipboardList,
+  AlertCircle, Clock, CheckCircle2, XCircle, Inbox,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  Ticket, TicketPrioridade, TicketStatus, fetchTickets,
+  Ticket, fetchMyTickets, fetchTickets,
   PRIORIDADE_LABEL, STATUS_LABEL, PRIORIDADE_COLOR, STATUS_COLOR,
 } from "@/lib/ticketsApi";
-import { TicketsCalendar } from "@/components/admin/tickets/TicketsCalendar";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
-
-const fmtDateInput = (d: Date) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
 
 const fmtDateBR = (iso: string) => {
   const [y, m, d] = iso.split("-");
@@ -34,26 +22,16 @@ const fmtDateBR = (iso: string) => {
 
 export default function Chamados() {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [month, setMonth] = useState<Date>(new Date());
-  const [selectedDate, setSelectedDate] = useState<string>(fmtDateInput(new Date()));
-
-  const [filterStatus, setFilterStatus] = useState<TicketStatus | "todos">("todos");
-  const [filterPrioridade, setFilterPrioridade] = useState<TicketPrioridade | "todas">("todas");
-  const [filterResp, setFilterResp] = useState("");
-  const [filterDataIni, setFilterDataIni] = useState("");
-  const [filterDataFim, setFilterDataFim] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
-  const [modalDefaultDate, setModalDefaultDate] = useState<string | undefined>(undefined);
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await fetchTickets();
+      const data = isAdmin ? await fetchTickets() : await fetchMyTickets();
       setTickets(data);
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao carregar chamados");
@@ -62,39 +40,21 @@ export default function Chamados() {
     }
   };
 
-  useEffect(() => { load(); }, []);
-
-  const filtered = useMemo(() => {
-    return tickets.filter((t) => {
-      if (filterStatus !== "todos" && t.status !== filterStatus) return false;
-      if (filterPrioridade !== "todas" && t.prioridade !== filterPrioridade) return false;
-      if (filterResp && !(t.responsavel ?? "").toLowerCase().includes(filterResp.toLowerCase())) return false;
-      if (filterDataIni && t.data_chamado < filterDataIni) return false;
-      if (filterDataFim && t.data_chamado > filterDataFim) return false;
-      return true;
-    });
-  }, [tickets, filterStatus, filterPrioridade, filterResp, filterDataIni, filterDataFim]);
-
-  const dayTickets = useMemo(
-    () => filtered.filter((t) => t.data_chamado === selectedDate),
-    [filtered, selectedDate],
-  );
+  useEffect(() => { load(); }, [isAdmin]);
 
   const stats = useMemo(() => ({
-    abertos: filtered.filter(t => t.status === "aberto").length,
-    andamento: filtered.filter(t => t.status === "em_andamento").length,
-    concluidos: filtered.filter(t => t.status === "concluido").length,
-    urgentes: filtered.filter(t => t.prioridade === "urgente" && t.status !== "concluido" && t.status !== "cancelado").length,
-  }), [filtered]);
+    abertos: tickets.filter(t => t.status === "aberto").length,
+    andamento: tickets.filter(t => t.status === "em_andamento" || t.status === "pendente").length,
+    concluidos: tickets.filter(t => t.status === "concluido").length,
+    urgentes: tickets.filter(t => t.prioridade === "urgente" && t.status !== "concluido" && t.status !== "cancelado").length,
+  }), [tickets]);
 
-  const openNew = (date?: string) => {
+  const openNew = () => {
     setEditingTicket(null);
-    setModalDefaultDate(date ?? selectedDate);
     setModalOpen(true);
   };
-  const openEdit = (t: Ticket) => {
+  const openView = (t: Ticket) => {
     setEditingTicket(t);
-    setModalDefaultDate(undefined);
     setModalOpen(true);
   };
 
@@ -116,7 +76,7 @@ export default function Chamados() {
             {/* Header */}
             <div className="flex items-center gap-2 md:gap-3 py-1 flex-wrap">
               <button
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/home")}
                 className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
                 aria-label="Voltar"
               >
@@ -126,21 +86,19 @@ export default function Chamados() {
                 <ClipboardList className="h-4 w-4 text-amber-400" />
               </div>
               <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Suporte</span>
                 <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">
-                  Agenda de Chamados
+                  {isAdmin ? "Chamados (todos)" : "Meus chamados"}
                 </span>
               </div>
               <div className="flex-1" />
-              <Button
-                size="sm" variant="outline"
-                onClick={() => setShowFilters((v) => !v)}
-                className="border-[var(--sgt-border-subtle)]"
-              >
-                <Filter className="h-4 w-4 mr-1" /> Filtros
-              </Button>
-              <Button size="sm" onClick={() => openNew()} className="bg-amber-500 hover:bg-amber-600 text-black">
-                <Plus className="h-4 w-4 mr-1" /> Novo chamado
+              {isAdmin && (
+                <Button size="sm" variant="outline" onClick={() => navigate("/admin/chamados")} className="border-amber-500/40 text-amber-300">
+                  Ver agenda completa
+                </Button>
+              )}
+              <Button size="sm" onClick={openNew} className="bg-amber-500 hover:bg-amber-600 text-black">
+                <Plus className="h-4 w-4 mr-1" /> Abrir chamado
               </Button>
               <UserMenu />
               <HomeButton />
@@ -150,9 +108,9 @@ export default function Chamados() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {[
                 { label: "Abertos", value: stats.abertos, icon: AlertCircle, color: "text-blue-400", bg: "bg-blue-500/10" },
-                { label: "Em andamento", value: stats.andamento, icon: Clock, color: "text-violet-400", bg: "bg-violet-500/10" },
+                { label: "Em tratamento", value: stats.andamento, icon: Clock, color: "text-violet-400", bg: "bg-violet-500/10" },
                 { label: "Concluídos", value: stats.concluidos, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                { label: "Urgentes ativos", value: stats.urgentes, icon: XCircle, color: "text-rose-400", bg: "bg-rose-500/10" },
+                { label: "Urgentes", value: stats.urgentes, icon: XCircle, color: "text-rose-400", bg: "bg-rose-500/10" },
               ].map((s) => (
                 <div key={s.label} className="rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-2.5 flex items-center gap-2.5">
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
@@ -166,126 +124,57 @@ export default function Chamados() {
               ))}
             </div>
 
-            {/* Filters */}
-            {showFilters && (
-              <div className="rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Status</label>
-                  <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
-                    <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      {(Object.keys(STATUS_LABEL) as TicketStatus[]).map((s) => (
-                        <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Prioridade</label>
-                  <Select value={filterPrioridade} onValueChange={(v) => setFilterPrioridade(v as any)}>
-                    <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todas">Todas</SelectItem>
-                      {(Object.keys(PRIORIDADE_LABEL) as TicketPrioridade[]).map((p) => (
-                        <SelectItem key={p} value={p}>{PRIORIDADE_LABEL[p]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Responsável</label>
-                  <Input className="h-9 mt-1" placeholder="Buscar" value={filterResp} onChange={(e) => setFilterResp(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">De</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataIni} onChange={(e) => setFilterDataIni(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Até</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataFim} onChange={(e) => setFilterDataFim(e.target.value)} />
-                </div>
-              </div>
-            )}
-
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
                 <Loader2 className="h-7 w-7 animate-spin text-amber-400" />
                 <p className="text-sm text-[var(--sgt-text-muted)]">Carregando chamados...</p>
               </div>
+            ) : tickets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+                <Inbox className="h-12 w-12 text-[var(--sgt-text-muted)] opacity-50" />
+                <p className="text-sm text-[var(--sgt-text-muted)]">
+                  Você ainda não abriu nenhum chamado.
+                </p>
+                <Button size="sm" onClick={openNew} className="bg-amber-500 hover:bg-amber-600 text-black">
+                  <Plus className="h-4 w-4 mr-1" /> Abrir meu primeiro chamado
+                </Button>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                {/* Calendar */}
-                <div className="lg:col-span-2">
-                  <TicketsCalendar
-                    month={month}
-                    onMonthChange={setMonth}
-                    selectedDate={selectedDate}
-                    onSelectDate={setSelectedDate}
-                    tickets={filtered}
-                    onTicketClick={openEdit}
-                    onEmptyDayClick={(d) => openNew(d)}
-                  />
-                </div>
-
-                {/* Day list */}
-                <div className="rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-3 sm:p-4 flex flex-col">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CalendarDays className="h-4 w-4 text-amber-400" />
-                    <h3 className="text-sm font-bold sgt-text">
-                      {fmtDateBR(selectedDate)}
-                    </h3>
-                    <span className="ml-auto text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">
-                      {dayTickets.length} chamado{dayTickets.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  {dayTickets.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
-                      <CalendarDays className="h-8 w-8 text-[var(--sgt-text-muted)] opacity-50" />
-                      <p className="text-sm text-[var(--sgt-text-muted)]">Nenhum chamado nesta data</p>
-                      <Button size="sm" variant="outline" onClick={() => openNew(selectedDate)}>
-                        <Plus className="h-3.5 w-3.5 mr-1" /> Criar chamado
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2 overflow-y-auto max-h-[520px]">
-                      {dayTickets.map((t) => {
-                        const pc = PRIORIDADE_COLOR[t.prioridade];
-                        const sc = STATUS_COLOR[t.status];
-                        return (
-                          <button
-                            key={t.id}
-                            onClick={() => openEdit(t)}
-                            className="text-left rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-base)] p-3 hover:border-amber-500/40 hover:bg-amber-500/5 transition-all"
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-1.5">
-                              <p className="text-sm font-semibold sgt-text line-clamp-1">{t.titulo}</p>
-                              {t.horario_chamado && (
-                                <span className="text-[10px] font-bold text-cyan-300 shrink-0">
-                                  {t.horario_chamado.slice(0, 5)}
-                                </span>
-                              )}
-                            </div>
-                            {t.responsavel && (
-                              <p className="text-[11px] text-[var(--sgt-text-muted)] mb-1.5 truncate">
-                                {t.responsavel}
-                              </p>
-                            )}
-                            <div className="flex flex-wrap gap-1.5">
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
-                                {PRIORIDADE_LABEL[t.prioridade]}
-                              </span>
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${sc.border} ${sc.bg} ${sc.text} font-semibold uppercase tracking-wider`}>
-                                {STATUS_LABEL[t.status]}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {tickets.map((t) => {
+                  const pc = PRIORIDADE_COLOR[t.prioridade];
+                  const sc = STATUS_COLOR[t.status];
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => openView(t)}
+                      className="text-left rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-4 hover:border-amber-500/40 hover:bg-amber-500/5 transition-all flex flex-col gap-2"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-bold sgt-text line-clamp-2 flex-1">{t.titulo}</p>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${sc.border} ${sc.bg} ${sc.text} font-semibold uppercase tracking-wider shrink-0`}>
+                          {STATUS_LABEL[t.status]}
+                        </span>
+                      </div>
+                      {t.descricao && (
+                        <p className="text-[12px] text-[var(--sgt-text-muted)] line-clamp-2">{t.descricao}</p>
+                      )}
+                      <div className="flex items-center justify-between gap-2 mt-1">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
+                          {PRIORIDADE_LABEL[t.prioridade]}
+                        </span>
+                        <span className="text-[10px] text-[var(--sgt-text-muted)]">
+                          {fmtDateBR(t.data_chamado)}{t.horario_chamado ? ` · ${t.horario_chamado.slice(0,5)}` : ""}
+                        </span>
+                      </div>
+                      {t.responsavel && (
+                        <p className="text-[11px] text-[var(--sgt-text-muted)] truncate">
+                          Responsável: <span className="text-slate-300">{t.responsavel}</span>
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -296,7 +185,7 @@ export default function Chamados() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         ticket={editingTicket}
-        defaultDate={modalDefaultDate}
+        defaultDate={undefined}
         onSaved={load}
       />
     </div>
