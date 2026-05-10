@@ -159,7 +159,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-40px" }}
         transition={{ duration: 0.25, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-        whileHover={{ y: -6, scale: 1.01 }}
+        whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.12, ease: "easeOut" } }}
         className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer
           border-amber-400/40 bg-gradient-to-br from-amber-400/[0.08] via-amber-400/[0.04] to-transparent
           hover:border-amber-400/70 hover:shadow-[0_0_40px_rgba(251,191,36,0.15),0_8px_32px_rgba(0,0,0,0.2)]`}
@@ -211,7 +211,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={data.disabled ? undefined : { y: -4 }}
+      whileHover={data.disabled ? undefined : { y: -4, transition: { duration: 0.12, ease: "easeOut" } }}
       className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${
         data.disabled
           ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
