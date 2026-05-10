@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Globe,
   Pin,
+  ClipboardList,
   Truck,
   Users,
   CreditCard,
@@ -223,6 +224,15 @@ export default function Home() {
       href: "https://webcloud2.datapardc.com/",
       tone: "amber" as const,
       pinned: true,
+    },
+    {
+      key: "chamados",
+      icon: ClipboardList,
+      title: "Chamados",
+      description: "Abra e acompanhe chamados de suporte. Admins podem gerenciar status, responsáveis e prioridades.",
+      cta: "Acessar chamados",
+      onClick: () => navigate("/chamados"),
+      tone: "amber" as const,
     },
     canAccess("dashboard") && {
       key: "dashboard",

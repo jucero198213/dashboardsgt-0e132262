@@ -11,7 +11,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import PainelAdministrativo from "./pages/admin/PainelAdministrativo";
-import Chamados from "./pages/admin/Chamados";
+import Chamados from "./pages/Chamados";
 import ContasAReceber from "./pages/ContasAReceber";
 import ContasAPagar from "./pages/ContasAPagar";
 import NotFound from "./pages/NotFound";
@@ -55,7 +55,7 @@ const App = () => (
               <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
               <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><EmDesenvolvimento /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
-              <Route path="/admin/chamados" element={<ProtectedRoute requiredRole="admin"><Chamados /></ProtectedRoute>} />
+              <Route path="/chamados" element={<ProtectedRoute><Chamados /></ProtectedRoute>} />
               <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
               <Route path="/compras" element={<ProtectedRoute><Compras /></ProtectedRoute>} />
               <Route path="/abastecimento" element={<ProtectedRoute><Abastecimento /></ProtectedRoute>} />

@@ -81,7 +81,7 @@ const NAV_ITEMS = [
     bg: "bg-amber-500/8",
     icon_color: "text-amber-400",
     badge_bg: "bg-amber-500/15",
-    route: "/admin/chamados",
+    route: "/chamados",
   },
 ];
 
