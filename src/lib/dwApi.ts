@@ -57,6 +57,10 @@ const ENDPOINT_OPERACIONAL = LOCAL_API_URL
 const ENDPOINT_FATURAMENTO_RESUMO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-faturamento-resumo`
   : `${SUPABASE_URL}/functions/v1/dw-faturamento-resumo`;
+
+const ENDPOINT_FINANCIAMENTO_FROTA = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-financiamento-frota`
+  : `${SUPABASE_URL}/functions/v1/dw-financiamento-frota`;
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -564,5 +568,47 @@ export async function fetchFaturamentoResumo(): Promise<FaturamentoResumoRespons
   return cached("faturamento:resumo", () =>
     callEdge<FaturamentoResumoResponse>(ENDPOINT_FATURAMENTO_RESUMO, {}),
     TTL_FINANCEIRO,
+  );
+}
+
+// ─── Tipos: FINANCIAMENTO FROTA ───────────────────────────────────────────────
+
+export interface FinanciamentoFrotaRow {
+  contrato:         string | number | null;
+  nota:             string | number | null;
+  valor_aquisicao:  number | null;
+  parcela_atual:    number | null;
+  total_parcelas:   number | null;
+  tipo:             string | null;
+  filial:           string | null;
+  banco:            string | null;
+  veiculo:          string | null;
+  frota:            string | null;
+  anomod:           number | null;
+  anofab:           number | null;
+  chassi:           string | null;
+  situacao:         string | null;
+  valor_parcela:    number | null;
+  juros:            number | null;
+  valor_desconto:   number | null;
+  vlrliq:           number | null;
+  valor_pago:       number | null;
+}
+
+export interface FinanciamentoFrotaResponse {
+  data: FinanciamentoFrotaRow[];
+}
+
+// ─── Exports públicos: FINANCIAMENTO FROTA ───────────────────────────────────
+
+export async function fetchFinanciamentoFrota(params?: {
+  filial?:   string | null;
+  banco?:    string | null;
+  situacao?: string | null;
+}): Promise<FinanciamentoFrotaResponse> {
+  const key = `financiamento-frota:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<FinanciamentoFrotaResponse>(ENDPOINT_FINANCIAMENTO_FROTA, params ?? {}),
+    TTL_FROTA,
   );
 }
