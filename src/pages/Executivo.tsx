@@ -195,12 +195,15 @@ function ModuleShortcut({
 
 // ─── Painel info (Alertas / RH / Compras) ────────────────────────────────────
 
-function InfoPanel({ children }: { children: React.ReactNode }) {
+function InfoPanel({ children, tone }: { children: React.ReactNode; tone: Tone }) {
+  const p = PALETTE[tone];
   return (
     <div
-      className="rounded-2xl border border-[var(--sgt-border)] p-4 flex flex-col gap-3 h-full"
-      style={{ background: "var(--sgt-bg-card)" }}
+      className={`relative overflow-hidden rounded-2xl border ${p.border} p-4 flex flex-col gap-3 h-full`}
+      style={{ background: "var(--sgt-bg-card)", boxShadow: `0 0 20px ${p.glow}` }}
     >
+      {/* Stripe no topo */}
+      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${p.stripe}`} />
       {children}
     </div>
   );
@@ -209,18 +212,19 @@ function InfoPanel({ children }: { children: React.ReactNode }) {
 function InfoPanelHeader({
   icon: Icon,
   label,
-  iconClass,
-  labelClass,
+  tone,
 }: {
   icon: React.ElementType;
   label: string;
-  iconClass: string;
-  labelClass: string;
+  tone: Tone;
 }) {
+  const p = PALETTE[tone];
   return (
     <div className="flex items-center gap-2">
-      <Icon className={`h-3.5 w-3.5 shrink-0 ${iconClass}`} />
-      <p className={`text-[10px] font-bold uppercase tracking-[0.24em] ${labelClass}`}>{label}</p>
+      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${p.iconBg} ${p.iconTxt}`}>
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <p className={`text-[10px] font-bold uppercase tracking-[0.24em] ${p.sub}`}>{label}</p>
     </div>
   );
 }
@@ -621,12 +625,11 @@ export default function Executivo() {
 
                 {/* Alertas e exceções */}
                 <AnimatedCard delay={480} className="flex flex-col">
-                  <InfoPanel>
+                  <InfoPanel tone="amber">
                     <InfoPanelHeader
                       icon={AlertTriangle}
                       label="Alertas e exceções"
-                      iconClass="text-amber-400"
-                      labelClass="text-amber-400/80"
+                      tone="amber"
                     />
                     <AlertItem
                       level={finKpis.cpVencidas > 0 ? "critical" : "ok"}
@@ -663,12 +666,11 @@ export default function Executivo() {
 
                 {/* RH resumo */}
                 <AnimatedCard delay={540} className="flex flex-col">
-                  <InfoPanel>
+                  <InfoPanel tone="violet">
                     <InfoPanelHeader
                       icon={Users}
                       label="Recursos humanos"
-                      iconClass="text-violet-400"
-                      labelClass="text-violet-400/80"
+                      tone="violet"
                     />
                     {qRh.isLoading ? (
                       <div className="space-y-2">
@@ -709,12 +711,11 @@ export default function Executivo() {
 
                 {/* Compras resumo */}
                 <AnimatedCard delay={600} className="flex flex-col">
-                  <InfoPanel>
+                  <InfoPanel tone="cyan">
                     <InfoPanelHeader
                       icon={ShoppingCart}
                       label={`Compras — ${mesAtual}`}
-                      iconClass="text-amber-400"
-                      labelClass="text-amber-400/80"
+                      tone="cyan"
                     />
                     {qCompras.isLoading ? (
                       <div className="space-y-2">
