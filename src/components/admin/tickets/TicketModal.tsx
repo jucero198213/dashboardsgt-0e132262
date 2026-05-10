@@ -13,19 +13,20 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Trash2, CheckCircle2, Save, Loader2 } from "lucide-react";
+import { Trash2, CheckCircle2, Save, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import {
   Ticket, TicketInput, TicketPrioridade, TicketStatus,
   createTicket, updateTicket, deleteTicket,
   PRIORIDADE_LABEL, STATUS_LABEL,
 } from "@/lib/ticketsApi";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   ticket: Ticket | null;
-  defaultDate?: string; // YYYY-MM-DD
+  defaultDate?: string;
   onSaved: () => void;
 }
 
@@ -42,9 +43,15 @@ const empty = (date?: string): TicketInput => ({
 });
 
 export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }: Props) {
+  const { isAdmin } = useAuth();
   const [form, setForm] = useState<TicketInput>(empty(defaultDate));
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // Usuário pode editar apenas se: novo chamado OU é admin
+  const podeEditar = !ticket || isAdmin;
+  // Apenas admin pode mudar status, responsável, observações internas
+  const somenteAdmin = !isAdmin;
 
   useEffect(() => {
     if (ticket) {
@@ -68,14 +75,8 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
     setForm((f) => ({ ...f, [k]: v }));
 
   const save = async () => {
-    if (!form.titulo.trim()) {
-      toast.error("Título é obrigatório");
-      return;
-    }
-    if (!form.data_chamado) {
-      toast.error("Data é obrigatória");
-      return;
-    }
+    if (!form.titulo.trim()) { toast.error("Título é obrigatório"); return; }
+    if (!form.data_chamado) { toast.error("Data é obrigatória"); return; }
     setSaving(true);
     try {
       const payload: TicketInput = {
@@ -92,7 +93,7 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
         toast.success("Chamado atualizado");
       } else {
         await createTicket(payload);
-        toast.success("Chamado criado");
+        toast.success("Chamado criado com sucesso!");
       }
       onSaved();
       onOpenChange(false);
@@ -139,49 +140,96 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{ticket ? "Editar chamado" : "Novo chamado"}</DialogTitle>
+            <DialogTitle>
+              {ticket
+                ? isAdmin ? "Editar chamado" : "Visualizar chamado"
+                : "Abrir novo chamado"}
+            </DialogTitle>
             <DialogDescription>
-              {ticket ? "Atualize os dados do chamado." : "Preencha as informações do novo chamado."}
+              {ticket
+                ? isAdmin
+                  ? "Atualize os dados e status do chamado."
+                  : "Detalhes do seu chamado. Apenas admins podem alterar o status."
+                : "Preencha as informações para abrir um chamado."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
+            {/* Título */}
             <div className="grid gap-2">
               <Label htmlFor="titulo">Título *</Label>
-              <Input id="titulo" value={form.titulo} onChange={(e) => set("titulo", e.target.value)} maxLength={200} />
+              <Input
+                id="titulo" value={form.titulo}
+                onChange={(e) => set("titulo", e.target.value)}
+                maxLength={200} disabled={!podeEditar}
+              />
             </div>
 
+            {/* Descrição */}
             <div className="grid gap-2">
               <Label htmlFor="descricao">Descrição</Label>
-              <Textarea id="descricao" rows={3} value={form.descricao ?? ""} onChange={(e) => set("descricao", e.target.value)} />
+              <Textarea
+                id="descricao" rows={3}
+                value={form.descricao ?? ""}
+                onChange={(e) => set("descricao", e.target.value)}
+                disabled={!podeEditar}
+              />
             </div>
 
+            {/* Cliente/Setor + Responsável */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="cliente">Cliente / Setor</Label>
-                <Input id="cliente" value={form.cliente_setor ?? ""} onChange={(e) => set("cliente_setor", e.target.value)} />
+                <Input
+                  id="cliente" value={form.cliente_setor ?? ""}
+                  onChange={(e) => set("cliente_setor", e.target.value)}
+                  disabled={!podeEditar}
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="resp">Responsável</Label>
-                <Input id="resp" value={form.responsavel ?? ""} onChange={(e) => set("responsavel", e.target.value)} />
+                <Label htmlFor="resp" className="flex items-center gap-1.5">
+                  Responsável
+                  {somenteAdmin && ticket && <Lock className="h-3 w-3 text-slate-500" />}
+                </Label>
+                <Input
+                  id="resp" value={form.responsavel ?? ""}
+                  onChange={(e) => set("responsavel", e.target.value)}
+                  disabled={!isAdmin}
+                  placeholder={!isAdmin ? "Definido pelo admin" : ""}
+                />
               </div>
             </div>
 
+            {/* Data + Horário */}
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="data">Data *</Label>
-                <Input id="data" type="date" value={form.data_chamado} onChange={(e) => set("data_chamado", e.target.value)} />
+                <Input
+                  id="data" type="date" value={form.data_chamado}
+                  onChange={(e) => set("data_chamado", e.target.value)}
+                  disabled={!podeEditar}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="hora">Horário</Label>
-                <Input id="hora" type="time" value={form.horario_chamado ?? ""} onChange={(e) => set("horario_chamado", e.target.value || null)} />
+                <Input
+                  id="hora" type="time"
+                  value={form.horario_chamado ?? ""}
+                  onChange={(e) => set("horario_chamado", e.target.value || null)}
+                  disabled={!podeEditar}
+                />
               </div>
             </div>
 
+            {/* Prioridade + Status */}
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label>Prioridade</Label>
-                <Select value={form.prioridade} onValueChange={(v) => set("prioridade", v as TicketPrioridade)}>
+                <Select
+                  value={form.prioridade}
+                  onValueChange={(v) => set("prioridade", v as TicketPrioridade)}
+                  disabled={!podeEditar}
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(PRIORIDADE_LABEL) as TicketPrioridade[]).map((p) => (
@@ -191,8 +239,15 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>Status</Label>
-                <Select value={form.status} onValueChange={(v) => set("status", v as TicketStatus)}>
+                <Label className="flex items-center gap-1.5">
+                  Status
+                  {somenteAdmin && ticket && <Lock className="h-3 w-3 text-slate-500" />}
+                </Label>
+                <Select
+                  value={form.status}
+                  onValueChange={(v) => set("status", v as TicketStatus)}
+                  disabled={!isAdmin}
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(STATUS_LABEL) as TicketStatus[]).map((s) => (
@@ -203,15 +258,26 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
               </div>
             </div>
 
+            {/* Observações — visível para todos, editável só pelo admin */}
             <div className="grid gap-2">
-              <Label htmlFor="obs">Observações</Label>
-              <Textarea id="obs" rows={2} value={form.observacoes ?? ""} onChange={(e) => set("observacoes", e.target.value)} />
+              <Label htmlFor="obs" className="flex items-center gap-1.5">
+                Observações
+                {somenteAdmin && ticket && <Lock className="h-3 w-3 text-slate-500" />}
+              </Label>
+              <Textarea
+                id="obs" rows={2}
+                value={form.observacoes ?? ""}
+                onChange={(e) => set("observacoes", e.target.value)}
+                disabled={!isAdmin}
+                placeholder={!isAdmin && ticket ? "Notas internas do admin" : ""}
+              />
             </div>
           </div>
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-between">
+            {/* Ações admin — só aparecem para admins */}
             <div className="flex gap-2">
-              {ticket && (
+              {ticket && isAdmin && (
                 <>
                   <Button type="button" variant="destructive" onClick={() => setConfirmDelete(true)} disabled={saving}>
                     <Trash2 className="h-4 w-4 mr-1" /> Excluir
@@ -225,11 +291,15 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
               )}
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>Cancelar</Button>
-              <Button type="button" onClick={save} disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                {ticket ? "Salvar" : "Criar"}
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
+                {podeEditar ? "Cancelar" : "Fechar"}
               </Button>
+              {podeEditar && (
+                <Button type="button" onClick={save} disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+                  {ticket ? "Salvar" : "Abrir chamado"}
+                </Button>
+              )}
             </div>
           </DialogFooter>
         </DialogContent>
