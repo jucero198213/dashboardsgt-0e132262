@@ -232,7 +232,8 @@ export default function Home() {
       description: "Abra e acompanhe chamados de suporte. Admins podem gerenciar status, responsáveis e prioridades.",
       cta: "Acessar chamados",
       onClick: () => navigate("/chamados"),
-      tone: "amber" as const,
+      tone: "rose" as const,
+      pinned: true,
     },
     canAccess("dashboard") && {
       key: "dashboard",
@@ -242,7 +243,7 @@ export default function Home() {
         "Visualize em tempo real contas a pagar, a receber, saldo líquido, inadimplência e evolução mensal do fluxo de caixa.",
       cta: "Acessar dashboard",
       onClick: () => navigate("/dashboard"),
-      tone: "amber" as const,
+      tone: "cyan" as const,
     },
     canAccess("indicadores") && {
       key: "indicadores",
@@ -288,7 +289,7 @@ export default function Home() {
       description: "Controle e gestão dos títulos a pagar, vencimentos e fluxo de caixa.",
       cta: "Acessar contas a pagar",
       onClick: () => navigate("/contas-a-pagar"),
-      tone: "rose" as const,
+      tone: "orange" as const,
     },
     {
       key: "contas-a-receber",
@@ -342,7 +343,7 @@ export default function Home() {
       description: "Cadastro de veículos, custo de manutenção por veículo, idade da frota e validações analíticas.",
       cta: "Acessar frota",
       onClick: () => navigate("/frota"),
-      tone: "cyan" as const,
+      tone: "rose" as const,
     },
     {
       key: "executivo",
