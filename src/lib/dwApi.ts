@@ -54,6 +54,9 @@ const ENDPOINT_OPERACIONAL = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-operacional`
   : `${SUPABASE_URL}/functions/v1/dw-operacional`;
 
+const ENDPOINT_FATURAMENTO_RESUMO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-faturamento-resumo`
+  : `${SUPABASE_URL}/functions/v1/dw-faturamento-resumo`;
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -183,6 +186,132 @@ export interface ManutencaoRow {
 
 export interface ManutencaoResponse {
   data: ManutencaoRow[];
+}
+
+// ─── Tipos: RH ───────────────────────────────────────────────────────────────
+
+export interface RhRow {
+  codmot:                 string | number | null;
+  motorista:              string | null;
+  data_nascimento:        string | null;
+  nacionalidade:          string | null;
+  estado:                 string | null;
+  endereco:               string | null;
+  bairro:                 string | null;
+  habilitacao:            string | null;
+  uf_habilitacao:         string | null;
+  categoria_habilitacao:  string | null;
+  validade_habilitacao:   string | null;
+  numero_rg:              string | null;
+  data_emissao_rg:        string | null;
+  numero_cpf:             string | null;
+  empregado:              string | null;
+  codigo_folha:           string | number | null;
+  codigo_filial:          string | number | null;
+  data_admissao:          string | null;
+  data_demissao:          string | null;
+  motivo_demissao:        string | null;
+  situacao:               string | null;
+  funcao:                 string | null;
+  tipo_funcionario:       string | null;
+  sexo:                   string | null;
+}
+
+export interface RhResponse {
+  data: RhRow[];
+}
+
+// ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
+
+export interface OperacionalRow {
+  ID:                    number | null;
+  CODCLI:                string | number | null;
+  CLI_NOMEAB:            string | null;
+  CODMOT:                string | number | null;
+  motorista:             string | null;
+  veiculo:               string | number | null;
+  latitude:              number | null;
+  longitude:             number | null;
+  referencia:            string | null;
+  veiculo2:              string | number | null;
+  veiculo3:              string | number | null;
+  tipo_documento:        string | null;
+  codigo_documento:      string | number | null;
+  serie_documento:       string | null;
+  filial_documento:      string | number | null;
+  cod_remetente:         string | number | null;
+  remetente:             string | null;
+  cod_destinatario:      string | number | null;
+  destinatario:          string | null;
+  data_saida_original:   string | null;
+  data_saida_real:       string | null;
+  percentual_completo:   number | null;
+  previsao_chegada:      string | null;
+  situacao_viagem:       string | null;
+  descricao_documento:   string | null;
+  descricao_situacao:    string | null;
+  descricao_origem:      string | null;
+  descricao_destino:     string | null;
+  latitude_remetente:    number | null;
+  longitude_remetente:   number | null;
+  latitude_destinatario: number | null;
+  longitude_destinatario:number | null;
+  total_itens:           number | null;
+  itens_real:            number | null;
+  classificacao_veiculo: string | null;
+  situacao_veiculo:      string | null;
+  em_manutencao:         string | number | null;
+}
+
+export interface OperacionalResponse {
+  data: OperacionalRow[];
+}
+
+// ─── Tipos: ABASTECIMENTO ─────────────────────────────────────────────────────
+
+export interface AbastecimentoRow {
+  codaba:            string | number | null;
+  motorista:         string | null;
+  posto:             string | null;
+  estado:            string | null;
+  vlrtot:            number | null;
+  quanti:            number | null;
+  datref:            string | null;
+  numdoc:            string | number | null;
+  veiculo:           string | number | null;
+  marca:             string | null;
+  modelo:            string | null;
+  linha:             string | number | null;
+  media:             number | null;
+  ultkmt:            number | null;
+  atukmt:            number | null;
+  medfab:            number | null;
+  odohor:            string | null;
+  frota:             string | null;
+  codigo_combustivel:string | number | null;
+  tipo_combustivel:  string | null;
+  nota_fiscal:       string | number | null;
+}
+
+export interface AbastecimentoResponse {
+  data: AbastecimentoRow[];
+}
+
+// ─── Tipos: FATURAMENTO RESUMO ────────────────────────────────────────────────
+
+export interface FaturamentoResumoResponse {
+  daily_revenue: {
+    reference_date:  string | null;
+    revenue_value:   number | null;
+    valid:           boolean;
+    error:           string | null;
+  };
+  monthly_revenue: {
+    reference_month: string | null;
+    revenue_value:   number | null;
+    valid:           boolean;
+    error:           string | null;
+  };
 }
 
 // ─── Tipos: COMPRAS ───────────────────────────────────────────────────────────
@@ -395,48 +524,12 @@ export async function fetchCompras(params?: {
 
 // ─── Exports públicos: ABASTECIMENTO ─────────────────────────────────────────
 
-/**
- * Busca os registros de abastecimento do período.
- * Filtra por DATA_REF >= dataInicio e DATA_REF <= dataFim.
- */
 export async function fetchAbastecimento(params?: {
   dataInicio?: string;
   dataFim?: string;
 }): Promise<AbastecimentoResponse> {
   const key = `abastecimento:${JSON.stringify(params ?? {})}`;
   return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}), TTL_FROTA);
-}
-// ─── Tipos: RH ────────────────────────────────────────────────────────────────
-
-export interface RhRow {
-  codmot: string | number | null;
-  motorista: string | null;
-  data_nascimento: string | null;
-  nacionalidade: string | null;
-  estado: string | null;
-  endereco: string | null;
-  bairro: string | null;
-  habilitacao: string | null;
-  uf_habilitacao: string | null;
-  categoria_habilitacao: string | null;
-  validade_habilitacao: string | null;
-  numero_rg: string | null;
-  data_emissao_rg: string | null;
-  numero_cpf: string | null;
-  empregado: string | null;
-  codigo_folha: string | number | null;
-  codigo_filial: string | number | null;
-  data_admissao: string | null;
-  data_demissao: string | null;
-  motivo_demissao: string | null;
-  situacao: string | null;
-  funcao: string | null;
-  tipo_funcionario: string | null;
-  sexo: string | null;
-}
-
-export interface RhResponse {
-  data: RhRow[];
 }
 
 // ─── Exports públicos: RH ─────────────────────────────────────────────────────
@@ -452,52 +545,6 @@ export async function fetchRh(params?: {
   return cached(key, () => callEdge<RhResponse>(ENDPOINT_RH, params ?? {}), TTL_RH);
 }
 
-// ─── Tipos: OPERACIONAL ───────────────────────────────────────────────────────
-
-export interface OperacionalRow {
-  id: string | number | null;
-  codcli: string | number | null;
-  cli_nomeab: string | null;
-  codmot: string | number | null;
-  motorista: string | null;
-  veiculo: string | null;
-  latitude: number | string | null;
-  longitude: number | string | null;
-  referencia: string | null;
-  veiculo2: string | null;
-  veiculo3: string | null;
-  tipo_documento: string | null;
-  codigo_documento: string | number | null;
-  serie_documento: string | null;
-  filial_documento: string | null;
-  cod_remetente: string | number | null;
-  remetente: string | null;
-  cod_destinatario: string | number | null;
-  destinatario: string | null;
-  data_saida_original: string | null;
-  data_saida_real: string | null;
-  percentual_completo: number | null;
-  previsao_chegada: string | null;
-  situacao_viagem: string | null;
-  descricao_documento: string | null;
-  descricao_situacao: string | null;
-  descricao_origem: string | null;
-  descricao_destino: string | null;
-  latitude_remetente: number | string | null;
-  longitude_remetente: number | string | null;
-  latitude_destinatario: number | string | null;
-  longitude_destinatario: number | string | null;
-  total_itens: number | null;
-  itens_real: number | null;
-  classificacao_veiculo: string | null;
-  situacao_veiculo: string | null;
-  em_manutencao: string | boolean | null;
-}
-
-export interface OperacionalResponse {
-  data: OperacionalRow[];
-}
-
 // ─── Exports públicos: OPERACIONAL ────────────────────────────────────────────
 
 /**
@@ -508,5 +555,14 @@ export async function fetchOperacional(): Promise<OperacionalResponse> {
   return cached("operacional:all", () =>
     callEdge<OperacionalResponse>(ENDPOINT_OPERACIONAL, {}),
     TTL_OPERACIONAL,
+  );
+}
+
+// ─── Exports públicos: FATURAMENTO RESUMO ────────────────────────────────────
+
+export async function fetchFaturamentoResumo(): Promise<FaturamentoResumoResponse> {
+  return cached("faturamento:resumo", () =>
+    callEdge<FaturamentoResumoResponse>(ENDPOINT_FATURAMENTO_RESUMO, {}),
+    TTL_FINANCEIRO,
   );
 }

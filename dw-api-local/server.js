@@ -971,7 +971,88 @@ app.post("/dw-abastecimento", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+app.post("/dw-faturamento-resumo", async (_req, res) => {
+  try {
+    const p = await getPool();
+    const dbReq = p.request();
+    dbReq.timeout = 30000;
 
+    const query = `
+      WITH latest_date AS (
+        SELECT MAX(T.DATA) AS reference_date
+        FROM VW_FAT_ICMS T WITH (NOLOCK)
+        WHERE T.DATA IS NOT NULL
+          AND T.CODFIL = 1
+      ),
+      daily_total AS (
+        SELECT
+          CAST(T.DATA AS DATE) AS reference_date,
+          SUM(T.TOTFRE) AS daily_revenue
+        FROM VW_FAT_ICMS T WITH (NOLOCK)
+        INNER JOIN latest_date L
+          ON CAST(T.DATA AS DATE) = CAST(L.reference_date AS DATE)
+        WHERE T.CODFIL = 1
+        GROUP BY CAST(T.DATA AS DATE)
+      ),
+      monthly_total AS (
+        SELECT
+          DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1) AS reference_month,
+          SUM(T.TOTFRE) AS monthly_revenue
+        FROM VW_FAT_ICMS T WITH (NOLOCK)
+        CROSS JOIN latest_date L
+        WHERE T.DATA >= DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1)
+          AND T.DATA < DATEADD(MONTH, 1, DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1))
+          AND T.CODFIL = 1
+        GROUP BY DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1)
+      )
+      SELECT
+        L.reference_date,
+        D.daily_revenue,
+        M.reference_month,
+        M.monthly_revenue
+      FROM latest_date L
+      LEFT JOIN daily_total D
+        ON D.reference_date = CAST(L.reference_date AS DATE)
+      LEFT JOIN monthly_total M
+        ON M.reference_month = DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1);
+    `;
+
+    const result = await dbReq.query(query);
+    const row = result.recordset?.[0];
+
+    if (!row) {
+      return res.json({
+        daily_revenue: { valid: false, error: "consulta sem dados" },
+        monthly_revenue: { valid: false, error: "consulta sem dados" },
+      });
+    }
+
+    return res.json({
+      daily_revenue: {
+        reference_date: row.reference_date ?? null,
+        revenue_value: row.daily_revenue ?? null,
+        valid: row.reference_date != null && row.daily_revenue != null,
+        error: row.reference_date != null && row.daily_revenue != null ? null : "faturamento diario incompleto",
+      },
+      monthly_revenue: {
+        reference_month: row.reference_month ?? null,
+        revenue_value: row.monthly_revenue ?? null,
+        valid: row.reference_month != null && row.monthly_revenue != null,
+        error: row.reference_month != null && row.monthly_revenue != null ? null : "faturamento mensal incompleto",
+      },
+    });
+  } catch (err) {
+    console.error("[dw-faturamento-resumo] Erro:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+
+    return res.status(500).json({
+      daily_revenue: { valid: false, error: err.message, code: err.code ?? null },
+      monthly_revenue: { valid: false, error: err.message, code: err.code ?? null },
+    });
+  }
+});
 
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {

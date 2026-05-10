@@ -404,9 +404,9 @@ export default function Home() {
       key: "executivo",
       icon: BarChart3,
       title: "Executivo",
-      description: "Painel gerencial com visão consolidada de todos os indicadores da empresa.",
-      cta: "Em breve",
-      onClick: () => navigate("/em-desenvolvimento/executivo"),
+      description: "Painel de comando com KPIs consolidados de financeiro, frota, operacional, RH, compras e manutenção.",
+      cta: "Acessar executivo",
+      onClick: () => navigate("/executivo"),
       tone: "violet" as const,
     },
   ].filter(Boolean) as ModuleCardData[];
