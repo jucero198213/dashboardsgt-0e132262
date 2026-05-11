@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Truck, CreditCard, DollarSign, TrendingDown,
   Search, ChevronUp, ChevronDown, ChevronRight,
-  FileText, Landmark, BarChart3,
+  Landmark, BarChart3,
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -443,7 +443,7 @@ export default function FinanciamentoFrota() {
                   {
                     label: "Valor em aberto",
                     value: fmt(kpis.valorEmAberto),
-                    sub:   "parcelas em aberto (sit. A)",
+                    sub:   "parcelas em aberto (sit. D)",
                     icon:  DollarSign,
                     stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
                     border: "border-rose-400/20",
