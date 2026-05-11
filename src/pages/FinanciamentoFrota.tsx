@@ -3,7 +3,7 @@
 //  Dados vindos de /dw-financiamento-frota (cada linha = uma parcela de um contrato)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useMemo } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Truck, CreditCard, DollarSign, TrendingDown,
@@ -29,6 +29,59 @@ const fmt = (v: number | null | undefined) =>
   v == null ? "—" : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const fmtN = (v: number) => v.toLocaleString("pt-BR");
+
+const toDateKey = (value: string | null | undefined) => {
+  if (!value) return null;
+  const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+};
+
+const inDateRange = (dateKey: string | null, start: string | null | undefined, end: string | null | undefined) => {
+  if (!dateKey) return false;
+  if (start && dateKey < start) return false;
+  if (end && dateKey > end) return false;
+  return true;
+};
+
+const normalizeSituacao = (value: string | null | undefined) => {
+  const situacao = String(value ?? "").trim().toUpperCase();
+  if (!situacao) return null;
+  if (situacao === "A" || situacao === "D" || situacao === "DEVEDOR") return "D";
+  if (situacao === "L" || situacao === "LIQUIDADO") return "L";
+  return situacao;
+};
+
+const isLiquidada = (value: string | null | undefined) => normalizeSituacao(value) === "L";
+
+const isDevedora = (value: string | null | undefined) => {
+  const situacao = normalizeSituacao(value);
+  return situacao != null && situacao !== "L";
+};
+
+const getSituacaoLabel = (value: string | null | undefined) => {
+  const situacao = normalizeSituacao(value);
+  if (situacao === "D") return "Devedor";
+  if (situacao === "L") return "Liquidado";
+  return situacao ?? "—";
+};
+
+const getSituacaoBadgeClass = (value: string | null | undefined) => {
+  const situacao = normalizeSituacao(value);
+  if (situacao === "D") return "bg-amber-400/10 text-amber-300 border-amber-400/20";
+  if (situacao === "L") return "bg-emerald-400/10 text-emerald-300 border-emerald-400/20";
+  return "bg-slate-400/10 text-slate-300 border-slate-400/20";
+};
+
+const getValorParcelaBase = (row: FinanciamentoFrotaRow) => row.valor_parcela_base ?? row.valor_parcela ?? 0;
+
+const getValorCompromisso = (row: FinanciamentoFrotaRow) => {
+  const valorPago = row.valor_pago ?? 0;
+  if (valorPago > 0) return valorPago;
+  return getValorParcelaBase(row) + (row.juros ?? 0);
+};
 
 // ─── Cores por banco ──────────────────────────────────────────────────────────
 
@@ -83,6 +136,7 @@ interface Contrato {
   contrato:        string | number | null;
   nota:            string | number | null;
   valor_aquisicao: number | null;
+  valor_contrato:  number | null;
   total_parcelas:  number | null;
   parcela_atual:   number | null;
   valor_parcela:   number | null;
@@ -92,7 +146,9 @@ interface Contrato {
   filial:          string | null;
   parcelas_pagas:  number;
   parcelas_abertas:number;
+  percentual_pago: number;
   compromisso:     number;
+  valor_em_aberto: number;
   divida_estimada: number;
   parcelas:        FinanciamentoFrotaRow[];
 }
@@ -131,6 +187,9 @@ export default function FinanciamentoFrota() {
   });
 
   const rows: FinanciamentoFrotaRow[] = useMemo(() => resp?.data ?? [], [resp]);
+  const rowsNoPeriodo = useMemo(() => (
+    rows.filter((row) => inDateRange(toDateKey(row.data_referencia), dwFilter.dataInicio, dwFilter.dataFim))
+  ), [rows, dwFilter.dataInicio, dwFilter.dataFim]);
 
   // ── Agrupa por veículo (um contrato = um veículo) ─────────────────────────
   const contratos: Contrato[] = useMemo(() => {
@@ -138,6 +197,7 @@ export default function FinanciamentoFrota() {
 
     for (const r of rows) {
       const key = String(r.veiculo ?? "?");
+      const situacao = normalizeSituacao(r.situacao);
       if (!map.has(key)) {
         map.set(key, {
           veiculo:          String(r.veiculo ?? ""),
@@ -149,16 +209,19 @@ export default function FinanciamentoFrota() {
           contrato:         r.contrato,
           nota:             r.nota,
           valor_aquisicao:  r.valor_aquisicao,
+          valor_contrato:   r.valor_contrato,
           total_parcelas:   r.total_parcelas,
           parcela_atual:    r.parcela_atual,
           valor_parcela:    r.valor_parcela,
           juros_total:      0,
           valor_pago_total: 0,
-          situacao:         r.situacao,
+          situacao,
           filial:           r.filial,
           parcelas_pagas:   0,
           parcelas_abertas: 0,
+          percentual_pago:  0,
           compromisso:      0,
+          valor_em_aberto:  0,
           divida_estimada:  0,
           parcelas:         [],
         });
@@ -168,26 +231,70 @@ export default function FinanciamentoFrota() {
       c.juros_total      += r.juros ?? 0;
       c.valor_pago_total += r.valor_pago ?? 0;
 
+      if (c.valor_contrato == null && r.valor_contrato != null) {
+        c.valor_contrato = r.valor_contrato;
+      }
+
+      if ((r.total_parcelas ?? 0) > (c.total_parcelas ?? 0)) {
+        c.total_parcelas = r.total_parcelas;
+      }
+
       // parcela mais recente = parcela_atual (usado só para metadados: banco, valor, total)
       if ((r.parcela_atual ?? 0) > (c.parcela_atual ?? 0)) {
         c.parcela_atual  = r.parcela_atual;
-        c.situacao       = r.situacao;
+        c.situacao       = situacao;
         c.valor_parcela  = r.valor_parcela;
-        c.total_parcelas = r.total_parcelas;
         c.banco          = r.banco;
-      }
-      // conta parcelas efetivamente pagas (Liquidado = "L")
-      if (r.situacao === "L") {
-        c.parcelas_pagas += 1;
       }
     }
 
     // calcula derivados depois de agregar
     for (const c of map.values()) {
-      const restantes      = Math.max(0, (c.total_parcelas ?? 0) - c.parcelas_pagas);
-      c.parcelas_abertas   = restantes;
-      c.compromisso        = c.valor_parcela ?? 0;
-      c.divida_estimada    = restantes * (c.valor_parcela ?? 0);
+      const parcelasUnicas = new Map<string, { situacao: string | null }>();
+
+      for (const parcela of c.parcelas) {
+        const parcelaKey = String(parcela.parcela_atual ?? `${c.veiculo}-${parcelasUnicas.size + 1}`);
+        const atual = normalizeSituacao(parcela.situacao);
+        const anterior = parcelasUnicas.get(parcelaKey);
+
+        if (!anterior) {
+          parcelasUnicas.set(parcelaKey, { situacao: atual });
+          continue;
+        }
+
+        if (isLiquidada(atual) || !isLiquidada(anterior.situacao)) {
+          parcelasUnicas.set(parcelaKey, { situacao: atual ?? anterior.situacao });
+        }
+      }
+
+      const totalParcelas = Math.max(
+        c.total_parcelas ?? 0,
+        parcelasUnicas.size,
+        ...c.parcelas.map((parcela) => parcela.parcela_atual ?? 0),
+      );
+
+      const parcelasPagas = Array.from(parcelasUnicas.values())
+        .filter((parcela) => isLiquidada(parcela.situacao))
+        .length;
+
+      const parcelasAbertas = totalParcelas > 0
+        ? Math.max(0, totalParcelas - parcelasPagas)
+        : Array.from(parcelasUnicas.values()).filter((parcela) => !isLiquidada(parcela.situacao)).length;
+
+      const valorEmAberto = c.parcelas
+        .filter((parcela) => isDevedora(parcela.situacao))
+        .reduce((soma, parcela) => soma + getValorParcelaBase(parcela), 0);
+
+      c.total_parcelas = totalParcelas || c.total_parcelas;
+      c.parcelas_pagas = Math.min(parcelasPagas, totalParcelas || parcelasPagas);
+      c.parcelas_abertas = parcelasAbertas;
+      c.percentual_pago = totalParcelas > 0
+        ? Math.min(100, Math.round((c.parcelas_pagas / totalParcelas) * 100))
+        : 0;
+      c.situacao = parcelasAbertas > 0 ? "D" : totalParcelas > 0 ? "L" : c.situacao;
+      c.compromisso = c.valor_parcela ?? 0;
+      c.valor_em_aberto = valorEmAberto;
+      c.divida_estimada = valorEmAberto;
     }
 
     return Array.from(map.values());
@@ -211,7 +318,7 @@ export default function FinanciamentoFrota() {
     return contratos
       .filter((c) => {
         const matchSearch = !q || [c.veiculo, c.banco, c.frota, c.chassi, String(c.contrato ?? "")]
-          .some((v) => v?.toLowerCase().includes(q));
+          .some((value) => String(value ?? "").toLowerCase().includes(q));
         const matchBanco = filtroBanco === "__all__" || c.banco === filtroBanco;
         const matchFrota = filtroFrota === "__all__" || c.frota === filtroFrota;
         const matchSit   = filtroSit   === "__all__" || c.situacao === filtroSit;
@@ -229,10 +336,12 @@ export default function FinanciamentoFrota() {
   // ── KPIs globais ─────────────────────────────────────────────────────────
   const kpis = useMemo(() => ({
     totalContratos:    contratos.length,
-    compromissoMensal: contratos.reduce((s, c) => s + c.compromisso, 0),
-    parcelasAbertas:   contratos.reduce((s, c) => s + c.parcelas_abertas, 0),
-    jurosTotal:        contratos.reduce((s, c) => s + c.juros_total, 0),
-  }), [contratos]);
+    compromissoMensal: rowsNoPeriodo.reduce((soma, row) => soma + getValorCompromisso(row), 0),
+    parcelasAbertas:   rowsNoPeriodo
+      .filter((row) => isDevedora(row.situacao))
+      .reduce((soma, row) => soma + getValorParcelaBase(row), 0),
+    jurosTotal:        rowsNoPeriodo.reduce((soma, row) => soma + (row.juros ?? 0), 0),
+  }), [contratos, rowsNoPeriodo]);
 
   // ── Distribuição por banco ────────────────────────────────────────────────
   const porBanco = useMemo(() => {
@@ -408,7 +517,7 @@ export default function FinanciamentoFrota() {
                   {
                     label: "Compromisso mensal",
                     value: fmt(kpis.compromissoMensal),
-                    sub:   "soma das parcelas atuais",
+                    sub:   "parcela + juros ou valor pago no periodo",
                     icon:  CreditCard,
                     stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
                     border: "border-amber-400/20",
@@ -419,8 +528,8 @@ export default function FinanciamentoFrota() {
                   },
                   {
                     label: "Parcelas em aberto",
-                    value: fmtN(kpis.parcelasAbertas),
-                    sub:   "total de parcelas restantes",
+                    value: fmt(kpis.parcelasAbertas),
+                    sub:   "valor total em aberto no periodo",
                     icon:  FileText,
                     stripe: "from-violet-500/25 via-violet-400/10 to-transparent",
                     border: "border-violet-400/20",
@@ -581,7 +690,7 @@ export default function FinanciamentoFrota() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="__all__">Todas</SelectItem>
-                          {situacs.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          {situacs.map((s) => <SelectItem key={s} value={s}>{getSituacaoLabel(s)}</SelectItem>)}
                         </SelectContent>
                       </Select>
 
@@ -592,7 +701,7 @@ export default function FinanciamentoFrota() {
 
                     {/* Tabela */}
                     <div className="flex-1 overflow-auto min-h-0">
-                      <table className="w-full text-[11px] border-collapse min-w-[820px]">
+                      <table className="w-full text-[11px] border-collapse min-w-[960px]">
                         <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head, var(--sgt-bg-section))" }}>
                           <tr>
                             {(
@@ -601,7 +710,8 @@ export default function FinanciamentoFrota() {
                                 { col: "frota" as keyof Contrato,           label: "Frota"        },
                                 { col: "banco" as keyof Contrato,           label: "Banco"        },
                                 { col: "valor_aquisicao" as keyof Contrato, label: "Aquisição"    },
-                                { col: "parcela_atual" as keyof Contrato,   label: "Progresso"    },
+                                { col: "valor_contrato" as keyof Contrato,  label: "Vlr. Contrato"},
+                                { col: "percentual_pago" as keyof Contrato, label: "Progresso"    },
                                 { col: "valor_parcela" as keyof Contrato,   label: "Vlr. Parcela" },
                                 { col: "juros_total" as keyof Contrato,     label: "Juros"        },
                                 { col: "situacao" as keyof Contrato,        label: "Situação"     },
@@ -625,7 +735,7 @@ export default function FinanciamentoFrota() {
                           {isLoading
                             ? Array.from({ length: 6 }).map((_, i) => (
                                 <tr key={i} className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-                                  {Array.from({ length: 9 }).map((_, j) => (
+                                  {Array.from({ length: 10 }).map((_, j) => (
                                     <td key={j} className="px-3 py-2.5">
                                       <div className="h-4 rounded animate-pulse bg-white/5" />
                                     </td>
@@ -634,16 +744,13 @@ export default function FinanciamentoFrota() {
                               ))
                             : filtered.map((c) => {
                                 const { color, rgb } = getBancoColor(c.banco, bancoIndex);
-                                const pct = c.total_parcelas
-                                  ? Math.min(100, Math.round((c.parcelas_pagas / c.total_parcelas) * 100))
-                                  : 0;
+                                const pct = c.percentual_pago;
                                 const rowKey = String(c.veiculo);
                                 const expanded = expandedRow === rowKey;
 
                                 return (
-                                  <>
+                                  <Fragment key={rowKey}>
                                     <tr
-                                      key={rowKey}
                                       onClick={() => setExpandedRow(expanded ? null : rowKey)}
                                       className="border-t cursor-pointer transition-colors hover:bg-white/[0.03]"
                                       style={{ borderColor: "var(--sgt-border-subtle)" }}
@@ -663,6 +770,7 @@ export default function FinanciamentoFrota() {
                                       </td>
                                       {/* Aquisição */}
                                       <td className="px-3 py-2.5 tabular-nums dark:text-slate-300">{fmt(c.valor_aquisicao)}</td>
+                                      <td className="px-3 py-2.5 tabular-nums dark:text-slate-300">{fmt(c.valor_contrato)}</td>
                                       {/* Progresso */}
                                       <td className="px-3 py-2.5">
                                         <div className="flex items-center gap-2">
@@ -685,14 +793,8 @@ export default function FinanciamentoFrota() {
                                       {/* Situação */}
                                       <td className="px-3 py-2.5">
                                         {c.situacao ? (
-                                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold border ${
-                                            c.situacao === "A"
-                                              ? "bg-amber-400/10 text-amber-300 border-amber-400/20"
-                                              : c.situacao === "L"
-                                              ? "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
-                                              : "bg-slate-400/10 text-slate-300 border-slate-400/20"
-                                          }`}>
-                                            {c.situacao === "A" ? "Em aberto" : c.situacao === "L" ? "Liquidado" : c.situacao}
+                                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold border ${getSituacaoBadgeClass(c.situacao)}`}>
+                                            {getSituacaoLabel(c.situacao)}
                                           </span>
                                         ) : "—"}
                                       </td>
@@ -711,7 +813,7 @@ export default function FinanciamentoFrota() {
                                         className="border-t"
                                         style={{ borderColor: "var(--sgt-border-subtle)" }}
                                       >
-                                        <td colSpan={9} className="px-4 py-3">
+                                        <td colSpan={10} className="px-4 py-3">
                                           <div
                                             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 rounded-xl border p-3"
                                             style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}
@@ -722,11 +824,12 @@ export default function FinanciamentoFrota() {
                                               { label: "Chassi",       value: c.chassi ?? "—"            },
                                               { label: "Ano Fab./Mod", value: c.anofab ? `${c.anofab}/${c.anomod ?? "?"}` : "—" },
                                               { label: "Filial",       value: c.filial ?? "—"            },
-                                              { label: "Vlr. líquido", value: fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0)) },
-                                              { label: "Total pago",   value: fmt(c.valor_pago_total)    },
-                                              { label: "Desconto",     value: fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0)) },
-                                              { label: "Parcelas rest.",value: fmtN(c.parcelas_abertas)  },
-                                              { label: "Dívida estimada", value: fmt(c.divida_estimada)  },
+                                              { label: "Vlr. contrato", value: fmt(c.valor_contrato)     },
+                                              { label: "Vlr. líquido",  value: fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0)) },
+                                              { label: "Total pago",    value: fmt(c.valor_pago_total)    },
+                                              { label: "Desconto",      value: fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0)) },
+                                              { label: "Parcelas rest.", value: fmtN(c.parcelas_abertas)  },
+                                              { label: "Valor em aberto", value: fmt(c.valor_em_aberto)   },
                                             ].map(({ label, value }) => (
                                               <div key={label} className="flex flex-col gap-0.5">
                                                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{label}</p>
@@ -737,7 +840,7 @@ export default function FinanciamentoFrota() {
                                         </td>
                                       </tr>
                                     )}
-                                  </>
+                                  </Fragment>
                                 );
                               })
                           }
