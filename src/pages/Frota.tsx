@@ -848,7 +848,7 @@ export default function Frota() {
                   border: "border-cyan-400/[0.12]",
                   glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
                   iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-                  iconTxt: "text-cyan-300",
+                  iconTxt: "text-rose-300",
                   sub2: "text-slate-500",
                 },
                 {

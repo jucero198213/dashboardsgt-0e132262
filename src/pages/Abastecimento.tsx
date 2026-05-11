@@ -68,7 +68,7 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-amber-400/30 bg-slate-950/95 px-3 py-2 shadow-xl backdrop-blur">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300 mb-1">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300 mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color ?? "#fff" }} className="text-[12px] font-semibold">
           {formatter ? formatter(p.value, p.name) : `${p.name}: ${p.value}`}
@@ -390,7 +390,7 @@ export default function Abastecimento() {
   // ── TONE_COLORS ─────────────────────────────────────────────────────────────
   const TONE_COLORS = {
     rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
-    amber:   { border: "border-amber-400/20",   icon: "text-amber-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
+    amber:   { border: "border-orange-400/20",   icon: "text-orange-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
     violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
     cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
     emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
@@ -430,17 +430,17 @@ export default function Abastecimento() {
                 <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
                 <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-orange-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Abastecimento</span>
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-300">Tempo real</span>
               </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -460,7 +460,7 @@ export default function Abastecimento() {
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-orange-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Abastecimento</span>
                 </div>
               </div>
@@ -482,7 +482,7 @@ export default function Abastecimento() {
 
             {/* Loading phase */}
             {loading && loadingPhase && (
-              <div className="flex items-center gap-2 text-[11px] text-amber-300/80">
+              <div className="flex items-center gap-2 text-[11px] text-orange-300/80">
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-amber-400/10">
                   <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
@@ -892,7 +892,7 @@ export default function Abastecimento() {
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <Fuel className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Registros de Abastecimento</span>
-                  <span className="rounded-full border border-amber-400/20 bg-amber-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-amber-300">
+                  <span className="rounded-full border border-orange-400/20 bg-amber-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-orange-300">
                     {fmtNum(tabelaFiltrada.length)} registros
                   </span>
                   <div className="ml-auto relative">
@@ -971,7 +971,7 @@ export default function Abastecimento() {
                               {/* Veículo */}
                               <td className="px-3 py-2.5">
                                 <div>
-                                  <span className="font-mono text-[11px] font-semibold text-amber-300">{r.veiculo}</span>
+                                  <span className="font-mono text-[11px] font-semibold text-orange-300">{r.veiculo}</span>
                                   {(r.marca || r.modelo) && (
                                     <p className="text-[9px] text-slate-600 truncate max-w-[120px]">
                                       {[r.marca, r.modelo].filter(Boolean).join(" · ")}
@@ -985,7 +985,7 @@ export default function Abastecimento() {
                               </td>
                               {/* Combustível */}
                               <td className="px-3 py-2.5 hidden sm:table-cell text-center">
-                                <span className="rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-amber-300 uppercase tracking-[0.1em]">
+                                <span className="rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-orange-300 uppercase tracking-[0.1em]">
                                   {r.tipoCombustivel ?? "—"}
                                 </span>
                               </td>
@@ -1043,7 +1043,7 @@ export default function Abastecimento() {
                       <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-orange-300 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
@@ -1059,8 +1059,8 @@ export default function Abastecimento() {
                             onClick={() => setPage(p)}
                             className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${
                               page === p
-                                ? "border border-amber-400/40 bg-amber-500/[0.15] text-amber-300"
-                                : "border border-white/[0.06] text-slate-500 hover:border-amber-400/20 hover:text-amber-300"
+                                ? "border border-amber-400/40 bg-amber-500/[0.15] text-orange-300"
+                                : "border border-white/[0.06] text-slate-500 hover:border-orange-400/20 hover:text-orange-300"
                             }`}
                           >
                             {p}
@@ -1070,7 +1070,7 @@ export default function Abastecimento() {
                       <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-orange-300 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>

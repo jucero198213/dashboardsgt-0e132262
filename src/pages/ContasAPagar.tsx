@@ -335,7 +335,7 @@ export default function ContasAPagar() {
       border: "border-rose-400/[0.12]",
       glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
       iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
-      iconTxt: "text-rose-300",
+      iconTxt: "text-orange-300",
       sub2: "text-slate-500",
     },
   ];
@@ -580,7 +580,7 @@ export default function ContasAPagar() {
               <div className="relative">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Atenção</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Atenção</p>
                     <p className="text-2xl font-black text-white mt-1">{insightsData.titulosProblema} {insightsData.titulosProblema === 1 ? "título" : "títulos"}</p>
                   </div>
                   <AlertTriangle className="h-5 w-5 text-rose-400/60" />
@@ -734,7 +734,7 @@ export default function ContasAPagar() {
                     <td className="px-3 py-2 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
                         (conta.status as string) === "Pago" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
-                        conta.status === "Vencido" ? "bg-rose-500/10 text-rose-300 border border-rose-400/20" :
+                        conta.status === "Vencido" ? "bg-rose-500/10 text-orange-300 border border-orange-400/20" :
                         conta.status === "Parcial" ? "bg-amber-500/10 text-amber-300 border border-amber-400/20" :
                         "bg-cyan-500/10 text-cyan-300 border border-cyan-400/20"
                       }`}>
