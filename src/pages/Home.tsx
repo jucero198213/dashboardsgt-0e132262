@@ -486,11 +486,11 @@ export default function Home() {
               </span>
             </motion.div>
 
-            <h1 className="text-[clamp(2rem,7vw,5.5rem)] font-black leading-[1.1] tracking-[-0.03em] w-full">
-              <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 py-1">
+            <h1 className="text-[clamp(2rem,7vw,5.5rem)] font-black leading-[1.25] tracking-[-0.03em] w-full">
+              <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 pb-2">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
-              <span className="mt-1 block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent py-1">
+              <span className="block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-2">
                 <AnimatedTitle text="Workspace" delay={0.45} />
               </span>
             </h1>
