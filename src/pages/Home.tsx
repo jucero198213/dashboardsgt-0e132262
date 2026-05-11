@@ -486,7 +486,7 @@ export default function Home() {
               </span>
             </motion.div>
 
-            <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full" style={{ fontFamily: "'Manrope', sans-serif" }}>
               <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 pb-3">
                 <AnimatedTitle text="Seja bem-vindo ao" />
               </span>
