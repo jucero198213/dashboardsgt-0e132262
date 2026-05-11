@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  FinanciamentoFrota.tsx  –  Painel de financiamentos de veículos da frota
 //  Dados vindos de /dw-financiamento-frota (cada linha = uma parcela de um contrato)
+//  v2 – fix progresso: total_parcelas não sobrescrito pelo loop de agregação
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useMemo } from "react";
