@@ -187,12 +187,14 @@ export default function FinanciamentoFrota() {
       c.juros_total      += r.juros ?? 0;
       c.valor_pago_total += r.valor_pago ?? 0;
 
-      // "D" = Devedor (em aberto), "L" = Liquidado (pago)
-      // Valor em aberto: parcelas ainda devidas (independe do período)
-      if (r.situacao === "D") c.valor_aberto += r.valor_parcela ?? 0;
+      // Parcela paga = VLRPAG > 0 (mais confiável que SITUAC do PAGDOC)
+      const pago = (r.valor_pago ?? 0) > 0;
 
-      // Compromisso e juros: parcelas devidas cujo vencimento cai no período
-      if (r.situacao === "D" && inPeriodo(r.data_vencimento)) {
+      // Valor em aberto: parcelas sem pagamento (independe do período)
+      if (!pago) c.valor_aberto += r.valor_parcela ?? 0;
+
+      // Compromisso e juros: parcelas sem pagamento cujo vencimento cai no período
+      if (!pago && inPeriodo(r.data_vencimento)) {
         c.compromisso_periodo += r.valor_parcela ?? 0;
         c.juros_periodo       += r.juros ?? 0;
       }
@@ -200,22 +202,24 @@ export default function FinanciamentoFrota() {
       // Campos de exibição: linha com maior número de parcela (mais recente)
       if ((r.parcela_atual ?? 0) > ((c as any)._maxParc ?? 0)) {
         (c as any)._maxParc = r.parcela_atual;
-        c.situacao      = r.situacao;
         c.valor_parcela = r.valor_parcela;
         c.banco         = r.banco;
       }
     }
 
-    // Segunda passagem: calcula parcela_atual = última parcela PAGA (L)
+    // Segunda passagem: calcula parcela_atual = última parcela paga (valor_pago > 0)
     // e total_parcelas = max visto (window fn já garante consistência)
     for (const c of map.values()) {
-      const pagas = c.parcelas.filter(p => p.situacao === "L");
+      const pagas = c.parcelas.filter(p => (p.valor_pago ?? 0) > 0);
       c.parcela_atual = pagas.length > 0
         ? Math.max(...pagas.map(p => p.parcela_atual ?? 0))
         : 0;
-      // total_parcelas já está correto (window fn, mesmo valor em todas as linhas)
+
       const maxTotal = Math.max(...c.parcelas.map(p => p.total_parcelas ?? 0));
       c.total_parcelas = maxTotal > 0 ? maxTotal : c.total_parcelas;
+
+      // situacao derivada: "L" se todas as parcelas pagas, senão "D"
+      c.situacao = (c.parcela_atual ?? 0) >= (c.total_parcelas ?? Infinity) ? "L" : "D";
 
       const restantes    = Math.max(0, (c.total_parcelas ?? 0) - (c.parcela_atual ?? 0));
       c.parcelas_abertas = restantes;
@@ -443,7 +447,7 @@ export default function FinanciamentoFrota() {
                   {
                     label: "Valor em aberto",
                     value: fmt(kpis.valorEmAberto),
-                    sub:   "parcelas em aberto (sit. D)",
+                    sub:   "parcelas sem pagamento registrado",
                     icon:  DollarSign,
                     stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
                     border: "border-rose-400/20",
