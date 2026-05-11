@@ -1070,8 +1070,6 @@ app.post("/dw-financiamento-frota", async (req, res) => {
     const p     = await getPool();
     const dbReq = p.request();
 
-    dbReq.input("dataInicio", sql.Date, dataInicio ? new Date(dataInicio) : null);
-    dbReq.input("dataFim",    sql.Date, dataFim    ? new Date(dataFim)    : null);
     dbReq.input("filial",     sql.VarChar(20), filial   || null);
     dbReq.input("banco",      sql.VarChar(80), banco    || null);
     dbReq.input("situacao",   sql.VarChar(5),  situacao || null);
@@ -1093,7 +1091,6 @@ WITH FINANCIAMENTOS AS (
         V.ANOFAB                                                                        AS anofab,
         V.CHASSI                                                                        AS chassi,
         I.SITUAC                                                                        AS situacao,
-        I.DATVEN                                                                        AS data_vencimento,
         I.VLRDOC                                                                        AS valor_parcela,
         I.VLRJUR                                                                        AS juros,
         I.VLRDES                                                                        AS valor_desconto,
@@ -1106,8 +1103,6 @@ WITH FINANCIAMENTOS AS (
     LEFT  JOIN PAGCON P WITH (NOLOCK) ON B.NUMCON = P.CODIGO
     INNER JOIN RODFRO F WITH (NOLOCK) ON V.CODFRO = F.CODFRO
     WHERE ISNULL(I.NUMCTF, '') <> ''
-      AND (@dataInicio IS NULL OR I.DATVEN >= @dataInicio)
-      AND (@dataFim    IS NULL OR I.DATVEN <= @dataFim)
       AND (@filial     IS NULL OR I.CODFIL  = @filial)
       AND (@banco      IS NULL OR O.DESCRI  LIKE '%' + @banco + '%')
       AND (@situacao   IS NULL OR I.SITUAC  = @situacao)
@@ -1127,7 +1122,6 @@ SELECT
     anofab,
     chassi,
     situacao,
-    data_vencimento,
     valor_parcela,
     juros,
     valor_desconto,

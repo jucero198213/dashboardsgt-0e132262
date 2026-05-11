@@ -90,9 +90,9 @@ interface Contrato {
   juros_total:        number;
   valor_pago_total:   number;
   valor_aberto:       number;   // parcelas situacao="A"
-  // totais sobre parcelas NO PERÍODO (data_vencimento in [dataInicio, dataFim])
-  compromisso_periodo:number;
-  juros_periodo:      number;
+  // totais sobre TODAS as parcelas abertas do contrato
+  compromisso_total:  number;  // soma valor_parcela sit. "A"
+  juros_total_aberto: number;  // soma juros sit. "A"
   situacao:           string | null;
   filial:             string | null;
   parcelas_abertas:   number;
@@ -135,19 +135,7 @@ export default function FinanciamentoFrota() {
 
   const rows: FinanciamentoFrotaRow[] = useMemo(() => resp?.data ?? [], [resp]);
 
-  // ── Helper de período ─────────────────────────────────────────────────────
-  const periodoInicio = dwFilter.dataInicio ? new Date(dwFilter.dataInicio + "T00:00:00") : null;
-  const periodoFim    = dwFilter.dataFim    ? new Date(dwFilter.dataFim    + "T23:59:59") : null;
-
-  const inPeriodo = (datven: string | null): boolean => {
-    if (!datven) return false;
-    const d = new Date(datven);
-    if (periodoInicio && d < periodoInicio) return false;
-    if (periodoFim    && d > periodoFim)    return false;
-    return true;
-  };
-
-  // ── Agrupa por veículo — calcula derivados period-aware ───────────────────
+  // ── Agrupa por veículo ────────────────────────────────────────────────────
   const contratos: Contrato[] = useMemo(() => {
     const map = new Map<string, Contrato>();
 
@@ -170,8 +158,8 @@ export default function FinanciamentoFrota() {
           juros_total:         0,
           valor_pago_total:    0,
           valor_aberto:        0,
-          compromisso_periodo: 0,
-          juros_periodo:       0,
+          compromisso_total:   0,
+          juros_total_aberto:  0,
           situacao:            r.situacao,
           filial:              r.filial,
           parcelas_abertas:    0,
@@ -185,12 +173,10 @@ export default function FinanciamentoFrota() {
       // Acumuladores sobre TODAS as parcelas
       c.juros_total      += r.juros ?? 0;
       c.valor_pago_total += r.valor_pago ?? 0;
-      if (r.situacao === "A") c.valor_aberto += r.valor_parcela ?? 0;
-
-      // Acumuladores SOMENTE para parcelas no período (data_vencimento)
-      if (inPeriodo(r.data_vencimento)) {
-        c.compromisso_periodo += r.valor_parcela ?? 0;
-        c.juros_periodo       += r.juros ?? 0;
+      if (r.situacao === "A") {
+        c.valor_aberto       += r.valor_parcela ?? 0;
+        c.compromisso_total  += r.valor_parcela ?? 0;
+        c.juros_total_aberto += r.juros ?? 0;
       }
 
       // Parcela mais recente define cabeçalho do contrato na tabela
@@ -211,7 +197,7 @@ export default function FinanciamentoFrota() {
 
     return Array.from(map.values());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, dwFilter.dataInicio, dwFilter.dataFim]);
+  }, [rows]);
 
   // ── Opções de filtro ──────────────────────────────────────────────────────
   const bancos  = useMemo(() => [...new Set(contratos.map((c) => c.banco).filter(Boolean))].sort() as string[], [contratos]);
@@ -249,10 +235,10 @@ export default function FinanciamentoFrota() {
   // Compromisso e juros refletem o PERÍODO selecionado (data_vencimento)
   // Valor em aberto = parcelas situacao "A" independente de período
   const kpis = useMemo(() => ({
-    totalContratos:      filtered.length,
-    valorEmAberto:       filtered.reduce((s, c) => s + c.valor_aberto, 0),
-    compromissoPeriodo:  filtered.reduce((s, c) => s + c.compromisso_periodo, 0),
-    jurosPeriodo:        filtered.reduce((s, c) => s + c.juros_periodo, 0),
+    totalContratos:  filtered.length,
+    valorEmAberto:   filtered.reduce((s, c) => s + c.valor_aberto, 0),
+    compromisso:     filtered.reduce((s, c) => s + c.compromisso_total, 0),
+    jurosAberto:     filtered.reduce((s, c) => s + c.juros_total_aberto, 0),
   }), [filtered]);
 
   // ── Distribuição por banco — também usa contratos filtrados ───────────────
@@ -261,7 +247,7 @@ export default function FinanciamentoFrota() {
     for (const c of filtered) {
       const b = c.banco ?? "Sem banco";
       const cur = map.get(b) ?? { compromisso: 0, count: 0 };
-      map.set(b, { compromisso: cur.compromisso + c.compromisso_periodo, count: cur.count + 1 });
+      map.set(b, { compromisso: cur.compromisso + c.compromisso_total, count: cur.count + 1 });
     }
     return [...map.entries()]
       .map(([banco, v]) => ({ banco, ...v }))
@@ -439,9 +425,9 @@ export default function FinanciamentoFrota() {
                     subTxt: "text-rose-400/70",
                   },
                   {
-                    label: "Compromisso no período",
-                    value: fmt(kpis.compromissoPeriodo),
-                    sub:   "vencimentos no período selecionado",
+                    label: "Compromisso em aberto",
+                    value: fmt(kpis.compromisso),
+                    sub:   "total das parcelas em aberto (sit. A)",
                     icon:  CreditCard,
                     stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
                     border: "border-amber-400/20",
@@ -451,9 +437,9 @@ export default function FinanciamentoFrota() {
                     subTxt: "text-amber-400/70",
                   },
                   {
-                    label: "Juros no período",
-                    value: fmt(kpis.jurosPeriodo),
-                    sub:   "juros das parcelas no período",
+                    label: "Juros em aberto",
+                    value: fmt(kpis.jurosAberto),
+                    sub:   "juros acumulados das parcelas abertas",
                     icon:  TrendingDown,
                     stripe: "from-violet-500/25 via-violet-400/10 to-transparent",
                     border: "border-violet-400/20",

@@ -588,7 +588,6 @@ export interface FinanciamentoFrotaRow {
   anofab:            number | null;
   chassi:            string | null;
   situacao:          string | null;
-  data_vencimento:   string | null;
   valor_parcela:     number | null;
   juros:             number | null;
   valor_desconto:    number | null;
