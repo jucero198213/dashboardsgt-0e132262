@@ -186,27 +186,37 @@ export default function FinanciamentoFrota() {
       // Acumuladores sobre TODAS as parcelas
       c.juros_total      += r.juros ?? 0;
       c.valor_pago_total += r.valor_pago ?? 0;
-      // Valor em aberto: parcelas com situacao "A" (independe do período)
-      if (r.situacao === "A") c.valor_aberto += r.valor_parcela ?? 0;
-      // Compromisso e juros: parcelas cujo DATVEN cai no período selecionado
-      if (inPeriodo(r.data_vencimento)) {
+
+      // "D" = Devedor (em aberto), "L" = Liquidado (pago)
+      // Valor em aberto: parcelas ainda devidas (independe do período)
+      if (r.situacao === "D") c.valor_aberto += r.valor_parcela ?? 0;
+
+      // Compromisso e juros: parcelas devidas cujo vencimento cai no período
+      if (r.situacao === "D" && inPeriodo(r.data_vencimento)) {
         c.compromisso_periodo += r.valor_parcela ?? 0;
         c.juros_periodo       += r.juros ?? 0;
       }
 
-      // Parcela mais recente define cabeçalho do contrato na tabela.
-      // IMPORTANTE: total_parcelas NÃO é atualizado aqui — a window function
-      // já garante que todas as linhas do contrato têm o mesmo valor.
-      // Atualizar junto com parcela_atual causaria X/X = 100% sempre.
-      if ((r.parcela_atual ?? 0) > (c.parcela_atual ?? 0)) {
-        c.parcela_atual = r.parcela_atual;
+      // Campos de exibição: linha com maior número de parcela (mais recente)
+      if ((r.parcela_atual ?? 0) > ((c as any)._maxParc ?? 0)) {
+        (c as any)._maxParc = r.parcela_atual;
         c.situacao      = r.situacao;
         c.valor_parcela = r.valor_parcela;
         c.banco         = r.banco;
       }
     }
 
+    // Segunda passagem: calcula parcela_atual = última parcela PAGA (L)
+    // e total_parcelas = max visto (window fn já garante consistência)
     for (const c of map.values()) {
+      const pagas = c.parcelas.filter(p => p.situacao === "L");
+      c.parcela_atual = pagas.length > 0
+        ? Math.max(...pagas.map(p => p.parcela_atual ?? 0))
+        : 0;
+      // total_parcelas já está correto (window fn, mesmo valor em todas as linhas)
+      const maxTotal = Math.max(...c.parcelas.map(p => p.total_parcelas ?? 0));
+      c.total_parcelas = maxTotal > 0 ? maxTotal : c.total_parcelas;
+
       const restantes    = Math.max(0, (c.total_parcelas ?? 0) - (c.parcela_atual ?? 0));
       c.parcelas_abertas = restantes;
       c.divida_estimada  = restantes * (c.valor_parcela ?? 0);
@@ -711,13 +721,13 @@ export default function FinanciamentoFrota() {
                                       <td className="px-3 py-2.5">
                                         {c.situacao ? (
                                           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold border ${
-                                            c.situacao === "A"
+                                            c.situacao === "D"
                                               ? "bg-amber-400/10 text-amber-300 border-amber-400/20"
                                               : c.situacao === "L"
                                               ? "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
                                               : "bg-slate-400/10 text-slate-300 border-slate-400/20"
                                           }`}>
-                                            {c.situacao === "A" ? "Em aberto" : c.situacao === "L" ? "Liquidado" : c.situacao}
+                                            {c.situacao === "D" ? "Em aberto" : c.situacao === "L" ? "Liquidado" : c.situacao}
                                           </span>
                                         ) : "—"}
                                       </td>

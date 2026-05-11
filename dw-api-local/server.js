@@ -1085,6 +1085,8 @@ app.post("/dw-financiamento-frota", async (req, res) => {
     dbReq.input("situacao", sql.VarChar(5),  situacao || null);
 
     const query = `
+-- Parte de PAGDOC (1 linha por parcela) e usa OUTER APPLY para buscar
+-- apenas 1 linha de PAGDOCI por NUMDOC — evita duplicatas do join direto.
 WITH FINANCIAMENTOS AS (
     SELECT
         D.DATREF                                                                        AS data_referencia,
@@ -1108,8 +1110,13 @@ WITH FINANCIAMENTOS AS (
         D.VLRDES                                                                        AS valor_desconto,
         D.VLRLIQ                                                                        AS vlrliq,
         D.VLRPAG                                                                        AS valor_pago
-    FROM PAGDOCI I WITH (NOLOCK)
-    INNER JOIN PAGDOC  D WITH (NOLOCK) ON I.NUMDOC  = D.NUMDOC
+    FROM PAGDOC  D WITH (NOLOCK)
+    OUTER APPLY (
+        SELECT TOP 1 I2.DATVEN
+        FROM PAGDOCI I2 WITH (NOLOCK)
+        WHERE I2.NUMDOC = D.NUMDOC
+        ORDER BY I2.DATVEN
+    ) I
     INNER JOIN PATBAT  B WITH (NOLOCK) ON D.NUMCTF  = B.NUMCON
     INNER JOIN RODVEI  V WITH (NOLOCK) ON B.CODVEI  = V.CODVEI
     LEFT  JOIN PAGCON  P WITH (NOLOCK) ON B.NUMCON  = P.CODIGO
