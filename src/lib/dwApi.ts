@@ -574,9 +574,12 @@ export async function fetchFaturamentoResumo(): Promise<FaturamentoResumoRespons
 // ─── Tipos: FINANCIAMENTO FROTA ───────────────────────────────────────────────
 
 export interface FinanciamentoFrotaRow {
+  data_referencia:   string | null;  // D.DATREF
+  data_vencimento:   string | null;  // I.DATVEN — usado para filtro de período client-side
   contrato:          string | number | null;
   nota:              string | number | null;
   valor_aquisicao:   number | null;
+  valor_contrato:    number | null;
   parcela_atual:     number | null;
   total_parcelas:    number | null;
   tipo:              string | null;
@@ -588,8 +591,8 @@ export interface FinanciamentoFrotaRow {
   anofab:            number | null;
   chassi:            string | null;
   situacao:          string | null;
-  data_vencimento:   string | null;
   valor_parcela:     number | null;
+  valor_parcela_base:number | null;  // I.VLRPAR
   juros:             number | null;
   valor_desconto:    number | null;
   vlrliq:            number | null;
