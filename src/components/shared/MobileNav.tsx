@@ -54,6 +54,14 @@ export function MobileNav() {
     show: boolean;
   }> = [
     {
+      to: "/executivo",
+      label: "Painel Executivo",
+      icon: BarChart3,
+      color: "text-amber-300",
+      bg: "bg-amber-400/10 border-amber-400/25",
+      show: canAccess("dashboard"),
+    },
+    {
       to: "/dashboard",
       label: "Dashboard",
       icon: BarChart3,
