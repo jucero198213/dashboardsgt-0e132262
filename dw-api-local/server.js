@@ -1056,66 +1056,88 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ENDPOINT: /dw-financiamento-frota
+//  Retorna TODAS as parcelas de contratos de financiamento de frota.
+//  Filtragem de período é feita NO CLIENTE (preserva window fn TOTAL_PARCELAS).
+//
 //  Parâmetros opcionais (body JSON):
-//    dataInicio : string | null  "YYYY-MM-DD"  → filtra por DATVEN da parcela
-//    dataFim    : string | null  "YYYY-MM-DD"
-//    filial     : string | null
-//    banco      : string | null
-//    situacao   : string | null  ex: "A" (aberto) | "L" (liquidado)
+//    filial   : string | null  → filtra por D.CODFIL
+//    banco    : string | null  → filtra por T.DESCRI (LIKE)
+//    situacao : string | null  → ex: "A" (aberto) | "L" (liquidado)
+//
+//  Estrutura de joins (SQL corrigido):
+//    PAGDOCI I  → parcelas (tem DATVEN = data de vencimento)
+//    PAGDOC  D  → cabeçalho do documento (tem NUMCTF, VLRDOC, SITUAC, etc.)
+//    PATBAT  B  → bem patrimonial / veículo adquirido
+//    RODVEI  V  → cadastro do veículo
+//    PAGCON  P  → contrato financeiro (tem CODTAR → banco)
+//    RODTAR  T  → tabela de tarifas/banco (DESCRI = nome do banco)
+//    RODFRO  F  → frota do veículo
 // ─────────────────────────────────────────────────────────────────────────────
 app.post("/dw-financiamento-frota", async (req, res) => {
-  const { dataInicio, dataFim, filial, banco, situacao } = req.body ?? {};
+  const { filial, banco, situacao } = req.body ?? {};
 
   try {
     const p     = await getPool();
     const dbReq = p.request();
 
-    dbReq.input("dataInicio", sql.Date, dataInicio ? new Date(dataInicio) : null);
-    dbReq.input("dataFim",    sql.Date, dataFim    ? new Date(dataFim)    : null);
-    dbReq.input("filial",     sql.VarChar(20), filial   || null);
-    dbReq.input("banco",      sql.VarChar(80), banco    || null);
-    dbReq.input("situacao",   sql.VarChar(5),  situacao || null);
+    dbReq.input("filial",   sql.VarChar(20), filial   || null);
+    dbReq.input("banco",    sql.VarChar(80), banco    || null);
+    dbReq.input("situacao", sql.VarChar(5),  situacao || null);
 
     const query = `
+-- Parte de PAGDOC (1 linha por parcela) e usa OUTER APPLY para buscar
+-- apenas 1 linha de PAGDOCI por NUMDOC — evita duplicatas do join direto.
 WITH FINANCIAMENTOS AS (
     SELECT
+        D.DATREF                                                                        AS data_referencia,
+        I.DATVEN                                                                        AS data_vencimento,
         P.NUMCON                                                                        AS contrato,
         B.NOTFIS                                                                        AS nota,
         B.VLRBRU                                                                        AS valor_aquisicao,
-        TRY_CAST(RIGHT(I.NUMDOC, 2) AS INT)                                             AS parcela_atual,
-        TRY_CAST(MAX(RIGHT(I.NUMDOC, 2)) OVER (PARTITION BY I.NUMCTF) AS INT)           AS total_parcelas,
-        I.TIPDOC                                                                        AS tipo,
-        I.CODFIL                                                                        AS filial,
-        O.DESCRI                                                                        AS banco,
+        P.VLRCON                                                                        AS valor_contrato,
+        TRY_CAST(RIGHT(D.NUMDOC, 2) AS INT)                                             AS parcela_atual,
+        TRY_CAST(MAX(RIGHT(D.NUMDOC, 2)) OVER (PARTITION BY D.NUMCTF) AS INT)           AS total_parcelas,
+        D.TIPDOC                                                                        AS tipo,
+        D.CODFIL                                                                        AS filial,
+        T.DESCRI                                                                        AS banco,
         V.CODVEI                                                                        AS veiculo,
         F.DESCRI                                                                        AS frota,
         V.ANOMOD                                                                        AS anomod,
         V.ANOFAB                                                                        AS anofab,
         V.CHASSI                                                                        AS chassi,
-        I.SITUAC                                                                        AS situacao,
-        I.DATVEN                                                                        AS data_vencimento,
-        I.VLRDOC                                                                        AS valor_parcela,
-        I.VLRJUR                                                                        AS juros,
-        I.VLRDES                                                                        AS valor_desconto,
-        I.VLRLIQ                                                                        AS vlrliq,
-        I.VLRPAG                                                                        AS valor_pago
-    FROM pagdoc I WITH (NOLOCK)
-    INNER JOIN PATBAT B WITH (NOLOCK) ON I.NUMCTF = B.NUMCON
-    INNER JOIN RODBCO O WITH (NOLOCK) ON I.CODBCO = O.CODBCO
-    INNER JOIN RODVEI V WITH (NOLOCK) ON B.CODVEI = V.CODVEI
-    LEFT  JOIN PAGCON P WITH (NOLOCK) ON B.NUMCON = P.CODIGO
-    INNER JOIN RODFRO F WITH (NOLOCK) ON V.CODFRO = F.CODFRO
-    WHERE ISNULL(I.NUMCTF, '') <> ''
-      AND (@dataInicio IS NULL OR I.DATVEN >= @dataInicio)
-      AND (@dataFim    IS NULL OR I.DATVEN <= @dataFim)
-      AND (@filial     IS NULL OR I.CODFIL  = @filial)
-      AND (@banco      IS NULL OR O.DESCRI  LIKE '%' + @banco + '%')
-      AND (@situacao   IS NULL OR I.SITUAC  = @situacao)
+        D.SITUAC                                                                        AS situacao,
+        D.VLRDOC                                                                        AS valor_parcela,
+        I.VLRPAR                                                                        AS valor_parcela_base,
+        D.VLRJUR                                                                        AS juros,
+        D.VLRDES                                                                        AS valor_desconto,
+        D.VLRLIQ                                                                        AS vlrliq,
+        D.VLRPAG                                                                        AS valor_pago
+    FROM PAGDOC  D WITH (NOLOCK)
+    OUTER APPLY (
+        SELECT TOP 1
+            I2.DATVEN,
+            I2.VLRPAR
+        FROM PAGDOCI I2 WITH (NOLOCK)
+        WHERE I2.NUMDOC = D.NUMDOC
+        ORDER BY I2.DATVEN
+    ) I
+    INNER JOIN PATBAT  B WITH (NOLOCK) ON D.NUMCTF  = B.NUMCON
+    INNER JOIN RODVEI  V WITH (NOLOCK) ON B.CODVEI  = V.CODVEI
+    LEFT  JOIN PAGCON  P WITH (NOLOCK) ON B.NUMCON  = P.CODIGO
+    INNER JOIN RODTAR  T WITH (NOLOCK) ON P.CODTAR  = T.CODTAR
+    INNER JOIN RODFRO  F WITH (NOLOCK) ON V.CODFRO  = F.CODFRO
+    WHERE ISNULL(D.NUMCTF, '') <> ''
+      AND (@filial   IS NULL OR D.CODFIL = @filial)
+      AND (@banco    IS NULL OR T.DESCRI LIKE '%' + @banco + '%')
+      AND (@situacao IS NULL OR D.SITUAC = @situacao)
 )
 SELECT
+    data_referencia,
+    data_vencimento,
     contrato,
     nota,
     valor_aquisicao,
+    valor_contrato,
     parcela_atual,
     total_parcelas,
     tipo,
@@ -1128,6 +1150,7 @@ SELECT
     chassi,
     situacao,
     valor_parcela,
+    valor_parcela_base,
     juros,
     valor_desconto,
     vlrliq,
