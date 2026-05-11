@@ -336,10 +336,8 @@ export default function FinanciamentoFrota() {
   // ── KPIs globais ─────────────────────────────────────────────────────────
   const kpis = useMemo(() => ({
     totalContratos:    contratos.length,
-    compromissoMensal: rowsNoPeriodo.reduce((soma, row) => soma + getValorCompromisso(row), 0),
-    parcelasAbertas:   rowsNoPeriodo
-      .filter((row) => isDevedora(row.situacao))
-      .reduce((soma, row) => soma + getValorParcelaBase(row), 0),
+    compromissoMensal: contratos.reduce((soma, c) => soma + (c.compromisso ?? 0), 0),
+    parcelasAbertas:   contratos.reduce((soma, c) => soma + (c.valor_em_aberto ?? 0), 0),
     jurosTotal:        rowsNoPeriodo.reduce((soma, row) => soma + (row.juros ?? 0), 0),
   }), [contratos, rowsNoPeriodo]);
 
