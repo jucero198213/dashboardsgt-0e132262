@@ -74,26 +74,30 @@ function getBancoColor(banco: string | null, bancoIndex: Map<string, number>): {
 // ─── Tipos auxiliares ─────────────────────────────────────────────────────────
 
 interface Contrato {
-  veiculo:         string;
-  frota:           string | null;
-  banco:           string | null;
-  chassi:          string | null;
-  anomod:          number | null;
-  anofab:          number | null;
-  contrato:        string | number | null;
-  nota:            string | number | null;
-  valor_aquisicao: number | null;
-  total_parcelas:  number | null;
-  parcela_atual:   number | null;
-  valor_parcela:   number | null;
-  juros_total:     number;
-  valor_pago_total:number;
-  situacao:        string | null;
-  filial:          string | null;
-  parcelas_abertas:number;
-  compromisso:     number;
-  divida_estimada: number;
-  parcelas:        FinanciamentoFrotaRow[];
+  veiculo:            string;
+  frota:              string | null;
+  banco:              string | null;
+  chassi:             string | null;
+  anomod:             number | null;
+  anofab:             number | null;
+  contrato:           string | number | null;
+  nota:               string | number | null;
+  valor_aquisicao:    number | null;
+  total_parcelas:     number | null;
+  parcela_atual:      number | null;
+  valor_parcela:      number | null;
+  // totais sobre TODAS as parcelas do contrato
+  juros_total:        number;
+  valor_pago_total:   number;
+  valor_aberto:       number;   // parcelas situacao="A"
+  // totais sobre parcelas NO PERÍODO (data_vencimento in [dataInicio, dataFim])
+  compromisso_periodo:number;
+  juros_periodo:      number;
+  situacao:           string | null;
+  filial:             string | null;
+  parcelas_abertas:   number;
+  divida_estimada:    number;
+  parcelas:           FinanciamentoFrotaRow[];
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -131,7 +135,19 @@ export default function FinanciamentoFrota() {
 
   const rows: FinanciamentoFrotaRow[] = useMemo(() => resp?.data ?? [], [resp]);
 
-  // ── Agrupa por veículo (um contrato = um veículo) ─────────────────────────
+  // ── Helper de período ─────────────────────────────────────────────────────
+  const periodoInicio = dwFilter.dataInicio ? new Date(dwFilter.dataInicio + "T00:00:00") : null;
+  const periodoFim    = dwFilter.dataFim    ? new Date(dwFilter.dataFim    + "T23:59:59") : null;
+
+  const inPeriodo = (datven: string | null): boolean => {
+    if (!datven) return false;
+    const d = new Date(datven);
+    if (periodoInicio && d < periodoInicio) return false;
+    if (periodoFim    && d > periodoFim)    return false;
+    return true;
+  };
+
+  // ── Agrupa por veículo — calcula derivados period-aware ───────────────────
   const contratos: Contrato[] = useMemo(() => {
     const map = new Map<string, Contrato>();
 
@@ -139,34 +155,45 @@ export default function FinanciamentoFrota() {
       const key = String(r.veiculo ?? "?");
       if (!map.has(key)) {
         map.set(key, {
-          veiculo:          String(r.veiculo ?? ""),
-          frota:            r.frota,
-          banco:            r.banco,
-          chassi:           r.chassi,
-          anomod:           r.anomod,
-          anofab:           r.anofab,
-          contrato:         r.contrato,
-          nota:             r.nota,
-          valor_aquisicao:  r.valor_aquisicao,
-          total_parcelas:   r.total_parcelas,
-          parcela_atual:    r.parcela_atual,
-          valor_parcela:    r.valor_parcela,
-          juros_total:      0,
-          valor_pago_total: 0,
-          situacao:         r.situacao,
-          filial:           r.filial,
-          parcelas_abertas: 0,
-          compromisso:      0,
-          divida_estimada:  0,
-          parcelas:         [],
+          veiculo:             String(r.veiculo ?? ""),
+          frota:               r.frota,
+          banco:               r.banco,
+          chassi:              r.chassi,
+          anomod:              r.anomod,
+          anofab:              r.anofab,
+          contrato:            r.contrato,
+          nota:                r.nota,
+          valor_aquisicao:     r.valor_aquisicao,
+          total_parcelas:      r.total_parcelas,
+          parcela_atual:       r.parcela_atual,
+          valor_parcela:       r.valor_parcela,
+          juros_total:         0,
+          valor_pago_total:    0,
+          valor_aberto:        0,
+          compromisso_periodo: 0,
+          juros_periodo:       0,
+          situacao:            r.situacao,
+          filial:              r.filial,
+          parcelas_abertas:    0,
+          divida_estimada:     0,
+          parcelas:            [],
         });
       }
       const c = map.get(key)!;
       c.parcelas.push(r);
+
+      // Acumuladores sobre TODAS as parcelas
       c.juros_total      += r.juros ?? 0;
       c.valor_pago_total += r.valor_pago ?? 0;
+      if (r.situacao === "A") c.valor_aberto += r.valor_parcela ?? 0;
 
-      // parcela mais recente = parcela_atual
+      // Acumuladores SOMENTE para parcelas no período (data_vencimento)
+      if (inPeriodo(r.data_vencimento)) {
+        c.compromisso_periodo += r.valor_parcela ?? 0;
+        c.juros_periodo       += r.juros ?? 0;
+      }
+
+      // Parcela mais recente define cabeçalho do contrato na tabela
       if ((r.parcela_atual ?? 0) > (c.parcela_atual ?? 0)) {
         c.parcela_atual  = r.parcela_atual;
         c.situacao       = r.situacao;
@@ -176,30 +203,28 @@ export default function FinanciamentoFrota() {
       }
     }
 
-    // calcula derivados depois de agregar
     for (const c of map.values()) {
-      const restantes      = Math.max(0, (c.total_parcelas ?? 0) - (c.parcela_atual ?? 0));
-      c.parcelas_abertas   = restantes;
-      c.compromisso        = c.valor_parcela ?? 0;
-      c.divida_estimada    = restantes * (c.valor_parcela ?? 0);
+      const restantes    = Math.max(0, (c.total_parcelas ?? 0) - (c.parcela_atual ?? 0));
+      c.parcelas_abertas = restantes;
+      c.divida_estimada  = restantes * (c.valor_parcela ?? 0);
     }
 
     return Array.from(map.values());
-  }, [rows]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, dwFilter.dataInicio, dwFilter.dataFim]);
 
   // ── Opções de filtro ──────────────────────────────────────────────────────
   const bancos  = useMemo(() => [...new Set(contratos.map((c) => c.banco).filter(Boolean))].sort() as string[], [contratos]);
   const frotas  = useMemo(() => [...new Set(contratos.map((c) => c.frota).filter(Boolean))].sort() as string[], [contratos]);
   const situacs = useMemo(() => [...new Set(contratos.map((c) => c.situacao).filter(Boolean))].sort() as string[], [contratos]);
 
-  // índice de banco para cores de fallback
   const bancoIndex = useMemo(() => {
     const m = new Map<string, number>();
     bancos.forEach((b, i) => m.set(b, i));
     return m;
   }, [bancos]);
 
-  // ── Filtro + sort ─────────────────────────────────────────────────────────
+  // ── Filtro + sort (tabela) ────────────────────────────────────────────────
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return contratos
@@ -220,26 +245,28 @@ export default function FinanciamentoFrota() {
       });
   }, [contratos, search, filtroBanco, filtroFrota, filtroSit, sortCol, sortAsc]);
 
-  // ── KPIs globais ─────────────────────────────────────────────────────────
+  // ── KPIs — calculados sobre os contratos FILTRADOS ────────────────────────
+  // Compromisso e juros refletem o PERÍODO selecionado (data_vencimento)
+  // Valor em aberto = parcelas situacao "A" independente de período
   const kpis = useMemo(() => ({
-    totalContratos:    contratos.length,
-    compromissoMensal: contratos.reduce((s, c) => s + c.compromisso, 0),
-    parcelasAbertas:   contratos.reduce((s, c) => s + c.parcelas_abertas, 0),
-    jurosTotal:        contratos.reduce((s, c) => s + c.juros_total, 0),
-  }), [contratos]);
+    totalContratos:      filtered.length,
+    valorEmAberto:       filtered.reduce((s, c) => s + c.valor_aberto, 0),
+    compromissoPeriodo:  filtered.reduce((s, c) => s + c.compromisso_periodo, 0),
+    jurosPeriodo:        filtered.reduce((s, c) => s + c.juros_periodo, 0),
+  }), [filtered]);
 
-  // ── Distribuição por banco ────────────────────────────────────────────────
+  // ── Distribuição por banco — também usa contratos filtrados ───────────────
   const porBanco = useMemo(() => {
     const map = new Map<string, { compromisso: number; count: number }>();
-    for (const c of contratos) {
+    for (const c of filtered) {
       const b = c.banco ?? "Sem banco";
       const cur = map.get(b) ?? { compromisso: 0, count: 0 };
-      map.set(b, { compromisso: cur.compromisso + c.compromisso, count: cur.count + 1 });
+      map.set(b, { compromisso: cur.compromisso + c.compromisso_periodo, count: cur.count + 1 });
     }
     return [...map.entries()]
       .map(([banco, v]) => ({ banco, ...v }))
       .sort((a, b) => b.compromisso - a.compromisso);
-  }, [contratos]);
+  }, [filtered]);
 
   const maxCompromisso = porBanco[0]?.compromisso ?? 1;
   const totalCompromisso = porBanco.reduce((s, b) => s + b.compromisso, 0) || 1;
@@ -388,7 +415,7 @@ export default function FinanciamentoFrota() {
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
                 {[
                   {
-                    label: "Contratos ativos",
+                    label: "Contratos",
                     value: fmtN(kpis.totalContratos),
                     sub:   "financiamentos vigentes",
                     icon:  Truck,
@@ -400,9 +427,21 @@ export default function FinanciamentoFrota() {
                     subTxt: "text-cyan-400/70",
                   },
                   {
-                    label: "Compromisso mensal",
-                    value: fmt(kpis.compromissoMensal),
-                    sub:   "soma das parcelas atuais",
+                    label: "Valor em aberto",
+                    value: fmt(kpis.valorEmAberto),
+                    sub:   "parcelas em aberto (sit. A)",
+                    icon:  DollarSign,
+                    stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
+                    border: "border-rose-400/20",
+                    glow:   "rgba(244,63,94,0.10)",
+                    iconBg: "bg-rose-400/10 border-rose-400/25",
+                    iconTxt:"text-rose-300",
+                    subTxt: "text-rose-400/70",
+                  },
+                  {
+                    label: "Compromisso no período",
+                    value: fmt(kpis.compromissoPeriodo),
+                    sub:   "vencimentos no período selecionado",
                     icon:  CreditCard,
                     stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
                     border: "border-amber-400/20",
@@ -412,28 +451,16 @@ export default function FinanciamentoFrota() {
                     subTxt: "text-amber-400/70",
                   },
                   {
-                    label: "Parcelas em aberto",
-                    value: fmtN(kpis.parcelasAbertas),
-                    sub:   "total de parcelas restantes",
-                    icon:  FileText,
+                    label: "Juros no período",
+                    value: fmt(kpis.jurosPeriodo),
+                    sub:   "juros das parcelas no período",
+                    icon:  TrendingDown,
                     stripe: "from-violet-500/25 via-violet-400/10 to-transparent",
                     border: "border-violet-400/20",
                     glow:   "rgba(139,92,246,0.10)",
                     iconBg: "bg-violet-400/10 border-violet-400/25",
                     iconTxt:"text-violet-300",
                     subTxt: "text-violet-400/70",
-                  },
-                  {
-                    label: "Juros acumulados",
-                    value: fmt(kpis.jurosTotal),
-                    sub:   "total de juros no período",
-                    icon:  TrendingDown,
-                    stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
-                    border: "border-rose-400/20",
-                    glow:   "rgba(244,63,94,0.10)",
-                    iconBg: "bg-rose-400/10 border-rose-400/25",
-                    iconTxt:"text-rose-300",
-                    subTxt: "text-rose-400/70",
                   },
                 ].map((k, i) => (
                   <AnimatedCard key={k.label} delay={i * 60}>
