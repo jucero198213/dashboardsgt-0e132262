@@ -579,6 +579,7 @@ export interface FinanciamentoFrotaRow {
   contrato:          string | number | null;
   nota:              string | number | null;
   valor_aquisicao:   number | null;
+  valor_contrato:    number | null;
   parcela_atual:     number | null;
   total_parcelas:    number | null;
   tipo:              string | null;
@@ -591,6 +592,7 @@ export interface FinanciamentoFrotaRow {
   chassi:            string | null;
   situacao:          string | null;
   valor_parcela:     number | null;
+  valor_parcela_base:number | null;  // I.VLRPAR
   juros:             number | null;
   valor_desconto:    number | null;
   vlrliq:            number | null;
