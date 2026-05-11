@@ -193,13 +193,15 @@ export default function FinanciamentoFrota() {
         c.juros_periodo       += r.juros ?? 0;
       }
 
-      // Parcela mais recente define cabeçalho do contrato na tabela
+      // Parcela mais recente define cabeçalho do contrato na tabela.
+      // IMPORTANTE: total_parcelas NÃO é atualizado aqui — a window function
+      // já garante que todas as linhas do contrato têm o mesmo valor.
+      // Atualizar junto com parcela_atual causaria X/X = 100% sempre.
       if ((r.parcela_atual ?? 0) > (c.parcela_atual ?? 0)) {
-        c.parcela_atual  = r.parcela_atual;
-        c.situacao       = r.situacao;
-        c.valor_parcela  = r.valor_parcela;
-        c.total_parcelas = r.total_parcelas;
-        c.banco          = r.banco;
+        c.parcela_atual = r.parcela_atual;
+        c.situacao      = r.situacao;
+        c.valor_parcela = r.valor_parcela;
+        c.banco         = r.banco;
       }
     }
 
