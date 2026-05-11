@@ -1094,6 +1094,7 @@ WITH FINANCIAMENTOS AS (
         P.NUMCON                                                                        AS contrato,
         B.NOTFIS                                                                        AS nota,
         B.VLRBRU                                                                        AS valor_aquisicao,
+        P.VLRCON                                                                        AS valor_contrato,
         TRY_CAST(RIGHT(D.NUMDOC, 2) AS INT)                                             AS parcela_atual,
         TRY_CAST(MAX(RIGHT(D.NUMDOC, 2)) OVER (PARTITION BY D.NUMCTF) AS INT)           AS total_parcelas,
         D.TIPDOC                                                                        AS tipo,
@@ -1106,13 +1107,16 @@ WITH FINANCIAMENTOS AS (
         V.CHASSI                                                                        AS chassi,
         D.SITUAC                                                                        AS situacao,
         D.VLRDOC                                                                        AS valor_parcela,
+        I.VLRPAR                                                                        AS valor_parcela_base,
         D.VLRJUR                                                                        AS juros,
         D.VLRDES                                                                        AS valor_desconto,
         D.VLRLIQ                                                                        AS vlrliq,
         D.VLRPAG                                                                        AS valor_pago
     FROM PAGDOC  D WITH (NOLOCK)
     OUTER APPLY (
-        SELECT TOP 1 I2.DATVEN
+        SELECT TOP 1
+            I2.DATVEN,
+            I2.VLRPAR
         FROM PAGDOCI I2 WITH (NOLOCK)
         WHERE I2.NUMDOC = D.NUMDOC
         ORDER BY I2.DATVEN
@@ -1133,6 +1137,7 @@ SELECT
     contrato,
     nota,
     valor_aquisicao,
+    valor_contrato,
     parcela_atual,
     total_parcelas,
     tipo,
@@ -1145,6 +1150,7 @@ SELECT
     chassi,
     situacao,
     valor_parcela,
+    valor_parcela_base,
     juros,
     valor_desconto,
     vlrliq,
