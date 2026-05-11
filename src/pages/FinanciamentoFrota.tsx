@@ -120,11 +120,11 @@ export default function FinanciamentoFrota() {
 
   // ── Query ──────────────────────────────────────────────────────────────────
   const { data: resp, isLoading, refetch } = useQuery({
-    queryKey: ["financiamento-frota", dwFilter.dataInicio, dwFilter.dataFim, dwFilter.filial, dwFilter.empresa],
+    queryKey: ["financiamento-frota", dwFilter.filial],
     queryFn: () => fetchFinanciamentoFrota({
-      dataInicio: dwFilter.dataInicio,
-      dataFim:    dwFilter.dataFim,
-      filial:     dwFilter.filial,
+      // Financiamento é snapshot de todos os contratos — sem filtro de período.
+      // dataInicio/dataFim do contexto não se aplicam aqui.
+      filial: dwFilter.filial,
     }),
     staleTime: 10 * 60_000,
   });
