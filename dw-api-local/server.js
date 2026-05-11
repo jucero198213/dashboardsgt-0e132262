@@ -1127,6 +1127,7 @@ SELECT
     anofab,
     chassi,
     situacao,
+    data_vencimento,
     valor_parcela,
     juros,
     valor_desconto,
