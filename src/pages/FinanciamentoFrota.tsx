@@ -291,17 +291,17 @@ export default function FinanciamentoFrota() {
                 <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
                 <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Financiamento de Frota</span>
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
                   {contratos.length} contratos
                 </span>
               </div>
@@ -361,7 +361,7 @@ export default function FinanciamentoFrota() {
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fin. Frota</span>
                 </div>
               </div>
@@ -405,11 +405,11 @@ export default function FinanciamentoFrota() {
                     sub:   "soma das parcelas atuais",
                     icon:  CreditCard,
                     stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
-                    border: "border-amber-400/20",
+                    border: "border-emerald-400/20",
                     glow:   "rgba(245,158,11,0.10)",
                     iconBg: "bg-amber-400/10 border-amber-400/25",
-                    iconTxt:"text-amber-300",
-                    subTxt: "text-amber-400/70",
+                    iconTxt:"text-emerald-300",
+                    subTxt: "text-emerald-400/70",
                   },
                   {
                     label: "Parcelas em aberto",
@@ -464,13 +464,13 @@ export default function FinanciamentoFrota() {
                 {/* Painel lateral — Distribuição por banco */}
                 <AnimatedCard delay={300} className="xl:w-[280px] shrink-0">
                   <div
-                    className="relative overflow-hidden rounded-2xl border border-amber-400/20 p-4 flex flex-col gap-3 h-full"
+                    className="relative overflow-hidden rounded-2xl border border-emerald-400/20 p-4 flex flex-col gap-3 h-full"
                     style={{ background: "var(--sgt-bg-card)", boxShadow: "0 0 20px rgba(245,158,11,0.08)" }}
                   >
                     <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-500/25 via-amber-400/10 to-transparent" />
 
                     <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg border bg-amber-400/10 border-amber-400/25 text-amber-300">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg border bg-amber-400/10 border-amber-400/25 text-emerald-300">
                         <BarChart3 className="h-3.5 w-3.5" />
                       </div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">
@@ -681,7 +681,7 @@ export default function FinanciamentoFrota() {
                                         {c.situacao ? (
                                           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold border ${
                                             c.situacao === "A"
-                                              ? "bg-amber-400/10 text-amber-300 border-amber-400/20"
+                                              ? "bg-amber-400/10 text-emerald-300 border-emerald-400/20"
                                               : c.situacao === "L"
                                               ? "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
                                               : "bg-slate-400/10 text-slate-300 border-slate-400/20"
