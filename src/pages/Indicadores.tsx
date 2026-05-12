@@ -467,12 +467,12 @@ export default function Indicadores() {
                       ) : faturamento.length === 0 ? (
                         <p className="text-[12px] dark:text-slate-600 text-slate-400 italic">Sem dados no período</p>
                       ) : (
-                        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto pr-1 justify-between scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent hover:scrollbar-thumb-slate-500" style={{ gap: "clamp(6px, 2vh, 18px)" }}>
+                        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent hover:scrollbar-thumb-slate-500" style={{ gap: 0 }}>
                           {faturamento.map((row, idx) => {
                             const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
                             const color = BAR_COLORS[idx % BAR_COLORS.length];
                             return (
-                              <div key={idx} className="flex items-center gap-2">
+                              <div key={idx} className="flex items-center gap-2 py-2.5" style={{ borderBottom: "0.5px solid rgba(255,255,255,0.05)" }}>
                                 <div className="flex flex-col min-w-0 shrink-0" style={{ width: "44%" }}>
                                   <span
                                     className="text-[12px] font-semibold truncate dark:text-slate-300 text-slate-600"
