@@ -178,7 +178,8 @@ export function HomeButton() {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-[280px] overflow-hidden rounded-2xl border p-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]"
+        collisionPadding={12}
+        className="flex max-h-[min(85vh,640px)] w-[280px] flex-col overflow-hidden rounded-2xl border p-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)]"
         style={{
           background: "var(--sgt-menu-bg, hsl(var(--popover)))",
           borderColor: "var(--sgt-border-medium, hsl(var(--border)))",
