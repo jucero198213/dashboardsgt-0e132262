@@ -556,3 +556,53 @@ section.sgt-section-card:hover {
 .sgt-tr-hover:hover {
   padding-left: 2px;
 }
+
+/* ── Light: botões com texto claro ficam ilegíveis ── */
+
+/* UpdateButton — amber com texto escuro */
+.light .border-amber-400\/50.bg-amber-500\/20,
+.light [class*="border-amber-400"][class*="bg-amber-500\/20"] {
+  background-color: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.45) !important;
+  color: #92400e !important;
+}
+.light [class*="border-amber-400"][class*="bg-amber-500\/20"]:hover {
+  background-color: rgba(245,158,11,0.20) !important;
+  color: #78350f !important;
+}
+
+/* text-amber-100/200 em light */
+.light .text-amber-100 { color: #92400e !important; }
+.light .text-amber-200 { color: #b45309 !important; }
+
+/* HomeButton — amber gradient com texto escuro */
+.light [class*="border-amber-500\/60"] {
+  background: rgba(245,158,11,0.10) !important;
+  border-color: rgba(245,158,11,0.40) !important;
+  color: #92400e !important;
+}
+.light [class*="border-amber-500\/60"]:hover {
+  background: rgba(245,158,11,0.18) !important;
+  color: #78350f !important;
+}
+
+/* Dropdown items no HomeButton */
+.light [class*="bg-amber-400\/10"] { background-color: rgba(245,158,11,0.08) !important; }
+.light [class*="bg-cyan-400\/10"]   { background-color: rgba(6,182,212,0.08) !important; }
+.light [class*="bg-rose-400\/10"]   { background-color: rgba(244,63,94,0.08) !important; }
+.light [class*="bg-violet-400\/10"] { background-color: rgba(139,92,246,0.08) !important; }
+.light [class*="bg-emerald-400\/10"]{ background-color: rgba(52,211,153,0.08) !important; }
+.light [class*="bg-orange-400\/10"] { background-color: rgba(251,146,60,0.08) !important; }
+
+/* Navbar badge "Tempo real" e outros badges com fundo escuro */
+.light [class*="bg-cyan-500\/\[0.08\]"]   { background-color: rgba(6,182,212,0.10) !important; }
+.light [class*="bg-amber-500\/\[0.08\]"]  { background-color: rgba(245,158,11,0.10) !important; }
+.light [class*="bg-rose-500\/\[0.08\]"]   { background-color: rgba(244,63,94,0.10) !important; }
+.light [class*="bg-violet-500\/\[0.08\]"] { background-color: rgba(139,92,246,0.10) !important; }
+.light [class*="text-cyan-300"]   { color: #0891b2 !important; }
+.light [class*="text-amber-300"]  { color: #b45309 !important; }
+.light [class*="text-rose-300"]   { color: #be123c !important; }
+.light [class*="text-violet-300"] { color: #6d28d9 !important; }
+.light [class*="text-emerald-300"]{ color: #059669 !important; }
+.light [class*="text-orange-300"] { color: #c2410c !important; }
+
