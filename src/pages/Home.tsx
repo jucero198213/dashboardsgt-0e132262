@@ -293,10 +293,10 @@ export default function Home() {
     canAccess("dashboard") && {
       key: "dashboard",
       icon: BarChart3,
-      title: "Dashboard",
+      title: "Fluxo de Caixa",
       description:
         "Visualize em tempo real contas a pagar, a receber, saldo líquido, inadimplência e evolução mensal do fluxo de caixa.",
-      cta: "Acessar dashboard",
+      cta: "Acessar fluxo de caixa",
       onClick: () => navigate("/dashboard"),
       tone: "cyan" as const,
     },
