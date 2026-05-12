@@ -428,7 +428,7 @@ export default function Indicadores() {
                   >
                     {/* Card Faturamento do Mês */}
                     <div
-                      className="flex flex-col gap-2 rounded-[12px] border p-4"
+                      className="flex flex-col gap-3 rounded-[12px] border p-5"
                       style={{ borderColor: "rgba(251,191,36,0.25)", background: "rgba(251,191,36,0.05)" }}
                     >
                       <div className="flex items-center justify-between">
@@ -443,7 +443,7 @@ export default function Indicadores() {
                       {isFetchingDw && faturamento.length === 0 ? (
                         <div className="h-8 w-4/5 rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                       ) : (
-                        <p className="text-[22px] font-extrabold tracking-[-0.03em] text-amber-300 tabular-nums leading-none">
+                        <p className="text-[30px] font-extrabold tracking-[-0.03em] text-amber-300 tabular-nums leading-none">
                           {formatBRL(totalFat)}
                         </p>
                       )}
