@@ -250,7 +250,7 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <div className="grid grid-cols-[260px_1fr] gap-3 h-full items-center">
+    <div className="grid grid-cols-1 sm:grid-cols-[240px_1fr] gap-3 h-full items-start sm:items-center">
       <svg viewBox="0 0 260 260" className="w-full" onMouseLeave={() => setHover(null)}>
         {slices.map((s, i) => {
           const isHover = hover === i;
@@ -279,7 +279,7 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
         )}
       </svg>
       
-      <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
+      <div className="flex flex-col gap-1 max-h-[200px] sm:max-h-[260px] overflow-auto pr-2">
         {data.slice(0, 10).map((m, i) => (
           <div key={m.nome} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
             className="flex items-center justify-between gap-2 px-1.5 py-0.5 rounded transition-colors hover:bg-white/5 cursor-pointer">
@@ -761,7 +761,7 @@ export default function Frota() {
               style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
 
             {/* ════════ NAVBAR ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
@@ -906,9 +906,9 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[340px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Top 10 custo */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -922,7 +922,7 @@ export default function Frota() {
               </div>
 
               {/* Distribuição por marca */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -937,9 +937,9 @@ export default function Frota() {
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[250px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[220px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
