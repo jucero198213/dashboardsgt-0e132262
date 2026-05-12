@@ -409,13 +409,13 @@ export default function FinanciamentoFrota() {
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
-                  {contratos.length} contratos
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                  Tempo real
                 </span>
               </div>
 
@@ -806,34 +806,54 @@ export default function FinanciamentoFrota() {
 
                                     {/* ── Linha expandida ── */}
                                     {expanded && (
-                                      <tr
-                                        key={`${rowKey}-detail`}
-                                        className="border-t"
-                                        style={{ borderColor: "var(--sgt-border-subtle)" }}
-                                      >
-                                        <td colSpan={10} className="px-4 py-3">
-                                          <div
-                                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 rounded-xl border p-3"
-                                            style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}
-                                          >
-                                            {[
-                                              { label: "Contrato",     value: String(c.contrato ?? "—") },
-                                              { label: "Nota fiscal",  value: String(c.nota ?? "—")     },
-                                              { label: "Chassi",       value: c.chassi ?? "—"            },
-                                              { label: "Ano Fab./Mod", value: c.anofab ? `${c.anofab}/${c.anomod ?? "?"}` : "—" },
-                                              { label: "Filial",       value: c.filial ?? "—"            },
-                                              { label: "Vlr. contrato", value: fmt(c.valor_contrato)     },
-                                              { label: "Vlr. líquido",  value: fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0)) },
-                                              { label: "Total pago",    value: fmt(c.valor_pago_total)    },
-                                              { label: "Desconto",      value: fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0)) },
-                                              { label: "Parcelas rest.", value: fmtN(c.parcelas_abertas)  },
-                                              { label: "Valor em aberto", value: fmt(c.valor_em_aberto)   },
-                                            ].map(({ label, value }) => (
-                                              <div key={label} className="flex flex-col gap-0.5">
-                                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{label}</p>
-                                                <p className="text-[12px] font-semibold dark:text-slate-200">{value}</p>
+                                      <tr key={`${rowKey}-detail`} className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                        <td colSpan={10} className="px-3 py-3">
+                                          <div className="rounded-xl border overflow-hidden" style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}>
+
+                                            {/* Header */}
+                                            <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}>
+                                              <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-400/20 bg-emerald-400/10">
+                                                <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                               </div>
-                                            ))}
+                                              <div>
+                                                <p className="text-[12px] font-bold dark:text-white text-slate-800">{c.veiculo} — {c.banco ?? "—"}</p>
+                                                <p className="text-[10px] text-[var(--sgt-text-muted)]">Contrato {c.contrato ?? "—"} · Chassi {c.chassi ?? "—"}</p>
+                                              </div>
+                                              <div className="ml-auto">
+                                                <span className={`text-[9px] font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border ${
+                                                  c.situacao === "QUITADO" ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400" :
+                                                  c.situacao === "ATIVO"   ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-400" :
+                                                  "border-slate-400/30 bg-slate-400/10 text-slate-400"
+                                                }`}>{c.situacao ?? "—"}</span>
+                                              </div>
+                                            </div>
+
+                                            {/* Métricas principais */}
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                              {[
+                                                { label: "Valor do Contrato",  value: fmt(c.valor_contrato),   accent: "text-emerald-400" },
+                                                { label: "Total Pago",         value: fmt(c.valor_pago_total), accent: "text-cyan-400"    },
+                                                { label: "Valor em Aberto",    value: fmt(c.valor_em_aberto),  accent: c.valor_em_aberto > 0 ? "text-amber-400" : "text-emerald-400" },
+                                                { label: "Parcela Mensal",     value: fmt(c.compromisso),      accent: "text-rose-400"    },
+                                                { label: "Parcelas Restantes", value: fmtN(c.parcelas_abertas),accent: "text-slate-300"   },
+                                                { label: "Ano Fab./Mod.",      value: c.anofab ? `${c.anofab}/${c.anomod ?? "?"}` : "—", accent: "text-slate-300" },
+                                              ].map(({ label, value, accent }) => (
+                                                <div key={label} className="flex flex-col gap-1 p-3" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)]">{label}</p>
+                                                  <p className={`text-[15px] font-black tabular-nums ${accent}`}>{value}</p>
+                                                </div>
+                                              ))}
+                                            </div>
+
+                                            {/* Info secundária */}
+                                            <div className="flex flex-wrap items-center gap-4 px-4 py-2 border-t text-[11px] text-[var(--sgt-text-muted)]" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                              <span>Nota fiscal: <strong className="dark:text-slate-300 text-slate-600">{c.nota ?? "—"}</strong></span>
+                                              <span>Filial: <strong className="dark:text-slate-300 text-slate-600">{c.filial ?? "—"}</strong></span>
+                                              <span>Frota: <strong className="dark:text-slate-300 text-slate-600">{c.frota ?? "—"}</strong></span>
+                                              <span>Desconto total: <strong className="text-emerald-400">{fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0))}</strong></span>
+                                              <span>Vlr. líquido: <strong className="dark:text-slate-300 text-slate-600">{fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0))}</strong></span>
+                                            </div>
+
                                           </div>
                                         </td>
                                       </tr>
