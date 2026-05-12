@@ -472,20 +472,19 @@ export default function Indicadores() {
                             const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
                             const color = BAR_COLORS[idx % BAR_COLORS.length];
                             return (
-                              <div key={idx} className="flex flex-col gap-1.5">
-                                <div className="flex items-center justify-between gap-2">
+                              <div key={idx} className="flex items-center gap-2">
+                                <div className="flex flex-col min-w-0 shrink-0" style={{ width: "44%" }}>
                                   <span
                                     className="text-[12px] font-semibold truncate dark:text-slate-300 text-slate-600"
-                                    style={{ maxWidth: "62%" }}
                                     title={row.DESCRI ?? "Sem grupo"}
                                   >
                                     {row.DESCRI ?? "Sem grupo"}
                                   </span>
-                                  <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color }}>
-                                    {(row.PERCENTUAL ?? 0).toFixed(1)}%
+                                  <span className="text-[10px] tabular-nums dark:text-slate-500 text-slate-400 truncate">
+                                    {formatBRL(row.FRETE_TOTAL)}
                                   </span>
                                 </div>
-                                <div className="h-[6px] w-full rounded-full overflow-hidden"
+                                <div className="flex-1 h-[6px] rounded-full overflow-hidden"
                                   style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className="h-full rounded-full transition-all duration-700"
@@ -496,8 +495,8 @@ export default function Indicadores() {
                                     }}
                                   />
                                 </div>
-                                <span className="text-[11px] tabular-nums dark:text-slate-500 text-slate-400">
-                                  {formatBRL(row.FRETE_TOTAL)}
+                                <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color, width: "34px", textAlign: "right" }}>
+                                  {(row.PERCENTUAL ?? 0).toFixed(1)}%
                                 </span>
                               </div>
                             );
