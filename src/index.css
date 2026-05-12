@@ -66,57 +66,57 @@
   }
 
   .light {
-    --background: 36 25% 93%;
-    --foreground: 25 30% 12%;
-    --card: 40 30% 98%;
-    --card-foreground: 25 30% 12%;
-    --popover: 40 30% 98%;
-    --popover-foreground: 25 30% 12%;
-    --primary: 168 55% 34%;
+    --background: 220 20% 96%;
+    --foreground: 220 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+    --primary: 188 80% 38%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 35 18% 88%;
-    --secondary-foreground: 25 25% 22%;
-    --muted: 35 15% 88%;
-    --muted-foreground: 25 12% 42%;
-    --accent: 168 55% 34%;
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 12% 46%;
+    --accent: 188 80% 38%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 68% 48%;
     --destructive-foreground: 0 0% 100%;
-    --warning: 35 88% 42%;
+    --warning: 38 90% 46%;
     --warning-foreground: 0 0% 100%;
-    --success: 160 55% 34%;
+    --success: 160 60% 36%;
     --success-foreground: 0 0% 100%;
-    --border: 30 15% 82%;
-    --input: 30 15% 82%;
-    --ring: 168 55% 34%;
+    --border: 220 15% 86%;
+    --input: 220 15% 86%;
+    --ring: 188 80% 38%;
     --radius: 0.75rem;
-    --card-elevated: 38 25% 96%;
+    --card-elevated: 220 20% 98%;
 
-    /* SGT tokens — warm light */
-    --sgt-bg-base:        #ede5d8;
-    --sgt-bg-card:        #faf8f5;
-    --sgt-bg-section:     #f2ece3;
-    --sgt-bg-overlay:     #f2ece3;
-    --sgt-border-subtle:  rgba(60,45,30,0.10);
-    --sgt-border-medium:  rgba(60,45,30,0.20);
-    --sgt-text-primary:   #1c1510;
-    --sgt-text-secondary: #4a3f35;
-    --sgt-text-muted:     #6b5e52;
-    --sgt-text-faint:     #a69888;
-    --sgt-input-bg:       rgba(60,45,30,0.04);
-    --sgt-input-border:   rgba(60,45,30,0.15);
-    --sgt-input-hover:    rgba(60,45,30,0.08);
-    --sgt-skeleton-bg:    rgba(60,45,30,0.07);
-    --sgt-divider:        rgba(60,45,30,0.10);
-    --sgt-row-alt:        rgba(60,45,30,0.03);
-    --sgt-row-hover:      rgba(168,120,60,0.07);
-    --sgt-table-head:     rgba(60,45,30,0.04);
-    --sgt-progress-track: rgba(60,45,30,0.10);
-    --sgt-menu-bg:        #faf8f5;
-    --sgt-scrollbar-track:#e4ddd2;
-    --sgt-scrollbar-thumb:#b5a898;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(168,120,60,0.05), transparent 45%);
-    --sgt-section-shadow: 0 8px 32px rgba(60,45,30,0.10), 0 1px 0 rgba(60,45,30,0.05);
+    /* SGT tokens — clean light */
+    --sgt-bg-base:        #f0f2f5;
+    --sgt-bg-card:        #ffffff;
+    --sgt-bg-section:     #f7f8fa;
+    --sgt-bg-overlay:     #f7f8fa;
+    --sgt-border-subtle:  rgba(30,40,60,0.09);
+    --sgt-border-medium:  rgba(30,40,60,0.18);
+    --sgt-text-primary:   #0f1623;
+    --sgt-text-secondary: #374151;
+    --sgt-text-muted:     #6b7280;
+    --sgt-text-faint:     #9ca3af;
+    --sgt-input-bg:       rgba(30,40,60,0.03);
+    --sgt-input-border:   rgba(30,40,60,0.14);
+    --sgt-input-hover:    rgba(30,40,60,0.07);
+    --sgt-skeleton-bg:    rgba(30,40,60,0.07);
+    --sgt-divider:        rgba(30,40,60,0.09);
+    --sgt-row-alt:        rgba(30,40,60,0.025);
+    --sgt-row-hover:      rgba(6,182,212,0.06);
+    --sgt-table-head:     rgba(30,40,60,0.04);
+    --sgt-progress-track: rgba(30,40,60,0.09);
+    --sgt-menu-bg:        #ffffff;
+    --sgt-scrollbar-track:#e5e7eb;
+    --sgt-scrollbar-thumb:#9ca3af;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(6,182,212,0.04), transparent 45%);
+    --sgt-section-shadow: 0 4px 24px rgba(30,40,60,0.08), 0 1px 0 rgba(30,40,60,0.05);
   }
 }
 
@@ -179,8 +179,8 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── Light: hero dots/lines pattern invisible ── */
-.light circle[fill="rgba(255,255,255,0.12)"] { fill: rgba(60,45,30,0.08); }
-.light path[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(60,45,30,0.04); }
+.light circle[fill="rgba(255,255,255,0.12)"] { fill: rgba(30,40,60,0.08); }
+.light path[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(30,40,60,0.04); }
 
 /* ── Light: chart SVG fills ── */
 .light rect[fill*="rgba(0,0,0"] { fill: transparent !important; }
@@ -190,7 +190,7 @@ button:focus-visible, a:focus-visible {
 /* ── Light: grid lines in charts ── */
 .light line[stroke*="rgba(255,255,255,0.07)"],
 .light line[stroke*="rgba(255,255,255,0.05)"],
-.light line[stroke*="rgba(255,255,255,0.10)"] { stroke: rgba(60,45,30,0.12) !important; }
+.light line[stroke*="rgba(255,255,255,0.10)"] { stroke: rgba(30,40,60,0.12) !important; }
 
 /* ── Light: module card dots background ── */
 .light .sgt-atmosphere { opacity: 0 !important; }
@@ -213,7 +213,7 @@ button:focus-visible, a:focus-visible {
   background: var(--sgt-bg-card) !important;
 }
 .light [class*="bg-black\/"] {
-  background-color: rgba(60,45,30,0.04) !important;
+  background-color: rgba(30,40,60,0.04) !important;
 }
 
 /* ── Mobile: safe areas for PWA standalone ── */
@@ -267,16 +267,16 @@ button:focus-visible, a:focus-visible {
 /* ── Light theme: boost contrast on Tailwind slate classes ── */
 .light .text-slate-300,
 .light .text-slate-400 {
-  color: #4a3f35 !important;
+  color: #374151 !important;
 }
 .light .text-slate-500 {
-  color: #6b5e52 !important;
+  color: #6b7280 !important;
 }
 .light .text-slate-600 {
-  color: #4a3f35 !important;
+  color: #374151 !important;
 }
 .light .text-white {
-  color: #1c1510 !important;
+  color: #0f1623 !important;
 }
 
 /* Card inner radial glows — tone down in light */
@@ -286,12 +286,12 @@ button:focus-visible, a:focus-visible {
 
 /* Table header text */
 .light .text-\[10px\].uppercase {
-  color: #4a3f35;
+  color: #6b7280;
 }
 
 /* Progress bar track */
 .light [class*="bg-white\/10"] {
-  background: rgba(60,45,30,0.10) !important;
+  background: rgba(30,40,60,0.10) !important;
 }
 
 /* Inner card section (ação rápida) */
@@ -321,7 +321,7 @@ button:focus-visible, a:focus-visible {
 
 /* Chart area: make SVG text visible */
 .light text {
-  fill: #6b5e52;
+  fill: #6b7280;
 }
 
 /* Gradient title in light mode */
@@ -330,24 +330,24 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── Light: additional text contrast fixes ── */
-.light .text-slate-300 { color: #4a3f35 !important; }
-.light .text-slate-400 { color: #4a3f35 !important; }
-.light .text-slate-500 { color: #6b5e52 !important; }
-.light .text-slate-600 { color: #4a3f35 !important; }
-.light .text-white     { color: #1c1510 !important; }
+.light .text-slate-300 { color: #374151 !important; }
+.light .text-slate-400 { color: #374151 !important; }
+.light .text-slate-500 { color: #6b7280 !important; }
+.light .text-slate-600 { color: #374151 !important; }
+.light .text-white     { color: #0f1623 !important; }
 
 /* Gradient title override in light — prevent invisible white */
-.light .from-white { --tw-gradient-from: #1c1510 !important; }
-.light .via-white  { --tw-gradient-via: #4a3f35 !important; }
+.light .from-white { --tw-gradient-from: #0f1623 !important; }
+.light .via-white  { --tw-gradient-via: #374151 !important; }
 
 /* SVG text override for chart axes */
-.light svg text { fill: #6b5e52; }
+.light svg text { fill: #6b7280; }
 
 /* Violet/cyan pill text in light */
-.light .text-violet-200 { color: #5b21b6 !important; }
-.light .text-cyan-200   { color: #0e7490 !important; }
-.light .text-emerald-200 { color: #065f46 !important; }
-.light .text-amber-200  { color: #92400e !important; }
+.light .text-violet-200 { color: #6d28d9 !important; }
+.light .text-cyan-200   { color: #0891b2 !important; }
+.light .text-emerald-200 { color: #059669 !important; }
+.light .text-amber-200  { color: #b45309 !important; }
 
 /* Emerald/amber "Ação rápida" label */
 .light .text-emerald-200\/75 { color: #065f46 !important; }
