@@ -1568,7 +1568,7 @@ const Index = () => {
                 <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Dashboard</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Fluxo de Caixa</span>
                 </div>
               </div>
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
@@ -1605,7 +1605,7 @@ const Index = () => {
                   <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                   <div className="flex flex-col leading-none min-w-0">
                     <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Dashboard</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fluxo de Caixa</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
