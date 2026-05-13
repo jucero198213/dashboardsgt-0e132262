@@ -334,6 +334,7 @@ export default function Home() {
       onClick: () => navigate("/chamados"),
       tone: "rose" as const,
       pinned: true,
+      featured: true,
     },
     canAccess("dashboard") && {
       key: "dashboard",
