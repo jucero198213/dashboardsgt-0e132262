@@ -15,6 +15,9 @@ import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
+import { UpdateButton } from "@/components/shared/UpdateButton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -1311,6 +1314,18 @@ const SCREENS: Record<ScreenId, React.ReactNode> = {
 export default function Finance() {
   const [active, setActive] = useState<ScreenId>("painel");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [dateFrom, setDateFrom]   = useState("2026-05-01");
+  const [dateTo,   setDateTo]     = useState("2026-05-13");
+  const [filterEmpresa, setFilterEmpresa] = useState("__all__");
+  const [filterFilial,  setFilterFilial]  = useState("__all__");
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleUpdate = async () => {
+    setIsFetching(true);
+    await new Promise(r => setTimeout(r, 1200));
+    setIsFetching(false);
+  };
+
   const meta = SCREEN_META[active];
 
   return (
@@ -1329,36 +1344,88 @@ export default function Finance() {
             boxShadow: "var(--sgt-section-shadow)",
           }}
         >
-          {/* ── HEADER ── */}
+          {/* ── HEADER DESKTOP ── */}
           <div
-            className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b"
+            className="hidden sm:flex flex-shrink-0 items-center gap-3 px-4 py-2.5 border-b"
             style={{ borderColor: "var(--sgt-border-subtle)" }}
           >
             {/* Logo + título */}
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
               <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
               <div className="flex flex-col leading-none">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                <span className="text-[16px] font-black tracking-[-0.03em] text-white">{meta.title}</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                <span className="text-[15px] font-black tracking-[-0.03em] text-white">{meta.title}</span>
               </div>
             </div>
 
-            {/* Badge live */}
-            <div className="hidden sm:flex h-6 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
+            {/* Badge tempo real */}
+            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
               </span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-300">Financeiro</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo Real</span>
             </div>
 
-            {/* Subtitle */}
-            <span className="hidden lg:block text-[12px] text-slate-500 border-l border-[var(--sgt-divider)] pl-3">{meta.sub}</span>
+            <div className="h-5 w-px shrink-0 bg-[var(--sgt-divider)]" />
 
-            <div className="ml-auto flex items-center gap-2">
-              <HomeButton />
-              <div className="sm:hidden"><MobileNav /></div>
+            {/* Filtros */}
+            <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+              <DatePickerInput value={dateFrom} onChange={setDateFrom} placeholder="Data início" />
+              <DatePickerInput value={dateTo}   onChange={setDateTo}   placeholder="Data fim" />
+              <div className="h-4 w-px shrink-0 bg-[var(--sgt-divider)]" />
+              <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
+                <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
+                  <SelectValue placeholder="Empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  <SelectItem value="sgt-sp">SGT São Paulo</SelectItem>
+                  <SelectItem value="sgt-rj">SGT Rio de Janeiro</SelectItem>
+                  <SelectItem value="sgt-mg">SGT Minas Gerais</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterFilial} onValueChange={setFilterFilial}>
+                <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
+                  <SelectValue placeholder="Filial" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">Todas</SelectItem>
+                  <SelectItem value="matriz">Matriz</SelectItem>
+                  <SelectItem value="filial-1">Filial 1</SelectItem>
+                  <SelectItem value="filial-2">Filial 2</SelectItem>
+                </SelectContent>
+              </Select>
+              <UpdateButton onClick={handleUpdate} isFetching={isFetching} />
+            </div>
+
+            <HomeButton />
+          </div>
+
+          {/* ── HEADER MOBILE ── */}
+          <div
+            className="flex sm:hidden flex-shrink-0 flex-col gap-2 px-4 py-2.5 border-b"
+            style={{ borderColor: "var(--sgt-border-subtle)" }}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img src={sgtLogo} alt="SGT" className="h-7 w-auto shrink-0" />
+                <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
+                <div className="flex flex-col leading-none min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">{meta.title}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <HomeButton />
+                <MobileNav />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <DatePickerInput value={dateFrom} onChange={setDateFrom} placeholder="Início" />
+              <DatePickerInput value={dateTo}   onChange={setDateTo}   placeholder="Fim" />
+              <UpdateButton onClick={handleUpdate} isFetching={isFetching} compact />
             </div>
           </div>
 
