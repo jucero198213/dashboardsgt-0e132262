@@ -1363,7 +1363,7 @@ export default function Finance() {
           </div>
 
           {/* ── BODY: SIDEBAR + CONTENT ── */}
-          <div className="flex flex-1 min-h-0 overflow-hidden">
+          <div className="flex flex-1 min-h-0 overflow-hidden relative">
             {/* SIDEBAR */}
             <aside
               className={`flex-shrink-0 flex flex-col border-r transition-all duration-300 ${sidebarCollapsed ? "w-[52px]" : "w-[200px]"}`}
@@ -1387,7 +1387,7 @@ export default function Finance() {
                             ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
                             : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
                         }`}
-                        style={{ width: sidebarCollapsed ? "calc(100% - 8px)" : "calc(100% - 8px)" }}
+                        style={{ width: "calc(100% - 8px)" }}
                       >
                         <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-amber-400" : ""}`} />
                         {!sidebarCollapsed && (
@@ -1407,20 +1407,25 @@ export default function Finance() {
                   );
                 })}
               </div>
-
-              {/* Collapse toggle */}
-              <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="flex items-center justify-center h-10 border-t text-slate-600 hover:text-slate-400 transition-colors"
-                style={{ borderColor: "var(--sgt-border-subtle)" }}
-                title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-              >
-                {sidebarCollapsed
-                  ? <ChevronRight className="h-3.5 w-3.5" />
-                  : <ChevronLeft className="h-3.5 w-3.5" />
-                }
-              </button>
             </aside>
+
+            {/* Floating collapse tab — fica colado na borda direita do sidebar */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+              className="absolute top-1/2 -translate-y-1/2 z-20 flex items-center justify-center transition-all duration-300"
+              style={{
+                left: sidebarCollapsed ? "calc(52px - 1px)" : "calc(200px - 1px)",
+              }}
+            >
+              <div className="flex items-center justify-center h-10 w-4 rounded-r-lg border border-l-0 bg-[var(--sgt-bg-card)] text-slate-500 hover:text-amber-300 hover:border-amber-500/30 hover:bg-amber-500/[0.06] transition-all shadow-[2px_0_8px_rgba(0,0,0,0.25)]"
+                style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                {sidebarCollapsed
+                  ? <ChevronRight className="h-3 w-3" />
+                  : <ChevronLeft className="h-3 w-3" />
+                }
+              </div>
+            </button>
 
             {/* MAIN CONTENT */}
             <main className="flex-1 overflow-y-auto p-4">
