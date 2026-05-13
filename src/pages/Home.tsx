@@ -80,7 +80,7 @@ interface ModuleCardData {
   cta: string;
   onClick?: () => void;
   href?: string;
-  tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange";
+  tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange" | "blue";
   disabled?: boolean;
   pinned?: boolean;
   featured?: boolean;
