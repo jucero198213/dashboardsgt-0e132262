@@ -121,22 +121,6 @@ const EXTRATO = [
   { desc: "TED recebida · Veloz Express", meta: "12/05/2025 · C.Receber DUP-004422", valor: 15700, tipo: "C" },
 ];
 
-const FLUXO_CAIXA = [
-  { dia: "01/05", previsto: 45000, realizado: 42000, saldo: 312000 },
-  { dia: "02/05", previsto: 32000, realizado: 28000, saldo: 298000 },
-  { dia: "05/05", previsto: 78000, realizado: 82000, saldo: 352000 },
-  { dia: "06/05", previsto: 15000, realizado: 14320, saldo: 338000 },
-  { dia: "07/05", previsto: 22000, realizado: 21600, saldo: 316000 },
-  { dia: "08/05", previsto: 38000, realizado: 35000, saldo: 351000 },
-  { dia: "09/05", previsto: 12000, realizado: 9180, saldo: 342000 },
-  { dia: "10/05", previsto: 55000, realizado: 52000, saldo: 394000 },
-  { dia: "12/05", previsto: 28000, realizado: 30200, saldo: 424000 },
-  { dia: "13/05", previsto: 41000, realizado: null, saldo: null },
-  { dia: "15/05", previsto: 19000, realizado: null, saldo: null },
-  { dia: "20/05", previsto: 67000, realizado: null, saldo: null },
-  { dia: "28/05", previsto: 33000, realizado: null, saldo: null },
-];
-
 const SALDO_HISTORICO = [
   { dia: "01/05", BB: 290000, BV: 65000, IT: 242000, CA: 48000 },
   { dia: "05/05", BB: 312000, BV: 72000, IT: 243000, CA: 50000 },
@@ -305,20 +289,6 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
     { label: "A Receber (abertas)", value: fmtK(totalReceber), sub: `${RECEBER.filter(r => r.status !== "Recebido").length} títulos`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
     { label: "Resultado Líquido", value: fmtK(Math.abs(saldo)), sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável", icon: BarChart3, stripe: "from-amber-400/60 to-amber-700/20", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]", iconTxt: "text-amber-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
   ];
-
-  const CashTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
-        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
-        {payload.map((p: any) => p.value !== null && (
-          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
-            {p.name === "previsto" ? "Previsto" : "Realizado"}: {fmtK(p.value)}
-          </p>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -1491,6 +1461,7 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
 export default function Finance() {
   const [active, setActive] = useState<ScreenId>("painel");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const navigate = useNavigate();
   const [dateFrom, setDateFrom]   = useState("2026-05-01");
   const [dateTo,   setDateTo]     = useState("2026-05-13");
   const [filterEmpresa, setFilterEmpresa] = useState("__all__");
