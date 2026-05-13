@@ -310,8 +310,38 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Página Home                                                       */
+/*  Abrir Excel/Word local (Windows) com fallback para Office Online */
 /* ---------------------------------------------------------------- */
+function openOfficeApp(app: "excel" | "word") {
+  const protocol = app === "excel" ? "ms-excel:nft|u|" : "ms-word:nft|u|";
+  const fallbackUrl =
+    app === "excel"
+      ? "https://www.office.com/launch/excel"
+      : "https://www.office.com/launch/word";
+
+  // Abre via iframe oculto: se o protocolo estiver registrado no SO,
+  // o app local abre. Após um pequeno timeout, abre o fallback online.
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = `${protocol}new`;
+  document.body.appendChild(iframe);
+
+  const start = Date.now();
+  const fallbackTimer = window.setTimeout(() => {
+    // Se a página perdeu o foco rapidamente, o app local abriu.
+    if (document.hidden || Date.now() - start > 2200) return;
+    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+  }, 1500);
+
+  const onBlur = () => {
+    window.clearTimeout(fallbackTimer);
+    window.removeEventListener("blur", onBlur);
+  };
+  window.addEventListener("blur", onBlur);
+
+  window.setTimeout(() => iframe.remove(), 4000);
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { canAccess } = usePagePermissions();
