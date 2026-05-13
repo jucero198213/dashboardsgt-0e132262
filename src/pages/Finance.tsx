@@ -10,7 +10,13 @@ import {
   ArrowRightLeft, Zap, Package, Bolt, Users,
   Truck, Flame, Wrench, Filter, ChevronDown,
   MapPin, Phone, Star, Mail, PanelLeftClose, PanelLeftOpen,
+  MoreHorizontal, ArrowUpDown,
 } from "lucide-react";
+import {
+  AreaChart, Area, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
+} from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -26,6 +32,18 @@ const fmtBRL = (v: number) =>
 const fmtK = (v: number) =>
   v >= 1e6 ? `R$ ${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `R$ ${(v / 1e3).toFixed(0)}k` : fmtBRL(v);
 const fmtDate = (s: string) => new Date(s).toLocaleDateString("pt-BR");
+function agingDias(vencimento: string): number {
+  const hoje = new Date("2025-05-13");
+  const venc = new Date(vencimento);
+  return Math.floor((hoje.getTime() - venc.getTime()) / 86400000);
+}
+function AgingBadge({ vencimento, status }: { vencimento: string; status: string }) {
+  if (!["Em Atraso", "Vencido"].includes(status)) return null;
+  const dias = agingDias(vencimento);
+  if (dias <= 0) return null;
+  const cls = dias > 60 ? "bg-rose-400/15 text-rose-300" : dias > 30 ? "bg-rose-400/10 text-rose-400" : "bg-amber-400/10 text-amber-300";
+  return <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${cls}`}>+{dias}d</span>;
+}
 
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────────
 const PAGAR = [
@@ -101,6 +119,29 @@ const EXTRATO = [
   { desc: "Boleto · Correios NF-021788", meta: "08/05/2025 · C.Pagar", valor: -7850, tipo: "D" },
   { desc: "Tarifa bancária", meta: "07/05/2025 · Lançamento automático", valor: -48.90, tipo: "D" },
   { desc: "TED recebida · Veloz Express", meta: "12/05/2025 · C.Receber DUP-004422", valor: 15700, tipo: "C" },
+];
+
+const FLUXO_CAIXA = [
+  { dia: "01/05", previsto: 45000, realizado: 42000, saldo: 312000 },
+  { dia: "02/05", previsto: 32000, realizado: 28000, saldo: 298000 },
+  { dia: "05/05", previsto: 78000, realizado: 82000, saldo: 352000 },
+  { dia: "06/05", previsto: 15000, realizado: 14320, saldo: 338000 },
+  { dia: "07/05", previsto: 22000, realizado: 21600, saldo: 316000 },
+  { dia: "08/05", previsto: 38000, realizado: 35000, saldo: 351000 },
+  { dia: "09/05", previsto: 12000, realizado: 9180, saldo: 342000 },
+  { dia: "10/05", previsto: 55000, realizado: 52000, saldo: 394000 },
+  { dia: "12/05", previsto: 28000, realizado: 30200, saldo: 424000 },
+  { dia: "13/05", previsto: 41000, realizado: null, saldo: null },
+  { dia: "15/05", previsto: 19000, realizado: null, saldo: null },
+  { dia: "20/05", previsto: 67000, realizado: null, saldo: null },
+  { dia: "28/05", previsto: 33000, realizado: null, saldo: null },
+];
+
+const SALDO_HISTORICO = [
+  { dia: "01/05", BB: 290000, BV: 65000, IT: 242000, CA: 48000 },
+  { dia: "05/05", BB: 312000, BV: 72000, IT: 243000, CA: 50000 },
+  { dia: "10/05", BB: 338000, BV: 80000, IT: 244000, CA: 52000 },
+  { dia: "13/05", BB: 312440, BV: 87130, IT: 245000, CA: 54200 },
 ];
 
 const CONCILIACAO_BANCO = [
@@ -250,7 +291,7 @@ function ConcStatus({ s }: { s: string }) {
 //  SCREENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ScreenPainel() {
+function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
   const totalPagar = PAGAR.filter(p => p.status !== "Pago").reduce((s, p) => s + p.valor, 0);
   const totalReceber = RECEBER.filter(r => r.status !== "Recebido").reduce((s, r) => s + r.valor, 0);
   const vencidosPagar = PAGAR.filter(p => p.status === "Vencido").reduce((s, p) => s + p.valor, 0);
@@ -265,48 +306,94 @@ function ScreenPainel() {
     { label: "Resultado Líquido", value: fmtK(Math.abs(saldo)), sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável", icon: BarChart3, stripe: "from-amber-400/60 to-amber-700/20", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]", iconTxt: "text-amber-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
   ];
 
+  const CashTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
+        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
+        {payload.map((p: any) => p.value !== null && (
+          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
+            {p.name === "previsto" ? "Previsto" : "Realizado"}: {fmtK(p.value)}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* Alertas rápidos */}
       {(vencidosPagar > 0 || atrasadosReceber > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {vencidosPagar > 0 && (
             <AnimatedCard delay={250}>
-              <div className="flex items-start gap-3 rounded-[12px] border border-rose-400/20 bg-rose-400/[0.06] p-3.5">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
-                <div>
+              <div className="flex items-center gap-3 rounded-[12px] border border-rose-400/20 bg-rose-400/[0.06] p-3 cursor-pointer hover:bg-rose-400/[0.09] transition-colors" onClick={() => onNavigate?.("pagar")}>
+                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold text-rose-300">Títulos vencidos a pagar</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{PAGAR.filter(p => p.status === "Vencido").length} títulos · {fmtBRL(vencidosPagar)} em atraso</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{PAGAR.filter(p => p.status === "Vencido").length} títulos · {fmtBRL(vencidosPagar)}</p>
                 </div>
+                <ChevronRight className="h-3.5 w-3.5 text-rose-400/50 shrink-0" />
               </div>
             </AnimatedCard>
           )}
           {atrasadosReceber > 0 && (
             <AnimatedCard delay={300}>
-              <div className="flex items-start gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] p-3.5">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
-                <div>
+              <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] p-3 cursor-pointer hover:bg-amber-400/[0.09] transition-colors" onClick={() => onNavigate?.("receber")}>
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+                <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold text-amber-300">Clientes em atraso</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{RECEBER.filter(r => r.status === "Em Atraso").length} clientes · {fmtBRL(atrasadosReceber)} inadimplentes</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{RECEBER.filter(r => r.status === "Em Atraso").length} clientes · {fmtBRL(atrasadosReceber)}</p>
                 </div>
+                <ChevronRight className="h-3.5 w-3.5 text-amber-400/50 shrink-0" />
               </div>
             </AnimatedCard>
           )}
         </div>
       )}
 
-      {/* Resumos lado a lado */}
+      <AnimatedCard delay={320}>
+        <SectionCard>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <div>
+              <span className="text-[12px] font-semibold text-slate-300">Fluxo de Caixa — Maio 2025</span>
+              <span className="ml-2 text-[10px] text-slate-600">Previsto vs Realizado</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-4 rounded-full bg-emerald-400/70" />Realizado</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-px w-4 border-t-2 border-dashed border-slate-500" />Previsto</span>
+            </div>
+          </div>
+          <div className="px-2 py-3" style={{ height: 180 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={FLUXO_CAIXA} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradReal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={32} />
+                <Tooltip content={<CashTooltip />} />
+                <Area type="monotone" dataKey="realizado" name="realizado" stroke="#34d399" strokeWidth={2} fill="url(#gradReal)" connectNulls={false} dot={{ fill: "#34d399", r: 3, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="previsto" name="previsto" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Top Pagar */}
-        <AnimatedCard delay={350}>
+        <AnimatedCard delay={380}>
           <SectionCard>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
               <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><ArrowDownCircle className="h-3.5 w-3.5 text-rose-400" />Próximos vencimentos a pagar</span>
+              <button onClick={() => onNavigate?.("pagar")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver todos <ChevronRight className="h-3 w-3" /></button>
             </div>
             {PAGAR.filter(p => p.status !== "Pago").slice(0, 5).map(p => (
               <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
@@ -316,7 +403,7 @@ function ScreenPainel() {
                   <p className="text-[10px] text-slate-600">{fmtDate(p.vencimento)}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[12px] font-semibold text-white">{fmtK(p.valor)}</p>
+                  <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(p.valor)}</p>
                   <StatusBadge s={p.status} />
                 </div>
               </div>
@@ -324,11 +411,11 @@ function ScreenPainel() {
           </SectionCard>
         </AnimatedCard>
 
-        {/* Top Receber */}
-        <AnimatedCard delay={400}>
+        <AnimatedCard delay={420}>
           <SectionCard>
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
               <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><ArrowUpCircle className="h-3.5 w-3.5 text-emerald-400" />Próximos recebimentos</span>
+              <button onClick={() => onNavigate?.("receber")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver todos <ChevronRight className="h-3 w-3" /></button>
             </div>
             {RECEBER.filter(r => r.status !== "Recebido").slice(0, 5).map(r => (
               <div key={r.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
@@ -338,7 +425,7 @@ function ScreenPainel() {
                   <p className="text-[10px] text-slate-600">{fmtDate(r.vencimento)}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[12px] font-semibold text-white">{fmtK(r.valor)}</p>
+                  <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(r.valor)}</p>
                   <StatusBadge s={r.status} />
                 </div>
               </div>
@@ -347,32 +434,30 @@ function ScreenPainel() {
         </AnimatedCard>
       </div>
 
-      {/* Bancos resumo */}
-      <AnimatedCard delay={450}>
+      <AnimatedCard delay={460}>
         <SectionCard>
-          <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
             <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><Landmark className="h-3.5 w-3.5 text-cyan-400" />Posição bancária</span>
+            <button onClick={() => onNavigate?.("bancos")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver extrato <ChevronRight className="h-3 w-3" /></button>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[var(--sgt-divider)]">
-            {BANCOS.map(b => {
-              const colMap: Record<string, string> = { amber: "text-amber-300", rose: "text-rose-300", violet: "text-violet-300", teal: "text-teal-300" };
-              return (
-                <div key={b.id} className="px-4 py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BankLogo sigla={b.sigla} size={20} />
-                    <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
-                  </div>
-                  <p className="text-[15px] font-black text-white leading-none">{fmtK(b.saldo)}</p>
-                  <p className="text-[10px] text-slate-600 mt-1">{b.tipo}</p>
+            {BANCOS.map(b => (
+              <div key={b.id} className="px-4 py-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <BankLogo sigla={b.sigla} size={20} />
+                  <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
                 </div>
-              );
-            })}
+                <p className="text-[15px] font-black text-white leading-none tabular-nums">{fmtK(b.saldo)}</p>
+                <p className="text-[10px] text-slate-600 mt-1">{b.tipo}</p>
+              </div>
+            ))}
           </div>
         </SectionCard>
       </AnimatedCard>
     </div>
   );
 }
+
 
 function ScreenPagar() {
   const [search, setSearch] = useState("");
@@ -575,7 +660,9 @@ function ScreenReceber() {
                     </Td>
                     <Td className="font-mono text-[11px] text-slate-500">{r.documento}</Td>
                     <Td className="text-slate-500">{fmtDate(r.emissao)}</Td>
-                    <Td className={r.status === "Em Atraso" ? "font-semibold text-rose-300" : "text-slate-400"}>{fmtDate(r.vencimento)}</Td>
+                    <Td className={r.status === "Em Atraso" ? "font-semibold text-rose-300" : "text-slate-400"}>
+                      {fmtDate(r.vencimento)}<AgingBadge vencimento={r.vencimento} status={r.status} />
+                    </Td>
                     <Td className={`font-semibold tabular-nums ${r.status === "Em Atraso" ? "text-rose-300" : r.status === "Vence Hoje" ? "text-blue-300" : r.status === "Recebido" ? "text-emerald-300" : "text-white"}`}>{fmtBRL(r.valor)}</Td>
                     <Td className="text-slate-500 text-[11px]">{r.tipo}</Td>
                     <Td><StatusBadge s={r.status} /></Td>
@@ -733,6 +820,9 @@ function ScreenConciliacao() {
 }
 
 function ScreenRelatorios() {
+  const [dateFrom, setDateFrom] = useState("2025-01-01");
+  const [dateTo,   setDateTo]   = useState("2025-05-31");
+
   const reports = [
     { name: "DRE Simplificado", desc: "Receitas, despesas e resultado por período. Exporta PDF e Excel.", tag: "Mensal", cor: "blue", icon: FileBarChart },
     { name: "Fluxo de Caixa", desc: "Entradas e saídas projetadas vs realizadas com saldo diário.", tag: "Diário", cor: "emerald", icon: BarChart3 },
@@ -743,9 +833,14 @@ function ScreenRelatorios() {
   ];
 
   const recentes = [
-    { nome: "DRE Abril/2025", tipo: "PDF", gerado: "11/05/2025 14:22", periodo: "Abr/2025", tamanho: "248 KB" },
-    { nome: "Fluxo de Caixa Mai/2025", tipo: "Excel", gerado: "10/05/2025 09:05", periodo: "Mai/2025", tamanho: "184 KB" },
-    { nome: "Aging Fornecedores Q1", tipo: "PDF", gerado: "02/04/2025 11:40", periodo: "Jan–Mar/25", tamanho: "512 KB" },
+    { nome: "DRE Abril/2025",           tipo: "PDF",   gerado: "11/05/2025 14:22", periodo: "Abr/2025",     tamanho: "248 KB" },
+    { nome: "Fluxo de Caixa Mai/2025",  tipo: "Excel", gerado: "10/05/2025 09:05", periodo: "Mai/2025",     tamanho: "184 KB" },
+    { nome: "Aging Fornecedores Q1",    tipo: "PDF",   gerado: "02/04/2025 11:40", periodo: "Jan–Mar/25",   tamanho: "512 KB" },
+    { nome: "DRE Mar/2025",             tipo: "PDF",   gerado: "05/04/2025 08:15", periodo: "Mar/2025",     tamanho: "231 KB" },
+    { nome: "Conciliação Mar/2025",     tipo: "Excel", gerado: "01/04/2025 16:00", periodo: "Mar/2025",     tamanho: "98 KB"  },
+    { nome: "Aging Clientes Fev/2025",  tipo: "PDF",   gerado: "03/03/2025 10:20", periodo: "Fev/2025",     tamanho: "178 KB" },
+    { nome: "Fluxo de Caixa Abr/2025", tipo: "Excel", gerado: "30/04/2025 17:45", periodo: "Abr/2025",     tamanho: "165 KB" },
+    { nome: "DRE Fev/2025",             tipo: "PDF",   gerado: "04/03/2025 09:00", periodo: "Fev/2025",     tamanho: "218 KB" },
   ];
 
   const corMap: Record<string, string> = {
@@ -759,11 +854,11 @@ function ScreenRelatorios() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-2.5">
         <span className="text-[11px] font-semibold text-slate-500">Período</span>
-        <input type="text" defaultValue="01/01/2025" className="h-7 w-28 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 text-[11px] text-slate-300 outline-none" />
+        <DatePickerInput value={dateFrom} onChange={setDateFrom} placeholder="Data início" />
         <span className="text-[11px] text-slate-600">até</span>
-        <input type="text" defaultValue="31/05/2025" className="h-7 w-28 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 text-[11px] text-slate-300 outline-none" />
+        <DatePickerInput value={dateTo} onChange={setDateTo} placeholder="Data fim" />
         <button className="ml-auto flex items-center gap-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/30 transition-colors">Gerar Relatório</button>
       </div>
 
@@ -774,7 +869,7 @@ function ScreenRelatorios() {
           const c = corMap[r.cor];
           return (
             <AnimatedCard key={r.name} delay={i * 60}>
-              <div className={`group flex flex-col gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all`}>
+              <div className="group flex flex-col gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all">
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${c}`}>
                   <Icon className="h-4 w-4" />
                 </div>
@@ -814,6 +909,7 @@ function ScreenRelatorios() {
     </div>
   );
 }
+
 
 function ScreenFornecedores() {
   const [search, setSearch] = useState("");
@@ -987,7 +1083,11 @@ function ScreenClientes() {
           const segCls = segCor[c.segmento] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
           return (
             <AnimatedCard key={c.id} delay={i * 50}>
-              <div className="group flex flex-col gap-3 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all">
+              <div className={`group flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 cursor-pointer transition-all ${
+              c.inadimplente
+                ? "border-rose-400/35 hover:border-rose-400/60"
+                : "border-[var(--sgt-border-subtle)] hover:border-[var(--sgt-border-medium)]"
+            }`}>
 
                 {/* Header: avatar + nome + status */}
                 <div className="flex items-start gap-2.5">
@@ -1021,7 +1121,7 @@ function ScreenClientes() {
                   {[
                     { label: "Fat. 12m",     value: fmtK(c.faturamento12m), clr: "text-emerald-300" },
                     { label: "Em aberto",    value: String(c.titulosAbertos), clr: c.titulosAbertos > 1 ? "text-rose-300" : c.titulosAbertos === 1 ? "text-amber-300" : "text-slate-400" },
-                    { label: "Prazo médio",  value: `${c.prazoMedio}d`,     clr: "text-slate-300" },
+                    { label: c.inadimplente ? "Dias em atraso" : "Prazo médio",  value: c.inadimplente ? `+${agingDias(RECEBER.find(r => r.cliente === c.nome && r.status === "Em Atraso")?.vencimento ?? "2025-05-13")}d` : `${c.prazoMedio}d`,     clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
                   ].map(s => (
                     <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
                       <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
@@ -1063,6 +1163,7 @@ function ScreenCategorias() {
   const receitas = CATEGORIAS.filter(c => c.tipo === "Receita");
   const totalDesp = despesas.reduce((s, c) => s + c.valor, 0);
   const totalRec = receitas.reduce((s, c) => s + c.valor, 0);
+  const total = totalDesp + totalRec;
 
   const barCor: Record<string, string> = {
     amber: "bg-amber-400", blue: "bg-blue-400", violet: "bg-violet-400",
@@ -1077,8 +1178,24 @@ function ScreenCategorias() {
     emerald: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
     cyan: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",
   };
+  const hexCor: Record<string, string> = {
+    amber: "#fbbf24", blue: "#60a5fa", violet: "#a78bfa",
+    teal: "#2dd4bf", rose: "#fb7185", emerald: "#34d399", cyan: "#22d3ee",
+  };
 
-  function CatList({ cats, total }: { cats: typeof CATEGORIAS; total: number }) {
+  const donutData = [
+    { name: "Despesas", value: totalDesp, fill: "#fb7185" },
+    { name: "Receitas", value: totalRec,  fill: "#34d399" },
+  ];
+
+  const CustomDonutLabel = ({ cx, cy }: any) => (
+    <>
+      <text x={cx} y={cy - 6} textAnchor="middle" fill="#e2e8f0" fontSize={18} fontWeight={700}>{((totalRec - totalDesp) / totalRec * 100).toFixed(0)}%</text>
+      <text x={cx} y={cy + 12} textAnchor="middle" fill="#64748b" fontSize={10}>margem</text>
+    </>
+  );
+
+  function CatList({ cats }: { cats: typeof CATEGORIAS }) {
     return (
       <div className="flex flex-col gap-2">
         {cats.map((c, i) => {
@@ -1096,13 +1213,19 @@ function ScreenCategorias() {
                     <div className="flex-1 h-1.5 rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
                       <div className={`h-1.5 rounded-full ${barCor[c.cor]}`} style={{ width: `${c.pct}%` }} />
                     </div>
-                    <span className={`text-[10px] font-semibold ${icoCor[c.cor].split(" ").find(x => x.startsWith("text-")) ?? ""}`}>{c.pct}%</span>
+                    <span className="text-[10px] font-semibold" style={{ color: hexCor[c.cor] }}>{c.pct}%</span>
                   </div>
                 </div>
                 <p className="text-[13px] font-semibold text-white tabular-nums text-right shrink-0">{fmtK(c.valor)}</p>
-                <div className="flex gap-1 shrink-0">
-                  <ActionBtn icon={Pencil} title="Editar" />
-                  <ActionBtn icon={Eye} title="Ver lançamentos" />
+                {/* Kebab menu — ações colapsadas */}
+                <div className="relative group/kb shrink-0">
+                  <button className="flex h-6 w-6 items-center justify-center rounded-md border border-transparent text-slate-600 hover:border-[var(--sgt-border-subtle)] hover:text-slate-300 transition-colors">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
+                  <div className="absolute right-0 top-7 z-10 hidden group-hover/kb:flex flex-col w-36 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] shadow-xl overflow-hidden">
+                    <button className="flex items-center gap-2 px-3 py-2 text-[11px] text-slate-400 hover:bg-[var(--sgt-row-hover)] hover:text-slate-200 transition-colors"><Eye className="h-3 w-3" />Ver lançamentos</button>
+                    <button className="flex items-center gap-2 px-3 py-2 text-[11px] text-slate-400 hover:bg-[var(--sgt-row-hover)] hover:text-slate-200 transition-colors"><Pencil className="h-3 w-3" />Editar</button>
+                  </div>
                 </div>
               </div>
             </AnimatedCard>
@@ -1114,32 +1237,65 @@ function ScreenCategorias() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3">
+      {/* Donut + totais */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <AnimatedCard>
-          <div className="rounded-[12px] border border-rose-400/20 bg-rose-400/[0.04] px-4 py-3">
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Composição do mês</span>
+            </div>
+            <div className="flex items-center justify-center py-2" style={{ height: 160 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={donutData} cx="50%" cy="50%" innerRadius={48} outerRadius={68} dataKey="value" labelLine={false} label={<CustomDonutLabel />}>
+                    {donutData.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center gap-4 pb-3">
+              <span className="flex items-center gap-1.5 text-[10px] text-rose-300"><span className="h-2 w-2 rounded-full bg-rose-400" />Despesas {((totalDesp/total)*100).toFixed(0)}%</span>
+              <span className="flex items-center gap-1.5 text-[10px] text-emerald-300"><span className="h-2 w-2 rounded-full bg-emerald-400" />Receitas {((totalRec/total)*100).toFixed(0)}%</span>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        <AnimatedCard delay={60}>
+          <div className="rounded-[12px] border border-rose-400/20 bg-rose-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-400/70">Total Despesas</p>
-            <p className="text-[22px] font-black text-rose-300 mt-1">{fmtK(totalDesp)}</p>
-            <p className="text-[11px] text-slate-600">no mês · {despesas.length} categorias</p>
+            <div>
+              <p className="text-[26px] font-black text-rose-300 mt-2">{fmtK(totalDesp)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">no mês · {despesas.length} categorias</p>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-rose-400/60" style={{ width: `${(totalDesp/total*100).toFixed(0)}%` }} />
+            </div>
           </div>
         </AnimatedCard>
-        <AnimatedCard delay={60}>
-          <div className="rounded-[12px] border border-emerald-400/20 bg-emerald-400/[0.04] px-4 py-3">
+
+        <AnimatedCard delay={120}>
+          <div className="rounded-[12px] border border-emerald-400/20 bg-emerald-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400/70">Total Receitas</p>
-            <p className="text-[22px] font-black text-emerald-300 mt-1">{fmtK(totalRec)}</p>
-            <p className="text-[11px] text-slate-600">no mês · {receitas.length} categorias</p>
+            <div>
+              <p className="text-[26px] font-black text-emerald-300 mt-2">{fmtK(totalRec)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">no mês · {receitas.length} categorias</p>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-emerald-400/60" style={{ width: `${(totalRec/total*100).toFixed(0)}%` }} />
+            </div>
           </div>
         </AnimatedCard>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Despesas</p>
-      </div>
-      <CatList cats={despesas} total={totalDesp} />
+      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Despesas</p>
+      <CatList cats={despesas} />
       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Receitas</p>
-      <CatList cats={receitas} total={totalRec} />
+      <CatList cats={receitas} />
     </div>
   );
 }
+
 
 // ─── BANK LOGOS ───────────────────────────────────────────────────────────────
 function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
@@ -1179,26 +1335,74 @@ function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
 }
 
 function ScreenBancos() {
+  const [extratoBank, setExtratoBank] = useState("BB");
   const totalSaldo = BANCOS.reduce((s, b) => s + b.saldo, 0);
+
   const corMap: Record<string, { bg: string; text: string; border: string; valText: string }> = {
-    amber: { bg: "bg-amber-400/10", text: "text-amber-300", border: "border-amber-400/20", valText: "text-amber-200" },
-    rose: { bg: "bg-rose-400/10", text: "text-rose-300", border: "border-rose-400/20", valText: "text-rose-200" },
+    amber:  { bg: "bg-amber-400/10",  text: "text-amber-300",  border: "border-amber-400/20",  valText: "text-amber-200"  },
+    rose:   { bg: "bg-rose-400/10",   text: "text-rose-300",   border: "border-rose-400/20",   valText: "text-rose-200"   },
     violet: { bg: "bg-violet-400/10", text: "text-violet-300", border: "border-violet-400/20", valText: "text-violet-200" },
-    teal: { bg: "bg-teal-400/10", text: "text-teal-300", border: "border-teal-400/20", valText: "text-teal-200" },
+    teal:   { bg: "bg-teal-400/10",   text: "text-teal-300",   border: "border-teal-400/20",   valText: "text-teal-200"   },
   };
-  const tipoMap: Record<string, string> = { Principal: "bg-amber-400/10 border-amber-400/20 text-amber-300", Movimento: "bg-blue-400/10 border-blue-400/20 text-blue-300", Investimento: "bg-violet-400/10 border-violet-400/20 text-violet-300" };
+  const tipoMap: Record<string, string> = {
+    Principal: "bg-amber-400/10 border-amber-400/20 text-amber-300",
+    Movimento: "bg-blue-400/10 border-blue-400/20 text-blue-300",
+    Investimento: "bg-violet-400/10 border-violet-400/20 text-violet-300",
+  };
+
+  const SaldoTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-2.5 py-1.5 shadow-xl">
+        <p className="text-[10px] text-slate-400">{payload[0]?.payload?.dia}</p>
+        {payload.map((p: any) => (
+          <p key={p.dataKey} className="text-[10px] font-semibold" style={{ color: p.color }}>{p.name}: {fmtK(p.value)}</p>
+        ))}
+      </div>
+    );
+  };
+
+  const bankColors: Record<string, string> = { BB: "#FFD700", BV: "#CC092F", IT: "#EC7000", CA: "#005CA9" };
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Total consolidado */}
+      {/* Saldo consolidado + mini sparkline */}
       <AnimatedCard>
-        <div className="rounded-[14px] border border-cyan-400/20 bg-cyan-400/[0.04] px-5 py-4 flex items-center gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Saldo Consolidado</p>
-            <p className="text-[28px] font-black text-cyan-300 leading-none mt-1">{fmtBRL(totalSaldo)}</p>
-            <p className="text-[11px] text-slate-600 mt-1">{BANCOS.length} contas ativas · atualizado agora</p>
+        <SectionCard>
+          <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--sgt-divider)]">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Saldo Consolidado</p>
+              <p className="text-[28px] font-black text-cyan-300 leading-none mt-1 tabular-nums">{fmtBRL(totalSaldo)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">{BANCOS.length} contas ativas · atualizado agora</p>
+            </div>
+            <div style={{ width: 200, height: 64 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={SALDO_HISTORICO} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                  {BANCOS.map(b => (
+                    <Line key={b.sigla} type="monotone" dataKey={b.sigla} name={b.nome}
+                      stroke={bankColors[b.sigla]} strokeWidth={1.5} dot={false} />
+                  ))}
+                  <Tooltip content={<SaldoTooltip />} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[var(--sgt-divider)]">
+            {BANCOS.map(b => {
+              const c = corMap[b.cor];
+              return (
+                <div key={b.id} className="px-4 py-2.5">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <BankLogo sigla={b.sigla} size={18} />
+                    <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
+                  </div>
+                  <p className={`text-[14px] font-black leading-none tabular-nums ${c.valText}`}>{fmtK(b.saldo)}</p>
+                  <p className="text-[9px] text-slate-600 mt-1">{b.tipo}</p>
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
       </AnimatedCard>
 
       {/* Cards dos bancos */}
@@ -1210,7 +1414,8 @@ function ScreenBancos() {
               <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${c.border}`}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${c.border}`}>
-                    <BankLogo sigla={b.sigla} size={36} /></div>
+                    <BankLogo sigla={b.sigla} size={36} />
+                  </div>
                   <div className="flex-1">
                     <p className="text-[13px] font-semibold text-slate-200">{b.nome}</p>
                     <p className="text-[10px] text-slate-600">Ag. {b.agencia} · CC {b.conta}</p>
@@ -1219,13 +1424,13 @@ function ScreenBancos() {
                 </div>
                 <div className="mb-3">
                   <p className="text-[10px] text-slate-600">Saldo disponível</p>
-                  <p className={`text-[22px] font-black leading-none ${c.valText}`}>{fmtBRL(b.saldo)}</p>
+                  <p className={`text-[22px] font-black leading-none tabular-nums ${c.valText}`}>{fmtBRL(b.saldo)}</p>
                 </div>
                 <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
                   {[
-                    { label: "Entradas no mês", value: `+${fmtK(b.entradas)}`, clr: "text-emerald-300" },
-                    { label: "Saídas no mês", value: b.saidas > 0 ? `-${fmtK(b.saidas)}` : "—", clr: b.saidas > 0 ? "text-rose-300" : "text-slate-500" },
-                    { label: "Títulos agendados", value: b.agendado > 0 ? fmtK(b.agendado) : "—", clr: b.agendado > 0 ? "text-amber-300" : "text-slate-500" },
+                    { label: "Entradas no mês",   value: `+${fmtK(b.entradas)}`,                        clr: "text-emerald-300" },
+                    { label: "Saídas no mês",      value: b.saidas > 0 ? `-${fmtK(b.saidas)}` : "—",   clr: b.saidas > 0 ? "text-rose-300" : "text-slate-500" },
+                    { label: "Títulos agendados",  value: b.agendado > 0 ? fmtK(b.agendado) : "—",     clr: b.agendado > 0 ? "text-amber-300" : "text-slate-500" },
                   ].map(row => (
                     <div key={row.label} className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-600">{row.label}</span>
@@ -1239,15 +1444,29 @@ function ScreenBancos() {
         })}
       </div>
 
-      {/* Extrato */}
-      <AnimatedCard delay={350}>
+      {/* Extrato com seletor de conta */}
+      <AnimatedCard delay={380}>
         <SectionCard>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
-            <span className="text-[12px] font-semibold text-slate-300">Últimos lançamentos — Banco do Brasil</span>
-            <div className="flex gap-2">
+          {/* Tabs de conta */}
+          <div className="flex items-center border-b border-[var(--sgt-divider)] px-4 pt-1 overflow-x-auto">
+            {BANCOS.map(b => (
+              <button key={b.sigla} onClick={() => setExtratoBank(b.sigla)}
+                className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
+                  extratoBank === b.sigla ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                }`}>
+                <BankLogo sigla={b.sigla} size={16} />
+                {b.nome}
+              </button>
+            ))}
+            <div className="ml-auto pb-2 flex gap-3 shrink-0">
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Plus className="h-3 w-3" />Lançamento manual</button>
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Download className="h-3 w-3" />Importar OFX</button>
             </div>
+          </div>
+          <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
+            <span className="text-[11px] text-slate-500">
+              Últimos lançamentos · {BANCOS.find(b => b.sigla === extratoBank)?.nome}
+            </span>
           </div>
           {EXTRATO.map((e, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
@@ -1266,6 +1485,7 @@ function ScreenBancos() {
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SIDEBAR CONFIG
@@ -1296,18 +1516,6 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
   bancos:       { title: "Bancos e Contas",    sub: "Saldos, extrato e conciliação por conta" },
 };
 
-const SCREENS: Record<ScreenId, React.ReactNode> = {
-  painel:       <ScreenPainel />,
-  pagar:        <ScreenPagar />,
-  receber:      <ScreenReceber />,
-  conciliacao:  <ScreenConciliacao />,
-  relatorios:   <ScreenRelatorios />,
-  fornecedores: <ScreenFornecedores />,
-  clientes:     <ScreenClientes />,
-  categorias:   <ScreenCategorias />,
-  bancos:       <ScreenBancos />,
-};
-
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1327,6 +1535,20 @@ export default function Finance() {
   };
 
   const meta = SCREEN_META[active];
+
+  function getScreen(id: ScreenId): React.ReactNode {
+    switch (id) {
+      case "painel":       return <ScreenPainel onNavigate={setActive} />;
+      case "pagar":        return <ScreenPagar />;
+      case "receber":      return <ScreenReceber />;
+      case "conciliacao":  return <ScreenConciliacao />;
+      case "relatorios":   return <ScreenRelatorios />;
+      case "fornecedores": return <ScreenFornecedores />;
+      case "clientes":     return <ScreenClientes />;
+      case "categorias":   return <ScreenCategorias />;
+      case "bancos":       return <ScreenBancos />;
+    }
+  }
 
   return (
     <div
@@ -1490,7 +1712,7 @@ export default function Finance() {
 
             {/* MAIN CONTENT */}
             <main className="flex-1 overflow-y-auto p-4">
-              {SCREENS[active]}
+              {getScreen(active)}
             </main>
           </div>
         </section>
