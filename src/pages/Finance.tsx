@@ -341,7 +341,7 @@ function ScreenPainel() {
               return (
                 <div key={b.id} className="px-4 py-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-black ${colMap[b.cor]}`}>{b.sigla}</span>
+                    <BankLogo sigla={b.sigla} size={20} />
                     <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
                   </div>
                   <p className="text-[15px] font-black text-white leading-none">{fmtK(b.saldo)}</p>
@@ -358,21 +358,31 @@ function ScreenPainel() {
 
 function ScreenPagar() {
   const [search, setSearch] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroAba, setFiltroAba] = useState("todos");
   const [page, setPage] = useState(1);
-  const PAGE = 7;
+  const PAGE = 30;
 
   const totalPagar = PAGAR.filter(p => p.status !== "Pago").reduce((s, p) => s + p.valor, 0);
   const vencido = PAGAR.filter(p => p.status === "Vencido").reduce((s, p) => s + p.valor, 0);
   const hoje = PAGAR.filter(p => p.status === "Vence Hoje").reduce((s, p) => s + p.valor, 0);
   const pago = PAGAR.filter(p => p.status === "Pago").reduce((s, p) => s + p.valor, 0);
 
+  const ABAS_PAGAR = [
+    { id: "todos",      label: "Todos",      count: PAGAR.length },
+    { id: "Vencido",    label: "Vencidos",   count: PAGAR.filter(p => p.status === "Vencido").length },
+    { id: "Vence Hoje", label: "Vence Hoje", count: PAGAR.filter(p => p.status === "Vence Hoje").length },
+    { id: "a-vencer",   label: "A Vencer",   count: PAGAR.filter(p => ["Pendente","Agendado"].includes(p.status)).length },
+    { id: "Pago",       label: "Pagos",      count: PAGAR.filter(p => p.status === "Pago").length },
+  ];
+
   const filtered = useMemo(() => PAGAR.filter(p => {
     const q = search.toLowerCase();
     const matchQ = !q || p.fornecedor.toLowerCase().includes(q) || p.documento.toLowerCase().includes(q);
-    const matchS = filtroStatus === "todos" || p.status === filtroStatus;
-    return matchQ && matchS;
-  }), [search, filtroStatus]);
+    let matchAba = true;
+    if (filtroAba === "a-vencer") matchAba = ["Pendente","Agendado"].includes(p.status);
+    else if (filtroAba !== "todos") matchAba = p.status === filtroAba;
+    return matchQ && matchAba;
+  }), [search, filtroAba]);
 
   const paginated = filtered.slice((page - 1) * PAGE, page * PAGE);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
@@ -390,29 +400,25 @@ function ScreenPagar() {
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }}>
-        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select value={filtroStatus} onChange={e => { setFiltroStatus(e.target.value); setPage(1); }}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option value="todos">Todos os status</option>
-          <option value="Vencido">Vencido</option>
-          <option value="Vence Hoje">Vence Hoje</option>
-          <option value="Pendente">Pendente</option>
-          <option value="Agendado">Agendado</option>
-          <option value="Pago">Pago</option>
-        </select>
-        <button className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
-          <Plus className="h-3 w-3" /> Novo Título
-        </button>
-      </FilterBar>
+      <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }} />
 
       <AnimatedCard delay={200}>
         <SectionCard>
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--sgt-divider)]">
+          {/* Abas */}
+          <div className="flex items-center gap-0 px-4 pt-3 border-b border-[var(--sgt-divider)] overflow-x-auto">
+            {ABAS_PAGAR.map(a => (
+              <button key={a.id} onClick={() => { setFiltroAba(a.id); setPage(1); }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
+                  filtroAba === a.id ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                }`}>
+                {a.label}
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${filtroAba === a.id ? "bg-amber-400/15 text-amber-300" : "bg-[var(--sgt-table-head)] text-slate-600"}`}>{a.count}</span>
+              </button>
+            ))}
+            <button className="ml-auto mb-2 flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors shrink-0"><Download className="h-3 w-3" /> Exportar</button>
+          </div>
+          <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">{filtered.length} títulos encontrados</span>
-            <div className="flex gap-2">
-              <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Download className="h-3 w-3" /> Exportar</button>
-            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
@@ -467,21 +473,31 @@ function ScreenPagar() {
 
 function ScreenReceber() {
   const [search, setSearch] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroAba, setFiltroAba] = useState("todos");
   const [page, setPage] = useState(1);
-  const PAGE = 7;
+  const PAGE = 30;
 
   const totalReceber = RECEBER.filter(r => r.status !== "Recebido").reduce((s, r) => s + r.valor, 0);
   const emAtraso = RECEBER.filter(r => r.status === "Em Atraso").reduce((s, r) => s + r.valor, 0);
   const previsto = RECEBER.filter(r => ["Pendente", "Vence Hoje"].includes(r.status)).reduce((s, r) => s + r.valor, 0);
   const recebido = RECEBER.filter(r => r.status === "Recebido").reduce((s, r) => s + r.valor, 0);
 
+  const ABAS_RECEBER = [
+    { id: "todos",      label: "Todos",       count: RECEBER.length },
+    { id: "Em Atraso",  label: "Em Atraso",   count: RECEBER.filter(r => r.status === "Em Atraso").length },
+    { id: "Vence Hoje", label: "Vence Hoje",  count: RECEBER.filter(r => r.status === "Vence Hoje").length },
+    { id: "a-vencer",   label: "A Vencer",    count: RECEBER.filter(r => ["Pendente","Agendado"].includes(r.status)).length },
+    { id: "Recebido",   label: "Recebidos",   count: RECEBER.filter(r => r.status === "Recebido").length },
+  ];
+
   const filtered = useMemo(() => RECEBER.filter(r => {
     const q = search.toLowerCase();
     const matchQ = !q || r.cliente.toLowerCase().includes(q) || r.documento.toLowerCase().includes(q);
-    const matchS = filtroStatus === "todos" || r.status === filtroStatus;
-    return matchQ && matchS;
-  }), [search, filtroStatus]);
+    let matchAba = true;
+    if (filtroAba === "a-vencer") matchAba = ["Pendente","Agendado"].includes(r.status);
+    else if (filtroAba !== "todos") matchAba = r.status === filtroAba;
+    return matchQ && matchAba;
+  }), [search, filtroAba]);
 
   const paginated = filtered.slice((page - 1) * PAGE, page * PAGE);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
@@ -499,30 +515,28 @@ function ScreenReceber() {
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }}>
-        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select value={filtroStatus} onChange={e => { setFiltroStatus(e.target.value); setPage(1); }}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option value="todos">Todos os status</option>
-          <option value="Em Atraso">Em Atraso</option>
-          <option value="Vence Hoje">Vence Hoje</option>
-          <option value="Pendente">Pendente</option>
-          <option value="Agendado">Agendado</option>
-          <option value="Recebido">Recebido</option>
-        </select>
-        <button className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
-          <Plus className="h-3 w-3" /> Novo Título
-        </button>
-      </FilterBar>
+      <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }} />
 
       <AnimatedCard delay={200}>
         <SectionCard>
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--sgt-divider)]">
-            <span className="text-[11px] text-slate-500">{filtered.length} títulos encontrados</span>
-            <div className="flex gap-2">
+          {/* Abas */}
+          <div className="flex items-center gap-0 px-4 pt-3 border-b border-[var(--sgt-divider)] overflow-x-auto">
+            {ABAS_RECEBER.map(a => (
+              <button key={a.id} onClick={() => { setFiltroAba(a.id); setPage(1); }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
+                  filtroAba === a.id ? "border-emerald-400 text-emerald-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                }`}>
+                {a.label}
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${filtroAba === a.id ? "bg-emerald-400/15 text-emerald-300" : "bg-[var(--sgt-table-head)] text-slate-600"}`}>{a.count}</span>
+              </button>
+            ))}
+            <div className="ml-auto mb-2 flex gap-3 shrink-0">
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Send className="h-3 w-3" /> Cobrar</button>
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Download className="h-3 w-3" /> Exportar</button>
             </div>
+          </div>
+          <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
+            <span className="text-[11px] text-slate-500">{filtered.length} títulos encontrados</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
@@ -577,6 +591,17 @@ function ScreenReceber() {
 
 function ScreenConciliacao() {
   const taxa = 88.6;
+  const [checkedBanco, setCheckedBanco] = useState<Record<number,boolean>>({});
+  const [checkedErp, setCheckedErp] = useState<Record<number,boolean>>({});
+  const totalChecked = Object.values(checkedBanco).filter(Boolean).length + Object.values(checkedErp).filter(Boolean).length;
+
+  function concStatusIcon(s: string) {
+    if (s === "Conciliado") return <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />;
+    if (s === "Divergência" || s.startsWith("Divergência")) return <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0 mt-0.5" />;
+    if (s.includes("Sem par")) return <Clock className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />;
+    return <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0 mt-0.5" />;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* KPIs */}
@@ -588,16 +613,39 @@ function ScreenConciliacao() {
         ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* Taxa de conciliação */}
+      {/* Barra de ações + taxa */}
       <AnimatedCard delay={200}>
-        <div className="flex items-center gap-4 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-3">
-          <span className="text-[12px] font-semibold text-slate-400">Taxa de conciliação</span>
-          <div className="flex-1 h-2 rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-3">
+          <span className="text-[12px] font-semibold text-slate-400 shrink-0">Taxa de conciliação</span>
+          <div className="flex-1 min-w-[80px] h-2 rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
             <div className="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${taxa}%`, transition: "width 1s ease" }} />
           </div>
           <span className="text-[13px] font-black text-emerald-300 shrink-0">{taxa}%</span>
-          <button className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors"><ArrowRightLeft className="h-3 w-3" />Conciliar Auto</button>
-          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors"><Download className="h-3 w-3" />Importar OFX</button>
+          <div className="h-4 w-px bg-[var(--sgt-divider)] hidden sm:block" />
+          {/* Botões de ação */}
+          <button
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+              totalChecked > 0
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25"
+                : "bg-[var(--sgt-input-bg)] border-[var(--sgt-border-subtle)] text-slate-500 opacity-50 cursor-default"
+            }`}>
+            <CheckCircle className="h-3 w-3" />
+            Confirmar selecionados{totalChecked > 0 ? ` (${totalChecked})` : ""}
+          </button>
+          <button className="flex items-center gap-1.5 rounded-lg border border-rose-400/25 bg-rose-400/[0.08] px-3 py-1.5 text-[11px] font-semibold text-rose-300 hover:bg-rose-400/[0.14] transition-colors">
+            <AlertTriangle className="h-3 w-3" />
+            Ver divergências (28)
+          </button>
+          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
+            <FileSpreadsheet className="h-3 w-3" />
+            Relatório de conciliação
+          </button>
+          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
+            <ArrowRightLeft className="h-3 w-3" />Conciliar Auto
+          </button>
+          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
+            <Download className="h-3 w-3" />Importar OFX
+          </button>
         </div>
       </AnimatedCard>
 
@@ -605,12 +653,21 @@ function ScreenConciliacao() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AnimatedCard delay={300}>
           <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex items-center gap-2">
               <span className="text-[12px] font-semibold text-slate-300">Extrato Bancário</span>
-              <span className="ml-2 text-[10px] text-slate-600">Bradesco ••4291 · Mai/2025</span>
+              <span className="text-[10px] text-slate-600">Bradesco ••4291 · Mai/2025</span>
+              <input type="checkbox" className="ml-auto accent-amber-400 h-3.5 w-3.5 cursor-pointer"
+                onChange={e => {
+                  const v: Record<number,boolean> = {};
+                  CONCILIACAO_BANCO.forEach((_, i) => v[i] = e.target.checked);
+                  setCheckedBanco(v);
+                }} />
             </div>
             {CONCILIACAO_BANCO.map((c, i) => (
-              <div key={i} className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0">
+              <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 transition-colors ${checkedBanco[i] ? "bg-amber-400/[0.04]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
+                <input type="checkbox" className="mt-0.5 accent-amber-400 h-3.5 w-3.5 cursor-pointer shrink-0"
+                  checked={!!checkedBanco[i]} onChange={e => setCheckedBanco(p => ({ ...p, [i]: e.target.checked }))} />
+                {concStatusIcon(c.status)}
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium text-slate-300">{c.desc}</p>
                   <p className="text-[10px] text-slate-600">{c.meta}</p>
@@ -625,12 +682,21 @@ function ScreenConciliacao() {
         </AnimatedCard>
         <AnimatedCard delay={350}>
           <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex items-center gap-2">
               <span className="text-[12px] font-semibold text-slate-300">Lançamentos ERP</span>
-              <span className="ml-2 text-[10px] text-slate-600">Não conciliados: 28</span>
+              <span className="text-[10px] text-slate-600">Não conciliados: 28</span>
+              <input type="checkbox" className="ml-auto accent-amber-400 h-3.5 w-3.5 cursor-pointer"
+                onChange={e => {
+                  const v: Record<number,boolean> = {};
+                  CONCILIACAO_ERP.forEach((_, i) => v[i] = e.target.checked);
+                  setCheckedErp(v);
+                }} />
             </div>
             {CONCILIACAO_ERP.map((c, i) => (
-              <div key={i} className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0">
+              <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 transition-colors ${checkedErp[i] ? "bg-amber-400/[0.04]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
+                <input type="checkbox" className="mt-0.5 accent-amber-400 h-3.5 w-3.5 cursor-pointer shrink-0"
+                  checked={!!checkedErp[i]} onChange={e => setCheckedErp(p => ({ ...p, [i]: e.target.checked }))} />
+                {concStatusIcon(c.status)}
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium text-slate-300">{c.desc}</p>
                   <p className="text-[10px] text-slate-600">{c.meta}</p>
@@ -755,12 +821,9 @@ function ScreenFornecedores() {
           <option>Bloqueado</option>
           <option>Inativo</option>
         </select>
-        <button className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
-          <Plus className="h-3 w-3" /> Novo Fornecedor
-        </button>
       </FilterBar>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {filtered.map((f, i) => (
           <AnimatedCard key={f.id} delay={i * 60}>
             <div className="flex flex-col gap-3 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all">
@@ -868,13 +931,49 @@ function ScreenCategorias() {
 
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Despesas</p>
-        <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors"><Plus className="h-3 w-3" />Nova Categoria</button>
       </div>
       <CatList cats={despesas} total={totalDesp} />
       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Receitas</p>
       <CatList cats={receitas} total={totalRec} />
     </div>
   );
+}
+
+// ─── BANK LOGOS ───────────────────────────────────────────────────────────────
+function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
+  const s = size;
+  if (sigla === "BB") return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="#FFD700" fillOpacity="0.12"/>
+      <circle cx="20" cy="20" r="11" stroke="#FFD700" strokeWidth="2.2" fill="none"/>
+      <circle cx="20" cy="20" r="6" stroke="#FFD700" strokeWidth="1.5" fill="none"/>
+      <line x1="9" y1="20" x2="31" y2="20" stroke="#FFD700" strokeWidth="1.5"/>
+    </svg>
+  );
+  if (sigla === "BV") return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="#CC092F" fillOpacity="0.12"/>
+      <rect x="8" y="13" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
+      <rect x="8" y="19.5" width="16" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
+      <rect x="8" y="26" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
+    </svg>
+  );
+  if (sigla === "IT") return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="#EC7000" fillOpacity="0.12"/>
+      <path d="M11 10 L20 30 L29 10" stroke="#EC7000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="20" cy="20" r="4.5" fill="#EC7000" fillOpacity="0.7"/>
+    </svg>
+  );
+  if (sigla === "CA") return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="8" fill="#005CA9" fillOpacity="0.12"/>
+      <rect x="8" y="17" width="24" height="14" rx="2.5" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2"/>
+      <path d="M14 17 L14 13 Q14 9 20 9 Q26 9 26 13 L26 17" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2" fill="none"/>
+      <circle cx="20" cy="24" r="3" fill="#005CA9" fillOpacity="0.75"/>
+    </svg>
+  );
+  return <span className="text-[13px] font-black text-slate-400">{sigla}</span>;
 }
 
 function ScreenBancos() {
@@ -908,7 +1007,8 @@ function ScreenBancos() {
             <AnimatedCard key={b.id} delay={i * 80}>
               <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${c.border}`}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border font-black text-[14px] ${c.bg} ${c.border} ${c.text}`}>{b.sigla}</div>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${c.border}`}>
+                    <BankLogo sigla={b.sigla} size={36} /></div>
                   <div className="flex-1">
                     <p className="text-[13px] font-semibold text-slate-200">{b.nome}</p>
                     <p className="text-[10px] text-slate-600">Ag. {b.agencia} · CC {b.conta}</p>
