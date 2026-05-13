@@ -1448,6 +1448,194 @@ function ScreenCategorias() {
 }
 
 
+// ─── TELA PREVISTO ────────────────────────────────────────────────────────────
+function ScreenPrevisto() {
+  const [horizonte, setHorizonte] = useState<30 | 60 | 90>(30);
+  const TODAY = new Date("2025-05-13");
+  const saldoAtual = BANCOS.reduce((s, b) => s + b.saldo, 0); // 698770
+
+  // Constrói projeção diária combinando C.Pagar + C.Receber pendentes/agendados
+  const eventosPrevistos = [
+    ...PAGAR.filter(p => ["Pendente","Agendado","Vence Hoje"].includes(p.status))
+            .map(p => ({ data: p.vencimento, valor: -p.valor, tipo: "Saída" as const, desc: p.fornecedor, doc: p.documento })),
+    ...RECEBER.filter(r => ["Pendente","Agendado","Vence Hoje"].includes(r.status))
+              .map(r => ({ data: r.vencimento, valor: r.valor,  tipo: "Entrada" as const, desc: r.cliente,    doc: r.documento })),
+  ].sort((a, b) => a.data.localeCompare(b.data));
+
+  // Gera linha do tempo de saldo projetado dia a dia
+  const projecao = useMemo(() => {
+    const limit = new Date(TODAY);
+    limit.setDate(limit.getDate() + horizonte);
+    const dias: { dia: string; entradas: number; saidas: number; saldo: number }[] = [];
+    let saldo = saldoAtual;
+    const cur = new Date(TODAY);
+    while (cur <= limit) {
+      const key = cur.toISOString().slice(0, 10);
+      const label = cur.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+      const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
+      const saidas   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída"  ).reduce((s, e) => s + Math.abs(e.valor), 0);
+      saldo += entradas - saidas;
+      if (entradas > 0 || saidas > 0 || dias.length % 5 === 0) {
+        dias.push({ dia: label, entradas, saidas, saldo });
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return dias;
+  }, [horizonte]);
+
+  const totalEntradas = eventosPrevistos.filter(e => e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
+  const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s, e) => s + Math.abs(e.valor), 0);
+  const saldoFinal    = saldoAtual + totalEntradas - totalSaidas;
+  const diasCriticos  = projecao.filter(d => d.saldo < 100000).length;
+
+  const kpis = [
+    { label: "Saldo Atual",      value: fmtK(saldoAtual),    sub: "4 contas bancárias",           icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"    },
+    { label: "Entradas Previstas",value: fmtK(totalEntradas), sub: `${eventosPrevistos.filter(e=>e.tipo==="Entrada").length} títulos a receber`, icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"   },
+    { label: "Saídas Previstas",  value: fmtK(totalSaidas),   sub: `${eventosPrevistos.filter(e=>e.tipo==="Saída").length} títulos a pagar`,    icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"    },
+    { label: "Saldo Projetado",   value: fmtK(saldoFinal),    sub: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, stripe: saldoFinal >= saldoAtual ? "from-amber-400/60 to-amber-700/20" : "from-rose-400/60 to-rose-700/20", iconBg: saldoFinal >= saldoAtual ? "bg-amber-400/[0.08] border border-amber-400/[0.15]" : "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: saldoFinal >= saldoAtual ? "text-amber-300" : "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
+  ];
+
+  const SaldoTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
+        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
+        {payload.map((p: any) => (
+          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
+            {p.name === "saldo" ? "Saldo" : p.name === "entradas" ? "Entradas" : "Saídas"}: {fmtK(p.value)}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+      </div>
+
+      {/* Alerta de dias críticos */}
+      {diasCriticos > 0 && (
+        <AnimatedCard delay={220}>
+          <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <p className="text-[12px] font-semibold text-amber-300">
+              {diasCriticos} dia{diasCriticos > 1 ? "s" : ""} com saldo projetado abaixo de R$ 100k no horizonte selecionado
+            </p>
+          </div>
+        </AnimatedCard>
+      )}
+
+      {/* Gráfico de saldo projetado */}
+      <AnimatedCard delay={260}>
+        <SectionCard>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <div>
+              <span className="text-[12px] font-semibold text-slate-300">Evolução do Saldo Projetado</span>
+              <span className="ml-2 text-[10px] text-slate-600">Baseado em títulos pendentes e agendados</span>
+            </div>
+            {/* Selector de horizonte */}
+            <div className="flex gap-1">
+              {([30, 60, 90] as const).map(h => (
+                <button key={h} onClick={() => setHorizonte(h)}
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                    horizonte === h
+                      ? "bg-amber-500/20 border border-amber-500/30 text-amber-300"
+                      : "border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"
+                  }`}>{h}d</button>
+              ))}
+            </div>
+          </div>
+          <div className="px-2 py-3" style={{ height: 200 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={projecao} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradSaldo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#22d3ee" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={36} />
+                <Tooltip content={<SaldoTooltip />} />
+                {/* Linha de alerta em 100k */}
+                <Line type="monotone" dataKey={() => 100000} stroke="#ef4444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="limite" legendType="none" />
+                <Area type="monotone" dataKey="saldo" stroke="#22d3ee" strokeWidth={2} fill="url(#gradSaldo)" dot={false} name="saldo" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex items-center gap-4 px-4 pb-3 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full bg-cyan-400/70" />Saldo projetado</span>
+            <span className="flex items-center gap-1.5"><span className="h-px w-4 border-t-2 border-dashed border-rose-500/50" />Limite de atenção (R$ 100k)</span>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
+
+      {/* Entradas e saídas lado a lado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Barras Entradas vs Saídas */}
+        <AnimatedCard delay={300}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Entradas × Saídas Previstas</span>
+              <span className="ml-2 text-[10px] text-slate-600">Por data de vencimento</span>
+            </div>
+            <div className="px-2 py-3" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)}
+                  margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "entradas" ? "Entradas" : "Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="entradas" name="entradas" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
+                  <Bar dataKey="saidas"   name="saidas"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex gap-4 px-4 pb-3 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Entradas</span>
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-rose-400" />Saídas</span>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        {/* Tabela de próximos eventos */}
+        <AnimatedCard delay={340}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Próximos Eventos</span>
+              <span className="ml-2 text-[10px] text-slate-600">Pendentes e agendados</span>
+            </div>
+            <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
+              {eventosPrevistos.slice(0, 12).map((e, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo === "Entrada" ? "bg-emerald-400" : "bg-rose-400"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium text-slate-300 truncate">{e.desc}</p>
+                    <p className="text-[10px] text-slate-600">{fmtDate(e.data)} · {e.doc}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className={`text-[12px] font-semibold tabular-nums ${e.tipo === "Entrada" ? "text-emerald-300" : "text-rose-300"}`}>
+                      {e.tipo === "Entrada" ? "+" : "-"}{fmtK(Math.abs(e.valor))}
+                    </p>
+                    <span className={`text-[9px] font-semibold ${e.tipo === "Entrada" ? "text-emerald-600" : "text-rose-600"}`}>{e.tipo}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+      </div>
+    </div>
+  );
+}
+
 // ─── BANK LOGOS ───────────────────────────────────────────────────────────────
 function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
   const s = size;
@@ -1641,15 +1829,16 @@ function ScreenBancos() {
 // ─────────────────────────────────────────────────────────────────────────────
 //  SIDEBAR CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
-type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
+type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "previsto" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
 const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: number; section?: string; externalTo?: string }[] = [
   { id: "painel",       label: "Painel",          icon: LayoutDashboard, section: "Financeiro" },
   { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, badge: 7 },
   { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle,   badge: 3, badgeColor: "amber" },
-  { id: "conciliacao",  label: "Conciliação",              icon: RefreshCcw },
-  { id: "fluxo",        label: "Fluxo de Caixa Realizado", icon: Activity, externalTo: "/dashboard" },
-  { id: "relatorios",   label: "Relatórios",               icon: FileBarChart },
+  { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
+  { id: "fluxo",        label: "Realizado",        icon: Activity,        externalTo: "/dashboard" },
+  { id: "previsto",     label: "Previsto",         icon: TrendingUp },
+  { id: "relatorios",   label: "Relatórios",       icon: FileBarChart },
   { id: "fornecedores", label: "Fornecedores",     icon: Building2,  section: "Cadastros" },
   { id: "clientes",     label: "Clientes",         icon: Users },
   { id: "categorias",   label: "Categorias",       icon: Tag },
@@ -1660,9 +1849,10 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
   painel:       { title: "Painel Financeiro",  sub: "Resumo consolidado do módulo financeiro" },
   pagar:        { title: "Contas a Pagar",     sub: "Gestão de títulos e obrigações financeiras" },
   receber:      { title: "Contas a Receber",   sub: "Gestão de recebimentos e clientes" },
-  conciliacao:  { title: "Conciliação Bancária",           sub: "Cruzamento entre extrato bancário e ERP" },
-  fluxo:        { title: "Fluxo de Caixa Realizado",       sub: "Redirecionando..." },
-  relatorios:   { title: "Relatórios",                     sub: "Demonstrativos financeiros e gerenciais" },
+  conciliacao:  { title: "Conciliação Bancária",     sub: "Cruzamento entre extrato bancário e ERP" },
+  fluxo:        { title: "Realizado",                sub: "Abrindo fluxo de caixa realizado..." },
+  previsto:     { title: "Previsto",                 sub: "Projeção de entradas e saídas futuras" },
+  relatorios:   { title: "Relatórios",               sub: "Demonstrativos financeiros e gerenciais" },
   fornecedores: { title: "Fornecedores",       sub: "Cadastro e gestão de fornecedores" },
   clientes:     { title: "Clientes",           sub: "Carteira de clientes e histórico de recebimentos" },
   categorias:   { title: "Categorias",         sub: "Plano de contas e centros de custo" },
@@ -1697,6 +1887,7 @@ export default function Finance() {
       case "receber":      return <ScreenReceber />;
       case "conciliacao":  return <ScreenConciliacao />;
       case "fluxo":        return null;
+      case "previsto":     return <ScreenPrevisto />;
       case "relatorios":   return <ScreenRelatorios />;
       case "fornecedores": return <ScreenFornecedores />;
       case "clientes":     return <ScreenClientes />;
