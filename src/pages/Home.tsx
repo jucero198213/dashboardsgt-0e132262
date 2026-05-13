@@ -139,6 +139,13 @@ const TONE: Record<
     cta: "text-orange-300",
     glow: "from-orange-400/20",
   },
+  blue: {
+    iconBg: "bg-[#4A6FB8]/15 border border-[#4A6FB8]/30",
+    iconText: "text-[#A8C0E8]",
+    ring: "hover:border-[#4A6FB8]/50",
+    cta: "text-[#A8C0E8]",
+    glow: "from-[#4A6FB8]/25",
+  },
 };
 
 function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
