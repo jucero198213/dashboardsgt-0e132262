@@ -183,9 +183,19 @@ export function MobileNav() {
         <button
           type="button"
           aria-label="Abrir menu"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/15 to-amber-400/10 text-amber-200 transition-all active:scale-95 hover:border-amber-400 hover:from-amber-500/25 hover:to-amber-400/20 hover:text-amber-100 sm:hidden"
+          className="group inline-flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-lg border border-white/[0.09] bg-white/[0.04] transition-all active:scale-95 hover:border-white/[0.16] hover:bg-white/[0.07] sm:hidden"
         >
-          <Menu className="h-4 w-4" />
+          {/* Avatar workspace */}
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] bg-gradient-to-br from-amber-400 to-amber-600 text-[10px] font-black text-white shadow-[0_0_8px_rgba(245,158,11,0.30)]">
+            S
+          </div>
+          {/* Labels */}
+          <div className="flex flex-col leading-none gap-px">
+            <span className="text-[11px] font-semibold text-slate-200">SGT Log</span>
+            <span className="text-[9px] text-slate-500">Workspace</span>
+          </div>
+          {/* Menu icon */}
+          <Menu className="h-3.5 w-3.5 text-slate-500 ml-0.5" />
         </button>
       </SheetTrigger>
 
