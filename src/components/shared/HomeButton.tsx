@@ -166,7 +166,7 @@ export function HomeButton() {
         <button
           type="button"
           title="Navegação rápida — SGT Log"
-          className="group inline-flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-lg border border-white/[0.09] bg-white/[0.04] transition-all duration-150 hover:border-white/[0.16] hover:bg-white/[0.07] data-[state=open]:border-white/[0.16] data-[state=open]:bg-white/[0.07]"
+          className="group hidden sm:inline-flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-lg border border-white/[0.09] bg-white/[0.04] transition-all duration-150 hover:border-white/[0.16] hover:bg-white/[0.07] data-[state=open]:border-white/[0.16] data-[state=open]:bg-white/[0.07]"
         >
           {/* Avatar workspace */}
           <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] bg-gradient-to-br from-amber-400 to-amber-600 text-[10px] font-black text-white shadow-[0_0_8px_rgba(245,158,11,0.30)]">
