@@ -282,6 +282,16 @@ export default function Home() {
       featured: true,
     },
     {
+      key: "portal-wr-sgt",
+      icon: Monitor,
+      title: "Portal WR SGT",
+      description: "Acesso ao portal WR SGT para gestão e operação do sistema integrado.",
+      cta: "Acessar portal",
+      href: "http://54.232.121.164:9474/#/login",
+      tone: "cyan" as const,
+      pinned: true,
+    },
+    {
       key: "chamados",
       icon: ClipboardList,
       title: "Chamados",
