@@ -310,8 +310,38 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Página Home                                                       */
+/*  Abrir Excel/Word local (Windows) com fallback para Office Online */
 /* ---------------------------------------------------------------- */
+function openOfficeApp(app: "excel" | "word") {
+  const protocol = app === "excel" ? "ms-excel:nft|u|" : "ms-word:nft|u|";
+  const fallbackUrl =
+    app === "excel"
+      ? "https://www.office.com/launch/excel"
+      : "https://www.office.com/launch/word";
+
+  // Abre via iframe oculto: se o protocolo estiver registrado no SO,
+  // o app local abre. Após um pequeno timeout, abre o fallback online.
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = `${protocol}new`;
+  document.body.appendChild(iframe);
+
+  const start = Date.now();
+  const fallbackTimer = window.setTimeout(() => {
+    // Se a página perdeu o foco rapidamente, o app local abriu.
+    if (document.hidden || Date.now() - start > 2200) return;
+    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+  }, 1500);
+
+  const onBlur = () => {
+    window.clearTimeout(fallbackTimer);
+    window.removeEventListener("blur", onBlur);
+  };
+  window.addEventListener("blur", onBlur);
+
+  window.setTimeout(() => iframe.remove(), 4000);
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { canAccess } = usePagePermissions();
@@ -708,16 +738,15 @@ export default function Home() {
                 </div>
               </motion.a>
 
-              <motion.a
-                href="https://www.office.com/launch/excel"
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.button
+                type="button"
+                onClick={() => openOfficeApp("excel")}
                 initial={reduce ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.55, delay: 0.2 }}
                 whileHover={{ y: -3 }}
-                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-emerald-400/30 hover:bg-[var(--sgt-input-hover)]/60"
+                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-emerald-400/30 hover:bg-[var(--sgt-input-hover)]/60 text-left cursor-pointer"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
                   <Table className="h-5 w-5" />
@@ -728,21 +757,20 @@ export default function Home() {
                     <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-emerald-300" />
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Abra o Excel Online para criar e editar planilhas diretamente no navegador.
+                    Abre o Excel instalado na sua máquina. Caso não esteja disponível, abre o Excel Online.
                   </p>
                 </div>
-              </motion.a>
+              </motion.button>
 
-              <motion.a
-                href="https://www.office.com/launch/word"
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.button
+                type="button"
+                onClick={() => openOfficeApp("word")}
                 initial={reduce ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.55, delay: 0.3 }}
                 whileHover={{ y: -3 }}
-                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-blue-400/30 hover:bg-[var(--sgt-input-hover)]/60"
+                className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-blue-400/30 hover:bg-[var(--sgt-input-hover)]/60 text-left cursor-pointer"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-400/10 text-blue-300">
                   <FileText className="h-5 w-5" />
@@ -753,10 +781,10 @@ export default function Home() {
                     <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-blue-300" />
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Abra o Word Online para criar e editar documentos diretamente no navegador.
+                    Abre o Word instalado na sua máquina. Caso não esteja disponível, abre o Word Online.
                   </p>
                 </div>
-              </motion.a>
+              </motion.button>
             </div>
 
             <p className="mt-12 text-center text-[10px] tracking-[0.2em] text-[var(--sgt-text-faint)]">
