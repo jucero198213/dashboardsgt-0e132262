@@ -23,6 +23,7 @@ import {
   Monitor,
   Table,
   FileText,
+  Banknote,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
@@ -490,6 +491,15 @@ export default function Home() {
       cta: "Acessar frota",
       onClick: () => navigate("/frota"),
       tone: "rose" as const,
+    },
+    {
+      key: "financeiro",
+      icon: Banknote,
+      title: "Financeiro",
+      description: "Portal financeiro completo: contas a pagar e receber, conciliação bancária, relatórios, fornecedores, categorias e bancos.",
+      cta: "Acessar financeiro",
+      onClick: () => navigate("/financeiro"),
+      tone: "emerald" as const,
     },
     {
       key: "executivo",

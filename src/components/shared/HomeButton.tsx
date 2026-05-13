@@ -16,6 +16,7 @@ import {
   Map,
   Fuel,
   ClipboardList,
+  Banknote,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,6 +44,14 @@ export function HomeButton() {
   const [open, setOpen] = useState(false);
 
   const items: NavItem[] = [
+    {
+      to: "/financeiro",
+      label: "Financeiro",
+      icon: Banknote,
+      color: "text-emerald-300",
+      bg: "bg-emerald-400/10 border-emerald-400/25",
+      show: true,
+    },
     {
       to: "/executivo",
       label: "Painel Executivo",
