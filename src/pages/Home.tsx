@@ -159,6 +159,41 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
   };
 
   if (data.featured) {
+    const featuredStyles: Record<string, {
+      border: string; bgGrad: string; hoverBorder: string; hoverShadow: string;
+      glow1: string; glow2: string; line: string;
+      badgeBorder: string; badgeBg: string; badgeText: string;
+      iconBorder: string; iconBg: string; iconText: string; iconShadow: string;
+      ctaText: string;
+    }> = {
+      amber: {
+        border: "border-amber-400/40",
+        bgGrad: "bg-gradient-to-br from-amber-400/[0.08] via-amber-400/[0.04] to-transparent",
+        hoverBorder: "hover:border-amber-400/70",
+        hoverShadow: "hover:shadow-[0_0_40px_rgba(251,191,36,0.15),0_8px_32px_rgba(0,0,0,0.2)]",
+        glow1: "from-amber-400/10",
+        glow2: "from-amber-400/25",
+        line: "via-amber-400/60",
+        badgeBorder: "border-amber-400/40", badgeBg: "bg-amber-400/15", badgeText: "text-amber-300",
+        iconBorder: "border-amber-400/30", iconBg: "bg-amber-400/15", iconText: "text-amber-300",
+        iconShadow: "shadow-[0_0_20px_rgba(251,191,36,0.15)]",
+        ctaText: "text-amber-300",
+      },
+      blue: {
+        border: "border-[#4A6FB8]/45",
+        bgGrad: "bg-gradient-to-br from-[#4A6FB8]/[0.10] via-[#4A6FB8]/[0.05] to-transparent",
+        hoverBorder: "hover:border-[#4A6FB8]/75",
+        hoverShadow: "hover:shadow-[0_0_40px_rgba(74,111,184,0.18),0_8px_32px_rgba(0,0,0,0.2)]",
+        glow1: "from-[#4A6FB8]/12",
+        glow2: "from-[#4A6FB8]/30",
+        line: "via-[#4A6FB8]/65",
+        badgeBorder: "border-[#4A6FB8]/45", badgeBg: "bg-[#4A6FB8]/20", badgeText: "text-[#A8C0E8]",
+        iconBorder: "border-[#4A6FB8]/35", iconBg: "bg-[#4A6FB8]/20", iconText: "text-[#A8C0E8]",
+        iconShadow: "shadow-[0_0_20px_rgba(74,111,184,0.2)]",
+        ctaText: "text-[#A8C0E8]",
+      },
+    };
+    const f = featuredStyles[data.tone] ?? featuredStyles.amber;
     return (
       <motion.button
         type="button"
@@ -168,32 +203,24 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         viewport={{ once: true, margin: "-40px" }}
         transition={{ duration: 0.25, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
         whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.12, ease: "easeOut" } }}
-        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer
-          border-amber-400/40 bg-gradient-to-br from-amber-400/[0.08] via-amber-400/[0.04] to-transparent
-          hover:border-amber-400/70 hover:shadow-[0_0_40px_rgba(251,191,36,0.15),0_8px_32px_rgba(0,0,0,0.2)]`}
+        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
       >
-        {/* Glow sempre visível, intensifica no hover */}
-        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-400/10 via-transparent to-transparent opacity-100" />
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[90%] -translate-x-1/2 rounded-full bg-gradient-to-b from-amber-400/25 to-transparent blur-3xl transition-opacity duration-500 opacity-60 group-hover:opacity-100" />
+        <div className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.glow1} via-transparent to-transparent opacity-100`} />
+        <div className={`pointer-events-none absolute -top-24 left-1/2 h-48 w-[90%] -translate-x-1/2 rounded-full bg-gradient-to-b ${f.glow2} to-transparent blur-3xl transition-opacity duration-500 opacity-60 group-hover:opacity-100`} />
 
-        {/* Linha decorativa superior */}
-        <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+        <div className={`absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r from-transparent ${f.line} to-transparent`} />
 
-        {/* Badges */}
         <div className="absolute top-5 right-5 flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/15 px-2.5 py-1">
-            <Pin className="h-2.5 w-2.5 text-amber-300" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">Fixado</span>
+          <div className={`flex items-center gap-1 rounded-full border ${f.badgeBorder} ${f.badgeBg} px-2.5 py-1`}>
+            <Pin className={`h-2.5 w-2.5 ${f.badgeText}`} />
+            <span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${f.badgeText}`}>Fixado</span>
           </div>
-
         </div>
 
-        {/* Ícone maior */}
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/15 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.15)]">
+        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${f.iconBorder} ${f.iconBg} ${f.iconText} ${f.iconShadow}`}>
           <Icon className="h-6 w-6" />
         </div>
 
-        {/* Título e descrição */}
         <div className="flex-1 space-y-2 relative z-10">
           <h3 className="text-[20px] font-black tracking-tight sgt-text">{data.title}</h3>
           <p className="text-[13.5px] leading-relaxed text-[var(--sgt-text-muted)]">
@@ -201,8 +228,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
           </p>
         </div>
 
-        {/* CTA */}
-        <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-amber-300 relative z-10">
+        <div className={`flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] ${f.ctaText} relative z-10`}>
           {data.cta}
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1.5" />
         </div>
