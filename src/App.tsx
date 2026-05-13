@@ -27,6 +27,7 @@ import Abastecimento from "./pages/Abastecimento";
 import Rh from "./pages/Rh";
 import Operacional from "./pages/Operacional";
 import Executivo from "./pages/Executivo";
+import Finance from "./pages/Finance";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/rh"           element={<ProtectedRoute><Rh /></ProtectedRoute>} />
               <Route path="/operacional"  element={<ProtectedRoute><Operacional /></ProtectedRoute>} />
               <Route path="/executivo"    element={<ProtectedRoute><Executivo /></ProtectedRoute>} />
+              <Route path="/financeiro"  element={<ProtectedRoute><Finance /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>
