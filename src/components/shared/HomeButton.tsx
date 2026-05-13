@@ -61,14 +61,6 @@ export function HomeButton() {
       show: canAccess("dashboard"),
     },
     {
-      to: "/dashboard",
-      label: "Fluxo de Caixa",
-      icon: BarChart3,
-      color: "text-cyan-300",
-      bg: "bg-cyan-400/10 border-cyan-400/25",
-      show: canAccess("dashboard"),
-    },
-    {
       to: "/indicadores",
       label: "Indicadores Estratégicos",
       icon: TrendingUp,
