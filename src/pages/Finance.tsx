@@ -325,6 +325,60 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
         </div>
       )}
 
+      {/* Gráfico Fluxo de Caixa — restaurado */}
+      <AnimatedCard delay={320}>
+        <SectionCard>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <div>
+              <span className="text-[12px] font-semibold text-slate-300">Fluxo de Caixa — Maio 2025</span>
+              <span className="ml-2 text-[10px] text-slate-600">Previsto vs Realizado</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-4 rounded-full bg-emerald-400/70" />Realizado</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-px w-4 border-t-2 border-dashed border-slate-500" />Previsto</span>
+            </div>
+          </div>
+          <div className="px-2 py-3" style={{ height: 180 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={[
+                  { dia: "01/05", previsto: 45000, realizado: 42000 },
+                  { dia: "02/05", previsto: 32000, realizado: 28000 },
+                  { dia: "05/05", previsto: 78000, realizado: 82000 },
+                  { dia: "06/05", previsto: 15000, realizado: 14320 },
+                  { dia: "07/05", previsto: 22000, realizado: 21600 },
+                  { dia: "08/05", previsto: 38000, realizado: 35000 },
+                  { dia: "09/05", previsto: 12000, realizado: 9180  },
+                  { dia: "10/05", previsto: 55000, realizado: 52000 },
+                  { dia: "12/05", previsto: 28000, realizado: 30200 },
+                  { dia: "13/05", previsto: 41000, realizado: undefined },
+                  { dia: "15/05", previsto: 19000, realizado: undefined },
+                  { dia: "20/05", previsto: 67000, realizado: undefined },
+                  { dia: "28/05", previsto: 33000, realizado: undefined },
+                ]}
+                margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="gradRealPainel" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#34d399" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0.01} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={32} />
+                <Tooltip
+                  formatter={(v: any, name: string) => [fmtK(v), name === "realizado" ? "Realizado" : "Previsto"]}
+                  contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
+                />
+                <Area type="monotone" dataKey="realizado" stroke="#34d399" strokeWidth={2} fill="url(#gradRealPainel)" connectNulls={false} dot={{ fill: "#34d399", r: 3, strokeWidth: 0 }} />
+                <Line type="monotone" dataKey="previsto"  stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AnimatedCard delay={380}>
           <SectionCard>
