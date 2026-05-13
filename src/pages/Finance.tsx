@@ -15,7 +15,7 @@ import {
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -440,6 +440,86 @@ function ScreenPagar() {
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
+      {/* ── GRÁFICOS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <AnimatedCard delay={160}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Aging — Títulos a Pagar</span>
+              <span className="ml-2 text-[10px] text-slate-600">Vencidos por faixa de dias</span>
+            </div>
+            <div className="px-2 py-3" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { faixa: "1–30d",    valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 1  && d <= 30; }).reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "31–60d",   valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 31 && d <= 60; }).reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "61–90d",   valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 61 && d <= 90; }).reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "90d+",     valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d  > 90; }).reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "Pendente", valor: PAGAR.filter(p => p.status === "Pendente").reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "Agendado", valor: PAGAR.filter(p => p.status === "Agendado").reduce((s,p)=>s+p.valor,0) },
+                  ]}
+                  margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="faixa" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Valor" radius={[4, 4, 0, 0]}>
+                    {["1–30d","31–60d","61–90d","90d+","Pendente","Agendado"].map((f) => (
+                      <Cell key={f} fill={
+                        f === "1–30d"    ? "#fbbf24" :
+                        f === "31–60d"   ? "#f97316" :
+                        f === "61–90d"   ? "#ef4444" :
+                        f === "90d+"     ? "#991b1b" :
+                        f === "Pendente" ? "#60a5fa" : "#a78bfa"
+                      } fillOpacity={0.82} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-3">
+              {([["1–30d","#fbbf24"],["31–60d","#f97316"],["61–90d","#ef4444"],["90d+","#991b1b"],["Pendente","#60a5fa"],["Agendado","#a78bfa"]] as [string,string][]).map(([l,c])=>(
+                <span key={l} className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <span className="h-2 w-2 rounded-sm" style={{ background: c }} />{l}
+                </span>
+              ))}
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        <AnimatedCard delay={200}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Top Fornecedores</span>
+              <span className="ml-2 text-[10px] text-slate-600">Por valor total em aberto</span>
+            </div>
+            <div className="px-2 py-3" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={Object.entries(
+                    PAGAR.filter(p => p.status !== "Pago").reduce((acc, p) => {
+                      const k = p.fornecedor.split(" ").slice(0,2).join(" ");
+                      acc[k] = (acc[k] || 0) + p.valor;
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).sort((a,b) => b[1]-a[1]).slice(0,5).map(([nome, valor]) => ({ nome, valor }))}
+                  margin={{ top: 4, right: 14, left: 4, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+                  <YAxis type="category" dataKey="nome" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={92} />
+                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Em aberto" fill="#fbbf24" fillOpacity={0.75} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+      </div>
+
       <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }} />
 
       <AnimatedCard delay={200}>
@@ -553,6 +633,86 @@ function ScreenReceber() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+      </div>
+
+      {/* ── GRÁFICOS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <AnimatedCard delay={160}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Aging — Títulos a Receber</span>
+              <span className="ml-2 text-[10px] text-slate-600">Em atraso por faixa de dias</span>
+            </div>
+            <div className="px-2 py-3" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { faixa: "1–30d",    valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 1  && d <= 30; }).reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "31–60d",   valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 31 && d <= 60; }).reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "61–90d",   valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 61 && d <= 90; }).reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "90d+",     valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d  > 90; }).reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "Pendente", valor: RECEBER.filter(r => r.status === "Pendente").reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "Agendado", valor: RECEBER.filter(r => r.status === "Agendado").reduce((s,r)=>s+r.valor,0) },
+                  ]}
+                  margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="faixa" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Valor" radius={[4, 4, 0, 0]}>
+                    {["1–30d","31–60d","61–90d","90d+","Pendente","Agendado"].map((f) => (
+                      <Cell key={f} fill={
+                        f === "1–30d"    ? "#fbbf24" :
+                        f === "31–60d"   ? "#f97316" :
+                        f === "61–90d"   ? "#ef4444" :
+                        f === "90d+"     ? "#991b1b" :
+                        f === "Pendente" ? "#34d399" : "#a78bfa"
+                      } fillOpacity={0.82} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-3">
+              {([["1–30d","#fbbf24"],["31–60d","#f97316"],["61–90d","#ef4444"],["90d+","#991b1b"],["Pendente","#34d399"],["Agendado","#a78bfa"]] as [string,string][]).map(([l,c])=>(
+                <span key={l} className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <span className="h-2 w-2 rounded-sm" style={{ background: c }} />{l}
+                </span>
+              ))}
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        <AnimatedCard delay={200}>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Top Clientes</span>
+              <span className="ml-2 text-[10px] text-slate-600">Por valor total a receber</span>
+            </div>
+            <div className="px-2 py-3" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={Object.entries(
+                    RECEBER.filter(r => r.status !== "Recebido").reduce((acc, r) => {
+                      const k = r.cliente.split(" ").slice(0,2).join(" ");
+                      acc[k] = (acc[k] || 0) + r.valor;
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).sort((a,b) => b[1]-a[1]).slice(0,5).map(([nome, valor]) => ({ nome, valor }))}
+                  margin={{ top: 4, right: 14, left: 4, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+                  <YAxis type="category" dataKey="nome" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={92} />
+                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="A receber" fill="#34d399" fillOpacity={0.75} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
       </div>
 
       <FilterBar search={search} onSearch={v => { setSearch(v); setPage(1); }} />
