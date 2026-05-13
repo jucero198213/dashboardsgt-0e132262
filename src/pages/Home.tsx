@@ -192,6 +192,19 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         iconShadow: "shadow-[0_0_20px_rgba(74,111,184,0.2)]",
         ctaText: "text-[#A8C0E8]",
       },
+      rose: {
+        border: "border-rose-400/45",
+        bgGrad: "bg-gradient-to-br from-rose-400/[0.10] via-rose-400/[0.05] to-transparent",
+        hoverBorder: "hover:border-rose-400/75",
+        hoverShadow: "hover:shadow-[0_0_40px_rgba(244,63,94,0.18),0_8px_32px_rgba(0,0,0,0.2)]",
+        glow1: "from-rose-400/12",
+        glow2: "from-rose-400/30",
+        line: "via-rose-400/65",
+        badgeBorder: "border-rose-400/45", badgeBg: "bg-rose-400/18", badgeText: "text-rose-300",
+        iconBorder: "border-rose-400/35", iconBg: "bg-rose-400/18", iconText: "text-rose-300",
+        iconShadow: "shadow-[0_0_20px_rgba(244,63,94,0.2)]",
+        ctaText: "text-rose-300",
+      },
     };
     const f = featuredStyles[data.tone] ?? featuredStyles.amber;
     return (
