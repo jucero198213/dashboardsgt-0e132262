@@ -9,6 +9,7 @@ import {
   Banknote, Send, Download, Plus, FileSpreadsheet,
   ArrowRightLeft, Zap, Package, Bolt, Users,
   Truck, Flame, Wrench, Filter, ChevronDown,
+  MapPin, Phone, Star, Mail,
 } from "lucide-react";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -57,6 +58,20 @@ const FORNECEDORES = [
   { id: 6, nome: "Eletropaulo S.A.", cnpj: "61.695.227/0001-93", categoria: "Utilidades", status: "Ativo", volume12m: 39000, titulos: 1, prazo: 15, avatar: "EL" },
   { id: 7, nome: "Projeção Transportes", cnpj: "18.432.007/0001-55", categoria: "Logística", status: "Ativo", volume12m: 95000, titulos: 2, prazo: 30, avatar: "PR" },
   { id: 8, nome: "MegaFlex Ind.", cnpj: "29.118.542/0001-09", categoria: "Insumos", status: "Inativo", volume12m: 22000, titulos: 0, prazo: 60, avatar: "MF" },
+];
+
+const CLIENTES = [
+  { id: 1,  nome: "Transpolog Ltda",       cnpj: "09.241.885/0001-12", segmento: "Transportadora",  status: "Ativo",        faturamento12m: 420000, titulosAbertos: 2, prazoMedio: 30, inadimplente: false, avatar: "TL", cidade: "São Paulo, SP",     contato: "Carlos Mendes" },
+  { id: 2,  nome: "Veloz Express",         cnpj: "17.332.091/0001-48", segmento: "Courier",          status: "Ativo",        faturamento12m: 188000, titulosAbertos: 1, prazoMedio: 28, inadimplente: false, avatar: "VE", cidade: "Campinas, SP",      contato: "Ana Rodrigues" },
+  { id: 3,  nome: "Cargo Rápido",          cnpj: "22.018.443/0001-90", segmento: "Frete Rodoviário", status: "Ativo",        faturamento12m: 112000, titulosAbertos: 1, prazoMedio: 35, inadimplente: false, avatar: "CR", cidade: "Ribeirão Preto, SP", contato: "Pedro Lima" },
+  { id: 4,  nome: "RodoLog S.A.",          cnpj: "31.029.774/0001-66", segmento: "Logística",        status: "Ativo",        faturamento12m: 504000, titulosAbertos: 1, prazoMedio: 30, inadimplente: false, avatar: "RL", cidade: "Santos, SP",        contato: "Mariana Costa" },
+  { id: 5,  nome: "Brilho Frete",          cnpj: "48.332.110/0001-22", segmento: "Frete Rodoviário", status: "Ativo",        faturamento12m: 222000, titulosAbertos: 0, prazoMedio: 28, inadimplente: false, avatar: "BF", cidade: "Curitiba, PR",      contato: "João Faria" },
+  { id: 6,  nome: "Paraíso Frotas",        cnpj: "55.817.009/0001-37", segmento: "Gestão de Frota",  status: "Ativo",        faturamento12m: 398000, titulosAbertos: 1, prazoMedio: 45, inadimplente: false, avatar: "PF", cidade: "Porto Alegre, RS",  contato: "Sílvia Borges" },
+  { id: 7,  nome: "LogMax Transportes",    cnpj: "62.114.882/0001-55", segmento: "Transportadora",  status: "Inadimplente", faturamento12m:  93000, titulosAbertos: 2, prazoMedio: 30, inadimplente: true,  avatar: "LM", cidade: "Goiânia, GO",       contato: "Roberto Alves" },
+  { id: 8,  nome: "DeltaCargo Ltda",       cnpj: "71.334.900/0001-81", segmento: "Courier",          status: "Ativo",        faturamento12m: 145000, titulosAbertos: 1, prazoMedio: 20, inadimplente: false, avatar: "DC", cidade: "Belo Horizonte, MG", contato: "Fernanda Souza" },
+  { id: 9,  nome: "TotalFrete S.A.",       cnpj: "83.210.447/0001-73", segmento: "Frete Rodoviário", status: "Inativo",      faturamento12m:  31000, titulosAbertos: 0, prazoMedio: 30, inadimplente: false, avatar: "TF", cidade: "Fortaleza, CE",     contato: "Diego Pinto" },
+  { id: 10, nome: "SupremaLog",            cnpj: "04.882.113/0001-40", segmento: "Logística",        status: "Ativo",        faturamento12m: 267000, titulosAbertos: 2, prazoMedio: 30, inadimplente: false, avatar: "SL", cidade: "Manaus, AM",        contato: "Camila Torres" },
+  { id: 11, nome: "NovaCarga Express",     cnpj: "19.003.228/0001-16", segmento: "Courier",          status: "Inadimplente", faturamento12m:  58000, titulosAbertos: 3, prazoMedio: 28, inadimplente: true,  avatar: "NC", cidade: "Recife, PE",        contato: "Thiago Nunes" },
 ];
 
 const CATEGORIAS = [
@@ -856,6 +871,166 @@ function ScreenFornecedores() {
   );
 }
 
+function ScreenClientes() {
+  const [search, setSearch] = useState("");
+  const [filtroSegmento, setFiltroSegmento] = useState("todos");
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+
+  const segmentos = [...new Set(CLIENTES.map(c => c.segmento))];
+
+  const filtered = useMemo(() =>
+    CLIENTES.filter(c => {
+      const q = search.toLowerCase();
+      const matchQ = !q || c.nome.toLowerCase().includes(q) || c.cnpj.includes(q) || c.contato.toLowerCase().includes(q);
+      const matchSeg = filtroSegmento === "todos" || c.segmento === filtroSegmento;
+      const matchSt  = filtroStatus   === "todos" || c.status   === filtroStatus;
+      return matchQ && matchSeg && matchSt;
+    }),
+    [search, filtroSegmento, filtroStatus]
+  );
+
+  const totalAtivos      = CLIENTES.filter(c => c.status === "Ativo").length;
+  const totalInadimplentes = CLIENTES.filter(c => c.inadimplente).length;
+  const faturamentoTotal = CLIENTES.reduce((s, c) => s + c.faturamento12m, 0);
+  const titulosAbertos   = CLIENTES.reduce((s, c) => s + c.titulosAbertos, 0);
+
+  const segCor: Record<string, string> = {
+    "Transportadora":  "bg-blue-400/10 border-blue-400/20 text-blue-300",
+    "Courier":         "bg-teal-400/10 border-teal-400/20 text-teal-300",
+    "Frete Rodoviário":"bg-amber-400/10 border-amber-400/20 text-amber-300",
+    "Logística":       "bg-violet-400/10 border-violet-400/20 text-violet-300",
+    "Gestão de Frota": "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
+  };
+
+  const avCor: Record<string, string> = {
+    TL: "bg-blue-400/10 border-blue-400/20 text-blue-300",
+    VE: "bg-teal-400/10 border-teal-400/20 text-teal-300",
+    CR: "bg-amber-400/10 border-amber-400/20 text-amber-300",
+    RL: "bg-violet-400/10 border-violet-400/20 text-violet-300",
+    BF: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",
+    PF: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
+    LM: "bg-rose-400/10 border-rose-400/20 text-rose-300",
+    DC: "bg-pink-400/10 border-pink-400/20 text-pink-300",
+    TF: "bg-slate-400/10 border-slate-400/20 text-slate-400",
+    SL: "bg-indigo-400/10 border-indigo-400/20 text-indigo-300",
+    NC: "bg-rose-400/10 border-rose-400/20 text-rose-300",
+    AF: "bg-orange-400/10 border-orange-400/20 text-orange-300",
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Total de Clientes",   value: String(CLIENTES.length),          sub: `${totalAtivos} ativos`,                    icon: Users,        stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]" },
+          { label: "Faturamento 12m",     value: fmtK(faturamentoTotal),           sub: "Receita gerada pelos clientes",            icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+          { label: "Títulos em Aberto",   value: String(titulosAbertos),           sub: "Recebimentos pendentes",                   icon: Clock,        stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
+          { label: "Inadimplentes",       value: String(totalInadimplentes),       sub: `${((totalInadimplentes/CLIENTES.length)*100).toFixed(0)}% da carteira`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
+        ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+      </div>
+
+      {/* Filtros */}
+      <FilterBar search={search} onSearch={setSearch}>
+        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
+        <select
+          value={filtroSegmento}
+          onChange={e => setFiltroSegmento(e.target.value)}
+          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none"
+        >
+          <option value="todos">Todos os segmentos</option>
+          {segmentos.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select
+          value={filtroStatus}
+          onChange={e => setFiltroStatus(e.target.value)}
+          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none"
+        >
+          <option value="todos">Status: Todos</option>
+          <option value="Ativo">Ativo</option>
+          <option value="Inadimplente">Inadimplente</option>
+          <option value="Inativo">Inativo</option>
+        </select>
+        <span className="text-[11px] text-slate-600 ml-1">{filtered.length} clientes</span>
+      </FilterBar>
+
+      {/* Grade de cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {filtered.map((c, i) => {
+          const avCls = avCor[c.avatar] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
+          const segCls = segCor[c.segmento] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
+          return (
+            <AnimatedCard key={c.id} delay={i * 50}>
+              <div className="group flex flex-col gap-3 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all">
+
+                {/* Header: avatar + nome + status */}
+                <div className="flex items-start gap-2.5">
+                  <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-semibold text-[11px] ${avCls}`}>
+                    {c.avatar}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-slate-200 leading-tight truncate">{c.nome}</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5 truncate">{c.cnpj}</p>
+                  </div>
+                  <StatusBadge s={c.status} />
+                </div>
+
+                {/* Segmento */}
+                <span className={`self-start rounded-md border px-2 py-0.5 text-[10px] font-medium ${segCls}`}>
+                  {c.segmento}
+                </span>
+
+                {/* Localidade + contato */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                    <MapPin className="h-3 w-3 shrink-0" />{c.cidade}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                    <Users className="h-3 w-3 shrink-0" />{c.contato}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { label: "Fat. 12m",     value: fmtK(c.faturamento12m), clr: "text-emerald-300" },
+                    { label: "Em aberto",    value: String(c.titulosAbertos), clr: c.titulosAbertos > 1 ? "text-rose-300" : c.titulosAbertos === 1 ? "text-amber-300" : "text-slate-400" },
+                    { label: "Prazo médio",  value: `${c.prazoMedio}d`,     clr: "text-slate-300" },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
+                      <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
+                      <p className={`text-[11px] font-semibold leading-none ${s.clr}`}>{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Ações */}
+                <div className="flex gap-1.5 pt-0.5">
+                  <button title="Ver títulos" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
+                    <Eye className="h-3 w-3" /> Títulos
+                  </button>
+                  <button title="Enviar cobrança" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
+                    <Send className="h-3 w-3" /> Cobrar
+                  </button>
+                  <button title="Editar" className="ml-auto flex h-6 w-6 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300 transition-colors">
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            </AnimatedCard>
+          );
+        })}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-slate-600">
+          <Users className="h-10 w-10 mb-3 opacity-30" />
+          <p className="text-[13px]">Nenhum cliente encontrado</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ScreenCategorias() {
   const despesas = CATEGORIAS.filter(c => c.tipo === "Despesa");
   const receitas = CATEGORIAS.filter(c => c.tipo === "Receita");
@@ -1068,7 +1243,7 @@ function ScreenBancos() {
 // ─────────────────────────────────────────────────────────────────────────────
 //  SIDEBAR CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
-type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "relatorios" | "fornecedores" | "categorias" | "bancos";
+type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
 const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: number; section?: string }[] = [
   { id: "painel",       label: "Painel",          icon: LayoutDashboard, section: "Financeiro" },
@@ -1077,6 +1252,7 @@ const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: numbe
   { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
   { id: "relatorios",   label: "Relatórios",       icon: FileBarChart },
   { id: "fornecedores", label: "Fornecedores",     icon: Building2,  section: "Cadastros" },
+  { id: "clientes",     label: "Clientes",         icon: Users },
   { id: "categorias",   label: "Categorias",       icon: Tag },
   { id: "bancos",       label: "Bancos",           icon: Landmark },
 ];
@@ -1088,6 +1264,7 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
   conciliacao:  { title: "Conciliação Bancária", sub: "Cruzamento entre extrato bancário e ERP" },
   relatorios:   { title: "Relatórios",         sub: "Demonstrativos financeiros e gerenciais" },
   fornecedores: { title: "Fornecedores",       sub: "Cadastro e gestão de fornecedores" },
+  clientes:     { title: "Clientes",           sub: "Carteira de clientes e histórico de recebimentos" },
   categorias:   { title: "Categorias",         sub: "Plano de contas e centros de custo" },
   bancos:       { title: "Bancos e Contas",    sub: "Saldos, extrato e conciliação por conta" },
 };
@@ -1099,6 +1276,7 @@ const SCREENS: Record<ScreenId, React.ReactNode> = {
   conciliacao:  <ScreenConciliacao />,
   relatorios:   <ScreenRelatorios />,
   fornecedores: <ScreenFornecedores />,
+  clientes:     <ScreenClientes />,
   categorias:   <ScreenCategorias />,
   bancos:       <ScreenBancos />,
 };
