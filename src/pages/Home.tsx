@@ -295,7 +295,7 @@ export default function Home() {
       description: "Acesso ao portal WR SGT para gestão e operação do sistema integrado.",
       cta: "Acessar portal",
       href: "http://54.232.121.164:9474/#/login",
-      tone: "cyan" as const,
+      tone: "blue" as const,
       pinned: true,
     },
     {
