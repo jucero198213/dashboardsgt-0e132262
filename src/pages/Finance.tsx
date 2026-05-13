@@ -814,28 +814,52 @@ function ScreenRelatorios() {
 
 function ScreenFornecedores() {
   const [search, setSearch] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("todos");
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+
   const filtered = useMemo(() =>
-    FORNECEDORES.filter(f => !search || f.nome.toLowerCase().includes(search.toLowerCase()) || f.cnpj.includes(search)),
-    [search]
+    FORNECEDORES.filter(f => {
+      const q = search.toLowerCase();
+      const matchQ = !q || f.nome.toLowerCase().includes(q) || f.cnpj.includes(q);
+      const matchC = filtroCategoria === "todos" || f.categoria === filtroCategoria;
+      const matchS = filtroStatus   === "todos" || f.status    === filtroStatus;
+      return matchQ && matchC && matchS;
+    }),
+    [search, filtroCategoria, filtroStatus]
   );
+
+  const totalAtivos    = FORNECEDORES.filter(f => f.status === "Ativo").length;
+  const totalBloqueados = FORNECEDORES.filter(f => f.status === "Bloqueado").length;
+  const volumeTotal    = FORNECEDORES.reduce((s, f) => s + f.volume12m, 0);
+  const titulosAbertos = FORNECEDORES.reduce((s, f) => s + f.titulos, 0);
+  const categorias     = [...new Set(FORNECEDORES.map(f => f.categoria))];
 
   return (
     <div className="flex flex-col gap-4">
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Total de Fornecedores", value: String(FORNECEDORES.length),  sub: `${totalAtivos} ativos`,                    icon: Building2,     stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]",  delay: 0   },
+          { label: "Volume Comprado 12m",   value: fmtK(volumeTotal),            sub: "Total de pagamentos realizados",           icon: TrendingDown,  stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",  delay: 60  },
+          { label: "Títulos em Aberto",     value: String(titulosAbertos),       sub: "Pagamentos pendentes",                     icon: Clock,         stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 120 },
+          { label: "Bloqueados / Inativos", value: String(totalBloqueados),      sub: `de ${FORNECEDORES.length} fornecedores`,   icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 180 },
+        ].map(k => <KpiCard key={k.label} {...k} />)}
+      </div>
       <FilterBar search={search} onSearch={setSearch}>
         <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option>Todas as categorias</option>
-          <option>Combustível</option>
-          <option>Rastreamento</option>
-          <option>Logística</option>
-          <option>Utilidades</option>
+        <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}
+          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
+          <option value="todos">Todas as categorias</option>
+          {categorias.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option>Status: Todos</option>
-          <option>Ativo</option>
-          <option>Bloqueado</option>
-          <option>Inativo</option>
+        <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}
+          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
+          <option value="todos">Status: Todos</option>
+          <option value="Ativo">Ativo</option>
+          <option value="Bloqueado">Bloqueado</option>
+          <option value="Inativo">Inativo</option>
         </select>
+        <span className="text-[11px] text-slate-600 ml-1">{filtered.length} fornecedores</span>
       </FilterBar>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
