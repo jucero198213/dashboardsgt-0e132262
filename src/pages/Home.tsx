@@ -80,7 +80,7 @@ interface ModuleCardData {
   cta: string;
   onClick?: () => void;
   href?: string;
-  tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange";
+  tone: "amber" | "violet" | "slate" | "cyan" | "emerald" | "rose" | "orange" | "blue";
   disabled?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -138,6 +138,13 @@ const TONE: Record<
     ring: "hover:border-orange-400/40",
     cta: "text-orange-300",
     glow: "from-orange-400/20",
+  },
+  blue: {
+    iconBg: "bg-[#4A6FB8]/15 border border-[#4A6FB8]/30",
+    iconText: "text-[#A8C0E8]",
+    ring: "hover:border-[#4A6FB8]/50",
+    cta: "text-[#A8C0E8]",
+    glow: "from-[#4A6FB8]/25",
   },
 };
 
@@ -288,7 +295,7 @@ export default function Home() {
       description: "Acesso ao portal WR SGT para gestão e operação do sistema integrado.",
       cta: "Acessar portal",
       href: "http://54.232.121.164:9474/#/login",
-      tone: "cyan" as const,
+      tone: "blue" as const,
       pinned: true,
     },
     {
