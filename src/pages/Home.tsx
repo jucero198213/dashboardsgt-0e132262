@@ -323,6 +323,7 @@ export default function Home() {
       href: "http://54.232.121.164:9474/#/login",
       tone: "blue" as const,
       pinned: true,
+      featured: true,
     },
     {
       key: "chamados",
