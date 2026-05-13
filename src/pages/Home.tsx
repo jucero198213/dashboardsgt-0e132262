@@ -21,6 +21,8 @@ import {
   Car,
   LineChart,
   Monitor,
+  Table,
+  FileText,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
