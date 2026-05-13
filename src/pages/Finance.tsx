@@ -10,7 +10,7 @@ import {
   ArrowRightLeft, Zap, Package, Bolt, Users,
   Truck, Flame, Wrench, Filter, ChevronDown,
   MapPin, Phone, Star, Mail, PanelLeftClose, PanelLeftOpen,
-  MoreHorizontal, ArrowUpDown,
+  MoreHorizontal, ArrowUpDown, Activity, ExternalLink,
 } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
@@ -354,39 +354,6 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
           )}
         </div>
       )}
-
-      <AnimatedCard delay={320}>
-        <SectionCard>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
-            <div>
-              <span className="text-[12px] font-semibold text-slate-300">Fluxo de Caixa — Maio 2025</span>
-              <span className="ml-2 text-[10px] text-slate-600">Previsto vs Realizado</span>
-            </div>
-            <div className="flex items-center gap-3 text-[10px] text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-4 rounded-full bg-emerald-400/70" />Realizado</span>
-              <span className="flex items-center gap-1.5"><span className="inline-block h-px w-4 border-t-2 border-dashed border-slate-500" />Previsto</span>
-            </div>
-          </div>
-          <div className="px-2 py-3" style={{ height: 180 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={FLUXO_CAIXA} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradReal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#34d399" stopOpacity={0.01} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={32} />
-                <Tooltip content={<CashTooltip />} />
-                <Area type="monotone" dataKey="realizado" name="realizado" stroke="#34d399" strokeWidth={2} fill="url(#gradReal)" connectNulls={false} dot={{ fill: "#34d399", r: 3, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="previsto" name="previsto" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </SectionCard>
-      </AnimatedCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AnimatedCard delay={380}>
@@ -1490,14 +1457,15 @@ function ScreenBancos() {
 // ─────────────────────────────────────────────────────────────────────────────
 //  SIDEBAR CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
-type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
+type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
-const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: number; section?: string }[] = [
+const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: number; section?: string; externalTo?: string }[] = [
   { id: "painel",       label: "Painel",          icon: LayoutDashboard, section: "Financeiro" },
   { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, badge: 7 },
   { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle,   badge: 3, badgeColor: "amber" },
-  { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
-  { id: "relatorios",   label: "Relatórios",       icon: FileBarChart },
+  { id: "conciliacao",  label: "Conciliação",              icon: RefreshCcw },
+  { id: "fluxo",        label: "Fluxo de Caixa Realizado", icon: Activity, externalTo: "/dashboard" },
+  { id: "relatorios",   label: "Relatórios",               icon: FileBarChart },
   { id: "fornecedores", label: "Fornecedores",     icon: Building2,  section: "Cadastros" },
   { id: "clientes",     label: "Clientes",         icon: Users },
   { id: "categorias",   label: "Categorias",       icon: Tag },
@@ -1508,8 +1476,9 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
   painel:       { title: "Painel Financeiro",  sub: "Resumo consolidado do módulo financeiro" },
   pagar:        { title: "Contas a Pagar",     sub: "Gestão de títulos e obrigações financeiras" },
   receber:      { title: "Contas a Receber",   sub: "Gestão de recebimentos e clientes" },
-  conciliacao:  { title: "Conciliação Bancária", sub: "Cruzamento entre extrato bancário e ERP" },
-  relatorios:   { title: "Relatórios",         sub: "Demonstrativos financeiros e gerenciais" },
+  conciliacao:  { title: "Conciliação Bancária",           sub: "Cruzamento entre extrato bancário e ERP" },
+  fluxo:        { title: "Fluxo de Caixa Realizado",       sub: "Redirecionando..." },
+  relatorios:   { title: "Relatórios",                     sub: "Demonstrativos financeiros e gerenciais" },
   fornecedores: { title: "Fornecedores",       sub: "Cadastro e gestão de fornecedores" },
   clientes:     { title: "Clientes",           sub: "Carteira de clientes e histórico de recebimentos" },
   categorias:   { title: "Categorias",         sub: "Plano de contas e centros de custo" },
@@ -1542,6 +1511,7 @@ export default function Finance() {
       case "pagar":        return <ScreenPagar />;
       case "receber":      return <ScreenReceber />;
       case "conciliacao":  return <ScreenConciliacao />;
+      case "fluxo":        return null;
       case "relatorios":   return <ScreenRelatorios />;
       case "fornecedores": return <ScreenFornecedores />;
       case "clientes":     return <ScreenClientes />;
@@ -1681,12 +1651,17 @@ export default function Finance() {
                         <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
                       )}
                       <button
-                        onClick={() => setActive(item.id)}
+                        onClick={() => {
+                          if (item.externalTo) { navigate(item.externalTo); return; }
+                          setActive(item.id);
+                        }}
                         title={sidebarCollapsed ? item.label : undefined}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${sidebarCollapsed ? "justify-center" : ""} ${
-                          isActive
-                            ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
-                            : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
+                          item.externalTo
+                            ? "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
+                            : isActive
+                              ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
+                              : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
                         }`}
                         style={{ width: "calc(100% - 8px)" }}
                       >
@@ -1694,7 +1669,8 @@ export default function Finance() {
                         {!sidebarCollapsed && (
                           <>
                             <span className="flex-1 text-left truncate">{item.label}</span>
-                            {item.badge && (
+                            {item.externalTo && <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />}
+                            {item.badge && !item.externalTo && (
                               <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
                                 (item as any).badgeColor === "amber"
                                   ? "bg-amber-400/15 text-amber-300"
