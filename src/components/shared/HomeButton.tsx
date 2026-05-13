@@ -165,14 +165,20 @@ export function HomeButton() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          title="Navegação rápida"
-          className="group relative inline-flex h-9 items-center gap-2 overflow-hidden rounded-xl border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/[0.18] via-amber-400/[0.10] to-amber-500/[0.18] px-2.5 sm:px-3.5 text-[12px] font-bold uppercase tracking-[0.08em] text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_2px_8px_rgba(245,158,11,0.12)] transition-all duration-150 hover:border-amber-400 hover:from-amber-500/25 hover:to-amber-400/20 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)] data-[state=open]:border-amber-400 data-[state=open]:from-amber-500/25 data-[state=open]:to-amber-400/20 data-[state=open]:text-white data-[state=open]:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(245,158,11,0.35)]"
+          title="Navegação rápida — SGT Log"
+          className="group inline-flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-lg border border-white/[0.09] bg-white/[0.04] transition-all duration-150 hover:border-white/[0.16] hover:bg-white/[0.07] data-[state=open]:border-white/[0.16] data-[state=open]:bg-white/[0.07]"
         >
-          <Home
-            className="relative h-3.5 w-3.5 shrink-0 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] transition-transform duration-200 group-hover:scale-110 group-hover:text-amber-200"
-          />
-          <span className="relative hidden sm:inline">Início</span>
-          <ChevronDown className="relative h-3.5 w-3.5 shrink-0 text-amber-300/80 transition-transform duration-200 group-data-[state=open]:rotate-180 group-hover:text-amber-200" />
+          {/* Avatar workspace */}
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[5px] bg-gradient-to-br from-amber-400 to-amber-600 text-[10px] font-black text-white shadow-[0_0_8px_rgba(245,158,11,0.30)]">
+            S
+          </div>
+          {/* Labels */}
+          <div className="hidden sm:flex flex-col leading-none gap-px">
+            <span className="text-[11px] font-semibold text-slate-200">SGT Log</span>
+            <span className="text-[9px] text-slate-500">Workspace</span>
+          </div>
+          {/* Chevron */}
+          <ChevronDown className="h-3 w-3 shrink-0 text-slate-500 transition-transform duration-200 group-data-[state=open]:rotate-180" />
         </button>
       </DropdownMenuTrigger>
 
