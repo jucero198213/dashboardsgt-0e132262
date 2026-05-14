@@ -1517,26 +1517,39 @@ function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
 
 function ScreenBancos() {
   const { dwRawData, filiais, isFetchingDw } = useFinancialData();
-  const [extratoFilial, setExtratoFilial] = useState<string | null>(null);
+  const [extratoKey, setExtratoKey] = useState<string | null>(null);
 
-  // ── Paleta de cores por filial ─────────────────────────────────────────────
+  // ── Paleta por conta/filial ────────────────────────────────────────────────
   const PALETA = [
-    { border: "border-amber-400/20",  val: "text-amber-200",   dot: "bg-amber-400",   hex: "#fbbf24" },
-    { border: "border-rose-400/20",   val: "text-rose-200",    dot: "bg-rose-400",    hex: "#fb7185" },
-    { border: "border-violet-400/20", val: "text-violet-200",  dot: "bg-violet-400",  hex: "#a78bfa" },
-    { border: "border-teal-400/20",   val: "text-teal-200",    dot: "bg-teal-400",    hex: "#2dd4bf"  },
-    { border: "border-blue-400/20",   val: "text-blue-200",    dot: "bg-blue-400",    hex: "#60a5fa" },
-    { border: "border-emerald-400/20",val: "text-emerald-200", dot: "bg-emerald-400", hex: "#34d399" },
+    { border: "border-amber-400/20",   val: "text-amber-200",    hex: "#fbbf24" },
+    { border: "border-rose-400/20",    val: "text-rose-200",     hex: "#fb7185" },
+    { border: "border-violet-400/20",  val: "text-violet-200",   hex: "#a78bfa" },
+    { border: "border-teal-400/20",    val: "text-teal-200",     hex: "#2dd4bf" },
+    { border: "border-blue-400/20",    val: "text-blue-200",     hex: "#60a5fa" },
+    { border: "border-emerald-400/20", val: "text-emerald-200",  hex: "#34d399" },
+    { border: "border-cyan-400/20",    val: "text-cyan-200",     hex: "#22d3ee" },
+    { border: "border-orange-400/20",  val: "text-orange-200",   hex: "#fb923c" },
   ];
 
-  // ── Agrega LB_D/LB_C por FILIAL ───────────────────────────────────────────
-  const porFilial = useMemo(() => {
+  // ── Agrega por COD_CONTA (quando disponível) ou FILIAL ─────────────────────
+  const porConta = useMemo(() => {
     const lbRows = dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C");
-    const map = new Map<string, { entradas: number; saidas: number; lancamentos: typeof lbRows }>();
+
+    // Chave de agrupamento: conta bancária real (quando disponível) ou filial
+    const getKey  = (r: typeof lbRows[0]) => r.COD_CONTA  ?? r.FILIAL ?? "—";
+    const getNome = (r: typeof lbRows[0]) => r.NOME_CONTA ?? filiais.find(f => f.id === r.FILIAL)?.nome ?? r.FILIAL ?? "—";
+    const getBanco = (r: typeof lbRows[0]) => r.NOME_BANCO ?? "—";
+
+    type Entry = {
+      cod: string; nome: string; banco: string;
+      entradas: number; saidas: number;
+      lancamentos: typeof lbRows;
+    };
+    const map = new Map<string, Entry>();
 
     lbRows.forEach(r => {
-      const k = r.FILIAL ?? "—";
-      if (!map.has(k)) map.set(k, { entradas: 0, saidas: 0, lancamentos: [] });
+      const k = getKey(r);
+      if (!map.has(k)) map.set(k, { cod: k, nome: getNome(r), banco: getBanco(r), entradas: 0, saidas: 0, lancamentos: [] });
       const e = map.get(k)!;
       const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
       if (r.ORIGEM === "LB_C") e.entradas += val;
@@ -1544,30 +1557,25 @@ function ScreenBancos() {
       e.lancamentos.push(r);
     });
 
-    return Array.from(map.entries())
-      .map(([cod, d], i) => {
-        const nomeFilial = filiais.find(f => f.id === cod)?.nome ?? cod;
-        return {
-          cod,
-          nome: nomeFilial,
-          sigla: nomeFilial.slice(0, 2).toUpperCase(),
-          entradas: d.entradas,
-          saidas: d.saidas,
-          liquido: d.entradas - d.saidas,
-          lancamentos: d.lancamentos.sort((a, b) =>
-            (b.DATA_EMISSAO ?? "").localeCompare(a.DATA_EMISSAO ?? "")
-          ),
-          paleta: PALETA[i % PALETA.length],
-        };
-      })
-      .sort((a, b) => Math.abs(b.liquido) - Math.abs(a.liquido));
+    return Array.from(map.values())
+      .sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas))
+      .map((c, i) => ({
+        ...c,
+        liquido: c.entradas - c.saidas,
+        sigla: c.nome.slice(0, 2).toUpperCase(),
+        paleta: PALETA[i % PALETA.length],
+        lancamentos: [...c.lancamentos].sort((a, b) =>
+          (b.DATA_LANCAMENTO ?? b.DATA_EMISSAO ?? "").localeCompare(
+           a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
+        ),
+      }));
   }, [dwRawData, filiais]);
 
-  // ── Evolução diária do movimento ──────────────────────────────────────────
+  // ── Evolução diária ────────────────────────────────────────────────────────
   const evolucaoDiaria = useMemo(() => {
     const map = new Map<string, { entradas: number; saidas: number }>();
     dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C").forEach(r => {
-      const dia = (r.DATA_EMISSAO ?? "").slice(0, 10);
+      const dia = (r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? "").slice(0, 10);
       if (!dia) return;
       if (!map.has(dia)) map.set(dia, { entradas: 0, saidas: 0 });
       const e = map.get(dia)!;
@@ -1578,20 +1586,23 @@ function ScreenBancos() {
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([iso, d]) => ({
-        dia: new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        dia:     new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         liquido: d.entradas - d.saidas,
         entradas: d.entradas,
-        saidas: d.saidas,
+        saidas:   d.saidas,
       }));
   }, [dwRawData]);
 
-  const totalEntradas = porFilial.reduce((s, f) => s + f.entradas, 0);
-  const totalSaidas   = porFilial.reduce((s, f) => s + f.saidas, 0);
+  const totalEntradas = porConta.reduce((s, c) => s + c.entradas, 0);
+  const totalSaidas   = porConta.reduce((s, c) => s + c.saidas,   0);
   const totalLiquido  = totalEntradas - totalSaidas;
 
-  // Filial selecionada no extrato
-  const filialAtiva = extratoFilial ?? porFilial[0]?.cod ?? null;
-  const filialData  = porFilial.find(f => f.cod === filialAtiva);
+  // Conta/filial ativa no extrato
+  const chaveAtiva = extratoKey ?? porConta[0]?.cod ?? null;
+  const contaAtiva = porConta.find(c => c.cod === chaveAtiva);
+
+  // Modo de agrupamento (conta real vs filial)
+  const usandoConta = porConta.some(c => dwRawData.find(r => r.COD_CONTA && (r.COD_CONTA === c.cod)));
 
   const MovTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
@@ -1609,7 +1620,7 @@ function ScreenBancos() {
 
   if (isFetchingDw) return <SkeletonLoader label="Carregando movimentação bancária..." />;
 
-  if (porFilial.length === 0) return (
+  if (porConta.length === 0) return (
     <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
       <Landmark className="h-10 w-10 opacity-30" />
       <p className="text-[13px]">Nenhum lançamento bancário no período. Clique em Atualizar.</p>
@@ -1628,68 +1639,73 @@ function ScreenBancos() {
               <p className={`text-[28px] font-black leading-none mt-1 tabular-nums ${totalLiquido >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
                 {totalLiquido >= 0 ? "+" : ""}{fmtBRL(totalLiquido)}
               </p>
-              <p className="text-[11px] text-slate-600 mt-1">{porFilial.length} filial{porFilial.length > 1 ? "is" : ""} · período selecionado</p>
+              <p className="text-[11px] text-slate-600 mt-1">
+                {porConta.length} {usandoConta ? "conta" : "filial"}{porConta.length > 1 ? "s" : ""} · período selecionado
+              </p>
             </div>
             <div style={{ width: 200, height: 64 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={evolucaoDiaria} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="gradBancoLiq" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="gradBancoLiq2" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor="#22d3ee" stopOpacity={0.2} />
                       <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.01} />
                     </linearGradient>
                   </defs>
                   <Tooltip content={<MovTooltip />} />
-                  <Area type="monotone" dataKey="liquido" stroke="#22d3ee" strokeWidth={1.5} fill="url(#gradBancoLiq)" dot={false} />
+                  <Area type="monotone" dataKey="liquido" stroke="#22d3ee" strokeWidth={1.5} fill="url(#gradBancoLiq2)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-          <div className={`grid divide-x divide-[var(--sgt-divider)]`} style={{ gridTemplateColumns: `repeat(${Math.min(porFilial.length, 4)}, 1fr)` }}>
-            {porFilial.slice(0, 4).map(f => (
-              <div key={f.cod} className="px-4 py-2.5">
+          {/* Sub-totais por conta/filial */}
+          <div className="grid divide-x divide-[var(--sgt-divider)]"
+            style={{ gridTemplateColumns: `repeat(${Math.min(porConta.length, 4)}, 1fr)` }}>
+            {porConta.slice(0, 4).map(c => (
+              <div key={c.cod} className="px-4 py-2.5">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${f.paleta.border} bg-[var(--sgt-table-head)]`}>{f.sigla}</span>
-                  <span className="text-[10px] text-slate-600 truncate">{f.nome}</span>
+                  <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${c.paleta.border} bg-[var(--sgt-table-head)]`}>{c.sigla}</span>
+                  <span className="text-[10px] text-slate-600 truncate">{c.nome}</span>
                 </div>
-                <p className={`text-[14px] font-black leading-none tabular-nums ${f.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
-                  {fmtK(f.liquido)}
-                </p>
-                <p className="text-[9px] text-slate-600 mt-1">Líquido do período</p>
+                <p className={`text-[14px] font-black leading-none tabular-nums ${c.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{fmtK(c.liquido)}</p>
+                <p className="text-[9px] text-slate-600 mt-1">{c.banco !== "—" ? c.banco : "Líquido do período"}</p>
               </div>
             ))}
           </div>
         </SectionCard>
       </AnimatedCard>
 
-      {/* Cards por filial */}
+      {/* Cards por conta/filial */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {porFilial.map((f, i) => (
-          <AnimatedCard key={f.cod} delay={i * 80}>
-            <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${f.paleta.border}`}>
+        {porConta.map((c, i) => (
+          <AnimatedCard key={c.cod} delay={i * 80}>
+            <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${c.paleta.border}`}>
               <div className="flex items-center gap-3 mb-4">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${f.paleta.border} bg-[var(--sgt-table-head)]`}>
-                  {f.sigla}
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${c.paleta.border} bg-[var(--sgt-table-head)]`}>
+                  {c.sigla}
                 </div>
-                <div className="flex-1">
-                  <p className="text-[13px] font-semibold text-slate-200">{f.nome}</p>
-                  <p className="text-[10px] text-slate-600">Filial {f.cod}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-slate-200 truncate">{c.nome}</p>
+                  <p className="text-[10px] text-slate-600">
+                    {c.banco !== "—" ? c.banco + " · " : ""}
+                    {usandoConta ? `Conta ${c.cod}` : `Filial ${c.cod}`}
+                  </p>
                 </div>
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${f.liquido >= 0 ? "bg-emerald-400/10 border-emerald-400/20 text-emerald-300" : "bg-rose-400/10 border-rose-400/20 text-rose-300"}`}>
-                  {f.liquido >= 0 ? "Superávit" : "Déficit"}
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${c.liquido >= 0 ? "bg-emerald-400/10 border-emerald-400/20 text-emerald-300" : "bg-rose-400/10 border-rose-400/20 text-rose-300"}`}>
+                  {c.liquido >= 0 ? "Superávit" : "Déficit"}
                 </span>
               </div>
               <div className="mb-3">
                 <p className="text-[10px] text-slate-600">Resultado líquido do período</p>
-                <p className={`text-[22px] font-black leading-none tabular-nums ${f.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
-                  {f.liquido >= 0 ? "+" : ""}{fmtBRL(f.liquido)}
+                <p className={`text-[22px] font-black leading-none tabular-nums ${c.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
+                  {c.liquido >= 0 ? "+" : ""}{fmtBRL(c.liquido)}
                 </p>
               </div>
               <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
                 {[
-                  { label: "Entradas no período", value: `+${fmtK(f.entradas)}`,  clr: "text-emerald-300" },
-                  { label: "Saídas no período",   value: `-${fmtK(f.saidas)}`,    clr: f.saidas > 0 ? "text-rose-300" : "text-slate-500" },
-                  { label: "Lançamentos",          value: String(f.lancamentos.length), clr: "text-slate-300" },
+                  { label: "Entradas",     value: `+${fmtK(c.entradas)}`, clr: "text-emerald-300" },
+                  { label: "Saídas",       value: `-${fmtK(c.saidas)}`,   clr: c.saidas > 0 ? "text-rose-300" : "text-slate-500" },
+                  { label: "Lançamentos",  value: String(c.lancamentos.length), clr: "text-slate-300" },
                 ].map(row => (
                   <div key={row.label} className="flex items-center justify-between text-[11px]">
                     <span className="text-slate-600">{row.label}</span>
@@ -1702,17 +1718,17 @@ function ScreenBancos() {
         ))}
       </div>
 
-      {/* Extrato com seletor de filial */}
+      {/* Extrato com seletor de conta/filial */}
       <AnimatedCard delay={380}>
         <SectionCard>
           <div className="flex items-center border-b border-[var(--sgt-divider)] px-4 pt-1 overflow-x-auto">
-            {porFilial.map(f => (
-              <button key={f.cod} onClick={() => setExtratoFilial(f.cod)}
+            {porConta.map(c => (
+              <button key={c.cod} onClick={() => setExtratoKey(c.cod)}
                 className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
-                  filialAtiva === f.cod ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                  chaveAtiva === c.cod ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
                 }`}>
-                <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${f.paleta.border}`}>{f.sigla}</span>
-                {f.nome}
+                <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${c.paleta.border}`}>{c.sigla}</span>
+                {c.nome}
               </button>
             ))}
             <div className="ml-auto pb-2 flex gap-3 shrink-0">
@@ -1726,14 +1742,27 @@ function ScreenBancos() {
           </div>
           <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">
-              {filialData?.lancamentos.length ?? 0} lançamentos · {filialData?.nome ?? "—"}
+              {contaAtiva?.lancamentos.length ?? 0} lançamentos ·{" "}
+              {contaAtiva?.banco !== "—" ? `${contaAtiva?.banco} · ` : ""}
+              {contaAtiva?.nome ?? "—"}
             </span>
           </div>
-          {(filialData?.lancamentos ?? []).slice(0, 20).map((r, i) => {
+          {(contaAtiva?.lancamentos ?? []).slice(0, 20).map((r, i) => {
             const isCredito = r.ORIGEM === "LB_C";
-            const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
-            const desc = r.TIPO_DOCUMENTO ? `${r.TIPO_DOCUMENTO} · ${r.DOCUMENTO ?? ""}` : (r.DOCUMENTO ?? "—");
-            const meta = r.DATA_EMISSAO ? fmtDate(r.DATA_EMISSAO.slice(0, 10)) : "—";
+            const val  = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+            // Descrição: historico > tipo_doc + doc > doc > "—"
+            const desc = r.HISTORICO
+              ?? (r.TIPO_DOCUMENTO && r.DOCUMENTO ? `${r.TIPO_DOCUMENTO} · ${r.DOCUMENTO}` : null)
+              ?? r.DOCUMENTO
+              ?? "—";
+            // Data: lançamento > emissão > compensação
+            const dataExib = r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? r.DATA_COMPENSACAO;
+            const meta = [
+              dataExib ? fmtDate(dataExib.slice(0, 10)) : null,
+              r.NUM_CHEQUE ? `Cheque ${r.NUM_CHEQUE}` : null,
+              r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}`   : null,
+            ].filter(Boolean).join(" · ") || "—";
+
             return (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
                 <div className={`h-2 w-2 rounded-full shrink-0 ${isCredito ? "bg-emerald-400" : "bg-rose-400"}`} />
@@ -1747,8 +1776,8 @@ function ScreenBancos() {
               </div>
             );
           })}
-          {(filialData?.lancamentos.length ?? 0) === 0 && (
-            <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum lançamento nesta filial</p>
+          {(contaAtiva?.lancamentos.length ?? 0) === 0 && (
+            <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum lançamento nesta conta</p>
           )}
         </SectionCard>
       </AnimatedCard>

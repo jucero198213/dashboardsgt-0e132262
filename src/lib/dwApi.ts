@@ -105,6 +105,16 @@ export interface DwRow {
   CENTRO_CUSTO: string | null;
   SINTETICA: string | null;
   ANALITICA: string | null;
+  // ── Campos bancários (LB_D / LB_C) ──────────────────────────
+  DATA_LANCAMENTO:   string | null;
+  COD_BANCO:         string | null;
+  NOME_BANCO:        string | null;
+  NUM_CHEQUE:        string | null;
+  NUM_AVISO:         string | null;
+  DATA_COMPENSACAO:  string | null;
+  HISTORICO:         string | null;
+  NOME_CONTA:        string | null;
+  COD_CONTA:         string | null;
 }
 
 export interface DwFetchResponse {
