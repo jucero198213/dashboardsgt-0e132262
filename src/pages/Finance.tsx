@@ -1210,26 +1210,34 @@ function ScreenCategorias() {
         </AnimatedCard>
 
         <AnimatedCard delay={60}>
-          <div className="rounded-[12px] border border-rose-400/20 bg-rose-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-400/70">Total Despesas</p>
-            <div>
-              <p className="text-[26px] font-black text-rose-300 mt-2 tabular-nums">{fmtK(totalDesp)}</p>
-              <p className="text-[11px] text-slate-600 mt-1">{despesas.length} centros de custo</p>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/60 to-rose-700/20" />
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Despesas</p>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-rose-400/[0.08] border border-rose-400/[0.15] text-rose-300">
+                <TrendingDown className="h-3.5 w-3.5" />
+              </div>
             </div>
-            <div className="mt-3 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{fmtK(totalDesp)}</p>
+            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{despesas.length} centros de custo</p>
+            <div className="mt-2 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
               <div className="h-1.5 rounded-full bg-rose-400/60" style={{ width: `${total>0?(totalDesp/total*100).toFixed(0):0}%` }} />
             </div>
           </div>
         </AnimatedCard>
 
         <AnimatedCard delay={120}>
-          <div className="rounded-[12px] border border-emerald-400/20 bg-emerald-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400/70">Total Receitas</p>
-            <div>
-              <p className="text-[26px] font-black text-emerald-300 mt-2 tabular-nums">{fmtK(totalRec)}</p>
-              <p className="text-[11px] text-slate-600 mt-1">{receitas.length} centros de custo</p>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/60 to-emerald-700/20" />
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Receitas</p>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-emerald-400/[0.08] border border-emerald-400/[0.15] text-emerald-300">
+                <TrendingUp className="h-3.5 w-3.5" />
+              </div>
             </div>
-            <div className="mt-3 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{fmtK(totalRec)}</p>
+            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{receitas.length} centros de custo</p>
+            <div className="mt-2 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
               <div className="h-1.5 rounded-full bg-emerald-400/60" style={{ width: `${total>0?(totalRec/total*100).toFixed(0):0}%` }} />
             </div>
           </div>
