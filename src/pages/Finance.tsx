@@ -1042,73 +1042,109 @@ function ScreenRelatorios() {
 
 
 function ScreenFornecedores() {
+  const { contasPagar, dwRawData, isFetchingDw } = useFinancialData();
   const [search, setSearch] = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
 
-  const filtered = useMemo(() =>
-    FORNECEDORES.filter(f => {
-      const q = search.toLowerCase();
-      const matchQ = !q || f.nome.toLowerCase().includes(q) || f.cnpj.includes(q);
-      const matchC = filtroCategoria === "todos" || f.categoria === filtroCategoria;
-      const matchS = filtroStatus   === "todos" || f.status    === filtroStatus;
-      return matchQ && matchC && matchS;
-    }),
-    [search, filtroCategoria, filtroStatus]
-  );
+  // Agrega por COD_PARCEIRO (CP apenas)
+  const fornecedores = useMemo(() => {
+    const cpRows = dwRawData.filter(r => r.ORIGEM === "CP" && r.NOME_PARCEIRO);
+    const map = new Map<string, {
+      cod: string; nome: string; volume: number;
+      titulosAbertos: number; titulosTotal: number;
+      prazoTotal: number; prazoCount: number; temVencido: boolean;
+    }>();
 
-  const totalAtivos    = FORNECEDORES.filter(f => f.status === "Ativo").length;
-  const totalBloqueados = FORNECEDORES.filter(f => f.status === "Bloqueado").length;
-  const volumeTotal    = FORNECEDORES.reduce((s, f) => s + f.volume12m, 0);
-  const titulosAbertos = FORNECEDORES.reduce((s, f) => s + f.titulos, 0);
-  const categorias     = [...new Set(FORNECEDORES.map(f => f.categoria))];
+    cpRows.forEach(r => {
+      const k = r.COD_PARCEIRO ?? r.NOME_PARCEIRO ?? "";
+      if (!map.has(k)) map.set(k, { cod: String(r.COD_PARCEIRO ?? ""), nome: r.NOME_PARCEIRO ?? "N/A", volume: 0, titulosAbertos: 0, titulosTotal: 0, prazoTotal: 0, prazoCount: 0, temVencido: false });
+      const e = map.get(k)!;
+      const val = r.VLR_PARCELA ?? r.VLRDOC ?? 0;
+      e.volume += val;
+      e.titulosTotal++;
+      const pago = (r.VLR_PAGO ?? 0) >= val && val > 0;
+      if (!pago) e.titulosAbertos++;
+      if (r.DATA_EMISSAO && r.DATA_VENCIMENTO) {
+        const dias = Math.floor((new Date(r.DATA_VENCIMENTO).getTime() - new Date(r.DATA_EMISSAO).getTime()) / 86400000);
+        if (dias > 0 && dias < 365) { e.prazoTotal += dias; e.prazoCount++; }
+      }
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      if (!pago && r.DATA_VENCIMENTO && new Date(r.DATA_VENCIMENTO) < hoje) e.temVencido = true;
+    });
+
+    return Array.from(map.values())
+      .sort((a,b) => b.volume - a.volume)
+      .map(f => ({
+        cod:     f.cod,
+        nome:    f.nome,
+        avatar:  f.nome.slice(0,2).toUpperCase(),
+        volume:  f.volume,
+        titulos: f.titulosAbertos,
+        prazo:   f.prazoCount > 0 ? Math.round(f.prazoTotal / f.prazoCount) : 0,
+        status:  f.temVencido ? "Com vencidos" : "Ativo",
+      }));
+  }, [dwRawData]);
+
+  const filtered = useMemo(() => fornecedores.filter(f => {
+    const q = search.toLowerCase();
+    const matchQ = !q || f.nome.toLowerCase().includes(q) || f.cod.toLowerCase().includes(q);
+    const matchS = filtroStatus === "todos" || f.status === filtroStatus;
+    return matchQ && matchS;
+  }), [fornecedores, search, filtroStatus]);
+
+  const totalAtivos    = fornecedores.filter(f => f.status === "Ativo").length;
+  const totalComVenc   = fornecedores.filter(f => f.status === "Com vencidos").length;
+  const volumeTotal    = fornecedores.reduce((s,f) => s+f.volume, 0);
+  const titulosAbertos = fornecedores.reduce((s,f) => s+f.titulos, 0);
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando fornecedores..." />;
+
+  if (fornecedores.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
+      <Building2 className="h-10 w-10 opacity-30" />
+      <p className="text-[13px]">Nenhum fornecedor no período. Clique em Atualizar.</p>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total de Fornecedores", value: String(FORNECEDORES.length),  sub: `${totalAtivos} ativos`,                    icon: Building2,     stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]",  delay: 0   },
-          { label: "Volume Comprado 12m",   value: fmtK(volumeTotal),            sub: "Total de pagamentos realizados",           icon: TrendingDown,  stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",  delay: 60  },
-          { label: "Títulos em Aberto",     value: String(titulosAbertos),       sub: "Pagamentos pendentes",                     icon: Clock,         stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 120 },
-          { label: "Bloqueados / Inativos", value: String(totalBloqueados),      sub: `de ${FORNECEDORES.length} fornecedores`,   icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 180 },
+          { label: "Total de Fornecedores", value: String(fornecedores.length), sub: `${totalAtivos} sem vencidos`,      icon: Building2,     stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]",  delay: 0   },
+          { label: "Volume no Período",      value: fmtK(volumeTotal),           sub: "Total de pagamentos",             icon: TrendingDown,  stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",  delay: 60  },
+          { label: "Títulos em Aberto",      value: String(titulosAbertos),      sub: "Pagamentos pendentes",            icon: Clock,         stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 120 },
+          { label: "Com Títulos Vencidos",   value: String(totalComVenc),        sub: `de ${fornecedores.length} forn.`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 180 },
         ].map(k => <KpiCard key={k.label} {...k} />)}
       </div>
+
       <FilterBar search={search} onSearch={setSearch}>
         <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option value="todos">Todas as categorias</option>
-          {categorias.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
         <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}
           className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
           <option value="todos">Status: Todos</option>
-          <option value="Ativo">Ativo</option>
-          <option value="Bloqueado">Bloqueado</option>
-          <option value="Inativo">Inativo</option>
+          <option value="Ativo">Sem vencidos</option>
+          <option value="Com vencidos">Com vencidos</option>
         </select>
         <span className="text-[11px] text-slate-600 ml-1">{filtered.length} fornecedores</span>
       </FilterBar>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {filtered.map((f, i) => (
-          <AnimatedCard key={f.id} delay={i * 60}>
-            <div className="flex flex-col gap-3 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 cursor-pointer hover:border-[var(--sgt-border-medium)] transition-all">
+          <AnimatedCard key={f.cod || f.nome} delay={i * 40}>
+            <div className={`flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 hover:border-[var(--sgt-border-medium)] transition-all ${f.status === "Com vencidos" ? "border-rose-400/30" : "border-[var(--sgt-border-subtle)]"}`}>
               <div className="flex items-center gap-3">
                 <Avatar initials={f.avatar} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-200 truncate">{f.nome}</p>
-                  <p className="text-[10px] text-slate-600">{f.cnpj}</p>
+                  <p className="text-[12px] font-semibold text-slate-200 truncate">{f.nome}</p>
+                  <p className="text-[10px] text-slate-600">Cód. {f.cod || "—"}</p>
                 </div>
                 <StatusBadge s={f.status} />
               </div>
-              <p className="text-[11px] text-slate-600">{f.categoria}</p>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: "Últimos 12m", value: fmtK(f.volume12m), clr: "text-blue-300" },
-                  { label: "Em aberto", value: String(f.titulos), clr: f.titulos > 2 ? "text-rose-300" : f.titulos > 0 ? "text-amber-300" : "text-slate-300" },
-                  { label: "Prazo médio", value: `${f.prazo}d`, clr: "text-slate-300" },
+                  { label: "Volume",      value: fmtK(f.volume), clr: "text-blue-300" },
+                  { label: "Em aberto",   value: String(f.titulos), clr: f.titulos > 2 ? "text-rose-300" : f.titulos > 0 ? "text-amber-300" : "text-slate-400" },
+                  { label: "Prazo médio", value: f.prazo > 0 ? `${f.prazo}d` : "—", clr: "text-slate-300" },
                 ].map(s => (
                   <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-2 py-1.5">
                     <p className="text-[9px] text-slate-600">{s.label}</p>
@@ -1125,157 +1161,126 @@ function ScreenFornecedores() {
 }
 
 function ScreenClientes() {
+  const { contasReceber, dwRawData, isFetchingDw } = useFinancialData();
   const [search, setSearch] = useState("");
-  const [filtroSegmento, setFiltroSegmento] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
 
-  const segmentos = [...new Set(CLIENTES.map(c => c.segmento))];
+  // Agrega por COD_PARCEIRO (CR apenas)
+  const clientes = useMemo(() => {
+    const crRows = dwRawData.filter(r => r.ORIGEM === "CR" && r.NOME_PARCEIRO);
+    const map = new Map<string, {
+      cod: string; nome: string; faturamento: number;
+      titulosAbertos: number; prazoTotal: number; prazoCount: number; temAtraso: boolean;
+    }>();
 
-  const filtered = useMemo(() =>
-    CLIENTES.filter(c => {
-      const q = search.toLowerCase();
-      const matchQ = !q || c.nome.toLowerCase().includes(q) || c.cnpj.includes(q) || c.contato.toLowerCase().includes(q);
-      const matchSeg = filtroSegmento === "todos" || c.segmento === filtroSegmento;
-      const matchSt  = filtroStatus   === "todos" || c.status   === filtroStatus;
-      return matchQ && matchSeg && matchSt;
-    }),
-    [search, filtroSegmento, filtroStatus]
+    crRows.forEach(r => {
+      const k = r.COD_PARCEIRO ?? r.NOME_PARCEIRO ?? "";
+      if (!map.has(k)) map.set(k, { cod: String(r.COD_PARCEIRO ?? ""), nome: r.NOME_PARCEIRO ?? "N/A", faturamento: 0, titulosAbertos: 0, prazoTotal: 0, prazoCount: 0, temAtraso: false });
+      const e = map.get(k)!;
+      const val = r.VLR_PARCELA ?? r.VLRDOC ?? 0;
+      e.faturamento += val;
+      const recebido = (r.VLR_PAGO ?? 0) >= val && val > 0;
+      if (!recebido) e.titulosAbertos++;
+      if (r.DATA_EMISSAO && r.DATA_VENCIMENTO) {
+        const dias = Math.floor((new Date(r.DATA_VENCIMENTO).getTime() - new Date(r.DATA_EMISSAO).getTime()) / 86400000);
+        if (dias > 0 && dias < 365) { e.prazoTotal += dias; e.prazoCount++; }
+      }
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      if (!recebido && r.DATA_VENCIMENTO && new Date(r.DATA_VENCIMENTO) < hoje) e.temAtraso = true;
+    });
+
+    return Array.from(map.values())
+      .sort((a,b) => b.faturamento - a.faturamento)
+      .map(c => ({
+        cod:          c.cod,
+        nome:         c.nome,
+        avatar:       c.nome.slice(0,2).toUpperCase(),
+        faturamento:  c.faturamento,
+        titulos:      c.titulosAbertos,
+        prazo:        c.prazoCount > 0 ? Math.round(c.prazoTotal / c.prazoCount) : 0,
+        inadimplente: c.temAtraso,
+        status:       c.temAtraso ? "Inadimplente" : "Ativo",
+      }));
+  }, [dwRawData]);
+
+  const filtered = useMemo(() => clientes.filter(c => {
+    const q = search.toLowerCase();
+    const matchQ = !q || c.nome.toLowerCase().includes(q) || c.cod.toLowerCase().includes(q);
+    const matchS = filtroStatus === "todos" || c.status === filtroStatus;
+    return matchQ && matchS;
+  }), [clientes, search, filtroStatus]);
+
+  const totalAtivos        = clientes.filter(c => !c.inadimplente).length;
+  const totalInadimplentes = clientes.filter(c => c.inadimplente).length;
+  const faturamentoTotal   = clientes.reduce((s,c) => s+c.faturamento, 0);
+  const titulosAbertos     = clientes.reduce((s,c) => s+c.titulos, 0);
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando clientes..." />;
+
+  if (clientes.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
+      <Users className="h-10 w-10 opacity-30" />
+      <p className="text-[13px]">Nenhum cliente no período. Clique em Atualizar.</p>
+    </div>
   );
-
-  const totalAtivos      = CLIENTES.filter(c => c.status === "Ativo").length;
-  const totalInadimplentes = CLIENTES.filter(c => c.inadimplente).length;
-  const faturamentoTotal = CLIENTES.reduce((s, c) => s + c.faturamento12m, 0);
-  const titulosAbertos   = CLIENTES.reduce((s, c) => s + c.titulosAbertos, 0);
-
-  const segCor: Record<string, string> = {
-    "Transportadora":  "bg-blue-400/10 border-blue-400/20 text-blue-300",
-    "Courier":         "bg-teal-400/10 border-teal-400/20 text-teal-300",
-    "Frete Rodoviário":"bg-amber-400/10 border-amber-400/20 text-amber-300",
-    "Logística":       "bg-violet-400/10 border-violet-400/20 text-violet-300",
-    "Gestão de Frota": "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
-  };
-
-  const avCor: Record<string, string> = {
-    TL: "bg-blue-400/10 border-blue-400/20 text-blue-300",
-    VE: "bg-teal-400/10 border-teal-400/20 text-teal-300",
-    CR: "bg-amber-400/10 border-amber-400/20 text-amber-300",
-    RL: "bg-violet-400/10 border-violet-400/20 text-violet-300",
-    BF: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",
-    PF: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
-    LM: "bg-rose-400/10 border-rose-400/20 text-rose-300",
-    DC: "bg-pink-400/10 border-pink-400/20 text-pink-300",
-    TF: "bg-slate-400/10 border-slate-400/20 text-slate-400",
-    SL: "bg-indigo-400/10 border-indigo-400/20 text-indigo-300",
-    NC: "bg-rose-400/10 border-rose-400/20 text-rose-300",
-    AF: "bg-orange-400/10 border-orange-400/20 text-orange-300",
-  };
 
   return (
     <div className="flex flex-col gap-4">
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total de Clientes",   value: String(CLIENTES.length),          sub: `${totalAtivos} ativos`,                    icon: Users,        stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]" },
-          { label: "Faturamento 12m",     value: fmtK(faturamentoTotal),           sub: "Receita gerada pelos clientes",            icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-          { label: "Títulos em Aberto",   value: String(titulosAbertos),           sub: "Recebimentos pendentes",                   icon: Clock,        stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
-          { label: "Inadimplentes",       value: String(totalInadimplentes),       sub: `${((totalInadimplentes/CLIENTES.length)*100).toFixed(0)}% da carteira`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
+          { label: "Total de Clientes",  value: String(clientes.length),   sub: `${totalAtivos} em dia`,                    icon: Users,         stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"   },
+          { label: "Faturamento",        value: fmtK(faturamentoTotal),     sub: "Receita gerada no período",                icon: TrendingUp,    stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
+          { label: "Títulos em Aberto",  value: String(titulosAbertos),     sub: "Recebimentos pendentes",                   icon: Clock,         stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
+          { label: "Inadimplentes",      value: String(totalInadimplentes), sub: `${clientes.length > 0 ? ((totalInadimplentes/clientes.length)*100).toFixed(0) : 0}% da carteira`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
         ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* Filtros */}
       <FilterBar search={search} onSearch={setSearch}>
         <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select
-          value={filtroSegmento}
-          onChange={e => setFiltroSegmento(e.target.value)}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none"
-        >
-          <option value="todos">Todos os segmentos</option>
-          {segmentos.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select
-          value={filtroStatus}
-          onChange={e => setFiltroStatus(e.target.value)}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none"
-        >
+        <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}
+          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
           <option value="todos">Status: Todos</option>
-          <option value="Ativo">Ativo</option>
+          <option value="Ativo">Em dia</option>
           <option value="Inadimplente">Inadimplente</option>
-          <option value="Inativo">Inativo</option>
         </select>
         <span className="text-[11px] text-slate-600 ml-1">{filtered.length} clientes</span>
       </FilterBar>
 
-      {/* Grade de cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {filtered.map((c, i) => {
-          const avCls = avCor[c.avatar] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
-          const segCls = segCor[c.segmento] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
-          return (
-            <AnimatedCard key={c.id} delay={i * 50}>
-              <div className={`group flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 cursor-pointer transition-all ${
-              c.inadimplente
-                ? "border-rose-400/35 hover:border-rose-400/60"
-                : "border-[var(--sgt-border-subtle)] hover:border-[var(--sgt-border-medium)]"
-            }`}>
-
-                {/* Header: avatar + nome + status */}
-                <div className="flex items-start gap-2.5">
-                  <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-semibold text-[11px] ${avCls}`}>
-                    {c.avatar}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-slate-200 leading-tight truncate">{c.nome}</p>
-                    <p className="text-[10px] text-slate-600 mt-0.5 truncate">{c.cnpj}</p>
-                  </div>
-                  <StatusBadge s={c.status} />
+        {filtered.map((c, i) => (
+          <AnimatedCard key={c.cod || c.nome} delay={i * 40}>
+            <div className={`group flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 cursor-pointer transition-all ${c.inadimplente ? "border-rose-400/35 hover:border-rose-400/60" : "border-[var(--sgt-border-subtle)] hover:border-[var(--sgt-border-medium)]"}`}>
+              <div className="flex items-start gap-2.5">
+                <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-semibold text-[11px] bg-blue-400/10 border-blue-400/20 text-blue-300`}>{c.avatar}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold text-slate-200 leading-tight truncate">{c.nome}</p>
+                  <p className="text-[10px] text-slate-600 mt-0.5">Cód. {c.cod || "—"}</p>
                 </div>
-
-                {/* Segmento */}
-                <span className={`self-start rounded-md border px-2 py-0.5 text-[10px] font-medium ${segCls}`}>
-                  {c.segmento}
-                </span>
-
-                {/* Localidade + contato */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
-                    <MapPin className="h-3 w-3 shrink-0" />{c.cidade}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
-                    <Users className="h-3 w-3 shrink-0" />{c.contato}
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-1.5">
-                  {[
-                    { label: "Fat. 12m",     value: fmtK(c.faturamento12m), clr: "text-emerald-300" },
-                    { label: "Em aberto",    value: String(c.titulosAbertos), clr: c.titulosAbertos > 1 ? "text-rose-300" : c.titulosAbertos === 1 ? "text-amber-300" : "text-slate-400" },
-                    { label: c.inadimplente ? "Dias em atraso" : "Prazo médio",  value: c.inadimplente ? `+${agingDias("2025-05-13")}d` : `${c.prazoMedio}d`,     clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
-                  ].map(s => (
-                    <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
-                      <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
-                      <p className={`text-[11px] font-semibold leading-none ${s.clr}`}>{s.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Ações */}
-                <div className="flex gap-1.5 pt-0.5">
-                  <button title="Ver títulos" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
-                    <Eye className="h-3 w-3" /> Títulos
-                  </button>
-                  <button title="Enviar cobrança" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
-                    <Send className="h-3 w-3" /> Cobrar
-                  </button>
-                  <button title="Editar" className="ml-auto flex h-6 w-6 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300 transition-colors">
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                </div>
+                <StatusBadge s={c.status} />
               </div>
-            </AnimatedCard>
-          );
-        })}
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { label: "Faturamento", value: fmtK(c.faturamento), clr: "text-emerald-300" },
+                  { label: "Em aberto",   value: String(c.titulos),    clr: c.titulos > 1 ? "text-rose-300" : c.titulos === 1 ? "text-amber-300" : "text-slate-400" },
+                  { label: c.inadimplente ? "Dias atraso" : "Prazo médio", value: c.inadimplente ? `+${agingDias(contasReceber.find(r => r.cliente === c.nome && dsReceber(r) === "Em Atraso")?.vencimento ?? new Date().toISOString().slice(0,10))}d` : c.prazo > 0 ? `${c.prazo}d` : "—", clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
+                ].map(s => (
+                  <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
+                    <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
+                    <p className={`text-[11px] font-semibold leading-none ${s.clr}`}>{s.value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-1.5 pt-0.5">
+                <button title="Ver títulos" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
+                  <Eye className="h-3 w-3" /> Títulos
+                </button>
+                <button title="Enviar cobrança" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
+                  <Send className="h-3 w-3" /> Cobrar
+                </button>
+              </div>
+            </div>
+          </AnimatedCard>
+        ))}
       </div>
 
       {filtered.length === 0 && (
