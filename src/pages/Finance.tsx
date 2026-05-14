@@ -1265,9 +1265,14 @@ function ScreenClientes() {
 }
 
 function ScreenCategorias() {
-  const { dwRawData, isFetchingDw } = useFinancialData();
+  const { dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
   const [filtroTipo, setFiltroTipo] = useState<"todos"|"Despesa"|"Receita">("todos");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (!isFetchingDw && dwRawData.length === 0) fetchFromDW();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Paleta de cores sequencial para centros de custo ──────────────────────
   const PALETA = [
