@@ -1294,65 +1294,198 @@ function ScreenClientes() {
 }
 
 function ScreenCategorias() {
-  const despesas = CATEGORIAS.filter(c => c.tipo === "Despesa");
-  const receitas = CATEGORIAS.filter(c => c.tipo === "Receita");
-  const totalDesp = despesas.reduce((s, c) => s + c.valor, 0);
-  const totalRec = receitas.reduce((s, c) => s + c.valor, 0);
-  const total = totalDesp + totalRec;
+  const { dwRawData, isFetchingDw } = useFinancialData();
+  const [filtroTipo, setFiltroTipo] = useState<"todos"|"Despesa"|"Receita">("todos");
+  const [search, setSearch] = useState("");
 
-  const barCor: Record<string, string> = {
-    amber: "bg-amber-400", blue: "bg-blue-400", violet: "bg-violet-400",
-    teal: "bg-teal-400", rose: "bg-rose-400", emerald: "bg-emerald-400", cyan: "bg-cyan-400",
-  };
-  const icoCor: Record<string, string> = {
-    amber: "bg-amber-400/10 border-amber-400/20 text-amber-300",
-    blue: "bg-blue-400/10 border-blue-400/20 text-blue-300",
-    violet: "bg-violet-400/10 border-violet-400/20 text-violet-300",
-    teal: "bg-teal-400/10 border-teal-400/20 text-teal-300",
-    rose: "bg-rose-400/10 border-rose-400/20 text-rose-300",
-    emerald: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300",
-    cyan: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",
-  };
-  const hexCor: Record<string, string> = {
-    amber: "#fbbf24", blue: "#60a5fa", violet: "#a78bfa",
-    teal: "#2dd4bf", rose: "#fb7185", emerald: "#34d399", cyan: "#22d3ee",
-  };
+  // ── Paleta de cores sequencial para centros de custo ──────────────────────
+  const PALETA = [
+    { bar: "bg-amber-400",   ico: "bg-amber-400/10 border-amber-400/20 text-amber-300",   hex: "#fbbf24" },
+    { bar: "bg-blue-400",    ico: "bg-blue-400/10 border-blue-400/20 text-blue-300",     hex: "#60a5fa" },
+    { bar: "bg-violet-400",  ico: "bg-violet-400/10 border-violet-400/20 text-violet-300", hex: "#a78bfa" },
+    { bar: "bg-teal-400",    ico: "bg-teal-400/10 border-teal-400/20 text-teal-300",     hex: "#2dd4bf" },
+    { bar: "bg-rose-400",    ico: "bg-rose-400/10 border-rose-400/20 text-rose-300",     hex: "#fb7185" },
+    { bar: "bg-emerald-400", ico: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300", hex: "#34d399" },
+    { bar: "bg-cyan-400",    ico: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",     hex: "#22d3ee" },
+    { bar: "bg-orange-400",  ico: "bg-orange-400/10 border-orange-400/20 text-orange-300", hex: "#fb923c" },
+    { bar: "bg-pink-400",    ico: "bg-pink-400/10 border-pink-400/20 text-pink-300",     hex: "#f472b6" },
+    { bar: "bg-indigo-400",  ico: "bg-indigo-400/10 border-indigo-400/20 text-indigo-300", hex: "#818cf8" },
+  ];
+
+  // ── Agrega dwRawData por CENTRO_CUSTO ─────────────────────────────────────
+  const categorias = useMemo(() => {
+    const mapDesp = new Map<string, { cod: string; nome: string; valor: number; qtd: number }>();
+    const mapRec  = new Map<string, { cod: string; nome: string; valor: number; qtd: number }>();
+
+    dwRawData.forEach(r => {
+      const nome = r.CENTRO_CUSTO ?? r.ANALITICA ?? r.SINTETICA ?? "Sem categoria";
+      const cod  = String(r.CODCUS ?? r.CODCGA ?? "");
+      const val  = r.VLR_PARCELA ?? r.VLR_LIQUIDO ?? r.VLRDOC ?? 0;
+      if (!val || val <= 0) return;
+
+      if (r.ORIGEM === "CP") {
+        const k = cod || nome;
+        if (!mapDesp.has(k)) mapDesp.set(k, { cod, nome, valor: 0, qtd: 0 });
+        const e = mapDesp.get(k)!;
+        e.valor += val;
+        e.qtd++;
+      } else if (r.ORIGEM === "CR") {
+        const k = cod || nome;
+        if (!mapRec.has(k)) mapRec.set(k, { cod, nome, valor: 0, qtd: 0 });
+        const e = mapRec.get(k)!;
+        e.valor += val;
+        e.qtd++;
+      }
+    });
+
+    const desp = Array.from(mapDesp.values()).sort((a,b) => b.valor - a.valor);
+    const rec  = Array.from(mapRec.values()).sort((a,b) => b.valor - a.valor);
+    const totalDesp = desp.reduce((s,c) => s+c.valor, 0);
+    const totalRec  = rec.reduce((s,c)  => s+c.valor, 0);
+
+    return {
+      despesas: desp.map((c,i) => ({ ...c, tipo: "Despesa" as const, pct: totalDesp > 0 ? (c.valor/totalDesp)*100 : 0, paleta: PALETA[i % PALETA.length] })),
+      receitas:  rec.map((c,i)  => ({ ...c, tipo: "Receita" as const, pct: totalRec > 0  ? (c.valor/totalRec)*100  : 0, paleta: PALETA[i % PALETA.length] })),
+      totalDesp,
+      totalRec,
+    };
+  }, [dwRawData]);
+
+  const { despesas, receitas, totalDesp, totalRec } = categorias;
+  const total = totalDesp + totalRec;
 
   const donutData = [
     { name: "Despesas", value: totalDesp, fill: "#fb7185" },
     { name: "Receitas", value: totalRec,  fill: "#34d399" },
   ];
 
-  const CustomDonutLabel = ({ cx, cy }: any) => (
-    <>
-      <text x={cx} y={cy - 6} textAnchor="middle" fill="#e2e8f0" fontSize={18} fontWeight={700}>{((totalRec - totalDesp) / totalRec * 100).toFixed(0)}%</text>
-      <text x={cx} y={cy + 12} textAnchor="middle" fill="#64748b" fontSize={10}>margem</text>
-    </>
+  const allItems = [
+    ...despesas.map(c => ({ ...c, tipo: "Despesa" as const })),
+    ...receitas.map(c => ({ ...c, tipo: "Receita" as const })),
+  ].filter(c => {
+    const q = search.toLowerCase();
+    const matchQ = !q || c.nome.toLowerCase().includes(q) || c.cod.toLowerCase().includes(q);
+    const matchT = filtroTipo === "todos" || c.tipo === filtroTipo;
+    return matchQ && matchT;
+  });
+
+  const CustomDonutLabel = ({ cx, cy }: any) => {
+    const margem = total > 0 ? ((totalRec - totalDesp) / total * 100) : 0;
+    return (
+      <>
+        <text x={cx} y={cy - 6} textAnchor="middle" fill="#e2e8f0" fontSize={18} fontWeight={700}>{margem >= 0 ? "+" : ""}{margem.toFixed(0)}%</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fill="#64748b" fontSize={10}>margem</text>
+      </>
+    );
+  };
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando categorias..." />;
+
+  if (total === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
+      <Tag className="h-10 w-10 opacity-30" />
+      <p className="text-[13px]">Nenhum dado por centro de custo no período. Clique em Atualizar.</p>
+    </div>
   );
 
-  function CatList({ cats }: { cats: typeof CATEGORIAS }) {
-    return (
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Donut + totais */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <AnimatedCard>
+          <SectionCard>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="text-[12px] font-semibold text-slate-300">Composição do período</span>
+            </div>
+            <div className="flex items-center justify-center py-2" style={{ height: 160 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={donutData} cx="50%" cy="50%" innerRadius={48} outerRadius={68} dataKey="value" labelLine={false} label={<CustomDonutLabel />}>
+                    {donutData.map((d,i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
+                  </Pie>
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center gap-4 pb-3">
+              <span className="flex items-center gap-1.5 text-[10px] text-rose-300"><span className="h-2 w-2 rounded-full bg-rose-400" />Despesas {total>0?((totalDesp/total)*100).toFixed(0):0}%</span>
+              <span className="flex items-center gap-1.5 text-[10px] text-emerald-300"><span className="h-2 w-2 rounded-full bg-emerald-400" />Receitas {total>0?((totalRec/total)*100).toFixed(0):0}%</span>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        <AnimatedCard delay={60}>
+          <div className="rounded-[12px] border border-rose-400/20 bg-rose-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-400/70">Total Despesas</p>
+            <div>
+              <p className="text-[26px] font-black text-rose-300 mt-2 tabular-nums">{fmtK(totalDesp)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">{despesas.length} centros de custo</p>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-rose-400/60" style={{ width: `${total>0?(totalDesp/total*100).toFixed(0):0}%` }} />
+            </div>
+          </div>
+        </AnimatedCard>
+
+        <AnimatedCard delay={120}>
+          <div className="rounded-[12px] border border-emerald-400/20 bg-emerald-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400/70">Total Receitas</p>
+            <div>
+              <p className="text-[26px] font-black text-emerald-300 mt-2 tabular-nums">{fmtK(totalRec)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">{receitas.length} centros de custo</p>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-emerald-400/60" style={{ width: `${total>0?(totalRec/total*100).toFixed(0):0}%` }} />
+            </div>
+          </div>
+        </AnimatedCard>
+      </div>
+
+      {/* Filtros */}
+      <FilterBar search={search} onSearch={setSearch}>
+        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
+        {(["todos","Despesa","Receita"] as const).map(t => (
+          <button key={t} onClick={() => setFiltroTipo(t)}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${filtroTipo===t?"bg-amber-500/15 border-amber-500/30 text-amber-300":"border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>
+            {t === "todos" ? "Todos" : t === "Despesa" ? "Despesas" : "Receitas"}
+          </button>
+        ))}
+        <span className="text-[11px] text-slate-600 ml-1">{allItems.length} centros</span>
+      </FilterBar>
+
+      {/* Lista de centros de custo */}
       <div className="flex flex-col gap-2">
-        {cats.map((c, i) => {
-          const Icon = c.icon;
+        {allItems.map((c, i) => {
+          const isPc = filtroTipo === "todos" ? c.tipo === "Despesa" ? totalDesp : totalRec : (filtroTipo === "Despesa" ? totalDesp : totalRec);
+          const pct = isPc > 0 ? (c.valor / isPc) * 100 : 0;
+          const icoTotal = filtroTipo === "todos" ? c.paleta.ico : c.paleta.ico;
+
           return (
-            <AnimatedCard key={c.id} delay={i * 60}>
+            <AnimatedCard key={`${c.tipo}-${c.cod}-${c.nome}`} delay={i * 40}>
               <div className="flex items-center gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-3 hover:border-[var(--sgt-border-medium)] transition-all">
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${icoCor[c.cor]}`}>
-                  <Icon className="h-4 w-4" />
+                {/* Ícone tipo */}
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-[10px] font-bold ${c.tipo === "Despesa" ? "bg-rose-400/10 border-rose-400/20 text-rose-300" : "bg-emerald-400/10 border-emerald-400/20 text-emerald-300"}`}>
+                  {c.tipo === "Despesa" ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
                 </div>
+
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-slate-200">{c.nome}</p>
-                  <p className="text-[10px] text-slate-600">{c.qtd} lançamentos · {c.fornecedores} {c.tipo === "Despesa" ? "fornecedores" : "clientes"}</p>
-                  <div className="mt-1.5 flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-[12px] font-semibold text-slate-200 truncate">{c.nome}</p>
+                    {c.cod && <span className="text-[9px] text-slate-600 shrink-0">#{c.cod}</span>}
+                    <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-semibold border ${c.tipo === "Despesa" ? "bg-rose-400/10 border-rose-400/20 text-rose-400" : "bg-emerald-400/10 border-emerald-400/20 text-emerald-400"}`}>{c.tipo}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-600 mb-1.5">{c.qtd} lançamentos</p>
+                  <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
-                      <div className={`h-1.5 rounded-full ${barCor[c.cor]}`} style={{ width: `${c.pct}%` }} />
+                      <div className={`h-1.5 rounded-full ${c.paleta.bar}`} style={{ width: `${Math.min(pct, 100)}%` }} />
                     </div>
-                    <span className="text-[10px] font-semibold" style={{ color: hexCor[c.cor] }}>{c.pct}%</span>
+                    <span className="text-[10px] font-semibold shrink-0" style={{ color: c.paleta.hex }}>{pct.toFixed(1)}%</span>
                   </div>
                 </div>
-                <p className="text-[13px] font-semibold text-white tabular-nums text-right shrink-0">{fmtK(c.valor)}</p>
-                {/* Kebab menu — ações colapsadas */}
+
+                <p className="text-[14px] font-semibold text-white tabular-nums text-right shrink-0 ml-2">{fmtK(c.valor)}</p>
+
+                {/* Kebab */}
                 <div className="relative group/kb shrink-0">
                   <button className="flex h-6 w-6 items-center justify-center rounded-md border border-transparent text-slate-600 hover:border-[var(--sgt-border-subtle)] hover:text-slate-300 transition-colors">
                     <MoreHorizontal className="h-3.5 w-3.5" />
@@ -1366,238 +1499,6 @@ function ScreenCategorias() {
             </AnimatedCard>
           );
         })}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      {/* Donut + totais */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <AnimatedCard>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
-              <span className="text-[12px] font-semibold text-slate-300">Composição do mês</span>
-            </div>
-            <div className="flex items-center justify-center py-2" style={{ height: 160 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={donutData} cx="50%" cy="50%" innerRadius={48} outerRadius={68} dataKey="value" labelLine={false} label={<CustomDonutLabel />}>
-                    {donutData.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.85} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex justify-center gap-4 pb-3">
-              <span className="flex items-center gap-1.5 text-[10px] text-rose-300"><span className="h-2 w-2 rounded-full bg-rose-400" />Despesas {((totalDesp/total)*100).toFixed(0)}%</span>
-              <span className="flex items-center gap-1.5 text-[10px] text-emerald-300"><span className="h-2 w-2 rounded-full bg-emerald-400" />Receitas {((totalRec/total)*100).toFixed(0)}%</span>
-            </div>
-          </SectionCard>
-        </AnimatedCard>
-
-        <AnimatedCard delay={60}>
-          <div className="rounded-[12px] border border-rose-400/20 bg-rose-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-400/70">Total Despesas</p>
-            <div>
-              <p className="text-[26px] font-black text-rose-300 mt-2">{fmtK(totalDesp)}</p>
-              <p className="text-[11px] text-slate-600 mt-1">no mês · {despesas.length} categorias</p>
-            </div>
-            <div className="mt-3 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-rose-400/60" style={{ width: `${(totalDesp/total*100).toFixed(0)}%` }} />
-            </div>
-          </div>
-        </AnimatedCard>
-
-        <AnimatedCard delay={120}>
-          <div className="rounded-[12px] border border-emerald-400/20 bg-emerald-400/[0.04] px-4 py-4 h-full flex flex-col justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-400/70">Total Receitas</p>
-            <div>
-              <p className="text-[26px] font-black text-emerald-300 mt-2">{fmtK(totalRec)}</p>
-              <p className="text-[11px] text-slate-600 mt-1">no mês · {receitas.length} categorias</p>
-            </div>
-            <div className="mt-3 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-emerald-400/60" style={{ width: `${(totalRec/total*100).toFixed(0)}%` }} />
-            </div>
-          </div>
-        </AnimatedCard>
-      </div>
-
-      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Despesas</p>
-      <CatList cats={despesas} />
-      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Receitas</p>
-      <CatList cats={receitas} />
-    </div>
-  );
-}
-
-
-// ─── TELA PREVISTO ────────────────────────────────────────────────────────────
-function ScreenPrevisto() {
-  const { contasPagar, contasReceber, isFetchingDw } = useFinancialData();
-  const [horizonte, setHorizonte] = useState<30 | 60 | 90>(30);
-  const saldoAtual = BANCOS.reduce((s, b) => s + b.saldo, 0);
-
-  // Eventos futuros = títulos pendentes de CP e CR
-  const eventosPrevistos = useMemo(() => [
-    ...contasPagar.filter(c => dsPagar(c) === "Pendente" || dsPagar(c) === "Vence Hoje")
-        .map(c => ({ data: c.vencimento, valor: -c.valor, tipo: "Saída" as const, desc: c.fornecedor, doc: c.documento ?? "" })),
-    ...contasReceber.filter(c => dsReceber(c) === "Pendente" || dsReceber(c) === "Vence Hoje")
-        .map(c => ({ data: c.vencimento, valor: c.valor, tipo: "Entrada" as const, desc: c.cliente, doc: c.documento ?? "" })),
-  ].sort((a,b) => a.data.localeCompare(b.data)), [contasPagar, contasReceber]);
-
-  const projecao = useMemo(() => {
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
-    const dias: { dia: string; entradas: number; saidas: number; saldo: number }[] = [];
-    let saldo = saldoAtual;
-    const cur = new Date(hoje);
-    while (cur <= limit) {
-      const key  = cur.toISOString().slice(0,10);
-      const label = cur.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
-      const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s,e) => s+e.valor,0);
-      const saidas   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor),0);
-      saldo += entradas - saidas;
-      if (entradas > 0 || saidas > 0 || dias.length % 5 === 0) dias.push({ dia: label, entradas, saidas, saldo });
-      cur.setDate(cur.getDate()+1);
-    }
-    return dias;
-  }, [horizonte, eventosPrevistos, saldoAtual]);
-
-  const totalEntradas = eventosPrevistos.filter(e => e.tipo === "Entrada").reduce((s,e) => s+e.valor,0);
-  const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor),0);
-  const saldoFinal    = saldoAtual + totalEntradas - totalSaidas;
-  const diasCriticos  = projecao.filter(d => d.saldo < 100000).length;
-
-  const kpis = [
-    { label: "Saldo Atual",       value: fmtK(saldoAtual),    sub: "4 contas bancárias",    icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
-    { label: "Entradas Previstas", value: fmtK(totalEntradas), sub: `${eventosPrevistos.filter(e=>e.tipo==="Entrada").length} títulos a receber`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-    { label: "Saídas Previstas",   value: fmtK(totalSaidas),   sub: `${eventosPrevistos.filter(e=>e.tipo==="Saída").length} títulos a pagar`,    icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-    { label: "Saldo Projetado",    value: fmtK(saldoFinal),    sub: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, stripe: saldoFinal >= saldoAtual ? "from-amber-400/60 to-amber-700/20" : "from-rose-400/60 to-rose-700/20", iconBg: saldoFinal >= saldoAtual ? "bg-amber-400/[0.08] border border-amber-400/[0.15]" : "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: saldoFinal >= saldoAtual ? "text-amber-300" : "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
-  ];
-
-  const SaldoTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
-        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
-        {payload.map((p: any) => (
-          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
-            {p.name === "saldo" ? "Saldo" : p.name === "entradas" ? "Entradas" : "Saídas"}: {fmtK(p.value)}
-          </p>
-        ))}
-      </div>
-    );
-  };
-
-  if (isFetchingDw) return <SkeletonLoader label="Calculando projeção de caixa..." />;
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
-      </div>
-
-      {diasCriticos > 0 && (
-        <AnimatedCard delay={220}>
-          <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
-            <p className="text-[12px] font-semibold text-amber-300">
-              {diasCriticos} dia{diasCriticos>1?"s":""} com saldo projetado abaixo de R$ 100k no horizonte selecionado
-            </p>
-          </div>
-        </AnimatedCard>
-      )}
-
-      <AnimatedCard delay={260}>
-        <SectionCard>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
-            <div>
-              <span className="text-[12px] font-semibold text-slate-300">Evolução do Saldo Projetado</span>
-              <span className="ml-2 text-[10px] text-slate-600">Baseado em títulos pendentes</span>
-            </div>
-            <div className="flex gap-1">
-              {([30, 60, 90] as const).map(h => (
-                <button key={h} onClick={() => setHorizonte(h)}
-                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${horizonte===h?"bg-amber-500/20 border border-amber-500/30 text-amber-300":"border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{h}d</button>
-              ))}
-            </div>
-          </div>
-          <div className="px-2 py-3" style={{ height: 200 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={projecao} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradSaldo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#22d3ee" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.01} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={36} />
-                <Tooltip content={<SaldoTooltip />} />
-                <Line type="monotone" dataKey={() => 100000} stroke="#ef4444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="limite" legendType="none" />
-                <Area type="monotone" dataKey="saldo" stroke="#22d3ee" strokeWidth={2} fill="url(#gradSaldo)" dot={false} name="saldo" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex items-center gap-4 px-4 pb-3 text-[10px] text-slate-500">
-            <span className="flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full bg-cyan-400/70" />Saldo projetado</span>
-            <span className="flex items-center gap-1.5"><span className="h-px w-4 border-t-2 border-dashed border-rose-500/50" />Limite de atenção (R$ 100k)</span>
-          </div>
-        </SectionCard>
-      </AnimatedCard>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AnimatedCard delay={300}>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
-              <span className="text-[12px] font-semibold text-slate-300">Entradas × Saídas Previstas</span>
-              <span className="ml-2 text-[10px] text-slate-600">Por data de vencimento</span>
-            </div>
-            <div className="px-2 py-3" style={{ height: 180 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={30} />
-                  <Tooltip formatter={(v:any,n:string) => [fmtK(v), n==="entradas"?"Entradas":"Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="entradas" name="entradas" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
-                  <Bar dataKey="saidas"   name="saidas"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex gap-4 px-4 pb-3 text-[10px] text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Entradas</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-rose-400" />Saídas</span>
-            </div>
-          </SectionCard>
-        </AnimatedCard>
-
-        <AnimatedCard delay={340}>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
-              <span className="text-[12px] font-semibold text-slate-300">Próximos Eventos</span>
-              <span className="ml-2 text-[10px] text-slate-600">Pendentes e a vencer</span>
-            </div>
-            <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
-              {eventosPrevistos.slice(0,12).map((e,i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo==="Entrada"?"bg-emerald-400":"bg-rose-400"}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-slate-300 truncate">{e.desc}</p>
-                    <p className="text-[10px] text-slate-600">{fmtDate(e.data)} · {e.doc}</p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className={`text-[12px] font-semibold tabular-nums ${e.tipo==="Entrada"?"text-emerald-300":"text-rose-300"}`}>{e.tipo==="Entrada"?"+":"-"}{fmtK(Math.abs(e.valor))}</p>
-                    <span className={`text-[9px] font-semibold ${e.tipo==="Entrada"?"text-emerald-600":"text-rose-600"}`}>{e.tipo}</span>
-                  </div>
-                </div>
-              ))}
-              {eventosPrevistos.length === 0 && <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum evento previsto no período</p>}
-            </div>
-          </SectionCard>
-        </AnimatedCard>
       </div>
     </div>
   );
