@@ -27,6 +27,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { PartnersAnalytics, type PartnerRow } from "@/components/finance/PartnersAnalytics";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -1002,266 +1003,84 @@ function ScreenRelatorios() {
 }
 
 
-function ScreenFornecedores() {
-  const { contasPagar, dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
-  const [search, setSearch] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
+function buildPartnersFromDW(rows: any[], origem: "CP" | "CR") {
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  const map = new Map<string, {
+    cod: string; nome: string; volume: number; emAberto: number; vencido: number;
+    qtdTitulos: number; qtdAbertos: number; qtdVencidos: number;
+    prazoTotal: number; prazoCount: number; ultimaMov: number | null;
+    rows: PartnerRow[];
+  }>();
 
+  rows.filter((r: any) => r.ORIGEM === origem && r.NOME_PARCEIRO).forEach((r: any) => {
+    const k = String(r.COD_PARCEIRO ?? r.NOME_PARCEIRO ?? "");
+    if (!map.has(k)) map.set(k, {
+      cod: String(r.COD_PARCEIRO ?? ""), nome: r.NOME_PARCEIRO ?? "N/A",
+      volume: 0, emAberto: 0, vencido: 0,
+      qtdTitulos: 0, qtdAbertos: 0, qtdVencidos: 0,
+      prazoTotal: 0, prazoCount: 0, ultimaMov: null, rows: [],
+    });
+    const e = map.get(k)!;
+    const valor = Number(r.VLR_PARCELA ?? r.VLRDOC ?? 0);
+    const valorPago = Number(r.VLR_PAGO ?? 0);
+    const pago = valorPago >= valor && valor > 0;
+    const venc = r.DATA_VENCIMENTO ? new Date(r.DATA_VENCIMENTO) : null;
+    if (venc) venc.setHours(0, 0, 0, 0);
+    const diasAtraso = !pago && venc && venc.getTime() < hoje.getTime()
+      ? Math.floor((hoje.getTime() - venc.getTime()) / 86400000) : 0;
+    const aberto = Math.max(0, valor - valorPago);
+
+    e.volume += valor;
+    e.qtdTitulos++;
+    if (!pago) { e.emAberto += aberto; e.qtdAbertos++; }
+    if (diasAtraso > 0) { e.vencido += aberto; e.qtdVencidos++; }
+    if (r.DATA_EMISSAO && r.DATA_VENCIMENTO) {
+      const dias = Math.floor((new Date(r.DATA_VENCIMENTO).getTime() - new Date(r.DATA_EMISSAO).getTime()) / 86400000);
+      if (dias > 0 && dias < 365) { e.prazoTotal += dias; e.prazoCount++; }
+    }
+    const movDate = r.DATA_PAGAMENTO ?? r.DATA_EMISSAO ?? null;
+    if (movDate) {
+      const t = new Date(movDate).getTime();
+      if (e.ultimaMov === null || t > e.ultimaMov) e.ultimaMov = t;
+    }
+    e.rows.push({
+      documento: String(r.NUMDOC ?? r.NUM_TITULO ?? "—"),
+      parcela: r.NUMPAR != null ? String(r.NUMPAR) : null,
+      emissao: r.DATA_EMISSAO ?? null,
+      vencimento: r.DATA_VENCIMENTO ?? null,
+      pagamento: r.DATA_PAGAMENTO ?? null,
+      valor, valorPago, pago, diasAtraso,
+    });
+  });
+
+  return Array.from(map.values()).map(e => ({
+    cod: e.cod, nome: e.nome,
+    volume: e.volume, emAberto: e.emAberto, vencido: e.vencido,
+    qtdTitulos: e.qtdTitulos, qtdAbertos: e.qtdAbertos, qtdVencidos: e.qtdVencidos,
+    prazoMedio: e.prazoCount > 0 ? Math.round(e.prazoTotal / e.prazoCount) : 0,
+    ultimaMov: e.ultimaMov ? new Date(e.ultimaMov).toISOString() : null,
+    rows: e.rows,
+  })).sort((a, b) => b.volume - a.volume);
+}
+
+function ScreenFornecedores() {
+  const { dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
   useEffect(() => {
     if (!isFetchingDw && dwRawData.length === 0) fetchFromDW();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Agrega por COD_PARCEIRO (CP apenas)
-  const fornecedores = useMemo(() => {
-    const cpRows = dwRawData.filter(r => r.ORIGEM === "CP" && r.NOME_PARCEIRO);
-    const map = new Map<string, {
-      cod: string; nome: string; volume: number;
-      titulosAbertos: number; titulosTotal: number;
-      prazoTotal: number; prazoCount: number; temVencido: boolean;
-    }>();
-
-    cpRows.forEach(r => {
-      const k = r.COD_PARCEIRO ?? r.NOME_PARCEIRO ?? "";
-      if (!map.has(k)) map.set(k, { cod: String(r.COD_PARCEIRO ?? ""), nome: r.NOME_PARCEIRO ?? "N/A", volume: 0, titulosAbertos: 0, titulosTotal: 0, prazoTotal: 0, prazoCount: 0, temVencido: false });
-      const e = map.get(k)!;
-      const val = r.VLR_PARCELA ?? r.VLRDOC ?? 0;
-      e.volume += val;
-      e.titulosTotal++;
-      const pago = (r.VLR_PAGO ?? 0) >= val && val > 0;
-      if (!pago) e.titulosAbertos++;
-      if (r.DATA_EMISSAO && r.DATA_VENCIMENTO) {
-        const dias = Math.floor((new Date(r.DATA_VENCIMENTO).getTime() - new Date(r.DATA_EMISSAO).getTime()) / 86400000);
-        if (dias > 0 && dias < 365) { e.prazoTotal += dias; e.prazoCount++; }
-      }
-      const hoje = new Date(); hoje.setHours(0,0,0,0);
-      if (!pago && r.DATA_VENCIMENTO && new Date(r.DATA_VENCIMENTO) < hoje) e.temVencido = true;
-    });
-
-    return Array.from(map.values())
-      .sort((a,b) => b.volume - a.volume)
-      .map(f => ({
-        cod:     f.cod,
-        nome:    f.nome,
-        avatar:  f.nome.slice(0,2).toUpperCase(),
-        volume:  f.volume,
-        titulos: f.titulosAbertos,
-        prazo:   f.prazoCount > 0 ? Math.round(f.prazoTotal / f.prazoCount) : 0,
-        status:  f.temVencido ? "Com vencidos" : "Ativo",
-      }));
-  }, [dwRawData]);
-
-  const filtered = useMemo(() => fornecedores.filter(f => {
-    const q = search.toLowerCase();
-    const matchQ = !q || f.nome.toLowerCase().includes(q) || f.cod.toLowerCase().includes(q);
-    const matchS = filtroStatus === "todos" || f.status === filtroStatus;
-    return matchQ && matchS;
-  }), [fornecedores, search, filtroStatus]);
-
-  const totalAtivos    = fornecedores.filter(f => f.status === "Ativo").length;
-  const totalComVenc   = fornecedores.filter(f => f.status === "Com vencidos").length;
-  const volumeTotal    = fornecedores.reduce((s,f) => s+f.volume, 0);
-  const titulosAbertos = fornecedores.reduce((s,f) => s+f.titulos, 0);
-
-  if (isFetchingDw) return <SkeletonLoader label="Carregando fornecedores..." />;
-
-  if (fornecedores.length === 0) return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
-      <Building2 className="h-10 w-10 opacity-30" />
-      <p className="text-[13px]">Nenhum fornecedor no período. Clique em Atualizar.</p>
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: "Total de Fornecedores", value: String(fornecedores.length), sub: `${totalAtivos} sem vencidos`,      icon: Building2,     stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]",  delay: 0   },
-          { label: "Volume no Período",      value: fmtK(volumeTotal),           sub: "Total de pagamentos",             icon: TrendingDown,  stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",  delay: 60  },
-          { label: "Títulos em Aberto",      value: String(titulosAbertos),      sub: "Pagamentos pendentes",            icon: Clock,         stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 120 },
-          { label: "Com Títulos Vencidos",   value: String(totalComVenc),        sub: `de ${fornecedores.length} forn.`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",   delay: 180 },
-        ].map(k => <KpiCard key={k.label} {...k} />)}
-      </div>
-
-      <FilterBar search={search} onSearch={setSearch}>
-        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option value="todos">Status: Todos</option>
-          <option value="Ativo">Sem vencidos</option>
-          <option value="Com vencidos">Com vencidos</option>
-        </select>
-        <span className="text-[11px] text-slate-600 ml-1">{filtered.length} fornecedores</span>
-      </FilterBar>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {filtered.map((f, i) => (
-          <AnimatedCard key={f.cod || f.nome} delay={i * 40}>
-            <div className={`flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 hover:border-[var(--sgt-border-medium)] transition-all ${f.status === "Com vencidos" ? "border-rose-400/30" : "border-[var(--sgt-border-subtle)]"}`}>
-              <div className="flex items-center gap-3">
-                <Avatar initials={f.avatar} size="md" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-slate-200 truncate">{f.nome}</p>
-                  <p className="text-[10px] text-slate-600">Cód. {f.cod || "—"}</p>
-                </div>
-                <StatusBadge s={f.status} />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: "Volume",      value: fmtK(f.volume), clr: "text-blue-300" },
-                  { label: "Em aberto",   value: String(f.titulos), clr: f.titulos > 2 ? "text-rose-300" : f.titulos > 0 ? "text-amber-300" : "text-slate-400" },
-                  { label: "Prazo médio", value: f.prazo > 0 ? `${f.prazo}d` : "—", clr: "text-slate-300" },
-                ].map(s => (
-                  <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-2 py-1.5">
-                    <p className="text-[9px] text-slate-600">{s.label}</p>
-                    <p className={`text-[12px] font-semibold ${s.clr}`}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </AnimatedCard>
-        ))}
-      </div>
-    </div>
-  );
+  const partners = useMemo(() => buildPartnersFromDW(dwRawData, "CP"), [dwRawData]);
+  return <PartnersAnalytics kind="fornecedor" partners={partners} isLoading={isFetchingDw} />;
 }
 
 function ScreenClientes() {
-  const { contasReceber, dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
-  const [search, setSearch] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
-
+  const { dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
   useEffect(() => {
     if (!isFetchingDw && dwRawData.length === 0) fetchFromDW();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Agrega por COD_PARCEIRO (CR apenas)
-  const clientes = useMemo(() => {
-    const crRows = dwRawData.filter(r => r.ORIGEM === "CR" && r.NOME_PARCEIRO);
-    const map = new Map<string, {
-      cod: string; nome: string; faturamento: number;
-      titulosAbertos: number; prazoTotal: number; prazoCount: number; temAtraso: boolean;
-    }>();
-
-    crRows.forEach(r => {
-      const k = r.COD_PARCEIRO ?? r.NOME_PARCEIRO ?? "";
-      if (!map.has(k)) map.set(k, { cod: String(r.COD_PARCEIRO ?? ""), nome: r.NOME_PARCEIRO ?? "N/A", faturamento: 0, titulosAbertos: 0, prazoTotal: 0, prazoCount: 0, temAtraso: false });
-      const e = map.get(k)!;
-      const val = r.VLR_PARCELA ?? r.VLRDOC ?? 0;
-      e.faturamento += val;
-      const recebido = (r.VLR_PAGO ?? 0) >= val && val > 0;
-      if (!recebido) e.titulosAbertos++;
-      if (r.DATA_EMISSAO && r.DATA_VENCIMENTO) {
-        const dias = Math.floor((new Date(r.DATA_VENCIMENTO).getTime() - new Date(r.DATA_EMISSAO).getTime()) / 86400000);
-        if (dias > 0 && dias < 365) { e.prazoTotal += dias; e.prazoCount++; }
-      }
-      const hoje = new Date(); hoje.setHours(0,0,0,0);
-      if (!recebido && r.DATA_VENCIMENTO && new Date(r.DATA_VENCIMENTO) < hoje) e.temAtraso = true;
-    });
-
-    return Array.from(map.values())
-      .sort((a,b) => b.faturamento - a.faturamento)
-      .map(c => ({
-        cod:          c.cod,
-        nome:         c.nome,
-        avatar:       c.nome.slice(0,2).toUpperCase(),
-        faturamento:  c.faturamento,
-        titulos:      c.titulosAbertos,
-        prazo:        c.prazoCount > 0 ? Math.round(c.prazoTotal / c.prazoCount) : 0,
-        inadimplente: c.temAtraso,
-        status:       c.temAtraso ? "Inadimplente" : "Ativo",
-      }));
-  }, [dwRawData]);
-
-  const filtered = useMemo(() => clientes.filter(c => {
-    const q = search.toLowerCase();
-    const matchQ = !q || c.nome.toLowerCase().includes(q) || c.cod.toLowerCase().includes(q);
-    const matchS = filtroStatus === "todos" || c.status === filtroStatus;
-    return matchQ && matchS;
-  }), [clientes, search, filtroStatus]);
-
-  const totalAtivos        = clientes.filter(c => !c.inadimplente).length;
-  const totalInadimplentes = clientes.filter(c => c.inadimplente).length;
-  const faturamentoTotal   = clientes.reduce((s,c) => s+c.faturamento, 0);
-  const titulosAbertos     = clientes.reduce((s,c) => s+c.titulos, 0);
-
-  if (isFetchingDw) return <SkeletonLoader label="Carregando clientes..." />;
-
-  if (clientes.length === 0) return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
-      <Users className="h-10 w-10 opacity-30" />
-      <p className="text-[13px]">Nenhum cliente no período. Clique em Atualizar.</p>
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: "Total de Clientes",  value: String(clientes.length),   sub: `${totalAtivos} em dia`,                    icon: Users,         stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"   },
-          { label: "Faturamento",        value: fmtK(faturamentoTotal),     sub: "Receita gerada no período",                icon: TrendingUp,    stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
-          { label: "Títulos em Aberto",  value: String(titulosAbertos),     sub: "Recebimentos pendentes",                   icon: Clock,         stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
-          { label: "Inadimplentes",      value: String(totalInadimplentes), sub: `${clientes.length > 0 ? ((totalInadimplentes/clientes.length)*100).toFixed(0) : 0}% da carteira`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-        ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
-      </div>
-
-      <FilterBar search={search} onSearch={setSearch}>
-        <div className="h-4 w-px bg-[var(--sgt-divider)]" />
-        <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}
-          className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 py-1 text-[11px] text-slate-300 outline-none">
-          <option value="todos">Status: Todos</option>
-          <option value="Ativo">Em dia</option>
-          <option value="Inadimplente">Inadimplente</option>
-        </select>
-        <span className="text-[11px] text-slate-600 ml-1">{filtered.length} clientes</span>
-      </FilterBar>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {filtered.map((c, i) => (
-          <AnimatedCard key={c.cod || c.nome} delay={i * 40}>
-            <div className={`group flex flex-col gap-3 rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 cursor-pointer transition-all ${c.inadimplente ? "border-rose-400/35 hover:border-rose-400/60" : "border-[var(--sgt-border-subtle)] hover:border-[var(--sgt-border-medium)]"}`}>
-              <div className="flex items-start gap-2.5">
-                <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-semibold text-[11px] bg-blue-400/10 border-blue-400/20 text-blue-300`}>{c.avatar}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-slate-200 leading-tight truncate">{c.nome}</p>
-                  <p className="text-[10px] text-slate-600 mt-0.5">Cód. {c.cod || "—"}</p>
-                </div>
-                <StatusBadge s={c.status} />
-              </div>
-              <div className="grid grid-cols-3 gap-1.5">
-                {[
-                  { label: "Faturamento", value: fmtK(c.faturamento), clr: "text-emerald-300" },
-                  { label: "Em aberto",   value: String(c.titulos),    clr: c.titulos > 1 ? "text-rose-300" : c.titulos === 1 ? "text-amber-300" : "text-slate-400" },
-                  { label: c.inadimplente ? "Dias atraso" : "Prazo médio", value: c.inadimplente ? `+${agingDias(contasReceber.find(r => r.cliente === c.nome && dsReceber(r) === "Em Atraso")?.vencimento ?? new Date().toISOString().slice(0,10))}d` : c.prazo > 0 ? `${c.prazo}d` : "—", clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
-                ].map(s => (
-                  <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
-                    <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
-                    <p className={`text-[11px] font-semibold leading-none ${s.clr}`}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-1.5 pt-0.5">
-                <button title="Ver títulos" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
-                  <Eye className="h-3 w-3" /> Títulos
-                </button>
-                <button title="Enviar cobrança" className="flex items-center gap-1 rounded-md border border-[var(--sgt-border-subtle)] bg-transparent px-2 py-1 text-[10px] text-slate-500 hover:text-slate-300 hover:border-[var(--sgt-border-medium)] transition-colors">
-                  <Send className="h-3 w-3" /> Cobrar
-                </button>
-              </div>
-            </div>
-          </AnimatedCard>
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-600">
-          <Users className="h-10 w-10 mb-3 opacity-30" />
-          <p className="text-[13px]">Nenhum cliente encontrado</p>
-        </div>
-      )}
-    </div>
-  );
+  const partners = useMemo(() => buildPartnersFromDW(dwRawData, "CR"), [dwRawData]);
+  return <PartnersAnalytics kind="cliente" partners={partners} isLoading={isFetchingDw} />;
 }
 
 function ScreenCategorias() {
