@@ -75,28 +75,6 @@ function AgingBadge({ vencimento, displayStatus }: { vencimento: string; display
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────────
 
 
-const BANCOS = [
-  { id: 1, nome: "Banco do Brasil", sigla: "BB", agencia: "3281-2", conta: "14.882-0", saldo: 312440, entradas: 189450, saidas: 158230, agendado: 42340, tipo: "Principal", cor: "amber" },
-  { id: 2, nome: "Bradesco", sigla: "BV", agencia: "0091-0", conta: "42.914-5", saldo: 87130, entradas: 42250, saidas: 20920, agendado: 12340, tipo: "Movimento", cor: "rose" },
-  { id: 3, nome: "Itaú BBA", sigla: "IT", agencia: "0140-3", conta: "88.120-2", saldo: 245000, entradas: 5120, saidas: 0, agendado: 0, tipo: "Investimento", cor: "violet" },
-  { id: 4, nome: "Caixa Econômica", sigla: "CA", agencia: "0422-1", conta: "10.334-7", saldo: 54200, entradas: 18000, saidas: 12800, agendado: 4200, tipo: "Movimento", cor: "teal" },
-];
-
-const EXTRATO = [
-  { desc: "Recebimento TED · RodoLog S.A.", meta: "10/05/2025 · C.Receber BOL-041200", valor: 42000, tipo: "C" },
-  { desc: "Débito · Pgto NF-004821 Petrobras", meta: "02/05/2025 · C.Pagar liquidada", valor: -14320, tipo: "D" },
-  { desc: "PIX recebido · Transpolog Ltda", meta: "05/05/2025 · C.Receber NF-008812", valor: 28400, tipo: "C" },
-  { desc: "Boleto · Correios NF-021788", meta: "08/05/2025 · C.Pagar", valor: -7850, tipo: "D" },
-  { desc: "Tarifa bancária", meta: "07/05/2025 · Lançamento automático", valor: -48.90, tipo: "D" },
-  { desc: "TED recebida · Veloz Express", meta: "12/05/2025 · C.Receber DUP-004422", valor: 15700, tipo: "C" },
-];
-
-const SALDO_HISTORICO = [
-  { dia: "01/05", BB: 290000, BV: 65000, IT: 242000, CA: 48000 },
-  { dia: "05/05", BB: 312000, BV: 72000, IT: 243000, CA: 50000 },
-  { dia: "10/05", BB: 338000, BV: 80000, IT: 244000, CA: 52000 },
-  { dia: "13/05", BB: 312440, BV: 87130, IT: 245000, CA: 54200 },
-];
 
 const CONCILIACAO_BANCO = [
   { desc: "Pgto NF Petrobras", meta: "02/05/2025 · Débito automático", valor: -14320, status: "Conciliado" },
@@ -255,18 +233,25 @@ function ConcStatus({ s }: { s: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
-  const { contasPagar, contasReceber, resumo, isFetchingDw } = useFinancialData();
+  const { contasPagar, contasReceber, resumo, dwRawData, filiais, isFetchingDw } = useFinancialData();
 
   const totalPagar   = resumo.contasPagar.saldoAPagar;
   const totalReceber = resumo.contasReceber.saldoAReceber;
-  const saldoBancos  = BANCOS.reduce((s, b) => s + b.saldo, 0);
   const saldo        = totalReceber - totalPagar;
+
+  // Movimentação bancária líquida do período (LB_C - LB_D)
+  const lbRows = dwRawData.filter(r => r.ORIGEM === "LB_C" || r.ORIGEM === "LB_D");
+  const saldoBancos = lbRows.reduce((s, r) => {
+    const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+    return r.ORIGEM === "LB_C" ? s + val : s - val;
+  }, 0);
+  const nFiliais = new Set(lbRows.map(r => r.FILIAL).filter(Boolean)).size;
 
   const vencidosPagar     = contasPagar.filter(c => dsPagar(c) === "Vencido").reduce((s,c) => s+c.valor, 0);
   const atrasadosReceber  = contasReceber.filter(c => dsReceber(c) === "Em Atraso").reduce((s,c) => s+c.valor, 0);
 
   const kpis = [
-    { label: "Saldo em Bancos",    value: fmtK(saldoBancos),         sub: `${BANCOS.length} contas ativas`,                             icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
+    { label: "Movimentação Bancos", value: fmtK(saldoBancos), sub: `${nFiliais || 0} filial${nFiliais !== 1 ? "is" : ""} · período`,                             icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
     { label: "A Pagar (abertas)",  value: fmtK(totalPagar),          sub: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos`,   icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
     { label: "A Receber (abertas)",value: fmtK(totalReceber),        sub: `${contasReceber.filter(c => dsReceber(c) !== "Recebido").length} títulos`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
     { label: "Resultado Líquido",  value: fmtK(Math.abs(saldo)),     sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
@@ -407,18 +392,36 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
       <AnimatedCard delay={460}>
         <SectionCard>
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
-            <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><Landmark className="h-3.5 w-3.5 text-cyan-400" />Posição bancária</span>
+            <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><Landmark className="h-3.5 w-3.5 text-cyan-400" />Movimentação por filial</span>
             <button onClick={() => onNavigate?.("bancos")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver extrato <ChevronRight className="h-3 w-3" /></button>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[var(--sgt-divider)]">
-            {BANCOS.map(b => (
-              <div key={b.id} className="px-4 py-3">
-                <div className="flex items-center gap-2 mb-2"><BankLogo sigla={b.sigla} size={20} /><span className="text-[10px] text-slate-600 truncate">{b.nome}</span></div>
-                <p className="text-[15px] font-black text-white leading-none tabular-nums">{fmtK(b.saldo)}</p>
-                <p className="text-[10px] text-slate-600 mt-1">{b.tipo}</p>
-              </div>
-            ))}
-          </div>
+          {lbRows.length === 0 ? (
+            <p className="px-4 py-4 text-[11px] text-slate-600 text-center">Sem lançamentos bancários no período</p>
+          ) : (
+            <div className="grid divide-x divide-[var(--sgt-divider)]" style={{ gridTemplateColumns: `repeat(${Math.min(nFiliais || 1, 4)}, 1fr)` }}>
+              {(() => {
+                const byFilial = new Map<string, number>();
+                lbRows.forEach(r => {
+                  const k = r.FILIAL ?? "—";
+                  const v = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+                  byFilial.set(k, (byFilial.get(k) ?? 0) + (r.ORIGEM === "LB_C" ? v : -v));
+                });
+                return Array.from(byFilial.entries()).slice(0, 4).map(([cod, liq]) => {
+                  const nome = filiais.find(f => f.id === cod)?.nome ?? cod;
+                  return (
+                    <div key={cod} className="px-4 py-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded text-[9px] font-black border border-amber-400/20 bg-[var(--sgt-table-head)]">{nome.slice(0,2).toUpperCase()}</span>
+                        <span className="text-[10px] text-slate-600 truncate">{nome}</span>
+                      </div>
+                      <p className={`text-[15px] font-black leading-none tabular-nums ${liq >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{fmtK(liq)}</p>
+                      <p className="text-[10px] text-slate-600 mt-1">Líquido</p>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          )}
         </SectionCard>
       </AnimatedCard>
     </div>
@@ -1309,9 +1312,16 @@ function ScreenCategorias() {
 
 // ─── TELA PREVISTO ────────────────────────────────────────────────────────────
 function ScreenPrevisto() {
-  const { contasPagar, contasReceber, isFetchingDw } = useFinancialData();
+  const { contasPagar, contasReceber, dwRawData, isFetchingDw } = useFinancialData();
   const [horizonte, setHorizonte] = useState<30 | 60 | 90>(30);
-  const saldoAtual = BANCOS.reduce((s, b) => s + b.saldo, 0);
+  // Saldo de partida = movimentação líquida bancária acumulada do período
+  const saldoAtual = useMemo(() =>
+    dwRawData.filter(r => r.ORIGEM === "LB_C" || r.ORIGEM === "LB_D")
+      .reduce((s, r) => {
+        const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+        return r.ORIGEM === "LB_C" ? s + val : s - val;
+      }, 0),
+  [dwRawData]);
 
   const eventosPrevistos = useMemo(() => [
     ...contasPagar.filter(c => dsPagar(c) === "Pendente" || dsPagar(c) === "Vence Hoje")
@@ -1506,157 +1516,245 @@ function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
 }
 
 function ScreenBancos() {
-  const [extratoBank, setExtratoBank] = useState("BB");
-  const totalSaldo = BANCOS.reduce((s, b) => s + b.saldo, 0);
+  const { dwRawData, filiais, isFetchingDw } = useFinancialData();
+  const [extratoFilial, setExtratoFilial] = useState<string | null>(null);
 
-  const corMap: Record<string, { bg: string; text: string; border: string; valText: string }> = {
-    amber:  { bg: "bg-amber-400/10",  text: "text-amber-300",  border: "border-amber-400/20",  valText: "text-amber-200"  },
-    rose:   { bg: "bg-rose-400/10",   text: "text-rose-300",   border: "border-rose-400/20",   valText: "text-rose-200"   },
-    violet: { bg: "bg-violet-400/10", text: "text-violet-300", border: "border-violet-400/20", valText: "text-violet-200" },
-    teal:   { bg: "bg-teal-400/10",   text: "text-teal-300",   border: "border-teal-400/20",   valText: "text-teal-200"   },
-  };
-  const tipoMap: Record<string, string> = {
-    Principal: "bg-amber-400/10 border-amber-400/20 text-amber-300",
-    Movimento: "bg-blue-400/10 border-blue-400/20 text-blue-300",
-    Investimento: "bg-violet-400/10 border-violet-400/20 text-violet-300",
-  };
+  // ── Paleta de cores por filial ─────────────────────────────────────────────
+  const PALETA = [
+    { border: "border-amber-400/20",  val: "text-amber-200",   dot: "bg-amber-400",   hex: "#fbbf24" },
+    { border: "border-rose-400/20",   val: "text-rose-200",    dot: "bg-rose-400",    hex: "#fb7185" },
+    { border: "border-violet-400/20", val: "text-violet-200",  dot: "bg-violet-400",  hex: "#a78bfa" },
+    { border: "border-teal-400/20",   val: "text-teal-200",    dot: "bg-teal-400",    hex: "#2dd4bf"  },
+    { border: "border-blue-400/20",   val: "text-blue-200",    dot: "bg-blue-400",    hex: "#60a5fa" },
+    { border: "border-emerald-400/20",val: "text-emerald-200", dot: "bg-emerald-400", hex: "#34d399" },
+  ];
 
-  const SaldoTooltip = ({ active, payload }: any) => {
+  // ── Agrega LB_D/LB_C por FILIAL ───────────────────────────────────────────
+  const porFilial = useMemo(() => {
+    const lbRows = dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C");
+    const map = new Map<string, { entradas: number; saidas: number; lancamentos: typeof lbRows }>();
+
+    lbRows.forEach(r => {
+      const k = r.FILIAL ?? "—";
+      if (!map.has(k)) map.set(k, { entradas: 0, saidas: 0, lancamentos: [] });
+      const e = map.get(k)!;
+      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+      if (r.ORIGEM === "LB_C") e.entradas += val;
+      else                      e.saidas   += val;
+      e.lancamentos.push(r);
+    });
+
+    return Array.from(map.entries())
+      .map(([cod, d], i) => {
+        const nomeFilial = filiais.find(f => f.id === cod)?.nome ?? cod;
+        return {
+          cod,
+          nome: nomeFilial,
+          sigla: nomeFilial.slice(0, 2).toUpperCase(),
+          entradas: d.entradas,
+          saidas: d.saidas,
+          liquido: d.entradas - d.saidas,
+          lancamentos: d.lancamentos.sort((a, b) =>
+            (b.DATA_EMISSAO ?? "").localeCompare(a.DATA_EMISSAO ?? "")
+          ),
+          paleta: PALETA[i % PALETA.length],
+        };
+      })
+      .sort((a, b) => Math.abs(b.liquido) - Math.abs(a.liquido));
+  }, [dwRawData, filiais]);
+
+  // ── Evolução diária do movimento ──────────────────────────────────────────
+  const evolucaoDiaria = useMemo(() => {
+    const map = new Map<string, { entradas: number; saidas: number }>();
+    dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C").forEach(r => {
+      const dia = (r.DATA_EMISSAO ?? "").slice(0, 10);
+      if (!dia) return;
+      if (!map.has(dia)) map.set(dia, { entradas: 0, saidas: 0 });
+      const e = map.get(dia)!;
+      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+      if (r.ORIGEM === "LB_C") e.entradas += val;
+      else                      e.saidas   += val;
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([iso, d]) => ({
+        dia: new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        liquido: d.entradas - d.saidas,
+        entradas: d.entradas,
+        saidas: d.saidas,
+      }));
+  }, [dwRawData]);
+
+  const totalEntradas = porFilial.reduce((s, f) => s + f.entradas, 0);
+  const totalSaidas   = porFilial.reduce((s, f) => s + f.saidas, 0);
+  const totalLiquido  = totalEntradas - totalSaidas;
+
+  // Filial selecionada no extrato
+  const filialAtiva = extratoFilial ?? porFilial[0]?.cod ?? null;
+  const filialData  = porFilial.find(f => f.cod === filialAtiva);
+
+  const MovTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
-      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-2.5 py-1.5 shadow-xl">
-        <p className="text-[10px] text-slate-400">{payload[0]?.payload?.dia}</p>
+      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
+        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
         {payload.map((p: any) => (
-          <p key={p.dataKey} className="text-[10px] font-semibold" style={{ color: p.color }}>{p.name}: {fmtK(p.value)}</p>
+          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
+            {p.name === "liquido" ? "Líquido" : p.name === "entradas" ? "Entradas" : "Saídas"}: {fmtK(p.value)}
+          </p>
         ))}
       </div>
     );
   };
 
-  const bankColors: Record<string, string> = { BB: "#FFD700", BV: "#CC092F", IT: "#EC7000", CA: "#005CA9" };
+  if (isFetchingDw) return <SkeletonLoader label="Carregando movimentação bancária..." />;
+
+  if (porFilial.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
+      <Landmark className="h-10 w-10 opacity-30" />
+      <p className="text-[13px]">Nenhum lançamento bancário no período. Clique em Atualizar.</p>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Saldo consolidado + mini sparkline */}
+
+      {/* Movimento consolidado + sparkline */}
       <AnimatedCard>
         <SectionCard>
           <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--sgt-divider)]">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Saldo Consolidado</p>
-              <p className="text-[28px] font-black text-cyan-300 leading-none mt-1 tabular-nums">{fmtBRL(totalSaldo)}</p>
-              <p className="text-[11px] text-slate-600 mt-1">{BANCOS.length} contas ativas · atualizado agora</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Movimentação Líquida</p>
+              <p className={`text-[28px] font-black leading-none mt-1 tabular-nums ${totalLiquido >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                {totalLiquido >= 0 ? "+" : ""}{fmtBRL(totalLiquido)}
+              </p>
+              <p className="text-[11px] text-slate-600 mt-1">{porFilial.length} filial{porFilial.length > 1 ? "is" : ""} · período selecionado</p>
             </div>
             <div style={{ width: 200, height: 64 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={SALDO_HISTORICO} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                  {BANCOS.map(b => (
-                    <Line key={b.sigla} type="monotone" dataKey={b.sigla} name={b.nome}
-                      stroke={bankColors[b.sigla]} strokeWidth={1.5} dot={false} />
-                  ))}
-                  <Tooltip content={<SaldoTooltip />} />
-                </LineChart>
+                <AreaChart data={evolucaoDiaria} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gradBancoLiq" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#22d3ee" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.01} />
+                    </linearGradient>
+                  </defs>
+                  <Tooltip content={<MovTooltip />} />
+                  <Area type="monotone" dataKey="liquido" stroke="#22d3ee" strokeWidth={1.5} fill="url(#gradBancoLiq)" dot={false} />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[var(--sgt-divider)]">
-            {BANCOS.map(b => {
-              const c = corMap[b.cor];
-              return (
-                <div key={b.id} className="px-4 py-2.5">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <BankLogo sigla={b.sigla} size={18} />
-                    <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
-                  </div>
-                  <p className={`text-[14px] font-black leading-none tabular-nums ${c.valText}`}>{fmtK(b.saldo)}</p>
-                  <p className="text-[9px] text-slate-600 mt-1">{b.tipo}</p>
+          <div className={`grid divide-x divide-[var(--sgt-divider)]`} style={{ gridTemplateColumns: `repeat(${Math.min(porFilial.length, 4)}, 1fr)` }}>
+            {porFilial.slice(0, 4).map(f => (
+              <div key={f.cod} className="px-4 py-2.5">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${f.paleta.border} bg-[var(--sgt-table-head)]`}>{f.sigla}</span>
+                  <span className="text-[10px] text-slate-600 truncate">{f.nome}</span>
                 </div>
-              );
-            })}
+                <p className={`text-[14px] font-black leading-none tabular-nums ${f.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
+                  {fmtK(f.liquido)}
+                </p>
+                <p className="text-[9px] text-slate-600 mt-1">Líquido do período</p>
+              </div>
+            ))}
           </div>
         </SectionCard>
       </AnimatedCard>
 
-      {/* Cards dos bancos */}
+      {/* Cards por filial */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {BANCOS.map((b, i) => {
-          const c = corMap[b.cor];
-          return (
-            <AnimatedCard key={b.id} delay={i * 80}>
-              <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${c.border}`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${c.border}`}>
-                    <BankLogo sigla={b.sigla} size={36} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[13px] font-semibold text-slate-200">{b.nome}</p>
-                    <p className="text-[10px] text-slate-600">Ag. {b.agencia} · CC {b.conta}</p>
-                  </div>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${tipoMap[b.tipo] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400"}`}>{b.tipo}</span>
+        {porFilial.map((f, i) => (
+          <AnimatedCard key={f.cod} delay={i * 80}>
+            <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${f.paleta.border}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${f.paleta.border} bg-[var(--sgt-table-head)]`}>
+                  {f.sigla}
                 </div>
-                <div className="mb-3">
-                  <p className="text-[10px] text-slate-600">Saldo disponível</p>
-                  <p className={`text-[22px] font-black leading-none tabular-nums ${c.valText}`}>{fmtBRL(b.saldo)}</p>
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-slate-200">{f.nome}</p>
+                  <p className="text-[10px] text-slate-600">Filial {f.cod}</p>
                 </div>
-                <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
-                  {[
-                    { label: "Entradas no mês",   value: `+${fmtK(b.entradas)}`,                        clr: "text-emerald-300" },
-                    { label: "Saídas no mês",      value: b.saidas > 0 ? `-${fmtK(b.saidas)}` : "—",   clr: b.saidas > 0 ? "text-rose-300" : "text-slate-500" },
-                    { label: "Títulos agendados",  value: b.agendado > 0 ? fmtK(b.agendado) : "—",     clr: b.agendado > 0 ? "text-amber-300" : "text-slate-500" },
-                  ].map(row => (
-                    <div key={row.label} className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-600">{row.label}</span>
-                      <span className={`font-semibold ${row.clr}`}>{row.value}</span>
-                    </div>
-                  ))}
-                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${f.liquido >= 0 ? "bg-emerald-400/10 border-emerald-400/20 text-emerald-300" : "bg-rose-400/10 border-rose-400/20 text-rose-300"}`}>
+                  {f.liquido >= 0 ? "Superávit" : "Déficit"}
+                </span>
               </div>
-            </AnimatedCard>
-          );
-        })}
+              <div className="mb-3">
+                <p className="text-[10px] text-slate-600">Resultado líquido do período</p>
+                <p className={`text-[22px] font-black leading-none tabular-nums ${f.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
+                  {f.liquido >= 0 ? "+" : ""}{fmtBRL(f.liquido)}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
+                {[
+                  { label: "Entradas no período", value: `+${fmtK(f.entradas)}`,  clr: "text-emerald-300" },
+                  { label: "Saídas no período",   value: `-${fmtK(f.saidas)}`,    clr: f.saidas > 0 ? "text-rose-300" : "text-slate-500" },
+                  { label: "Lançamentos",          value: String(f.lancamentos.length), clr: "text-slate-300" },
+                ].map(row => (
+                  <div key={row.label} className="flex items-center justify-between text-[11px]">
+                    <span className="text-slate-600">{row.label}</span>
+                    <span className={`font-semibold ${row.clr}`}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AnimatedCard>
+        ))}
       </div>
 
-      {/* Extrato com seletor de conta */}
+      {/* Extrato com seletor de filial */}
       <AnimatedCard delay={380}>
         <SectionCard>
-          {/* Tabs de conta */}
           <div className="flex items-center border-b border-[var(--sgt-divider)] px-4 pt-1 overflow-x-auto">
-            {BANCOS.map(b => (
-              <button key={b.sigla} onClick={() => setExtratoBank(b.sigla)}
+            {porFilial.map(f => (
+              <button key={f.cod} onClick={() => setExtratoFilial(f.cod)}
                 className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
-                  extratoBank === b.sigla ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                  filialAtiva === f.cod ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
                 }`}>
-                <BankLogo sigla={b.sigla} size={16} />
-                {b.nome}
+                <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${f.paleta.border}`}>{f.sigla}</span>
+                {f.nome}
               </button>
             ))}
             <div className="ml-auto pb-2 flex gap-3 shrink-0">
-              <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Plus className="h-3 w-3" />Lançamento manual</button>
-              <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"><Download className="h-3 w-3" />Importar OFX</button>
+              <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
+                <Plus className="h-3 w-3" />Lançamento manual
+              </button>
+              <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
+                <Download className="h-3 w-3" />Exportar
+              </button>
             </div>
           </div>
           <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">
-              Últimos lançamentos · {BANCOS.find(b => b.sigla === extratoBank)?.nome}
+              {filialData?.lancamentos.length ?? 0} lançamentos · {filialData?.nome ?? "—"}
             </span>
           </div>
-          {EXTRATO.map((e, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-              <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo === "C" ? "bg-emerald-400" : "bg-rose-400"}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-medium text-slate-300">{e.desc}</p>
-                <p className="text-[10px] text-slate-600">{e.meta}</p>
+          {(filialData?.lancamentos ?? []).slice(0, 20).map((r, i) => {
+            const isCredito = r.ORIGEM === "LB_C";
+            const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+            const desc = r.TIPO_DOCUMENTO ? `${r.TIPO_DOCUMENTO} · ${r.DOCUMENTO ?? ""}` : (r.DOCUMENTO ?? "—");
+            const meta = r.DATA_EMISSAO ? fmtDate(r.DATA_EMISSAO.slice(0, 10)) : "—";
+            return (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
+                <div className={`h-2 w-2 rounded-full shrink-0 ${isCredito ? "bg-emerald-400" : "bg-rose-400"}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-medium text-slate-300 truncate">{desc}</p>
+                  <p className="text-[10px] text-slate-600">{meta}</p>
+                </div>
+                <p className={`text-[13px] font-semibold tabular-nums shrink-0 ${isCredito ? "text-emerald-300" : "text-rose-300"}`}>
+                  {isCredito ? "+" : "-"}{fmtBRL(val)}
+                </p>
               </div>
-              <p className={`text-[13px] font-semibold tabular-nums shrink-0 ${e.valor > 0 ? "text-emerald-300" : "text-rose-300"}`}>
-                {e.valor > 0 ? "+" : ""}{fmtBRL(e.valor)}
-              </p>
-            </div>
-          ))}
+            );
+          })}
+          {(filialData?.lancamentos.length ?? 0) === 0 && (
+            <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum lançamento nesta filial</p>
+          )}
         </SectionCard>
       </AnimatedCard>
     </div>
   );
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SIDEBAR CONFIG
