@@ -1828,17 +1828,14 @@ export default function Finance() {
   const [active, setActive] = useState<ScreenId>("painel");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
-  const [dateFrom, setDateFrom]   = useState("2026-05-01");
-  const [dateTo,   setDateTo]     = useState("2026-05-13");
-  const [filterEmpresa, setFilterEmpresa] = useState("__all__");
-  const [filterFilial,  setFilterFilial]  = useState("__all__");
-  const [isFetching, setIsFetching] = useState(false);
 
-  const handleUpdate = async () => {
-    setIsFetching(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setIsFetching(false);
-  };
+  // ── Dados reais do servidor ──────────────────────────────────────────────
+  const {
+    dwFilter, setDwFilter,
+    filiais, empresas,
+    isFetchingDw, fetchFromDW,
+    loadingPhase, progress,
+  } = useFinancialData();
 
   const meta = SCREEN_META[active];
 
@@ -1914,32 +1911,28 @@ export default function Finance() {
 
             {/* Filtros */}
             <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
-              <DatePickerInput value={dateFrom} onChange={setDateFrom} placeholder="Data início" />
-              <DatePickerInput value={dateTo}   onChange={setDateTo}   placeholder="Data fim" />
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}   onChange={v => setDwFilter("dataFim", v)}   placeholder="Data fim" />
               <div className="h-4 w-px shrink-0 bg-[var(--sgt-divider)]" />
-              <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
+              <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
                 <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
                   <SelectValue placeholder="Empresa" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Todas</SelectItem>
-                  <SelectItem value="sgt-sp">SGT São Paulo</SelectItem>
-                  <SelectItem value="sgt-rj">SGT Rio de Janeiro</SelectItem>
-                  <SelectItem value="sgt-mg">SGT Minas Gerais</SelectItem>
+                  {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Select value={filterFilial} onValueChange={setFilterFilial}>
+              <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
                 <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px] transition-all">
                   <SelectValue placeholder="Filial" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">Todas</SelectItem>
-                  <SelectItem value="matriz">Matriz</SelectItem>
-                  <SelectItem value="filial-1">Filial 1</SelectItem>
-                  <SelectItem value="filial-2">Filial 2</SelectItem>
+                  {filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa).map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <UpdateButton onClick={handleUpdate} isFetching={isFetching} />
+              <UpdateButton onClick={fetchFromDW} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
             </div>
 
             <HomeButton />
@@ -1965,9 +1958,9 @@ export default function Finance() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              <DatePickerInput value={dateFrom} onChange={setDateFrom} placeholder="Início" />
-              <DatePickerInput value={dateTo}   onChange={setDateTo}   placeholder="Fim" />
-              <UpdateButton onClick={handleUpdate} isFetching={isFetching} compact />
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />
+              <DatePickerInput value={dwFilter.dataFim}   onChange={v => setDwFilter("dataFim", v)}   placeholder="Fim" />
+              <UpdateButton onClick={fetchFromDW} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
             </div>
           </div>
 
