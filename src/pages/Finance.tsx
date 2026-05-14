@@ -88,6 +88,21 @@ const CLIENTES = [
   { id: 11, nome: "NovaCarga Express",     cnpj: "19.003.228/0001-16", segmento: "Courier",          status: "Inadimplente", faturamento12m:  58000, titulosAbertos: 3, prazoMedio: 28, inadimplente: true,  avatar: "NC", cidade: "Recife, PE",        contato: "Thiago Nunes" },
 ];
 
+const FORNECEDORES = [
+  { id: 1,  nome: "Petrobras Distribuidora",  cnpj: "33.000.167/0001-01", categoria: "Combustível",      status: "Ativo",      volume12m: 480000, titulos: 3, prazo: 28, avatar: "PD" },
+  { id: 2,  nome: "Auto Posto Estrela",       cnpj: "12.445.901/0001-22", categoria: "Combustível",      status: "Ativo",      volume12m: 220000, titulos: 2, prazo: 15, avatar: "AE" },
+  { id: 3,  nome: "Pneus Brasil Ltda",        cnpj: "21.118.077/0001-33", categoria: "Manutenção",       status: "Ativo",      volume12m: 138000, titulos: 1, prazo: 30, avatar: "PB" },
+  { id: 4,  nome: "Mecânica Diesel Forte",    cnpj: "44.882.331/0001-44", categoria: "Manutenção",       status: "Ativo",      volume12m:  92000, titulos: 2, prazo: 30, avatar: "MD" },
+  { id: 5,  nome: "TecSys Sistemas",          cnpj: "55.317.220/0001-55", categoria: "Tecnologia",       status: "Ativo",      volume12m:  64000, titulos: 1, prazo: 30, avatar: "TS" },
+  { id: 6,  nome: "Energisa Distribuição",    cnpj: "06.882.110/0001-66", categoria: "Utilidades",       status: "Ativo",      volume12m:  48000, titulos: 1, prazo: 10, avatar: "ED" },
+  { id: 7,  nome: "Sabesp",                   cnpj: "43.776.517/0001-80", categoria: "Utilidades",       status: "Ativo",      volume12m:  18000, titulos: 0, prazo: 10, avatar: "SB" },
+  { id: 8,  nome: "Office Supplies Ltda",     cnpj: "77.220.991/0001-77", categoria: "Tecnologia",       status: "Bloqueado",  volume12m:  12000, titulos: 4, prazo: 30, avatar: "OS" },
+  { id: 9,  nome: "Lubrax Comércio",          cnpj: "88.117.404/0001-88", categoria: "Combustível",      status: "Ativo",      volume12m:  86000, titulos: 1, prazo: 21, avatar: "LC" },
+  { id: 10, nome: "Auto Peças Líder",         cnpj: "99.443.882/0001-99", categoria: "Manutenção",       status: "Inativo",    volume12m:  22000, titulos: 0, prazo: 30, avatar: "AP" },
+  { id: 11, nome: "Cloud Pro Solutions",      cnpj: "10.554.778/0001-10", categoria: "Tecnologia",       status: "Ativo",      volume12m:  41000, titulos: 1, prazo: 30, avatar: "CP" },
+  { id: 12, nome: "RH Mais Consultoria",      cnpj: "23.665.001/0001-23", categoria: "Pessoal",          status: "Ativo",      volume12m:  35000, titulos: 0, prazo: 15, avatar: "RM" },
+];
+
 const CATEGORIAS = [
   { id: 1, nome: "Combustível e Lubrificantes", tipo: "Despesa", icon: Flame, valor: 199325, pct: 70, cor: "amber", qtd: 14, fornecedores: 3 },
   { id: 2, nome: "Manutenção e Reparos", tipo: "Despesa", icon: Wrench, valor: 34170, pct: 12, cor: "blue", qtd: 8, fornecedores: 5 },
