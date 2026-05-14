@@ -27,6 +27,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { PartnersAnalytics, type PartnerRow } from "@/components/finance/PartnersAnalytics";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
