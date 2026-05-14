@@ -1003,9 +1003,14 @@ function ScreenRelatorios() {
 
 
 function ScreenFornecedores() {
-  const { contasPagar, dwRawData, isFetchingDw } = useFinancialData();
+  const { contasPagar, dwRawData, isFetchingDw, fetchFromDW } = useFinancialData();
   const [search, setSearch] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+
+  useEffect(() => {
+    if (!isFetchingDw && dwRawData.length === 0) fetchFromDW();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Agrega por COD_PARCEIRO (CP apenas)
   const fornecedores = useMemo(() => {
