@@ -1251,7 +1251,7 @@ function ScreenClientes() {
                   {[
                     { label: "Fat. 12m",     value: fmtK(c.faturamento12m), clr: "text-emerald-300" },
                     { label: "Em aberto",    value: String(c.titulosAbertos), clr: c.titulosAbertos > 1 ? "text-rose-300" : c.titulosAbertos === 1 ? "text-amber-300" : "text-slate-400" },
-                    { label: c.inadimplente ? "Dias em atraso" : "Prazo médio",  value: c.inadimplente ? `+${agingDias(RECEBER.find(r => r.cliente === c.nome && r.status === "Em Atraso")?.vencimento ?? "2025-05-13")}d` : `${c.prazoMedio}d`,     clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
+                    { label: c.inadimplente ? "Dias em atraso" : "Prazo médio",  value: c.inadimplente ? `+${agingDias("2025-05-13")}d` : `${c.prazoMedio}d`,     clr: c.inadimplente ? "text-rose-300" : "text-slate-300" },
                   ].map(s => (
                     <div key={s.label} className="rounded-lg bg-[var(--sgt-table-head)] px-1.5 py-1.5">
                       <p className="text-[9px] text-slate-600 leading-none mb-1">{s.label}</p>
