@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
+import type { ContaPagar, ContaReceber } from "@/data/mockData";
 import {
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
   FileBarChart, Building2, Tag, Landmark,
@@ -32,13 +34,37 @@ const fmtBRL = (v: number) =>
 const fmtK = (v: number) =>
   v >= 1e6 ? `R$ ${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `R$ ${(v / 1e3).toFixed(0)}k` : fmtBRL(v);
 const fmtDate = (s: string) => new Date(s).toLocaleDateString("pt-BR");
+
 function agingDias(vencimento: string): number {
-  const hoje = new Date("2025-05-13");
-  const venc = new Date(vencimento);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const venc = new Date(vencimento); venc.setHours(0,0,0,0);
   return Math.floor((hoje.getTime() - venc.getTime()) / 86400000);
 }
-function AgingBadge({ vencimento, status }: { vencimento: string; status: string }) {
-  if (!["Em Atraso", "Vencido"].includes(status)) return null;
+
+// Mapeia ContaPagar.status → label de exibição
+function dsPagar(c: ContaPagar): string {
+  if (c.status === "Parcial") return c.valorPago >= c.valor ? "Pago" : "Pago Parcial";
+  if (c.status === "Vencido") return "Vencido";
+  // Em Aberto
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const venc = new Date(c.vencimento); venc.setHours(0,0,0,0);
+  if (venc.getTime() < hoje.getTime()) return "Vencido";
+  if (venc.getTime() === hoje.getTime()) return "Vence Hoje";
+  return "Pendente";
+}
+
+// Mapeia ContaReceber.status → label de exibição
+function dsReceber(c: ContaReceber): string {
+  if (c.status === "Parcial") return c.valorRecebido >= c.valor ? "Recebido" : "Recebido Parcial";
+  if (c.status === "Vencido") return "Em Atraso";
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const venc = new Date(c.vencimento); venc.setHours(0,0,0,0);
+  if (venc.getTime() < hoje.getTime()) return "Em Atraso";
+  if (venc.getTime() === hoje.getTime()) return "Vence Hoje";
+  return "Pendente";
+}
+function AgingBadge({ vencimento, displayStatus }: { vencimento: string; displayStatus: string }) {
+  if (!["Em Atraso","Vencido"].includes(displayStatus)) return null;
   const dias = agingDias(vencimento);
   if (dias <= 0) return null;
   const cls = dias > 60 ? "bg-rose-400/15 text-rose-300" : dias > 30 ? "bg-rose-400/10 text-rose-400" : "bg-amber-400/10 text-amber-300";
@@ -46,40 +72,7 @@ function AgingBadge({ vencimento, status }: { vencimento: string; status: string
 }
 
 // ─── MOCK DATA ─────────────────────────────────────────────────────────────────
-const PAGAR = [
-  { id: 1, fornecedor: "Petrobras Distribuidora", cnpj: "33.453.178/0001-00", documento: "NF-004821", emissao: "2025-04-08", vencimento: "2025-05-02", valor: 14320, tipo: "NF", status: "Vencido" },
-  { id: 2, fornecedor: "Brasken S.A.", cnpj: "42.150.391/0001-70", documento: "BOL-009134", emissao: "2025-04-10", vencimento: "2025-05-13", valor: 12340, tipo: "Boleto", status: "Vence Hoje" },
-  { id: 3, fornecedor: "Correios & Logística", cnpj: "34.028.316/0001-03", documento: "NF-021788", emissao: "2025-04-15", vencimento: "2025-05-20", valor: 7850, tipo: "NF", status: "Pendente" },
-  { id: 4, fornecedor: "SASCAR Tecnologia", cnpj: "01.838.723/0001-27", documento: "CTR-003312", emissao: "2025-05-01", vencimento: "2025-06-01", valor: 4200, tipo: "Contrato", status: "Agendado" },
-  { id: 5, fornecedor: "Omnilink S.A.", cnpj: "07.175.725/0001-84", documento: "NF-018940", emissao: "2025-04-03", vencimento: "2025-04-25", valor: 9180, tipo: "NF", status: "Vencido" },
-  { id: 6, fornecedor: "Projeção Transportes", cnpj: "18.432.007/0001-55", documento: "NF-031204", emissao: "2025-04-20", vencimento: "2025-05-28", valor: 21600, tipo: "NF", status: "Pendente" },
-  { id: 7, fornecedor: "Eletropaulo S.A.", cnpj: "61.695.227/0001-93", documento: "BOL-104412", emissao: "2025-05-05", vencimento: "2025-05-15", valor: 3290, tipo: "Boleto", status: "Pendente" },
-  { id: 8, fornecedor: "Petrobras Distribuidora", cnpj: "33.453.178/0001-00", documento: "NF-004933", emissao: "2025-04-25", vencimento: "2025-05-25", valor: 16800, tipo: "NF", status: "Pendente" },
-  { id: 9, fornecedor: "Brasken S.A.", cnpj: "42.150.391/0001-70", documento: "BOL-009201", emissao: "2025-04-30", vencimento: "2025-06-10", valor: 8900, tipo: "Boleto", status: "Agendado" },
-  { id: 10, fornecedor: "Correios & Logística", cnpj: "34.028.316/0001-03", documento: "NF-022001", emissao: "2025-04-12", vencimento: "2025-04-20", valor: 5400, tipo: "NF", status: "Pago" },
-];
 
-const RECEBER = [
-  { id: 1, cliente: "Transpolog Ltda", cnpj: "09.241.885/0001-12", documento: "NF-008812", emissao: "2025-04-02", vencimento: "2025-04-28", valor: 28400, tipo: "NF", status: "Em Atraso" },
-  { id: 2, cliente: "Veloz Express", cnpj: "17.332.091/0001-48", documento: "DUP-004422", emissao: "2025-04-10", vencimento: "2025-05-13", valor: 15700, tipo: "Duplicata", status: "Vence Hoje" },
-  { id: 3, cliente: "Cargo Rápido", cnpj: "22.018.443/0001-90", documento: "NF-019933", emissao: "2025-04-18", vencimento: "2025-05-22", valor: 9300, tipo: "NF", status: "Pendente" },
-  { id: 4, cliente: "RodoLog S.A.", cnpj: "31.029.774/0001-66", documento: "BOL-041200", emissao: "2025-05-05", vencimento: "2025-05-30", valor: 42000, tipo: "Boleto", status: "Pendente" },
-  { id: 5, cliente: "Brilho Frete", cnpj: "48.332.110/0001-22", documento: "NF-022101", emissao: "2025-04-28", vencimento: "2025-05-28", valor: 18500, tipo: "NF", status: "Recebido" },
-  { id: 6, cliente: "Paraíso Frotas", cnpj: "55.817.009/0001-37", documento: "DUP-009811", emissao: "2025-05-01", vencimento: "2025-05-31", valor: 33200, tipo: "Duplicata", status: "Agendado" },
-  { id: 7, cliente: "LogMax Transportes", cnpj: "62.114.882/0001-55", documento: "NF-033100", emissao: "2025-04-05", vencimento: "2025-04-18", valor: 11200, tipo: "NF", status: "Em Atraso" },
-  { id: 8, cliente: "Transpolog Ltda", cnpj: "09.241.885/0001-12", documento: "NF-009001", emissao: "2025-05-01", vencimento: "2025-06-01", valor: 31000, tipo: "NF", status: "Pendente" },
-];
-
-const FORNECEDORES = [
-  { id: 1, nome: "Petrobras Distribuidora", cnpj: "33.453.178/0001-00", categoria: "Combustível", status: "Ativo", volume12m: 198000, titulos: 3, prazo: 30, avatar: "PE" },
-  { id: 2, nome: "Correios & Logística", cnpj: "34.028.316/0001-03", categoria: "Logística", status: "Ativo", volume12m: 84000, titulos: 1, prazo: 28, avatar: "CO" },
-  { id: 3, nome: "SASCAR Tecnologia", cnpj: "01.838.723/0001-27", categoria: "Rastreamento", status: "Ativo", volume12m: 50000, titulos: 1, prazo: 30, avatar: "SC" },
-  { id: 4, nome: "Brasken S.A.", cnpj: "42.150.391/0001-70", categoria: "Materiais", status: "Ativo", volume12m: 142000, titulos: 2, prazo: 45, avatar: "BR" },
-  { id: 5, nome: "Omnilink S.A.", cnpj: "07.175.725/0001-84", categoria: "Rastreamento", status: "Bloqueado", volume12m: 61000, titulos: 4, prazo: 30, avatar: "OM" },
-  { id: 6, nome: "Eletropaulo S.A.", cnpj: "61.695.227/0001-93", categoria: "Utilidades", status: "Ativo", volume12m: 39000, titulos: 1, prazo: 15, avatar: "EL" },
-  { id: 7, nome: "Projeção Transportes", cnpj: "18.432.007/0001-55", categoria: "Logística", status: "Ativo", volume12m: 95000, titulos: 2, prazo: 30, avatar: "PR" },
-  { id: 8, nome: "MegaFlex Ind.", cnpj: "29.118.542/0001-09", categoria: "Insumos", status: "Inativo", volume12m: 22000, titulos: 0, prazo: 60, avatar: "MF" },
-];
 
 const CLIENTES = [
   { id: 1,  nome: "Transpolog Ltda",       cnpj: "09.241.885/0001-12", segmento: "Transportadora",  status: "Ativo",        faturamento12m: 420000, titulosAbertos: 2, prazoMedio: 30, inadimplente: false, avatar: "TL", cidade: "São Paulo, SP",     contato: "Carlos Mendes" },
@@ -148,15 +141,15 @@ const CONCILIACAO_ERP = [
 
 // ─── STATUS BADGE CONFIG ───────────────────────────────────────────────────────
 function statusCfg(s: string) {
-  if (s === "Vencido" || s === "Em Atraso") return { dot: "bg-rose-400", text: "text-rose-300", bg: "bg-rose-400/10 border-rose-400/20" };
-  if (s === "Vence Hoje") return { dot: "bg-blue-400", text: "text-blue-300", bg: "bg-blue-400/10 border-blue-400/20" };
-  if (s === "Pendente") return { dot: "bg-amber-400", text: "text-amber-300", bg: "bg-amber-400/10 border-amber-400/20" };
-  if (s === "Agendado") return { dot: "bg-violet-400", text: "text-violet-300", bg: "bg-violet-400/10 border-violet-400/20" };
-  if (s === "Pago" || s === "Recebido") return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
-  if (s === "Ativo") return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
-  if (s === "Bloqueado") return { dot: "bg-rose-400", text: "text-rose-300", bg: "bg-rose-400/10 border-rose-400/20" };
-  if (s === "Inativo") return { dot: "bg-slate-400", text: "text-slate-400", bg: "bg-slate-400/10 border-slate-400/20" };
-  if (s === "Conciliado") return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
+  if (s === "Vencido" || s === "Em Atraso")   return { dot: "bg-rose-400",    text: "text-rose-300",    bg: "bg-rose-400/10 border-rose-400/20" };
+  if (s === "Vence Hoje")                      return { dot: "bg-blue-400",    text: "text-blue-300",    bg: "bg-blue-400/10 border-blue-400/20" };
+  if (s === "Pendente")                        return { dot: "bg-amber-400",   text: "text-amber-300",   bg: "bg-amber-400/10 border-amber-400/20" };
+  if (s === "Pago" || s === "Recebido")        return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
+  if (s === "Pago Parcial" || s === "Recebido Parcial") return { dot: "bg-teal-400", text: "text-teal-300", bg: "bg-teal-400/10 border-teal-400/20" };
+  if (s === "Ativo")     return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
+  if (s === "Bloqueado") return { dot: "bg-rose-400",    text: "text-rose-300",    bg: "bg-rose-400/10 border-rose-400/20" };
+  if (s === "Inativo")   return { dot: "bg-slate-400",   text: "text-slate-400",   bg: "bg-slate-400/10 border-slate-400/20" };
+  if (s === "Conciliado")   return { dot: "bg-emerald-400", text: "text-emerald-300", bg: "bg-emerald-400/10 border-emerald-400/20" };
   if (s === "Divergência" || s.startsWith("Divergência")) return { dot: "bg-rose-400", text: "text-rose-300", bg: "bg-rose-400/10 border-rose-400/20" };
   if (s.includes("Sem par")) return { dot: "bg-amber-400", text: "text-amber-300", bg: "bg-amber-400/10 border-amber-400/20" };
   return { dot: "bg-slate-400", text: "text-slate-400", bg: "bg-slate-400/10 border-slate-400/20" };
@@ -198,6 +191,15 @@ function SectionCard({ children, className = "" }: { children: React.ReactNode; 
   return (
     <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] border-[var(--sgt-border-subtle)] overflow-hidden ${className}`}>
       {children}
+    </div>
+  );
+}
+
+function SkeletonLoader({ label }: { label?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-600">
+      <div className="h-8 w-8 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
+      {label && <p className="text-[12px] font-medium">{label}</p>}
     </div>
   );
 }
@@ -276,19 +278,24 @@ function ConcStatus({ s }: { s: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
-  const totalPagar = PAGAR.filter(p => p.status !== "Pago").reduce((s, p) => s + p.valor, 0);
-  const totalReceber = RECEBER.filter(r => r.status !== "Recebido").reduce((s, r) => s + r.valor, 0);
-  const vencidosPagar = PAGAR.filter(p => p.status === "Vencido").reduce((s, p) => s + p.valor, 0);
-  const atrasadosReceber = RECEBER.filter(r => r.status === "Em Atraso").reduce((s, r) => s + r.valor, 0);
-  const saldo = totalReceber - totalPagar;
-  const saldoBancos = BANCOS.reduce((s, b) => s + b.saldo, 0);
+  const { contasPagar, contasReceber, resumo, isFetchingDw } = useFinancialData();
+
+  const totalPagar   = resumo.contasPagar.saldoAPagar;
+  const totalReceber = resumo.contasReceber.saldoAReceber;
+  const saldoBancos  = BANCOS.reduce((s, b) => s + b.saldo, 0);
+  const saldo        = totalReceber - totalPagar;
+
+  const vencidosPagar     = contasPagar.filter(c => dsPagar(c) === "Vencido").reduce((s,c) => s+c.valor, 0);
+  const atrasadosReceber  = contasReceber.filter(c => dsReceber(c) === "Em Atraso").reduce((s,c) => s+c.valor, 0);
 
   const kpis = [
-    { label: "Saldo em Bancos", value: fmtK(saldoBancos), sub: `${BANCOS.length} contas ativas`, icon: Landmark, stripe: "from-cyan-400/60 to-cyan-700/20", iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]", iconTxt: "text-cyan-300", glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]" },
-    { label: "A Pagar (abertas)", value: fmtK(totalPagar), sub: `${PAGAR.filter(p => p.status !== "Pago").length} títulos`, icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-    { label: "A Receber (abertas)", value: fmtK(totalReceber), sub: `${RECEBER.filter(r => r.status !== "Recebido").length} títulos`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-    { label: "Resultado Líquido", value: fmtK(Math.abs(saldo)), sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável", icon: BarChart3, stripe: "from-amber-400/60 to-amber-700/20", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]", iconTxt: "text-amber-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
+    { label: "Saldo em Bancos",    value: fmtK(saldoBancos),         sub: `${BANCOS.length} contas ativas`,                             icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
+    { label: "A Pagar (abertas)",  value: fmtK(totalPagar),          sub: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos`,   icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
+    { label: "A Receber (abertas)",value: fmtK(totalReceber),        sub: `${contasReceber.filter(c => dsReceber(c) !== "Recebido").length} títulos`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
+    { label: "Resultado Líquido",  value: fmtK(Math.abs(saldo)),     sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
   ];
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando painel financeiro..." />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -304,7 +311,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
                 <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold text-rose-300">Títulos vencidos a pagar</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{PAGAR.filter(p => p.status === "Vencido").length} títulos · {fmtBRL(vencidosPagar)}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{contasPagar.filter(c => dsPagar(c) === "Vencido").length} títulos · {fmtBRL(vencidosPagar)}</p>
                 </div>
                 <ChevronRight className="h-3.5 w-3.5 text-rose-400/50 shrink-0" />
               </div>
@@ -316,7 +323,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
                 <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold text-amber-300">Clientes em atraso</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{RECEBER.filter(r => r.status === "Em Atraso").length} clientes · {fmtBRL(atrasadosReceber)}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{contasReceber.filter(c => dsReceber(c) === "Em Atraso").length} clientes · {fmtBRL(atrasadosReceber)}</p>
                 </div>
                 <ChevronRight className="h-3.5 w-3.5 text-amber-400/50 shrink-0" />
               </div>
@@ -325,55 +332,42 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
         </div>
       )}
 
-      {/* Gráfico Fluxo de Caixa — restaurado */}
       <AnimatedCard delay={320}>
         <SectionCard>
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
             <div>
-              <span className="text-[12px] font-semibold text-slate-300">Fluxo de Caixa — Maio 2025</span>
+              <span className="text-[12px] font-semibold text-slate-300">Fluxo de Caixa</span>
               <span className="ml-2 text-[10px] text-slate-600">Previsto vs Realizado</span>
             </div>
             <div className="flex items-center gap-3 text-[10px] text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-4 rounded-full bg-emerald-400/70" />Realizado</span>
-              <span className="flex items-center gap-1.5"><span className="inline-block h-px w-4 border-t-2 border-dashed border-slate-500" />Previsto</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-1.5 w-4 rounded-full bg-emerald-400/70" />A Receber</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-px w-4 border-t-2 border-dashed border-rose-400/50" />A Pagar</span>
             </div>
           </div>
           <div className="px-2 py-3" style={{ height: 180 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={[
-                  { dia: "01/05", previsto: 45000, realizado: 42000 },
-                  { dia: "02/05", previsto: 32000, realizado: 28000 },
-                  { dia: "05/05", previsto: 78000, realizado: 82000 },
-                  { dia: "06/05", previsto: 15000, realizado: 14320 },
-                  { dia: "07/05", previsto: 22000, realizado: 21600 },
-                  { dia: "08/05", previsto: 38000, realizado: 35000 },
-                  { dia: "09/05", previsto: 12000, realizado: 9180  },
-                  { dia: "10/05", previsto: 55000, realizado: 52000 },
-                  { dia: "12/05", previsto: 28000, realizado: 30200 },
-                  { dia: "13/05", previsto: 41000, realizado: undefined },
-                  { dia: "15/05", previsto: 19000, realizado: undefined },
-                  { dia: "20/05", previsto: 67000, realizado: undefined },
-                  { dia: "28/05", previsto: 33000, realizado: undefined },
-                ]}
+              <BarChart
+                data={(() => {
+                  const map: Record<string, { mes: string; pagar: number; receber: number }> = {};
+                  [...contasPagar, ...contasReceber].forEach(r => {
+                    const d = (r as any).vencimento || "";
+                    if (!d) return;
+                    const mes = d.slice(0,7);
+                    if (!map[mes]) map[mes] = { mes: new Date(d).toLocaleDateString("pt-BR",{month:"short",year:"2-digit"}), pagar: 0, receber: 0 };
+                    if ("fornecedor" in r) map[mes].pagar  += (r as ContaPagar).valor;
+                    else                  map[mes].receber += (r as ContaReceber).valor;
+                  });
+                  return Object.values(map).slice(-6);
+                })()}
                 margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
               >
-                <defs>
-                  <linearGradient id="gradRealPainel" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#34d399" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#34d399" stopOpacity={0.01} />
-                  </linearGradient>
-                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={32} />
-                <Tooltip
-                  formatter={(v: any, name: string) => [fmtK(v), name === "realizado" ? "Realizado" : "Previsto"]}
-                  contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
-                />
-                <Area type="monotone" dataKey="realizado" stroke="#34d399" strokeWidth={2} fill="url(#gradRealPainel)" connectNulls={false} dot={{ fill: "#34d399", r: 3, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="previsto"  stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-              </AreaChart>
+                <XAxis dataKey="mes" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={32} />
+                <Tooltip formatter={(v:any, n:string) => [fmtK(v), n === "receber" ? "A Receber" : "A Pagar"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                <Bar dataKey="receber" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
+                <Bar dataKey="pagar"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </SectionCard>
@@ -386,19 +380,23 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
               <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><ArrowDownCircle className="h-3.5 w-3.5 text-rose-400" />Próximos vencimentos a pagar</span>
               <button onClick={() => onNavigate?.("pagar")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver todos <ChevronRight className="h-3 w-3" /></button>
             </div>
-            {PAGAR.filter(p => p.status !== "Pago").slice(0, 5).map(p => (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                <Avatar initials={p.fornecedor.slice(0, 2).toUpperCase()} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium text-slate-300 truncate">{p.fornecedor}</p>
-                  <p className="text-[10px] text-slate-600">{fmtDate(p.vencimento)}</p>
+            {contasPagar.filter(c => ["Pendente","Vence Hoje","Vencido"].includes(dsPagar(c))).slice(0,5).map((c,i) => {
+              const st = dsPagar(c);
+              return (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
+                  <Avatar initials={c.fornecedor.slice(0,2).toUpperCase()} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-slate-300 truncate">{c.fornecedor}</p>
+                    <p className="text-[10px] text-slate-600">{fmtDate(c.vencimento)}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(c.valor)}</p>
+                    <StatusBadge s={st} />
+                  </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(p.valor)}</p>
-                  <StatusBadge s={p.status} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {contasPagar.length === 0 && <p className="px-4 py-6 text-center text-[12px] text-slate-600">Sem títulos no período</p>}
           </SectionCard>
         </AnimatedCard>
 
@@ -408,19 +406,23 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
               <span className="text-[12px] font-semibold text-slate-300 flex items-center gap-2"><ArrowUpCircle className="h-3.5 w-3.5 text-emerald-400" />Próximos recebimentos</span>
               <button onClick={() => onNavigate?.("receber")} className="text-[10px] text-slate-600 hover:text-amber-300 transition-colors flex items-center gap-0.5">Ver todos <ChevronRight className="h-3 w-3" /></button>
             </div>
-            {RECEBER.filter(r => r.status !== "Recebido").slice(0, 5).map(r => (
-              <div key={r.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                <Avatar initials={r.cliente.slice(0, 2).toUpperCase()} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium text-slate-300 truncate">{r.cliente}</p>
-                  <p className="text-[10px] text-slate-600">{fmtDate(r.vencimento)}</p>
+            {contasReceber.filter(c => ["Pendente","Vence Hoje","Em Atraso"].includes(dsReceber(c))).slice(0,5).map((c,i) => {
+              const st = dsReceber(c);
+              return (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
+                  <Avatar initials={c.cliente.slice(0,2).toUpperCase()} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-slate-300 truncate">{c.cliente}</p>
+                    <p className="text-[10px] text-slate-600">{fmtDate(c.vencimento)}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(c.valor)}</p>
+                    <StatusBadge s={st} />
+                  </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[12px] font-semibold text-white tabular-nums">{fmtK(r.valor)}</p>
-                  <StatusBadge s={r.status} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {contasReceber.length === 0 && <p className="px-4 py-6 text-center text-[12px] text-slate-600">Sem títulos no período</p>}
           </SectionCard>
         </AnimatedCard>
       </div>
@@ -434,10 +436,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[var(--sgt-divider)]">
             {BANCOS.map(b => (
               <div key={b.id} className="px-4 py-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <BankLogo sigla={b.sigla} size={20} />
-                  <span className="text-[10px] text-slate-600 truncate">{b.nome}</span>
-                </div>
+                <div className="flex items-center gap-2 mb-2"><BankLogo sigla={b.sigla} size={20} /><span className="text-[10px] text-slate-600 truncate">{b.nome}</span></div>
                 <p className="text-[15px] font-black text-white leading-none tabular-nums">{fmtK(b.saldo)}</p>
                 <p className="text-[10px] text-slate-600 mt-1">{b.tipo}</p>
               </div>
@@ -449,44 +448,50 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
   );
 }
 
-
 function ScreenPagar() {
+  const { contasPagar, resumo, isFetchingDw } = useFinancialData();
   const [search, setSearch] = useState("");
   const [filtroAba, setFiltroAba] = useState("todos");
   const [page, setPage] = useState(1);
   const PAGE = 30;
 
-  const totalPagar = PAGAR.filter(p => p.status !== "Pago").reduce((s, p) => s + p.valor, 0);
-  const vencido = PAGAR.filter(p => p.status === "Vencido").reduce((s, p) => s + p.valor, 0);
-  const hoje = PAGAR.filter(p => p.status === "Vence Hoje").reduce((s, p) => s + p.valor, 0);
-  const pago = PAGAR.filter(p => p.status === "Pago").reduce((s, p) => s + p.valor, 0);
+  const today = new Date(); today.setHours(0,0,0,0);
 
-  const ABAS_PAGAR = [
-    { id: "todos",      label: "Todos",      count: PAGAR.length },
-    { id: "Vencido",    label: "Vencidos",   count: PAGAR.filter(p => p.status === "Vencido").length },
-    { id: "Vence Hoje", label: "Vence Hoje", count: PAGAR.filter(p => p.status === "Vence Hoje").length },
-    { id: "a-vencer",   label: "A Vencer",   count: PAGAR.filter(p => ["Pendente","Agendado"].includes(p.status)).length },
-    { id: "Pago",       label: "Pagos",      count: PAGAR.filter(p => p.status === "Pago").length },
+  const totalPagar   = resumo.contasPagar.saldoAPagar;
+  const vencido      = contasPagar.filter(c => dsPagar(c) === "Vencido").reduce((s,c) => s+c.valor, 0);
+  const hojeVal      = contasPagar.filter(c => dsPagar(c) === "Vence Hoje").reduce((s,c) => s+c.valor, 0);
+  const pago         = resumo.contasPagar.valorPago;
+
+  const ABAS = [
+    { id: "todos",       label: "Todos",      count: contasPagar.length },
+    { id: "Vencido",     label: "Vencidos",   count: contasPagar.filter(c => dsPagar(c) === "Vencido").length },
+    { id: "Vence Hoje",  label: "Vence Hoje", count: contasPagar.filter(c => dsPagar(c) === "Vence Hoje").length },
+    { id: "a-vencer",    label: "A Vencer",   count: contasPagar.filter(c => dsPagar(c) === "Pendente").length },
+    { id: "Pago",        label: "Pagos",      count: contasPagar.filter(c => ["Pago","Pago Parcial"].includes(dsPagar(c))).length },
   ];
 
-  const filtered = useMemo(() => PAGAR.filter(p => {
+  const filtered = useMemo(() => contasPagar.filter(c => {
     const q = search.toLowerCase();
-    const matchQ = !q || p.fornecedor.toLowerCase().includes(q) || p.documento.toLowerCase().includes(q);
+    const st = dsPagar(c);
+    const matchQ = !q || c.fornecedor.toLowerCase().includes(q) || (c.documento ?? "").toLowerCase().includes(q);
     let matchAba = true;
-    if (filtroAba === "a-vencer") matchAba = ["Pendente","Agendado"].includes(p.status);
-    else if (filtroAba !== "todos") matchAba = p.status === filtroAba;
+    if (filtroAba === "a-vencer")   matchAba = st === "Pendente";
+    else if (filtroAba === "Pago")  matchAba = ["Pago","Pago Parcial"].includes(st);
+    else if (filtroAba !== "todos") matchAba = st === filtroAba;
     return matchQ && matchAba;
-  }), [search, filtroAba]);
+  }), [contasPagar, search, filtroAba]);
 
-  const paginated = filtered.slice((page - 1) * PAGE, page * PAGE);
+  const paginated = filtered.slice((page-1)*PAGE, page*PAGE);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
 
   const kpis = [
-    { label: "Total a Pagar", value: fmtK(totalPagar), sub: `${PAGAR.filter(p => p.status !== "Pago").length} títulos em aberto`, icon: Wallet, stripe: "from-blue-400/60 to-blue-700/20", iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]", iconTxt: "text-blue-300", glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]" },
-    { label: "Vencido", value: fmtK(vencido), sub: `${PAGAR.filter(p => p.status === "Vencido").length} títulos em atraso`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-    { label: "Vence Hoje", value: fmtK(hoje), sub: `${PAGAR.filter(p => p.status === "Vence Hoje").length} títulos para hoje`, icon: Clock, stripe: "from-amber-400/60 to-amber-700/20", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]", iconTxt: "text-amber-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
-    { label: "Pago no Mês", value: fmtK(pago), sub: `${PAGAR.filter(p => p.status === "Pago").length} títulos quitados`, icon: CheckCircle, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+    { label: "Total a Pagar", value: fmtK(totalPagar), sub: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos em aberto`, icon: Wallet,        stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"   },
+    { label: "Vencido",       value: fmtK(vencido),    sub: `${contasPagar.filter(c => dsPagar(c) === "Vencido").length} títulos em atraso`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
+    { label: "Vence Hoje",    value: fmtK(hojeVal),    sub: `${contasPagar.filter(c => dsPagar(c) === "Vence Hoje").length} títulos para hoje`, icon: Clock,      stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
+    { label: "Pago no Mês",   value: fmtK(pago),       sub: `${contasPagar.filter(c => ["Pago","Pago Parcial"].includes(dsPagar(c))).length} títulos quitados`, icon: CheckCircle, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
   ];
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando contas a pagar..." />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -494,7 +499,7 @@ function ScreenPagar() {
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* ── GRÁFICOS ── */}
+      {/* Gráficos aging + top fornecedores */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <AnimatedCard delay={160}>
           <SectionCard>
@@ -506,43 +511,29 @@ function ScreenPagar() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
-                    { faixa: "1–30d",    valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 1  && d <= 30; }).reduce((s,p)=>s+p.valor,0) },
-                    { faixa: "31–60d",   valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 31 && d <= 60; }).reduce((s,p)=>s+p.valor,0) },
-                    { faixa: "61–90d",   valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d >= 61 && d <= 90; }).reduce((s,p)=>s+p.valor,0) },
-                    { faixa: "90d+",     valor: PAGAR.filter(p => { const d = agingDias(p.vencimento); return p.status === "Vencido" && d  > 90; }).reduce((s,p)=>s+p.valor,0) },
-                    { faixa: "Pendente", valor: PAGAR.filter(p => p.status === "Pendente").reduce((s,p)=>s+p.valor,0) },
-                    { faixa: "Agendado", valor: PAGAR.filter(p => p.status === "Agendado").reduce((s,p)=>s+p.valor,0) },
+                    { faixa: "1–30d",    valor: contasPagar.filter(c => { const d = agingDias(c.vencimento); return dsPagar(c) === "Vencido" && d >= 1  && d <= 30; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "31–60d",   valor: contasPagar.filter(c => { const d = agingDias(c.vencimento); return dsPagar(c) === "Vencido" && d >= 31 && d <= 60; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "61–90d",   valor: contasPagar.filter(c => { const d = agingDias(c.vencimento); return dsPagar(c) === "Vencido" && d >= 61 && d <= 90; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "90d+",     valor: contasPagar.filter(c => { const d = agingDias(c.vencimento); return dsPagar(c) === "Vencido" && d  > 90;           }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "Pendente", valor: contasPagar.filter(c => dsPagar(c) === "Pendente").reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "V. Hoje",  valor: contasPagar.filter(c => dsPagar(c) === "Vence Hoje").reduce((s,c)=>s+c.valor,0) },
                   ]}
                   margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                   <XAxis dataKey="faixa" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
-                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="valor" name="Valor" radius={[4, 4, 0, 0]}>
-                    {["1–30d","31–60d","61–90d","90d+","Pendente","Agendado"].map((f) => (
-                      <Cell key={f} fill={
-                        f === "1–30d"    ? "#fbbf24" :
-                        f === "31–60d"   ? "#f97316" :
-                        f === "61–90d"   ? "#ef4444" :
-                        f === "90d+"     ? "#991b1b" :
-                        f === "Pendente" ? "#60a5fa" : "#a78bfa"
-                      } fillOpacity={0.82} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Valor" radius={[4,4,0,0]}>
+                    {["1–30d","31–60d","61–90d","90d+","Pendente","V. Hoje"].map((f) => (
+                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#60a5fa":"#a78bfa"} fillOpacity={0.82} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-3">
-              {([["1–30d","#fbbf24"],["31–60d","#f97316"],["61–90d","#ef4444"],["90d+","#991b1b"],["Pendente","#60a5fa"],["Agendado","#a78bfa"]] as [string,string][]).map(([l,c])=>(
-                <span key={l} className="flex items-center gap-1 text-[10px] text-slate-500">
-                  <span className="h-2 w-2 rounded-sm" style={{ background: c }} />{l}
-                </span>
-              ))}
-            </div>
           </SectionCard>
         </AnimatedCard>
-
         <AnimatedCard delay={200}>
           <SectionCard>
             <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
@@ -551,22 +542,20 @@ function ScreenPagar() {
             </div>
             <div className="px-2 py-3" style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  layout="vertical"
+                <BarChart layout="vertical"
                   data={Object.entries(
-                    PAGAR.filter(p => p.status !== "Pago").reduce((acc, p) => {
-                      const k = p.fornecedor.split(" ").slice(0,2).join(" ");
-                      acc[k] = (acc[k] || 0) + p.valor;
-                      return acc;
-                    }, {} as Record<string, number>)
-                  ).sort((a,b) => b[1]-a[1]).slice(0,5).map(([nome, valor]) => ({ nome, valor }))}
+                    contasPagar.filter(c => !["Pago","Pago Parcial"].includes(dsPagar(c))).reduce((acc,c) => {
+                      const k = c.fornecedor.split(" ").slice(0,2).join(" ");
+                      acc[k] = (acc[k] || 0) + c.valor; return acc;
+                    }, {} as Record<string,number>)
+                  ).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([nome,valor])=>({nome,valor}))}
                   margin={{ top: 4, right: 14, left: 4, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} />
                   <YAxis type="category" dataKey="nome" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={92} />
-                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="valor" name="Em aberto" fill="#fbbf24" fillOpacity={0.75} radius={[0, 4, 4, 0]} />
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Em aberto" fill="#fbbf24" fillOpacity={0.75} radius={[0,4,4,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -578,9 +567,8 @@ function ScreenPagar() {
 
       <AnimatedCard delay={200}>
         <SectionCard>
-          {/* Abas */}
           <div className="flex items-center gap-0 px-4 pt-3 border-b border-[var(--sgt-divider)] overflow-x-auto">
-            {ABAS_PAGAR.map(a => (
+            {ABAS.map(a => (
               <button key={a.id} onClick={() => { setFiltroAba(a.id); setPage(1); }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
                   filtroAba === a.id ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
@@ -597,46 +585,40 @@ function ScreenPagar() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
               <thead><tr>
-                <Th>Fornecedor</Th><Th>Documento</Th><Th>Emissão</Th><Th>Vencimento</Th><Th>Valor</Th><Th>Tipo</Th><Th>Status</Th><Th>Ações</Th>
+                <Th>Fornecedor</Th><Th>Documento</Th><Th>Emissão</Th><Th>Vencimento</Th><Th>Valor</Th><Th>Status</Th><Th>Ações</Th>
               </tr></thead>
               <tbody>
-                {paginated.map(p => (
-                  <tr key={p.id} className="hover:bg-[var(--sgt-row-hover)] transition-colors">
-                    <Td>
-                      <div className="flex items-center gap-2">
-                        <Avatar initials={p.fornecedor.slice(0, 2).toUpperCase()} />
-                        <div>
-                          <p className="font-medium text-slate-200 text-[12px]">{p.fornecedor}</p>
-                          <p className="text-[10px] text-slate-600">{p.cnpj}</p>
+                {paginated.map(c => {
+                  const st = dsPagar(c);
+                  return (
+                    <tr key={c.id} className="hover:bg-[var(--sgt-row-hover)] transition-colors">
+                      <Td>
+                        <div className="flex items-center gap-2">
+                          <Avatar initials={c.fornecedor.slice(0,2).toUpperCase()} />
+                          <p className="font-medium text-slate-200 text-[12px] truncate max-w-[140px]">{c.fornecedor}</p>
                         </div>
-                      </div>
-                    </Td>
-                    <Td className="font-mono text-[11px] text-slate-500">{p.documento}</Td>
-                    <Td className="text-slate-500">{fmtDate(p.emissao)}</Td>
-                    <Td className={p.status === "Vencido" || p.status === "Vence Hoje" ? "font-semibold text-rose-300" : "text-slate-400"}>{fmtDate(p.vencimento)}</Td>
-                    <Td className={`font-semibold tabular-nums ${p.status === "Vencido" ? "text-rose-300" : p.status === "Vence Hoje" ? "text-blue-300" : "text-white"}`}>{fmtBRL(p.valor)}</Td>
-                    <Td className="text-slate-500 text-[11px]">{p.tipo}</Td>
-                    <Td><StatusBadge s={p.status} /></Td>
-                    <Td>
-                      <div className="flex gap-1">
-                        <ActionBtn icon={Banknote} title="Registrar pagamento" />
-                        <ActionBtn icon={Pencil} title="Editar" />
-                        <ActionBtn icon={Eye} title="Detalhes" />
-                      </div>
-                    </Td>
-                  </tr>
-                ))}
+                      </Td>
+                      <Td className="font-mono text-[11px] text-slate-500">{c.documento}{c.parcela ? `/${c.parcela}` : ""}</Td>
+                      <Td className="text-slate-500">{fmtDate(c.dataEmissao)}</Td>
+                      <Td className={st === "Vencido" ? "font-semibold text-rose-300" : st === "Vence Hoje" ? "font-semibold text-blue-300" : "text-slate-400"}>{fmtDate(c.vencimento)}</Td>
+                      <Td className={`font-semibold tabular-nums ${st === "Vencido" ? "text-rose-300" : st === "Vence Hoje" ? "text-blue-300" : "text-white"}`}>{fmtBRL(c.valor)}</Td>
+                      <Td><StatusBadge s={st} /></Td>
+                      <Td><div className="flex gap-1"><ActionBtn icon={Banknote} title="Registrar pagamento" /><ActionBtn icon={Eye} title="Detalhes" /></div></Td>
+                    </tr>
+                  );
+                })}
+                {paginated.length === 0 && <tr><td colSpan={7} className="text-center py-8 text-slate-600 text-[12px]">Nenhum título encontrado</td></tr>}
               </tbody>
             </table>
           </div>
           <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--sgt-divider)]">
-            <span className="text-[11px] text-slate-600">{(page - 1) * PAGE + 1}–{Math.min(page * PAGE, filtered.length)} de {filtered.length}</span>
+            <span className="text-[11px] text-slate-600">{(page-1)*PAGE+1}–{Math.min(page*PAGE, filtered.length)} de {filtered.length}</span>
             <div className="flex gap-1">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
-              {Array.from({ length: pages }, (_, i) => i + 1).map(n => (
-                <button key={n} onClick={() => setPage(n)} className={`h-7 w-7 rounded-md text-[11px] font-medium transition-colors ${n === page ? "bg-amber-500/20 border border-amber-500/40 text-amber-300" : "border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{n}</button>
+              <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
+              {Array.from({length:Math.min(pages,5)},(_,i)=>i+1).map(n=>(
+                <button key={n} onClick={() => setPage(n)} className={`h-7 w-7 rounded-md text-[11px] font-medium transition-colors ${n===page?"bg-amber-500/20 border border-amber-500/40 text-amber-300":"border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{n}</button>
               ))}
-              <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
+              <button onClick={() => setPage(p => Math.min(pages,p+1))} disabled={page===pages} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
             </div>
           </div>
         </SectionCard>
@@ -646,42 +628,47 @@ function ScreenPagar() {
 }
 
 function ScreenReceber() {
+  const { contasReceber, resumo, isFetchingDw } = useFinancialData();
   const [search, setSearch] = useState("");
   const [filtroAba, setFiltroAba] = useState("todos");
   const [page, setPage] = useState(1);
   const PAGE = 30;
 
-  const totalReceber = RECEBER.filter(r => r.status !== "Recebido").reduce((s, r) => s + r.valor, 0);
-  const emAtraso = RECEBER.filter(r => r.status === "Em Atraso").reduce((s, r) => s + r.valor, 0);
-  const previsto = RECEBER.filter(r => ["Pendente", "Vence Hoje"].includes(r.status)).reduce((s, r) => s + r.valor, 0);
-  const recebido = RECEBER.filter(r => r.status === "Recebido").reduce((s, r) => s + r.valor, 0);
+  const totalReceber = resumo.contasReceber.saldoAReceber;
+  const emAtraso     = contasReceber.filter(c => dsReceber(c) === "Em Atraso").reduce((s,c) => s+c.valor, 0);
+  const previsto     = contasReceber.filter(c => ["Pendente","Vence Hoje"].includes(dsReceber(c))).reduce((s,c) => s+c.valor, 0);
+  const recebido     = resumo.contasReceber.valorRecebido;
 
-  const ABAS_RECEBER = [
-    { id: "todos",      label: "Todos",       count: RECEBER.length },
-    { id: "Em Atraso",  label: "Em Atraso",   count: RECEBER.filter(r => r.status === "Em Atraso").length },
-    { id: "Vence Hoje", label: "Vence Hoje",  count: RECEBER.filter(r => r.status === "Vence Hoje").length },
-    { id: "a-vencer",   label: "A Vencer",    count: RECEBER.filter(r => ["Pendente","Agendado"].includes(r.status)).length },
-    { id: "Recebido",   label: "Recebidos",   count: RECEBER.filter(r => r.status === "Recebido").length },
+  const ABAS = [
+    { id: "todos",      label: "Todos",      count: contasReceber.length },
+    { id: "Em Atraso",  label: "Em Atraso",  count: contasReceber.filter(c => dsReceber(c) === "Em Atraso").length },
+    { id: "Vence Hoje", label: "Vence Hoje", count: contasReceber.filter(c => dsReceber(c) === "Vence Hoje").length },
+    { id: "a-vencer",   label: "A Vencer",   count: contasReceber.filter(c => dsReceber(c) === "Pendente").length },
+    { id: "Recebido",   label: "Recebidos",  count: contasReceber.filter(c => ["Recebido","Recebido Parcial"].includes(dsReceber(c))).length },
   ];
 
-  const filtered = useMemo(() => RECEBER.filter(r => {
+  const filtered = useMemo(() => contasReceber.filter(c => {
     const q = search.toLowerCase();
-    const matchQ = !q || r.cliente.toLowerCase().includes(q) || r.documento.toLowerCase().includes(q);
+    const st = dsReceber(c);
+    const matchQ = !q || c.cliente.toLowerCase().includes(q) || (c.documento ?? "").toLowerCase().includes(q);
     let matchAba = true;
-    if (filtroAba === "a-vencer") matchAba = ["Pendente","Agendado"].includes(r.status);
-    else if (filtroAba !== "todos") matchAba = r.status === filtroAba;
+    if (filtroAba === "a-vencer")   matchAba = st === "Pendente";
+    else if (filtroAba === "Recebido") matchAba = ["Recebido","Recebido Parcial"].includes(st);
+    else if (filtroAba !== "todos") matchAba = st === filtroAba;
     return matchQ && matchAba;
-  }), [search, filtroAba]);
+  }), [contasReceber, search, filtroAba]);
 
-  const paginated = filtered.slice((page - 1) * PAGE, page * PAGE);
+  const paginated = filtered.slice((page-1)*PAGE, page*PAGE);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
 
   const kpis = [
-    { label: "Total a Receber", value: fmtK(totalReceber), sub: `${RECEBER.filter(r => r.status !== "Recebido").length} títulos em aberto`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-    { label: "Em Atraso", value: fmtK(emAtraso), sub: `${RECEBER.filter(r => r.status === "Em Atraso").length} clientes inadimplentes`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-    { label: "Previsto no Mês", value: fmtK(previsto), sub: `${RECEBER.filter(r => ["Pendente", "Vence Hoje"].includes(r.status)).length} vencimentos`, icon: Clock, stripe: "from-blue-400/60 to-blue-700/20", iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]", iconTxt: "text-blue-300", glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]" },
-    { label: "Recebido no Mês", value: fmtK(recebido), sub: `${RECEBER.filter(r => r.status === "Recebido").length} títulos liquidados`, icon: CheckCircle, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+    { label: "Total a Receber",  value: fmtK(totalReceber), sub: `${contasReceber.filter(c => !["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos em aberto`, icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
+    { label: "Em Atraso",        value: fmtK(emAtraso),     sub: `${contasReceber.filter(c => dsReceber(c) === "Em Atraso").length} clientes inadimplentes`,  icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
+    { label: "Previsto no Mês",  value: fmtK(previsto),     sub: `${contasReceber.filter(c => ["Pendente","Vence Hoje"].includes(dsReceber(c))).length} vencimentos`,            icon: Clock,         stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"  },
+    { label: "Recebido no Mês",  value: fmtK(recebido),     sub: `${contasReceber.filter(c => ["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos liquidados`, icon: CheckCircle,  stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
   ];
+
+  if (isFetchingDw) return <SkeletonLoader label="Carregando contas a receber..." />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -689,7 +676,7 @@ function ScreenReceber() {
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* ── GRÁFICOS ── */}
+      {/* Gráficos aging + top clientes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <AnimatedCard delay={160}>
           <SectionCard>
@@ -701,43 +688,29 @@ function ScreenReceber() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
-                    { faixa: "1–30d",    valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 1  && d <= 30; }).reduce((s,r)=>s+r.valor,0) },
-                    { faixa: "31–60d",   valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 31 && d <= 60; }).reduce((s,r)=>s+r.valor,0) },
-                    { faixa: "61–90d",   valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d >= 61 && d <= 90; }).reduce((s,r)=>s+r.valor,0) },
-                    { faixa: "90d+",     valor: RECEBER.filter(r => { const d = agingDias(r.vencimento); return r.status === "Em Atraso" && d  > 90; }).reduce((s,r)=>s+r.valor,0) },
-                    { faixa: "Pendente", valor: RECEBER.filter(r => r.status === "Pendente").reduce((s,r)=>s+r.valor,0) },
-                    { faixa: "Agendado", valor: RECEBER.filter(r => r.status === "Agendado").reduce((s,r)=>s+r.valor,0) },
+                    { faixa: "1–30d",    valor: contasReceber.filter(c => { const d = agingDias(c.vencimento); return dsReceber(c) === "Em Atraso" && d >= 1  && d <= 30; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "31–60d",   valor: contasReceber.filter(c => { const d = agingDias(c.vencimento); return dsReceber(c) === "Em Atraso" && d >= 31 && d <= 60; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "61–90d",   valor: contasReceber.filter(c => { const d = agingDias(c.vencimento); return dsReceber(c) === "Em Atraso" && d >= 61 && d <= 90; }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "90d+",     valor: contasReceber.filter(c => { const d = agingDias(c.vencimento); return dsReceber(c) === "Em Atraso" && d  > 90;           }).reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "Pendente", valor: contasReceber.filter(c => dsReceber(c) === "Pendente").reduce((s,c)=>s+c.valor,0) },
+                    { faixa: "V. Hoje",  valor: contasReceber.filter(c => dsReceber(c) === "Vence Hoje").reduce((s,c)=>s+c.valor,0) },
                   ]}
                   margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                   <XAxis dataKey="faixa" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
-                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="valor" name="Valor" radius={[4, 4, 0, 0]}>
-                    {["1–30d","31–60d","61–90d","90d+","Pendente","Agendado"].map((f) => (
-                      <Cell key={f} fill={
-                        f === "1–30d"    ? "#fbbf24" :
-                        f === "31–60d"   ? "#f97316" :
-                        f === "61–90d"   ? "#ef4444" :
-                        f === "90d+"     ? "#991b1b" :
-                        f === "Pendente" ? "#34d399" : "#a78bfa"
-                      } fillOpacity={0.82} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="Valor" radius={[4,4,0,0]}>
+                    {["1–30d","31–60d","61–90d","90d+","Pendente","V. Hoje"].map((f) => (
+                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#34d399":"#a78bfa"} fillOpacity={0.82} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-3">
-              {([["1–30d","#fbbf24"],["31–60d","#f97316"],["61–90d","#ef4444"],["90d+","#991b1b"],["Pendente","#34d399"],["Agendado","#a78bfa"]] as [string,string][]).map(([l,c])=>(
-                <span key={l} className="flex items-center gap-1 text-[10px] text-slate-500">
-                  <span className="h-2 w-2 rounded-sm" style={{ background: c }} />{l}
-                </span>
-              ))}
-            </div>
           </SectionCard>
         </AnimatedCard>
-
         <AnimatedCard delay={200}>
           <SectionCard>
             <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
@@ -746,22 +719,20 @@ function ScreenReceber() {
             </div>
             <div className="px-2 py-3" style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  layout="vertical"
+                <BarChart layout="vertical"
                   data={Object.entries(
-                    RECEBER.filter(r => r.status !== "Recebido").reduce((acc, r) => {
-                      const k = r.cliente.split(" ").slice(0,2).join(" ");
-                      acc[k] = (acc[k] || 0) + r.valor;
-                      return acc;
-                    }, {} as Record<string, number>)
-                  ).sort((a,b) => b[1]-a[1]).slice(0,5).map(([nome, valor]) => ({ nome, valor }))}
+                    contasReceber.filter(c => !["Recebido","Recebido Parcial"].includes(dsReceber(c))).reduce((acc,c) => {
+                      const k = c.cliente.split(" ").slice(0,2).join(" ");
+                      acc[k] = (acc[k] || 0) + c.valor; return acc;
+                    }, {} as Record<string,number>)
+                  ).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([nome,valor])=>({nome,valor}))}
                   margin={{ top: 4, right: 14, left: 4, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} />
                   <YAxis type="category" dataKey="nome" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={92} />
-                  <Tooltip formatter={(v: any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="valor" name="A receber" fill="#34d399" fillOpacity={0.75} radius={[0, 4, 4, 0]} />
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <Bar dataKey="valor" name="A receber" fill="#34d399" fillOpacity={0.75} radius={[0,4,4,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -773,9 +744,8 @@ function ScreenReceber() {
 
       <AnimatedCard delay={200}>
         <SectionCard>
-          {/* Abas */}
           <div className="flex items-center gap-0 px-4 pt-3 border-b border-[var(--sgt-divider)] overflow-x-auto">
-            {ABAS_RECEBER.map(a => (
+            {ABAS.map(a => (
               <button key={a.id} onClick={() => { setFiltroAba(a.id); setPage(1); }}
                 className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
                   filtroAba === a.id ? "border-emerald-400 text-emerald-300" : "border-transparent text-slate-500 hover:text-slate-300"
@@ -795,48 +765,42 @@ function ScreenReceber() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
               <thead><tr>
-                <Th>Cliente</Th><Th>Documento</Th><Th>Emissão</Th><Th>Vencimento</Th><Th>Valor</Th><Th>Tipo</Th><Th>Status</Th><Th>Ações</Th>
+                <Th>Cliente</Th><Th>Documento</Th><Th>Emissão</Th><Th>Vencimento</Th><Th>Valor</Th><Th>Status</Th><Th>Ações</Th>
               </tr></thead>
               <tbody>
-                {paginated.map(r => (
-                  <tr key={r.id} className="hover:bg-[var(--sgt-row-hover)] transition-colors">
-                    <Td>
-                      <div className="flex items-center gap-2">
-                        <Avatar initials={r.cliente.slice(0, 2).toUpperCase()} />
-                        <div>
-                          <p className="font-medium text-slate-200 text-[12px]">{r.cliente}</p>
-                          <p className="text-[10px] text-slate-600">{r.cnpj}</p>
+                {paginated.map(c => {
+                  const st = dsReceber(c);
+                  return (
+                    <tr key={c.id} className="hover:bg-[var(--sgt-row-hover)] transition-colors">
+                      <Td>
+                        <div className="flex items-center gap-2">
+                          <Avatar initials={c.cliente.slice(0,2).toUpperCase()} />
+                          <p className="font-medium text-slate-200 text-[12px] truncate max-w-[140px]">{c.cliente}</p>
                         </div>
-                      </div>
-                    </Td>
-                    <Td className="font-mono text-[11px] text-slate-500">{r.documento}</Td>
-                    <Td className="text-slate-500">{fmtDate(r.emissao)}</Td>
-                    <Td className={r.status === "Em Atraso" ? "font-semibold text-rose-300" : "text-slate-400"}>
-                      {fmtDate(r.vencimento)}<AgingBadge vencimento={r.vencimento} status={r.status} />
-                    </Td>
-                    <Td className={`font-semibold tabular-nums ${r.status === "Em Atraso" ? "text-rose-300" : r.status === "Vence Hoje" ? "text-blue-300" : r.status === "Recebido" ? "text-emerald-300" : "text-white"}`}>{fmtBRL(r.valor)}</Td>
-                    <Td className="text-slate-500 text-[11px]">{r.tipo}</Td>
-                    <Td><StatusBadge s={r.status} /></Td>
-                    <Td>
-                      <div className="flex gap-1">
-                        <ActionBtn icon={Send} title="Enviar cobrança" />
-                        <ActionBtn icon={Pencil} title="Editar" />
-                        <ActionBtn icon={Eye} title="Detalhes" />
-                      </div>
-                    </Td>
-                  </tr>
-                ))}
+                      </Td>
+                      <Td className="font-mono text-[11px] text-slate-500">{c.documento}{c.parcela ? `/${c.parcela}` : ""}</Td>
+                      <Td className="text-slate-500">{fmtDate(c.dataEmissao)}</Td>
+                      <Td className={st === "Em Atraso" ? "font-semibold text-rose-300" : "text-slate-400"}>
+                        {fmtDate(c.vencimento)}<AgingBadge vencimento={c.vencimento} displayStatus={st} />
+                      </Td>
+                      <Td className={`font-semibold tabular-nums ${st === "Em Atraso" ? "text-rose-300" : st === "Vence Hoje" ? "text-blue-300" : st === "Recebido" ? "text-emerald-300" : "text-white"}`}>{fmtBRL(c.valor)}</Td>
+                      <Td><StatusBadge s={st} /></Td>
+                      <Td><div className="flex gap-1"><ActionBtn icon={Send} title="Enviar cobrança" /><ActionBtn icon={Eye} title="Detalhes" /></div></Td>
+                    </tr>
+                  );
+                })}
+                {paginated.length === 0 && <tr><td colSpan={7} className="text-center py-8 text-slate-600 text-[12px]">Nenhum título encontrado</td></tr>}
               </tbody>
             </table>
           </div>
           <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--sgt-divider)]">
-            <span className="text-[11px] text-slate-600">{(page - 1) * PAGE + 1}–{Math.min(page * PAGE, filtered.length)} de {filtered.length}</span>
+            <span className="text-[11px] text-slate-600">{(page-1)*PAGE+1}–{Math.min(page*PAGE, filtered.length)} de {filtered.length}</span>
             <div className="flex gap-1">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
-              {Array.from({ length: pages }, (_, i) => i + 1).map(n => (
-                <button key={n} onClick={() => setPage(n)} className={`h-7 w-7 rounded-md text-[11px] font-medium transition-colors ${n === page ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-300" : "border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{n}</button>
+              <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronLeft className="h-3.5 w-3.5" /></button>
+              {Array.from({length:Math.min(pages,5)},(_,i)=>i+1).map(n=>(
+                <button key={n} onClick={() => setPage(n)} className={`h-7 w-7 rounded-md text-[11px] font-medium transition-colors ${n===page?"bg-emerald-500/20 border border-emerald-500/40 text-emerald-300":"border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{n}</button>
               ))}
-              <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
+              <button onClick={() => setPage(p => Math.min(pages,p+1))} disabled={page===pages} className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--sgt-border-subtle)] text-slate-500 disabled:opacity-30 hover:text-slate-300 transition-colors"><ChevronRight className="h-3.5 w-3.5" /></button>
             </div>
           </div>
         </SectionCard>
@@ -1450,49 +1414,46 @@ function ScreenCategorias() {
 
 // ─── TELA PREVISTO ────────────────────────────────────────────────────────────
 function ScreenPrevisto() {
+  const { contasPagar, contasReceber, isFetchingDw } = useFinancialData();
   const [horizonte, setHorizonte] = useState<30 | 60 | 90>(30);
-  const TODAY = new Date("2025-05-13");
-  const saldoAtual = BANCOS.reduce((s, b) => s + b.saldo, 0); // 698770
+  const saldoAtual = BANCOS.reduce((s, b) => s + b.saldo, 0);
 
-  // Constrói projeção diária combinando C.Pagar + C.Receber pendentes/agendados
-  const eventosPrevistos = [
-    ...PAGAR.filter(p => ["Pendente","Agendado","Vence Hoje"].includes(p.status))
-            .map(p => ({ data: p.vencimento, valor: -p.valor, tipo: "Saída" as const, desc: p.fornecedor, doc: p.documento })),
-    ...RECEBER.filter(r => ["Pendente","Agendado","Vence Hoje"].includes(r.status))
-              .map(r => ({ data: r.vencimento, valor: r.valor,  tipo: "Entrada" as const, desc: r.cliente,    doc: r.documento })),
-  ].sort((a, b) => a.data.localeCompare(b.data));
+  // Eventos futuros = títulos pendentes de CP e CR
+  const eventosPrevistos = useMemo(() => [
+    ...contasPagar.filter(c => dsPagar(c) === "Pendente" || dsPagar(c) === "Vence Hoje")
+        .map(c => ({ data: c.vencimento, valor: -c.valor, tipo: "Saída" as const, desc: c.fornecedor, doc: c.documento ?? "" })),
+    ...contasReceber.filter(c => dsReceber(c) === "Pendente" || dsReceber(c) === "Vence Hoje")
+        .map(c => ({ data: c.vencimento, valor: c.valor, tipo: "Entrada" as const, desc: c.cliente, doc: c.documento ?? "" })),
+  ].sort((a,b) => a.data.localeCompare(b.data)), [contasPagar, contasReceber]);
 
-  // Gera linha do tempo de saldo projetado dia a dia
   const projecao = useMemo(() => {
-    const limit = new Date(TODAY);
-    limit.setDate(limit.getDate() + horizonte);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
     const dias: { dia: string; entradas: number; saidas: number; saldo: number }[] = [];
     let saldo = saldoAtual;
-    const cur = new Date(TODAY);
+    const cur = new Date(hoje);
     while (cur <= limit) {
-      const key = cur.toISOString().slice(0, 10);
-      const label = cur.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-      const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
-      const saidas   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída"  ).reduce((s, e) => s + Math.abs(e.valor), 0);
+      const key  = cur.toISOString().slice(0,10);
+      const label = cur.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+      const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s,e) => s+e.valor,0);
+      const saidas   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor),0);
       saldo += entradas - saidas;
-      if (entradas > 0 || saidas > 0 || dias.length % 5 === 0) {
-        dias.push({ dia: label, entradas, saidas, saldo });
-      }
-      cur.setDate(cur.getDate() + 1);
+      if (entradas > 0 || saidas > 0 || dias.length % 5 === 0) dias.push({ dia: label, entradas, saidas, saldo });
+      cur.setDate(cur.getDate()+1);
     }
     return dias;
-  }, [horizonte]);
+  }, [horizonte, eventosPrevistos, saldoAtual]);
 
-  const totalEntradas = eventosPrevistos.filter(e => e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
-  const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s, e) => s + Math.abs(e.valor), 0);
+  const totalEntradas = eventosPrevistos.filter(e => e.tipo === "Entrada").reduce((s,e) => s+e.valor,0);
+  const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor),0);
   const saldoFinal    = saldoAtual + totalEntradas - totalSaidas;
   const diasCriticos  = projecao.filter(d => d.saldo < 100000).length;
 
   const kpis = [
-    { label: "Saldo Atual",      value: fmtK(saldoAtual),    sub: "4 contas bancárias",           icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"    },
-    { label: "Entradas Previstas",value: fmtK(totalEntradas), sub: `${eventosPrevistos.filter(e=>e.tipo==="Entrada").length} títulos a receber`, icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"   },
-    { label: "Saídas Previstas",  value: fmtK(totalSaidas),   sub: `${eventosPrevistos.filter(e=>e.tipo==="Saída").length} títulos a pagar`,    icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"    },
-    { label: "Saldo Projetado",   value: fmtK(saldoFinal),    sub: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, stripe: saldoFinal >= saldoAtual ? "from-amber-400/60 to-amber-700/20" : "from-rose-400/60 to-rose-700/20", iconBg: saldoFinal >= saldoAtual ? "bg-amber-400/[0.08] border border-amber-400/[0.15]" : "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: saldoFinal >= saldoAtual ? "text-amber-300" : "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
+    { label: "Saldo Atual",       value: fmtK(saldoAtual),    sub: "4 contas bancárias",    icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
+    { label: "Entradas Previstas", value: fmtK(totalEntradas), sub: `${eventosPrevistos.filter(e=>e.tipo==="Entrada").length} títulos a receber`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+    { label: "Saídas Previstas",   value: fmtK(totalSaidas),   sub: `${eventosPrevistos.filter(e=>e.tipo==="Saída").length} títulos a pagar`,    icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
+    { label: "Saldo Projetado",    value: fmtK(saldoFinal),    sub: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, stripe: saldoFinal >= saldoAtual ? "from-amber-400/60 to-amber-700/20" : "from-rose-400/60 to-rose-700/20", iconBg: saldoFinal >= saldoAtual ? "bg-amber-400/[0.08] border border-amber-400/[0.15]" : "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: saldoFinal >= saldoAtual ? "text-amber-300" : "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
   ];
 
   const SaldoTooltip = ({ active, payload, label }: any) => {
@@ -1509,42 +1470,36 @@ function ScreenPrevisto() {
     );
   };
 
+  if (isFetchingDw) return <SkeletonLoader label="Calculando projeção de caixa..." />;
+
   return (
     <div className="flex flex-col gap-4">
-      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
-      {/* Alerta de dias críticos */}
       {diasCriticos > 0 && (
         <AnimatedCard delay={220}>
           <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3">
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
             <p className="text-[12px] font-semibold text-amber-300">
-              {diasCriticos} dia{diasCriticos > 1 ? "s" : ""} com saldo projetado abaixo de R$ 100k no horizonte selecionado
+              {diasCriticos} dia{diasCriticos>1?"s":""} com saldo projetado abaixo de R$ 100k no horizonte selecionado
             </p>
           </div>
         </AnimatedCard>
       )}
 
-      {/* Gráfico de saldo projetado */}
       <AnimatedCard delay={260}>
         <SectionCard>
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--sgt-divider)]">
             <div>
               <span className="text-[12px] font-semibold text-slate-300">Evolução do Saldo Projetado</span>
-              <span className="ml-2 text-[10px] text-slate-600">Baseado em títulos pendentes e agendados</span>
+              <span className="ml-2 text-[10px] text-slate-600">Baseado em títulos pendentes</span>
             </div>
-            {/* Selector de horizonte */}
             <div className="flex gap-1">
               {([30, 60, 90] as const).map(h => (
                 <button key={h} onClick={() => setHorizonte(h)}
-                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
-                    horizonte === h
-                      ? "bg-amber-500/20 border border-amber-500/30 text-amber-300"
-                      : "border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"
-                  }`}>{h}d</button>
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${horizonte===h?"bg-amber-500/20 border border-amber-500/30 text-amber-300":"border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{h}d</button>
               ))}
             </div>
           </div>
@@ -1559,9 +1514,8 @@ function ScreenPrevisto() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                 <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={36} />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={36} />
                 <Tooltip content={<SaldoTooltip />} />
-                {/* Linha de alerta em 100k */}
                 <Line type="monotone" dataKey={() => 100000} stroke="#ef4444" strokeWidth={1} strokeDasharray="3 3" dot={false} name="limite" legendType="none" />
                 <Area type="monotone" dataKey="saldo" stroke="#22d3ee" strokeWidth={2} fill="url(#gradSaldo)" dot={false} name="saldo" />
               </AreaChart>
@@ -1574,9 +1528,7 @@ function ScreenPrevisto() {
         </SectionCard>
       </AnimatedCard>
 
-      {/* Entradas e saídas lado a lado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Barras Entradas vs Saídas */}
         <AnimatedCard delay={300}>
           <SectionCard>
             <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
@@ -1585,14 +1537,11 @@ function ScreenPrevisto() {
             </div>
             <div className="px-2 py-3" style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)}
-                  margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                >
+                <BarChart data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
                   <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
-                  <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "entradas" ? "Entradas" : "Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v:number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                  <Tooltip formatter={(v:any,n:string) => [fmtK(v), n==="entradas"?"Entradas":"Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
                   <Bar dataKey="entradas" name="entradas" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
                   <Bar dataKey="saidas"   name="saidas"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
                 </BarChart>
@@ -1605,29 +1554,27 @@ function ScreenPrevisto() {
           </SectionCard>
         </AnimatedCard>
 
-        {/* Tabela de próximos eventos */}
         <AnimatedCard delay={340}>
           <SectionCard>
             <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
               <span className="text-[12px] font-semibold text-slate-300">Próximos Eventos</span>
-              <span className="ml-2 text-[10px] text-slate-600">Pendentes e agendados</span>
+              <span className="ml-2 text-[10px] text-slate-600">Pendentes e a vencer</span>
             </div>
             <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
-              {eventosPrevistos.slice(0, 12).map((e, i) => (
+              {eventosPrevistos.slice(0,12).map((e,i) => (
                 <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo === "Entrada" ? "bg-emerald-400" : "bg-rose-400"}`} />
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo==="Entrada"?"bg-emerald-400":"bg-rose-400"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-medium text-slate-300 truncate">{e.desc}</p>
                     <p className="text-[10px] text-slate-600">{fmtDate(e.data)} · {e.doc}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className={`text-[12px] font-semibold tabular-nums ${e.tipo === "Entrada" ? "text-emerald-300" : "text-rose-300"}`}>
-                      {e.tipo === "Entrada" ? "+" : "-"}{fmtK(Math.abs(e.valor))}
-                    </p>
-                    <span className={`text-[9px] font-semibold ${e.tipo === "Entrada" ? "text-emerald-600" : "text-rose-600"}`}>{e.tipo}</span>
+                    <p className={`text-[12px] font-semibold tabular-nums ${e.tipo==="Entrada"?"text-emerald-300":"text-rose-300"}`}>{e.tipo==="Entrada"?"+":"-"}{fmtK(Math.abs(e.valor))}</p>
+                    <span className={`text-[9px] font-semibold ${e.tipo==="Entrada"?"text-emerald-600":"text-rose-600"}`}>{e.tipo}</span>
                   </div>
                 </div>
               ))}
+              {eventosPrevistos.length === 0 && <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum evento previsto no período</p>}
             </div>
           </SectionCard>
         </AnimatedCard>
