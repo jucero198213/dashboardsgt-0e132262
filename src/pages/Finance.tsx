@@ -1752,7 +1752,7 @@ export default function Finance() {
       case "receber":      return <ScreenReceber />;
       case "conciliacao":  return <ScreenConciliacao />;
       case "fluxo":        return null;
-      case "previsto":     return <ScreenPrevisto />;
+      case "previsto":     return null;
       case "relatorios":   return <ScreenRelatorios />;
       case "fornecedores": return <ScreenFornecedores />;
       case "clientes":     return <ScreenClientes />;
