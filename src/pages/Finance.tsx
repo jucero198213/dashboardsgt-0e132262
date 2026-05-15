@@ -13,7 +13,7 @@ import {
   Truck, Flame, Wrench, Filter, ChevronDown,
   MapPin, Phone, Star, Mail, PanelLeftClose, PanelLeftOpen,
   MoreHorizontal, ArrowUpDown, Activity, ExternalLink,
-  LineChart, Headphones, UserCog, Briefcase, ShoppingCart, Fuel,
+  LineChart as LineChartIcon, Headphones, UserCog, Briefcase, ShoppingCart, Fuel,
 } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
