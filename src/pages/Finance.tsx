@@ -28,6 +28,7 @@ import { UpdateButton } from "@/components/shared/UpdateButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { PartnersAnalytics, type PartnerRow } from "@/components/finance/PartnersAnalytics";
+import { BankLogo } from "@/components/finance/BankLogo";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -1643,9 +1644,13 @@ function ScreenBancos() {
               return (
                 <div key={c.cod_conta} className="px-4 py-2.5">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${p.border} bg-[var(--sgt-table-head)]`}>
-                      {c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase()}
-                    </span>
+                    <BankLogo
+                      nome={c.nome_banco}
+                      codigo={c.cod_banco}
+                      sigla={(c.nome_banco ?? c.nome_conta).slice(0,2).toUpperCase()}
+                      size={20}
+                      rounded="rounded-md"
+                    />
                     <span className="text-[10px] text-slate-600 truncate">{c.nome_banco || c.nome_conta}</span>
                   </div>
                   <p className={`text-[14px] font-black leading-none tabular-nums ${p.val}`}>{fmtK(c.saldo_atual)}</p>
@@ -1668,9 +1673,12 @@ function ScreenBancos() {
               <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${p.border}`}>
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${p.border} bg-[var(--sgt-table-head)]`}>
-                    {sigla}
-                  </div>
+                  <BankLogo
+                    nome={c.nome_banco}
+                    codigo={c.cod_banco}
+                    sigla={sigla}
+                    size={40}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-slate-200 truncate">
                       {c.nome_banco || c.nome_conta}
@@ -1717,7 +1725,13 @@ function ScreenBancos() {
                   className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
                     extratoKey === c.cod_conta ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
-                  <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${p.border}`}>{sigla}</span>
+                  <BankLogo
+                    nome={c.nome_banco}
+                    codigo={c.cod_banco}
+                    sigla={sigla}
+                    size={16}
+                    rounded="rounded"
+                  />
                   {c.nome_banco || c.nome_conta}
                 </button>
               );
