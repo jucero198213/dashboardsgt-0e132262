@@ -1948,7 +1948,8 @@ export default function Finance() {
                       : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
 
                   if (sidebarCollapsed) {
-                    // Modo p\u00edlula: \u00edcone vis\u00edvel; ao hover, expande para a direita revelando o label
+                    // Modo p\u00edlula: todas as p\u00edlulas usam o mesmo tom \u00e2mbar
+                    const collapsedTone = "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25 hover:bg-amber-500/[0.18]";
                     return (
                       <div key={item.id} className="relative px-1.5 py-0.5">
                         <button
@@ -1957,9 +1958,9 @@ export default function Finance() {
                             setActive(item.id);
                           }}
                           title={item.label}
-                          className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${baseTone}`}
+                          className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${collapsedTone}`}
                         >
-                          <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-amber-400" : ""}`} />
+                          <Icon className="h-4 w-4 shrink-0 text-amber-400" />
                           <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
                             {item.label}
                           </span>
@@ -1971,7 +1972,7 @@ export default function Finance() {
                             }`}>{item.badge}</span>
                           )}
                           {item.externalTo && (
-                            <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100" />
+                            <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-amber-300/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100" />
                           )}
                         </button>
                       </div>
