@@ -1960,7 +1960,7 @@ export default function Finance() {
                           title={item.label}
                           className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${collapsedTone}`}
                         >
-                          <Icon className="h-4 w-4 shrink-0 text-amber-400" />
+                          <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 group-hover:text-amber-400 ${isActive ? "text-amber-400" : "text-slate-500"}`} />
                           <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
                             {item.label}
                           </span>
