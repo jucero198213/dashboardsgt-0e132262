@@ -1758,18 +1758,36 @@ function ScreenBancos() {
 // ─────────────────────────────────────────────────────────────────────────────
 type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "previsto" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
-const NAV: { id: ScreenId; label: string; icon: React.ElementType; badge?: number; section?: string; externalTo?: string }[] = [
-  { id: "painel",       label: "Painel",          icon: LayoutDashboard, section: "Financeiro" },
+const NAV: { id: string; label: string; icon: React.ElementType; badge?: number; badgeColor?: "amber" | "rose"; section?: string; externalTo?: string }[] = [
+  { id: "painel",       label: "Painel",           icon: LayoutDashboard, section: "Financeiro" },
   { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, badge: 7 },
   { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle,   badge: 3, badgeColor: "amber" },
   { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
   { id: "fluxo",        label: "Realizado",        icon: Activity,        externalTo: "/dashboard" },
   { id: "previsto",     label: "Previsto",         icon: TrendingUp },
   { id: "relatorios",   label: "Relatórios",       icon: FileBarChart },
-  { id: "fornecedores", label: "Fornecedores",     icon: Building2,  section: "Cadastros" },
+
+  { id: "fornecedores", label: "Fornecedores",     icon: Building2,       section: "Cadastros" },
   { id: "clientes",     label: "Clientes",         icon: Users },
   { id: "categorias",   label: "Categorias",       icon: Tag },
   { id: "bancos",       label: "Bancos",           icon: Landmark },
+
+  // ── Acessos externos ────────────────────────────────────────────────
+  { id: "ext-executivo",    label: "Painel Executivo",       icon: Briefcase,       section: "Gestão",     externalTo: "/executivo" },
+  { id: "ext-indicadores",  label: "Indicadores",            icon: LineChartIcon,   externalTo: "/indicadores" },
+  { id: "ext-faturamento",  label: "Faturamento",            icon: Banknote,        externalTo: "/faturamento" },
+  { id: "ext-cap",          label: "Contas a Pagar (Det.)",  icon: ArrowDownCircle, externalTo: "/contas-a-pagar" },
+  { id: "ext-car",          label: "Contas a Receber (Det.)",icon: ArrowUpCircle,   externalTo: "/contas-a-receber" },
+
+  { id: "ext-operacional",  label: "Operacional",            icon: MapPin,          section: "Operação",   externalTo: "/operacional" },
+  { id: "ext-frota",        label: "Gestão de Frota",        icon: Truck,           externalTo: "/frota" },
+  { id: "ext-fin-frota",    label: "Financiamento de Frota", icon: Wallet,          externalTo: "/financiamento-frota" },
+  { id: "ext-manutencao",   label: "Manutenção",             icon: Wrench,          externalTo: "/manutencao" },
+  { id: "ext-abastecimento",label: "Abastecimento",          icon: Fuel,            externalTo: "/abastecimento" },
+
+  { id: "ext-compras",      label: "Compras",                icon: ShoppingCart,    section: "Suporte",    externalTo: "/compras" },
+  { id: "ext-rh",           label: "RH",                     icon: UserCog,         externalTo: "/rh" },
+  { id: "ext-chamados",     label: "Chamados",               icon: Headphones,      externalTo: "/chamados" },
 ];
 
 const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
