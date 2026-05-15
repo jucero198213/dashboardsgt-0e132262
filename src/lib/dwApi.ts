@@ -61,6 +61,11 @@ const ENDPOINT_FATURAMENTO_RESUMO = LOCAL_API_URL
 const ENDPOINT_FINANCIAMENTO_FROTA = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-financiamento-frota`
   : `${SUPABASE_URL}/functions/v1/dw-financiamento-frota`;
+
+const ENDPOINT_BANCOS = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-bancos`
+  : `${SUPABASE_URL}/functions/v1/dw-bancos`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -73,7 +78,28 @@ export interface FilterOption {
 
 export interface DwFiltersResponse {
   empresas: FilterOption[];
-  filiais: FilterOption[];
+  filiais:  FilterOption[];
+}
+
+// ── Conta bancária (/dw-bancos) ─────────────────────────────────────────────
+export interface BankAccount {
+  cod_conta:    string;
+  nome_conta:   string;
+  agencia:      string;
+  num_conta:    string;
+  cod_banco:    string;
+  nome_banco:   string;
+  tipo_conta:   string;
+  filial:       string;
+  empresa:      string;
+  nome_filial:  string;
+  saldo_atual:  number;
+  entradas_mes: number;
+  saidas_mes:   number;
+}
+
+export interface BankAccountsResponse {
+  data: BankAccount[];
 }
 
 export interface DwRow {
@@ -626,5 +652,18 @@ export async function fetchFinanciamentoFrota(params?: {
   return cached(key, () =>
     callEdge<FinanciamentoFrotaResponse>(ENDPOINT_FINANCIAMENTO_FROTA, params ?? {}),
     TTL_FROTA,
+  );
+}
+
+// ─── Exports públicos: BANCOS ───────────────────────────────────────────────
+
+export async function fetchBankAccounts(params?: {
+  filial?:  string | null;
+  empresa?: string | null;
+}): Promise<BankAccountsResponse> {
+  const key = `bancos:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<BankAccountsResponse>(ENDPOINT_BANCOS, params ?? {}),
+    60 * 5, // 5 min cache — saldo muda raramente
   );
 }

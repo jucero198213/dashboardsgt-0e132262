@@ -1516,268 +1516,258 @@ function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
 }
 
 function ScreenBancos() {
-  const { dwRawData, filiais, isFetchingDw } = useFinancialData();
+  const { dwRawData, dwFilter, filiais, isFetchingDw } = useFinancialData();
+  const [contas, setContas] = useState<import("@/lib/dwApi").BankAccount[]>([]);
+  const [loadingContas, setLoadingContas] = useState(false);
   const [extratoKey, setExtratoKey] = useState<string | null>(null);
+  const [erroBancos, setErroBancos] = useState<string | null>(null);
 
-  // ── Paleta por conta/filial ────────────────────────────────────────────────
-  const PALETA = [
-    { border: "border-amber-400/20",   val: "text-amber-200",    hex: "#fbbf24" },
-    { border: "border-rose-400/20",    val: "text-rose-200",     hex: "#fb7185" },
-    { border: "border-violet-400/20",  val: "text-violet-200",   hex: "#a78bfa" },
-    { border: "border-teal-400/20",    val: "text-teal-200",     hex: "#2dd4bf" },
-    { border: "border-blue-400/20",    val: "text-blue-200",     hex: "#60a5fa" },
-    { border: "border-emerald-400/20", val: "text-emerald-200",  hex: "#34d399" },
-    { border: "border-cyan-400/20",    val: "text-cyan-200",     hex: "#22d3ee" },
-    { border: "border-orange-400/20",  val: "text-orange-200",   hex: "#fb923c" },
-  ];
+  // Busca contas bancárias com saldo real
+  useEffect(() => {
+    setLoadingContas(true);
+    setErroBancos(null);
+    import("@/lib/dwApi").then(({ fetchBankAccounts }) =>
+      fetchBankAccounts({
+        filial:  dwFilter.filial  ?? undefined,
+        empresa: dwFilter.empresa ?? undefined,
+      })
+    ).then(res => {
+      setContas(res.data ?? []);
+      setExtratoKey(res.data?.[0]?.cod_conta ?? null);
+    }).catch(err => {
+      setErroBancos(err.message);
+    }).finally(() => setLoadingContas(false));
+  }, [dwFilter.filial, dwFilter.empresa]);
 
-  // ── Agrega por COD_CONTA (quando disponível) ou FILIAL ─────────────────────
-  const porConta = useMemo(() => {
-    const lbRows = dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C");
+  // Lançamentos bancários do período (do /dw-financeiro já carregado)
+  const lbRows = useMemo(() =>
+    dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C"),
+    [dwRawData]
+  );
 
-    // Chave de agrupamento: conta bancária real (quando disponível) ou filial
-    const getKey  = (r: typeof lbRows[0]) => r.COD_CONTA  ?? r.FILIAL ?? "—";
-    const getNome = (r: typeof lbRows[0]) => r.NOME_CONTA ?? filiais.find(f => f.id === r.FILIAL)?.nome ?? r.FILIAL ?? "—";
-    const getBanco = (r: typeof lbRows[0]) => r.NOME_BANCO ?? "—";
-
-    type Entry = {
-      cod: string; nome: string; banco: string;
-      entradas: number; saidas: number;
-      lancamentos: typeof lbRows;
-    };
-    const map = new Map<string, Entry>();
-
-    lbRows.forEach(r => {
-      const k = getKey(r);
-      if (!map.has(k)) map.set(k, { cod: k, nome: getNome(r), banco: getBanco(r), entradas: 0, saidas: 0, lancamentos: [] });
-      const e = map.get(k)!;
-      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
-      if (r.ORIGEM === "LB_C") e.entradas += val;
-      else                      e.saidas   += val;
-      e.lancamentos.push(r);
-    });
-
-    return Array.from(map.values())
-      .sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas))
-      .map((c, i) => ({
-        ...c,
-        liquido: c.entradas - c.saidas,
-        sigla: c.nome.slice(0, 2).toUpperCase(),
-        paleta: PALETA[i % PALETA.length],
-        lancamentos: [...c.lancamentos].sort((a, b) =>
-          (b.DATA_LANCAMENTO ?? b.DATA_EMISSAO ?? "").localeCompare(
-           a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
-        ),
-      }));
-  }, [dwRawData, filiais]);
-
-  // ── Evolução diária ────────────────────────────────────────────────────────
-  const evolucaoDiaria = useMemo(() => {
-    const map = new Map<string, { entradas: number; saidas: number }>();
-    dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C").forEach(r => {
-      const dia = (r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? "").slice(0, 10);
-      if (!dia) return;
-      if (!map.has(dia)) map.set(dia, { entradas: 0, saidas: 0 });
-      const e = map.get(dia)!;
-      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
-      if (r.ORIGEM === "LB_C") e.entradas += val;
-      else                      e.saidas   += val;
-    });
-    return Array.from(map.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([iso, d]) => ({
-        dia:     new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-        liquido: d.entradas - d.saidas,
-        entradas: d.entradas,
-        saidas:   d.saidas,
-      }));
-  }, [dwRawData]);
-
-  const totalEntradas = porConta.reduce((s, c) => s + c.entradas, 0);
-  const totalSaidas   = porConta.reduce((s, c) => s + c.saidas,   0);
-  const totalLiquido  = totalEntradas - totalSaidas;
-
-  // Conta/filial ativa no extrato
-  const chaveAtiva = extratoKey ?? porConta[0]?.cod ?? null;
-  const contaAtiva = porConta.find(c => c.cod === chaveAtiva);
-
-  // Modo de agrupamento (conta real vs filial)
-  const usandoConta = porConta.some(c => dwRawData.find(r => r.COD_CONTA && (r.COD_CONTA === c.cod)));
-
-  const MovTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 shadow-xl">
-        <p className="text-[10px] font-semibold text-slate-400 mb-1">{label}</p>
-        {payload.map((p: any) => (
-          <p key={p.name} className="text-[11px] font-semibold" style={{ color: p.color }}>
-            {p.name === "liquido" ? "Líquido" : p.name === "entradas" ? "Entradas" : "Saídas"}: {fmtK(p.value)}
-          </p>
-        ))}
-      </div>
+  // Extrato: filtra por COD_CONTA quando disponível, senão por FILIAL
+  const contaAtiva = contas.find(c => c.cod_conta === extratoKey);
+  const extratoRows = useMemo(() => {
+    if (!contaAtiva) return [];
+    return lbRows.filter(r =>
+      r.COD_CONTA
+        ? r.COD_CONTA === contaAtiva.cod_conta
+        : r.FILIAL    === contaAtiva.filial
+    ).sort((a,b) =>
+      (b.DATA_LANCAMENTO ?? b.DATA_EMISSAO ?? "")
+       .localeCompare(a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
     );
+  }, [contaAtiva, lbRows]);
+
+  // Paleta por índice
+  const PALETA = [
+    { border: "border-amber-400/20",   val: "text-amber-200",    bg: "bg-amber-400/[0.04]" },
+    { border: "border-rose-400/20",    val: "text-rose-200",     bg: "bg-rose-400/[0.04]"  },
+    { border: "border-violet-400/20",  val: "text-violet-200",   bg: "bg-violet-400/[0.04]"},
+    { border: "border-teal-400/20",    val: "text-teal-200",     bg: "bg-teal-400/[0.04]"  },
+    { border: "border-blue-400/20",    val: "text-blue-200",     bg: "bg-blue-400/[0.04]"  },
+    { border: "border-emerald-400/20", val: "text-emerald-200",  bg: "bg-emerald-400/[0.04]"},
+    { border: "border-cyan-400/20",    val: "text-cyan-200",     bg: "bg-cyan-400/[0.04]"  },
+    { border: "border-orange-400/20",  val: "text-orange-200",   bg: "bg-orange-400/[0.04]"},
+  ];
+  const tipoLabel: Record<string, string> = {
+    Principal: "bg-amber-400/10 border-amber-400/20 text-amber-300",
+    Movimento: "bg-blue-400/10 border-blue-400/20 text-blue-300",
+    Investimento: "bg-violet-400/10 border-violet-400/20 text-violet-300",
   };
 
-  if (isFetchingDw) return <SkeletonLoader label="Carregando movimentação bancária..." />;
+  const saldoTotal = contas.reduce((s, c) => s + c.saldo_atual, 0);
 
-  if (porConta.length === 0) return (
+  // Evolução diária do movimento do período
+  const evolucao = useMemo(() => {
+    const map = new Map<string, number>();
+    lbRows.forEach(r => {
+      const dia = (r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? "").slice(0, 10);
+      if (!dia) return;
+      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+      map.set(dia, (map.get(dia) ?? 0) + (r.ORIGEM === "LB_C" ? val : -val));
+    });
+    return Array.from(map.entries()).sort((a,b) => a[0].localeCompare(b[0]))
+      .map(([iso, liq]) => ({ dia: new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}), liq }));
+  }, [lbRows]);
+
+  if (loadingContas || isFetchingDw) return <SkeletonLoader label="Carregando saldos bancários..." />;
+
+  if (erroBancos) return (
     <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
       <Landmark className="h-10 w-10 opacity-30" />
-      <p className="text-[13px]">Nenhum lançamento bancário no período. Clique em Atualizar.</p>
+      <p className="text-[13px] text-rose-400">Erro ao carregar contas: {erroBancos}</p>
+      <p className="text-[11px]">Verifique se o endpoint /dw-bancos está ativo no servidor.</p>
+    </div>
+  );
+
+  if (contas.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
+      <Landmark className="h-10 w-10 opacity-30" />
+      <p className="text-[13px]">Nenhuma conta bancária encontrada. Verifique o endpoint /dw-bancos.</p>
     </div>
   );
 
   return (
     <div className="flex flex-col gap-4">
 
-      {/* Movimento consolidado + sparkline */}
+      {/* ── Saldo Consolidado ── */}
       <AnimatedCard>
         <SectionCard>
           <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--sgt-divider)]">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Movimentação Líquida</p>
-              <p className={`text-[28px] font-black leading-none mt-1 tabular-nums ${totalLiquido >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
-                {totalLiquido >= 0 ? "+" : ""}{fmtBRL(totalLiquido)}
-              </p>
-              <p className="text-[11px] text-slate-600 mt-1">
-                {porConta.length} {usandoConta ? "conta" : "filial"}{porConta.length > 1 ? "s" : ""} · período selecionado
-              </p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-400/70">Saldo Consolidado</p>
+              <p className="text-[28px] font-black text-cyan-300 leading-none mt-1 tabular-nums">{fmtBRL(saldoTotal)}</p>
+              <p className="text-[11px] text-slate-600 mt-1">{contas.length} conta{contas.length !== 1 ? "s" : ""} ativas · atualizado agora</p>
             </div>
             <div style={{ width: 200, height: 64 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={evolucaoDiaria} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <AreaChart data={evolucao} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="gradBancoLiq2" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="gradBancoSaldo" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor="#22d3ee" stopOpacity={0.2} />
                       <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.01} />
                     </linearGradient>
                   </defs>
-                  <Tooltip content={<MovTooltip />} />
-                  <Area type="monotone" dataKey="liquido" stroke="#22d3ee" strokeWidth={1.5} fill="url(#gradBancoLiq2)" dot={false} />
+                  <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background:"var(--sgt-bg-card)", border:"0.5px solid var(--sgt-border-subtle)", borderRadius:8, fontSize:11 }} />
+                  <Area type="monotone" dataKey="liq" stroke="#22d3ee" strokeWidth={1.5} fill="url(#gradBancoSaldo)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-          {/* Sub-totais por conta/filial */}
+          {/* Mini-totais por conta */}
           <div className="grid divide-x divide-[var(--sgt-divider)]"
-            style={{ gridTemplateColumns: `repeat(${Math.min(porConta.length, 4)}, 1fr)` }}>
-            {porConta.slice(0, 4).map(c => (
-              <div key={c.cod} className="px-4 py-2.5">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${c.paleta.border} bg-[var(--sgt-table-head)]`}>{c.sigla}</span>
-                  <span className="text-[10px] text-slate-600 truncate">{c.nome}</span>
+            style={{ gridTemplateColumns: `repeat(${Math.min(contas.length, 4)}, 1fr)` }}>
+            {contas.slice(0, 4).map((c, i) => {
+              const p = PALETA[i % PALETA.length];
+              return (
+                <div key={c.cod_conta} className="px-4 py-2.5">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${p.border} bg-[var(--sgt-table-head)]`}>
+                      {c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase()}
+                    </span>
+                    <span className="text-[10px] text-slate-600 truncate">{c.nome_banco || c.nome_conta}</span>
+                  </div>
+                  <p className={`text-[14px] font-black leading-none tabular-nums ${p.val}`}>{fmtK(c.saldo_atual)}</p>
+                  <p className="text-[9px] text-slate-600 mt-1">{c.tipo_conta}</p>
                 </div>
-                <p className={`text-[14px] font-black leading-none tabular-nums ${c.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{fmtK(c.liquido)}</p>
-                <p className="text-[9px] text-slate-600 mt-1">{c.banco !== "—" ? c.banco : "Líquido do período"}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </SectionCard>
       </AnimatedCard>
 
-      {/* Cards por conta/filial */}
+      {/* ── Cards por conta ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {porConta.map((c, i) => (
-          <AnimatedCard key={c.cod} delay={i * 80}>
-            <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${c.paleta.border}`}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${c.paleta.border} bg-[var(--sgt-table-head)]`}>
-                  {c.sigla}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-200 truncate">{c.nome}</p>
-                  <p className="text-[10px] text-slate-600">
-                    {c.banco !== "—" ? c.banco + " · " : ""}
-                    {usandoConta ? `Conta ${c.cod}` : `Filial ${c.cod}`}
-                  </p>
-                </div>
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${c.liquido >= 0 ? "bg-emerald-400/10 border-emerald-400/20 text-emerald-300" : "bg-rose-400/10 border-rose-400/20 text-rose-300"}`}>
-                  {c.liquido >= 0 ? "Superávit" : "Déficit"}
-                </span>
-              </div>
-              <div className="mb-3">
-                <p className="text-[10px] text-slate-600">Resultado líquido do período</p>
-                <p className={`text-[22px] font-black leading-none tabular-nums ${c.liquido >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
-                  {c.liquido >= 0 ? "+" : ""}{fmtBRL(c.liquido)}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
-                {[
-                  { label: "Entradas",     value: `+${fmtK(c.entradas)}`, clr: "text-emerald-300" },
-                  { label: "Saídas",       value: `-${fmtK(c.saidas)}`,   clr: c.saidas > 0 ? "text-rose-300" : "text-slate-500" },
-                  { label: "Lançamentos",  value: String(c.lancamentos.length), clr: "text-slate-300" },
-                ].map(row => (
-                  <div key={row.label} className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-600">{row.label}</span>
-                    <span className={`font-semibold ${row.clr}`}>{row.value}</span>
+        {contas.map((c, i) => {
+          const p = PALETA[i % PALETA.length];
+          const tipoClass = tipoLabel[c.tipo_conta] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
+          const sigla = c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase();
+          return (
+            <AnimatedCard key={c.cod_conta} delay={i * 80}>
+              <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${p.border}`}>
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${p.border} bg-[var(--sgt-table-head)]`}>
+                    {sigla}
                   </div>
-                ))}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-slate-200 truncate">
+                      {c.nome_banco || c.nome_conta}
+                    </p>
+                    <p className="text-[10px] text-slate-600">
+                      {c.agencia ? `Ag. ${c.agencia} · ` : ""}CC {c.num_conta}
+                    </p>
+                  </div>
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${tipoClass}`}>{c.tipo_conta}</span>
+                </div>
+                {/* Saldo */}
+                <div className="mb-3">
+                  <p className="text-[10px] text-slate-600">Saldo disponível</p>
+                  <p className={`text-[22px] font-black leading-none tabular-nums ${p.val}`}>{fmtBRL(c.saldo_atual)}</p>
+                </div>
+                {/* Detalhes */}
+                <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
+                  {[
+                    { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`, clr: "text-emerald-300" },
+                    { label: "Saídas no mês",    value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
+                    { label: "Lançamentos",      value: String(lbRows.filter(r => r.COD_CONTA ? r.COD_CONTA === c.cod_conta : r.FILIAL === c.filial).length), clr: "text-slate-300" },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-600">{row.label}</span>
+                      <span className={`font-semibold ${row.clr}`}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </AnimatedCard>
-        ))}
+            </AnimatedCard>
+          );
+        })}
       </div>
 
-      {/* Extrato com seletor de conta/filial */}
+      {/* ── Extrato com tabs por conta ── */}
       <AnimatedCard delay={380}>
         <SectionCard>
           <div className="flex items-center border-b border-[var(--sgt-divider)] px-4 pt-1 overflow-x-auto">
-            {porConta.map(c => (
-              <button key={c.cod} onClick={() => setExtratoKey(c.cod)}
-                className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
-                  chaveAtiva === c.cod ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
-                }`}>
-                <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${c.paleta.border}`}>{c.sigla}</span>
-                {c.nome}
-              </button>
-            ))}
+            {contas.map((c, i) => {
+              const p = PALETA[i % PALETA.length];
+              const sigla = c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase();
+              return (
+                <button key={c.cod_conta} onClick={() => setExtratoKey(c.cod_conta)}
+                  className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
+                    extratoKey === c.cod_conta ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                  }`}>
+                  <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${p.border}`}>{sigla}</span>
+                  {c.nome_banco || c.nome_conta}
+                </button>
+              );
+            })}
             <div className="ml-auto pb-2 flex gap-3 shrink-0">
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
                 <Plus className="h-3 w-3" />Lançamento manual
               </button>
               <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors">
-                <Download className="h-3 w-3" />Exportar
+                <Download className="h-3 w-3" />Importar OFX
               </button>
             </div>
           </div>
           <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">
-              {contaAtiva?.lancamentos.length ?? 0} lançamentos ·{" "}
-              {contaAtiva?.banco !== "—" ? `${contaAtiva?.banco} · ` : ""}
-              {contaAtiva?.nome ?? "—"}
+              Últimos lançamentos ·{" "}
+              {contaAtiva?.nome_banco ? `${contaAtiva.nome_banco} · ` : ""}
+              {contaAtiva?.nome_conta ?? "—"}
             </span>
           </div>
-          {(contaAtiva?.lancamentos ?? []).slice(0, 20).map((r, i) => {
-            const isCredito = r.ORIGEM === "LB_C";
+
+          {extratoRows.slice(0, 20).map((r, i) => {
+            const isC  = r.ORIGEM === "LB_C";
             const val  = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
-            // Descrição: historico > tipo_doc + doc > doc > "—"
             const desc = r.HISTORICO
               ?? (r.TIPO_DOCUMENTO && r.DOCUMENTO ? `${r.TIPO_DOCUMENTO} · ${r.DOCUMENTO}` : null)
-              ?? r.DOCUMENTO
-              ?? "—";
-            // Data: lançamento > emissão > compensação
+              ?? r.DOCUMENTO ?? "—";
             const dataExib = r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? r.DATA_COMPENSACAO;
             const meta = [
-              dataExib ? fmtDate(dataExib.slice(0, 10)) : null,
+              dataExib ? fmtDate(dataExib.slice(0,10)) : null,
               r.NUM_CHEQUE ? `Cheque ${r.NUM_CHEQUE}` : null,
               r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}`   : null,
             ].filter(Boolean).join(" · ") || "—";
-
             return (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                <div className={`h-2 w-2 rounded-full shrink-0 ${isCredito ? "bg-emerald-400" : "bg-rose-400"}`} />
+                <div className={`h-2 w-2 rounded-full shrink-0 ${isC ? "bg-emerald-400" : "bg-rose-400"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium text-slate-300 truncate">{desc}</p>
                   <p className="text-[10px] text-slate-600">{meta}</p>
                 </div>
-                <p className={`text-[13px] font-semibold tabular-nums shrink-0 ${isCredito ? "text-emerald-300" : "text-rose-300"}`}>
-                  {isCredito ? "+" : "-"}{fmtBRL(val)}
+                <p className={`text-[13px] font-semibold tabular-nums shrink-0 ${isC ? "text-emerald-300" : "text-rose-300"}`}>
+                  {isC ? "+" : "-"}{fmtBRL(val)}
                 </p>
               </div>
             );
           })}
-          {(contaAtiva?.lancamentos.length ?? 0) === 0 && (
-            <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum lançamento nesta conta</p>
+          {extratoRows.length === 0 && (
+            <p className="px-4 py-8 text-center text-[12px] text-slate-600">
+              Nenhum lançamento no período para esta conta
+            </p>
           )}
         </SectionCard>
       </AnimatedCard>
