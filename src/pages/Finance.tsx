@@ -1932,17 +1932,55 @@ export default function Finance() {
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* SIDEBAR */}
             <aside
-              className={`flex-shrink-0 flex flex-col border-r transition-all duration-300 ${sidebarCollapsed ? "w-[52px]" : "w-[200px]"}`}
+              className={`flex-shrink-0 flex flex-col border-r transition-all duration-300 ${sidebarCollapsed ? "w-[52px] overflow-visible" : "w-[200px]"}`}
               style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-section)" }}
             >
-              <div className="flex flex-col flex-1 overflow-y-auto py-2">
+              <div className={`flex flex-col flex-1 py-2 ${sidebarCollapsed ? "overflow-visible" : "overflow-y-auto"}`}>
                 {NAV.map((item, i) => {
                   const Icon = item.icon;
                   const isActive = active === item.id;
                   const showSection = item.section && (i === 0 || NAV[i - 1].section !== item.section);
+
+                  const baseTone = item.externalTo
+                    ? "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
+                    : isActive
+                      ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
+                      : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
+
+                  if (sidebarCollapsed) {
+                    // Modo p\u00edlula: \u00edcone vis\u00edvel; ao hover, expande para a direita revelando o label
+                    return (
+                      <div key={item.id} className="relative px-1.5 py-0.5">
+                        <button
+                          onClick={() => {
+                            if (item.externalTo) { navigate(item.externalTo); return; }
+                            setActive(item.id);
+                          }}
+                          title={item.label}
+                          className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${baseTone}`}
+                        >
+                          <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-amber-400" : ""}`} />
+                          <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
+                            {item.label}
+                          </span>
+                          {item.badge && !item.externalTo && (
+                            <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 ${
+                              (item as any).badgeColor === "amber"
+                                ? "bg-amber-400/15 text-amber-300"
+                                : "bg-rose-400/15 text-rose-300"
+                            }`}>{item.badge}</span>
+                          )}
+                          {item.externalTo && (
+                            <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100" />
+                          )}
+                        </button>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div key={item.id}>
-                      {showSection && !sidebarCollapsed && (
+                      {showSection && (
                         <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
                       )}
                       <button
@@ -1950,29 +1988,18 @@ export default function Finance() {
                           if (item.externalTo) { navigate(item.externalTo); return; }
                           setActive(item.id);
                         }}
-                        title={sidebarCollapsed ? item.label : undefined}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${sidebarCollapsed ? "justify-center" : ""} ${
-                          item.externalTo
-                            ? "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
-                            : isActive
-                              ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
-                              : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
-                        }`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone}`}
                         style={{ width: "calc(100% - 8px)" }}
                       >
                         <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-amber-400" : ""}`} />
-                        {!sidebarCollapsed && (
-                          <>
-                            <span className="flex-1 text-left truncate">{item.label}</span>
-                            {item.externalTo && <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />}
-                            {item.badge && !item.externalTo && (
-                              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                                (item as any).badgeColor === "amber"
-                                  ? "bg-amber-400/15 text-amber-300"
-                                  : "bg-rose-400/15 text-rose-300"
-                              }`}>{item.badge}</span>
-                            )}
-                          </>
+                        <span className="flex-1 text-left truncate">{item.label}</span>
+                        {item.externalTo && <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />}
+                        {item.badge && !item.externalTo && (
+                          <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                            (item as any).badgeColor === "amber"
+                              ? "bg-amber-400/15 text-amber-300"
+                              : "bg-rose-400/15 text-rose-300"
+                          }`}>{item.badge}</span>
                         )}
                       </button>
                     </div>
