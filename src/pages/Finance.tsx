@@ -1949,7 +1949,9 @@ export default function Finance() {
 
                   if (sidebarCollapsed) {
                     // Modo p\u00edlula: todas as p\u00edlulas usam o mesmo tom \u00e2mbar
-                    const collapsedTone = "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25 hover:bg-amber-500/[0.18]";
+                    const collapsedTone = isActive
+                      ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25 hover:bg-amber-500/[0.18]"
+                      : "text-slate-500 border border-transparent hover:bg-amber-500/[0.12] hover:text-amber-300 hover:border-amber-500/25";
                     return (
                       <div key={item.id} className="relative px-1.5 py-0.5">
                         <button
