@@ -1776,18 +1776,18 @@ const NAV: { id: string; label: string; icon: React.ElementType; badge?: number;
   { id: "ext-executivo",    label: "Painel Executivo",       icon: Briefcase,       section: "Gestão",     externalTo: "/executivo" },
   { id: "ext-indicadores",  label: "Indicadores",            icon: LineChartIcon,   externalTo: "/indicadores" },
   { id: "ext-faturamento",  label: "Faturamento",            icon: Banknote,        externalTo: "/faturamento" },
-  { id: "ext-cap",          label: "Contas a Pagar (Det.)",  icon: ArrowDownCircle, externalTo: "/contas-a-pagar" },
-  { id: "ext-car",          label: "Contas a Receber (Det.)",icon: ArrowUpCircle,   externalTo: "/contas-a-receber" },
 
   { id: "ext-operacional",  label: "Operacional",            icon: MapPin,          section: "Operação",   externalTo: "/operacional" },
   { id: "ext-frota",        label: "Gestão de Frota",        icon: Truck,           externalTo: "/frota" },
-  { id: "ext-fin-frota",    label: "Financiamento de Frota", icon: Wallet,          externalTo: "/financiamento-frota" },
+  { id: "ext-fin-frota",    label: "Financiamentos",         icon: Wallet,          externalTo: "/financiamento-frota" },
   { id: "ext-manutencao",   label: "Manutenção",             icon: Wrench,          externalTo: "/manutencao" },
   { id: "ext-abastecimento",label: "Abastecimento",          icon: Fuel,            externalTo: "/abastecimento" },
 
-  { id: "ext-compras",      label: "Compras",                icon: ShoppingCart,    section: "Suporte",    externalTo: "/compras" },
-  { id: "ext-rh",           label: "RH",                     icon: UserCog,         externalTo: "/rh" },
-  { id: "ext-chamados",     label: "Chamados",               icon: Headphones,      externalTo: "/chamados" },
+  { id: "ext-compras",      label: "Compras",                icon: ShoppingCart,    section: "Compras",    externalTo: "/compras" },
+
+  { id: "ext-rh",           label: "RH",                     icon: UserCog,         section: "RH",         externalTo: "/rh" },
+
+  { id: "ext-chamados",     label: "Chamados",               icon: Headphones,      section: "Suporte",    externalTo: "/chamados" },
 ];
 
 const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
