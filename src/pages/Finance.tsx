@@ -28,6 +28,7 @@ import { UpdateButton } from "@/components/shared/UpdateButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { PartnersAnalytics, type PartnerRow } from "@/components/finance/PartnersAnalytics";
+import { BankLogo } from "@/components/finance/BankLogo";
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -1478,43 +1479,6 @@ function ScreenPrevisto() {
   );
 }
 
-// ─── BANK LOGOS ───────────────────────────────────────────────────────────────
-function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
-  const s = size;
-  if (sigla === "BB") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#FFD700" fillOpacity="0.12"/>
-      <circle cx="20" cy="20" r="11" stroke="#FFD700" strokeWidth="2.2" fill="none"/>
-      <circle cx="20" cy="20" r="6" stroke="#FFD700" strokeWidth="1.5" fill="none"/>
-      <line x1="9" y1="20" x2="31" y2="20" stroke="#FFD700" strokeWidth="1.5"/>
-    </svg>
-  );
-  if (sigla === "BV") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#CC092F" fillOpacity="0.12"/>
-      <rect x="8" y="13" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-      <rect x="8" y="19.5" width="16" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-      <rect x="8" y="26" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-    </svg>
-  );
-  if (sigla === "IT") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#EC7000" fillOpacity="0.12"/>
-      <path d="M11 10 L20 30 L29 10" stroke="#EC7000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="20" cy="20" r="4.5" fill="#EC7000" fillOpacity="0.7"/>
-    </svg>
-  );
-  if (sigla === "CA") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#005CA9" fillOpacity="0.12"/>
-      <rect x="8" y="17" width="24" height="14" rx="2.5" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2"/>
-      <path d="M14 17 L14 13 Q14 9 20 9 Q26 9 26 13 L26 17" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2" fill="none"/>
-      <circle cx="20" cy="24" r="3" fill="#005CA9" fillOpacity="0.75"/>
-    </svg>
-  );
-  return <span className="text-[13px] font-black text-slate-400">{sigla}</span>;
-}
-
 function ScreenBancos() {
   const { dwRawData, dwFilter, filiais, isFetchingDw } = useFinancialData();
   const [contas, setContas] = useState<import("@/lib/dwApi").BankAccount[]>([]);
@@ -1643,9 +1607,13 @@ function ScreenBancos() {
               return (
                 <div key={c.cod_conta} className="px-4 py-2.5">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-black border ${p.border} bg-[var(--sgt-table-head)]`}>
-                      {c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase()}
-                    </span>
+                    <BankLogo
+                      nome={c.nome_banco}
+                      codigo={c.cod_banco}
+                      sigla={(c.nome_banco ?? c.nome_conta).slice(0,2).toUpperCase()}
+                      size={20}
+                      rounded="rounded-md"
+                    />
                     <span className="text-[10px] text-slate-600 truncate">{c.nome_banco || c.nome_conta}</span>
                   </div>
                   <p className={`text-[14px] font-black leading-none tabular-nums ${p.val}`}>{fmtK(c.saldo_atual)}</p>
@@ -1668,9 +1636,12 @@ function ScreenBancos() {
               <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${p.border}`}>
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl border text-[13px] font-black ${p.border} bg-[var(--sgt-table-head)]`}>
-                    {sigla}
-                  </div>
+                  <BankLogo
+                    nome={c.nome_banco}
+                    codigo={c.cod_banco}
+                    sigla={sigla}
+                    size={40}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-slate-200 truncate">
                       {c.nome_banco || c.nome_conta}
@@ -1717,7 +1688,13 @@ function ScreenBancos() {
                   className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
                     extratoKey === c.cod_conta ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
-                  <span className={`inline-flex h-4 w-4 items-center justify-center rounded text-[8px] font-black border ${p.border}`}>{sigla}</span>
+                  <BankLogo
+                    nome={c.nome_banco}
+                    codigo={c.cod_banco}
+                    sigla={sigla}
+                    size={16}
+                    rounded="rounded"
+                  />
                   {c.nome_banco || c.nome_conta}
                 </button>
               );
