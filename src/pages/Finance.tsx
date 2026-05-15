@@ -1976,7 +1976,7 @@ export default function Finance() {
                         <button
                           onClick={() => {
                             if (item.externalTo) { navigate(item.externalTo); return; }
-                            setActive(item.id);
+                            setActive(item.id as ScreenId);
                           }}
                           title={item.label}
                           className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${collapsedTone}`}
