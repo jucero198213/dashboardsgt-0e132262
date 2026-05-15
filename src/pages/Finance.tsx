@@ -1479,43 +1479,6 @@ function ScreenPrevisto() {
   );
 }
 
-// ─── BANK LOGOS ───────────────────────────────────────────────────────────────
-function BankLogo({ sigla, size = 40 }: { sigla: string; size?: number }) {
-  const s = size;
-  if (sigla === "BB") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#FFD700" fillOpacity="0.12"/>
-      <circle cx="20" cy="20" r="11" stroke="#FFD700" strokeWidth="2.2" fill="none"/>
-      <circle cx="20" cy="20" r="6" stroke="#FFD700" strokeWidth="1.5" fill="none"/>
-      <line x1="9" y1="20" x2="31" y2="20" stroke="#FFD700" strokeWidth="1.5"/>
-    </svg>
-  );
-  if (sigla === "BV") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#CC092F" fillOpacity="0.12"/>
-      <rect x="8" y="13" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-      <rect x="8" y="19.5" width="16" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-      <rect x="8" y="26" width="24" height="3.5" rx="1.75" fill="#CC092F" fillOpacity="0.85"/>
-    </svg>
-  );
-  if (sigla === "IT") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#EC7000" fillOpacity="0.12"/>
-      <path d="M11 10 L20 30 L29 10" stroke="#EC7000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="20" cy="20" r="4.5" fill="#EC7000" fillOpacity="0.7"/>
-    </svg>
-  );
-  if (sigla === "CA") return (
-    <svg width={s} height={s} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="8" fill="#005CA9" fillOpacity="0.12"/>
-      <rect x="8" y="17" width="24" height="14" rx="2.5" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2"/>
-      <path d="M14 17 L14 13 Q14 9 20 9 Q26 9 26 13 L26 17" stroke="#005CA9" strokeOpacity="0.85" strokeWidth="2" fill="none"/>
-      <circle cx="20" cy="24" r="3" fill="#005CA9" fillOpacity="0.75"/>
-    </svg>
-  );
-  return <span className="text-[13px] font-black text-slate-400">{sigla}</span>;
-}
-
 function ScreenBancos() {
   const { dwRawData, dwFilter, filiais, isFetchingDw } = useFinancialData();
   const [contas, setContas] = useState<import("@/lib/dwApi").BankAccount[]>([]);
