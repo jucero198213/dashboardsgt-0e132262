@@ -2008,7 +2008,7 @@ export default function Finance() {
                       <button
                         onClick={() => {
                           if (item.externalTo) { navigate(item.externalTo); return; }
-                          setActive(item.id);
+                          setActive(item.id as ScreenId);
                         }}
                         className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone}`}
                         style={{ width: "calc(100% - 8px)" }}
