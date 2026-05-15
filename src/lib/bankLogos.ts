@@ -63,11 +63,11 @@ const BY_NAME: Array<[RegExp, string]> = [
 export function getBankLogoUrl(nome?: string | null, codigo?: string | null): string | null {
   if (codigo) {
     const code = String(codigo).padStart(3, "0");
-    if (BY_CODE[code]) return `https://logo.clearbit.com/${BY_CODE[code]}`;
+    if (BY_CODE[code]) return `https://www.google.com/s2/favicons?domain=${BY_CODE[code]}&sz=128`;
   }
   if (nome) {
     for (const [re, dom] of BY_NAME) {
-      if (re.test(nome)) return `https://logo.clearbit.com/${dom}`;
+      if (re.test(nome)) return `https://www.google.com/s2/favicons?domain=${dom}&sz=128`;
     }
   }
   return null;
