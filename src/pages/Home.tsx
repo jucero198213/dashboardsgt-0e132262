@@ -355,13 +355,10 @@ export default function Home() {
   const auroraY = useTransform(scrollY, [0, 800], [0, -120]);
   const auroraScale = useTransform(scrollY, [0, 800], [1, 1.08]);
   const lightsY = useTransform(scrollY, [0, 800], [0, -60]);
-  const heroBgY = useTransform(scrollY, [0, 600], [0, 160]);
-  const badgeY = useTransform(scrollY, [0, 500], [0, 80]);
-  const titleY = useTransform(scrollY, [0, 600], [0, 140]);
-  const logoY = useTransform(scrollY, [0, 600], [0, 90]);
-  const descY = useTransform(scrollY, [0, 600], [0, 60]);
-  const ctaY = useTransform(scrollY, [0, 600], [0, 40]);
+  const heroY = useTransform(scrollY, [0, 600], [0, 140]);
+  const logoY = useTransform(scrollY, [0, 600], [0, 70]);
   const heroOpacity = useTransform(scrollY, [0, 400, 700], [1, 0.85, 0.35]);
+
 
 
   const modules: ModuleCardData[] = [
