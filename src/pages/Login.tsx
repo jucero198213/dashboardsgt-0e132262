@@ -275,23 +275,18 @@ export default function Login() {
             </h1>
           </div>
 
-          {/* Tratamento premium do logo SGT (sem PNG pixelado) */}
+          {/* Logo SGT original — limpo e enquadrado */}
           <div className="group flex flex-col">
-            <div className="flex items-baseline gap-1">
-              <span className="bg-gradient-to-b from-amber-300 via-amber-400 to-orange-600 bg-clip-text text-[clamp(3.5rem,7vw,6rem)] font-black italic leading-none tracking-tighter text-transparent">
-                SGT
-              </span>
-              <span className="origin-left translate-y-2 rotate-90 text-2xl font-bold italic uppercase tracking-tight text-white/40">
-                Log
-              </span>
-            </div>
-            <div className="mt-2 h-[3px] w-48 bg-gradient-to-r from-amber-500 via-orange-600 to-transparent" />
-            <p className="mt-4 text-[10px] font-medium uppercase tracking-[0.3em] text-white/30">
-              Sistema de Gestão em Transporte
-            </p>
+            <img
+              src={sgtLogo}
+              alt="SGT Log"
+              draggable={false}
+              className="h-auto w-[clamp(260px,28vw,360px)] select-none drop-shadow-[0_8px_40px_rgba(245,158,11,0.25)] transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+            <div className="mt-3 h-[3px] w-48 bg-gradient-to-r from-amber-500 via-orange-600 to-transparent" />
           </div>
 
-          <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-400/70">
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-400/70">
             Plataforma unificada para operações logísticas de alto desempenho e controle de frota em tempo real.
           </p>
         </div>
