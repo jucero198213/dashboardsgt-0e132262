@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useReducedMotion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
   BarChart3,
   TrendingUp,
