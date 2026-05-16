@@ -510,21 +510,18 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Background sutil */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <circle cx="20" cy="20" r="1.5" fill="rgba(255,255,255,0.12)" />
-              </pattern>
-              <pattern id="lines" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <path d="M0 80 L80 0" stroke="rgba(255,255,255,0.04)" strokeWidth="1" fill="none" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dots)" />
-            <rect width="100%" height="100%" fill="url(#lines)" />
-          </svg>
-        </div>
+        {/* Mesh gradient — 4 pontos */}
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          style={{
+            backgroundImage: [
+              "radial-gradient(at 18% 22%, rgba(245,158,11,0.22) 0px, transparent 55%)",
+              "radial-gradient(at 82% 18%, rgba(227,6,19,0.16) 0px, transparent 55%)",
+              "radial-gradient(at 15% 85%, rgba(6,182,212,0.14) 0px, transparent 55%)",
+              "radial-gradient(at 85% 88%, rgba(139,92,246,0.16) 0px, transparent 55%)",
+            ].join(", "),
+          }}
+        />
 
         {/* Luzes de fundo */}
         <div className="pointer-events-none absolute inset-0"
