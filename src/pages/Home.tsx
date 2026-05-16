@@ -559,7 +559,7 @@ export default function Home() {
           {/* ── HERO ── */}
           <motion.section
             style={reduce ? undefined : { y: heroY, opacity: heroOpacity }}
-            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-12 pb-8 text-center sm:pt-16 sm:pb-12 lg:px-10 lg:pt-20 lg:pb-16 will-change-transform">
+            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-2 pb-6 text-center sm:pt-3 sm:pb-8 lg:px-10 lg:pt-4 lg:pb-10 will-change-transform">
 
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 12 }}
