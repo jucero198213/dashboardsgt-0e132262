@@ -1,5 +1,6 @@
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
   BarChart3,
   TrendingUp,
@@ -348,6 +349,18 @@ export default function Home() {
   const { canAccess } = usePagePermissions();
   const reduce = useReducedMotion();
 
+  // Parallax — scroll do container .section (overflow-auto)
+  const scrollRef = useRef<HTMLElement | null>(null);
+  const { scrollY } = useScroll({ container: scrollRef as React.RefObject<HTMLElement> });
+  const auroraY = useTransform(scrollY, [0, 800], [0, -120]);
+  const auroraScale = useTransform(scrollY, [0, 800], [1, 1.08]);
+  const lightsY = useTransform(scrollY, [0, 800], [0, -60]);
+  const heroY = useTransform(scrollY, [0, 600], [0, 140]);
+  const logoY = useTransform(scrollY, [0, 600], [0, 70]);
+  const heroOpacity = useTransform(scrollY, [0, 400, 700], [1, 0.85, 0.35]);
+
+
+
   const modules: ModuleCardData[] = [
     {
       key: "visual-rodopar",
@@ -503,6 +516,7 @@ export default function Home() {
 
       {/* Section envolvente */}
       <section
+        ref={scrollRef}
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
           background: "var(--sgt-bg-section)",
@@ -510,10 +524,12 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Aurora executiva — 3 radiais */}
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden"
+        {/* Aurora executiva — 3 radiais (parallax lento) */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 overflow-hidden will-change-transform"
           style={{
+            y: reduce ? 0 : auroraY,
+            scale: reduce ? 1 : auroraScale,
             backgroundImage: [
               "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(30,58,95,0.32), transparent 65%)",
               "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(180,140,70,0.18), transparent 65%)",
@@ -523,13 +539,14 @@ export default function Home() {
           }}
         />
 
-        {/* Luzes de fundo */}
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
+        {/* Luzes de fundo (parallax médio) */}
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
+
 
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
@@ -540,7 +557,10 @@ export default function Home() {
           <TodayTicketsPopup />
 
           {/* ── HERO ── */}
-          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-12 pb-8 text-center sm:pt-16 sm:pb-12 lg:px-10 lg:pt-20 lg:pb-16">
+          <motion.section
+            style={reduce ? undefined : { y: heroY, opacity: heroOpacity }}
+            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-12 pb-8 text-center sm:pt-16 sm:pb-12 lg:px-10 lg:pt-20 lg:pb-16 will-change-transform">
+
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -569,7 +589,8 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 flex w-full justify-center"
+              style={reduce ? undefined : { y: logoY }}
+              className="mt-8 flex w-full justify-center will-change-transform"
             >
               <SgtLogoSlot className="h-[100px] sm:h-[130px] lg:h-[155px]" />
             </motion.div>
@@ -623,7 +644,7 @@ export default function Home() {
                 <ChevronDown className="h-4 w-4" />
               </motion.div>
             </motion.button>
-          </section>
+          </motion.section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
           <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
