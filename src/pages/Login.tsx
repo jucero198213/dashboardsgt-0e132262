@@ -277,11 +277,26 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Plinto do logo: aura quente atrás + moldura sutil de vidro */}
-          <div className="relative">
-            {/* Backlight quente concentrado atrás do logo */}
-            <div className="pointer-events-none absolute -inset-12 rounded-[40px] bg-[radial-gradient(ellipse_60%_70%_at_30%_50%,rgba(245,140,30,0.22),transparent_70%)]" />
-            <div className="pointer-events-none absolute -inset-8 rounded-[32px] bg-[radial-gradient(ellipse_50%_60%_at_50%_50%,rgba(227,6,19,0.10),transparent_75%)]" />
+          {/* Plinto do logo: aura quente difusa, perfeitamente centrada atrás do logo */}
+          <div className="relative w-[clamp(320px,32vw,440px)]">
+            {/* Halo principal — elipse ampla e suave, centrada na massa do logo */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[180%] w-[140%] -translate-x-1/2 -translate-y-1/2"
+              style={{
+                background:
+                  "radial-gradient(ellipse 50% 42% at 50% 50%, rgba(245,140,30,0.18), rgba(227,6,19,0.06) 45%, transparent 72%)",
+                filter: "blur(28px)",
+              }}
+            />
+            {/* Núcleo quente — pequeno acento sob o logotipo */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[60%] w-[70%] -translate-x-1/2 -translate-y-1/2"
+              style={{
+                background:
+                  "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,170,60,0.16), transparent 70%)",
+                filter: "blur(20px)",
+              }}
+            />
 
             <div className="relative flex flex-col gap-6">
               <img
@@ -290,7 +305,7 @@ export default function Login() {
                 draggable={false}
                 width={1514}
                 height={466}
-                className="h-auto w-[clamp(320px,32vw,440px)] select-none object-contain drop-shadow-[0_12px_40px_rgba(245,140,30,0.35)]"
+                className="h-auto w-full select-none object-contain drop-shadow-[0_8px_28px_rgba(245,140,30,0.22)]"
                 style={{ imageRendering: "auto" }}
               />
 
