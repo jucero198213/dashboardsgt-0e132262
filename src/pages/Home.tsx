@@ -510,16 +510,16 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Mesh gradient — 4 pontos */}
+        {/* Aurora — 3 radiais */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{
             backgroundImage: [
-              "radial-gradient(at 18% 22%, rgba(245,158,11,0.22) 0px, transparent 55%)",
-              "radial-gradient(at 82% 18%, rgba(227,6,19,0.16) 0px, transparent 55%)",
-              "radial-gradient(at 15% 85%, rgba(6,182,212,0.14) 0px, transparent 55%)",
-              "radial-gradient(at 85% 88%, rgba(139,92,246,0.16) 0px, transparent 55%)",
+              "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(16,185,129,0.22), transparent 65%)",
+              "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(139,92,246,0.20), transparent 65%)",
+              "radial-gradient(ellipse 70% 50% at 50% 100%, rgba(6,182,212,0.18), transparent 65%)",
             ].join(", "),
+            filter: "blur(2px)",
           }}
         />
 
