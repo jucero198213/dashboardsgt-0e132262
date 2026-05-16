@@ -589,7 +589,8 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-8 flex w-full justify-center"
+              style={reduce ? undefined : { y: logoY }}
+              className="mt-8 flex w-full justify-center will-change-transform"
             >
               <SgtLogoSlot className="h-[100px] sm:h-[130px] lg:h-[155px]" />
             </motion.div>
