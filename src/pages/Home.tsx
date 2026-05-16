@@ -643,7 +643,7 @@ export default function Home() {
                 <ChevronDown className="h-4 w-4" />
               </motion.div>
             </motion.button>
-          </section>
+          </motion.section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
           <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
