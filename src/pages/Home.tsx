@@ -510,14 +510,14 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Aurora — 3 radiais */}
+        {/* Aurora executiva — 3 radiais */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{
             backgroundImage: [
-              "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(16,185,129,0.22), transparent 65%)",
-              "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(139,92,246,0.20), transparent 65%)",
-              "radial-gradient(ellipse 70% 50% at 50% 100%, rgba(6,182,212,0.18), transparent 65%)",
+              "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(30,58,95,0.32), transparent 65%)",
+              "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(180,140,70,0.18), transparent 65%)",
+              "radial-gradient(ellipse 70% 50% at 50% 100%, rgba(15,27,45,0.45), transparent 70%)",
             ].join(", "),
             filter: "blur(2px)",
           }}
