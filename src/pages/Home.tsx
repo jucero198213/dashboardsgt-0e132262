@@ -352,12 +352,12 @@ export default function Home() {
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
   const { scrollY } = useScroll({ container: scrollRef as React.RefObject<HTMLElement> });
-  const auroraY = useTransform(scrollY, [0, 800], [0, -120]);
-  const auroraScale = useTransform(scrollY, [0, 800], [1, 1.08]);
-  const lightsY = useTransform(scrollY, [0, 800], [0, -60]);
-  const heroY = useTransform(scrollY, [0, 600], [0, 140]);
-  const logoY = useTransform(scrollY, [0, 600], [0, 70]);
-  const heroOpacity = useTransform(scrollY, [0, 400, 700], [1, 0.85, 0.35]);
+  const auroraY = useTransform(scrollY, [0, 800], [0, -260]);
+  const auroraScale = useTransform(scrollY, [0, 800], [1, 1.18]);
+  const lightsY = useTransform(scrollY, [0, 800], [0, -160]);
+  const heroY = useTransform(scrollY, [0, 600], [0, 320]);
+  const logoY = useTransform(scrollY, [0, 600], [0, 180]);
+  const heroOpacity = useTransform(scrollY, [0, 300, 600], [1, 0.6, 0]);
 
 
 
