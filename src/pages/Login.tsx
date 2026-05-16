@@ -248,131 +248,155 @@ export default function Login() {
     );
   }
 
-  // ── Render: Login normal ──
+  // ── Render: Login normal (Cinematic enterprise) ──
   return (
-    <div className="relative flex min-h-screen overflow-hidden sgt-bg-base">
+    <div className="relative flex min-h-screen w-full overflow-hidden sgt-bg-base text-slate-200 selection:bg-amber-500/30">
 
-      {/* ── Atmosfera global ── */}
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_80%_60%_at_30%_-10%,rgba(180,110,4,0.22),transparent_55%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_50%_at_100%_110%,rgba(6,182,212,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
+      {/* PAINEL ESQUERDO — Branding cinematográfico */}
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-white/5 p-16 lg:flex lg:w-1/2">
+        {/* Aura âmbar */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-600/10 blur-[120px]" />
+        <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_80%_60%_at_20%_-10%,rgba(180,110,4,0.18),transparent_60%)]" />
 
-      {/* PAINEL ESQUERDO — Branding */}
-      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-[var(--sgt-border-subtle)] sgt-bg-section px-12 py-14 lg:flex lg:w-[52%]">
-        <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_90%_70%_at_0%_10%,rgba(180,110,4,0.18),transparent_60%)]" />
-        <div className="relative">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-400/25 bg-amber-400/10">
-              <BarChart3 className="h-5 w-5 text-amber-300" />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-amber-400/70">SGT LOG</p>
-            </div>
+        {/* Chip topo */}
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-amber-500/80">SGT LOG · Enterprise</span>
           </div>
         </div>
-        <div className="relative space-y-4">
+
+        {/* Bloco central — título + logo estilizado */}
+        <div className="relative z-10 flex flex-col gap-6 animate-[fadeSlideIn_0.7s_ease-out]">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.32em] text-amber-400/70 mb-1">Bem-vindo ao</p>
-            <h1 className="text-[clamp(2rem,3.5vw,3rem)] font-black leading-[1.05] tracking-[-0.04em] sgt-text">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.4em] text-amber-500">Bem-vindo ao</p>
+            <h1 className="text-[clamp(3rem,6vw,5rem)] font-extrabold leading-[1] tracking-tighter text-white">
               Workspace
             </h1>
           </div>
-          <img src={sgtLogo} alt="SGT Log" className="h-[120px] w-auto select-none" draggable={false} style={{ marginLeft: 0 }} />
-          <p className="max-w-[340px] text-[14px] leading-relaxed text-[var(--sgt-text-muted)]">
-            Acesse com suas credenciais para continuar.
+
+          {/* Tratamento premium do logo SGT (sem PNG pixelado) */}
+          <div className="group flex flex-col">
+            <div className="flex items-baseline gap-1">
+              <span className="bg-gradient-to-b from-amber-300 via-amber-400 to-orange-600 bg-clip-text text-[clamp(3.5rem,7vw,6rem)] font-black italic leading-none tracking-tighter text-transparent">
+                SGT
+              </span>
+              <span className="origin-left translate-y-2 rotate-90 text-2xl font-bold italic uppercase tracking-tight text-white/40">
+                Log
+              </span>
+            </div>
+            <div className="mt-2 h-[3px] w-48 bg-gradient-to-r from-amber-500 via-orange-600 to-transparent" />
+            <p className="mt-4 text-[10px] font-medium uppercase tracking-[0.3em] text-white/30">
+              Sistema de Gestão em Transporte
+            </p>
+          </div>
+
+          <p className="mt-6 max-w-sm text-sm leading-relaxed text-slate-400/70">
+            Plataforma unificada para operações logísticas de alto desempenho e controle de frota em tempo real.
           </p>
         </div>
-        <div className="relative flex items-center justify-between">
-          <p className="text-[11px] text-[var(--sgt-text-faint)]">© 2026 SGT Log · Todos os direitos reservados</p>
-          <p className="text-[10px] text-[var(--sgt-text-faint)] tracking-[0.1em]">v2.0</p>
+
+        {/* Rodapé */}
+        <div className="relative z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-white/20">
+          <span>© 2026 SGT Log · Todos os direitos reservados</span>
+          <span>v2.0</span>
         </div>
       </div>
 
       {/* PAINEL DIREITO — Formulário */}
-      <div className="relative flex flex-1 items-center justify-center px-6 py-12 lg:px-16">
-        <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_70%_60%_at_100%_-10%,rgba(6,182,212,0.06),transparent_55%)]" />
-        <div className="relative w-full max-w-[400px] animate-[fadeSlideIn_0.6s_ease-out]">
+      <div className="relative flex w-full flex-col items-center justify-center p-8 lg:w-1/2"
+           style={{ background: "radial-gradient(circle at center, rgba(15,20,35,1) 0%, rgba(6,9,18,1) 100%)" }}>
+        <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_70%_60%_at_100%_-10%,rgba(6,182,212,0.05),transparent_55%)]" />
+
+        <div className="relative flex w-full max-w-[420px] flex-col gap-10 animate-[fadeSlideIn_0.6s_ease-out]">
 
           {/* Logo mobile */}
-          <div className="mb-10 flex items-center gap-3 lg:hidden">
+          <div className="flex items-center gap-3 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10">
-              <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
+              <BarChart3 className="h-4 w-4 text-amber-300" />
             </div>
-            <p className="text-[13px] font-bold tracking-[-0.01em] text-white">Workspace <span className="text-amber-300">SGT</span></p>
+            <p className="text-[13px] font-bold tracking-tight text-white">Workspace <span className="text-amber-300">SGT</span></p>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-[28px] font-extrabold tracking-[-0.03em] sgt-text">Bem-vindo</h2>
-            <p className="mt-1.5 text-[14px] text-[var(--sgt-text-muted)]">Acesse o portal com suas credenciais</p>
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="text-4xl font-bold tracking-tight text-white">Bem-vindo</h2>
+            <p className="text-slate-400">Acesse o portal com suas credenciais</p>
           </div>
 
           {error && (
-            <div className="mb-6 flex items-center gap-2.5 rounded-[14px] border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-[13px] text-rose-300">
+            <div className="flex items-center gap-2.5 rounded-xl border border-rose-400/20 bg-rose-400/[0.08] px-4 py-3 text-[13px] text-rose-300">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="ml-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">E-mail</label>
+              <div className="group relative">
+                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-500 transition-colors group-focus-within:text-amber-500">
+                  <Mail className="h-[18px] w-[18px]" />
+                </div>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   required autoComplete="email" placeholder="seu@email.com"
-                  className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
+                  className="h-14 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-12 pr-4 text-white placeholder:text-slate-600 outline-none transition-all focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
+            {/* Senha */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between px-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Senha</label>
+              </div>
+              <div className="group relative">
+                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-500 transition-colors group-focus-within:text-amber-500">
+                  <Lock className="h-[18px] w-[18px]" />
+                </div>
                 <input
                   type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                   required autoComplete="current-password" placeholder="••••••••"
-                  className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-12 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
+                  className="h-14 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-12 pr-12 text-white placeholder:text-slate-700 outline-none transition-all focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--sgt-text-muted)] transition-colors hover:text-[var(--sgt-text-secondary)]">
-                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-500 transition-colors hover:text-white">
+                  {showPass ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit" disabled={submitting}
-              className="relative mt-2 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-[14px] bg-amber-500/[0.12] text-[14px] font-bold text-amber-300 transition-all duration-300 border border-amber-400/25 hover:bg-amber-400/[0.18] hover:border-amber-400/40 hover:shadow-[0_8px_32px_rgba(245,158,11,0.18)] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-amber-400/60 via-amber-300/40 to-transparent" />
-              {submitting ? (
-                <><Loader2 className="h-4 w-4 animate-spin" />Autenticando...</>
-              ) : "Acessar Portal"}
-            </button>
+            <div className="flex flex-col gap-4 pt-2">
+              <button
+                type="submit" disabled={submitting}
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 font-bold text-[#060912] shadow-[0_0_40px_-10px_rgba(245,158,11,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_-5px_rgba(245,158,11,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />Autenticando...</>
+                ) : "Acessar Portal"}
+              </button>
+
+              <button
+                type="button" onClick={() => setMode("first-access")}
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] text-sm font-medium text-slate-300 transition-all hover:border-white/20 hover:bg-white/[0.05]"
+              >
+                <UserPlus className="h-[18px] w-[18px]" />
+                Primeiro acesso? Defina sua senha
+              </button>
+            </div>
           </form>
 
-          {/* Primeiro Acesso */}
-          <div className="mt-6 flex justify-center">
+          {/* Rodapé */}
+          <div className="flex items-center justify-between border-t border-white/5 pt-8">
+            <p className="text-[11px] font-medium tracking-tight text-slate-500">
+              Acesso restrito · Uso interno SGT Log
+            </p>
             <button
-              onClick={() => setMode("first-access")}
-              className="flex items-center gap-2 rounded-[14px] border border-cyan-500/20 bg-cyan-500/5 px-5 py-2.5 text-[13px] font-medium text-cyan-300 transition-all hover:bg-cyan-500/10 hover:border-cyan-500/30"
+              type="button" onClick={toggleTheme}
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-slate-300 transition-colors hover:bg-white/10"
             >
-              <UserPlus className="h-4 w-4" />
-              Primeiro acesso? Defina sua senha
-            </button>
-          </div>
-
-          <div className="mt-8 flex items-center justify-between">
-            <p className="text-[11px] text-[var(--sgt-text-faint)]">Acesso restrito · Uso interno SGT Log</p>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] px-2.5 py-1.5 text-[11px] font-medium text-[color:var(--sgt-text-muted)] transition-all hover:border-[var(--sgt-border-medium)] hover:text-[color:var(--sgt-text-secondary)]"
-              style={{ background: "var(--sgt-input-bg)" }}
-            >
-              {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-cyan-400" />}
+              {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5 text-cyan-400" />}
               {theme === "dark" ? "Tema claro" : "Tema escuro"}
             </button>
           </div>
