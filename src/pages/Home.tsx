@@ -519,6 +519,7 @@ export default function Home() {
 
       {/* Section envolvente */}
       <section
+        ref={scrollRef}
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
           background: "var(--sgt-bg-section)",
@@ -526,10 +527,12 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Aurora executiva — 3 radiais */}
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden"
+        {/* Aurora executiva — 3 radiais (parallax lento) */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 overflow-hidden will-change-transform"
           style={{
+            y: reduce ? 0 : auroraY,
+            scale: reduce ? 1 : auroraScale,
             backgroundImage: [
               "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(30,58,95,0.32), transparent 65%)",
               "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(180,140,70,0.18), transparent 65%)",
@@ -539,13 +542,14 @@ export default function Home() {
           }}
         />
 
-        {/* Luzes de fundo */}
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
-        <div className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
+        {/* Luzes de fundo (parallax médio) */}
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
+        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
+          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
+
 
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
