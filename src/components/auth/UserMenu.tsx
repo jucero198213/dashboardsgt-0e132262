@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Link } from "react-router-dom";
-import { LogOut, Shield, User, ChevronDown, Sun, Moon } from "lucide-react";
+import { LogOut, Shield, User, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface UserMenuProps {
@@ -44,15 +44,11 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3 text-[12px] backdrop-blur-xl transition-all hover:border-amber-400/30 hover:bg-white/[0.07] hover:shadow-[0_0_24px_-4px_rgba(245,158,11,0.35)]"
-        style={{ color: "var(--sgt-text-secondary)" }}
+        aria-label="Menu do usuário"
+        className="group relative flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/[0.08] text-amber-300 backdrop-blur-sm transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-400/[0.12] hover:shadow-[0_8px_24px_-8px_rgba(245,158,11,0.5)]"
       >
-        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-[12px] font-bold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_-2px_rgba(245,158,11,0.45)] ring-1 ring-amber-300/40">
-          {initials}
-          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[var(--sgt-bg,#0b1220)]" />
-        </span>
-        <span className="hidden sm:inline max-w-[140px] truncate font-medium">{user.email}</span>
-        <ChevronDown className={`h-3.5 w-3.5 opacity-60 transition-transform ${open ? "rotate-180" : "group-hover:translate-y-0.5"}`} />
+        <User className="h-[18px] w-[18px]" strokeWidth={2} />
+        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-[var(--sgt-bg,#0b1220)]" />
       </button>
 
       {open && (
