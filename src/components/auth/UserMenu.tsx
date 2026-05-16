@@ -44,18 +44,15 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-xl border px-3 py-2 text-[12px] transition-all"
-        style={{
-          background: "var(--sgt-input-bg)",
-          borderColor: "var(--sgt-input-border)",
-          color: "var(--sgt-text-secondary)",
-        }}
+        className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3 text-[12px] backdrop-blur-xl transition-all hover:border-amber-400/30 hover:bg-white/[0.07] hover:shadow-[0_0_24px_-4px_rgba(245,158,11,0.35)]"
+        style={{ color: "var(--sgt-text-secondary)" }}
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-[11px] font-bold text-cyan-300">
+        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-[12px] font-bold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_-2px_rgba(245,158,11,0.45)] ring-1 ring-amber-300/40">
           {initials}
-        </div>
-        <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[var(--sgt-bg,#0b1220)]" />
+        </span>
+        <span className="hidden sm:inline max-w-[140px] truncate font-medium">{user.email}</span>
+        <ChevronDown className={`h-3.5 w-3.5 opacity-60 transition-transform ${open ? "rotate-180" : "group-hover:translate-y-0.5"}`} />
       </button>
 
       {open && (
