@@ -313,7 +313,7 @@ export default function Login() {
               <div className="flex items-center gap-4">
                 <div className="h-px flex-1 bg-gradient-to-r from-amber-500/70 via-orange-600/40 to-transparent" />
                 <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/40">
-                  est. transporte · gestão
+                  gestão - operação - financeiro
                 </p>
               </div>
             </div>
