@@ -266,28 +266,47 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Bloco central — título + logo estilizado */}
-        <div className="relative z-10 flex flex-col gap-6 animate-[fadeSlideIn_0.7s_ease-out]">
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.4em] text-amber-500">Bem-vindo ao</p>
-            <h1 className="text-[clamp(3rem,6vw,5rem)] font-extrabold leading-[1] tracking-tighter text-white">
-              Workspace
-            </h1>
+        {/* Bloco central — logo SGT como peça arquitetônica */}
+        <div className="relative z-10 flex flex-col gap-10 animate-[fadeSlideIn_0.7s_ease-out]">
+
+          {/* Kicker discreto que ancora o logo */}
+          <div className="flex items-center gap-3">
+            <span className="h-px w-10 bg-gradient-to-r from-amber-500/60 to-transparent" />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-amber-500/70">
+              Bem-vindo ao Workspace
+            </p>
           </div>
 
-          {/* Logo SGT original — limpo e enquadrado */}
-          <div className="group flex flex-col">
-            <img
-              src={sgtLogo}
-              alt="SGT Log"
-              draggable={false}
-              className="h-auto w-[clamp(260px,28vw,360px)] select-none drop-shadow-[0_8px_40px_rgba(245,158,11,0.25)] transition-transform duration-500 group-hover:scale-[1.02]"
-            />
-            <div className="mt-3 h-[3px] w-48 bg-gradient-to-r from-amber-500 via-orange-600 to-transparent" />
+          {/* Plinto do logo: aura quente atrás + moldura sutil de vidro */}
+          <div className="relative">
+            {/* Backlight quente concentrado atrás do logo */}
+            <div className="pointer-events-none absolute -inset-12 rounded-[40px] bg-[radial-gradient(ellipse_60%_70%_at_30%_50%,rgba(245,140,30,0.22),transparent_70%)]" />
+            <div className="pointer-events-none absolute -inset-8 rounded-[32px] bg-[radial-gradient(ellipse_50%_60%_at_50%_50%,rgba(227,6,19,0.10),transparent_75%)]" />
+
+            <div className="relative flex flex-col gap-6">
+              <img
+                src={sgtLogo}
+                alt="SGT Log — Sistema de Gestão em Transporte"
+                draggable={false}
+                width={1514}
+                height={466}
+                className="h-auto w-[clamp(320px,32vw,440px)] select-none object-contain drop-shadow-[0_12px_40px_rgba(245,140,30,0.35)]"
+                style={{ imageRendering: "auto" }}
+              />
+
+              {/* Régua tipográfica que conecta logo ↔ tagline (linguagem visual unificada) */}
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 bg-gradient-to-r from-amber-500/70 via-orange-600/40 to-transparent" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-white/40">
+                  est. transporte · gestão
+                </p>
+              </div>
+            </div>
           </div>
 
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-400/70">
-            Plataforma unificada para operações logísticas de alto desempenho e controle de frota em tempo real.
+          <p className="max-w-[420px] text-[15px] leading-relaxed text-slate-400/75">
+            Plataforma unificada para operações logísticas de alto desempenho
+            <span className="text-amber-400/70"> e controle de frota em tempo real.</span>
           </p>
         </div>
 
