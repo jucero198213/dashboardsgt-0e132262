@@ -1878,17 +1878,7 @@ export default function Finance() {
               </div>
             </div>
 
-            {/* Toggle sidebar — padrão Linear/Vercel */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-transparent text-slate-500 transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200"
-            >
-              {sidebarCollapsed
-                ? <PanelLeftOpen className="h-3.5 w-3.5" />
-                : <PanelLeftClose className="h-3.5 w-3.5" />
-              }
-            </button>
+
 
             {/* Badge tempo real */}
             <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
