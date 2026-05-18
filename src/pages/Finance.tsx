@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import type { ContaPagar, ContaReceber } from "@/data/mockData";
 import {
@@ -1808,9 +1808,18 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
 //  MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Finance() {
-  const [active, setActive] = useState<ScreenId>("painel");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const screenParam = (searchParams.get("s") as ScreenId) ?? "painel";
+  const [active, _setActive] = useState<ScreenId>(screenParam);
   const navigate = useNavigate();
+
+  // Sincroniza estado interno ⇄ URL (?s=)
+  useEffect(() => { _setActive(screenParam); }, [screenParam]);
+  const setActive = (id: ScreenId) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("s", id);
+    setSearchParams(next, { replace: true });
+  };
 
   // ── Dados reais do servidor ──────────────────────────────────────────────
   const {
@@ -1869,17 +1878,7 @@ export default function Finance() {
               </div>
             </div>
 
-            {/* Toggle sidebar — padrão Linear/Vercel */}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={sidebarCollapsed ? "Expandir menu" : "Recolher menu"}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-transparent text-slate-500 transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200"
-            >
-              {sidebarCollapsed
-                ? <PanelLeftOpen className="h-3.5 w-3.5" />
-                : <PanelLeftClose className="h-3.5 w-3.5" />
-              }
-            </button>
+
 
             {/* Badge tempo real */}
             <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
@@ -1947,90 +1946,8 @@ export default function Finance() {
             </div>
           </div>
 
-          {/* ── BODY: SIDEBAR + CONTENT ── */}
+          {/* ── BODY: a sidebar global vive em AppLayout; aqui apenas o conteúdo ── */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
-            {/* SIDEBAR */}
-            <aside
-              className={`flex-shrink-0 flex flex-col border-r transition-all duration-300 ${sidebarCollapsed ? "w-[52px] overflow-visible" : "w-[200px]"}`}
-              style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-section)" }}
-            >
-              <div className={`flex flex-col flex-1 py-2 ${sidebarCollapsed ? "overflow-visible" : "overflow-y-auto"}`}>
-                {NAV.map((item, i) => {
-                  const Icon = item.icon;
-                  const isActive = active === item.id;
-                  const showSection = item.section && (i === 0 || NAV[i - 1].section !== item.section);
-
-                  const baseTone = item.externalTo
-                    ? "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
-                    : isActive
-                      ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
-                      : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
-
-                  if (sidebarCollapsed) {
-                    // Modo p\u00edlula: todas as p\u00edlulas usam o mesmo tom \u00e2mbar
-                    const collapsedTone = isActive
-                      ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25 hover:bg-amber-500/[0.18]"
-                      : "text-slate-500 border border-transparent hover:bg-amber-500/[0.12] hover:text-amber-300 hover:border-amber-500/25";
-                    return (
-                      <div key={item.id} className="relative px-1.5 py-0.5">
-                        <button
-                          onClick={() => {
-                            if (item.externalTo) { navigate(item.externalTo); return; }
-                            setActive(item.id as ScreenId);
-                          }}
-                          title={item.label}
-                          className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${collapsedTone}`}
-                        >
-                          <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 group-hover:text-amber-400 ${isActive ? "text-amber-400" : "text-slate-500"}`} />
-                          <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
-                            {item.label}
-                          </span>
-                          {item.badge && !item.externalTo && (
-                            <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 ${
-                              (item as any).badgeColor === "amber"
-                                ? "bg-amber-400/15 text-amber-300"
-                                : "bg-rose-400/15 text-rose-300"
-                            }`}>{item.badge}</span>
-                          )}
-                          {item.externalTo && (
-                            <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-amber-300/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100" />
-                          )}
-                        </button>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div key={item.id}>
-                      {showSection && (
-                        <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
-                      )}
-                      <button
-                        onClick={() => {
-                          if (item.externalTo) { navigate(item.externalTo); return; }
-                          setActive(item.id as ScreenId);
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone}`}
-                        style={{ width: "calc(100% - 8px)" }}
-                      >
-                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-amber-400" : ""}`} />
-                        <span className="flex-1 text-left truncate">{item.label}</span>
-                        {item.externalTo && <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />}
-                        {item.badge && !item.externalTo && (
-                          <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                            (item as any).badgeColor === "amber"
-                              ? "bg-amber-400/15 text-amber-300"
-                              : "bg-rose-400/15 text-rose-300"
-                          }`}>{item.badge}</span>
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </aside>
-
-            {/* MAIN CONTENT */}
             <main className="flex-1 overflow-y-auto p-4">
               {getScreen(active)}
             </main>

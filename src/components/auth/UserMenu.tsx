@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { LogOut, Shield, User, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -14,6 +14,11 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Em todas as telas internas o acesso ao usuário/admin/logout vive na AppSidebar.
+  // O UserMenu só aparece no Portal /home.
+  const showOnRoute = location.pathname === "/home";
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -23,7 +28,7 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  if (!user) return null;
+  if (!user || !showOnRoute) return null;
 
   const initials = (user.email ?? "U")[0].toUpperCase();
 

@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AppLayout } from "@/components/shared/AppLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -46,25 +47,24 @@ const App = () => (
               <Route path="/"         element={<Navigate to="/login" replace />} />
               <Route path="/login"    element={<Login />} />
               <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute requiredPage="dashboard"><Index /></ProtectedRoute>} />
-              <Route path="/contas-a-receber" element={<ProtectedRoute requiredPage="dashboard"><ContasAReceber /></ProtectedRoute>} />
-              <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="dashboard"><ContasAPagar /></ProtectedRoute>} />
-              <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><Indicadores /></ProtectedRoute>} />
-              <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><IndicadorDetalhe /></ProtectedRoute>} />
-              <Route path="/financiamento-frota" element={<ProtectedRoute><FinanciamentoFrota /></ProtectedRoute>} />
-              <Route path="/faturamento" element={<ProtectedRoute><Faturamento /></ProtectedRoute>} />
-              <Route path="/frota" element={<ProtectedRoute><Frota /></ProtectedRoute>} />
-              <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
-              <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><EmDesenvolvimento /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><PainelAdministrativo /></ProtectedRoute>} />
-              <Route path="/chamados" element={<ProtectedRoute><Chamados /></ProtectedRoute>} />
-              <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
-              <Route path="/compras"      element={<ProtectedRoute><Compras /></ProtectedRoute>} />
-              <Route path="/abastecimento" element={<ProtectedRoute><Abastecimento /></ProtectedRoute>} />
-              <Route path="/rh"           element={<ProtectedRoute><Rh /></ProtectedRoute>} />
-              <Route path="/operacional"  element={<ProtectedRoute><Operacional /></ProtectedRoute>} />
-              <Route path="/executivo"    element={<ProtectedRoute><Executivo /></ProtectedRoute>} />
-              <Route path="/financeiro"  element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute requiredPage="dashboard"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
+              <Route path="/contas-a-receber" element={<ProtectedRoute requiredPage="dashboard"><AppLayout><ContasAReceber /></AppLayout></ProtectedRoute>} />
+              <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="dashboard"><AppLayout><ContasAPagar /></AppLayout></ProtectedRoute>} />
+              <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><AppLayout><Indicadores /></AppLayout></ProtectedRoute>} />
+              <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><AppLayout><IndicadorDetalhe /></AppLayout></ProtectedRoute>} />
+              <Route path="/financiamento-frota" element={<ProtectedRoute><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
+              <Route path="/faturamento" element={<ProtectedRoute><AppLayout><Faturamento /></AppLayout></ProtectedRoute>} />
+              <Route path="/frota" element={<ProtectedRoute><AppLayout><Frota /></AppLayout></ProtectedRoute>} />
+              <Route path="/manutencao" element={<ProtectedRoute><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
+              <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
+              <Route path="/chamados" element={<ProtectedRoute><AppLayout><Chamados /></AppLayout></ProtectedRoute>} />
+              <Route path="/compras"      element={<ProtectedRoute><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
+              <Route path="/abastecimento" element={<ProtectedRoute><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
+              <Route path="/rh"           element={<ProtectedRoute><AppLayout><Rh /></AppLayout></ProtectedRoute>} />
+              <Route path="/operacional"  element={<ProtectedRoute><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
+              <Route path="/executivo"    element={<ProtectedRoute><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
+              <Route path="/financeiro"  element={<ProtectedRoute><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </FinancialDataProvider>
