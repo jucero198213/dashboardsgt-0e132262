@@ -14,6 +14,11 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Em todas as telas internas o acesso ao usuário/admin/logout vive na AppSidebar.
+  // O UserMenu só aparece no Portal /home.
+  const showOnRoute = location.pathname === "/home";
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
