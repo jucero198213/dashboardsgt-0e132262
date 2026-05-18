@@ -222,7 +222,7 @@ export default function Operacional() {
       const origCurta = orig.length > 18 ? orig.slice(0, 18) + "…" : orig;
       const destCurta = dest.length > 18 ? dest.slice(0, 18) + "…" : dest;
       return {
-        id: String(d.id ?? ""),
+        id: String(d.ID ?? ""),
         veiculo: String(d.veiculo ?? "—"),
         veiculo2: d.veiculo2 ? String(d.veiculo2) : null,
         veiculo3: d.veiculo3 ? String(d.veiculo3) : null,
