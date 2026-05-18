@@ -1627,39 +1627,40 @@ function ScreenBancos() {
       </AnimatedCard>
 
       {/* ── Cards por conta ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {contas.map((c, i) => {
           const p = PALETA[i % PALETA.length];
           const tipoClass = tipoLabel[c.tipo_conta] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
           const sigla = c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase();
           return (
             <AnimatedCard key={c.cod_conta} delay={i * 80}>
-              <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 ${p.border}`}>
+              <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-3.5 ${p.border} cursor-pointer`}
+                   onClick={() => setExtratoKey(c.cod_conta)}>
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-2.5 mb-3">
                   <BankLogo
                     nome={c.nome_banco}
                     codigo={c.cod_banco}
                     sigla={sigla}
-                    size={40}
+                    size={36}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-slate-200 truncate">
+                    <p className="text-[12px] font-semibold text-slate-200 truncate">
                       {c.nome_banco || c.nome_conta}
                     </p>
-                    <p className="text-[10px] text-slate-600">
-                      {c.agencia ? `Ag. ${c.agencia} · ` : ""}CC {c.num_conta}
+                    <p className="text-[10px] text-slate-600 truncate">
+                      {c.agencia ? `Ag. ${c.agencia} · ` : ""}{c.tipo_conta || "CC"} {c.num_conta}
                     </p>
                   </div>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${tipoClass}`}>{c.tipo_conta}</span>
+                  <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${tipoClass}`}>{c.tipo_conta || "CC"}</span>
                 </div>
                 {/* Saldo */}
                 <div className="mb-3">
-                  <p className="text-[10px] text-slate-600">Saldo disponível</p>
-                  <p className={`text-[22px] font-black leading-none tabular-nums ${p.val}`}>{fmtBRL(c.saldo_atual)}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-600">Saldo disponível</p>
+                  <p className={`text-[clamp(1.1rem,2vw,1.4rem)] font-black leading-none tabular-nums mt-0.5 ${p.val}`}>{fmtBRL(c.saldo_atual)}</p>
                 </div>
                 {/* Detalhes */}
-                <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-3">
+                <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-2.5">
                   {[
                     { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`, clr: "text-emerald-300" },
                     { label: "Saídas no mês",    value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
@@ -1717,28 +1718,43 @@ function ScreenBancos() {
             </span>
           </div>
 
-          {extratoRows.slice(0, 20).map((r, i) => {
+          {extratoRows.slice(0, 30).map((r, i) => {
             const isC  = r.ORIGEM === "LB_C";
             const val  = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+            // Descrição: prioriza HISTORICO (vem de BANHIS.DESCRI), senão ANALITICA/CENTRO_CUSTO, senão documento
+            const TIPDOC_LABEL: Record<string,string> = {
+              LB: "Lançamento Bancário", BOL: "Boleto", PIX: "PIX", TED: "TED",
+              DOC: "DOC", TRA: "Transferência", DEB: "Débito", CHQ: "Cheque",
+              DEP: "Depósito", TAR: "Tarifa", IOF: "IOF", JUR: "Juros",
+            };
+            const tipoDesc = r.TIPO_DOCUMENTO ? (TIPDOC_LABEL[r.TIPO_DOCUMENTO] ?? r.TIPO_DOCUMENTO) : null;
             const desc = r.HISTORICO
-              ?? (r.TIPO_DOCUMENTO && r.DOCUMENTO ? `${r.TIPO_DOCUMENTO} · ${r.DOCUMENTO}` : null)
-              ?? r.DOCUMENTO ?? "—";
+              ?? r.ANALITICA
+              ?? r.CENTRO_CUSTO
+              ?? (tipoDesc && r.DOCUMENTO ? `${tipoDesc} nº ${r.DOCUMENTO}` : null)
+              ?? (r.DOCUMENTO ? `Doc. ${r.DOCUMENTO}` : null)
+              ?? "Lançamento sem histórico";
             const dataExib = r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? r.DATA_COMPENSACAO;
             const meta = [
               dataExib ? fmtDate(dataExib.slice(0,10)) : null,
+              r.DOCUMENTO ? `Doc. ${r.DOCUMENTO}` : null,
               r.NUM_CHEQUE ? `Cheque ${r.NUM_CHEQUE}` : null,
               r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}`   : null,
+              r.CENTRO_CUSTO && r.CENTRO_CUSTO !== desc ? r.CENTRO_CUSTO : null,
             ].filter(Boolean).join(" · ") || "—";
             return (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
                 <div className={`h-2 w-2 rounded-full shrink-0 ${isC ? "bg-emerald-400" : "bg-rose-400"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-medium text-slate-300 truncate">{desc}</p>
-                  <p className="text-[10px] text-slate-600">{meta}</p>
+                  <p className="text-[10px] text-slate-600 truncate">{meta}</p>
                 </div>
-                <p className={`text-[13px] font-semibold tabular-nums shrink-0 ${isC ? "text-emerald-300" : "text-rose-300"}`}>
-                  {isC ? "+" : "-"}{fmtBRL(val)}
-                </p>
+                <div className="text-right shrink-0 ml-2">
+                  <p className={`text-[13px] font-semibold tabular-nums ${isC ? "text-emerald-300" : "text-rose-300"}`}>
+                    {isC ? "+" : "-"}{fmtBRL(val)}
+                  </p>
+                  {tipoDesc && <p className="text-[9px] text-slate-600 mt-0.5">{tipoDesc}</p>}
+                </div>
               </div>
             );
           })}
