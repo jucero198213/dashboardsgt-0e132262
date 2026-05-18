@@ -215,14 +215,14 @@ export default function Operacional() {
       const perc = d.percentual_completo ?? 0;
       const totalIt = d.total_itens ?? 0;
       const realIt = d.itens_real ?? 0;
-      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S" || d.em_manutencao === true;
+      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S";
       const semGps = !d.latitude && !d.longitude;
       const orig = d.descricao_origem ?? d.remetente ?? "—";
       const dest = d.descricao_destino ?? d.destinatario ?? "—";
       const origCurta = orig.length > 18 ? orig.slice(0, 18) + "…" : orig;
       const destCurta = dest.length > 18 ? dest.slice(0, 18) + "…" : dest;
       return {
-        id: String(d.id ?? ""),
+        id: String(d.ID ?? ""),
         veiculo: String(d.veiculo ?? "—"),
         veiculo2: d.veiculo2 ? String(d.veiculo2) : null,
         veiculo3: d.veiculo3 ? String(d.veiculo3) : null,
