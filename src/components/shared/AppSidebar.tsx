@@ -84,17 +84,20 @@ export function AppSidebar() {
 
           if (collapsed) {
             const tone = active
-              ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25 hover:bg-amber-500/[0.18]"
+              ? "bg-gradient-to-r from-amber-500/25 to-amber-500/10 text-amber-200 border border-amber-400/50 shadow-[0_0_18px_rgba(245,158,11,0.35)] hover:bg-amber-500/[0.22]"
               : "text-slate-500 border border-transparent hover:bg-amber-500/[0.12] hover:text-amber-300 hover:border-amber-500/25";
             return (
               <div key={item.id} className="relative px-1.5 py-0.5">
+                {active && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                )}
                 <button
                   onClick={() => handleClick(item)}
                   title={item.label}
                   className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${tone}`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 group-hover:text-amber-400 ${active ? "text-amber-400" : "text-slate-500"}`} />
-                  <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
+                  <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 group-hover:text-amber-400 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "text-slate-500"}`} />
+                  <span className={`whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75 ${active ? "font-semibold" : ""}`}>
                     {item.label}
                   </span>
                   {item.badge && item.financeScreen && (
@@ -110,25 +113,26 @@ export function AppSidebar() {
             );
           }
 
-          const baseTone = item.to
-            ? "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300"
-            : active
-              ? "bg-amber-500/[0.12] text-amber-300 border border-amber-500/25"
-              : "text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
+          const baseTone = active
+            ? "bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent text-amber-200 border border-amber-400/40 shadow-[0_0_20px_rgba(245,158,11,0.25)]"
+            : "text-slate-500 border border-transparent hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
 
           return (
-            <div key={item.id}>
+            <div key={item.id} className="relative">
               {showSection && (
                 <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
               )}
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+              )}
               <button
                 onClick={() => handleClick(item)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone}`}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone} ${active ? "font-semibold" : ""}`}
                 style={{ width: "calc(100% - 8px)" }}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-400" : ""}`} />
+                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
                 <span className="flex-1 text-left truncate">{item.label}</span>
-                {item.to && <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />}
+                {item.to && <ExternalLink className={`h-3 w-3 shrink-0 ${active ? "text-amber-300/80" : "text-slate-600"}`} />}
                 {item.badge && item.financeScreen && (
                   <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
                     item.badgeColor === "amber" ? "bg-amber-400/15 text-amber-300" : "bg-rose-400/15 text-rose-300"
@@ -139,6 +143,7 @@ export function AppSidebar() {
           );
         })}
       </div>
+
 
       {/* Footer: usuário (clique abre menu com tema/admin/sair) */}
       <UserFooter
