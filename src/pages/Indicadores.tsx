@@ -19,6 +19,7 @@ const INDICATOR_IDENTITY: Record<string, {
   colorRgb: string;    // rgb para gradientes/glows
   bgColor: string;     // fundo do ícone
   label: string;       // descrição curta
+  displayName?: string; // nome exibido no card (substitui ind.nome se definido)
 }> = {
   "PMT": {
     icon: Package,
@@ -61,6 +62,7 @@ const INDICATOR_IDENTITY: Record<string, {
     colorRgb: "148,163,184",
     bgColor: "rgba(148,163,184,0.10)",
     label: "Gestão",
+    displayName: "ADM",
   },
   "Manutenção": {
     icon: Wrench,
@@ -322,7 +324,7 @@ export default function Indicadores() {
                                     </div>
                                     <div className="min-w-0">
                                       <p className="text-[11px] font-bold uppercase tracking-[0.18em] dark:text-slate-300 text-slate-600 truncate">
-                                        {ind.nome}
+                                        {identity.displayName ?? ind.nome}
                                       </p>
                                       <p className="text-[10px] font-medium mt-0.5" style={{ color: `rgba(${identity.colorRgb},0.6)` }}>
                                         {identity.label}

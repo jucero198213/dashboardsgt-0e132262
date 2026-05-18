@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   PanelLeftClose, PanelLeftOpen, ExternalLink,
-  Sun, Moon, Shield, LogOut, User,
+  Sun, Moon, Shield, LogOut, Home,
 } from "lucide-react";
 import { APP_NAV, type AppNavItem } from "./appNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import sgtLogo from "@/assets/sgt-logo.png";
 
 const STORAGE_KEY = "sgt-sidebar-collapsed";
 
-/** Sidebar global fixa — replica visual idêntica à sidebar da tela /financeiro. */
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,11 +24,9 @@ export function AppSidebar() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
-    // Notifica o layout para ajustar o padding-left
     window.dispatchEvent(new CustomEvent("sgt-sidebar-toggle", { detail: { collapsed } }));
   }, [collapsed]);
 
-  // Detecta sub-tela ativa do módulo financeiro via ?s=
   const search = new URLSearchParams(location.search);
   const financeScreen = search.get("s") ?? "painel";
 
@@ -51,102 +49,139 @@ export function AppSidebar() {
     }
   }
 
+  const isHomeActive = location.pathname === "/home";
+
   return (
     <aside
       className={`hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col border-r transition-all duration-300 ${
-        collapsed ? "w-[52px] overflow-visible" : "w-[200px]"
+        collapsed ? "w-[56px]" : "w-[210px]"
       }`}
       style={{
         borderColor: "var(--sgt-border-subtle)",
         background: "var(--sgt-bg-section)",
-        boxShadow: "var(--sgt-section-shadow, 0 0 0 transparent)",
+        boxShadow: "4px 0 24px rgba(0,0,0,0.25)",
       }}
     >
-      {/* Toggle no topo */}
-      <div className="flex items-center justify-end px-2 py-2 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+      {/* ── HEADER: Logo + Toggle ── */}
+      <div
+        className={`flex items-center border-b shrink-0 ${collapsed ? "justify-center px-2 py-3" : "justify-between px-3 py-3"}`}
+        style={{ borderColor: "var(--sgt-border-subtle)" }}
+      >
+        {!collapsed && (
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src={sgtLogo} alt="SGT" className="h-7 w-auto shrink-0 object-contain" />
+            <div className="flex flex-col leading-none min-w-0">
+              <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-amber-400/60">Workspace</span>
+              <span className="text-[13px] font-black tracking-[-0.03em] dark:text-white text-slate-800">SGT Log</span>
+            </div>
+          </div>
+        )}
+        {collapsed && (
+          <img src={sgtLogo} alt="SGT" className="h-6 w-auto object-contain mb-0.5" />
+        )}
         <button
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Expandir menu" : "Recolher menu"}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--sgt-border-subtle)] bg-transparent text-slate-500 transition-all hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200"
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all
+            border-[var(--sgt-border-subtle)] bg-transparent text-slate-500
+            hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200
+            ${collapsed ? "mt-2" : ""}`}
         >
-          {collapsed
-            ? <PanelLeftOpen className="h-3.5 w-3.5" />
-            : <PanelLeftClose className="h-3.5 w-3.5" />}
+          {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
         </button>
       </div>
 
-      {/* NAV */}
-      <div className={`flex flex-col flex-1 py-2 ${collapsed ? "overflow-visible" : "overflow-y-auto"}`}>
+      {/* ── HOME BUTTON ── */}
+      <div className="px-2 pt-2.5 pb-1 shrink-0">
+        <button
+          onClick={() => navigate("/home")}
+          title="Início"
+          className={`w-full flex items-center gap-2.5 rounded-xl border transition-all duration-200 font-semibold text-[12px]
+            ${collapsed ? "justify-center px-0 py-2.5 h-10" : "px-3 py-2.5"}
+            ${isHomeActive
+              ? "bg-amber-500/20 border-amber-400/50 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.2)]"
+              : "bg-[var(--sgt-row-hover)] border-[var(--sgt-border-subtle)] text-slate-400 hover:bg-amber-500/10 hover:border-amber-400/30 hover:text-amber-300"
+            }`}
+        >
+          <Home className={`h-4 w-4 shrink-0 ${isHomeActive ? "text-amber-300" : ""}`} />
+          {!collapsed && <span className="flex-1 text-left">Início</span>}
+        </button>
+      </div>
+
+      {/* ── DIVIDER ── */}
+      <div className="mx-3 my-1 h-px shrink-0" style={{ background: "var(--sgt-border-subtle)" }} />
+
+      {/* ── NAV ── */}
+      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 scrollbar-none">
         {APP_NAV.map((item, i) => {
           const Icon = item.icon;
           const active = isItemActive(item);
           const showSection = item.section && (i === 0 || APP_NAV[i - 1].section !== item.section);
 
+          /* ── COLLAPSED ── */
           if (collapsed) {
-            const tone = active
-              ? "bg-gradient-to-r from-amber-500/25 to-amber-500/10 text-amber-200 border border-amber-400/50 shadow-[0_0_18px_rgba(245,158,11,0.35)] hover:bg-amber-500/[0.22]"
-              : "text-slate-500 border border-transparent hover:bg-amber-500/[0.12] hover:text-amber-300 hover:border-amber-500/25";
             return (
-              <div key={item.id} className="relative px-1.5 py-0.5">
+              <div key={item.id} className="relative px-1.5 py-[2px]">
+                {showSection && <div className="h-px mx-1 my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                 )}
                 <button
                   onClick={() => handleClick(item)}
                   title={item.label}
-                  className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] ${tone}`}
+                  className={`group relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
+                    ${active
+                      ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
+                      : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300"
+                    }`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 group-hover:text-amber-400 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "text-slate-500"}`} />
-                  <span className={`whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75 ${active ? "font-semibold" : ""}`}>
-                    {item.label}
-                  </span>
-                  {item.badge && item.financeScreen && (
-                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 ${
-                      item.badgeColor === "amber" ? "bg-amber-400/15 text-amber-300" : "bg-rose-400/15 text-rose-300"
-                    }`}>{item.badge}</span>
-                  )}
-                  {item.to && (
-                    <ExternalLink className="ml-auto h-3 w-3 shrink-0 text-amber-300/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100" />
-                  )}
+                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
                 </button>
               </div>
             );
           }
 
-          const baseTone = active
-            ? "bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent text-amber-200 border border-amber-400/40 shadow-[0_0_20px_rgba(245,158,11,0.25)]"
-            : "text-slate-500 border border-transparent hover:bg-[var(--sgt-row-hover)] hover:text-slate-300";
-
+          /* ── EXPANDED ── */
           return (
-            <div key={item.id} className="relative">
+            <div key={item.id}>
               {showSection && (
-                <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
-              )}
-              {active && (
-                <span className="pointer-events-none absolute left-1 top-1/2 z-10 -translate-y-1/2 h-6 w-[3px] rounded-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]" />
+                <div className="flex items-center gap-2 px-3 pt-4 pb-1.5">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</span>
+                  <div className="flex-1 h-px" style={{ background: "var(--sgt-border-subtle)" }} />
+                </div>
               )}
 
-              <button
-                onClick={() => handleClick(item)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone} ${active ? "font-semibold" : ""}`}
-                style={{ width: "calc(100% - 8px)" }}
-              >
-                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
-                <span className="flex-1 text-left truncate">{item.label}</span>
-                {item.to && <ExternalLink className={`h-3 w-3 shrink-0 ${active ? "text-amber-300/80" : "text-slate-600"}`} />}
-                {item.badge && item.financeScreen && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                    item.badgeColor === "amber" ? "bg-amber-400/15 text-amber-300" : "bg-rose-400/15 text-rose-300"
-                  }`}>{item.badge}</span>
+              <div className="relative mx-2 my-[2px]">
+                {active && (
+                  <span className="pointer-events-none absolute left-0 top-1/2 z-10 -translate-y-1/2 h-5 w-[3px] rounded-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]" />
                 )}
-              </button>
+                <button
+                  onClick={() => handleClick(item)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] rounded-xl border transition-all duration-150
+                    ${active
+                      ? "bg-amber-500/15 border-amber-400/35 text-amber-200 font-semibold shadow-[0_0_18px_rgba(245,158,11,0.18)]"
+                      : "border-transparent text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300 font-medium"
+                    }`}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
+                  <span className="flex-1 text-left truncate">{item.label}</span>
+                  {item.to && <ExternalLink className={`h-3 w-3 shrink-0 opacity-50 ${active ? "text-amber-300" : "text-slate-600"}`} />}
+                  {item.badge && item.financeScreen && (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                      item.badgeColor === "amber" ? "bg-amber-400/15 text-amber-300" : "bg-rose-400/15 text-rose-300"
+                    }`}>{item.badge}</span>
+                  )}
+                </button>
+              </div>
             </div>
           );
         })}
+
+        {/* Espaço no final da lista */}
+        <div className="h-2 shrink-0" />
       </div>
 
-
-      {/* Footer: usuário (clique abre menu com tema/admin/sair) */}
+      {/* ── FOOTER: Usuário ── */}
       <UserFooter
         collapsed={collapsed}
         email={user?.email ?? ""}
@@ -183,39 +218,43 @@ function UserFooter({
   }, []);
 
   const initials = (email || "U")[0].toUpperCase();
+  const shortEmail = email.length > 22 ? email.substring(0, 22) + "…" : email;
 
   return (
-    <div ref={ref} className="relative border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-      {/* Botão do usuário */}
+    <div ref={ref} className="relative border-t shrink-0" style={{ borderColor: "var(--sgt-border-subtle)" }}>
       <button
         onClick={() => setOpen(o => !o)}
         title={email || "Usuário"}
-        className={`group flex items-center gap-2 w-full transition-colors ${
-          collapsed ? "justify-center px-1.5 py-2" : "px-3 py-2.5"
-        } hover:bg-[var(--sgt-row-hover)]`}
+        className={`group flex items-center gap-2.5 w-full transition-all duration-150 hover:bg-[var(--sgt-row-hover)]
+          ${collapsed ? "justify-center px-2 py-3" : "px-3 py-3"}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-400/25 bg-amber-400/[0.10] text-[11px] font-bold text-amber-300">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 text-[12px] font-bold text-amber-300">
           {initials}
         </span>
         {!collapsed && (
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-[11px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{email}</p>
-            <p className="text-[9px] text-slate-500">{isAdmin ? "Administrador" : "Usuário"}</p>
+            <p className="text-[11px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{shortEmail}</p>
+            <p className="text-[9px] text-slate-500 mt-0.5">{isAdmin ? "Administrador" : "Usuário"}</p>
           </div>
         )}
       </button>
 
-      {/* Popup com as opções */}
       {open && (
         <div
-          className={`absolute z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.45)] ${
-            collapsed ? "left-[calc(100%+8px)] bottom-1" : "left-2 right-2 bottom-[calc(100%+6px)]"
-          }`}
+          className={`absolute z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.5)]
+            ${collapsed ? "left-[calc(100%+8px)] bottom-1" : "left-2 right-2 bottom-[calc(100%+6px)]"}`}
           style={{ background: "var(--sgt-menu-bg)", borderColor: "var(--sgt-border-medium)" }}
         >
+          {/* Email no topo do popup */}
+          {!collapsed && (
+            <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+              <p className="text-[10px] text-slate-500 truncate">{email}</p>
+            </div>
+          )}
+
           <button
             onClick={() => { setOpen(false); onToggleTheme(); }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
+            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
             style={{ color: "var(--sgt-text-secondary)" }}
           >
             {theme === "dark"
@@ -226,7 +265,7 @@ function UserFooter({
           {isAdmin && (
             <button
               onClick={() => { setOpen(false); onGoAdmin(); }}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
+              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
               style={{ color: "var(--sgt-text-secondary)" }}
             >
               <Shield className="h-3.5 w-3.5 text-red-400" />
@@ -234,9 +273,11 @@ function UserFooter({
             </button>
           )}
 
+          <div className="h-px mx-2" style={{ background: "var(--sgt-border-subtle)" }} />
+
           <button
             onClick={() => { setOpen(false); onSignOut(); }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)] hover:!text-rose-300"
+            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)] hover:!text-rose-300"
             style={{ color: "var(--sgt-text-secondary)" }}
           >
             <LogOut className="h-3.5 w-3.5" />
@@ -248,7 +289,6 @@ function UserFooter({
   );
 }
 
-/** Hook utilitário para o layout saber a largura atual da sidebar */
 export function useSidebarWidth() {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -264,5 +304,5 @@ export function useSidebarWidth() {
     return () => window.removeEventListener("sgt-sidebar-toggle", handler as EventListener);
   }, []);
 
-  return collapsed ? 52 : 200;
+  return collapsed ? 56 : 210;
 }
