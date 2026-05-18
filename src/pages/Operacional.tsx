@@ -215,7 +215,7 @@ export default function Operacional() {
       const perc = d.percentual_completo ?? 0;
       const totalIt = d.total_itens ?? 0;
       const realIt = d.itens_real ?? 0;
-      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S" || d.em_manutencao === true;
+      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S";
       const semGps = !d.latitude && !d.longitude;
       const orig = d.descricao_origem ?? d.remetente ?? "—";
       const dest = d.descricao_destino ?? d.destinatario ?? "—";
