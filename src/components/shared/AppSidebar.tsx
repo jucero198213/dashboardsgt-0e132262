@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   PanelLeftClose, PanelLeftOpen, ExternalLink,
@@ -140,88 +140,105 @@ export function AppSidebar() {
         })}
       </div>
 
-      {/* Footer: user info + theme + admin + logout */}
-      <div className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-        {!collapsed && user && (
-          <div className="px-3 py-2 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-400/25 bg-amber-400/[0.08] text-amber-300">
-                <User className="h-3 w-3" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{user.email}</p>
-                <p className="text-[9px] text-slate-500">{isAdmin ? "Administrador" : "Usuário"}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className={`flex ${collapsed ? "flex-col items-center" : "flex-col"} py-1`}>
-          <FooterAction
-            collapsed={collapsed}
-            onClick={toggleTheme}
-            icon={theme === "dark" ? Sun : Moon}
-            label={theme === "dark" ? "Tema claro" : "Tema escuro"}
-            iconClass={theme === "dark" ? "text-amber-400" : "text-cyan-400"}
-          />
-          {isAdmin && (
-            <FooterAction
-              collapsed={collapsed}
-              onClick={() => navigate("/admin")}
-              icon={Shield}
-              label="Área Administrativa"
-              iconClass="text-red-400"
-            />
-          )}
-          <FooterAction
-            collapsed={collapsed}
-            onClick={() => signOut()}
-            icon={LogOut}
-            label="Sair"
-            iconClass="text-slate-500"
-            hoverClass="hover:text-rose-300"
-          />
-        </div>
-      </div>
+      {/* Footer: usuário (clique abre menu com tema/admin/sair) */}
+      <UserFooter
+        collapsed={collapsed}
+        email={user?.email ?? ""}
+        isAdmin={isAdmin}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onGoAdmin={() => navigate("/admin")}
+        onSignOut={() => signOut()}
+      />
     </aside>
   );
 }
 
-function FooterAction({
-  collapsed, onClick, icon: Icon, label, iconClass = "", hoverClass = "",
+function UserFooter({
+  collapsed, email, isAdmin, theme, onToggleTheme, onGoAdmin, onSignOut,
 }: {
   collapsed: boolean;
-  onClick: () => void;
-  icon: React.ElementType;
-  label: string;
-  iconClass?: string;
-  hoverClass?: string;
+  email: string;
+  isAdmin: boolean;
+  theme: "dark" | "light";
+  onToggleTheme: () => void;
+  onGoAdmin: () => void;
+  onSignOut: () => void;
 }) {
-  if (collapsed) {
-    return (
-      <div className="relative px-1.5 py-0.5 w-full flex justify-center">
-        <button
-          onClick={onClick}
-          title={label}
-          className={`group relative flex items-center gap-2.5 h-9 w-9 hover:w-[176px] overflow-hidden rounded-full pl-2.5 pr-3 text-[12px] font-medium transition-all duration-300 ease-out hover:z-30 hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)] text-slate-500 border border-transparent hover:bg-amber-500/[0.12] hover:border-amber-500/25 ${hoverClass}`}
-        >
-          <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
-          <span className="whitespace-nowrap opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 delay-75">
-            {label}
-          </span>
-        </button>
-      </div>
-    );
-  }
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const initials = (email || "U")[0].toUpperCase();
+
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium rounded-lg mx-1 text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300 transition-colors ${hoverClass}`}
-      style={{ width: "calc(100% - 8px)" }}
-    >
-      <Icon className={`h-4 w-4 shrink-0 ${iconClass}`} />
-      <span className="flex-1 text-left truncate">{label}</span>
-    </button>
+    <div ref={ref} className="relative border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+      {/* Botão do usuário */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        title={email || "Usuário"}
+        className={`group flex items-center gap-2 w-full transition-colors ${
+          collapsed ? "justify-center px-1.5 py-2" : "px-3 py-2.5"
+        } hover:bg-[var(--sgt-row-hover)]`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-400/25 bg-amber-400/[0.10] text-[11px] font-bold text-amber-300">
+          {initials}
+        </span>
+        {!collapsed && (
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-[11px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{email}</p>
+            <p className="text-[9px] text-slate-500">{isAdmin ? "Administrador" : "Usuário"}</p>
+          </div>
+        )}
+      </button>
+
+      {/* Popup com as opções */}
+      {open && (
+        <div
+          className={`absolute z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.45)] ${
+            collapsed ? "left-[calc(100%+8px)] bottom-1" : "left-2 right-2 bottom-[calc(100%+6px)]"
+          }`}
+          style={{ background: "var(--sgt-menu-bg)", borderColor: "var(--sgt-border-medium)" }}
+        >
+          <button
+            onClick={() => { setOpen(false); onToggleTheme(); }}
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
+            style={{ color: "var(--sgt-text-secondary)" }}
+          >
+            {theme === "dark"
+              ? <><Sun className="h-3.5 w-3.5 text-amber-400" />Tema claro</>
+              : <><Moon className="h-3.5 w-3.5 text-cyan-400" />Tema escuro</>}
+          </button>
+
+          {isAdmin && (
+            <button
+              onClick={() => { setOpen(false); onGoAdmin(); }}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)]"
+              style={{ color: "var(--sgt-text-secondary)" }}
+            >
+              <Shield className="h-3.5 w-3.5 text-red-400" />
+              Área Administrativa
+            </button>
+          )}
+
+          <button
+            onClick={() => { setOpen(false); onSignOut(); }}
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-[12px] transition-colors hover:bg-[var(--sgt-input-hover)] hover:!text-rose-300"
+            style={{ color: "var(--sgt-text-secondary)" }}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sair
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
