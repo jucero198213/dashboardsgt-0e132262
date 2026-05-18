@@ -28,7 +28,7 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  if (!user) return null;
+  if (!user || !showOnRoute) return null;
 
   const initials = (user.email ?? "U")[0].toUpperCase();
 
