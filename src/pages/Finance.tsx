@@ -1488,21 +1488,25 @@ function ScreenBancos() {
   const [erroBancos, setErroBancos] = useState<string | null>(null);
 
   // Busca contas bancárias com saldo real
-  useEffect(() => {
+  const recarregarContas = () => {
     setLoadingContas(true);
     setErroBancos(null);
     import("@/lib/dwApi").then(({ fetchBankAccounts }) =>
       fetchBankAccounts({
-        filial:  dwFilter.filial  ?? undefined,
-        empresa: dwFilter.empresa ?? undefined,
+        filial:     dwFilter.filial     ?? undefined,
+        empresa:    dwFilter.empresa    ?? undefined,
+        dataInicio: dwFilter.dataInicio ?? undefined,
+        dataFim:    dwFilter.dataFim    ?? undefined,
       })
     ).then(res => {
-      setContas(res.data ?? []);
-      setExtratoKey(res.data?.[0]?.cod_conta ?? null);
+      const lista = res.data ?? [];
+      setContas(lista);
+      setExtratoKey(prev => lista.find(c => c.cod_conta === prev) ? prev : (lista[0]?.cod_conta ?? null));
     }).catch(err => {
       setErroBancos(err.message);
     }).finally(() => setLoadingContas(false));
-  }, [dwFilter.filial, dwFilter.empresa]);
+  };
+  useEffect(() => { recarregarContas(); }, [dwFilter.filial, dwFilter.empresa, dwFilter.dataInicio, dwFilter.dataFim]);
 
   // Lançamentos bancários do período (do /dw-financeiro já carregado)
   const lbRows = useMemo(() =>
@@ -1559,25 +1563,73 @@ function ScreenBancos() {
   if (loadingContas || isFetchingDw) return <SkeletonLoader label="Carregando saldos bancários..." />;
 
   if (erroBancos) return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
-      <Landmark className="h-10 w-10 opacity-30" />
-      <p className="text-[13px] text-rose-400">Erro ao carregar contas: {erroBancos}</p>
-      <p className="text-[11px]">Verifique se o endpoint /dw-bancos está ativo no servidor.</p>
+    <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-400/[0.08]">
+        <Landmark className="h-6 w-6 text-rose-400/60" />
+      </div>
+      <div className="text-center max-w-[360px]">
+        <p className="text-[13px] font-semibold text-rose-300">Erro ao carregar saldos bancários</p>
+        <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">{erroBancos}</p>
+        <p className="text-[10px] text-slate-700 mt-1">Verifique se o servidor local está ativo e o endpoint /dw-bancos foi criado.</p>
+      </div>
+      <button onClick={recarregarContas}
+        className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-500/10 px-4 py-2 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors">
+        <RefreshCcw className="h-3.5 w-3.5" /> Tentar novamente
+      </button>
     </div>
   );
 
   if (contas.length === 0) return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
-      <Landmark className="h-10 w-10 opacity-30" />
-      <p className="text-[13px]">Nenhuma conta bancária encontrada. Verifique o endpoint /dw-bancos.</p>
+    <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-400/10 bg-slate-400/[0.05]">
+        <Landmark className="h-6 w-6 text-slate-600" />
+      </div>
+      <div className="text-center max-w-[360px]">
+        <p className="text-[13px] font-semibold text-slate-400">Nenhuma conta encontrada</p>
+        <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">Nenhuma movimentação bancária no período selecionado, ou o endpoint /dw-bancos não está respondendo.</p>
+      </div>
+      <button onClick={recarregarContas}
+        className="flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-500/10 px-4 py-2 text-[11px] font-semibold text-amber-300 hover:bg-amber-500/20 transition-colors">
+        <RefreshCcw className="h-3.5 w-3.5" /> Recarregar
+      </button>
     </div>
   );
 
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Saldo Consolidado ── */}
-      <AnimatedCard>
+      {/* ── KPIs Consolidados ── */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          {
+            label: "Saldo Consolidado",
+            value: fmtBRL(saldoTotal),
+            sub: `${contas.length} conta${contas.length !== 1 ? "s" : ""} ativas`,
+            icon: Landmark, stripe: "from-cyan-400/60 to-cyan-700/20",
+            iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]", iconTxt: "text-cyan-300",
+            glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
+          },
+          {
+            label: "Entradas no Período",
+            value: fmtK(contas.reduce((s, c) => s + c.entradas_mes, 0)),
+            sub: `Créditos no período`,
+            icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20",
+            iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300",
+            glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
+          },
+          {
+            label: "Saídas no Período",
+            value: fmtK(contas.reduce((s, c) => s + c.saidas_mes, 0)),
+            sub: `Débitos no período`,
+            icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",
+            iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300",
+            glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
+          },
+        ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+      </div>
+
+      {/* ── Saldo Consolidado + Evolução ── */}
+      <AnimatedCard delay={180}>
         <SectionCard>
           <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--sgt-divider)]">
             <div>
@@ -1585,7 +1637,7 @@ function ScreenBancos() {
               <p className="text-[28px] font-black text-cyan-300 leading-none mt-1 tabular-nums">{fmtBRL(saldoTotal)}</p>
               <p className="text-[11px] text-slate-600 mt-1">{contas.length} conta{contas.length !== 1 ? "s" : ""} ativas · atualizado agora</p>
             </div>
-            <div style={{ width: 200, height: 64 }}>
+            <div style={{ width: 220, height: 64 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={evolucao} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                   <defs>
@@ -1600,26 +1652,26 @@ function ScreenBancos() {
               </ResponsiveContainer>
             </div>
           </div>
-          {/* Mini-totais por conta */}
-          <div className="grid divide-x divide-[var(--sgt-divider)]"
-            style={{ gridTemplateColumns: `repeat(${Math.min(contas.length, 4)}, 1fr)` }}>
-            {contas.slice(0, 4).map((c, i) => {
+          {/* Mini-totais por conta — scroll horizontal se > 4 */}
+          <div className="flex divide-x divide-[var(--sgt-divider)] overflow-x-auto">
+            {contas.map((c, i) => {
               const p = PALETA[i % PALETA.length];
               return (
-                <div key={c.cod_conta} className="px-4 py-2.5">
+                <button key={c.cod_conta} onClick={() => setExtratoKey(c.cod_conta)}
+                  className={`flex-shrink-0 min-w-[140px] px-4 py-2.5 text-left transition-colors ${extratoKey === c.cod_conta ? "bg-[var(--sgt-row-hover)]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
                   <div className="flex items-center gap-2 mb-1.5">
                     <BankLogo
                       nome={c.nome_banco}
                       codigo={c.cod_banco}
                       sigla={(c.nome_banco ?? c.nome_conta).slice(0,2).toUpperCase()}
-                      size={20}
+                      size={18}
                       rounded="rounded-md"
                     />
-                    <span className="text-[10px] text-slate-600 truncate">{c.nome_banco || c.nome_conta}</span>
+                    <span className="text-[10px] text-slate-500 truncate max-w-[100px]">{c.nome_banco || c.nome_conta}</span>
                   </div>
                   <p className={`text-[14px] font-black leading-none tabular-nums ${p.val}`}>{fmtK(c.saldo_atual)}</p>
-                  <p className="text-[9px] text-slate-600 mt-1">{c.tipo_conta}</p>
-                </div>
+                  <p className="text-[9px] text-slate-600 mt-1">{c.tipo_conta || "CC"}</p>
+                </button>
               );
             })}
           </div>
@@ -1710,12 +1762,25 @@ function ScreenBancos() {
               </button>
             </div>
           </div>
-          <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">
-              Últimos lançamentos ·{" "}
-              {contaAtiva?.nome_banco ? `${contaAtiva.nome_banco} · ` : ""}
-              {contaAtiva?.nome_conta ?? "—"}
+              {contaAtiva ? (
+                <>
+                  <span className="text-slate-400 font-medium">{contaAtiva.nome_banco || contaAtiva.nome_conta}</span>
+                  {contaAtiva.agencia ? <span className="text-slate-600"> · Ag. {contaAtiva.agencia}</span> : null}
+                  {contaAtiva.num_conta ? <span className="text-slate-600"> · Cta. {contaAtiva.num_conta}</span> : null}
+                  <span className="text-slate-600"> · {extratoRows.length} lançamento{extratoRows.length !== 1 ? "s" : ""}</span>
+                </>
+              ) : "Nenhuma conta selecionada"}
             </span>
+            {contaAtiva && (
+              <div className="flex items-center gap-4 text-[11px]">
+                <span className="text-emerald-300 font-semibold">+{fmtK(contaAtiva.entradas_mes)}</span>
+                <span className="text-slate-600">entradas</span>
+                <span className="text-rose-300 font-semibold">-{fmtK(contaAtiva.saidas_mes)}</span>
+                <span className="text-slate-600">saídas</span>
+              </div>
+            )}
           </div>
 
           {extratoRows.slice(0, 30).map((r, i) => {
