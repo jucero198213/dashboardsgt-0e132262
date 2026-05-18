@@ -7,7 +7,6 @@ import {
 import { APP_NAV, type AppNavItem } from "./appNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import sgtLogo from "@/assets/sgt-logo.png";
 
 const STORAGE_KEY = "sgt-sidebar-collapsed";
 
@@ -62,30 +61,17 @@ export function AppSidebar() {
         boxShadow: "4px 0 24px rgba(0,0,0,0.25)",
       }}
     >
-      {/* ── HEADER: Logo + Toggle ── */}
+      {/* ── HEADER: Toggle ── */}
       <div
-        className={`flex items-center border-b shrink-0 ${collapsed ? "justify-center px-2 py-3" : "justify-between px-3 py-3"}`}
+        className="flex items-center justify-end border-b shrink-0 px-2 py-2.5"
         style={{ borderColor: "var(--sgt-border-subtle)" }}
       >
-        {!collapsed && (
-          <div className="flex items-center gap-2.5 min-w-0">
-            <img src={sgtLogo} alt="SGT" className="h-7 w-auto shrink-0 object-contain" />
-            <div className="flex flex-col leading-none min-w-0">
-              <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-amber-400/60">Workspace</span>
-              <span className="text-[13px] font-black tracking-[-0.03em] dark:text-white text-slate-800">SGT Log</span>
-            </div>
-          </div>
-        )}
-        {collapsed && (
-          <img src={sgtLogo} alt="SGT" className="h-6 w-auto object-contain mb-0.5" />
-        )}
         <button
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Expandir menu" : "Recolher menu"}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-all
             border-[var(--sgt-border-subtle)] bg-transparent text-slate-500
-            hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200
-            ${collapsed ? "mt-2" : ""}`}
+            hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-row-hover)] hover:text-slate-200"
         >
           {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
         </button>
