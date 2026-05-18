@@ -428,7 +428,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  B.CODCTA   AS COD_CONTA,
+  B.DATDOC   AS DATA_LANCAMENTO,
+  H.DESCRI   AS HISTORICO,
+  NULL       AS NOME_CONTA,
+  NULL       AS COD_BANCO,
+  NULL       AS NOME_BANCO,
+  NULL       AS NUM_CHEQUE,
+  NULL       AS NUM_AVISO,
+  B.DATCOM   AS DATA_COMPENSACAO
 FROM BANRAZ B WITH (NOLOCK)
   LEFT JOIN BANHIS  H   WITH (NOLOCK) ON H.CODHISBC=B.CODHISBC
   LEFT JOIN BANRNF  N   WITH (NOLOCK) ON N.ID_RAZ=B.ID_RAZ
@@ -478,7 +487,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  B.CODCTA   AS COD_CONTA,
+  B.DATDOC   AS DATA_LANCAMENTO,
+  H.DESCRI   AS HISTORICO,
+  NULL       AS NOME_CONTA,
+  NULL       AS COD_BANCO,
+  NULL       AS NOME_BANCO,
+  NULL       AS NUM_CHEQUE,
+  NULL       AS NUM_AVISO,
+  B.DATCOM   AS DATA_COMPENSACAO
 FROM BANRAZ B WITH (NOLOCK)
   LEFT JOIN BANHIS  H   WITH (NOLOCK) ON H.CODHISBC=B.CODHISBC
   LEFT JOIN BANRNF  N   WITH (NOLOCK) ON N.ID_RAZ=B.ID_RAZ
@@ -1064,6 +1082,116 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
 //    banco    : string | null  → filtra por T.DESCRI (LIKE)
 //    situacao : string | null  → ex: "A" (aberto) | "L" (liquidado)
 //
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENDPOINT: /dw-bancos
+// Retorna saldos e movimentação por conta bancária no período.
+// Tenta enriquecer com BANCAD (cadastro); se não existir, usa apenas BANRAZ.
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-bancos", async (req, res) => {
+  const { filial, empresa, dataInicio, dataFim } = req.body ?? {};
+
+  try {
+    const p = await getPool();
+
+    const hoje = new Date();
+    const di = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const df = dataFim    ? new Date(dataFim)    : hoje;
+
+    // ── Movimentação agregada por conta ───────────────────────────────────
+    const movReq = p.request();
+    movReq.input("dataInicio", sql.Date, di);
+    movReq.input("dataFim",    sql.Date, df);
+    movReq.input("filial",     sql.VarChar(20), filial  || null);
+    movReq.input("empresa",    sql.VarChar(20), empresa || null);
+
+    const movResult = await movReq.query(`
+      SELECT
+        B.CODCTA      AS cod_conta,
+        B.CODFIL      AS filial,
+        CAST(SUM(CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS entradas_mes,
+        CAST(SUM(CASE WHEN B.DEBCRE='D' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS saidas_mes,
+        CAST(SUM(CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE -B.VLRDOC END) AS DECIMAL(18,2)) AS saldo_periodo
+      FROM BANRAZ B WITH (NOLOCK)
+        LEFT JOIN RODFIL F WITH (NOLOCK) ON B.CODFIL = F.CODFIL
+      WHERE B.SITUAC = 'O' AND B.VLRDOC > 0 AND B.ORIGEM = 'LB'
+        AND B.CODCTA NOT IN ('BX-FORNEC')
+        AND B.TIPDOC NOT IN ('ADF','ADL','TRA','ADC')
+        AND B.DATDOC BETWEEN @dataInicio AND @dataFim
+        AND (@filial  IS NULL OR B.CODFIL = @filial)
+        AND (@empresa IS NULL OR F.CODEMP = @empresa)
+      GROUP BY B.CODCTA, B.CODFIL
+      ORDER BY entradas_mes DESC
+    `);
+
+    const movMap = new Map();
+    for (const r of movResult.recordset) movMap.set(r.filial + ":" + r.cod_conta, r);
+
+    // ── Tenta BANCAD para dados cadastrais (agência, nome, banco) ─────────
+    let bancadRows = [];
+    try {
+      const bancadReq = p.request();
+      bancadReq.input("filial",  sql.VarChar(20), filial  || null);
+      bancadReq.input("empresa", sql.VarChar(20), empresa || null);
+      const bancadResult = await bancadReq.query(`
+        SELECT
+          CA.CODCTA  AS cod_conta,
+          CA.DESCRI  AS nome_conta,
+          ISNULL(CA.AGENCIA,'') AS agencia,
+          ISNULL(CA.NUMCTA,'')  AS num_conta,
+          ISNULL(CA.TIPOCTA,'CC') AS tipo_conta,
+          ISNULL(CA.CODBCO,'')  AS cod_banco,
+          ISNULL(BC.DESCRI, ISNULL(CA.CODBCO,'')) AS nome_banco,
+          CA.CODFIL  AS filial,
+          ISNULL(F.CODEMP,'')    AS empresa,
+          ISNULL(F.NOMEAB, CA.CODFIL) AS nome_filial
+        FROM BANCAD CA WITH (NOLOCK)
+          LEFT JOIN RODBCO BC WITH (NOLOCK) ON BC.CODBCO = CA.CODBCO
+          LEFT JOIN RODFIL F  WITH (NOLOCK) ON F.CODFIL  = CA.CODFIL
+        WHERE ISNULL(CA.ATIVO,'A') <> 'I'
+          AND (@filial  IS NULL OR CA.CODFIL = @filial)
+          AND (@empresa IS NULL OR F.CODEMP  = @empresa)
+      `);
+      bancadRows = bancadResult.recordset;
+    } catch (_) { /* BANCAD não existe — sem dados cadastrais */ }
+
+    let contas = [];
+
+    if (bancadRows.length > 0) {
+      for (const ca of bancadRows) {
+        const mov = movMap.get(ca.filial + ":" + ca.cod_conta) ?? { entradas_mes: 0, saidas_mes: 0, saldo_periodo: 0 };
+        contas.push({
+          cod_conta: ca.cod_conta, nome_conta: ca.nome_conta,
+          agencia: ca.agencia, num_conta: ca.num_conta,
+          cod_banco: ca.cod_banco, nome_banco: ca.nome_banco,
+          tipo_conta: ca.tipo_conta, filial: ca.filial,
+          empresa: ca.empresa, nome_filial: ca.nome_filial,
+          saldo_atual: mov.saldo_periodo,
+          entradas_mes: mov.entradas_mes, saidas_mes: mov.saidas_mes,
+        });
+      }
+    } else {
+      for (const mov of movResult.recordset) {
+        contas.push({
+          cod_conta: mov.cod_conta, nome_conta: mov.cod_conta,
+          agencia: '', num_conta: mov.cod_conta,
+          cod_banco: '', nome_banco: '',
+          tipo_conta: 'CC', filial: mov.filial,
+          empresa: empresa ?? '', nome_filial: mov.filial,
+          saldo_atual: mov.saldo_periodo,
+          entradas_mes: mov.entradas_mes, saidas_mes: mov.saidas_mes,
+        });
+      }
+    }
+
+    contas = contas.filter(c => c.entradas_mes !== 0 || c.saidas_mes !== 0 || c.saldo_atual !== 0);
+    return res.json({ data: contas });
+  } catch (err) {
+    console.error("[/dw-bancos]", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 //  Estrutura de joins (SQL corrigido):
 //    PAGDOCI I  → parcelas (tem DATVEN = data de vencimento)
 //    PAGDOC  D  → cabeçalho do documento (tem NUMCTF, VLRDOC, SITUAC, etc.)
