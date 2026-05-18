@@ -123,8 +123,9 @@ export function AppSidebar() {
                 <p className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</p>
               )}
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                <span className="pointer-events-none absolute left-1 top-1/2 z-10 -translate-y-1/2 h-6 w-[3px] rounded-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]" />
               )}
+
               <button
                 onClick={() => handleClick(item)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium transition-all duration-150 rounded-lg mx-1 ${baseTone} ${active ? "font-semibold" : ""}`}
