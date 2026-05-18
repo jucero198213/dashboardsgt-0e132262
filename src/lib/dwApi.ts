@@ -629,12 +629,14 @@ export async function fetchFinanciamentoFrota(params?: {
 // ─── Exports públicos: BANCOS ───────────────────────────────────────────────
 
 export async function fetchBankAccounts(params?: {
-  filial?:  string | null;
-  empresa?: string | null;
+  filial?:      string | null;
+  empresa?:     string | null;
+  dataInicio?:  string | null;
+  dataFim?:     string | null;
 }): Promise<BankAccountsResponse> {
   const key = `bancos:${JSON.stringify(params ?? {})}`;
   return cached(key, () =>
     callEdge<BankAccountsResponse>(ENDPOINT_BANCOS, params ?? {}),
-    60 * 5, // 5 min cache — saldo muda raramente
+    60 * 2, // 2 min cache
   );
 }
