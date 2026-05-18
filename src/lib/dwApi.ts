@@ -83,19 +83,20 @@ export interface DwFiltersResponse {
 
 // ── Conta bancária (/dw-bancos) ─────────────────────────────────────────────
 export interface BankAccount {
-  cod_conta:    string;
-  nome_conta:   string;
-  agencia:      string;
-  num_conta:    string;
-  cod_banco:    string;
-  nome_banco:   string;
-  tipo_conta:   string;
-  filial:       string;
-  empresa:      string;
-  nome_filial:  string;
-  saldo_atual:  number;
-  entradas_mes: number;
-  saidas_mes:   number;
+  cod_conta:      string;
+  nome_conta:     string;
+  agencia:        string;
+  num_conta:      string;
+  cod_banco:      string;
+  nome_banco:     string;
+  tipo_conta:     string;
+  filial:         string;
+  empresa:        string;
+  nome_filial:    string;
+  saldo_anterior: number;   // acumulado antes do período
+  saldo_atual:    number;   // saldo_anterior + créditos − débitos do período
+  entradas_mes:   number;
+  saidas_mes:     number;
 }
 
 export interface BankAccountsResponse {

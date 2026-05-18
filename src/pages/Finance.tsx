@@ -1714,7 +1714,8 @@ function ScreenBancos() {
                 {/* Detalhes */}
                 <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-2.5">
                   {[
-                    { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`, clr: "text-emerald-300" },
+                    { label: "Saldo anterior",   value: fmtK(c.saldo_anterior ?? 0),                                                       clr: "text-slate-400" },
+                    { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`,                                                         clr: "text-emerald-300" },
                     { label: "Saídas no mês",    value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
                     { label: "Lançamentos",      value: String(lbRows.filter(r => r.COD_CONTA ? r.COD_CONTA === c.cod_conta : r.FILIAL === c.filial).length), clr: "text-slate-300" },
                   ].map(row => (
