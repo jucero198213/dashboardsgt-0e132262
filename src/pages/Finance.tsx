@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import type { ContaPagar, ContaReceber } from "@/data/mockData";
 import {
