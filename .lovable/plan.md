@@ -1,44 +1,88 @@
-# Sistema de Chamados — Usuários + Admins
+# Padronização global: sidebar do /financeiro em todas as telas internas
 
 ## Objetivo
-Hoje a tela `/admin/chamados` é exclusiva para admins. Vamos transformar em um fluxo de duas pontas:
-- **Usuário comum**: abre chamados, acompanha status, vê histórico próprio e troca mensagens (opcional).
-- **Admin**: continua vendo todos os chamados, atribui responsável, muda status (aberto, em andamento, pendente, concluído, cancelado) e responde.
+Aplicar exatamente a mesma sidebar da tela `/financeiro` em todas as telas internas (exceto `/home` e `/login`), mantendo um padrão visual único, e remover o `UserMenu` (avatar) e o `HomeButton` do canto superior direito de todas elas. Logout, troca de tema e acesso administrativo passam a viver dentro da própria sidebar.
 
-## Alterações no banco
-1. Adicionar coluna `aberto_por uuid` em `tickets` (id do usuário que abriu). Backfill com `created_by`.
-2. Adicionar status `pendente` à lista de status válidos (já é texto, basta atualizar app).
-3. Atualizar **RLS de `tickets`**:
-   - SELECT: admin vê tudo; usuário vê apenas onde `aberto_por = auth.uid()`.
-   - INSERT: qualquer usuário autenticado pode inserir, desde que `aberto_por = auth.uid()` e `status = 'aberto'`.
-   - UPDATE: apenas admin (usuário não edita após abrir; pode cancelar o próprio — opcional, ver pergunta).
-   - DELETE: apenas admin.
-4. Nova tabela opcional `ticket_messages` (id, ticket_id, autor_id, mensagem, created_at) para conversa entre usuário e admin. RLS: ambos os lados envolvidos no chamado podem ler/escrever.
+## Arquitetura proposta
 
-## Alterações no frontend
+### 1. Novo componente `src/components/shared/AppShell.tsx`
+Layout-wrapper único que substitui o boilerplate repetido em cada página:
 
-### Nova rota de usuário: `/chamados`
-- Acessível a qualquer usuário autenticado (sem `requiredPage`).
-- Lista os chamados do usuário com badge de status e prioridade.
-- Botão "Abrir novo chamado" → modal com título, descrição, prioridade.
-- Clicar em um chamado abre painel/modal somente-leitura com status atual, responsável, observações do admin e (se habilitado) thread de mensagens.
+- Container externo `min-h-[100dvh]` + `BackgroundEffects`
+- `<section>` arredondada (mesmo estilo do Finance)
+- Header desktop e header mobile (logo SGT + título da workspace + badge "Tempo Real")
+- Slot opcional para filtros customizados (`headerSlot`)
+- Sidebar idêntica à do Finance (colapsável, modo pílula com hover-expand, ámbar nos ativos)
+- `<main>` com o `children` da página
+- Sem `UserMenu` e sem `HomeButton` no header
 
-### Item de menu
-- Adicionar "Chamados" no menu/portal `/home` para todos os usuários.
-- Admin continua com "Agenda de Chamados" no Painel Administrativo.
+Props: `title`, `headerSlot?`, `children`.
 
-### Tela admin (`/admin/chamados`)
-- Mostrar coluna "Aberto por" (nome/email) na lista e no modal.
-- Adicionar status **Pendente** ao seletor.
-- (Se mensagens habilitadas) painel de respostas no `TicketModal`.
+### 2. Novo componente `src/components/shared/AppSidebar.tsx`
+Extraído do bloco `<aside>` do `Finance.tsx`:
 
-### `ticketsApi.ts`
-- Atualizar tipos: novo status `pendente`, novo campo `aberto_por`.
-- Funções novas: `fetchMyTickets()`, `createUserTicket(payload)` que força `aberto_por = user.id` e `status = 'aberto'`.
+- Lista `NAV` movida para `src/components/shared/appNav.ts` (única fonte de verdade)
+- Detecção de "ativo" via `useLocation().pathname` (compara com `externalTo`)
+- Na rota `/financeiro`, mantém comportamento interno (sub-screens via prop `activeInternal` + `onSelectInternal`)
+- Itens extras no rodapé da sidebar: **Tema** (sun/moon), **Área Administrativa** (só admin), **Sair** — substituem o UserMenu
+- Estado `collapsed` persistido em `localStorage` (`sgt-sidebar-collapsed`) para manter preferência entre telas
 
-## Perguntas em aberto
-- Usuário pode **cancelar** o próprio chamado antes de ser tratado? (sugestão: sim)
-- Quer **thread de mensagens** entre usuário e admin agora, ou só status + observações por enquanto?
-- Notificação ao admin quando um chamado é aberto (toast no `/home`, badge no menu)?
+### 3. Refator do `Finance.tsx`
+- Remove duplicação: passa a usar `<AppShell>` + `<AppSidebar activeInternal={active} onSelectInternal={setActive} />`
+- Mantém os filtros (data/empresa/filial/update) via `headerSlot`
+- Comportamento 100% preservado
 
-Confirme essas três decisões e eu implemento.
+### 4. Aplicação nas demais páginas
+Rotas afetadas (todas dentro de `<ProtectedRoute>`):
+
+```text
+/dashboard            → Index.tsx
+/indicadores          → Indicadores.tsx
+/indicadores/:id      → IndicadorDetalhe.tsx
+/contas-a-receber     → ContasAReceber.tsx
+/contas-a-pagar       → ContasAPagar.tsx
+/financiamento-frota  → FinanciamentoFrota.tsx
+/faturamento          → Faturamento.tsx
+/frota                → Frota.tsx
+/manutencao           → Manutencao.tsx
+/compras              → Compras.tsx
+/abastecimento        → Abastecimento.tsx
+/rh                   → Rh.tsx
+/operacional          → Operacional.tsx
+/executivo            → Executivo.tsx
+/financeiro           → Finance.tsx (já tratado acima)
+/chamados             → Chamados.tsx
+/admin                → admin/PainelAdministrativo.tsx
+/em-desenvolvimento/* → EmDesenvolvimento.tsx
+```
+
+Em cada uma:
+- Remover `<HomeButton>` e `<UserMenu>` dos headers existentes
+- Trocar o wrapper externo (div + BackgroundEffects + section…) por `<AppShell title="…" headerSlot={…}>`
+- Manter o conteúdo interno (KPIs, tabelas, gráficos, filtros) intacto — só muda a casca
+
+> Não toco em `/home` nem `/login` (você pediu para excluir).
+
+## O que NÃO muda
+- Lógica de dados, contextos, filtros, gráficos, permissões
+- Tema claro/escuro, cores semânticas, tokens
+- Comportamento mobile (MobileNav segue existindo para navegação rápida em telas pequenas)
+
+## Detalhes técnicos
+- Active state da sidebar: `pathname.startsWith(item.externalTo)` para suportar rotas dinâmicas (`/indicadores/:id`)
+- Para evitar regressões visuais, manterei os mesmos tokens CSS (`--sgt-bg-section`, `--sgt-border-subtle`, etc.)
+- O botão de logout dentro da sidebar usa `signOut()` do `AuthContext`; tema usa `toggleTheme()` do `ThemeContext`; link admin condicionado a `isAdmin`
+- Toggle collapsed continua disponível no header desktop (botão `PanelLeftClose/Open`)
+
+## Riscos / pontos de atenção
+1. Cada página tem header com filtros bem diferentes → o `headerSlot` cobre isso, mas vou validar página por página
+2. `Index.tsx` (dashboard) e `Indicadores.tsx` têm presentation mode / hotkey → preservar
+3. Telas com upload Excel (ContasAPagar/Receber) têm fluxos próprios → só altero o chrome externo
+4. Build pode acusar imports não usados (`HomeButton`, `UserMenu`) — removo junto
+
+## Entrega
+Após sua aprovação executo em lote:
+1. Criar `appNav.ts`, `AppSidebar.tsx`, `AppShell.tsx`
+2. Refatorar `Finance.tsx`
+3. Aplicar `AppShell` em todas as páginas listadas em paralelo
+4. Validar build
