@@ -381,35 +381,6 @@ export interface ComprasResponse {
   data: ComprasRow[];
 }
 
-// ─── Tipos: ABASTECIMENTO ─────────────────────────────────────────────────────
-
-export interface AbastecimentoRow {
-  codaba: string | number | null;
-  motorista: string | null;
-  posto: string | null;
-  estado: string | null;
-  vlrtot: number | null;
-  quanti: number | null;
-  datref: string | null;
-  numdoc: string | number | null;
-  veiculo: string | null;
-  marca: string | null;
-  modelo: string | null;
-  linha: string | number | null;
-  media: number | null;
-  ultkmt: number | null;
-  atukmt: number | null;
-  medfab: number | null;
-  odohor: string | null;
-  frota: string | null;
-  codigo_combustivel: string | number | null;
-  tipo_combustivel: string | null;
-  nota_fiscal: string | number | null;
-}
-
-export interface AbastecimentoResponse {
-  data: AbastecimentoRow[];
-}
 
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
