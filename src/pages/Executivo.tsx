@@ -270,12 +270,13 @@ export default function Executivo() {
       },
       {
         queryKey: ["exec-frota"],
-        queryFn: fetchFrota,
+        queryFn: () => fetchFrota(),
         staleTime: 10 * 60_000,
       },
       {
         queryKey: ["exec-rh"],
-        queryFn: fetchRh,
+        queryFn: () => fetchRh(),
+
         staleTime: 10 * 60_000,
       },
       {
