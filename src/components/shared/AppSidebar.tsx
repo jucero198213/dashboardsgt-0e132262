@@ -142,6 +142,8 @@ export function AppSidebar() {
             </div>
           );
         })}
+      </div>
+
 
       {/* Footer: usuário (clique abre menu com tema/admin/sair) */}
       <UserFooter
