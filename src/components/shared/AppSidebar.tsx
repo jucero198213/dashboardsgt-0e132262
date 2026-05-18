@@ -140,49 +140,16 @@ export function AppSidebar() {
         })}
       </div>
 
-      {/* Footer: user info + theme + admin + logout */}
-      <div className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-        {!collapsed && user && (
-          <div className="px-3 py-2 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-400/25 bg-amber-400/[0.08] text-amber-300">
-                <User className="h-3 w-3" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{user.email}</p>
-                <p className="text-[9px] text-slate-500">{isAdmin ? "Administrador" : "Usuário"}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className={`flex ${collapsed ? "flex-col items-center" : "flex-col"} py-1`}>
-          <FooterAction
-            collapsed={collapsed}
-            onClick={toggleTheme}
-            icon={theme === "dark" ? Sun : Moon}
-            label={theme === "dark" ? "Tema claro" : "Tema escuro"}
-            iconClass={theme === "dark" ? "text-amber-400" : "text-cyan-400"}
-          />
-          {isAdmin && (
-            <FooterAction
-              collapsed={collapsed}
-              onClick={() => navigate("/admin")}
-              icon={Shield}
-              label="Área Administrativa"
-              iconClass="text-red-400"
-            />
-          )}
-          <FooterAction
-            collapsed={collapsed}
-            onClick={() => signOut()}
-            icon={LogOut}
-            label="Sair"
-            iconClass="text-slate-500"
-            hoverClass="hover:text-rose-300"
-          />
-        </div>
-      </div>
+      {/* Footer: usuário (clique abre menu com tema/admin/sair) */}
+      <UserFooter
+        collapsed={collapsed}
+        email={user?.email ?? ""}
+        isAdmin={isAdmin}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onGoAdmin={() => navigate("/admin")}
+        onSignOut={() => signOut()}
+      />
     </aside>
   );
 }
