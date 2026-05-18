@@ -1137,18 +1137,17 @@ app.post("/dw-bancos", async (req, res) => {
         SELECT
           CA.CODCTA  AS cod_conta,
           CA.DESCRI  AS nome_conta,
-          ISNULL(CA.AGENCIA,'') AS agencia,
-          ISNULL(CA.NUMCTA,'')  AS num_conta,
-          ISNULL(CA.TIPOCTA,'CC') AS tipo_conta,
-          ISNULL(CA.CODBCO,'')  AS cod_banco,
+          ISNULL(CA.NUMAGC,'') AS agencia,
+          ISNULL(CA.CODCTA,'') AS num_conta,
+          ISNULL(CA.CODBCO,'') AS cod_banco,
           ISNULL(BC.DESCRI, ISNULL(CA.CODBCO,'')) AS nome_banco,
           CA.CODFIL  AS filial,
           ISNULL(F.CODEMP,'')    AS empresa,
           ISNULL(F.NOMEAB, CA.CODFIL) AS nome_filial
-        FROM BANCAD CA WITH (NOLOCK)
+        FROM BANCTA CA WITH (NOLOCK)
           LEFT JOIN RODBCO BC WITH (NOLOCK) ON BC.CODBCO = CA.CODBCO
           LEFT JOIN RODFIL F  WITH (NOLOCK) ON F.CODFIL  = CA.CODFIL
-        WHERE ISNULL(CA.ATIVO,'A') <> 'I'
+        WHERE ISNULL(CA.SITUAC,'A') <> 'I'
           AND (@filial  IS NULL OR CA.CODFIL = @filial)
           AND (@empresa IS NULL OR F.CODEMP  = @empresa)
       `);
