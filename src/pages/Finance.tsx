@@ -1808,9 +1808,18 @@ const SCREEN_META: Record<ScreenId, { title: string; sub: string }> = {
 //  MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Finance() {
-  const [active, setActive] = useState<ScreenId>("painel");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const screenParam = (searchParams.get("s") as ScreenId) ?? "painel";
+  const [active, _setActive] = useState<ScreenId>(screenParam);
   const navigate = useNavigate();
+
+  // Sincroniza estado interno ⇄ URL (?s=)
+  useEffect(() => { _setActive(screenParam); }, [screenParam]);
+  const setActive = (id: ScreenId) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("s", id);
+    setSearchParams(next, { replace: true });
+  };
 
   // ── Dados reais do servidor ──────────────────────────────────────────────
   const {
