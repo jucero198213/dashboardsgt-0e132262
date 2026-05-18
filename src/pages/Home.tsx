@@ -13,11 +13,9 @@ import {
   ClipboardList,
   Truck,
   Users,
-  CreditCard,
   ShoppingCart,
   Wrench,
   Settings,
-  Receipt,
   Fuel,
   Car,
   LineChart,
@@ -25,6 +23,16 @@ import {
   Table,
   FileText,
   Banknote,
+  LayoutDashboard,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  RefreshCcw,
+  Activity,
+  FileBarChart,
+  MapPin,
+  Wallet,
+  UserCog,
+  Briefcase,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
@@ -312,6 +320,94 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 }
 
 /* ---------------------------------------------------------------- */
+/*  Card de módulo agrupado (com sub-itens clicáveis)               */
+/* ---------------------------------------------------------------- */
+interface SubItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  onClick: () => void;
+}
+
+interface ModuleGroup {
+  key: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  tone: keyof typeof TONE;
+  items: SubItem[];
+}
+
+function ModuleGroupCard({ group, index }: { group: ModuleGroup; index: number }) {
+  const tone = TONE[group.tone];
+  const GroupIcon = group.icon;
+  const reduce = useReducedMotion();
+
+  // Mapeamento de cores de acento por tone
+  const accentLine: Record<string, string> = {
+    amber:   "via-amber-400/50",
+    violet:  "via-violet-400/50",
+    cyan:    "via-cyan-400/50",
+    emerald: "via-emerald-400/50",
+    rose:    "via-rose-400/50",
+    orange:  "via-orange-400/50",
+    blue:    "via-blue-400/50",
+    slate:   "via-slate-400/30",
+  };
+  const accent = accentLine[group.tone] ?? "via-white/10";
+
+  return (
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.35, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      className={`group relative flex flex-col overflow-hidden rounded-3xl border dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white backdrop-blur-sm transition-all duration-300 ${tone.ring} hover:dark:border-white/20 hover:border-slate-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]`}
+    >
+      {/* Linha de acento no topo */}
+      <div className={`h-[2px] w-full bg-gradient-to-r from-transparent ${accent} to-transparent`} />
+
+      {/* Glow superior no hover */}
+      <div className={`pointer-events-none absolute -top-20 left-1/2 h-40 w-4/5 -translate-x-1/2 rounded-full bg-gradient-to-b ${tone.glow} to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-60`} />
+
+      {/* Header do módulo */}
+      <div className="flex items-center gap-3 px-6 pt-5 pb-4">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${tone.iconBg} ${tone.iconText}`}>
+          <GroupIcon className="h-5 w-5" />
+        </div>
+        <div>
+          <h3 className="text-[16px] font-black tracking-tight sgt-text">{group.title}</h3>
+          <p className="text-[11px] text-[var(--sgt-text-muted)] mt-0.5">{group.description}</p>
+        </div>
+      </div>
+
+      {/* Divisor */}
+      <div className="mx-5 h-px dark:bg-white/[0.07] bg-slate-100" />
+
+      {/* Sub-itens */}
+      <div className="flex flex-col px-3 py-3">
+        {group.items.map((item) => {
+          const ItemIcon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={item.onClick}
+              className="group/item flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-150 hover:dark:bg-white/[0.06] hover:bg-slate-50"
+            >
+              <ItemIcon className={`h-4 w-4 shrink-0 ${tone.iconText} opacity-60 group-hover/item:opacity-100 transition-opacity`} />
+              <span className="flex-1 text-[13px] font-medium dark:text-slate-300 text-slate-600 group-hover/item:dark:text-white group-hover/item:text-slate-900 transition-colors">
+                {item.label}
+              </span>
+              <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${tone.cta} opacity-0 -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-150`} />
+            </button>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
 /*  Abrir Excel/Word local (Windows) com fallback para Office Online */
 /* ---------------------------------------------------------------- */
 function openOfficeApp(app: "excel" | "word") {
@@ -361,7 +457,8 @@ export default function Home() {
 
 
 
-  const modules: ModuleCardData[] = [
+  // ── Cards fixados — NÃO ALTERAR ──────────────────────────────────
+  const pinnedModules: ModuleCardData[] = [
     {
       key: "visual-rodopar",
       icon: Globe,
@@ -395,107 +492,75 @@ export default function Home() {
       pinned: true,
       featured: true,
     },
-    canAccess("indicadores") && {
-      key: "indicadores",
-      icon: TrendingUp,
-      title: "Indicadores",
-      description:
-        "Consulte métricas, desempenho e resultados para apoiar a tomada de decisão.",
-      cta: "Acessar indicadores",
-      onClick: () => navigate("/indicadores"),
-      tone: "violet" as const,
+  ];
+
+  // ── Cards de módulo agrupado ──────────────────────────────────────
+  const moduleGroups: ModuleGroup[] = [
+    {
+      key: "financeiro",
+      title: "Financeiro",
+      description: "Gestão financeira completa",
+      icon: Banknote,
+      tone: "emerald",
+      items: [
+        { id: "fin-painel",      label: "Painel",            icon: LayoutDashboard,  onClick: () => navigate("/financeiro") },
+        { id: "fin-pagar",       label: "Contas a Pagar",    icon: ArrowDownCircle,  onClick: () => navigate("/financeiro?s=pagar") },
+        { id: "fin-receber",     label: "Contas a Receber",  icon: ArrowUpCircle,    onClick: () => navigate("/financeiro?s=receber") },
+        { id: "fin-conciliacao", label: "Conciliação",       icon: RefreshCcw,       onClick: () => navigate("/financeiro?s=conciliacao") },
+        { id: "fin-realizado",   label: "Realizado",         icon: Activity,         onClick: () => navigate("/dashboard") },
+        { id: "fin-previsto",    label: "Previsto",          icon: TrendingUp,       onClick: () => navigate("/financeiro?s=previsto") },
+        { id: "fin-relatorios",  label: "Relatórios",        icon: FileBarChart,     onClick: () => navigate("/financeiro?s=relatorios") },
+      ],
     },
     {
-      key: "financiamento",
-      icon: Truck,
-      title: "Financiamento de Frota",
-      description: "Gerencie contratos, saldos devedores, parcelas e vencimentos de todos os financiamentos da frota.",
-      cta: "Acessar financiamentos",
-      onClick: () => navigate("/financiamento-frota"),
-      tone: "emerald" as const,
+      key: "gestao",
+      title: "Gestão",
+      description: "Painéis estratégicos e indicadores",
+      icon: BarChart3,
+      tone: "violet",
+      items: [
+        { id: "ges-executivo",   label: "Painel Executivo",  icon: Briefcase,        onClick: () => navigate("/executivo") },
+        ...(canAccess("indicadores") ? [
+          { id: "ges-indicadores", label: "Indicadores",     icon: LineChart,        onClick: () => navigate("/indicadores") },
+        ] : []),
+        { id: "ges-faturamento", label: "Faturamento",       icon: FileBarChart,     onClick: () => navigate("/faturamento") },
+      ],
     },
     {
-      key: "faturamento",
-      icon: LineChart,
-      title: "Faturamento",
-      description: "Emissão de NF, faturamento por cliente e acompanhamento de receitas.",
-      cta: "Acessar faturamento",
-      onClick: () => navigate("/faturamento"),
-      tone: "amber" as const,
-    },
-    {
-      key: "rh",
-      icon: Users,
-      title: "RH",
-      description: "Gestão de colaboradores, folha de pagamento, admissões e desligamentos.",
-      cta: "Acessar RH",
-      onClick: () => navigate("/rh"),
-      tone: "violet" as const,
+      key: "operacao",
+      title: "Operação",
+      description: "Frota, rotas e abastecimento",
+      icon: MapPin,
+      tone: "cyan",
+      items: [
+        { id: "op-operacional",  label: "Operacional",       icon: Settings,         onClick: () => navigate("/operacional") },
+        { id: "op-frota",        label: "Gestão de Frota",   icon: Truck,            onClick: () => navigate("/frota") },
+        { id: "op-financiamento",label: "Financiamentos",    icon: Wallet,           onClick: () => navigate("/financiamento-frota") },
+        { id: "op-manutencao",   label: "Manutenção",        icon: Wrench,           onClick: () => navigate("/manutencao") },
+        { id: "op-abastecimento",label: "Abastecimento",     icon: Fuel,             onClick: () => navigate("/abastecimento") },
+      ],
     },
     {
       key: "compras",
-      icon: ShoppingCart,
       title: "Compras",
-      description: "Notas fiscais de entrada, fornecedores, grupos de produtos e centro de custo.",
-      cta: "Acessar compras",
-      onClick: () => navigate("/compras"),
-      tone: "amber" as const,
+      description: "Notas de entrada e fornecedores",
+      icon: ShoppingCart,
+      tone: "amber",
+      items: [
+        { id: "cmp-compras",     label: "Compras",           icon: ShoppingCart,     onClick: () => navigate("/compras") },
+      ],
     },
     {
-      key: "manutencao",
-      icon: Wrench,
-      title: "Manutenção",
-      description: "Ordens de serviço, preventiva e corretiva de veículos e equipamentos.",
-      cta: "Acessar",
-      onClick: () => navigate("/manutencao"),
-      tone: "orange" as const,
+      key: "rh",
+      title: "RH",
+      description: "Gestão de pessoas e folha",
+      icon: Users,
+      tone: "violet",
+      items: [
+        { id: "rh-rh",           label: "RH",                icon: UserCog,          onClick: () => navigate("/rh") },
+      ],
     },
-    {
-      key: "operacional",
-      icon: Settings,
-      title: "Operacional",
-      description: "Gestão de rotas, viagens, motoristas e desempenho operacional.",
-      cta: "Acessar operacional",
-      onClick: () => navigate("/operacional"),
-      tone: "cyan" as const,
-    },
-    {
-      key: "abastecimento",
-      icon: Fuel,
-      title: "Abastecimento",
-      description: "Controle de combustível, consumo por veículo e custo operacional.",
-      cta: "Acessar abastecimento",
-      onClick: () => navigate("/abastecimento"),
-      tone: "orange" as const,
-    },
-    {
-      key: "frota",
-      icon: Car,
-      title: "Frota",
-      description: "Cadastro de veículos, custo de manutenção por veículo, idade da frota e validações analíticas.",
-      cta: "Acessar frota",
-      onClick: () => navigate("/frota"),
-      tone: "rose" as const,
-    },
-    {
-      key: "financeiro",
-      icon: Banknote,
-      title: "Financeiro",
-      description: "Portal financeiro completo: contas a pagar e receber, conciliação bancária, relatórios, fornecedores, categorias e bancos.",
-      cta: "Acessar financeiro",
-      onClick: () => navigate("/financeiro"),
-      tone: "emerald" as const,
-    },
-    {
-      key: "executivo",
-      icon: BarChart3,
-      title: "Executivo",
-      description: "Painel de comando com KPIs consolidados de financeiro, frota, operacional, RH, compras e manutenção.",
-      cta: "Acessar executivo",
-      onClick: () => navigate("/executivo"),
-      tone: "violet" as const,
-    },
-  ].filter(Boolean) as ModuleCardData[];
+  ];
 
   const scrollToModules = () => {
     document.getElementById("modulos")?.scrollIntoView({ behavior: "smooth" });
@@ -656,16 +721,40 @@ export default function Home() {
               className="mb-10 text-center"
             >
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
-                Módulos principais
+                Acessos rápidos
               </p>
               <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
                 Acessos do Workspace SGT
               </h2>
             </motion.div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {modules.map((m, i) => (
+            {/* Cards fixados — Visual Rodopar, Portal WR SGT, Chamados */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
+              {pinnedModules.map((m, i) => (
                 <ModuleCard key={m.key} data={m} index={i} />
+              ))}
+            </div>
+
+            {/* Módulos do sistema */}
+            <motion.div
+              initial={reduce ? false : { opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-8 flex items-center gap-4"
+            >
+              <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] dark:text-slate-500 text-slate-400">
+                  Módulos do sistema
+                </p>
+              </div>
+              <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
+            </motion.div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {moduleGroups.map((g, i) => (
+                <ModuleGroupCard key={g.key} group={g} index={i} />
               ))}
             </div>
           </section>
