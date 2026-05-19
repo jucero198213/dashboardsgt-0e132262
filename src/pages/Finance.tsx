@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import type { ContaPagar, ContaReceber } from "@/data/mockData";
@@ -1952,8 +1952,6 @@ export default function Finance() {
           >
             {/* Logo + título */}
             <div className="flex items-center gap-3 shrink-0">
-              <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
-              <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
               <div className="flex flex-col leading-none">
                 <span className="text-[9px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                 <span className="text-[15px] font-black tracking-[-0.03em] text-white">{meta.title}</span>

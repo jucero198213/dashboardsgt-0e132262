@@ -1,4 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 //  Executivo.tsx  –  Painel de comando consolidado de todas as áreas SGT
 //  Carrega 8 APIs em paralelo e exibe KPIs, alertas e atalhos de módulos.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -420,8 +420,6 @@ export default function Executivo() {
             {/* ════════ NAVBAR DESKTOP ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Painel Executivo</span>
