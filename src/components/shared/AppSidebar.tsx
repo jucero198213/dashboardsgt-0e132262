@@ -120,7 +120,7 @@ export function AppSidebar() {
                   onClick={() => handleClick(item)}
                   onMouseEnter={(e) => {
                     const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                    setHovered({ id: item.id, label: item.label, top: r.top, left: r.right });
+                    setHovered({ id: item.id, label: item.label, icon: item.icon, active, top: r.top, left: r.left, height: r.height });
                   }}
                   aria-label={item.label}
                   className={`relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
