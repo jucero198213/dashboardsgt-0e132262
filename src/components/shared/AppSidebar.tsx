@@ -196,13 +196,13 @@ export function AppSidebar() {
               ? "bg-amber-500/20 border-amber-400/45 text-amber-100 shadow-[0_0_22px_rgba(245,158,11,0.35)]"
               : "bg-amber-500/15 border-amber-400/35 text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_18px_rgba(245,158,11,0.22)]"
             } backdrop-blur-md animate-fade-in`}
-          style={{ top: hovered.top, left: hovered.left, height: hovered.height }}
+          style={{ top: hovered.top, left: hovered.left, height: hovered.height, width: 180 }}
         >
-          <span className="flex items-center justify-center" style={{ width: hovered.height, height: hovered.height }}>
+          <span className="flex items-center justify-center shrink-0" style={{ width: hovered.height, height: hovered.height }}>
             <HIcon className="h-4 w-4 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" />
           </span>
-          {hovered.label}
-          <ChevronRight className="h-3 w-3 text-amber-300/80" />
+          <span className="flex-1 truncate">{hovered.label}</span>
+          <ChevronRight className="h-3 w-3 shrink-0 text-amber-300/80" />
         </div>
       );
     })()}
