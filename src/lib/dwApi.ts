@@ -641,3 +641,38 @@ export async function fetchBankAccounts(params?: {
     60 * 2, // 2 min cache
   );
 }
+
+// ── Extrato bancário por conta (/dw-bancos-extrato) ──────────────────────────
+const ENDPOINT_BANCOS_EXTRATO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-bancos-extrato`
+  : `${SUPABASE_URL}/functions/v1/dw-bancos-extrato`;
+
+export interface BancoExtratoRow {
+  COD_CONTA:         string;
+  FILIAL:            number;
+  DOCUMENTO:         string | null;
+  TIPO_DOCUMENTO:    string | null;
+  DEBCRE:            'C' | 'D';
+  VLRDOC:            number;
+  DATA_LANCAMENTO:   string | null;
+  DATA_COMPENSACAO:  string | null;
+  HISTORICO:         string;
+  CENTRO_CUSTO:      string;
+  ANALITICA:         string;
+  ORIGEM:            'LB_C' | 'LB_D';
+  SITUACAO:          string;
+}
+
+export async function fetchBancoExtrato(params: {
+  codcta:      string;
+  codfil?:     number | null;
+  filial?:     string | null;
+  empresa?:    string | null;
+  dataInicio?: string | null;
+  dataFim?:    string | null;
+}): Promise<{ data: BancoExtratoRow[]; total: number }> {
+  // sem cache — carrega sempre que conta/período mudar
+  return callEdge<{ data: BancoExtratoRow[]; total: number }>(
+    ENDPOINT_BANCOS_EXTRATO, params
+  );
+}

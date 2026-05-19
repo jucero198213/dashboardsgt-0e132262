@@ -1261,6 +1261,75 @@ app.post("/dw-bancos", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENDPOINT: /dw-bancos-extrato
+// Retorna lançamentos de uma conta bancária específica no período.
+// Query independente do /dw-financeiro — usa SITUAC NOT IN ('C') para
+// capturar tanto lançamentos abertos (O) quanto efetivados/compensados (E).
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-bancos-extrato", async (req, res) => {
+  const { codcta, codfil, filial, empresa, dataInicio, dataFim } = req.body ?? {};
+
+  if (!codcta) return res.status(400).json({ error: "codcta obrigatório" });
+
+  try {
+    const p    = await getPool();
+    const hoje = new Date();
+    const di   = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const df   = dataFim    ? new Date(dataFim)    : hoje;
+
+    const q = p.request();
+    q.input("codcta",     sql.VarChar(30), codcta);
+    q.input("codfil",     sql.Int,         codfil    || null);
+    q.input("filial",     sql.VarChar(20), filial    || null);
+    q.input("empresa",    sql.VarChar(20), empresa   || null);
+    q.input("dataInicio", sql.Date,        di);
+    q.input("dataFim",    sql.Date,        df);
+
+    const result = await q.query(`
+      SELECT
+        B.CODCTA                             AS COD_CONTA,
+        B.CODFIL                             AS FILIAL,
+        B.NUMDOC                             AS DOCUMENTO,
+        B.TIPDOC                             AS TIPO_DOCUMENTO,
+        B.DEBCRE,
+        B.VLRDOC,
+        B.DATDOC                             AS DATA_LANCAMENTO,
+        B.DATCOM                             AS DATA_COMPENSACAO,
+        ISNULL(H.DESCRI, '')                 AS HISTORICO,
+        ISNULL(RAT.CODCUS, '')               AS CODCUS,
+        ISNULL(CUS.DESCRI, '')               AS CENTRO_CUSTO,
+        ISNULL(RAT.ANALIT, '')               AS CODANALIT,
+        ISNULL(CLA.DESCRI, '')               AS ANALITICA,
+        CASE WHEN B.DEBCRE = 'C' THEN 'LB_C' ELSE 'LB_D' END AS ORIGEM,
+        B.SITUAC                             AS SITUACAO
+      FROM BANRAZ B WITH (NOLOCK)
+        LEFT JOIN BANHIS  H   WITH (NOLOCK) ON H.CODHISBC = B.CODHISBC
+        LEFT JOIN BANRAT  RAT WITH (NOLOCK) ON RAT.NUMDOC = B.NUMDOC
+                                            AND RAT.CODCTA = B.CODCTA
+                                            AND RAT.CODFIL = B.CODFIL
+                                            AND RAT.ID_RAZ = B.ID_RAZ
+        LEFT JOIN RODCUS  CUS WITH (NOLOCK) ON CUS.CODCUS = RAT.CODCUS
+        LEFT JOIN PAGCLA  CLA WITH (NOLOCK) ON CLA.CODCLAP = RAT.ANALIT
+        LEFT JOIN RODFIL  F   WITH (NOLOCK) ON F.CODFIL  = B.CODFIL
+      WHERE B.CODCTA  = @codcta
+        AND B.SITUAC NOT IN ('C')
+        AND B.VLRDOC > 0
+        AND B.DATDOC BETWEEN @dataInicio AND @dataFim
+        AND (@codfil  IS NULL OR B.CODFIL = @codfil)
+        AND (@filial  IS NULL OR B.CODFIL = @filial)
+        AND (@empresa IS NULL OR F.CODEMP = @empresa)
+      ORDER BY B.DATDOC DESC, B.NUMDOC DESC
+    `);
+
+    return res.json({ data: result.recordset, total: result.recordset.length });
+  } catch (err) {
+    console.error("[/dw-bancos-extrato]", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 //  Estrutura de joins (SQL corrigido):
 //    PAGDOCI I  → parcelas (tem DATVEN = data de vencimento)
 //    PAGDOC  D  → cabeçalho do documento (tem NUMCTF, VLRDOC, SITUAC, etc.)

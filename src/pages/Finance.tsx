@@ -1491,6 +1491,8 @@ function ScreenBancos() {
   const [erroBancos, setErroBancos] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<BancoViewMode>("cards");
   const [extratoPage, setExtratoPage] = useState(1);
+  const [extratoData, setExtratoData] = useState<import("@/lib/dwApi").BancoExtratoRow[]>([]);
+  const [loadingExtrato, setLoadingExtrato] = useState(false);
 
   // Busca contas bancárias com saldo real
   const recarregarContas = () => {
@@ -1513,32 +1515,27 @@ function ScreenBancos() {
   };
   useEffect(() => { recarregarContas(); }, [dwFilter.filial, dwFilter.empresa, dwFilter.dataInicio, dwFilter.dataFim]);
 
-  // Lançamentos bancários do período (do /dw-financeiro já carregado)
-  const lbRows = useMemo(() =>
-    dwRawData.filter(r => r.ORIGEM === "LB_D" || r.ORIGEM === "LB_C"),
-    [dwRawData]
-  );
-
-  // Extrato: filtra por COD_CONTA quando disponível, senão por FILIAL
   const contaAtiva = contas.find(c => c.cod_conta === extratoKey);
 
-  // Reset de página via useEffect — NUNCA dentro de useMemo (anti-pattern React)
-  useEffect(() => { setExtratoPage(1); }, [extratoKey]);
+  // Extrato: endpoint dedicado /dw-bancos-extrato
+  // SITUAC NOT IN ('C') — captura abertos (O) e efetivados (E), não só pendentes
+  useEffect(() => {
+    if (!contaAtiva) { setExtratoData([]); return; }
+    setLoadingExtrato(true);
+    setExtratoPage(1);
+    import("@/lib/dwApi").then(({ fetchBancoExtrato }) =>
+      fetchBancoExtrato({
+        codcta:     contaAtiva.cod_conta,
+        codfil:     parseInt(String(contaAtiva.filial)) || null,
+        dataInicio: dwFilter.dataInicio ?? undefined,
+        dataFim:    dwFilter.dataFim    ?? undefined,
+      })
+    ).then(res => setExtratoData(res.data ?? []))
+     .catch(() => setExtratoData([]))
+     .finally(() => setLoadingExtrato(false));
+  }, [contaAtiva?.cod_conta, contaAtiva?.filial, dwFilter.dataInicio, dwFilter.dataFim]);
 
-  const extratoRows = useMemo(() => {
-    if (!contaAtiva) return [];
-    return lbRows.filter(r => {
-      // Filtra por COD_CONTA quando disponível (campo direto do BANRAZ)
-      if (r.COD_CONTA) return r.COD_CONTA === contaAtiva.cod_conta;
-      // Fallback por CODCTA no documento (campo alternativo)
-      if ((r as any).CODCTA) return (r as any).CODCTA === contaAtiva.cod_conta;
-      // Sem identificador de conta: retorna vazio (não mistura contas da mesma filial)
-      return false;
-    }).sort((a,b) =>
-      (b.DATA_LANCAMENTO ?? b.DATA_EMISSAO ?? "")
-       .localeCompare(a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
-    );
-  }, [contaAtiva, lbRows]);
+  const extratoRows = extratoData;
 
   const EXTRATO_PAGE_SIZE = 50;
   const extratoPaginas   = Math.max(1, Math.ceil(extratoRows.length / EXTRATO_PAGE_SIZE));
@@ -1813,7 +1810,7 @@ function ScreenBancos() {
                   <span className="text-slate-400 font-medium">{contaAtiva.nome_banco || contaAtiva.nome_conta}</span>
                   {contaAtiva.agencia ? <span className="text-slate-600"> · Ag. {contaAtiva.agencia}</span> : null}
                   {contaAtiva.num_conta ? <span className="text-slate-600"> · Cta. {contaAtiva.num_conta}</span> : null}
-                  <span className="text-slate-600"> · {extratoRows.length} lançamento{extratoRows.length !== 1 ? "s" : ""}{extratoPaginas > 1 ? ` · pág. ${extratoPage}/${extratoPaginas}` : ""}</span>
+                  <span className="text-slate-600"> · {loadingExtrato ? "carregando…" : `${extratoRows.length} lançamento${extratoRows.length !== 1 ? "s" : ""}${extratoPaginas > 1 ? ` · pág. ${extratoPage}/${extratoPaginas}` : ""}`}</span>
                 </>
               ) : "Nenhuma conta selecionada"}
             </span>
@@ -1827,28 +1824,33 @@ function ScreenBancos() {
             )}
           </div>
 
+          {/* Loading state */}
+          {loadingExtrato && (
+            <div className="flex items-center justify-center py-10 gap-2 text-[12px] text-slate-600">
+              <RefreshCcw className="h-3.5 w-3.5 animate-spin" /> Carregando lançamentos...
+            </div>
+          )}
+
           {/* Lista paginada — 50 por página */}
-          {extratoPageRows.map((r, i) => {
+          {!loadingExtrato && extratoPageRows.map((r, i) => {
             const isC  = r.ORIGEM === "LB_C";
-            const val  = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+            const val  = Math.abs(r.VLRDOC ?? 0);
             const TIPDOC_LABEL: Record<string,string> = {
               LB: "Lançamento Bancário", BOL: "Boleto", PIX: "PIX", TED: "TED",
               DOC: "DOC", TRA: "Transferência", DEB: "Débito", CHQ: "Cheque",
               DEP: "Depósito", TAR: "Tarifa", IOF: "IOF", JUR: "Juros",
             };
             const tipoDesc = r.TIPO_DOCUMENTO ? (TIPDOC_LABEL[r.TIPO_DOCUMENTO] ?? r.TIPO_DOCUMENTO) : null;
-            const desc = r.HISTORICO
-              ?? r.ANALITICA
-              ?? r.CENTRO_CUSTO
+            const desc = (r.HISTORICO || null)
+              ?? (r.ANALITICA || null)
+              ?? (r.CENTRO_CUSTO || null)
               ?? (tipoDesc && r.DOCUMENTO ? `${tipoDesc} nº ${r.DOCUMENTO}` : null)
               ?? (r.DOCUMENTO ? `Doc. ${r.DOCUMENTO}` : null)
               ?? "Lançamento sem histórico";
-            const dataExib = r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? r.DATA_COMPENSACAO;
+            const dataExib = r.DATA_LANCAMENTO ?? r.DATA_COMPENSACAO;
             const meta = [
               dataExib ? fmtDate(dataExib.slice(0,10)) : null,
               r.DOCUMENTO ? `Doc. ${r.DOCUMENTO}` : null,
-              r.NUM_CHEQUE ? `Cheque ${r.NUM_CHEQUE}` : null,
-              r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}` : null,
               r.CENTRO_CUSTO && r.CENTRO_CUSTO !== desc ? r.CENTRO_CUSTO : null,
             ].filter(Boolean).join(" · ") || "—";
             return (
@@ -1869,7 +1871,7 @@ function ScreenBancos() {
           })}
 
           {/* Estado vazio */}
-          {extratoRows.length === 0 && (
+          {!loadingExtrato && extratoRows.length === 0 && (
             <p className="px-4 py-8 text-center text-[12px] text-slate-600">
               Nenhum lançamento no período para esta conta
             </p>
