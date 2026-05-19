@@ -231,10 +231,10 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       <motion.button
         type="button"
         onClick={handleClick}
-        initial={reduce ? false : { opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
-        transition={{ duration: 0.25, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+        initial={reduce ? false : { opacity: 0, y: 52, scale: 0.93 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.12 }}
+        transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
         whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.12, ease: "easeOut" } }}
         className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
       >
@@ -274,10 +274,10 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       type="button"
       onClick={handleClick}
       disabled={data.disabled}
-      initial={reduce ? false : { opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduce ? false : { opacity: 0, y: 52, scale: 0.93 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={data.disabled ? undefined : { y: -4, transition: { duration: 0.12, ease: "easeOut" } }}
       className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
         data.disabled
@@ -605,10 +605,10 @@ export default function Home() {
           {/* ── MÓDULOS PRINCIPAIS ── */}
           <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
             <motion.div
-              initial={reduce ? false : { opacity: 0, y: 20 }}
+              initial={reduce ? false : { opacity: 0, y: 36 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="mb-10 text-center"
             >
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
@@ -628,10 +628,10 @@ export default function Home() {
 
             {/* Módulos do sistema */}
             <motion.div
-              initial={reduce ? false : { opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5 }}
+              initial={reduce ? false : { opacity: 0, y: 24, scaleX: 0.85 }}
+              whileInView={{ opacity: 1, y: 0, scaleX: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               className="mb-8 flex items-center gap-4"
             >
               <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
@@ -653,10 +653,10 @@ export default function Home() {
           {/* ── FERRAMENTAS COMPLEMENTARES ── */}
           <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
             <motion.div
-              initial={reduce ? false : { opacity: 0, y: 20 }}
+              initial={reduce ? false : { opacity: 0, y: 36 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="mb-10 text-center"
             >
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-cyan-400/80">
@@ -672,10 +672,10 @@ export default function Home() {
                 href="https://receitaflow.lovable.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55 }}
+                initial={reduce ? false : { opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -3 }}
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-cyan-400/30 hover:bg-[var(--sgt-input-hover)]/60"
               >
@@ -697,10 +697,10 @@ export default function Home() {
                 href="https://analyticspro.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: 0.1 }}
+                initial={reduce ? false : { opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -3 }}
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-violet-400/30 hover:bg-[var(--sgt-input-hover)]/60"
               >
@@ -721,10 +721,10 @@ export default function Home() {
               <motion.button
                 type="button"
                 onClick={() => openOfficeApp("excel")}
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: 0.2 }}
+                initial={reduce ? false : { opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -3 }}
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-emerald-400/30 hover:bg-[var(--sgt-input-hover)]/60 text-left cursor-pointer"
               >
@@ -745,10 +745,10 @@ export default function Home() {
               <motion.button
                 type="button"
                 onClick={() => openOfficeApp("word")}
-                initial={reduce ? false : { opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.55, delay: 0.3 }}
+                initial={reduce ? false : { opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -3 }}
                 className="group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:border-blue-400/30 hover:bg-[var(--sgt-input-hover)]/60 text-left cursor-pointer"
               >
