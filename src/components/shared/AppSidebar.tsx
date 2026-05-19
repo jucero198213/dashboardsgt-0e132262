@@ -20,7 +20,7 @@ export function AppSidebar() {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
   });
-  const [hovered, setHovered] = useState<{ id: string; label: string; top: number; left: number } | null>(null);
+  const [hovered, setHovered] = useState<{ id: string; label: string; icon: AppNavItem["icon"]; active: boolean; top: number; left: number; height: number } | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
@@ -120,7 +120,7 @@ export function AppSidebar() {
                   onClick={() => handleClick(item)}
                   onMouseEnter={(e) => {
                     const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                    setHovered({ id: item.id, label: item.label, top: r.top, left: r.right });
+                    setHovered({ id: item.id, label: item.label, icon: item.icon, active, top: r.top, left: r.left, height: r.height });
                   }}
                   aria-label={item.label}
                   className={`relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
@@ -186,20 +186,26 @@ export function AppSidebar() {
         onSignOut={() => signOut()}
       />
     {/* ── FLYOUT global (escapa o overflow do scroll) ── */}
-    {collapsed && hovered && (
-      <div
-        className="pointer-events-none fixed z-[60] flex h-9 items-center gap-1.5 whitespace-nowrap
-          rounded-r-xl pl-3 pr-3 text-[12px] font-semibold tracking-wide
-          border border-l-0 border-amber-400/40
-          bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5
-          text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_22px_rgba(245,158,11,0.28)]
-          backdrop-blur-md animate-fade-in"
-        style={{ top: hovered.top, left: hovered.left - 6 }}
-      >
-        {hovered.label}
-        <ChevronRight className="h-3 w-3 text-amber-300/80" />
-      </div>
-    )}
+    {collapsed && hovered && (() => {
+      const HIcon = hovered.icon;
+      return (
+        <div
+          className={`pointer-events-none fixed z-[60] flex items-center gap-2 whitespace-nowrap
+            rounded-xl border pr-3 text-[12px] font-semibold tracking-wide
+            ${hovered.active
+              ? "bg-amber-500/20 border-amber-400/45 text-amber-100 shadow-[0_0_22px_rgba(245,158,11,0.35)]"
+              : "bg-amber-500/15 border-amber-400/35 text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_18px_rgba(245,158,11,0.22)]"
+            } backdrop-blur-md animate-fade-in`}
+          style={{ top: hovered.top, left: hovered.left, height: hovered.height }}
+        >
+          <span className="flex items-center justify-center" style={{ width: hovered.height, height: hovered.height }}>
+            <HIcon className="h-4 w-4 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" />
+          </span>
+          {hovered.label}
+          <ChevronRight className="h-3 w-3 text-amber-300/80" />
+        </div>
+      );
+    })()}
     </aside>
   );
 }
