@@ -231,7 +231,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       <motion.button
         type="button"
         onClick={handleClick}
-        whileHover={{ y: -6, scale: 1.01, transition: { duration: 0.15, ease: "easeOut" } }}
+        whileHover={{ y: -5, transition: { duration: 0.18, ease: "easeOut" } }}
         className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
       >
         <div className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.glow1} via-transparent to-transparent opacity-100`} />
@@ -334,29 +334,25 @@ function openOfficeApp(app: "excel" | "word") {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Wrapper com animação ao entrar na viewport (reversível)          */
+/*  Reveal — fade + slide up, dispara uma vez ao entrar na tela      */
 /* ---------------------------------------------------------------- */
 function Reveal({
   children,
   delay = 0,
-  from = "bottom",
   className = "",
 }: {
   children: React.ReactNode;
   delay?: number;
-  from?: "bottom" | "left" | "right";
   className?: string;
 }) {
   const reduce = useReducedMotion();
-  const x = from === "left" ? -48 : from === "right" ? 48 : 0;
-  const y = from === "bottom" ? 52 : 0;
   return (
     <motion.div
       className={className}
-      initial={reduce ? false : { opacity: 0, y, x, scale: 0.94 }}
-      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      viewport={{ once: false, amount: 0.15 }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       {children}
     </motion.div>
