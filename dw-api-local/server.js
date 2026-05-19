@@ -1094,149 +1094,109 @@ app.post("/dw-bancos", async (req, res) => {
   try {
     const p = await getPool();
 
+    // Período: usa parâmetros do filtro global; padrão = mês corrente até hoje
     const hoje = new Date();
-    const di = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const df = dataFim    ? new Date(dataFim)    : hoje;
+    const di = dataInicio
+      ? new Date(dataInicio)
+      : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const df = dataFim ? new Date(dataFim) : hoje;
 
-    // ── 1. Movimentação do PERÍODO (créditos e débitos) ───────────────────
-    // SITUAC NOT IN ('C') = inclui abertos (O) + efetivados/compensados (E)
-    // CORRIGIDO: removido SITUAC='O' que excluía ~96% dos lançamentos compensados
-    const movReq = p.request();
-    movReq.input("dataInicio", sql.Date, di);
-    movReq.input("dataFim",    sql.Date, df);
-    movReq.input("filial",     sql.VarChar(20), filial  || null);
-    movReq.input("empresa",    sql.VarChar(20), empresa || null);
+    // ── Query única: saldo anterior + entradas + saídas + saldo final ─────
+    // Baseada no script validado diretamente no ERP.
+    // INNER JOIN BANCTA: garante apenas contas ativas com cadastro real.
+    // CASE por data: divide historico em "antes do período" vs "no período".
+    // Sem filtro B.ORIGEM para não perder lançamentos com origem diferente de LB.
+    const req2 = p.request();
+    req2.input("dataInicio", sql.Date, di);
+    req2.input("dataFim",    sql.Date, df);
+    req2.input("filial",     sql.VarChar(20), filial  || null);
+    req2.input("empresa",    sql.VarChar(20), empresa || null);
 
-    const movResult = await movReq.query(`
+    const result = await req2.query(`
       SELECT
-        B.CODCTA AS cod_conta,
-        B.CODFIL AS filial,
-        CAST(SUM(CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS entradas_mes,
-        CAST(SUM(CASE WHEN B.DEBCRE='D' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS saidas_mes
+        B.CODCTA                                              AS cod_conta,
+        B.CODFIL                                             AS filial,
+        MAX(C.DESCRI)                                        AS nome_conta,
+        MAX(ISNULL(C.NUMAGC,''))                             AS agencia,
+        MAX(ISNULL(C.CODBCO,''))                             AS cod_banco,
+        MAX(ISNULL(BC.DESCRI, ISNULL(C.CODBCO,'')))         AS nome_banco,
+        MAX(ISNULL(F.CODEMP,''))                             AS empresa,
+        MAX(ISNULL(F.NOMEAB, CAST(B.CODFIL AS VARCHAR(20)))) AS nome_filial,
+
+        -- Saldo anterior: acumulado de tudo que veio ANTES do período
+        CAST(SUM(
+          CASE
+            WHEN B.DATDOC < @dataInicio
+            THEN CASE WHEN B.DEBCRE = 'C' THEN B.VLRDOC ELSE -B.VLRDOC END
+            ELSE 0
+          END
+        ) AS DECIMAL(18,2)) AS saldo_anterior,
+
+        -- Entradas do período (créditos)
+        CAST(SUM(
+          CASE
+            WHEN B.DATDOC BETWEEN @dataInicio AND @dataFim
+             AND B.DEBCRE = 'C'
+            THEN B.VLRDOC ELSE 0
+          END
+        ) AS DECIMAL(18,2)) AS entradas_mes,
+
+        -- Saídas do período (débitos)
+        CAST(SUM(
+          CASE
+            WHEN B.DATDOC BETWEEN @dataInicio AND @dataFim
+             AND B.DEBCRE = 'D'
+            THEN B.VLRDOC ELSE 0
+          END
+        ) AS DECIMAL(18,2)) AS saidas_mes,
+
+        -- Saldo final = saldo_anterior + líquido do período
+        CAST(SUM(
+          CASE
+            WHEN B.DATDOC < @dataInicio
+            THEN CASE WHEN B.DEBCRE = 'C' THEN B.VLRDOC ELSE -B.VLRDOC END
+            ELSE 0
+          END
+        ) + SUM(
+          CASE
+            WHEN B.DATDOC BETWEEN @dataInicio AND @dataFim
+            THEN CASE WHEN B.DEBCRE = 'C' THEN B.VLRDOC ELSE -B.VLRDOC END
+            ELSE 0
+          END
+        ) AS DECIMAL(18,2)) AS saldo_final
+
       FROM BANRAZ B WITH (NOLOCK)
-        LEFT JOIN RODFIL F WITH (NOLOCK) ON B.CODFIL = F.CODFIL
+        LEFT JOIN  RODFIL F  WITH (NOLOCK) ON F.CODFIL  = B.CODFIL
+        INNER JOIN BANCTA C  WITH (NOLOCK) ON C.CODCTA  = B.CODCTA
+        LEFT JOIN  RODBCO BC WITH (NOLOCK) ON BC.CODBCO = C.CODBCO
+
       WHERE B.SITUAC NOT IN ('C')
         AND B.VLRDOC > 0
-        AND B.ORIGEM = 'LB'
-        AND B.DATDOC BETWEEN @dataInicio AND @dataFim
-        AND (@filial  IS NULL OR B.CODFIL = @filial)
-        AND (@empresa IS NULL OR F.CODEMP = @empresa)
+        AND C.SITUAC LIKE 'A%'
+        AND B.DATDOC <= @dataFim
+        AND (@filial  IS NULL OR B.CODFIL  = @filial)
+        AND (@empresa IS NULL OR F.CODEMP  = @empresa)
+
       GROUP BY B.CODCTA, B.CODFIL
+      ORDER BY saldo_final DESC
     `);
 
-    // ── 2. SALDO ANTERIOR (acumulado antes do início do período) ─────────
-    // Necessário para: Sld. Atual = Sld. Anterior + Total Crédito - Total Débito
-    const saldoAntReq = p.request();
-    saldoAntReq.input("dataInicio", sql.Date, di);
-    saldoAntReq.input("filial",     sql.VarChar(20), filial  || null);
-    saldoAntReq.input("empresa",    sql.VarChar(20), empresa || null);
-
-    const saldoAntResult = await saldoAntReq.query(`
-      SELECT
-        B.CODCTA AS cod_conta,
-        B.CODFIL AS filial,
-        CAST(SUM(CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE -B.VLRDOC END) AS DECIMAL(18,2)) AS saldo_anterior
-      FROM BANRAZ B WITH (NOLOCK)
-        LEFT JOIN RODFIL F WITH (NOLOCK) ON B.CODFIL = F.CODFIL
-      WHERE B.SITUAC NOT IN ('C')
-        AND B.VLRDOC > 0
-        AND B.ORIGEM = 'LB'
-        AND B.DATDOC < @dataInicio
-        AND (@filial  IS NULL OR B.CODFIL = @filial)
-        AND (@empresa IS NULL OR F.CODEMP = @empresa)
-      GROUP BY B.CODCTA, B.CODFIL
-    `);
-
-    const movMap      = new Map();
-    const saldoAntMap = new Map();
-    for (const r of movResult.recordset)      movMap.set(r.filial + ":" + r.cod_conta, r);
-    for (const r of saldoAntResult.recordset) saldoAntMap.set(r.filial + ":" + r.cod_conta, r.saldo_anterior);
-
-    // ── 3. Cadastro BANCTA — apenas contas com banco real (CODBCO <> '') ──
-    // Filtro CODBCO NOT NULL exclui carteiras internas (DUP-CARTCRED, etc.)
-    let bancadRows = [];
-    try {
-      const bancadReq = p.request();
-      bancadReq.input("filial",  sql.VarChar(20), filial  || null);
-      bancadReq.input("empresa", sql.VarChar(20), empresa || null);
-      const bancadResult = await bancadReq.query(`
-        SELECT
-          CA.CODCTA  AS cod_conta,
-          CA.DESCRI  AS nome_conta,
-          ISNULL(CA.NUMAGC,'') AS agencia,
-          ISNULL(CA.CODCTA,'') AS num_conta,
-          ISNULL(CA.CODBCO,'') AS cod_banco,
-          ISNULL(BC.DESCRI, ISNULL(CA.CODBCO,'')) AS nome_banco,
-          CA.CODFIL  AS filial,
-          ISNULL(F.CODEMP,'')    AS empresa,
-          ISNULL(F.NOMEAB, CA.CODFIL) AS nome_filial
-        FROM BANCTA CA WITH (NOLOCK)
-          LEFT JOIN RODBCO BC WITH (NOLOCK) ON BC.CODBCO = CA.CODBCO
-          LEFT JOIN RODFIL F  WITH (NOLOCK) ON F.CODFIL  = CA.CODFIL
-        WHERE ISNULL(CA.SITUAC,'A') <> 'I'
-          AND CA.CODBCO IS NOT NULL
-          AND LTRIM(RTRIM(CA.CODBCO)) <> ''
-          AND (@filial  IS NULL OR CA.CODFIL = @filial)
-          AND (@empresa IS NULL OR F.CODEMP  = @empresa)
-      `);
-      bancadRows = bancadResult.recordset;
-    } catch (_) { /* BANCTA indisponivel -- fallback BANRAZ */ }
-
-    let contas = [];
-
-    if (bancadRows.length > 0) {
-      for (const ca of bancadRows) {
-        const key      = ca.filial + ":" + ca.cod_conta;
-        const mov      = movMap.get(key)     ?? { entradas_mes: 0, saidas_mes: 0 };
-        const saldoAnt = saldoAntMap.get(key) ?? 0;
-        const saldoPer = (mov.entradas_mes ?? 0) - (mov.saidas_mes ?? 0);
-        contas.push({
-          cod_conta:      ca.cod_conta,
-          nome_conta:     ca.nome_conta,
-          agencia:        ca.agencia,
-          num_conta:      ca.num_conta,
-          cod_banco:      ca.cod_banco,
-          nome_banco:     ca.nome_banco,
-          tipo_conta:     'CC',
-          filial:         ca.filial,
-          empresa:        ca.empresa,
-          nome_filial:    ca.nome_filial,
-          saldo_anterior: saldoAnt,
-          saldo_atual:    saldoAnt + saldoPer,
-          entradas_mes:   mov.entradas_mes ?? 0,
-          saidas_mes:     mov.saidas_mes   ?? 0,
-        });
-      }
-    } else {
-      const allKeys = new Set([...movMap.keys(), ...saldoAntMap.keys()]);
-      for (const key of allKeys) {
-        const idx2     = key.indexOf(":");
-        const fil      = key.slice(0, idx2), cod = key.slice(idx2 + 1);
-        const mov      = movMap.get(key)     ?? { entradas_mes: 0, saidas_mes: 0 };
-        const saldoAnt = saldoAntMap.get(key) ?? 0;
-        const saldoPer = (mov.entradas_mes ?? 0) - (mov.saidas_mes ?? 0);
-        contas.push({
-          cod_conta:      cod,
-          nome_conta:     cod,
-          agencia:        '',
-          num_conta:      cod,
-          cod_banco:      '',
-          nome_banco:     '',
-          tipo_conta:     'CC',
-          filial:         fil,
-          empresa:        empresa ?? '',
-          nome_filial:    fil,
-          saldo_anterior: saldoAnt,
-          saldo_atual:    saldoAnt + saldoPer,
-          entradas_mes:   mov.entradas_mes ?? 0,
-          saidas_mes:     mov.saidas_mes   ?? 0,
-        });
-      }
-    }
-
-    contas = contas
-      .filter(c => c.entradas_mes !== 0 || c.saidas_mes !== 0 || c.saldo_atual !== 0 || c.saldo_anterior !== 0)
-      .sort((a, b) => b.saldo_atual - a.saldo_atual);
+    const contas = result.recordset.map(r => ({
+      cod_conta:      r.cod_conta,
+      nome_conta:     r.nome_conta,
+      agencia:        r.agencia      ?? '',
+      num_conta:      r.cod_conta,
+      cod_banco:      r.cod_banco    ?? '',
+      nome_banco:     r.nome_banco   ?? '',
+      tipo_conta:     'CC',
+      filial:         r.filial,
+      empresa:        r.empresa      ?? '',
+      nome_filial:    r.nome_filial  ?? String(r.filial),
+      saldo_anterior: r.saldo_anterior ?? 0,
+      saldo_atual:    r.saldo_final    ?? 0,
+      entradas_mes:   r.entradas_mes   ?? 0,
+      saidas_mes:     r.saidas_mes     ?? 0,
+    }));
 
     return res.json({ data: contas });
   } catch (err) {
