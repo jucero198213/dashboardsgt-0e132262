@@ -331,38 +331,14 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Abrir Excel/Word local (Windows) com fallback para Office Online */
+/*  Abrir Excel/Word Online (Microsoft 365 na web)                   */
 /* ---------------------------------------------------------------- */
 function openOfficeApp(app: "excel" | "word") {
-  // Protocolo registrado pelo Office no Windows.
-  // "ms-excel:" e "ms-word:" abrem o app instalado diretamente.
-  const protocol = app === "excel" ? "ms-excel:" : "ms-word:";
-  const fallbackUrl =
+  const url =
     app === "excel"
       ? "https://www.office.com/launch/excel"
       : "https://www.office.com/launch/word";
-
-  let appOpened = false;
-
-  // Se o protocolo for tratado pelo SO, o browser perde o foco (blur).
-  const onBlur = () => {
-    appOpened = true;
-    window.removeEventListener("blur", onBlur);
-    clearTimeout(timer);
-  };
-  window.addEventListener("blur", onBlur);
-
-  // Dispara o protocolo nativo
-  window.location.href = protocol;
-
-  // Se em 1,5 s o blur não disparou, o app local não está disponível
-  // → abre Office Online como fallback
-  const timer = window.setTimeout(() => {
-    window.removeEventListener("blur", onBlur);
-    if (!appOpened) {
-      window.open(fallbackUrl, "_blank", "noopener,noreferrer");
-    }
-  }, 1500);
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 export default function Home() {
@@ -752,7 +728,7 @@ export default function Home() {
                     <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-emerald-300" />
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Abre o Excel instalado na sua máquina. Caso não esteja disponível, abre o Excel Online.
+                    Acesse o Microsoft Excel Online para criar e editar planilhas diretamente no navegador.
                   </p>
                 </div>
               </motion.button>
@@ -776,7 +752,7 @@ export default function Home() {
                     <ExternalLink className="h-3 w-3 text-[var(--sgt-text-muted)] transition-colors group-hover:text-blue-300" />
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                    Abre o Word instalado na sua máquina. Caso não esteja disponível, abre o Word Online.
+                    Acesse o Microsoft Word Online para criar e editar documentos diretamente no navegador.
                   </p>
                 </div>
               </motion.button>
