@@ -1120,8 +1120,9 @@ app.post("/dw-bancos", async (req, res) => {
         LEFT JOIN RODBCO BC WITH (NOLOCK) ON BC.CODBCO = CA.CODBCO
         LEFT JOIN RODFIL  F  WITH (NOLOCK) ON F.CODFIL  = CA.CODFIL
       WHERE CA.SITUAC LIKE 'A%'
-        AND CA.CODBCO     IS NOT NULL
+        AND CA.CODBCO IS NOT NULL
         AND LTRIM(RTRIM(CA.CODBCO)) <> ''
+        AND LTRIM(RTRIM(CA.CODBCO)) <> '0'
         AND (@filial  IS NULL OR CA.CODFIL = @filial)
         AND (@empresa IS NULL OR F.CODEMP  = @empresa)
     `);
