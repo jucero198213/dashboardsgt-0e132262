@@ -1521,14 +1521,20 @@ function ScreenBancos() {
 
   // Extrato: filtra por COD_CONTA quando disponível, senão por FILIAL
   const contaAtiva = contas.find(c => c.cod_conta === extratoKey);
+
+  // Reset de página via useEffect — NUNCA dentro de useMemo (anti-pattern React)
+  useEffect(() => { setExtratoPage(1); }, [extratoKey]);
+
   const extratoRows = useMemo(() => {
-    setExtratoPage(1); // reset ao trocar de conta
     if (!contaAtiva) return [];
-    return lbRows.filter(r =>
-      r.COD_CONTA
-        ? r.COD_CONTA === contaAtiva.cod_conta
-        : r.FILIAL    === contaAtiva.filial
-    ).sort((a,b) =>
+    return lbRows.filter(r => {
+      // Filtra por COD_CONTA quando disponível (campo direto do BANRAZ)
+      if (r.COD_CONTA) return r.COD_CONTA === contaAtiva.cod_conta;
+      // Fallback por CODCTA no documento (campo alternativo)
+      if ((r as any).CODCTA) return (r as any).CODCTA === contaAtiva.cod_conta;
+      // Sem identificador de conta: retorna vazio (não mistura contas da mesma filial)
+      return false;
+    }).sort((a,b) =>
       (b.DATA_LANCAMENTO ?? b.DATA_EMISSAO ?? "")
        .localeCompare(a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
     );
