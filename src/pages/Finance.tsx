@@ -14,6 +14,7 @@ import {
   MapPin, Phone, Star, Mail, PanelLeftClose, PanelLeftOpen,
   MoreHorizontal, ArrowUpDown, Activity, ExternalLink,
   LineChart as LineChartIcon, Headphones, UserCog, Briefcase, ShoppingCart, Fuel,
+  List, LayoutGrid, Table2, PieChart,
 } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
@@ -1480,12 +1481,15 @@ function ScreenPrevisto() {
   );
 }
 
+type BancoViewMode = "cards" | "tabela" | "analytics";
+
 function ScreenBancos() {
   const { dwRawData, dwFilter, filiais, isFetchingDw } = useFinancialData();
   const [contas, setContas] = useState<import("@/lib/dwApi").BankAccount[]>([]);
   const [loadingContas, setLoadingContas] = useState(false);
   const [extratoKey, setExtratoKey] = useState<string | null>(null);
   const [erroBancos, setErroBancos] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<BancoViewMode>("cards");
 
   // Busca contas bancárias com saldo real
   const recarregarContas = () => {
@@ -1628,6 +1632,26 @@ function ScreenBancos() {
         ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
       </div>
 
+      {/* ── View Mode Toggle ── */}
+      <div className="flex items-center justify-end">
+        <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5">
+          {([
+            { id: "cards"     as BancoViewMode, icon: LayoutGrid, label: "Cards" },
+            { id: "tabela"    as BancoViewMode, icon: Table2,     label: "Tabela" },
+            { id: "analytics" as BancoViewMode, icon: BarChart3,  label: "Analytics" },
+          ] as { id: BancoViewMode; icon: React.ElementType; label: string }[]).map(t => {
+            const Icon = t.icon;
+            const active = viewMode === t.id;
+            return (
+              <button key={t.id} onClick={() => setViewMode(t.id)}
+                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-cyan-400/15 text-cyan-200" : "text-slate-500 hover:text-slate-300"}`}>
+                <Icon className="h-3 w-3" /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ── Saldo Consolidado + Evolução ── */}
       <AnimatedCard delay={180}>
         <SectionCard>
@@ -1678,6 +1702,10 @@ function ScreenBancos() {
         </SectionCard>
       </AnimatedCard>
 
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* VIEW: CARDS                                            */}
+      {/* ══════════════════════════════════════════════════════ */}
+      {viewMode === "cards" && <>
       {/* ── Cards por conta ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {contas.map((c, i) => {
@@ -1831,6 +1859,172 @@ function ScreenBancos() {
           )}
         </SectionCard>
       </AnimatedCard>
+      </> /* end viewMode === "cards" */}
+
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* VIEW: TABELA                                          */}
+      {/* ══════════════════════════════════════════════════════ */}
+      {viewMode === "tabela" && (
+        <AnimatedCard>
+          <SectionCard>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="border-b border-[var(--sgt-divider)]">
+                    {["Banco","Conta","Agência","Filial","Saldo Anterior","Entradas","Saídas","Saldo Atual"].map(h => (
+                      <th key={h} className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {contas.map((c2, i) => {
+                    const saldoClr = c2.saldo_atual >= 0 ? "text-emerald-300" : "text-rose-300";
+                    return (
+                      <tr key={i} onClick={() => { setViewMode("cards"); setExtratoKey(c2.cod_conta); }}
+                        className="border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] cursor-pointer transition-colors">
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <BankLogo nome={c2.nome_banco} codigo={c2.cod_banco}
+                              sigla={(c2.nome_banco || c2.nome_conta).slice(0,2).toUpperCase()} size={24} />
+                            <span className="text-slate-300 font-medium truncate max-w-[140px]">{c2.nome_banco || c2.nome_conta}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 text-slate-400 font-mono">{c2.cod_conta}</td>
+                        <td className="px-4 py-2.5 text-slate-500">{c2.agencia || "—"}</td>
+                        <td className="px-4 py-2.5 text-slate-500">{c2.nome_filial || c2.filial}</td>
+                        <td className="px-4 py-2.5 text-slate-400 tabular-nums">{fmtBRL(c2.saldo_anterior ?? 0)}</td>
+                        <td className="px-4 py-2.5 text-emerald-300 tabular-nums font-medium">+{fmtBRL(c2.entradas_mes)}</td>
+                        <td className="px-4 py-2.5 text-rose-300 tabular-nums font-medium">{c2.saidas_mes > 0 ? `-${fmtBRL(c2.saidas_mes)}` : "—"}</td>
+                        <td className={`px-4 py-2.5 tabular-nums font-bold ${saldoClr}`}>{fmtBRL(c2.saldo_atual)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-[var(--sgt-divider)] bg-[var(--sgt-row-hover)]">
+                    <td colSpan={4} className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                      Total — {contas.length} conta{contas.length !== 1 ? "s" : ""}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-400 tabular-nums font-bold">
+                      {fmtBRL(contas.reduce((s, x) => s + (x.saldo_anterior ?? 0), 0))}
+                    </td>
+                    <td className="px-4 py-2.5 text-emerald-300 tabular-nums font-bold">
+                      +{fmtBRL(contas.reduce((s, x) => s + x.entradas_mes, 0))}
+                    </td>
+                    <td className="px-4 py-2.5 text-rose-300 tabular-nums font-bold">
+                      -{fmtBRL(contas.reduce((s, x) => s + x.saidas_mes, 0))}
+                    </td>
+                    <td className={`px-4 py-2.5 tabular-nums font-bold ${saldoTotal >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                      {fmtBRL(saldoTotal)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+      )}
+
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* VIEW: ANALYTICS                                       */}
+      {/* ══════════════════════════════════════════════════════ */}
+      {viewMode === "analytics" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Saldo por banco — barra horizontal */}
+          <AnimatedCard>
+            <SectionCard>
+              <p className="px-5 pt-4 pb-3 text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-400/70 border-b border-[var(--sgt-divider)]">
+                Saldo Atual por Conta
+              </p>
+              <div className="p-4 space-y-2">
+                {[...contas].sort((a,b) => b.saldo_atual - a.saldo_atual).slice(0,10).map((ct, i) => {
+                  const max = Math.max(...contas.map(x => Math.abs(x.saldo_atual)));
+                  const pct = max > 0 ? Math.abs(ct.saldo_atual) / max * 100 : 0;
+                  const pos = ct.saldo_atual >= 0;
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <BankLogo nome={ct.nome_banco} codigo={ct.cod_banco}
+                        sigla={(ct.nome_banco || ct.nome_conta).slice(0,2).toUpperCase()} size={20} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[11px] text-slate-400 truncate max-w-[160px]">{ct.nome_banco || ct.nome_conta}</span>
+                          <span className={`text-[11px] font-bold tabular-nums ml-2 shrink-0 ${pos ? "text-emerald-300" : "text-rose-300"}`}>{fmtK(ct.saldo_atual)}</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                          <div className={`h-full rounded-full transition-all ${pos ? "bg-emerald-400/70" : "bg-rose-400/70"}`}
+                            style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </SectionCard>
+          </AnimatedCard>
+
+          {/* Entradas vs Saídas — barra comparativa */}
+          <AnimatedCard delay={60}>
+            <SectionCard>
+              <p className="px-5 pt-4 pb-3 text-[10px] font-bold uppercase tracking-[0.25em] text-amber-400/70 border-b border-[var(--sgt-divider)]">
+                Entradas vs Saídas no Período
+              </p>
+              <div className="p-4 space-y-3">
+                {contas.filter(ct => ct.entradas_mes > 0 || ct.saidas_mes > 0)
+                  .sort((a,b) => (b.entradas_mes + b.saidas_mes) - (a.entradas_mes + a.saidas_mes))
+                  .slice(0,8).map((ct, i) => {
+                  const maxVal = Math.max(...contas.map(x => Math.max(x.entradas_mes, x.saidas_mes)));
+                  const pctE = maxVal > 0 ? ct.entradas_mes / maxVal * 100 : 0;
+                  const pctS = maxVal > 0 ? ct.saidas_mes   / maxVal * 100 : 0;
+                  return (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] text-slate-400 truncate max-w-[160px]">{ct.nome_banco || ct.nome_conta}</span>
+                        <span className="text-[10px] text-slate-600 ml-2 shrink-0">{fmtK(ct.entradas_mes)} / {fmtK(ct.saidas_mes)}</span>
+                      </div>
+                      <div className="flex gap-1 h-2">
+                        <div className="h-full rounded-full bg-emerald-400/60 transition-all" style={{ width: `${pctE}%` }} />
+                        <div className="h-full rounded-full bg-rose-400/60 transition-all"    style={{ width: `${pctS}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </SectionCard>
+          </AnimatedCard>
+
+          {/* Distribuição de saldo — área chart */}
+          <AnimatedCard delay={120} className="lg:col-span-2">
+            <SectionCard>
+              <p className="px-5 pt-4 pb-3 text-[10px] font-bold uppercase tracking-[0.25em] text-violet-400/70 border-b border-[var(--sgt-divider)]">
+                Distribuição do Saldo Consolidado
+              </p>
+              <div className="p-4" style={{ height: 220 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={contas.filter(ct => ct.saldo_atual !== 0).map(ct => ({
+                    name: (ct.nome_banco || ct.nome_conta).slice(0, 12),
+                    saldo: ct.saldo_atual,
+                    fill: ct.saldo_atual >= 0 ? "#34d399" : "#f87171",
+                  }))} margin={{ top: 4, right: 8, left: 8, bottom: 40 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={{ fill: "#64748b", fontSize: 10 }}
+                      angle={-35} textAnchor="end" interval={0} />
+                    <YAxis tick={{ fill: "#64748b", fontSize: 10 }}
+                      tickFormatter={(v) => fmtK(v)} width={60} />
+                    <Tooltip formatter={(v: any) => fmtBRL(v)} labelStyle={{ color: "#cbd5e1" }}
+                      contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
+                    <Bar dataKey="saldo" radius={[4,4,0,0]}>
+                      {contas.filter(ct => ct.saldo_atual !== 0).map((ct, i) => (
+                        <Cell key={i} fill={ct.saldo_atual >= 0 ? "#34d39966" : "#f8717166"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionCard>
+          </AnimatedCard>
+        </div>
+      )}
+
     </div>
   );
 }
