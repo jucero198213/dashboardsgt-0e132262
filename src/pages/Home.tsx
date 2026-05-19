@@ -398,6 +398,15 @@ export default function Home() {
   // ── Cards de módulo agrupado — mesmo padrão visual do ModuleCard ──
   const moduleCards: ModuleCardData[] = [
     {
+      key: "receitaflow",
+      icon: Sparkles,
+      title: "ReceitaFlow",
+      description: "Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.",
+      cta: "Acessar ReceitaFlow",
+      href: "https://receitaflow.lovable.app",
+      tone: "cyan" as const,
+    },
+    {
       key: "financeiro",
       icon: Banknote,
       title: "Financeiro",
@@ -422,7 +431,7 @@ export default function Home() {
       description: "Operacional, gestão de frota, financiamentos, manutenção e abastecimento.",
       cta: "Acessar operação",
       onClick: () => navigate("/operacional"),
-      tone: "cyan" as const,      // ciano = movimento/logística
+      tone: "blue" as const,       // azul = movimento/logística
     },
     {
       key: "compras",
