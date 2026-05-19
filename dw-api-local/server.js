@@ -1092,21 +1092,23 @@ app.post("/dw-bancos", async (req, res) => {
   const { filial, empresa, dataInicio, dataFim } = req.body ?? {};
 
   try {
-    const p = await getPool();
-
+    const p    = await getPool();
     const hoje = new Date();
-    const di = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const df = dataFim    ? new Date(dataFim)    : hoje;
+    const di   = dataInicio ? new Date(dataInicio) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const df   = dataFim    ? new Date(dataFim)    : hoje;
 
-    // ── 1. Cadastro BANCTA (apenas contas com banco real) ─────────────────
-    // CODBCO IS NOT NULL + <> '' exclui carteiras/contas internas sem banco
-    const bancaReq = p.request();
-    bancaReq.input("filial",  sql.VarChar(20), filial  || null);
-    bancaReq.input("empresa", sql.VarChar(20), empresa || null);
+    // ═══════════════════════════════════════════════════════════════════════
+    // QUERY 1 — Cadastro de contas (BANCTA)
+    // Filtra apenas contas com banco real (CODBCO preenchido).
+    // Carteiras internas têm CODBCO nulo/vazio e são excluídas aqui.
+    // ═══════════════════════════════════════════════════════════════════════
+    const q1 = p.request();
+    q1.input("filial",  sql.VarChar(20), filial  || null);
+    q1.input("empresa", sql.VarChar(20), empresa || null);
 
-    const bancaResult = await bancaReq.query(`
+    const rCadastro = await q1.query(`
       SELECT
-        CA.CODCTA                                            AS cod_conta,
+        CA.CODCTA                                           AS cod_conta,
         CA.CODFIL                                           AS filial,
         CA.DESCRI                                           AS nome_conta,
         ISNULL(CA.NUMAGC,'')                                AS agencia,
@@ -1118,82 +1120,147 @@ app.post("/dw-bancos", async (req, res) => {
         LEFT JOIN RODBCO BC WITH (NOLOCK) ON BC.CODBCO = CA.CODBCO
         LEFT JOIN RODFIL  F  WITH (NOLOCK) ON F.CODFIL  = CA.CODFIL
       WHERE CA.SITUAC LIKE 'A%'
-        AND CA.CODBCO IS NOT NULL
+        AND CA.CODBCO     IS NOT NULL
         AND LTRIM(RTRIM(CA.CODBCO)) <> ''
         AND (@filial  IS NULL OR CA.CODFIL = @filial)
         AND (@empresa IS NULL OR F.CODEMP  = @empresa)
     `);
 
-    // ── 2. Saldo armazenado no BANCTA (campo varia por versão Datasul) ────
-    // Tenta vários nomes de campo comuns. O saldo armazenado é atualizado
-    // pelo fechamento bancário e equivale ao "Saldo Anterior" do ERP.
-    // Se não existir nenhum, cai no cálculo via BANRAZ (mais lento).
-    const SALDO_FIELDS = ['SALDOAT', 'SALDOA', 'SALDBA', 'SALDO_AT', 'VLR_SALDO', 'SALDO'];
-    const bancaSaldoMap = new Map();
-    let saldoFieldFound = false;
+    // ═══════════════════════════════════════════════════════════════════════
+    // QUERY 2 — Movimentação do PERÍODO (BANRAZ puro, SEM join com BANCTA)
+    // Separado do cadastro para não excluir lançamentos cuja conta existe em
+    // BANRAZ mas tem CODBCO diferente ou nulo em BANCTA.
+    // ═══════════════════════════════════════════════════════════════════════
+    const q2 = p.request();
+    q2.input("dataInicio", sql.Date, di);
+    q2.input("dataFim",    sql.Date, df);
+    q2.input("filial",     sql.VarChar(20), filial  || null);
+    q2.input("empresa",    sql.VarChar(20), empresa || null);
 
-    for (const field of SALDO_FIELDS) {
-      try {
-        const sr = await p.request().query(
-          `SELECT CODCTA, CODFIL, ISNULL(${field}, 0) AS saldo FROM BANCTA WITH (NOLOCK)`
-        );
-        for (const r of sr.recordset)
-          bancaSaldoMap.set(r.CODFIL + ":" + r.CODCTA, parseFloat(r.saldo) || 0);
-        saldoFieldFound = true;
-        console.log(`[/dw-bancos] Saldo field found: BANCTA.${field}`);
-        break;
-      } catch (_) { /* tenta o próximo */ }
-    }
-
-    // ── 3. Movimentação do PERÍODO via BANRAZ ─────────────────────────────
-    // SITUAC NOT IN ('C') = inclui abertos (O) + efetivados/compensados (E/L)
-    const movReq = p.request();
-    movReq.input("dataInicio", sql.Date, di);
-    movReq.input("dataFim",    sql.Date, df);
-    movReq.input("filial",     sql.VarChar(20), filial  || null);
-    movReq.input("empresa",    sql.VarChar(20), empresa || null);
-
-    const movResult = await movReq.query(`
+    const rMov = await q2.query(`
       SELECT
-        B.CODCTA AS cod_conta,
-        B.CODFIL AS filial,
-        CAST(SUM(CASE WHEN B.DEBCRE='C' AND B.DATDOC BETWEEN @dataInicio AND @dataFim
-                      THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS entradas_mes,
-        CAST(SUM(CASE WHEN B.DEBCRE='D' AND B.DATDOC BETWEEN @dataInicio AND @dataFim
-                      THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS saidas_mes,
-        CAST(SUM(CASE WHEN B.DATDOC < @dataInicio
-                      THEN CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE -B.VLRDOC END
-                      ELSE 0 END) AS DECIMAL(18,2)) AS saldo_anterior_banraz
+        B.CODCTA,
+        B.CODFIL,
+        CAST(SUM(CASE WHEN B.DEBCRE = 'C' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS entradas_mes,
+        CAST(SUM(CASE WHEN B.DEBCRE = 'D' THEN B.VLRDOC ELSE 0 END) AS DECIMAL(18,2)) AS saidas_mes
       FROM BANRAZ B WITH (NOLOCK)
-        INNER JOIN BANCTA C WITH (NOLOCK) ON C.CODCTA = B.CODCTA
-          AND C.CODBCO IS NOT NULL AND LTRIM(RTRIM(C.CODBCO)) <> ''
         LEFT JOIN RODFIL F WITH (NOLOCK) ON F.CODFIL = B.CODFIL
       WHERE B.SITUAC NOT IN ('C')
         AND B.VLRDOC > 0
-        AND C.SITUAC LIKE 'A%'
-        AND B.DATDOC <= @dataFim
-        AND (@filial  IS NULL OR B.CODFIL  = @filial)
-        AND (@empresa IS NULL OR F.CODEMP  = @empresa)
+        AND B.DATDOC BETWEEN @dataInicio AND @dataFim
+        AND (@filial  IS NULL OR B.CODFIL = @filial)
+        AND (@empresa IS NULL OR F.CODEMP = @empresa)
       GROUP BY B.CODCTA, B.CODFIL
     `);
 
     const movMap = new Map();
-    for (const r of movResult.recordset)
-      movMap.set(r.filial + ":" + r.cod_conta, r);
+    for (const r of rMov.recordset)
+      movMap.set(`${r.CODFIL}:${r.CODCTA}`, r);
 
-    // ── 4. Monta resultado final ──────────────────────────────────────────
-    const contas = bancaResult.recordset.map(ca => {
-      const key  = ca.filial + ":" + ca.cod_conta;
-      const mov  = movMap.get(key) ?? { entradas_mes: 0, saidas_mes: 0, saldo_anterior_banraz: 0 };
-      const ent  = parseFloat(mov.entradas_mes)          || 0;
-      const sai  = parseFloat(mov.saidas_mes)            || 0;
-      const antB = parseFloat(mov.saldo_anterior_banraz) || 0;
+    // ═══════════════════════════════════════════════════════════════════════
+    // QUERY 3 — Saldo anterior
+    // Estratégia em cascata:
+    //   A) BANSALDO  → fechamento mensal armazenado (mais preciso, como o ERP)
+    //   B) BANCTA    → campo de saldo armazenado (SALDOAT, SALDOA, etc.)
+    //   C) BANRAZ    → acumulado dos últimos 5 anos (fallback)
+    // ═══════════════════════════════════════════════════════════════════════
+    const saldoMap = new Map();
+    let saldoSource = 'banraz_5anos';
 
-      // Saldo anterior: usa campo do BANCTA se disponível (mais preciso),
-      // senão usa o acumulado histórico do BANRAZ (pode ter distorções).
-      const saldoAnt = saldoFieldFound
-        ? (bancaSaldoMap.get(key) ?? 0) - ent + sai   // BANCTA.saldo = saldo ATUAL; ant = atual - período
-        : antB;
+    // ── A) BANSALDO (fechamento mensal) ─────────────────────────────────
+    try {
+      const qA = p.request();
+      qA.input("dataRef", sql.Date, di);
+
+      // Tenta estrutura com DATFEC (data de fechamento)
+      let rA;
+      try {
+        rA = await qA.query(`
+          SELECT S.CODCTA, S.CODFIL, S.SALDO
+          FROM BANSALDO S WITH (NOLOCK)
+          WHERE S.DATFEC = (
+            SELECT MAX(S2.DATFEC) FROM BANSALDO S2 WITH (NOLOCK)
+            WHERE S2.DATFEC < @dataRef AND S2.CODCTA = S.CODCTA AND S2.CODFIL = S.CODFIL
+          )
+        `);
+      } catch {
+        // Tenta com MES/ANO
+        rA = await p.request().query(`
+          SELECT S.CODCTA, S.CODFIL, S.SALDO
+          FROM BANSALDO S WITH (NOLOCK)
+          WHERE S.ANO  = YEAR(DATEADD(MONTH,-1,@dataRef))
+            AND S.MES  = MONTH(DATEADD(MONTH,-1,@dataRef))
+        `);
+      }
+
+      if (rA.recordset.length > 0) {
+        for (const r of rA.recordset)
+          saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.SALDO) || 0);
+        saldoSource = 'BANSALDO';
+      }
+    } catch (_) { /* BANSALDO não existe — tenta B */ }
+
+    // ── B) BANCTA campo de saldo armazenado ──────────────────────────────
+    if (saldoSource !== 'BANSALDO') {
+      const candidatos = ['SALDOAT','SALDOA','SALDBA','VLR_SALDO','SALDO'];
+      for (const campo of candidatos) {
+        try {
+          const rB = await p.request().query(
+            `SELECT CODCTA, CODFIL, ISNULL(${campo},0) AS saldo FROM BANCTA WITH (NOLOCK)`
+          );
+          if (rB.recordset.length > 0) {
+            for (const r of rB.recordset)
+              saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo) || 0);
+            saldoSource = `BANCTA.${campo}`;
+            break;
+          }
+        } catch (_) { continue; }
+      }
+    }
+
+    // ── C) BANRAZ acumulado — últimos 5 anos (fallback) ──────────────────
+    if (saldoSource !== 'BANSALDO' && !saldoSource.startsWith('BANCTA.')) {
+      const limiteAnt = new Date(di.getFullYear() - 5, di.getMonth(), di.getDate());
+      const qC = p.request();
+      qC.input("dataInicio",   sql.Date, di);
+      qC.input("limiteAnt",    sql.Date, limiteAnt);
+      qC.input("filial",       sql.VarChar(20), filial  || null);
+      qC.input("empresa",      sql.VarChar(20), empresa || null);
+
+      const rC = await qC.query(`
+        SELECT B.CODCTA, B.CODFIL,
+          CAST(SUM(CASE WHEN B.DEBCRE='C' THEN B.VLRDOC ELSE -B.VLRDOC END) AS DECIMAL(18,2)) AS saldo_anterior
+        FROM BANRAZ B WITH (NOLOCK)
+          LEFT JOIN RODFIL F WITH (NOLOCK) ON F.CODFIL = B.CODFIL
+        WHERE B.SITUAC NOT IN ('C')
+          AND B.VLRDOC  > 0
+          AND B.DATDOC >= @limiteAnt
+          AND B.DATDOC <  @dataInicio
+          AND (@filial  IS NULL OR B.CODFIL = @filial)
+          AND (@empresa IS NULL OR F.CODEMP = @empresa)
+        GROUP BY B.CODCTA, B.CODFIL
+      `);
+      for (const r of rC.recordset)
+        saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo_anterior) || 0);
+    }
+
+    console.log(`[/dw-bancos] saldoSource=${saldoSource} | contas_cadastro=${rCadastro.recordset.length} | movimentos_periodo=${rMov.recordset.length}`);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // MERGE: Cadastro + Movimentos + Saldo
+    // ═══════════════════════════════════════════════════════════════════════
+    const contas = rCadastro.recordset.map(ca => {
+      const key = `${ca.filial}:${ca.cod_conta}`;
+      const mov = movMap.get(key) ?? { entradas_mes: 0, saidas_mes: 0 };
+      const ent = parseFloat(mov.entradas_mes) || 0;
+      const sai = parseFloat(mov.saidas_mes)   || 0;
+
+      let saldoAnt = parseFloat(saldoMap.get(key)) || 0;
+      // Se saldo veio de BANCTA.campo = saldo atual do cadastro (não anterior)
+      // Retroage: saldo_anterior = saldo_atual_cadastro - entradas + saidas
+      if (saldoSource.startsWith('BANCTA.')) {
+        saldoAnt = saldoAnt - ent + sai;
+      }
 
       return {
         cod_conta:      ca.cod_conta,
@@ -1219,7 +1286,13 @@ app.post("/dw-bancos", async (req, res) => {
 
     return res.json({
       data: resultado,
-      _meta: { saldoFieldFound, periodoInicio: di, periodoFim: df }
+      _meta: {
+        saldoSource,
+        contas_cadastro:   rCadastro.recordset.length,
+        movimentos_periodo: rMov.recordset.length,
+        periodoInicio: di,
+        periodoFim:    df,
+      }
     });
 
   } catch (err) {
