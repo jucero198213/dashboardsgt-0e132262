@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  PanelLeftClose, PanelLeftOpen, ExternalLink,
+  PanelLeftClose, PanelLeftOpen, ExternalLink, ChevronRight,
   Sun, Moon, Shield, LogOut, Home,
 } from "lucide-react";
 import { APP_NAV, type AppNavItem } from "./appNav";
@@ -107,22 +107,39 @@ export function AppSidebar() {
           /* ── COLLAPSED ── */
           if (collapsed) {
             return (
-              <div key={item.id} className="relative px-1.5 py-[2px]">
+              <div key={item.id} className="relative px-1.5 py-[2px] group/item">
                 {showSection && <div className="h-px mx-1 my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
                 {active && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                 )}
                 <button
                   onClick={() => handleClick(item)}
-                  title={item.label}
-                  className={`group relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
+                  aria-label={item.label}
+                  className={`relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
                     ${active
                       ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
-                      : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300"
+                      : "border-transparent text-slate-500 group-hover/item:bg-amber-500/10 group-hover/item:border-amber-400/20 group-hover/item:text-amber-300"
                     }`}
                 >
                   <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
                 </button>
+
+                {/* ── Flyout label (hover) ── */}
+                <div
+                  className="pointer-events-none absolute left-[calc(100%-6px)] top-1/2 z-50 -translate-y-1/2
+                    flex items-center gap-1.5 whitespace-nowrap rounded-r-full rounded-l-md
+                    pl-4 pr-3 py-1.5 text-[11px] font-semibold tracking-wide
+                    border border-l-0 border-amber-400/40
+                    bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5
+                    text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_20px_rgba(245,158,11,0.25)]
+                    backdrop-blur-md
+                    opacity-0 -translate-x-2
+                    transition-all duration-200 ease-out
+                    group-hover/item:opacity-100 group-hover/item:translate-x-0 group-hover/item:pointer-events-auto"
+                >
+                  {item.label}
+                  <ChevronRight className="h-3 w-3 text-amber-300/80" />
+                </div>
               </div>
             );
           }
