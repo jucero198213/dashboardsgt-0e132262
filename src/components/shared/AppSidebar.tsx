@@ -7,6 +7,7 @@ import {
 import { APP_NAV, type AppNavItem } from "./appNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import sgtLogo from "@/assets/sgt-logo.png";
 
 const STORAGE_KEY = "sgt-sidebar-collapsed";
 
