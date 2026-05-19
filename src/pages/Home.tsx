@@ -92,7 +92,7 @@ interface ModuleCardData {
 
 const TONE: Record<
   string,
-  { iconBg: string; iconText: string; ring: string; cta: string; glow: string }
+  { iconBg: string; iconText: string; ring: string; cta: string; glow: string; accent: string; hoverShadow: string }
 > = {
   amber: {
     iconBg: "bg-amber-400/10 border border-amber-400/20",
@@ -100,6 +100,8 @@ const TONE: Record<
     ring: "hover:border-amber-400/40",
     cta: "text-amber-300",
     glow: "from-amber-400/20",
+    accent: "from-amber-400/70 via-amber-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,191,36,0.12)]",
   },
   violet: {
     iconBg: "bg-violet-400/10 border border-violet-400/20",
@@ -107,6 +109,8 @@ const TONE: Record<
     ring: "hover:border-violet-400/40",
     cta: "text-violet-300",
     glow: "from-violet-400/20",
+    accent: "from-violet-400/70 via-violet-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(167,139,250,0.12)]",
   },
   slate: {
     iconBg: "bg-slate-400/10 border border-slate-400/20",
@@ -114,6 +118,8 @@ const TONE: Record<
     ring: "",
     cta: "text-slate-400",
     glow: "from-slate-400/10",
+    accent: "from-slate-400/40 via-slate-400/15 to-transparent",
+    hoverShadow: "",
   },
   emerald: {
     iconBg: "bg-emerald-400/10 border border-emerald-400/20",
@@ -121,6 +127,8 @@ const TONE: Record<
     ring: "hover:border-emerald-400/40",
     cta: "text-emerald-300",
     glow: "from-emerald-400/20",
+    accent: "from-emerald-400/70 via-emerald-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(52,211,153,0.12)]",
   },
   cyan: {
     iconBg: "bg-cyan-400/10 border border-cyan-400/20",
@@ -128,6 +136,8 @@ const TONE: Record<
     ring: "hover:border-cyan-400/40",
     cta: "text-cyan-400",
     glow: "from-cyan-400/20",
+    accent: "from-cyan-400/70 via-cyan-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(34,211,238,0.12)]",
   },
   rose: {
     iconBg: "bg-rose-400/10 border border-rose-400/20",
@@ -135,6 +145,8 @@ const TONE: Record<
     ring: "hover:border-rose-400/40",
     cta: "text-rose-300",
     glow: "from-rose-400/20",
+    accent: "from-rose-400/70 via-rose-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,113,133,0.12)]",
   },
   orange: {
     iconBg: "bg-orange-400/10 border border-orange-400/20",
@@ -142,6 +154,8 @@ const TONE: Record<
     ring: "hover:border-orange-400/40",
     cta: "text-orange-300",
     glow: "from-orange-400/20",
+    accent: "from-orange-400/70 via-orange-400/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,146,60,0.12)]",
   },
   blue: {
     iconBg: "bg-[#4A6FB8]/15 border border-[#4A6FB8]/30",
@@ -149,6 +163,8 @@ const TONE: Record<
     ring: "hover:border-[#4A6FB8]/50",
     cta: "text-[#A8C0E8]",
     glow: "from-[#4A6FB8]/25",
+    accent: "from-[#4A6FB8]/70 via-[#4A6FB8]/30 to-transparent",
+    hoverShadow: "hover:shadow-[0_8px_32px_rgba(74,111,184,0.15)]",
   },
 };
 
@@ -263,12 +279,17 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.35, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={data.disabled ? undefined : { y: -4, transition: { duration: 0.12, ease: "easeOut" } }}
-      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${
+      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
         data.disabled
           ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
-          : "cursor-pointer dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white hover:dark:bg-white/[0.08] hover:bg-slate-50 dark:hover:border-white/20 hover:border-slate-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)]"
+          : "cursor-pointer dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white hover:dark:bg-white/[0.07] hover:bg-slate-50 dark:hover:border-white/20 hover:border-slate-300"
       }`}
     >
+      {/* Linha de acento no topo */}
+      {!data.disabled && (
+        <div className={`absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r ${tone.accent}`} />
+      )}
+
       {/* Glow superior */}
       <div
         className={`pointer-events-none absolute -top-20 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-gradient-to-b ${tone.glow} to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100`}
@@ -284,9 +305,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       )}
 
       {/* Ícone */}
-      <div
-        className={`flex h-12 w-12 items-center justify-center rounded-2xl ${tone.iconBg} ${tone.iconText}`}
-      >
+      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 ${tone.iconBg} ${tone.iconText}`}>
         <Icon className="h-5 w-5" />
       </div>
 
@@ -407,7 +426,7 @@ export default function Home() {
       description: "Contas a pagar e receber, conciliação bancária, fluxo de caixa e relatórios financeiros.",
       cta: "Acessar financeiro",
       onClick: () => navigate("/financeiro"),
-      tone: "emerald" as const,
+      tone: "emerald" as const,   // verde = dinheiro/finanças
     },
     {
       key: "gestao",
@@ -416,7 +435,7 @@ export default function Home() {
       description: "Painel executivo, indicadores estratégicos e faturamento consolidado.",
       cta: "Acessar gestão",
       onClick: () => navigate("/executivo"),
-      tone: "violet" as const,
+      tone: "violet" as const,    // violeta = inteligência/estratégia
     },
     {
       key: "operacao",
@@ -425,7 +444,7 @@ export default function Home() {
       description: "Operacional, gestão de frota, financiamentos, manutenção e abastecimento.",
       cta: "Acessar operação",
       onClick: () => navigate("/operacional"),
-      tone: "cyan" as const,
+      tone: "cyan" as const,      // ciano = movimento/logística
     },
     {
       key: "compras",
@@ -434,16 +453,16 @@ export default function Home() {
       description: "Notas fiscais de entrada, fornecedores, grupos de produtos e centro de custo.",
       cta: "Acessar compras",
       onClick: () => navigate("/compras"),
-      tone: "amber" as const,
+      tone: "orange" as const,    // laranja = comércio/aquisição
     },
     {
       key: "rh",
-      icon: Users,
+      icon: UserCog,
       title: "RH",
       description: "Gestão de colaboradores, folha de pagamento, admissões e desligamentos.",
       cta: "Acessar RH",
       onClick: () => navigate("/rh"),
-      tone: "violet" as const,
+      tone: "rose" as const,      // rosa = pessoas/equipe
     },
   ];
 
