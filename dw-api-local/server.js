@@ -1330,6 +1330,8 @@ app.post("/dw-bancos-extrato", async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ENDPOINT: /dw-financiamento-frota
 //  Estrutura de joins (SQL corrigido):
 //    PAGDOCI I  → parcelas (tem DATVEN = data de vencimento)
 //    PAGDOC  D  → cabeçalho do documento (tem NUMCTF, VLRDOC, SITUAC, etc.)
