@@ -1799,8 +1799,8 @@ function ScreenBancos() {
         })}
       </div>
 
-      {/* ── Extrato com tabs por conta ── */}
-      <div className={expandedCard ? "animate-[fade-slide-down_0.25s_ease-out]" : ""}>
+      {/* ── Extrato — visível apenas quando um card está expandido ── */}
+      {expandedCard && <div className="animate-[fade-slide-down_0.25s_ease-out]">
       <SectionCard>
           {/* Tab strip — oculto quando há card expandido (extrato já identificado pelo card) */}
           {!expandedCard && (
@@ -1927,7 +1927,7 @@ function ScreenBancos() {
             </div>
           )}
       </SectionCard>
-      </div>
+      </div>}
       </> /* end viewMode === "cards" */}
 
       {/* ══════════════════════════════════════════════════════ */}
