@@ -7,6 +7,7 @@ import {
 import { APP_NAV, type AppNavItem } from "./appNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import sgtLogo from "@/assets/sgt-logo.png";
 
 const STORAGE_KEY = "sgt-sidebar-collapsed";
 
@@ -62,11 +63,16 @@ export function AppSidebar() {
         boxShadow: "4px 0 24px rgba(0,0,0,0.25)",
       }}
     >
-      {/* ── HEADER: Toggle ── */}
+      {/* ── HEADER: Logo + Toggle ── */}
       <div
-        className="flex items-center justify-end border-b shrink-0 px-2 py-2.5"
+        className={`flex items-center border-b shrink-0 px-2 py-2.5 ${collapsed ? "flex-col gap-1.5" : "justify-between gap-2"}`}
         style={{ borderColor: "var(--sgt-border-subtle)" }}
       >
+        <img
+          src={sgtLogo}
+          alt="SGT"
+          className={`block w-auto object-contain shrink-0 transition-all duration-300 ${collapsed ? "h-5" : "h-7"}`}
+        />
         <button
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Expandir menu" : "Recolher menu"}
