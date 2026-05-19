@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign, TrendingDown, Clock, CheckCircle, AlertTriangle,
@@ -404,8 +404,6 @@ export default function ContasAReceber() {
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
           <div className="flex items-center gap-3">
-            <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
-            <div className="h-6 w-px bg-[var(--sgt-border-medium)]" />
             <div className="flex flex-col leading-none">
               <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
               <span className="text-[17px] font-black tracking-[-0.03em] text-white">Contas a Receber</span>
