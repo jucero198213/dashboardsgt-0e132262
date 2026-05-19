@@ -474,6 +474,7 @@ export default function Indicadores() {
                           colorRgb: "148,163,184",
                           bgColor: "rgba(148,163,184,0.10)",
                           label: "",
+                          displayName: undefined as string | undefined,
                         };
                         const Icon = identity.icon;
                         const statusColor = abaixoDaMeta ? "#34d399" : "#f87171";
