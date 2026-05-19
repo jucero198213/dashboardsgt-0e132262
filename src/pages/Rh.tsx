@@ -10,7 +10,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
   Tooltip as ReTooltip, CartesianGrid, Cell,
 } from "recharts";
-import sgtLogo from "@/assets/sgt-logo.png";
+
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
