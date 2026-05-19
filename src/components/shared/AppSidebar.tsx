@@ -85,12 +85,12 @@ export function AppSidebar() {
       </div>
 
       {/* ── HOME BUTTON ── */}
-      <div className="px-2 pt-2.5 pb-1 shrink-0">
+      <div className={`pt-2.5 pb-1 shrink-0 flex ${collapsed ? "justify-center px-0" : "px-2"}`}>
         <button
           onClick={() => navigate("/home")}
           title="Início"
-          className={`w-full flex items-center gap-2.5 rounded-xl border transition-all duration-200 font-semibold text-[12px]
-            ${collapsed ? "justify-center px-0 py-2.5 h-10" : "px-3 py-2.5"}
+          className={`flex items-center gap-2.5 rounded-xl border transition-all duration-200 font-semibold text-[12px]
+            ${collapsed ? "justify-center h-9 w-9" : "w-full px-3 py-2.5"}
             ${isHomeActive
               ? "bg-amber-500/20 border-amber-400/50 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.2)]"
               : "bg-[var(--sgt-row-hover)] border-[var(--sgt-border-subtle)] text-slate-400 hover:bg-amber-500/10 hover:border-amber-400/30 hover:text-amber-300"
@@ -117,8 +117,8 @@ export function AppSidebar() {
           /* ── COLLAPSED ── */
           if (collapsed) {
             return (
-              <div key={item.id} className="relative px-1.5 py-[2px]">
-                {showSection && <div className="h-px mx-1 my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
+              <div key={item.id} className="relative flex flex-col items-center py-[2px]">
+                {showSection && <div className="w-8 h-px my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
                 {active && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                 )}
@@ -129,7 +129,7 @@ export function AppSidebar() {
                     setHovered({ id: item.id, label: item.label, icon: item.icon, active, top: r.top, left: r.left, height: r.height });
                   }}
                   aria-label={item.label}
-                  className={`relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
+                  className={`flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
                     ${active
                       ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
                       : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300"
