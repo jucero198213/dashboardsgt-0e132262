@@ -20,7 +20,7 @@ export function AppSidebar() {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
   });
-  const [hovered, setHovered] = useState<{ id: string; label: string; top: number; left: number } | null>(null);
+  const [hovered, setHovered] = useState<{ id: string; label: string; icon: AppNavItem["icon"]; active: boolean; top: number; left: number; height: number } | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
