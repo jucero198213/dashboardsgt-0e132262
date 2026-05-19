@@ -188,13 +188,13 @@ export function AppSidebar() {
     {/* ── FLYOUT global (escapa o overflow do scroll) ── */}
     {collapsed && hovered && (
       <div
-        className="pointer-events-none fixed z-[60] flex items-center gap-1.5 whitespace-nowrap
-          rounded-r-full rounded-l-md pl-4 pr-3 py-1.5 text-[11px] font-semibold tracking-wide
+        className="pointer-events-none fixed z-[60] flex h-9 items-center gap-1.5 whitespace-nowrap
+          rounded-r-xl pl-3 pr-3 text-[12px] font-semibold tracking-wide
           border border-l-0 border-amber-400/40
-          bg-gradient-to-r from-amber-500/30 via-amber-500/18 to-amber-500/5
+          bg-gradient-to-r from-amber-500/25 via-amber-500/15 to-amber-500/5
           text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_22px_rgba(245,158,11,0.28)]
           backdrop-blur-md animate-fade-in"
-        style={{ top: hovered.top, left: hovered.left - 4, transform: "translateY(-50%)" }}
+        style={{ top: hovered.top, left: hovered.left - 6 }}
       >
         {hovered.label}
         <ChevronRight className="h-3 w-3 text-amber-300/80" />
