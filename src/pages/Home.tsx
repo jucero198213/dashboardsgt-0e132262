@@ -1,4 +1,4 @@
-import { useRef, createContext, useContext } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import {
@@ -334,32 +334,29 @@ function openOfficeApp(app: "excel" | "word") {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Contexto que propaga o container de scroll para filhos           */
+/*  Wrapper com animação ao entrar na viewport (reversível)          */
 /* ---------------------------------------------------------------- */
-const ScrollCtx = createContext<React.RefObject<HTMLElement | null>>({ current: null });
-
-/* ---------------------------------------------------------------- */
-/*  Wrapper com animação dirigida pelo scroll (não whileInView)      */
-/* ---------------------------------------------------------------- */
-function ScrollReveal({ children, index = 0 }: { children: React.ReactNode; index?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const container = useContext(ScrollCtx) as React.RefObject<HTMLElement>;
+function Reveal({
+  children,
+  delay = 0,
+  from = "bottom",
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  from?: "bottom" | "left" | "right";
+  className?: string;
+}) {
   const reduce = useReducedMotion();
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    container,
-    offset: ["0 1", "0.6 0.75"],
-  });
-
-  const y       = useTransform(scrollYProgress, [0, 1], [72, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.25, 1], [0, 0.1, 1]);
-  const scale   = useTransform(scrollYProgress, [0, 1], [0.88, 1]);
-
+  const x = from === "left" ? -48 : from === "right" ? 48 : 0;
+  const y = from === "bottom" ? 52 : 0;
   return (
     <motion.div
-      ref={ref}
-      style={{ y: reduce ? 0 : y, opacity: reduce ? 1 : opacity, scale: reduce ? 1 : scale, height: "100%" }}
+      className={className}
+      initial={reduce ? false : { opacity: 0, y, x, scale: 0.94 }}
+      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.15 }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -381,32 +378,6 @@ export default function Home() {
   const logoY = useTransform(scrollY, [0, 600], [0, 180]);
   const heroOpacity = useTransform(scrollY, [0, 300, 600], [1, 0.6, 0]);
 
-  // ── Sticky scroll story — cards fixados ──────────────────────────
-  const featuredRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: fp } = useScroll({
-    target: featuredRef,
-    container: scrollRef as React.RefObject<HTMLElement>,
-    offset: ["start start", "end start"],
-  });
-
-  // Header da secao entra e some
-  const fHeaderY       = useTransform(fp, [0, 0.10], [32, 0]);
-  const fHeaderOpacity = useTransform(fp, [0, 0.08, 0.72, 0.92], [0, 1, 1, 0]);
-
-  // Card 1 — anima em [0 → 0.25]
-  const fc1Y = useTransform(fp, [0.00, 0.25], [80, 0]);
-  const fc1O = useTransform(fp, [0.00, 0.25], [0, 1]);
-  const fc1S = useTransform(fp, [0.00, 0.25], [0.84, 1]);
-
-  // Card 2 — anima em [0.18 → 0.43]
-  const fc2Y = useTransform(fp, [0.18, 0.43], [80, 0]);
-  const fc2O = useTransform(fp, [0.18, 0.43], [0, 1]);
-  const fc2S = useTransform(fp, [0.18, 0.43], [0.84, 1]);
-
-  // Card 3 — anima em [0.36 → 0.61]
-  const fc3Y = useTransform(fp, [0.36, 0.61], [80, 0]);
-  const fc3O = useTransform(fp, [0.36, 0.61], [0, 1]);
-  const fc3S = useTransform(fp, [0.36, 0.61], [0.84, 1]);
 
 
 
@@ -556,7 +527,7 @@ export default function Home() {
           style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
 
 
-        <ScrollCtx.Provider value={scrollRef}>
+        <>
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
           {/* Top bar */}
@@ -656,166 +627,109 @@ export default function Home() {
           </motion.section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
-          <section id="modulos" className="relative w-full">
+          <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
 
-            {/* ═══ STICKY SCROLL STORY — cards fixados animam ao rolar ═══ */}
-            <div ref={featuredRef} style={{ minHeight: "260vh" }} className="relative">
-              {/* Container sticky: ocupa 100dvh e gruda no topo enquanto o usuário
-                  rola os 260 vh — os cards animam conforme o progresso do scroll */}
-              <div
-                className="sticky top-0 flex flex-col justify-center overflow-hidden"
-                style={{ height: "100dvh" }}
-              >
-                <div className="relative mx-auto w-full max-w-[1500px] px-4 lg:px-10">
+            <Reveal className="mb-10 text-center">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
+                Acessos rápidos
+              </p>
+              <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
+                Acessos do Workspace SGT
+              </h2>
+            </Reveal>
 
-                  {/* Barra de progresso do scroll */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-40 h-[2px] rounded-full overflow-hidden"
-                    style={{ background: "var(--sgt-border-subtle)" }}>
-                    <motion.div
-                      className="h-full rounded-full bg-gradient-to-r from-amber-400/60 to-amber-300/30"
-                      style={{ scaleX: fp, transformOrigin: "left" }}
-                    />
-                  </div>
-
-                  {/* Título — entra com scroll e some no final */}
-                  <motion.div
-                    style={{ y: reduce ? 0 : fHeaderY, opacity: reduce ? 1 : fHeaderOpacity }}
-                    className="mb-10 text-center"
-                  >
-                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-amber-400/80">
-                      Acessos rápidos
-                    </p>
-                    <h2 className="text-[clamp(1.75rem,3.5vw,2.8rem)] font-black tracking-[-0.03em] sgt-text">
-                      Acessos do Workspace SGT
-                    </h2>
-                  </motion.div>
-
-                  {/* Cards — animam em sequência conforme o scroll */}
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <motion.div style={{ y: reduce ? 0 : fc1Y, opacity: reduce ? 1 : fc1O, scale: reduce ? 1 : fc1S }} className="h-full">
-                      <ModuleCard data={pinnedModules[0]} index={0} />
-                    </motion.div>
-                    <motion.div style={{ y: reduce ? 0 : fc2Y, opacity: reduce ? 1 : fc2O, scale: reduce ? 1 : fc2S }} className="h-full">
-                      <ModuleCard data={pinnedModules[1]} index={0} />
-                    </motion.div>
-                    <motion.div style={{ y: reduce ? 0 : fc3Y, opacity: reduce ? 1 : fc3O, scale: reduce ? 1 : fc3S }} className="h-full">
-                      <ModuleCard data={pinnedModules[2]} index={0} />
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
+            {/* Cards fixados — Visual Rodopar, Portal WR SGT, Chamados */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
+              {pinnedModules.map((m, i) => (
+                <Reveal key={m.key} delay={i * 0.12} className="h-full">
+                  <ModuleCard data={m} index={0} />
+                </Reveal>
+              ))}
             </div>
-            {/* ═══ FIM STICKY ═══ */}
 
-            {/* Módulos do sistema — scroll-driven reveal via ScrollReveal */}
-            <div className="mx-auto w-full max-w-[1500px] px-4 py-14 lg:px-10">
-              <ScrollReveal>
-                <div className="mb-8 flex items-center gap-4">
-                  <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.32em] dark:text-slate-500 text-slate-400">
-                    Módulos do sistema
-                  </p>
-                  <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
-                </div>
-              </ScrollReveal>
-
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {moduleCards.map((m, i) => (
-                  <ScrollReveal key={m.key} index={i}>
-                    <ModuleCard data={m} index={0} />
-                  </ScrollReveal>
-                ))}
+            {/* Separador Módulos do sistema */}
+            <Reveal delay={0.05} className="mb-8">
+              <div className="flex items-center gap-4">
+                <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] dark:text-slate-500 text-slate-400">
+                  Módulos do sistema
+                </p>
+                <div className="h-px flex-1 dark:bg-white/[0.07] bg-slate-200" />
               </div>
+            </Reveal>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {moduleCards.map((m, i) => (
+                <Reveal key={m.key} delay={i * 0.1} className="h-full">
+                  <ModuleCard data={m} index={0} />
+                </Reveal>
+              ))}
             </div>
           </section>
 
           {/* ── FERRAMENTAS COMPLEMENTARES ── */}
           <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
-            <ScrollReveal>
-              <div className="mb-10 text-center">
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-cyan-400/80">
-                  Ferramentas complementares
-                </p>
-                <h2 className="text-[clamp(1.4rem,2.6vw,2rem)] font-bold tracking-[-0.025em] sgt-text">
-                  Recursos de apoio ao ecossistema
-                </h2>
-              </div>
-            </ScrollReveal>
+            <Reveal className="mb-10 text-center">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.32em] text-cyan-400/80">
+                Ferramentas complementares
+              </p>
+              <h2 className="text-[clamp(1.4rem,2.6vw,2rem)] font-bold tracking-[-0.025em] sgt-text">
+                Recursos de apoio ao ecossistema
+              </h2>
+            </Reveal>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[900px] mx-auto">
               {[
-                {
-                  href: "https://receitaflow.lovable.app",
-                  label: "ReceitaFlow",
+                { href: "https://receitaflow.lovable.app", label: "ReceitaFlow",
                   desc: "Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.",
                   iconEl: <Sparkles className="h-5 w-5" />,
                   iconCls: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
-                  hoverCls: "hover:border-cyan-400/30 hover:bg-[var(--sgt-input-hover)]/60",
-                  linkCls: "group-hover:text-cyan-300",
-                  onClick: undefined as (() => void) | undefined,
-                },
-                {
-                  href: "https://analyticspro.com.br",
-                  label: "Analytics Pro",
+                  hoverCls: "hover:border-cyan-400/30", linkCls: "group-hover:text-cyan-300", onClick: undefined as (() => void) | undefined },
+                { href: "https://analyticspro.com.br", label: "Analytics Pro",
                   desc: "Plataforma de análise e inteligência de dados para apoiar a tomada de decisão no ecossistema SGT.",
                   iconEl: <BarChart3 className="h-5 w-5" />,
                   iconCls: "border-violet-400/20 bg-violet-400/10 text-violet-300",
-                  hoverCls: "hover:border-violet-400/30 hover:bg-[var(--sgt-input-hover)]/60",
-                  linkCls: "group-hover:text-violet-300",
-                  onClick: undefined as (() => void) | undefined,
-                },
-                {
-                  href: undefined,
-                  label: "Microsoft Excel",
+                  hoverCls: "hover:border-violet-400/30", linkCls: "group-hover:text-violet-300", onClick: undefined as (() => void) | undefined },
+                { href: undefined, label: "Microsoft Excel",
                   desc: "Acesse o Microsoft Excel Online para criar e editar planilhas diretamente no navegador.",
                   iconEl: <Table className="h-5 w-5" />,
                   iconCls: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
-                  hoverCls: "hover:border-emerald-400/30 hover:bg-[var(--sgt-input-hover)]/60",
-                  linkCls: "group-hover:text-emerald-300",
-                  onClick: () => openOfficeApp("excel"),
-                },
-                {
-                  href: undefined,
-                  label: "Microsoft Word",
+                  hoverCls: "hover:border-emerald-400/30", linkCls: "group-hover:text-emerald-300", onClick: () => openOfficeApp("excel") },
+                { href: undefined, label: "Microsoft Word",
                   desc: "Acesse o Microsoft Word Online para criar e editar documentos diretamente no navegador.",
                   iconEl: <FileText className="h-5 w-5" />,
                   iconCls: "border-blue-400/20 bg-blue-400/10 text-blue-300",
-                  hoverCls: "hover:border-blue-400/30 hover:bg-[var(--sgt-input-hover)]/60",
-                  linkCls: "group-hover:text-blue-300",
-                  onClick: () => openOfficeApp("word"),
-                },
+                  hoverCls: "hover:border-blue-400/30", linkCls: "group-hover:text-blue-300", onClick: () => openOfficeApp("word") },
               ].map((item, i) => (
-                <ScrollReveal key={item.label} index={i}>
-                  <motion.div
-                    whileHover={{ y: -3, transition: { duration: 0.15 } }}
-                    className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors ${item.hoverCls} ${item.onClick ? "cursor-pointer" : ""} h-full`}
-                    onClick={item.onClick}
-                    role={item.onClick ? "button" : undefined}
-                    {...(item.href ? {
-                      as: "a" as unknown as undefined,
-                    } : {})}
-                  >
-                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>
-                      {item.iconEl}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {item.href ? (
-                          <a href={item.href} target="_blank" rel="noopener noreferrer"
-                            className="text-[15px] font-bold sgt-text hover:underline">
-                            {item.label}
-                          </a>
-                        ) : (
+                <Reveal key={item.label} delay={i * 0.1} className="h-full">
+                  {item.href ? (
+                    <motion.a href={item.href} target="_blank" rel="noopener noreferrer"
+                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:bg-[var(--sgt-input-hover)]/60 ${item.hoverCls} h-full`}>
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
                           <h3 className="text-[15px] font-bold sgt-text">{item.label}</h3>
-                        )}
-                        <ExternalLink className={`h-3 w-3 text-[var(--sgt-text-muted)] transition-colors ${item.linkCls}`} />
+                          <ExternalLink className={`h-3 w-3 text-[var(--sgt-text-muted)] transition-colors ${item.linkCls}`} />
+                        </div>
+                        <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">{item.desc}</p>
                       </div>
-                      <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </motion.div>
-                </ScrollReveal>
+                    </motion.a>
+                  ) : (
+                    <motion.button type="button" onClick={item.onClick}
+                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:bg-[var(--sgt-input-hover)]/60 ${item.hoverCls} text-left cursor-pointer w-full h-full`}>
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[15px] font-bold sgt-text">{item.label}</h3>
+                          <ExternalLink className={`h-3 w-3 text-[var(--sgt-text-muted)] transition-colors ${item.linkCls}`} />
+                        </div>
+                        <p className="mt-1 text-[13px] leading-relaxed text-[var(--sgt-text-muted)]">{item.desc}</p>
+                      </div>
+                    </motion.button>
+                  )}
+                </Reveal>
               ))}
             </div>
 
@@ -825,7 +739,7 @@ export default function Home() {
           </section>
 
         </div>
-        </ScrollCtx.Provider>
+        </>
       </section>
     </div>
   );
