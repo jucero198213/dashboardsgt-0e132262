@@ -14,7 +14,7 @@ import {
   MapPin, Phone, Star, Mail, PanelLeftClose, PanelLeftOpen,
   MoreHorizontal, ArrowUpDown, Activity, ExternalLink,
   LineChart as LineChartIcon, Headphones, UserCog, Briefcase, ShoppingCart, Fuel,
-  List, LayoutGrid, Table2, PieChart,
+  List, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
