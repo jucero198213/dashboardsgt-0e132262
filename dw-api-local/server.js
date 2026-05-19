@@ -1160,72 +1160,36 @@ app.post("/dw-bancos", async (req, res) => {
     // ═══════════════════════════════════════════════════════════════════════
     // QUERY 3 — Saldo anterior
     // Estratégia em cascata:
-    //   A) BANSALDO  → fechamento mensal armazenado (mais preciso, como o ERP)
-    //   B) BANCTA    → campo de saldo armazenado (SALDOAT, SALDOA, etc.)
-    //   C) BANRAZ    → acumulado dos últimos 5 anos (fallback)
+    //   A) BANCTA → campo de saldo armazenado (SALDOAT, SALDOA, SALDBA, etc.)
+    //   B) BANRAZ → acumulado dos últimos 5 anos (fallback)
     // ═══════════════════════════════════════════════════════════════════════
     const saldoMap = new Map();
     let saldoSource = 'banraz_5anos';
 
-    // ── A) BANSALDO (fechamento mensal) ─────────────────────────────────
-    try {
-      const qA = p.request();
-      qA.input("dataRef", sql.Date, di);
-
-      // Tenta estrutura com DATFEC (data de fechamento)
-      let rA;
+    // ── A) BANCTA campo de saldo armazenado ──────────────────────────────
+    const candidatos = ['SALDOAT','SALDOA','SALDBA','VLR_SALDO','SALDO'];
+    for (const campo of candidatos) {
       try {
-        rA = await qA.query(`
-          SELECT S.CODCTA, S.CODFIL, S.SALDO
-          FROM BANSALDO S WITH (NOLOCK)
-          WHERE S.DATFEC = (
-            SELECT MAX(S2.DATFEC) FROM BANSALDO S2 WITH (NOLOCK)
-            WHERE S2.DATFEC < @dataRef AND S2.CODCTA = S.CODCTA AND S2.CODFIL = S.CODFIL
-          )
-        `);
-      } catch {
-        // Tenta com MES/ANO
-        rA = await p.request().query(`
-          SELECT S.CODCTA, S.CODFIL, S.SALDO
-          FROM BANSALDO S WITH (NOLOCK)
-          WHERE S.ANO  = YEAR(DATEADD(MONTH,-1,@dataRef))
-            AND S.MES  = MONTH(DATEADD(MONTH,-1,@dataRef))
-        `);
-      }
-
-      if (rA.recordset.length > 0) {
-        for (const r of rA.recordset)
-          saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.SALDO) || 0);
-        saldoSource = 'BANSALDO';
-      }
-    } catch (_) { /* BANSALDO não existe — tenta B */ }
-
-    // ── B) BANCTA campo de saldo armazenado ──────────────────────────────
-    if (saldoSource !== 'BANSALDO') {
-      const candidatos = ['SALDOAT','SALDOA','SALDBA','VLR_SALDO','SALDO'];
-      for (const campo of candidatos) {
-        try {
-          const rB = await p.request().query(
-            `SELECT CODCTA, CODFIL, ISNULL(${campo},0) AS saldo FROM BANCTA WITH (NOLOCK)`
-          );
-          if (rB.recordset.length > 0) {
-            for (const r of rB.recordset)
-              saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo) || 0);
-            saldoSource = `BANCTA.${campo}`;
-            break;
-          }
-        } catch (_) { continue; }
-      }
+        const rB = await p.request().query(
+          `SELECT CODCTA, CODFIL, ISNULL(${campo},0) AS saldo FROM BANCTA WITH (NOLOCK)`
+        );
+        if (rB.recordset.length > 0) {
+          for (const r of rB.recordset)
+            saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo) || 0);
+          saldoSource = `BANCTA.${campo}`;
+          break;
+        }
+      } catch (_) { continue; }
     }
 
-    // ── C) BANRAZ acumulado — últimos 5 anos (fallback) ──────────────────
-    if (saldoSource !== 'BANSALDO' && !saldoSource.startsWith('BANCTA.')) {
+    // ── B) BANRAZ acumulado — últimos 5 anos (fallback) ──────────────────
+    if (!saldoSource.startsWith('BANCTA.')) {
       const limiteAnt = new Date(di.getFullYear() - 5, di.getMonth(), di.getDate());
       const qC = p.request();
-      qC.input("dataInicio",   sql.Date, di);
-      qC.input("limiteAnt",    sql.Date, limiteAnt);
-      qC.input("filial",       sql.VarChar(20), filial  || null);
-      qC.input("empresa",      sql.VarChar(20), empresa || null);
+      qC.input("dataInicio", sql.Date, di);
+      qC.input("limiteAnt",  sql.Date, limiteAnt);
+      qC.input("filial",     sql.VarChar(20), filial  || null);
+      qC.input("empresa",    sql.VarChar(20), empresa || null);
 
       const rC = await qC.query(`
         SELECT B.CODCTA, B.CODFIL,
