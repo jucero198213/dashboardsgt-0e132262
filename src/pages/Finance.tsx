@@ -1563,18 +1563,18 @@ function ScreenBancos() {
 
   const saldoTotal = contas.reduce((s, c) => s + c.saldo_atual, 0);
 
-  // Evolução diária do movimento do período
+  // Evolução diária — usa extratoData da conta ativa
   const evolucao = useMemo(() => {
     const map = new Map<string, number>();
-    lbRows.forEach(r => {
-      const dia = (r.DATA_LANCAMENTO ?? r.DATA_EMISSAO ?? "").slice(0, 10);
+    extratoData.forEach(r => {
+      const dia = (r.DATA_LANCAMENTO ?? r.DATA_COMPENSACAO ?? "").slice(0, 10);
       if (!dia) return;
-      const val = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
+      const val = Math.abs(r.VLRDOC ?? 0);
       map.set(dia, (map.get(dia) ?? 0) + (r.ORIGEM === "LB_C" ? val : -val));
     });
     return Array.from(map.entries()).sort((a,b) => a[0].localeCompare(b[0]))
       .map(([iso, liq]) => ({ dia: new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}), liq }));
-  }, [lbRows]);
+  }, [extratoData]);
 
   if (loadingContas || isFetchingDw) return <SkeletonLoader label="Carregando saldos bancários..." />;
 
@@ -1757,7 +1757,7 @@ function ScreenBancos() {
                     { label: "Saldo anterior",   value: fmtK(c.saldo_anterior ?? 0),                                                       clr: "text-slate-400" },
                     { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`,                                                         clr: "text-emerald-300" },
                     { label: "Saídas no mês",    value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
-                    { label: "Lançamentos",      value: String(lbRows.filter(r => r.COD_CONTA ? r.COD_CONTA === c.cod_conta : r.FILIAL === c.filial).length), clr: "text-slate-300" },
+                    { label: "Lançamentos",      value: extratoKey === c.cod_conta ? String(extratoData.length) : "—",                                        clr: "text-slate-300" },
                   ].map(row => (
                     <div key={row.label} className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-600">{row.label}</span>
