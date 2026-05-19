@@ -1,4 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 //  FinanciamentoFrota.tsx  –  Painel de financiamentos de veículos da frota
 //  Dados vindos de /dw-financiamento-frota (cada linha = uma parcela de um contrato)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -401,8 +401,6 @@ export default function FinanciamentoFrota() {
             {/* ════════ NAVBAR DESKTOP ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Financiamento de Frota</span>
