@@ -1493,6 +1493,7 @@ function ScreenBancos() {
   const [extratoPage, setExtratoPage] = useState(1);
   const [extratoData, setExtratoData] = useState<import("@/lib/dwApi").BancoExtratoRow[]>([]);
   const [loadingExtrato, setLoadingExtrato] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Busca contas bancárias com saldo real
   const recarregarContas = () => {
@@ -1655,7 +1656,7 @@ function ScreenBancos() {
             const Icon = t.icon;
             const active = viewMode === t.id;
             return (
-              <button key={t.id} onClick={() => setViewMode(t.id)}
+              <button key={t.id} onClick={() => { setViewMode(t.id); setExpandedCard(null); }}
                 className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-cyan-400/15 text-cyan-200" : "text-slate-500 hover:text-slate-300"}`}>
                 <Icon className="h-3 w-3" /> {t.label}
               </button>
@@ -1719,23 +1720,36 @@ function ScreenBancos() {
       {/* ══════════════════════════════════════════════════════ */}
       {viewMode === "cards" && <>
       {/* ── Cards por conta ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {contas.map((c, i) => {
+      <div className={`grid gap-3 transition-all duration-300 ${
+        expandedCard
+          ? "grid-cols-1 sm:grid-cols-1"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      }`}>
+        {(expandedCard
+          ? contas.filter(ct => ct.cod_conta === expandedCard)
+          : contas
+        ).map((c, i) => {
           const p = PALETA[i % PALETA.length];
           const tipoClass = tipoLabel[c.tipo_conta] ?? "bg-slate-400/10 border-slate-400/20 text-slate-400";
           const sigla = c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase();
+          const isExpanded = expandedCard === c.cod_conta;
           return (
-            <AnimatedCard key={c.cod_conta} delay={i * 80}>
-              <div className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-3.5 ${p.border} cursor-pointer`}
-                   onClick={() => setExtratoKey(c.cod_conta)}>
+            <AnimatedCard key={c.cod_conta} delay={expandedCard ? 0 : i * 80}>
+              <div
+                className={`rounded-[14px] border bg-[var(--sgt-bg-card)] p-3.5 ${p.border} cursor-pointer
+                  transition-all duration-200 hover:brightness-110
+                  ${isExpanded ? "ring-1 ring-amber-400/30 shadow-[0_0_30px_rgba(251,191,36,0.08)]" : ""}`}
+                onClick={() => {
+                  if (isExpanded) {
+                    setExpandedCard(null);
+                  } else {
+                    setExpandedCard(c.cod_conta);
+                    setExtratoKey(c.cod_conta);
+                  }
+                }}>
                 {/* Header */}
                 <div className="flex items-center gap-2.5 mb-3">
-                  <BankLogo
-                    nome={c.nome_banco}
-                    codigo={c.cod_banco}
-                    sigla={sigla}
-                    size={36}
-                  />
+                  <BankLogo nome={c.nome_banco} codigo={c.cod_banco} sigla={sigla} size={36} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-semibold text-slate-200 truncate">
                       {c.nome_banco || c.nome_conta}
@@ -1744,20 +1758,34 @@ function ScreenBancos() {
                       {c.agencia ? `Ag. ${c.agencia} · ` : ""}{c.tipo_conta || "CC"} {c.num_conta}
                     </p>
                   </div>
-                  <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${tipoClass}`}>{c.tipo_conta || "CC"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-semibold ${tipoClass}`}>
+                      {c.tipo_conta || "CC"}
+                    </span>
+                    {isExpanded && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setExpandedCard(null); }}
+                        className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-slate-200 transition-colors"
+                        title="Voltar para todos os cards">
+                        <ChevronLeft className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {/* Saldo */}
                 <div className="mb-3">
                   <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-600">Saldo disponível</p>
-                  <p className={`text-[clamp(1.1rem,2vw,1.4rem)] font-black leading-none tabular-nums mt-0.5 ${p.val}`}>{fmtBRL(c.saldo_atual)}</p>
+                  <p className={`text-[clamp(1.1rem,2vw,1.4rem)] font-black leading-none tabular-nums mt-0.5 ${p.val}`}>
+                    {fmtBRL(c.saldo_atual)}
+                  </p>
                 </div>
                 {/* Detalhes */}
                 <div className="flex flex-col gap-1 border-t border-[var(--sgt-divider)] pt-2.5">
                   {[
-                    { label: "Saldo anterior",   value: fmtK(c.saldo_anterior ?? 0),                                                       clr: "text-slate-400" },
-                    { label: "Entradas no mês",  value: `+${fmtK(c.entradas_mes)}`,                                                         clr: "text-emerald-300" },
-                    { label: "Saídas no mês",    value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
-                    { label: "Lançamentos",      value: extratoKey === c.cod_conta ? String(extratoData.length) : "—",                                        clr: "text-slate-300" },
+                    { label: "Saldo anterior",  value: fmtK(c.saldo_anterior ?? 0),                                                  clr: "text-slate-400" },
+                    { label: "Entradas no mês", value: `+${fmtK(c.entradas_mes)}`,                                                   clr: "text-emerald-300" },
+                    { label: "Saídas no mês",   value: c.saidas_mes > 0 ? `-${fmtK(c.saidas_mes)}` : "—", clr: c.saidas_mes > 0 ? "text-rose-300" : "text-slate-500" },
+                    { label: "Lançamentos",     value: extratoKey === c.cod_conta ? String(extratoData.length) : "—",                clr: "text-slate-300" },
                   ].map(row => (
                     <div key={row.label} className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-600">{row.label}</span>
@@ -1772,25 +1800,20 @@ function ScreenBancos() {
       </div>
 
       {/* ── Extrato com tabs por conta ── */}
-      <AnimatedCard delay={380}>
-        <SectionCard>
+      <div className={expandedCard ? "animate-[fade-slide-down_0.25s_ease-out]" : ""}>
+      <SectionCard>
+          {/* Tab strip — oculto quando há card expandido (extrato já identificado pelo card) */}
+          {!expandedCard && (
           <div className="flex items-center border-b border-[var(--sgt-divider)] px-4 pt-1 overflow-x-auto">
-            {contas.map((c, i) => {
-              const p = PALETA[i % PALETA.length];
-              const sigla = c.nome_banco ? c.nome_banco.slice(0,2).toUpperCase() : c.nome_conta.slice(0,2).toUpperCase();
+            {contas.map((ct) => {
+              const sigla = ct.nome_banco ? ct.nome_banco.slice(0,2).toUpperCase() : ct.nome_conta.slice(0,2).toUpperCase();
               return (
-                <button key={c.cod_conta} onClick={() => setExtratoKey(c.cod_conta)}
+                <button key={ct.cod_conta} onClick={() => { setExtratoKey(ct.cod_conta); setExtratoPage(1); }}
                   className={`flex items-center gap-2 px-3 py-2.5 text-[11px] font-medium whitespace-nowrap border-b-2 transition-all -mb-px ${
-                    extratoKey === c.cod_conta ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
+                    extratoKey === ct.cod_conta ? "border-amber-400 text-amber-300" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
-                  <BankLogo
-                    nome={c.nome_banco}
-                    codigo={c.cod_banco}
-                    sigla={sigla}
-                    size={16}
-                    rounded="rounded"
-                  />
-                  {c.nome_banco || c.nome_conta}
+                  <BankLogo nome={ct.nome_banco} codigo={ct.cod_banco} sigla={sigla} size={16} rounded="rounded" />
+                  {ct.nome_banco || ct.nome_conta}
                 </button>
               );
             })}
@@ -1803,6 +1826,7 @@ function ScreenBancos() {
               </button>
             </div>
           </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 border-b border-[var(--sgt-divider)]">
             <span className="text-[11px] text-slate-500">
               {contaAtiva ? (
@@ -1902,8 +1926,8 @@ function ScreenBancos() {
               </div>
             </div>
           )}
-        </SectionCard>
-      </AnimatedCard>
+      </SectionCard>
+      </div>
       </> /* end viewMode === "cards" */}
 
       {/* ══════════════════════════════════════════════════════ */}
