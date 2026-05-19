@@ -2073,8 +2073,8 @@ type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "prev
 
 const NAV: { id: string; label: string; icon: React.ElementType; badge?: number; badgeColor?: "amber" | "rose"; section?: string; externalTo?: string }[] = [
   { id: "painel",       label: "Painel",           icon: LayoutDashboard, section: "Financeiro" },
-  { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, badge: 7 },
-  { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle,   badge: 3, badgeColor: "amber" },
+  { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle },
+  { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle },
   { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
   { id: "fluxo",        label: "Realizado",        icon: Activity,        externalTo: "/dashboard" },
   { id: "previsto",     label: "Previsto",         icon: TrendingUp },
