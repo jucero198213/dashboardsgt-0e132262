@@ -26,8 +26,8 @@ export type AppNavItem = {
  */
 export const APP_NAV: AppNavItem[] = [
   { id: "fin-painel",       label: "Painel",           icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro" },
-  { id: "fin-pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, financeScreen: "pagar",        badge: 7 },
-  { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   financeScreen: "receber",      badge: 3, badgeColor: "amber" },
+  { id: "fin-pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, financeScreen: "pagar" },
+  { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   financeScreen: "receber" },
   { id: "fin-conciliacao",  label: "Conciliação",      icon: RefreshCcw,      financeScreen: "conciliacao" },
   { id: "fin-realizado",    label: "Realizado",        icon: Activity,        to: "/dashboard" },
   { id: "fin-previsto",     label: "Previsto",         icon: TrendingUp,      financeScreen: "previsto" },
