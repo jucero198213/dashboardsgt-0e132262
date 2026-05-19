@@ -1490,6 +1490,7 @@ function ScreenBancos() {
   const [extratoKey, setExtratoKey] = useState<string | null>(null);
   const [erroBancos, setErroBancos] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<BancoViewMode>("cards");
+  const [extratoPage, setExtratoPage] = useState(1);
 
   // Busca contas bancárias com saldo real
   const recarregarContas = () => {
@@ -1521,6 +1522,7 @@ function ScreenBancos() {
   // Extrato: filtra por COD_CONTA quando disponível, senão por FILIAL
   const contaAtiva = contas.find(c => c.cod_conta === extratoKey);
   const extratoRows = useMemo(() => {
+    setExtratoPage(1); // reset ao trocar de conta
     if (!contaAtiva) return [];
     return lbRows.filter(r =>
       r.COD_CONTA
@@ -1531,6 +1533,13 @@ function ScreenBancos() {
        .localeCompare(a.DATA_LANCAMENTO ?? a.DATA_EMISSAO ?? "")
     );
   }, [contaAtiva, lbRows]);
+
+  const EXTRATO_PAGE_SIZE = 50;
+  const extratoPaginas   = Math.max(1, Math.ceil(extratoRows.length / EXTRATO_PAGE_SIZE));
+  const extratoPageRows  = extratoRows.slice(
+    (extratoPage - 1) * EXTRATO_PAGE_SIZE,
+    extratoPage * EXTRATO_PAGE_SIZE
+  );
 
   // Paleta por índice
   const PALETA = [
@@ -1681,7 +1690,7 @@ function ScreenBancos() {
             {contas.map((c, i) => {
               const p = PALETA[i % PALETA.length];
               return (
-                <button key={c.cod_conta} onClick={() => setExtratoKey(c.cod_conta)}
+                <button key={c.cod_conta} onClick={() => { setExtratoKey(c.cod_conta); setExtratoPage(1); }}
                   className={`flex-shrink-0 min-w-[140px] px-4 py-2.5 text-left transition-colors ${extratoKey === c.cod_conta ? "bg-[var(--sgt-row-hover)]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
                   <div className="flex items-center gap-2 mb-1.5">
                     <BankLogo
@@ -1798,7 +1807,7 @@ function ScreenBancos() {
                   <span className="text-slate-400 font-medium">{contaAtiva.nome_banco || contaAtiva.nome_conta}</span>
                   {contaAtiva.agencia ? <span className="text-slate-600"> · Ag. {contaAtiva.agencia}</span> : null}
                   {contaAtiva.num_conta ? <span className="text-slate-600"> · Cta. {contaAtiva.num_conta}</span> : null}
-                  <span className="text-slate-600"> · {extratoRows.length} lançamento{extratoRows.length !== 1 ? "s" : ""}</span>
+                  <span className="text-slate-600"> · {extratoRows.length} lançamento{extratoRows.length !== 1 ? "s" : ""}{extratoPaginas > 1 ? ` · pág. ${extratoPage}/${extratoPaginas}` : ""}</span>
                 </>
               ) : "Nenhuma conta selecionada"}
             </span>
@@ -1812,10 +1821,10 @@ function ScreenBancos() {
             )}
           </div>
 
-          {extratoRows.slice(0, 30).map((r, i) => {
+          {/* Lista paginada — 50 por página */}
+          {extratoPageRows.map((r, i) => {
             const isC  = r.ORIGEM === "LB_C";
             const val  = Math.abs(r.VLRDOC ?? r.VLR_PARCELA ?? 0);
-            // Descrição: prioriza HISTORICO (vem de BANHIS.DESCRI), senão ANALITICA/CENTRO_CUSTO, senão documento
             const TIPDOC_LABEL: Record<string,string> = {
               LB: "Lançamento Bancário", BOL: "Boleto", PIX: "PIX", TED: "TED",
               DOC: "DOC", TRA: "Transferência", DEB: "Débito", CHQ: "Cheque",
@@ -1833,7 +1842,7 @@ function ScreenBancos() {
               dataExib ? fmtDate(dataExib.slice(0,10)) : null,
               r.DOCUMENTO ? `Doc. ${r.DOCUMENTO}` : null,
               r.NUM_CHEQUE ? `Cheque ${r.NUM_CHEQUE}` : null,
-              r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}`   : null,
+              r.NUM_AVISO  ? `Aviso ${r.NUM_AVISO}` : null,
               r.CENTRO_CUSTO && r.CENTRO_CUSTO !== desc ? r.CENTRO_CUSTO : null,
             ].filter(Boolean).join(" · ") || "—";
             return (
@@ -1852,10 +1861,38 @@ function ScreenBancos() {
               </div>
             );
           })}
+
+          {/* Estado vazio */}
           {extratoRows.length === 0 && (
             <p className="px-4 py-8 text-center text-[12px] text-slate-600">
               Nenhum lançamento no período para esta conta
             </p>
+          )}
+
+          {/* Paginação */}
+          {extratoPaginas > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--sgt-divider)]">
+              <span className="text-[11px] text-slate-600">
+                {(extratoPage - 1) * EXTRATO_PAGE_SIZE + 1}–{Math.min(extratoPage * EXTRATO_PAGE_SIZE, extratoRows.length)} de {extratoRows.length} lançamentos
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setExtratoPage(p => Math.max(1, p - 1))}
+                  disabled={extratoPage === 1}
+                  className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-medium border border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                  <ChevronLeft className="h-3 w-3" /> Anterior
+                </button>
+                <span className="px-3 py-1.5 text-[11px] font-semibold text-slate-300">
+                  {extratoPage} / {extratoPaginas}
+                </span>
+                <button
+                  onClick={() => setExtratoPage(p => Math.min(extratoPaginas, p + 1))}
+                  disabled={extratoPage === extratoPaginas}
+                  className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11px] font-medium border border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                  Próximo <ChevronRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
           )}
         </SectionCard>
       </AnimatedCard>
