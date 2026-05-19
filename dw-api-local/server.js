@@ -1166,21 +1166,17 @@ app.post("/dw-bancos", async (req, res) => {
     const saldoMap = new Map();
     let saldoSource = 'banraz_5anos';
 
-    // ── A) BANCTA campo de saldo armazenado ──────────────────────────────
-    const candidatos = ['SALDOAT','SALDOA','SALDBA','VLR_SALDO','SALDO'];
-    for (const campo of candidatos) {
-      try {
-        const rB = await p.request().query(
-          `SELECT CODCTA, CODFIL, ISNULL(${campo},0) AS saldo FROM BANCTA WITH (NOLOCK)`
-        );
-        if (rB.recordset.length > 0) {
-          for (const r of rB.recordset)
-            saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo) || 0);
-          saldoSource = `BANCTA.${campo}`;
-          break;
-        }
-      } catch (_) { continue; }
-    }
+    // ── A) BANCTA.SLDATU — saldo atual armazenado (campo confirmado no BD) ──
+    try {
+      const rB = await p.request().query(`
+        SELECT CODCTA, CODFIL, ISNULL(SLDATU, 0) AS saldo FROM BANCTA WITH (NOLOCK)
+      `);
+      if (rB.recordset.length > 0) {
+        for (const r of rB.recordset)
+          saldoMap.set(`${r.CODFIL}:${r.CODCTA}`, parseFloat(r.saldo) || 0);
+        saldoSource = 'BANCTA.SLDATU';
+      }
+    } catch (_) { /* campo não acessível — cai no fallback */ }
 
     // ── B) BANRAZ acumulado — últimos 5 anos (fallback) ──────────────────
     if (!saldoSource.startsWith('BANCTA.')) {
