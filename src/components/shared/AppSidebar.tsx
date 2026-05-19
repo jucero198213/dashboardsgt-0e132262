@@ -107,14 +107,13 @@ export function AppSidebar() {
           /* ── COLLAPSED ── */
           if (collapsed) {
             return (
-              <div key={item.id} className="relative px-1.5 py-[2px]">
+              <div key={item.id} className="relative px-1.5 py-[2px] group/item">
                 {showSection && <div className="h-px mx-1 my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
                 {active && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                 )}
                 <button
                   onClick={() => handleClick(item)}
-                  title={item.label}
                   className={`group relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
                     ${active
                       ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
@@ -123,6 +122,16 @@ export function AppSidebar() {
                 >
                   <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
                 </button>
+                <span
+                  className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 z-50 whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[11px] font-medium opacity-0 -translate-x-1 transition-all duration-150 group-hover/item:opacity-100 group-hover/item:translate-x-0 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+                  style={{
+                    background: "var(--sgt-menu-bg)",
+                    borderColor: "var(--sgt-border-medium)",
+                    color: "var(--sgt-text-primary)",
+                  }}
+                >
+                  {item.label}
+                </span>
               </div>
             );
           }
