@@ -334,33 +334,35 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 /*  Abrir Excel/Word local (Windows) com fallback para Office Online */
 /* ---------------------------------------------------------------- */
 function openOfficeApp(app: "excel" | "word") {
-  const protocol = app === "excel" ? "ms-excel:nft|u|" : "ms-word:nft|u|";
+  // Protocolo registrado pelo Office no Windows.
+  // "ms-excel:" e "ms-word:" abrem o app instalado diretamente.
+  const protocol = app === "excel" ? "ms-excel:" : "ms-word:";
   const fallbackUrl =
     app === "excel"
       ? "https://www.office.com/launch/excel"
       : "https://www.office.com/launch/word";
 
-  // Abre via iframe oculto: se o protocolo estiver registrado no SO,
-  // o app local abre. Após um pequeno timeout, abre o fallback online.
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = `${protocol}new`;
-  document.body.appendChild(iframe);
+  let appOpened = false;
 
-  const start = Date.now();
-  const fallbackTimer = window.setTimeout(() => {
-    // Se a página perdeu o foco rapidamente, o app local abriu.
-    if (document.hidden || Date.now() - start > 2200) return;
-    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
-  }, 1500);
-
+  // Se o protocolo for tratado pelo SO, o browser perde o foco (blur).
   const onBlur = () => {
-    window.clearTimeout(fallbackTimer);
+    appOpened = true;
     window.removeEventListener("blur", onBlur);
+    clearTimeout(timer);
   };
   window.addEventListener("blur", onBlur);
 
-  window.setTimeout(() => iframe.remove(), 4000);
+  // Dispara o protocolo nativo
+  window.location.href = protocol;
+
+  // Se em 1,5 s o blur não disparou, o app local não está disponível
+  // → abre Office Online como fallback
+  const timer = window.setTimeout(() => {
+    window.removeEventListener("blur", onBlur);
+    if (!appOpened) {
+      window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+    }
+  }, 1500);
 }
 
 export default function Home() {
