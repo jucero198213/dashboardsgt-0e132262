@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  PanelLeftClose, PanelLeftOpen, ExternalLink,
+  PanelLeftClose, PanelLeftOpen, ExternalLink, ChevronRight,
   Sun, Moon, Shield, LogOut, Home,
 } from "lucide-react";
 import { APP_NAV, type AppNavItem } from "./appNav";
