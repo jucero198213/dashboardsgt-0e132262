@@ -560,7 +560,7 @@ export default function Home() {
           {/* ── HERO ── */}
           <motion.section
             style={reduce ? undefined : { y: heroY, opacity: heroOpacity }}
-            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-2 pb-6 text-center sm:pt-3 sm:pb-8 lg:px-10 lg:pt-4 lg:pb-10 will-change-transform">
+            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10 will-change-transform">
 
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
