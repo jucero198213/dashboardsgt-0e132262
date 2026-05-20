@@ -360,22 +360,28 @@ function Reveal({
   );
 }
 
-function useGreeting(email: string) {
+function useGreeting(user: { email?: string; user_metadata?: Record<string, string> } | null) {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
 
-  // Tenta pegar o nome antes do @ e capitaliza a primeira letra
-  const rawName = email.split("@")[0] ?? "";
-  const firstName = rawName
-    .split(/[._-]/)[0]
-    .replace(/\d+/g, "")
-    .trim();
-  const name = firstName
-    ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
-    : "";
+  // 1. Tenta user_metadata.full_name ou name
+  const meta = user?.user_metadata ?? {};
+  const metaName: string = meta.full_name ?? meta.name ?? meta.display_name ?? "";
+  if (metaName.trim()) {
+    const first = metaName.trim().split(" ")[0];
+    return { greeting, name: first.charAt(0).toUpperCase() + first.slice(1).toLowerCase() };
+  }
 
-  return { greeting, name };
+  // 2. Extrai do email, ignora prefixos genéricos (ti, rh, adm, etc.)
+  const GENERIC = new Set(["ti", "rh", "adm", "ceo", "financeiro", "compras", "admin", "info", "contato", "suporte"]);
+  const raw = (user?.email ?? "").split("@")[0] ?? "";
+  const part = raw.split(/[._-]/)[0].replace(/\d+/g, "").trim().toLowerCase();
+  if (part.length >= 3 && !GENERIC.has(part)) {
+    return { greeting, name: part.charAt(0).toUpperCase() + part.slice(1) };
+  }
+
+  return { greeting, name: "" };
 }
 
 export default function Home() {
@@ -383,7 +389,7 @@ export default function Home() {
   const { user } = useAuth();
   const { canAccess } = usePagePermissions();
   const reduce = useReducedMotion();
-  const { greeting, name } = useGreeting(user?.email ?? "");
+  const { greeting, name } = useGreeting(user);
 
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
@@ -573,9 +579,19 @@ export default function Home() {
               </span>
             </motion.div>
 
+            {/* Saudação personalizada — linha menor acima do título */}
+            <motion.p
+              initial={reduce ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+              className="mb-2 text-[clamp(1.1rem,2.2vw,1.6rem)] font-semibold tracking-wide dark:text-slate-300 text-slate-600"
+            >
+              {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
+            </motion.p>
+
             <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full">
               <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 pb-3">
-                <AnimatedTitle text={name ? `${greeting}, ${name}!` : `${greeting}!`} />
+                <AnimatedTitle text="Bem-vindo ao" />
               </span>
               <span className="block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-3">
                 <AnimatedTitle text="Workspace SGT" delay={0.45} />
