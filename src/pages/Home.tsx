@@ -27,7 +27,6 @@ import {
   UserCog,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -360,36 +359,18 @@ function Reveal({
   );
 }
 
-function useGreeting(user: { email?: string; user_metadata?: Record<string, string> } | null) {
+function useGreeting() {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
-
-  // 1. Tenta user_metadata.full_name ou name
-  const meta = user?.user_metadata ?? {};
-  const metaName: string = meta.full_name ?? meta.name ?? meta.display_name ?? "";
-  if (metaName.trim()) {
-    const first = metaName.trim().split(" ")[0];
-    return { greeting, name: first.charAt(0).toUpperCase() + first.slice(1).toLowerCase() };
-  }
-
-  // 2. Extrai do email, ignora prefixos genéricos (ti, rh, adm, etc.)
-  const GENERIC = new Set(["ti", "rh", "adm", "ceo", "financeiro", "compras", "admin", "info", "contato", "suporte"]);
-  const raw = (user?.email ?? "").split("@")[0] ?? "";
-  const part = raw.split(/[._-]/)[0].replace(/\d+/g, "").trim().toLowerCase();
-  if (part.length >= 3 && !GENERIC.has(part)) {
-    return { greeting, name: part.charAt(0).toUpperCase() + part.slice(1) };
-  }
-
-  return { greeting, name: "" };
+  return greeting;
 }
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { canAccess } = usePagePermissions();
   const reduce = useReducedMotion();
-  const { greeting, name } = useGreeting(user);
+  const greeting = useGreeting();
 
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
@@ -586,7 +567,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.25 }}
               className="mb-2 text-[clamp(1.1rem,2.2vw,1.6rem)] font-semibold tracking-wide dark:text-slate-300 text-slate-600"
             >
-              {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
+              {`${greeting}! 👋`}
             </motion.p>
 
             <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full">
