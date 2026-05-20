@@ -63,4 +63,32 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
+  build: {
+    // Chunk mínimo para split valer a pena (evita muitos arquivos tiny)
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core — raramente muda, fica em cache por muito tempo
+          "vendor-react":   ["react", "react-dom", "react-router-dom"],
+          // Charts — são pesados e mudam raramente
+          "vendor-charts":  ["recharts"],
+          // Animações
+          "vendor-motion":  ["framer-motion"],
+          // UI components (radix + shadcn)
+          "vendor-ui":      [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-tabs",
+          ],
+          // Supabase + query
+          "vendor-data":    ["@supabase/supabase-js", "@tanstack/react-query"],
+          // Ícones
+          "vendor-icons":   ["lucide-react"],
+        },
+      },
+    },
+  },
 }));
