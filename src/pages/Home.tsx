@@ -575,7 +575,7 @@ export default function Home() {
                 <AnimatedTitle text="Bem-vindo ao" />
               </span>
               <span className="block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-3">
-                <AnimatedTitle text="Workspace SGT" delay={0.45} />
+                <AnimatedTitle text="Workspace" delay={0.45} />
               </span>
             </h1>
 
