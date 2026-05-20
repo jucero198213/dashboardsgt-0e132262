@@ -32,6 +32,7 @@ const Rh                 = lazy(() => import("./pages/Rh"));
 const Operacional        = lazy(() => import("./pages/Operacional"));
 const Executivo          = lazy(() => import("./pages/Executivo"));
 const Finance            = lazy(() => import("./pages/Finance"));
+const Fiscal             = lazy(() => import("./pages/Fiscal"));
 
 // ── Loading screen mínimo (sem flash, sem layout shift) ───────────────────────
 function PageLoader() {
@@ -90,6 +91,7 @@ const App = () => (
                 <Route path="/operacional"  element={<ProtectedRoute><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
                 <Route path="/executivo"    element={<ProtectedRoute><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
                 <Route path="/financeiro"  element={<ProtectedRoute><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
+                <Route path="/fiscal"     element={<ProtectedRoute><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
