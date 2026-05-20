@@ -549,7 +549,7 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden sm:block text-[12px] font-medium text-slate-500 tracking-wide pl-1"
+              className="hidden sm:block text-[14px] font-medium text-slate-400 tracking-wide pl-1"
             >
               {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
             </motion.span>
@@ -561,21 +561,6 @@ export default function Home() {
           <motion.section
             style={reduce ? undefined : { y: heroY, opacity: heroOpacity }}
             className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-2 pb-6 text-center sm:pt-3 sm:pb-8 lg:px-10 lg:pt-4 lg:pb-10 will-change-transform">
-
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/[0.08] px-4 py-2"
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-300">
-                SGT Log · Sistema de Gestão em Transporte
-              </span>
-            </motion.div>
 
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
