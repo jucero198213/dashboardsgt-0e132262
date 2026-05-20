@@ -3,7 +3,7 @@ import {
   FileBarChart, Building2, Tag, Landmark,
   TrendingUp, Activity, Wallet, Banknote, Users,
   Truck, Wrench, MapPin, Briefcase, ShoppingCart, Fuel,
-  LineChart as LineChartIcon, Headphones, UserCog,
+  LineChart as LineChartIcon, Headphones, UserCog, Scale,
 } from "lucide-react";
 
 export type AppNavItem = {
@@ -32,6 +32,7 @@ export const APP_NAV: AppNavItem[] = [
   { id: "fin-realizado",    label: "Realizado",        icon: Activity,        to: "/dashboard" },
   { id: "fin-previsto",     label: "Previsto",         icon: TrendingUp,      financeScreen: "previsto" },
   { id: "fin-relatorios",   label: "Relatórios",       icon: FileBarChart,    financeScreen: "relatorios" },
+  { id: "ext-fiscal",       label: "Fiscal",           icon: Scale,           to: "/fiscal" },
 
   { id: "fin-fornecedores", label: "Fornecedores",     icon: Building2,       financeScreen: "fornecedores", section: "Cadastros" },
   { id: "fin-clientes",     label: "Clientes",         icon: Users,           financeScreen: "clientes" },
