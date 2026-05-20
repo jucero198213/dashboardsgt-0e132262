@@ -678,8 +678,9 @@ export default function Faturamento() {
                   ) : (
                     rows.map((r, i) => {
                       const barW = totalFaturado > 0 ? Math.min((r.total / totalFaturado) * 100, 100) : 0;
-                      const STRIPE_COLORS = ["#f59e0b","#22d3ee","#a78bfa","#34d399","#f87171","#fb923c","#60a5fa","#e879f9"];
-                      const color = STRIPE_COLORS[i % STRIPE_COLORS.length];
+                      // Opacidade decrescente: 1º lugar pleno, últimos mais suaves
+                      const opacity = Math.max(0.35, 1 - (i / rows.length) * 0.65);
+                      const barColor = `rgba(245,158,11,${opacity})`;
                       return (
                         <div
                           key={`${r.descri}-${i}`}
@@ -700,14 +701,14 @@ export default function Faturamento() {
                               <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                 <div
                                   className="h-full rounded-full transition-all duration-700"
-                                  style={{ width: `${barW}%`, background: color }}
+                                  style={{ width: `${barW}%`, background: barColor }}
                                 />
                               </div>
                             </div>
                           </div>
 
                           {/* Valor */}
-                          <span className="text-[12px] font-bold tabular-nums text-right flex items-center justify-end gap-1" style={{ color }}>
+                          <span className="text-[12px] font-bold tabular-nums text-right flex items-center justify-end gap-1" style={{ color: "var(--sgt-text-primary)" }}>
                             {fmtBRL(r.total)}
                             <MiniDelta valorAtual={r.total} valorAnterior={mapaAnterior.get(r.descri) ?? null} />
                           </span>
