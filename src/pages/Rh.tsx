@@ -63,9 +63,9 @@ const NOMES_MES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set"
 
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const PALETTE = [
-  RAW.accent.emerald, RAW.accent.cyan, RAW.accent.violet,
-  RAW.accent.amber, RAW.accent.rose, RAW.accent.red,
-  "#fb923c", "#94a3b8",
+  "#fbbf24", "#f59e0b", "#fcd34d",
+  "#d97706", "#fde68a", "#b45309",
+  "#f59e0b", "#94a3b8",
 ];
 const colorFor = (_: string, i: number) => PALETTE[i % PALETTE.length];
 
@@ -911,7 +911,7 @@ export default function Rh() {
                     <div className="flex-1 space-y-2 overflow-auto pr-1">
                       {distMotivoDem.map((r, i) => {
                         const max = distMotivoDem[0].qtd;
-                        const fill = [RAW.accent.rose, RAW.accent.amber, "#fb923c", RAW.accent.violet, RAW.accent.cyan, "#94a3b8"][i] ?? "#94a3b8";
+                        const fill = ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706", "#fde68a", "#94a3b8"][i] ?? "#94a3b8";
                         return (
                           <div key={r.nome}>
                             <div className="flex items-center justify-between mb-0.5">

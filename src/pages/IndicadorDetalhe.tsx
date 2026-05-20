@@ -592,8 +592,8 @@ export default function IndicadorDetalhe() {
                     <LineChart data={evolucaoDiaria} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
                       <defs>
                         <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#22d3ee" />
-                          <stop offset="100%" stopColor="#06b6d4" />
+                          <stop offset="0%" stopColor="#fbbf24" />
+                          <stop offset="100%" stopColor="#f59e0b" />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="2 6" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -602,7 +602,7 @@ export default function IndicadorDetalhe() {
                         tickFormatter={(v) => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}k` : String(v)} />
                       <Tooltip content={<CustomTooltip />} />
                       <Line type="monotone" dataKey="mesAnterior" name="Mês Anterior" stroke="rgba(100,116,139,0.45)" strokeWidth={1.5} strokeDasharray="5 4" dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: "rgba(100,116,139,0.6)" }} />
-                      <Line type="monotone" dataKey="mesAtual"    name="Mês Atual"    stroke="url(#lineGradient)"     strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 2, stroke: "#0e7490", fill: "#22d3ee" }} />
+                      <Line type="monotone" dataKey="mesAtual"    name="Mês Atual"    stroke="url(#lineGradient)"     strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 2, stroke: "#d97706", fill: "#fbbf24" }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

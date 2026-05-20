@@ -86,15 +86,15 @@ const getValorCompromisso = (row: FinanciamentoFrotaRow) => {
 // ─── Cores por banco ──────────────────────────────────────────────────────────
 
 const BANCO_PALETTE: { key: string; color: string; rgb: string }[] = [
-  { key: "SCANIA",     color: "#60a5fa", rgb: "96,165,250"   },
-  { key: "BRADESCO",   color: "#f472b6", rgb: "244,114,182"  },
-  { key: "ITAU",       color: "#fbbf24", rgb: "251,191,36"   },
-  { key: "SANTANDER",  color: "#f87171", rgb: "248,113,113"  },
-  { key: "BB",         color: "#34d399", rgb: "52,211,153"   },
-  { key: "CEF",        color: "#a78bfa", rgb: "167,139,250"  },
-  { key: "SICOOB",     color: "#22d3ee", rgb: "34,211,238"   },
-  { key: "VOLVO",      color: "#fb923c", rgb: "251,146,60"   },
-  { key: "MERCEDES",   color: "#94a3b8", rgb: "148,163,184"  },
+  { key: "SCANIA",    color: "#fbbf24", rgb: "251,191,36"  },
+  { key: "BRADESCO",  color: "#f59e0b", rgb: "245,158,11"  },
+  { key: "ITAU",      color: "#fcd34d", rgb: "252,211,77"  },
+  { key: "SANTANDER", color: "#d97706", rgb: "217,119,6"   },
+  { key: "BB",        color: "#fde68a", rgb: "253,230,138" },
+  { key: "CEF",       color: "#b45309", rgb: "180,83,9"    },
+  { key: "SICOOB",    color: "#fbbf24", rgb: "251,191,36"  },
+  { key: "VOLVO",     color: "#f59e0b", rgb: "245,158,11"  },
+  { key: "MERCEDES",  color: "#94a3b8", rgb: "148,163,184" },
 ];
 
 function getBancoStyle(banco: string | null): { color: string; rgb: string } {
@@ -104,15 +104,15 @@ function getBancoStyle(banco: string | null): { color: string; rgb: string } {
   return match ?? { color: "#94a3b8", rgb: "148,163,184" };
 }
 
-// cores para bancos não mapeados (geradas por índice)
+// cores para bancos não mapeados (geradas por índice) — tons âmbar
 const FALLBACK_COLORS = [
-  { color: "#60a5fa", rgb: "96,165,250" },
-  { color: "#34d399", rgb: "52,211,153" },
-  { color: "#f472b6", rgb: "244,114,182" },
-  { color: "#fbbf24", rgb: "251,191,36" },
-  { color: "#a78bfa", rgb: "167,139,250" },
-  { color: "#22d3ee", rgb: "34,211,238" },
-  { color: "#fb923c", rgb: "251,146,60" },
+  { color: "#fbbf24", rgb: "251,191,36"  },
+  { color: "#f59e0b", rgb: "245,158,11"  },
+  { color: "#fcd34d", rgb: "252,211,77"  },
+  { color: "#d97706", rgb: "217,119,6"   },
+  { color: "#fde68a", rgb: "253,230,138" },
+  { color: "#b45309", rgb: "180,83,9"    },
+  { color: "#92400e", rgb: "146,64,14"   },
 ];
 
 function getBancoColor(banco: string | null, bancoIndex: Map<string, number>): { color: string; rgb: string } {

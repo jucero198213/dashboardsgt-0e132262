@@ -59,8 +59,8 @@ const minPrevisao = (previsao: string | null): number | null => {
 
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const PALETTE = [
-  RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet,
-  RAW.accent.amber, RAW.accent.rose, "#fb923c", "#94a3b8",
+  "#fbbf24", "#f59e0b", "#fcd34d",
+  "#d97706", "#fde68a", "#b45309", "#94a3b8",
 ];
 const colorFor = (_: string, i: number) => PALETTE[i % PALETTE.length];
 

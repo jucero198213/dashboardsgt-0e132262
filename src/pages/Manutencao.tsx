@@ -49,13 +49,13 @@ const fmtData = (s: string | null) => {
 
 // ─── Paleta de cores alinhada ao theme.ts ─────────────────────────────────────
 const PALETTE = [
-  RAW.accent.violet,
-  RAW.accent.cyan,
-  RAW.accent.amber,
-  RAW.accent.emerald,
-  RAW.accent.rose,
-  RAW.accent.red,
-  "#fb923c",
+  "#fbbf24",
+  "#f59e0b",
+  "#fcd34d",
+  "#d97706",
+  "#fde68a",
+  "#b45309",
+  "#f59e0b",
   "#94a3b8",
 ];
 const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
