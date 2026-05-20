@@ -233,10 +233,9 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         type="button"
         onClick={handleClick}
         whileHover={{ y: -5, transition: { duration: 0.18, ease: "easeOut" } }}
-        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left backdrop-blur-sm transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
+        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
       >
-        <div className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.glow1} via-transparent to-transparent opacity-100`} />
-        <div className={`pointer-events-none absolute -top-24 left-1/2 h-48 w-[90%] -translate-x-1/2 rounded-full bg-gradient-to-b ${f.glow2} to-transparent blur-3xl transition-opacity duration-500 opacity-60 group-hover:opacity-100`} />
+        <div className={`pointer-events-none absolute -top-24 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-gradient-to-b ${f.glow2} to-transparent blur-2xl transition-opacity duration-500 opacity-0 group-hover:opacity-60`} />
 
         <div className={`absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r from-transparent ${f.line} to-transparent`} />
 
@@ -272,7 +271,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       onClick={handleClick}
       disabled={data.disabled}
       whileHover={data.disabled ? undefined : { y: -4, transition: { duration: 0.15, ease: "easeOut" } }}
-      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left backdrop-blur-sm transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
+      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
         data.disabled
           ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
           : "cursor-pointer dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white hover:dark:bg-white/[0.07] hover:bg-slate-50 dark:hover:border-white/20 hover:border-slate-300"
@@ -283,9 +282,9 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
         <div className={`absolute inset-x-0 top-0 h-[2px] rounded-t-3xl bg-gradient-to-r ${tone.accent}`} />
       )}
 
-      {/* Glow superior */}
+      {/* Glow superior — sutil no hover */}
       <div
-        className={`pointer-events-none absolute -top-20 left-1/2 h-40 w-[80%] -translate-x-1/2 rounded-full bg-gradient-to-b ${tone.glow} to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100`}
+        className={`pointer-events-none absolute -top-16 left-1/2 h-32 w-[70%] -translate-x-1/2 rounded-full bg-gradient-to-b ${tone.glow} to-transparent opacity-0 blur-xl transition-opacity duration-400 group-hover:opacity-70`}
       />
 
       {/* Badge fixado */}
@@ -383,9 +382,6 @@ export default function Home() {
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
   const { scrollY } = useScroll({ container: scrollRef as React.RefObject<HTMLElement> });
-  const auroraY = useTransform(scrollY, [0, 800], [0, -260]);
-  const auroraScale = useTransform(scrollY, [0, 800], [1, 1.18]);
-  const lightsY = useTransform(scrollY, [0, 800], [0, -160]);
   const heroY = useTransform(scrollY, [0, 600], [0, 320]);
   const logoY = useTransform(scrollY, [0, 600], [0, 180]);
   const heroOpacity = useTransform(scrollY, [0, 300, 600], [1, 0.6, 0]);
@@ -500,10 +496,8 @@ export default function Home() {
       className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
-      {/* Atmosfera dark */}
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.22),transparent_58%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_55%_50%_at_85%_110%,rgba(139,92,246,0.08),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_45%_at_15%_110%,rgba(6,182,212,0.06),transparent_60%)]" />
+      {/* Atmosfera dark — sutil */}
+      <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.10),transparent_58%)]" />
 
       {/* Section envolvente */}
       <section
@@ -515,28 +509,11 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Aurora executiva — 3 radiais (parallax lento) */}
-        <motion.div
-          className="pointer-events-none absolute inset-0 overflow-hidden will-change-transform"
-          style={{
-            y: reduce ? 0 : auroraY,
-            scale: reduce ? 1 : auroraScale,
-            backgroundImage: [
-              "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(30,58,95,0.32), transparent 65%)",
-              "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(180,140,70,0.18), transparent 65%)",
-              "radial-gradient(ellipse 70% 50% at 50% 100%, rgba(15,27,45,0.45), transparent 70%)",
-            ].join(", "),
-            filter: "blur(2px)",
-          }}
+        {/* Ambient sutil */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 65% 40% at 50% 10%, rgba(180,140,70,0.08), transparent 65%)" }}
         />
-
-        {/* Luzes de fundo (parallax médio) */}
-        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
-          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.08), transparent 70%)" }} />
-        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
-          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 10% 50%, rgba(6,182,212,0.06), transparent 60%)" }} />
-        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
-          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 40% 40% at 90% 50%, rgba(139,92,246,0.06), transparent 60%)" }} />
 
 
         <>
@@ -581,7 +558,7 @@ export default function Home() {
                 style={{
                   fontSize: "clamp(4.5rem,13vw,11rem)",
                   backgroundImage: "linear-gradient(135deg, #fffbeb 0%, #fcd34d 30%, #f59e0b 60%, #ea580c 100%)",
-                  filter: "drop-shadow(0 0 56px rgba(245,158,11,0.4)) drop-shadow(0 4px 28px rgba(234,88,12,0.25))",
+                  filter: "drop-shadow(0 2px 16px rgba(245,158,11,0.22))",
                   lineHeight: 1,
                 }}
               >
