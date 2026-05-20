@@ -543,7 +543,16 @@ export default function Home() {
         <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 w-full">
 
           {/* Top bar */}
-          <div className="flex items-center justify-end py-1">
+          <div className="flex items-center justify-between py-1">
+            {/* Saudação na top bar — discreta, sempre visível */}
+            <motion.span
+              initial={reduce ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="hidden sm:block text-[12px] font-medium text-slate-500 tracking-wide pl-1"
+            >
+              {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
+            </motion.span>
             <UserMenu showAdmin />
           </div>
           <TodayTicketsPopup />
@@ -568,22 +577,12 @@ export default function Home() {
               </span>
             </motion.div>
 
-            {/* Saudação — fria, discreta, como um subtítulo */}
-            <motion.p
-              initial={reduce ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="mb-5 text-[clamp(0.9rem,1.6vw,1.15rem)] font-medium tracking-[0.06em] text-slate-500"
-            >
-              {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
-            </motion.p>
-
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
 
-              {/* "BEM-VINDO AO" — mais escuro que a saudação, cria degrau */}
+              {/* "BEM-VINDO AO" — visível, claro, espaçado */}
               <motion.span
-                className="block text-[clamp(0.65rem,1.2vw,0.95rem)] font-bold uppercase tracking-[0.55em] text-slate-600 mb-5"
+                className="block text-[clamp(0.7rem,1.3vw,1rem)] font-semibold uppercase tracking-[0.5em] text-slate-300/70 mb-4"
                 initial={reduce ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.3 }}
