@@ -23,37 +23,37 @@ const INDICATOR_IDENTITY: Record<string, {
 }> = {
   "PMT": {
     icon: Package,
-    color: "#60a5fa",
-    colorRgb: "96,165,250",
-    bgColor: "rgba(96,165,250,0.12)",
+    color: "#fbbf24",
+    colorRgb: "251,191,36",
+    bgColor: "rgba(251,191,36,0.12)",
     label: "Investimentos",
   },
   "Diesel": {
     icon: Fuel,
-    color: "#fbbf24",
-    colorRgb: "251,191,36",
-    bgColor: "rgba(251,191,36,0.12)",
+    color: "#f59e0b",
+    colorRgb: "245,158,11",
+    bgColor: "rgba(245,158,11,0.12)",
     label: "Combustível",
   },
   "Folha": {
     icon: Users,
-    color: "#a78bfa",
-    colorRgb: "167,139,250",
-    bgColor: "rgba(167,139,250,0.12)",
+    color: "#fcd34d",
+    colorRgb: "252,211,77",
+    bgColor: "rgba(252,211,77,0.10)",
     label: "Pessoal",
   },
   "Imposto": {
     icon: Receipt,
-    color: "#f472b6",
-    colorRgb: "244,114,182",
-    bgColor: "rgba(244,114,182,0.12)",
+    color: "#d97706",
+    colorRgb: "217,119,6",
+    bgColor: "rgba(217,119,6,0.12)",
     label: "Fiscal",
   },
   "Pedágio": {
     icon: Navigation,
-    color: "#22d3ee",
-    colorRgb: "34,211,238",
-    bgColor: "rgba(34,211,238,0.12)",
+    color: "#fbbf24",
+    colorRgb: "251,191,36",
+    bgColor: "rgba(251,191,36,0.10)",
     label: "Rotas",
   },
   "Administrativo": {
@@ -66,16 +66,16 @@ const INDICATOR_IDENTITY: Record<string, {
   },
   "Manutenção": {
     icon: Wrench,
-    color: "#fb923c",
-    colorRgb: "251,146,60",
-    bgColor: "rgba(251,146,60,0.12)",
+    color: "#f59e0b",
+    colorRgb: "245,158,11",
+    bgColor: "rgba(245,158,11,0.12)",
     label: "Frota",
   },
   "Pneu": {
     icon: Circle,
-    color: "#34d399",
-    colorRgb: "52,211,153",
-    bgColor: "rgba(52,211,153,0.10)",
+    color: "#fde68a",
+    colorRgb: "253,230,138",
+    bgColor: "rgba(253,230,138,0.08)",
     label: "Borracharia",
   },
 };
@@ -611,8 +611,8 @@ export default function Indicadores() {
                   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
                 const maxFrete = Math.max(...faturamento.map((r) => r.FRETE_TOTAL ?? 0), 1);
                 const BAR_COLORS = [
-                  "#f59e0b", "#22d3ee", "#a78bfa", "#34d399",
-                  "#fb923c", "#f472b6", "#60a5fa", "#94a3b8",
+                  "#fbbf24", "#f59e0b", "#fcd34d", "#d97706",
+                  "#fde68a", "#b45309", "#f59e0b", "#fbbf24",
                 ];
 
                 return (

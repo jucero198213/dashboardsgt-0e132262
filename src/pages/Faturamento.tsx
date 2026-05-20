@@ -447,7 +447,6 @@ export default function Faturamento() {
     };
   }, [manutencao]);
   const maxTotal = top5[0]?.total ?? 1;
-  const COLORS = ["#2dd4bf","#f87171","#a78bfa","#fbbf24","#34d399","#94a3b8"];
 
   return (
     <div className="flex flex-col transition-all duration-300 min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"

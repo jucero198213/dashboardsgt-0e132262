@@ -509,7 +509,7 @@ function ScreenPagar() {
                   <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
                   <Bar dataKey="valor" name="Valor" radius={[4,4,0,0]}>
                     {["1–30d","31–60d","61–90d","90d+","Pendente","V. Hoje"].map((f) => (
-                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#60a5fa":"#a78bfa"} fillOpacity={0.82} />
+                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#fbbf24":"#f59e0b"} fillOpacity={0.82} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -686,7 +686,7 @@ function ScreenReceber() {
                   <Tooltip formatter={(v:any) => fmtK(v)} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
                   <Bar dataKey="valor" name="Valor" radius={[4,4,0,0]}>
                     {["1–30d","31–60d","61–90d","90d+","Pendente","V. Hoje"].map((f) => (
-                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#34d399":"#a78bfa"} fillOpacity={0.82} />
+                      <Cell key={f} fill={f==="1–30d"?"#fbbf24":f==="31–60d"?"#f97316":f==="61–90d"?"#ef4444":f==="90d+"?"#991b1b":f==="Pendente"?"#fbbf24":"#f59e0b"} fillOpacity={0.82} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -1101,16 +1101,16 @@ function ScreenCategorias() {
 
   // ── Paleta de cores sequencial para centros de custo ──────────────────────
   const PALETA = [
-    { bar: "bg-amber-400",   ico: "bg-amber-400/10 border-amber-400/20 text-amber-300",   hex: "#fbbf24" },
-    { bar: "bg-blue-400",    ico: "bg-blue-400/10 border-blue-400/20 text-blue-300",     hex: "#60a5fa" },
-    { bar: "bg-violet-400",  ico: "bg-violet-400/10 border-violet-400/20 text-violet-300", hex: "#a78bfa" },
-    { bar: "bg-teal-400",    ico: "bg-teal-400/10 border-teal-400/20 text-teal-300",     hex: "#2dd4bf" },
-    { bar: "bg-rose-400",    ico: "bg-rose-400/10 border-rose-400/20 text-rose-300",     hex: "#fb7185" },
-    { bar: "bg-emerald-400", ico: "bg-emerald-400/10 border-emerald-400/20 text-emerald-300", hex: "#34d399" },
-    { bar: "bg-cyan-400",    ico: "bg-cyan-400/10 border-cyan-400/20 text-cyan-300",     hex: "#22d3ee" },
-    { bar: "bg-orange-400",  ico: "bg-orange-400/10 border-orange-400/20 text-orange-300", hex: "#fb923c" },
-    { bar: "bg-pink-400",    ico: "bg-pink-400/10 border-pink-400/20 text-pink-300",     hex: "#f472b6" },
-    { bar: "bg-indigo-400",  ico: "bg-indigo-400/10 border-indigo-400/20 text-indigo-300", hex: "#818cf8" },
+    { bar: "bg-amber-400",    ico: "bg-amber-400/10 border-amber-400/20 text-amber-300",  hex: "#fbbf24" },
+    { bar: "bg-amber-500",    ico: "bg-amber-500/10 border-amber-500/20 text-amber-400",  hex: "#f59e0b" },
+    { bar: "bg-amber-300",    ico: "bg-amber-300/10 border-amber-300/20 text-amber-200",  hex: "#fcd34d" },
+    { bar: "bg-amber-600",    ico: "bg-amber-600/10 border-amber-600/20 text-amber-500",  hex: "#d97706" },
+    { bar: "bg-amber-200",    ico: "bg-amber-200/10 border-amber-200/20 text-amber-100",  hex: "#fde68a" },
+    { bar: "bg-amber-700",    ico: "bg-amber-700/10 border-amber-700/20 text-amber-600",  hex: "#b45309" },
+    { bar: "bg-amber-400/75", ico: "bg-amber-400/8  border-amber-400/15 text-amber-300",  hex: "#fbbf24" },
+    { bar: "bg-amber-500/75", ico: "bg-amber-500/8  border-amber-500/15 text-amber-400",  hex: "#f59e0b" },
+    { bar: "bg-amber-300/75", ico: "bg-amber-300/8  border-amber-300/15 text-amber-200",  hex: "#fcd34d" },
+    { bar: "bg-amber-600/75", ico: "bg-amber-600/8  border-amber-600/15 text-amber-500",  hex: "#d97706" },
   ];
 
   // ── Agrega dwRawData por CENTRO_CUSTO ─────────────────────────────────────

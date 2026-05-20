@@ -612,15 +612,15 @@ export default function Compras() {
                             <div key={f.nome} className="flex flex-col gap-1">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] font-medium truncate" style={{ color: "var(--sgt-text-secondary)" }}>{f.nome}</span>
-                                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: isMax ? "#22d3ee" : "var(--sgt-text-secondary)" }}>{fmtK(f.valor)}</span>
+                                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: isMax ? "#fbbf24" : "var(--sgt-text-secondary)" }}>{fmtK(f.valor)}</span>
                               </div>
                               <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                 <div
                                   className="h-full rounded-full transition-all duration-700"
                                   style={{
                                     width: `${Math.max(pct, 2)}%`,
-                                    background: isMax ? "linear-gradient(90deg,#22d3ee,#0891b2)" : "linear-gradient(90deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))",
-                                    boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none",
+                                    background: isMax ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,rgba(251,191,36,0.6),rgba(245,158,11,0.4))",
+                                    boxShadow: isMax ? "0 0 10px rgba(251,191,36,0.3)" : "none",
                                   }}
                                 />
                               </div>

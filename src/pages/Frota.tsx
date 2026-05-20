@@ -46,16 +46,16 @@ const hexToRgb = (hex: string) => {
 };
 
 const MARCA_COLORS: Record<string, { color: string; rgb: string }> = {
-  SCANIA:          { color: RAW.accent.cyan,    rgb: hexToRgb(RAW.accent.cyan) },
-  VOLVO:           { color: RAW.accent.violet,  rgb: hexToRgb(RAW.accent.violet) },
-  MERCEDES:        { color: "#94a3b8",          rgb: "148,163,184" },
-  "MERCEDES-BENZ": { color: "#94a3b8",          rgb: "148,163,184" },
-  VOLKSWAGEN:      { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
-  VW:              { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
-  FORD:            { color: RAW.accent.rose,    rgb: hexToRgb(RAW.accent.rose) },
-  IVECO:           { color: RAW.accent.red,     rgb: hexToRgb(RAW.accent.red) },
-  DAF:             { color: RAW.accent.amber,   rgb: hexToRgb(RAW.accent.amber) },
-  MAN:             { color: "#fb923c",          rgb: "251,146,60" },
+  SCANIA:          { color: "#fbbf24", rgb: "251,191,36"  },
+  VOLVO:           { color: "#f59e0b", rgb: "245,158,11"  },
+  MERCEDES:        { color: "#94a3b8", rgb: "148,163,184" },
+  "MERCEDES-BENZ": { color: "#94a3b8", rgb: "148,163,184" },
+  VOLKSWAGEN:      { color: "#fcd34d", rgb: "252,211,77"  },
+  VW:              { color: "#fcd34d", rgb: "252,211,77"  },
+  FORD:            { color: "#d97706", rgb: "217,119,6"   },
+  IVECO:           { color: "#fde68a", rgb: "253,230,138" },
+  DAF:             { color: "#b45309", rgb: "180,83,9"    },
+  MAN:             { color: "#f59e0b", rgb: "245,158,11"  },
 };
 
 function getMarcaColor(marca: string | null) {
@@ -64,14 +64,14 @@ function getMarcaColor(marca: string | null) {
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
 
-// ─── Paleta determinística usando tokens do theme ─────────────────────────────
+// ─── Paleta determinística — tons âmbar ──────────────────────────────────────
 const PALETTE = [
-  RAW.accent.cyan,
-  RAW.accent.violet,
-  RAW.accent.amber,
-  RAW.accent.emerald,
-  RAW.accent.rose,
-  RAW.accent.red,
+  "#fbbf24",
+  "#f59e0b",
+  "#fcd34d",
+  "#d97706",
+  "#fde68a",
+  "#b45309",
 ];
 const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
 
@@ -437,8 +437,8 @@ const AgeCostChart = ({ data }: { data: any[] }) => {
       <defs>
         {data.map((d, i) => (
           <linearGradient key={i} id={`age-g-${i}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.92" />
-            <stop offset="100%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.7" />
+            <stop offset="0%" stopColor={colors[d.faixa] || "#fbbf24"} stopOpacity="0.92" />
+            <stop offset="100%" stopColor={colors[d.faixa] || "#fbbf24"} stopOpacity="0.7" />
           </linearGradient>
         ))}
       </defs>
