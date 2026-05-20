@@ -27,6 +27,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -359,10 +360,30 @@ function Reveal({
   );
 }
 
+function useGreeting(email: string) {
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+
+  // Tenta pegar o nome antes do @ e capitaliza a primeira letra
+  const rawName = email.split("@")[0] ?? "";
+  const firstName = rawName
+    .split(/[._-]/)[0]
+    .replace(/\d+/g, "")
+    .trim();
+  const name = firstName
+    ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
+    : "";
+
+  return { greeting, name };
+}
+
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { canAccess } = usePagePermissions();
   const reduce = useReducedMotion();
+  const { greeting, name } = useGreeting(user?.email ?? "");
 
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
@@ -554,10 +575,10 @@ export default function Home() {
 
             <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full">
               <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 pb-3">
-                <AnimatedTitle text="Seja bem-vindo ao" />
+                <AnimatedTitle text={name ? `${greeting}, ${name}!` : `${greeting}!`} />
               </span>
               <span className="block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-3">
-                <AnimatedTitle text="Workspace" delay={0.45} />
+                <AnimatedTitle text="Workspace SGT" delay={0.45} />
               </span>
             </h1>
 
