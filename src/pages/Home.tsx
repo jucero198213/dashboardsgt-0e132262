@@ -27,6 +27,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -359,18 +360,25 @@ function Reveal({
   );
 }
 
-function useGreeting() {
+function useGreeting(email?: string) {
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
-  return greeting;
+
+  const raw = (email ?? "").split("@")[0].split(/[._-]/)[0].replace(/\d+/g, "").trim();
+  const name = raw.length >= 2
+    ? raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase()
+    : "";
+
+  return { greeting, name };
 }
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { canAccess } = usePagePermissions();
   const reduce = useReducedMotion();
-  const greeting = useGreeting();
+  const { greeting, name } = useGreeting(user?.email);
 
   // Parallax — scroll do container .section (overflow-auto)
   const scrollRef = useRef<HTMLElement | null>(null);
@@ -567,7 +575,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.25 }}
               className="mb-2 text-[clamp(1.1rem,2.2vw,1.6rem)] font-semibold tracking-wide dark:text-slate-300 text-slate-600"
             >
-              {`${greeting}! 👋`}
+              {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
             </motion.p>
 
             <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full">
