@@ -568,23 +568,48 @@ export default function Home() {
               </span>
             </motion.div>
 
-            {/* Saudação personalizada — linha menor acima do título */}
+            {/* Saudação */}
             <motion.p
               initial={reduce ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="mb-2 text-[clamp(1.1rem,2.2vw,1.6rem)] font-semibold tracking-wide dark:text-slate-300 text-slate-600"
+              className="mb-5 text-[clamp(0.95rem,1.8vw,1.25rem)] font-medium tracking-wide dark:text-slate-400 text-slate-500"
             >
               {name ? `${greeting}, ${name}! 👋` : `${greeting}! 👋`}
             </motion.p>
 
-            <h1 className="text-[clamp(3rem,9vw,8rem)] font-black leading-[1.15] tracking-[-0.03em] w-full">
-              <span className="block dark:bg-gradient-to-r dark:from-slate-200 dark:via-white dark:to-slate-300 dark:bg-clip-text dark:text-transparent text-slate-800 pb-3">
-                <AnimatedTitle text="Bem-vindo ao" />
+            {/* Título hero elevado */}
+            <h1 className="w-full leading-none tracking-tight">
+              {/* "BEM-VINDO AO" — fino, uppercase, muito espaçado */}
+              <motion.span
+                className="block text-[clamp(0.7rem,1.4vw,1.05rem)] font-semibold uppercase tracking-[0.45em] dark:text-slate-500 text-slate-400 mb-4"
+                initial={reduce ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.3 }}
+              >
+                Bem-vindo ao
+              </motion.span>
+
+              {/* "Workspace" — dominante, glow âmbar */}
+              <span
+                className="block font-black tracking-[-0.04em] bg-gradient-to-br from-amber-300 via-amber-500 to-orange-500 bg-clip-text text-transparent"
+                style={{
+                  fontSize: "clamp(4.5rem,13vw,11rem)",
+                  filter: "drop-shadow(0 0 48px rgba(245,158,11,0.35)) drop-shadow(0 2px 24px rgba(245,158,11,0.2))",
+                  lineHeight: 1,
+                }}
+              >
+                <AnimatedTitle text="Workspace" delay={0.4} />
               </span>
-              <span className="block bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-3">
-                <AnimatedTitle text="Workspace" delay={0.45} />
-              </span>
+
+              {/* Linha decorativa sob o título */}
+              <motion.span
+                className="block mx-auto mt-5 h-[2px] rounded-full bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"
+                style={{ width: "clamp(120px,30vw,320px)" }}
+                initial={reduce ? false : { scaleX: 0, opacity: 0 }}
+                animate={{ scaleX: 1, opacity: 1 }}
+                transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              />
             </h1>
 
             <motion.div
