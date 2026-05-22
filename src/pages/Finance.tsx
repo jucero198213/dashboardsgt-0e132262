@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import type { ContaPagar, ContaReceber } from "@/data/mockData";
@@ -19,7 +19,7 @@ import {
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, ReferenceLine,
+  PieChart, Pie, Cell, BarChart, Bar, ReferenceLine, ComposedChart,
 } from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -792,56 +792,309 @@ function ScreenReceber() {
   );
 }
 
-function ScreenConciliacao() {
-  const taxa = 88.6;
-  const [checkedBanco, setCheckedBanco] = useState<Record<number,boolean>>({});
-  const [checkedErp, setCheckedErp] = useState<Record<number,boolean>>({});
-  const totalChecked = Object.values(checkedBanco).filter(Boolean).length + Object.values(checkedErp).filter(Boolean).length;
+type ConciliacaoStatus = "conciliado" | "pendente" | "divergencia" | "sempar";
 
-  function concStatusIcon(s: string) {
-    if (s === "Conciliado") return <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />;
-    if (s === "Divergência" || s.startsWith("Divergência")) return <AlertTriangle className="h-3.5 w-3.5 text-rose-400 shrink-0 mt-0.5" />;
-    if (s.includes("Sem par")) return <Clock className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />;
-    return <Clock className="h-3.5 w-3.5 text-slate-500 shrink-0 mt-0.5" />;
+type ConciliacaoLancamento = {
+  data: string;
+  desc: string;
+  doc: string;
+  extrato: number;
+  erp: number;
+  diff: number;
+  status: ConciliacaoStatus;
+};
+
+const CONCILIACAO_LANCAMENTOS: ConciliacaoLancamento[] = [
+  { data: "22/05/26", desc: "TRANSF ENTRE FILIAIS",    doc: "TED-8821", extrato: 48200.00, erp: 48200.00, diff: 0,        status: "conciliado" },
+  { data: "22/05/26", desc: "PAGTO FORNECEDOR DIESEL",  doc: "DOC-4412", extrato:-22450.00, erp:-22450.00, diff: 0,        status: "conciliado" },
+  { data: "21/05/26", desc: "RECEB FRETE CLI 0041",     doc: "NF-10892", extrato: 15800.00, erp: 15800.00, diff: 0,        status: "conciliado" },
+  { data: "21/05/26", desc: "DÉBITO AUTOMÁTICO IPVA",   doc: "DEB-0032", extrato: -3200.00, erp:     0.00, diff:-3200.00,  status: "divergencia" },
+  { data: "20/05/26", desc: "RECEB FRETE CLI 0077",     doc: "NF-10888", extrato: 34600.00, erp: 34600.00, diff: 0,        status: "conciliado" },
+  { data: "20/05/26", desc: "FOLHA PAGAMENTO MAI/26",   doc: "RH-0514",  extrato:-89200.00, erp:-89200.00, diff: 0,        status: "conciliado" },
+  { data: "19/05/26", desc: "TARIFA BANCÁRIA MAINT.",   doc: "TB-0190",  extrato:   -84.50, erp:     0.00, diff:  -84.50,  status: "pendente" },
+  { data: "19/05/26", desc: "RECEB FRETE CLI 0099",     doc: "NF-10881", extrato: 28900.00, erp: 28750.00, diff:  150.00,  status: "divergencia" },
+  { data: "18/05/26", desc: "PAGTO SEGURO FROTA",       doc: "SEG-0221", extrato: -6800.00, erp: -6800.00, diff: 0,        status: "conciliado" },
+  { data: "18/05/26", desc: "ESTORNO FRETE CLI 0033",   doc: "EST-0041", extrato:  5100.00, erp:  5100.00, diff: 0,        status: "conciliado" },
+  { data: "17/05/26", desc: "SICOOB TED RECEBIDO",      doc: "TED-7741", extrato: 12400.00, erp:     0.00, diff:12400.00,  status: "sempar" },
+  { data: "17/05/26", desc: "RECEB FRETE CLI 0019",     doc: "NF-10875", extrato: 19500.00, erp: 19500.00, diff: 0,        status: "conciliado" },
+  { data: "16/05/26", desc: "ABASTECIMENTO FILIAL BSB", doc: "AB-0512",  extrato: -4320.00, erp: -4320.00, diff: 0,        status: "conciliado" },
+  { data: "16/05/26", desc: "TED SEM IDENTIFICAÇÃO",    doc: "TD-8891",  extrato:  8750.00, erp:     0.00, diff: 8750.00,  status: "sempar" },
+  { data: "15/05/26", desc: "PAGTO MANUTENÇÃO FROTA",   doc: "MAN-0381", extrato: -7200.00, erp: -7200.00, diff: 0,        status: "conciliado" },
+  { data: "15/05/26", desc: "RECEB FRETE CLI 0055",     doc: "NF-10870", extrato: 41200.00, erp: 41200.00, diff: 0,        status: "conciliado" },
+  { data: "14/05/26", desc: "DÉBITO MULTA TRÂNSITO",    doc: "MULT-001", extrato:  -480.00, erp:     0.00, diff: -480.00,  status: "pendente" },
+  { data: "14/05/26", desc: "RECEB FRETE CLI 0088",     doc: "NF-10866", extrato: 22800.00, erp: 22800.00, diff: 0,        status: "conciliado" },
+  { data: "13/05/26", desc: "PAGTO PEÇAS CLI 0012",     doc: "DOC-4395", extrato: -3100.00, erp: -3100.00, diff: 0,        status: "conciliado" },
+  { data: "13/05/26", desc: "IOF OPERAÇÃO CRÉDITO",     doc: "IOF-0214", extrato:   -210.30, erp:     0.00, diff: -210.30, status: "pendente" },
+];
+
+const CONCILIACAO_CHART = [
+  { dia: "01/05", extrato: 180000, erp: 180000, divergencia: 0 },
+  { dia: "02/05", extrato: 195000, erp: 195000, divergencia: 0 },
+  { dia: "03/05", extrato: 220000, erp: 218000, divergencia: 2000 },
+  { dia: "04/05", extrato: 210000, erp: 209000, divergencia: 1000 },
+  { dia: "05/05", extrato: 230000, erp: 229000, divergencia: 1000 },
+  { dia: "06/05", extrato: 245000, erp: 244000, divergencia: 1000 },
+  { dia: "07/05", extrato: 260000, erp: 258000, divergencia: 2000 },
+  { dia: "08/05", extrato: 270000, erp: 268000, divergencia: 2000 },
+  { dia: "09/05", extrato: 285000, erp: 284000, divergencia: 1000 },
+  { dia: "10/05", extrato: 300000, erp: 298000, divergencia: 2000 },
+  { dia: "11/05", extrato: 310000, erp: 308000, divergencia: 2000 },
+  { dia: "12/05", extrato: 295000, erp: 293000, divergencia: 2000 },
+  { dia: "13/05", extrato: 320000, erp: 318000, divergencia: 2000 },
+  { dia: "14/05", extrato: 340000, erp: 335000, divergencia: 5000 },
+  { dia: "15/05", extrato: 355000, erp: 353000, divergencia: 2000 },
+  { dia: "16/05", extrato: 370000, erp: 366000, divergencia: 4000 },
+  { dia: "17/05", extrato: 385000, erp: 370000, divergencia: 15000 },
+  { dia: "18/05", extrato: 400000, erp: 398000, divergencia: 2000 },
+  { dia: "19/05", extrato: 410000, erp: 408000, divergencia: 2000 },
+  { dia: "20/05", extrato: 425000, erp: 423000, divergencia: 2000 },
+  { dia: "21/05", extrato: 440000, erp: 438000, divergencia: 2000 },
+  { dia: "22/05", extrato: 455000, erp: 452000, divergencia: 3000 },
+];
+
+function fmtConcBRL(v: number) {
+  const abs = Math.abs(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${v < 0 ? "−" : ""}R$ ${abs}`;
+}
+
+function fmtConcAxis(v: number) {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}k`;
+  return `R$ ${v}`;
+}
+
+function ConciliacaoBadge({ status }: { status: ConciliacaoStatus }) {
+  const meta: Record<ConciliacaoStatus, { label: string; cls: string; dot: string }> = {
+    conciliado: { label: "Conciliado", cls: "border-emerald-400/25 bg-emerald-400/10 text-emerald-300", dot: "bg-emerald-400" },
+    pendente: { label: "Pendente", cls: "border-blue-400/25 bg-blue-400/10 text-blue-300", dot: "bg-blue-400" },
+    divergencia: { label: "Divergência", cls: "border-rose-400/25 bg-rose-400/10 text-rose-300", dot: "bg-rose-400" },
+    sempar: { label: "Sem par no ERP", cls: "border-amber-400/25 bg-amber-400/10 text-amber-300", dot: "bg-amber-400" },
+  };
+  const current = meta[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-bold ${current.cls}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${current.dot}`} />
+      {current.label}
+    </span>
+  );
+}
+
+function ConciliacaoProgress({ value, color = "#22C97A" }: { value: number; color?: string }) {
+  return (
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="h-full rounded-full transition-all duration-700" style={{ width: `${value}%`, background: color }} />
+    </div>
+  );
+}
+
+function ScreenConciliacao() {
+  // ── State ──────────────────────────────────────────────────────────────────
+  const [search, setSearch]             = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroBanco, setFiltroBanco]   = useState("todos");
+  const [page, setPage]                 = useState(1);
+  const [selectedRows, setSelectedRows] = useState<Record<number, boolean>>({});
+  const PAGE_SIZE = 10;
+
+  // ── Mock — lançamentos para conciliação ───────────────────────────────────
+  const lancamentos = useMemo(() => [
+    { data:"22/05/26", desc:"TRANSF ENTRE FILIAIS",     doc:"TED-8821", extrato:  48200.00, erp:  48200.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"22/05/26", desc:"PAGTO FORNECEDOR DIESEL",  doc:"DOC-4412", extrato: -22450.00, erp: -22450.00, diff:    0,      status:"Conciliado",   banco:"brad"   },
+    { data:"21/05/26", desc:"RECEB FRETE CLI 0041",     doc:"NF-10892", extrato:  15800.00, erp:  15800.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"21/05/26", desc:"DÉBITO AUTOMÁTICO IPVA",   doc:"DEB-0032", extrato:  -3200.00, erp:      0.00, diff:-3200,     status:"Divergência",   banco:"sicoob" },
+    { data:"20/05/26", desc:"RECEB FRETE CLI 0077",     doc:"NF-10888", extrato:  34600.00, erp:  34600.00, diff:    0,      status:"Conciliado",   banco:"brad"   },
+    { data:"20/05/26", desc:"FOLHA PAGAMENTO MAI/26",   doc:"RH-0514",  extrato: -89200.00, erp: -89200.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"19/05/26", desc:"TARIFA BANCÁRIA MAINT.",   doc:"TB-0190",  extrato:    -84.50, erp:      0.00, diff:  -84.5,   status:"Sem par ERP",   banco:"brad"   },
+    { data:"19/05/26", desc:"RECEB FRETE CLI 0099",     doc:"NF-10881", extrato:  28900.00, erp:  28750.00, diff:  150,     status:"Divergência",   banco:"bb"     },
+    { data:"18/05/26", desc:"PAGTO SEGURO FROTA",       doc:"SEG-0221", extrato:  -6800.00, erp:  -6800.00, diff:    0,      status:"Conciliado",   banco:"sicoob" },
+    { data:"18/05/26", desc:"ESTORNO FRETE CLI 0033",   doc:"EST-0041", extrato:   5100.00, erp:   5100.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"17/05/26", desc:"SICOOB TED RECEBIDO",      doc:"TED-7741", extrato:  12400.00, erp:      0.00, diff:12400,     status:"Sem par ERP",   banco:"sicoob" },
+    { data:"17/05/26", desc:"RECEB FRETE CLI 0019",     doc:"NF-10875", extrato:  19500.00, erp:  19500.00, diff:    0,      status:"Conciliado",   banco:"brad"   },
+    { data:"16/05/26", desc:"ABASTECIMENTO FILIAL BSB", doc:"AB-0512",  extrato:  -4320.00, erp:  -4320.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"16/05/26", desc:"TED SEM IDENTIFICAÇÃO",    doc:"TD-8891",  extrato:   8750.00, erp:      0.00, diff: 8750,     status:"Pendente",      banco:"sicoob" },
+    { data:"15/05/26", desc:"PAGTO MANUTENÇÃO FROTA",   doc:"MAN-0381", extrato:  -7200.00, erp:  -7200.00, diff:    0,      status:"Conciliado",   banco:"brad"   },
+    { data:"15/05/26", desc:"RECEB FRETE CLI 0055",     doc:"NF-10870", extrato:  41200.00, erp:  41200.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"14/05/26", desc:"DÉBITO MULTA TRÂNSITO",    doc:"MULT-001", extrato:   -480.00, erp:      0.00, diff: -480,     status:"Pendente",      banco:"brad"   },
+    { data:"14/05/26", desc:"RECEB FRETE CLI 0088",     doc:"NF-10866", extrato:  22800.00, erp:  22800.00, diff:    0,      status:"Conciliado",   banco:"bb"     },
+    { data:"13/05/26", desc:"PAGTO PEÇAS CLI 0012",     doc:"DOC-4395", extrato:  -3100.00, erp:  -3100.00, diff:    0,      status:"Conciliado",   banco:"sicoob" },
+    { data:"13/05/26", desc:"IOF OPERAÇÃO CRÉDITO",     doc:"IOF-0214", extrato:   -210.30, erp:      0.00, diff: -210.3,   status:"Sem par ERP",   banco:"brad"   },
+  ], []);
+
+  // ── Dados do gráfico de evolução diária ───────────────────────────────────
+  const chartData = [
+    { dia:"01/05", extrato:180, erp:180, diverg:0  },{ dia:"03/05", extrato:220, erp:218, diverg:2  },
+    { dia:"05/05", extrato:245, erp:244, diverg:1  },{ dia:"07/05", extrato:270, erp:268, diverg:2  },
+    { dia:"09/05", extrato:300, erp:298, diverg:2  },{ dia:"11/05", extrato:310, erp:308, diverg:2  },
+    { dia:"13/05", extrato:340, erp:335, diverg:5  },{ dia:"15/05", extrato:370, erp:366, diverg:4  },
+    { dia:"17/05", extrato:400, erp:385, diverg:15 },{ dia:"19/05", extrato:420, erp:418, diverg:2  },
+    { dia:"21/05", extrato:445, erp:442, diverg:3  },{ dia:"22/05", extrato:458, erp:455, diverg:3  },
+  ];
+
+  // ── Filtro / busca ─────────────────────────────────────────────────────────
+  const filtrados = useMemo(() => {
+    let list = lancamentos;
+    if (filtroBanco !== "todos") list = list.filter(l => l.banco === filtroBanco);
+    if (filtroStatus !== "todos") list = list.filter(l => {
+      if (filtroStatus === "Conciliado")  return l.status === "Conciliado";
+      if (filtroStatus === "Pendente")    return l.status === "Pendente";
+      if (filtroStatus === "Divergência") return l.status === "Divergência";
+      if (filtroStatus === "Sem par ERP") return l.status === "Sem par ERP";
+      return true;
+    });
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(l => l.desc.toLowerCase().includes(q) || l.doc.toLowerCase().includes(q));
+    }
+    return list;
+  }, [lancamentos, filtroBanco, filtroStatus, search]);
+
+  const totalPags  = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
+  const paginados  = filtrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalSel   = Object.values(selectedRows).filter(Boolean).length;
+
+  function toggleRow(i: number) { setSelectedRows(p => ({ ...p, [i]: !p[i] })); }
+  function toggleAll() {
+    const allSel = paginados.every((_, i) => selectedRows[(page - 1) * PAGE_SIZE + i]);
+    const next: Record<number,boolean> = { ...selectedRows };
+    paginados.forEach((_, i) => { next[(page - 1) * PAGE_SIZE + i] = !allSel; });
+    setSelectedRows(next);
   }
+
+  // ── Helpers de formatação ─────────────────────────────────────────────────
+  function fmtVal(v: number) {
+    const abs = Math.abs(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (v < 0 ? "−" : "") + "R$ " + abs;
+  }
+
+  // ── Config de status badge ────────────────────────────────────────────────
+  function badgeCfg(s: string) {
+    if (s === "Conciliado")  return { bg: "bg-emerald-400/10 border-emerald-400/25", text: "text-emerald-300", dot: "bg-emerald-400" };
+    if (s === "Divergência") return { bg: "bg-rose-400/10 border-rose-400/25",     text: "text-rose-300",    dot: "bg-rose-400"    };
+    if (s === "Pendente")    return { bg: "bg-blue-400/10 border-blue-400/25",      text: "text-blue-300",   dot: "bg-blue-400"    };
+    if (s === "Sem par ERP") return { bg: "bg-amber-400/10 border-amber-400/25",    text: "text-amber-300",  dot: "bg-amber-400"   };
+    return { bg: "bg-slate-400/10 border-slate-400/20", text: "text-slate-400", dot: "bg-slate-400" };
+  }
+
+  // ── KPI computados ────────────────────────────────────────────────────────
+  const totalExtrato   = lancamentos.reduce((s, l) => s + Math.abs(l.extrato), 0);
+  const totalErp       = lancamentos.reduce((s, l) => s + Math.abs(l.erp),     0);
+  const totalConc      = lancamentos.filter(l => l.status === "Conciliado").reduce((s, l) => s + Math.abs(l.extrato), 0);
+  const qtdDiverg      = lancamentos.filter(l => l.status === "Divergência").length;
+  const taxaConc       = totalExtrato > 0 ? (totalConc / totalExtrato) * 100 : 0;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* KPIs */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Lançamentos Banco", value: "247", sub: "Maio 2025", icon: Landmark, stripe: "from-blue-400/60 to-blue-700/20", iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]", iconTxt: "text-blue-300", glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]" },
-          { label: "Conciliados", value: "219", sub: "88,6% do total", icon: CheckCircle, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-          { label: "Divergências", value: "28", sub: "Requer atenção", icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-        ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+
+      {/* ══════ ALERT BANNER ══════ */}
+      <AnimatedCard delay={0}>
+        <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/25 bg-amber-400/[0.07] px-4 py-3">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+          <p className="flex-1 text-[12px] text-slate-400">
+            <span className="font-semibold text-amber-300">Atenção:</span>{" "}
+            23 lançamentos do Sicoob estão há mais de 72h sem correspondência no ERP. Revisar antes do fechamento mensal.
+          </p>
+          <button className="text-[11px] font-semibold text-amber-400 underline underline-offset-2 hover:text-amber-300 shrink-0">
+            Ver pendências →
+          </button>
+        </div>
+      </AnimatedCard>
+
+      {/* ══════ KPI CARDS — 5 colunas ══════ */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Extrato Banco */}
+        <AnimatedCard delay={0}>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-blue-400/[0.12] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_4px_40px_rgba(59,130,246,0.16)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-400/60 to-blue-700/20" />
+            <div className="absolute left-0 top-[20%] bottom-[20%] w-[2px] rounded-r-full bg-blue-400" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">Extrato Banco</p>
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-blue-300 text-[clamp(1.1rem,1.8vw,1.5rem)] overflow-hidden text-ellipsis whitespace-nowrap">
+              {fmtK(totalExtrato)}
+            </p>
+            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{lancamentos.length} lançamentos</p>
+          </div>
+        </AnimatedCard>
+
+        {/* Total ERP */}
+        <AnimatedCard delay={60}>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_4px_40px_rgba(255,255,255,0.06)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-slate-400/40 to-slate-700/10" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">Total ERP</p>
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.1rem,1.8vw,1.5rem)] overflow-hidden text-ellipsis whitespace-nowrap">
+              {fmtK(totalErp)}
+            </p>
+            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">
+              <span className="text-rose-300">−{fmtK(totalExtrato - totalErp)}</span> diferença bruta
+            </p>
+          </div>
+        </AnimatedCard>
+
+        {/* Conciliado */}
+        <AnimatedCard delay={120}>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-emerald-400/[0.12] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/60 to-emerald-700/20" />
+            <div className="absolute left-0 top-[20%] bottom-[20%] w-[2px] rounded-r-full bg-emerald-400" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">Conciliado</p>
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-emerald-300 text-[clamp(1.1rem,1.8vw,1.5rem)] overflow-hidden text-ellipsis whitespace-nowrap">
+              {fmtK(totalConc)}
+            </p>
+            <div className="mt-2">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[9px] font-medium text-slate-600">{lancamentos.filter(l => l.status === "Conciliado").length} pares</p>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
+                <div className="h-full rounded-full bg-emerald-400 transition-all duration-1000" style={{ width: `${taxaConc.toFixed(1)}%` }} />
+              </div>
+            </div>
+          </div>
+        </AnimatedCard>
+
+        {/* Divergências */}
+        <AnimatedCard delay={180}>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-rose-400/[0.12] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/60 to-rose-700/20" />
+            <div className="absolute left-0 top-[20%] bottom-[20%] w-[2px] rounded-r-full bg-rose-400" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">Divergências</p>
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-rose-300 text-[clamp(1.3rem,2.2vw,1.8rem)]">
+              {qtdDiverg}
+            </p>
+            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">
+              {fmtK(lancamentos.filter(l => l.status === "Divergência").reduce((s, l) => s + Math.abs(l.diff), 0))} impacto
+            </p>
+          </div>
+        </AnimatedCard>
+
+        {/* Taxa de Conciliação */}
+        <AnimatedCard delay={240}>
+          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-amber-400/[0.14] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-400/60 to-amber-700/20" />
+            <div className="absolute left-0 top-[20%] bottom-[20%] w-[2px] rounded-r-full bg-amber-400" />
+            <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500">Taxa Conciliação</p>
+            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-amber-300 text-[clamp(1.3rem,2.2vw,1.8rem)]">
+              {taxaConc.toFixed(1)}%
+            </p>
+            <div className="mt-2">
+              <div className="h-1.5 w-full rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
+                <div className="h-full rounded-full bg-amber-400 transition-all duration-1000" style={{ width: `${taxaConc.toFixed(1)}%` }} />
+              </div>
+              <p className="mt-1 text-[9px] text-rose-300 font-medium">Meta: 95% · −{(95 - taxaConc).toFixed(1)}p.p.</p>
+            </div>
+          </div>
+        </AnimatedCard>
       </div>
 
-      {/* Barra de ações + taxa */}
-      <AnimatedCard delay={200}>
-        <div className="flex flex-wrap items-center gap-3 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-3">
-          <span className="text-[12px] font-semibold text-slate-400 shrink-0">Taxa de conciliação</span>
-          <div className="flex-1 min-w-[80px] h-2 rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
-            <div className="h-2 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${taxa}%`, transition: "width 1s ease" }} />
-          </div>
-          <span className="text-[13px] font-black text-emerald-300 shrink-0">{taxa}%</span>
-          <div className="h-4 w-px bg-[var(--sgt-divider)] hidden sm:block" />
-          {/* Botões de ação */}
-          <button
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
-              totalChecked > 0
-                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25"
-                : "bg-[var(--sgt-input-bg)] border-[var(--sgt-border-subtle)] text-slate-500 opacity-50 cursor-default"
-            }`}>
+      {/* ══════ AÇÕES RÁPIDAS ══════ */}
+      <AnimatedCard delay={280}>
+        <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-4 py-3">
+          <button className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-all border ${
+            totalSel > 0
+              ? "bg-emerald-500/15 border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/25"
+              : "bg-[var(--sgt-input-bg)] border-[var(--sgt-border-subtle)] text-slate-600 cursor-default opacity-50"
+          }`}>
             <CheckCircle className="h-3 w-3" />
-            Confirmar selecionados{totalChecked > 0 ? ` (${totalChecked})` : ""}
+            Confirmar selecionados{totalSel > 0 ? ` (${totalSel})` : ""}
           </button>
-          <button className="flex items-center gap-1.5 rounded-lg border border-rose-400/25 bg-rose-400/[0.08] px-3 py-1.5 text-[11px] font-semibold text-rose-300 hover:bg-rose-400/[0.14] transition-colors">
-            <AlertTriangle className="h-3 w-3" />
-            Ver divergências (28)
-          </button>
-          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
-            <FileSpreadsheet className="h-3 w-3" />
-            Relatório de conciliação
+          <button className="flex items-center gap-1.5 rounded-lg border border-rose-400/25 bg-rose-400/[0.08] px-3 py-1.5 text-[11px] font-semibold text-rose-300 hover:bg-rose-400/15 transition-colors">
+            <AlertTriangle className="h-3 w-3" />Ver divergências ({qtdDiverg})
           </button>
           <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
             <ArrowRightLeft className="h-3 w-3" />Conciliar Auto
@@ -849,70 +1102,286 @@ function ScreenConciliacao() {
           <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
             <Download className="h-3 w-3" />Importar OFX
           </button>
+          <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
+            <FileSpreadsheet className="h-3 w-3" />Relatório
+          </button>
         </div>
       </AnimatedCard>
 
-      {/* Side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AnimatedCard delay={300}>
+      {/* ══════ CONTAS POR BANCO ══════ */}
+      <div>
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-600">Visão por Conta Bancária</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { id:"bb",     nome:"Banco do Brasil", conta:"001 · C/C 12345-6", extrato:2140000, erp:2120000, pct:94.1, cor:"text-yellow-300",  bg:"bg-yellow-400/10 border-yellow-400/20", letra:"BB" },
+            { id:"brad",   nome:"Bradesco",         conta:"237 · C/C 78901-2", extrato:1890000, erp:1880000, pct:91.8, cor:"text-rose-300",    bg:"bg-rose-400/10 border-rose-400/20",     letra:"BR" },
+            { id:"sicoob", nome:"Sicoob",            conta:"756 · C/C 34567-8", extrato:834000,  erp:811000,  pct:83.2, cor:"text-emerald-300", bg:"bg-emerald-400/10 border-emerald-400/20",letra:"SC" },
+          ].map(b => (
+            <AnimatedCard key={b.id} delay={300}>
+              <button
+                onClick={() => { setFiltroBanco(filtroBanco === b.id ? "todos" : b.id); setPage(1); }}
+                className={`group w-full text-left rounded-[14px] border bg-[var(--sgt-bg-card)] p-4 transition-all duration-200 hover:-translate-y-[1px] ${
+                  filtroBanco === b.id
+                    ? "border-amber-400/35 bg-amber-400/[0.05] shadow-[0_0_18px_rgba(245,158,11,0.15)]"
+                    : "border-[var(--sgt-border-subtle)] hover:border-[var(--sgt-border-medium)]"
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-[13px] font-semibold text-slate-200">{b.nome}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-slate-600">{b.conta}</p>
+                  </div>
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl border text-[11px] font-black ${b.bg} ${b.cor}`}>
+                    {b.letra}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 mb-0.5">Extrato</p>
+                    <p className={`font-black text-[13px] ${b.cor}`}>{fmtK(b.extrato)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 mb-0.5">ERP</p>
+                    <p className="font-black text-[13px] text-slate-200">{fmtK(b.erp)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[9px] text-slate-600">Conciliação</p>
+                  <p className={`text-[11px] font-black ${b.pct >= 90 ? "text-emerald-300" : "text-amber-300"}`}>{b.pct}%</p>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-[var(--sgt-progress-track)] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ${b.pct >= 90 ? "bg-emerald-400" : "bg-amber-400"}`}
+                    style={{ width: `${b.pct}%` }}
+                  />
+                </div>
+              </button>
+            </AnimatedCard>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════ GRÁFICO + INSIGHT IA ══════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+
+        {/* Gráfico de evolução */}
+        <AnimatedCard delay={340}>
           <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex items-center gap-2">
-              <span className="text-[12px] font-semibold text-slate-300">Extrato Bancário</span>
-              <span className="text-[10px] text-slate-600">Bradesco ••4291 · Mai/2025</span>
-              <input type="checkbox" className="ml-auto accent-amber-400 h-3.5 w-3.5 cursor-pointer"
-                onChange={e => {
-                  const v: Record<number,boolean> = {};
-                  CONCILIACAO_BANCO.forEach((_, i) => v[i] = e.target.checked);
-                  setCheckedBanco(v);
-                }} />
-            </div>
-            {CONCILIACAO_BANCO.map((c, i) => (
-              <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 transition-colors ${checkedBanco[i] ? "bg-amber-400/[0.04]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
-                <input type="checkbox" className="mt-0.5 accent-amber-400 h-3.5 w-3.5 cursor-pointer shrink-0"
-                  checked={!!checkedBanco[i]} onChange={e => setCheckedBanco(p => ({ ...p, [i]: e.target.checked }))} />
-                {concStatusIcon(c.status)}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium text-slate-300">{c.desc}</p>
-                  <p className="text-[10px] text-slate-600">{c.meta}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className={`text-[12px] font-semibold tabular-nums ${c.valor > 0 ? "text-emerald-300" : "text-rose-300"}`}>{c.valor > 0 ? "+" : ""}{fmtBRL(c.valor)}</p>
-                  <ConcStatus s={c.status} />
-                </div>
+            <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex flex-wrap items-center gap-3">
+              <div>
+                <p className="text-[12px] font-semibold text-slate-300">Evolução da Conciliação — Mai/26</p>
+                <p className="text-[10px] text-slate-600 mt-0.5">Extrato vs ERP diário · valores em R$ mil</p>
               </div>
-            ))}
+              <div className="flex items-center gap-4 ml-auto">
+                <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-blue-400" /><span className="text-[10px] text-slate-500">Extrato</span></div>
+                <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" /><span className="text-[10px] text-slate-500">ERP</span></div>
+                <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400/80" /><span className="text-[10px] text-slate-500">Diverg.</span></div>
+              </div>
+            </div>
+            <div className="p-4 h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }} barCategoryGap="40%">
+                  <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="dia" tick={{ fill: "rgba(255,255,255,0.30)", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "rgba(255,255,255,0.30)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}k`} />
+                  <Tooltip
+                    contentStyle={{ background: "#1A2540", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8 }}
+                    labelStyle={{ color: "#F0F4F8", fontSize: 11, fontWeight: 600 }}
+                    itemStyle={{ color: "#8FA3BB", fontSize: 11 }}
+                    formatter={(v: number, name: string) => [`R$ ${v}k`, name === "extrato" ? "Extrato" : name === "erp" ? "ERP" : "Divergência"]}
+                  />
+                  <Bar dataKey="extrato" fill="#4A9EFF" opacity={0.7} radius={[3,3,0,0]} />
+                  <Bar dataKey="erp"     fill="#22C97A" opacity={0.75} radius={[3,3,0,0]} />
+                  <Bar dataKey="diverg"  fill="#F0A730" opacity={0.85} radius={[3,3,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </SectionCard>
         </AnimatedCard>
-        <AnimatedCard delay={350}>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex items-center gap-2">
-              <span className="text-[12px] font-semibold text-slate-300">Lançamentos ERP</span>
-              <span className="text-[10px] text-slate-600">Não conciliados: 28</span>
-              <input type="checkbox" className="ml-auto accent-amber-400 h-3.5 w-3.5 cursor-pointer"
-                onChange={e => {
-                  const v: Record<number,boolean> = {};
-                  CONCILIACAO_ERP.forEach((_, i) => v[i] = e.target.checked);
-                  setCheckedErp(v);
-                }} />
+
+        {/* Insight IA */}
+        <AnimatedCard delay={380}>
+          <div className="flex flex-col h-full rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4 hover:border-[var(--sgt-border-medium)] transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 bg-rose-400/[0.08] px-2 py-1 text-[10px] font-bold text-rose-300 uppercase tracking-[0.06em]">
+                <AlertTriangle className="h-2.5 w-2.5" />Alerta
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+                ✦ Novo
+              </span>
             </div>
-            {CONCILIACAO_ERP.map((c, i) => (
-              <div key={i} className={`flex items-start gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 transition-colors ${checkedErp[i] ? "bg-amber-400/[0.04]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
-                <input type="checkbox" className="mt-0.5 accent-amber-400 h-3.5 w-3.5 cursor-pointer shrink-0"
-                  checked={!!checkedErp[i]} onChange={e => setCheckedErp(p => ({ ...p, [i]: e.target.checked }))} />
-                {concStatusIcon(c.status)}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-medium text-slate-300">{c.desc}</p>
-                  <p className="text-[10px] text-slate-600">{c.meta}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className={`text-[12px] font-semibold tabular-nums ${c.valor > 0 ? "text-emerald-300" : "text-rose-300"}`}>{c.valor > 0 ? "+" : ""}{fmtBRL(c.valor)}</p>
-                  <ConcStatus s={c.status} />
-                </div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600 mb-1.5 flex items-center gap-1.5">
+              <Zap className="h-2.5 w-2.5 text-amber-400" />SGT Insights IA
+            </p>
+            <p className="text-[13px] font-bold text-slate-200 leading-snug mb-2">
+              Sicoob acumula 23 lançamentos sem correspondência no ERP há 3+ dias
+            </p>
+            <p className="text-[11px] text-slate-500 leading-relaxed flex-1">
+              Os lançamentos do Sicoob (C/C 34567-8) entre 14/05 e 17/05 não encontraram par no sistema. Padrão sugere transferências entre filiais não registradas pelo operador.
+            </p>
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-600 mb-1">
+                <span>Confiança</span><span className="text-amber-300">87%</span>
               </div>
-            ))}
-          </SectionCard>
+              <div className="h-1 w-full rounded-full bg-[var(--sgt-progress-track)] overflow-hidden mb-4">
+                <div className="h-full rounded-full bg-amber-400 transition-all duration-1000" style={{ width: "87%" }} />
+              </div>
+              <div className="border-t border-[var(--sgt-divider)] pt-3">
+                <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600 mb-1">Impacto estimado</p>
+                <p className="font-black text-[18px] text-rose-300 tracking-[-0.03em">−R$ 23.480,00</p>
+              </div>
+            </div>
+          </div>
         </AnimatedCard>
       </div>
+
+      {/* ══════ TABELA DE LANÇAMENTOS ══════ */}
+      <AnimatedCard delay={420}>
+        <SectionCard>
+          {/* Header + filtros */}
+          <div className="px-4 py-3 border-b border-[var(--sgt-divider)] flex flex-wrap items-center gap-2">
+            <div className="flex flex-col">
+              <span className="text-[12px] font-semibold text-slate-300">Lançamentos para Conciliação</span>
+              <span className="text-[10px] text-slate-600 mt-0.5">{filtrados.length} registros</span>
+            </div>
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {/* Banco */}
+              <select
+                value={filtroBanco}
+                onChange={e => { setFiltroBanco(e.target.value); setPage(1); }}
+                className="h-8 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2 text-[11px] text-slate-300 focus:outline-none focus:border-[var(--sgt-border-medium)] cursor-pointer"
+              >
+                <option value="todos">Todos os bancos</option>
+                <option value="bb">Banco do Brasil</option>
+                <option value="brad">Bradesco</option>
+                <option value="sicoob">Sicoob</option>
+              </select>
+              {/* Status tabs */}
+              <div className="flex gap-1">
+                {["todos","Conciliado","Pendente","Divergência","Sem par ERP"].map(s => (
+                  <button key={s}
+                    onClick={() => { setFiltroStatus(s); setPage(1); }}
+                    className={`h-7 rounded-lg border px-2.5 text-[10px] font-semibold transition-all whitespace-nowrap ${
+                      filtroStatus === s
+                        ? "border-amber-400/40 bg-amber-500/15 text-amber-300"
+                        : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-500 hover:text-slate-300"
+                    }`}>
+                    {s === "todos" ? "Todos" : s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Search bar */}
+          <div className="px-4 py-2 border-b border-[var(--sgt-divider)]">
+            <div className="relative max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-600" />
+              <input
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                placeholder="Buscar por descrição ou documento..."
+                className="h-8 w-full rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] pl-9 pr-3 text-[12px] text-slate-300 placeholder-slate-600 focus:outline-none focus:border-[var(--sgt-border-medium)]"
+              />
+            </div>
+          </div>
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ background: "var(--sgt-table-head)", borderBottom: "1px solid var(--sgt-divider)" }}>
+                  <th className="px-4 py-2.5 w-8">
+                    <input type="checkbox" className="accent-amber-400 cursor-pointer"
+                      onChange={toggleAll}
+                      checked={paginados.length > 0 && paginados.every((_, i) => selectedRows[(page-1)*PAGE_SIZE+i])}
+                    />
+                  </th>
+                  <Th>Data</Th>
+                  <Th>Descrição / Doc</Th>
+                  <Th className="text-right">Extrato</Th>
+                  <Th className="text-right hidden md:table-cell">ERP</Th>
+                  <Th className="text-right hidden lg:table-cell">Diferença</Th>
+                  <Th>Status</Th>
+                  <Th className="text-right">Ações</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginados.map((l, i) => {
+                  const absIdx = (page - 1) * PAGE_SIZE + i;
+                  const bc = badgeCfg(l.status);
+                  const diffClass = l.diff === 0 ? "text-slate-600" : Math.abs(l.diff) < 500 ? "text-amber-300" : "text-rose-300";
+                  return (
+                    <tr key={absIdx} className={`border-b border-[var(--sgt-divider)] transition-colors ${selectedRows[absIdx] ? "bg-amber-400/[0.04]" : "hover:bg-[var(--sgt-row-hover)]"}`}>
+                      <td className="px-4 py-2.5 w-8">
+                        <input type="checkbox" className="accent-amber-400 cursor-pointer"
+                          checked={!!selectedRows[absIdx]} onChange={() => toggleRow(absIdx)} />
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">{l.data}</td>
+                      <td className="px-3 py-2.5">
+                        <p className="text-[12px] font-medium text-slate-200">{l.desc}</p>
+                        <p className="text-[10px] text-slate-600">{l.doc}</p>
+                      </td>
+                      <td className={`px-3 py-2.5 text-right font-mono text-[12px] font-semibold tabular-nums ${l.extrato >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                        {l.extrato !== 0 ? fmtVal(l.extrato) : <span className="text-slate-700">—</span>}
+                      </td>
+                      <td className={`px-3 py-2.5 text-right font-mono text-[12px] font-semibold tabular-nums hidden md:table-cell ${l.erp >= 0 ? "text-slate-300" : "text-rose-300/70"}`}>
+                        {l.erp !== 0 ? fmtVal(l.erp) : <span className="text-slate-700">—</span>}
+                      </td>
+                      <td className={`px-3 py-2.5 text-right font-mono text-[12px] font-semibold tabular-nums hidden lg:table-cell ${diffClass}`}>
+                        {l.diff === 0 ? "—" : fmtVal(l.diff)}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${bc.bg} ${bc.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${bc.dot}`} />{l.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100" style={{ opacity: undefined }}>
+                          <ActionBtn icon={CheckCircle} title="Conciliar" />
+                          <ActionBtn icon={ArrowRightLeft} title="Vincular" />
+                          <ActionBtn icon={Eye} title="Detalhes" />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {paginados.length === 0 && (
+                  <tr><td colSpan={8} className="py-10 text-center text-[12px] text-slate-600">Nenhum lançamento encontrado</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {/* Paginação */}
+          {totalPags > 1 && (
+            <div className="flex items-center justify-between border-t border-[var(--sgt-divider)] px-4 py-3">
+              <p className="text-[11px] text-slate-600">
+                {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE, filtrados.length)} de {filtrados.length}
+              </p>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                {Array.from({ length: Math.min(5, totalPags) }, (_, i) => {
+                  const p = totalPags <= 5 ? i+1 : page <= 3 ? i+1 : page >= totalPags-2 ? totalPags-4+i : page-2+i;
+                  return (
+                    <button key={p} onClick={() => setPage(p)}
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${
+                        page===p ? "border border-amber-400/40 bg-amber-500/15 text-amber-300" : "border border-white/[0.06] text-slate-500 hover:border-amber-400/20 hover:text-amber-300"
+                      }`}>
+                      {p}
+                    </button>
+                  );
+                })}
+                <button onClick={() => setPage(p => Math.min(totalPags,p+1))} disabled={page===totalPags}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </SectionCard>
+      </AnimatedCard>
+
     </div>
   );
 }
