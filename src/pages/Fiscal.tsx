@@ -207,7 +207,7 @@ export default function Fiscal() {
 
               <div className="flex-1" />
 
-              <UpdateButton onClick={buscarNotas} isLoading={isLoading} />
+              <UpdateButton onClick={buscarNotas} isFetching={isLoading} />
             </div>
 
             {/* ── MOBILE NAV ── */}
