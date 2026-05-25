@@ -4,6 +4,7 @@ import {
   TrendingUp, Activity, Wallet, Banknote, Users,
   Truck, Wrench, MapPin, Briefcase, ShoppingCart, Fuel,
   LineChart as LineChartIcon, Headphones, UserCog, Scale,
+  Sparkles, Globe, Monitor,
 } from "lucide-react";
 
 export type AppNavItem = {
@@ -17,14 +18,23 @@ export type AppNavItem = {
   section?: string;
   badge?: number;
   badgeColor?: "amber" | "rose";
+  /** Marca como portal integrado — recebe destaque visual especial */
+  portal?: boolean;
 };
 
 /**
  * NAV global — replicado da sidebar da tela /financeiro.
  * Itens com `financeScreen` controlam sub-telas dentro de /financeiro;
  * itens com `to` são rotas normais.
+ * Itens com `portal: true` aparecem primeiro com destaque visual.
  */
 export const APP_NAV: AppNavItem[] = [
+  // ── Portais integrados — sempre em primeiro ──────────────────────────────
+  { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais" },
+  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    to: "/visual-rodopar", portal: true },
+  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  to: "/portal-wr",      portal: true },
+
+  // ── Módulos do sistema ────────────────────────────────────────────────────
   { id: "fin-painel",       label: "Painel",           icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro" },
   { id: "fin-pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, financeScreen: "pagar" },
   { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   financeScreen: "receber" },

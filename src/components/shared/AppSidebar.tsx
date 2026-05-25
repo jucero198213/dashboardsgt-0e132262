@@ -114,13 +114,22 @@ export function AppSidebar() {
           const active = isItemActive(item);
           const showSection = item.section && (i === 0 || APP_NAV[i - 1].section !== item.section);
 
+          // Estilos para portais integrados (seção "Portais")
+          const portalInactive = "bg-cyan-500/8 border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/15 hover:border-cyan-400/40 hover:text-cyan-200";
+          const portalActive   = "bg-cyan-500/20 border-cyan-400/50 text-cyan-100 shadow-[0_0_16px_rgba(34,211,238,0.18)]";
+          const portalIconActive   = "text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]";
+          const portalIconInactive = "text-cyan-500";
+          const portalBarActive    = "bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]";
+
           /* ── COLLAPSED ── */
           if (collapsed) {
             return (
               <div key={item.id} className="relative flex flex-col items-center py-[2px]">
                 {showSection && <div className="w-8 h-px my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                  <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full ${
+                    item.portal ? portalBarActive : "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                  }`} />
                 )}
                 <button
                   onClick={() => handleClick(item)}
@@ -130,12 +139,18 @@ export function AppSidebar() {
                   }}
                   aria-label={item.label}
                   className={`flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
-                    ${active
-                      ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
-                      : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300"
+                    ${item.portal
+                      ? (active ? portalActive : portalInactive)
+                      : (active
+                          ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
+                          : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300")
                     }`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
+                  <Icon className={`h-4 w-4 shrink-0 ${
+                    item.portal
+                      ? (active ? portalIconActive : portalIconInactive)
+                      : (active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "")
+                  }`} />
                 </button>
               </div>
             );
@@ -146,26 +161,39 @@ export function AppSidebar() {
             <div key={item.id}>
               {showSection && (
                 <div className="flex items-center gap-2 px-3 pt-4 pb-1.5">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">{item.section}</span>
+                  <span className={`text-[9px] font-bold uppercase tracking-[0.4em] ${item.portal ? "text-cyan-600" : "text-slate-600"}`}>
+                    {item.section}
+                  </span>
                   <div className="flex-1 h-px" style={{ background: "var(--sgt-border-subtle)" }} />
                 </div>
               )}
 
               <div className="relative mx-2 my-[2px]">
                 {active && (
-                  <span className="pointer-events-none absolute left-0 top-1/2 z-10 -translate-y-1/2 h-5 w-[3px] rounded-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]" />
+                  <span className={`pointer-events-none absolute left-0 top-1/2 z-10 -translate-y-1/2 h-5 w-[3px] rounded-full ${
+                    item.portal ? portalBarActive : "bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.9)]"
+                  }`} />
                 )}
                 <button
                   onClick={() => handleClick(item)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] rounded-xl border transition-all duration-150
-                    ${active
-                      ? "bg-amber-500/15 border-amber-400/35 text-amber-200 font-semibold shadow-[0_0_18px_rgba(245,158,11,0.18)]"
-                      : "border-transparent text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300 font-medium"
+                    ${item.portal
+                      ? (active ? `${portalActive} font-semibold` : `${portalInactive} font-medium`)
+                      : (active
+                          ? "bg-amber-500/15 border-amber-400/35 text-amber-200 font-semibold shadow-[0_0_18px_rgba(245,158,11,0.18)]"
+                          : "border-transparent text-slate-500 hover:bg-[var(--sgt-row-hover)] hover:text-slate-300 font-medium")
                     }`}
                 >
-                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : ""}`} />
+                  <Icon className={`h-4 w-4 shrink-0 ${
+                    item.portal
+                      ? (active ? portalIconActive : portalIconInactive)
+                      : (active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "")
+                  }`} />
                   <span className="flex-1 text-left truncate">{item.label}</span>
-                  {item.to && <ExternalLink className={`h-3 w-3 shrink-0 opacity-50 ${active ? "text-amber-300" : "text-slate-600"}`} />}
+                  {/* Portais não mostram ícone ExternalLink — são rotas internas */}
+                  {!item.portal && item.to && (
+                    <ExternalLink className={`h-3 w-3 shrink-0 opacity-50 ${active ? "text-amber-300" : "text-slate-600"}`} />
+                  )}
                   {item.badge && item.financeScreen && (
                     <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
                       item.badgeColor === "amber" ? "bg-amber-400/15 text-amber-300" : "bg-rose-400/15 text-rose-300"
@@ -197,15 +225,23 @@ export function AppSidebar() {
       return (
         <div
           className={`pointer-events-none fixed z-[60] flex items-center gap-2 whitespace-nowrap
-            rounded-xl border pr-3 text-[12px] font-semibold tracking-wide
-            ${hovered.active
-              ? "bg-amber-500/20 border-amber-400/45 text-amber-100 shadow-[0_0_22px_rgba(245,158,11,0.35)]"
-              : "bg-amber-500/15 border-amber-400/35 text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_18px_rgba(245,158,11,0.22)]"
-            } backdrop-blur-md animate-fade-in`}
+            rounded-xl border pr-3 text-[12px] font-semibold tracking-wide backdrop-blur-md animate-fade-in
+            ${(() => {
+              const isPortal = APP_NAV.find(n => n.id === hovered.id)?.portal;
+              if (isPortal) return hovered.active
+                ? "bg-cyan-500/20 border-cyan-400/45 text-cyan-100 shadow-[0_0_22px_rgba(34,211,238,0.35)]"
+                : "bg-cyan-500/15 border-cyan-400/35 text-cyan-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_18px_rgba(34,211,238,0.22)]";
+              return hovered.active
+                ? "bg-amber-500/20 border-amber-400/45 text-amber-100 shadow-[0_0_22px_rgba(245,158,11,0.35)]"
+                : "bg-amber-500/15 border-amber-400/35 text-amber-100 shadow-[0_8px_24px_rgba(0,0,0,0.45),0_0_18px_rgba(245,158,11,0.22)]";
+            })()}`}
           style={{ top: hovered.top, left: hovered.left, height: hovered.height, width: 180 }}
         >
           <span className="flex items-center justify-center shrink-0" style={{ width: hovered.height, height: hovered.height }}>
-            <HIcon className="h-4 w-4 text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" />
+            {(() => {
+              const isPortal = APP_NAV.find(n => n.id === hovered.id)?.portal;
+              return <HIcon className={`h-4 w-4 ${isPortal ? "text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.7)]" : "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]"}`} />;
+            })()}
           </span>
           <span className="flex-1 truncate">{hovered.label}</span>
           <ChevronRight className="h-3 w-3 shrink-0 text-amber-300/80" />
