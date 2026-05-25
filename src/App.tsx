@@ -33,7 +33,10 @@ const Operacional        = lazy(() => import("./pages/Operacional"));
 const Executivo          = lazy(() => import("./pages/Executivo"));
 const Finance            = lazy(() => import("./pages/Finance"));
 const Fiscal             = lazy(() => import("./pages/Fiscal"));
-const SgtWorkspace       = lazy(() => import("./pages/SgtWorkspace"));
+const SgtWorkspace            = lazy(() => import("./pages/SgtWorkspace"));
+const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspace"));
+const PortalWrWorkspace       = lazy(() => import("./pages/PortalWrWorkspace"));
+const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
 
 // ── Loading screen mínimo (sem flash, sem layout shift) ───────────────────────
 function PageLoader() {
@@ -93,7 +96,10 @@ const App = () => (
                 <Route path="/executivo"    element={<ProtectedRoute><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
                 <Route path="/financeiro"  element={<ProtectedRoute><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
                 <Route path="/fiscal"     element={<ProtectedRoute><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
-                <Route path="/sgt"        element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/sgt"              element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/visual-rodopar"  element={<ProtectedRoute><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/portal-wr"       element={<ProtectedRoute><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

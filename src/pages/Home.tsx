@@ -401,7 +401,7 @@ export default function Home() {
       title: "Visual Rodopar",
       description: "Portal de gestão e monitoramento complementar ao ecossistema Workspace SGT.",
       cta: "Acessar portal",
-      href: "https://webcloud2.datapardc.com/",
+      onClick: () => navigate("/visual-rodopar"),
       tone: "amber" as const,
       pinned: true,
       featured: true,
@@ -412,7 +412,7 @@ export default function Home() {
       title: "Portal WR SGT",
       description: "Acesso ao portal WR SGT para gestão e operação do sistema integrado.",
       cta: "Acessar portal",
-      href: "http://54.232.121.164:9474/#/login",
+      onClick: () => navigate("/portal-wr"),
       tone: "blue" as const,
       pinned: true,
       featured: true,
@@ -438,7 +438,7 @@ export default function Home() {
       title: "ReceitaFlow",
       description: "Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.",
       cta: "Acessar ReceitaFlow",
-      href: "https://receitaflow.lovable.app",
+      onClick: () => navigate("/receitaflow"),
       tone: "cyan" as const,
     },
     {
@@ -709,11 +709,11 @@ export default function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[900px] mx-auto">
               {[
-                { href: "https://receitaflow.lovable.app", label: "ReceitaFlow",
+                { href: undefined, label: "ReceitaFlow",
                   desc: "Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.",
                   iconEl: <Sparkles className="h-5 w-5" />,
                   iconCls: "border-cyan-400/20 bg-cyan-400/10 text-cyan-300",
-                  hoverCls: "hover:border-cyan-400/30", linkCls: "group-hover:text-cyan-300", onClick: undefined as (() => void) | undefined },
+                  hoverCls: "hover:border-cyan-400/30", linkCls: "group-hover:text-cyan-300", onClick: () => navigate("/receitaflow") },
                 { href: "https://analyticspro.com.br", label: "Analytics Pro",
                   desc: "Plataforma de análise e inteligência de dados para apoiar a tomada de decisão no ecossistema SGT.",
                   iconEl: <BarChart3 className="h-5 w-5" />,
