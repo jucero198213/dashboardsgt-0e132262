@@ -2,91 +2,59 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import fs from "fs";
-
-// Plugin que garante que o sw.js final é o kill-switch, não o Workbox
-function swKillSwitchPlugin() {
-  return {
-    name: "sw-kill-switch",
-    closeBundle() {
-      const killSwitch = `// Kill-switch: desregistra SWs e limpa caches
-self.addEventListener("install", (e) => e.waitUntil(self.skipWaiting()));
-self.addEventListener("activate", (e) =>
-  e.waitUntil((async () => {
-    await self.clients.claim();
-    const names = await caches.keys();
-    await Promise.all(names.map((n) => caches.delete(n)));
-    await self.registration.unregister();
-  })())
-);
-self.addEventListener("fetch", () => {});
-`;
-      // Sobrescreve sw.js com o kill-switch
-      const swPath = path.resolve(__dirname, "dist/sw.js");
-      if (fs.existsSync(swPath)) {
-        fs.writeFileSync(swPath, killSwitch);
-      }
-      // Neutraliza o workbox
-      const distDir = path.resolve(__dirname, "dist");
-      if (fs.existsSync(distDir)) {
-        const workboxFiles = fs.readdirSync(distDir).filter(f => f.startsWith("workbox-"));
-        workboxFiles.forEach(f => {
-          fs.writeFileSync(path.resolve(distDir, f), "// disabled");
-        });
-      }
-      // Neutraliza o registerSW.js para não registrar nada
-      const regPath = path.resolve(__dirname, "dist/registerSW.js");
-      if (fs.existsSync(regPath)) {
-        fs.writeFileSync(regPath, "// SW registration disabled");
-      }
-    },
-  };
-}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "0.0.0.0",
     port: 8080,
-    hmr: {
-      overlay: false,
-    },
+    hmr: { overlay: false },
   },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    swKillSwitchPlugin(),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
+    alias: { "@": path.resolve(__dirname, "./src") },
+    dedupe: [
+      "react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime",
+      "@tanstack/react-query", "@tanstack/query-core",
+    ],
   },
   build: {
-    // Chunk mínimo para split valer a pena (evita muitos arquivos tiny)
     chunkSizeWarningLimit: 600,
+    target: "es2020",
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React core — raramente muda, fica em cache por muito tempo
-          "vendor-react":   ["react", "react-dom", "react-router-dom"],
-          // Charts — são pesados e mudam raramente
-          "vendor-charts":  ["recharts"],
-          // Animações
-          "vendor-motion":  ["framer-motion"],
-          // UI components (radix + shadcn)
-          "vendor-ui":      [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-tabs",
-          ],
-          // Supabase + query
-          "vendor-data":    ["@supabase/supabase-js", "@tanstack/react-query"],
+        manualChunks(id) {
+          // React core
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/") || id.includes("node_modules/react-router-dom/")) {
+            return "vendor-react";
+          }
+          // Charts
+          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
+            return "vendor-charts";
+          }
+          // Animações (só carregado em Home)
+          if (id.includes("node_modules/framer-motion")) {
+            return "vendor-motion";
+          }
+          // Mapa (só carregado em Operacional)
+          if (id.includes("node_modules/leaflet") || id.includes("node_modules/react-leaflet")) {
+            return "vendor-map";
+          }
+          // Supabase + React Query
+          if (id.includes("node_modules/@supabase") || id.includes("node_modules/@tanstack")) {
+            return "vendor-data";
+          }
           // Ícones
-          "vendor-icons":   ["lucide-react"],
+          if (id.includes("node_modules/lucide-react")) {
+            return "vendor-icons";
+          }
+          // Radix UI (UI primitives)
+          if (id.includes("node_modules/@radix-ui")) {
+            return "vendor-radix";
+          }
         },
       },
     },

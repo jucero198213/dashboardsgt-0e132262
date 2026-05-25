@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   BarChart3,
   TrendingUp,
@@ -51,28 +51,19 @@ function SgtLogoSlot({ className = "" }: { className?: string }) {
 /* ---------------------------------------------------------------- */
 function AnimatedTitle({ text, delay = 0 }: { text: string; delay?: number }) {
   const reduce = useReducedMotion();
-  const letters = Array.from(text);
+  if (reduce) return <span className="inline-block">{text}</span>;
   return (
-    <span aria-label={text} className="inline-block">
-      {letters.map((char, i) => (
-        <motion.span
-          key={i}
-          aria-hidden="true"
-          className="inline-block"
-          initial={reduce ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.5,
-            delay: delay + i * 0.025,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
-    </span>
+    <motion.span
+      className="inline-block"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {text}
+    </motion.span>
   );
 }
+
 
 /* ---------------------------------------------------------------- */
 /*  Cards de módulos                                                  */
@@ -335,7 +326,7 @@ function openOfficeApp(app: "excel" | "word") {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Reveal — fade + slide up, dispara uma vez ao entrar na tela      */
+/*  Reveal — fade + slide up via CSS + IntersectionObserver nativo   */
 /* ---------------------------------------------------------------- */
 function Reveal({
   children,
@@ -346,17 +337,32 @@ function Reveal({
   delay?: number;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { rootMargin: "-60px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={className}
-      initial={reduce ? false : { opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(28px)",
+        transition: `opacity 0.6s ${delay}s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s ${delay}s cubic-bezier(0.25,0.46,0.45,0.94)`,
+      }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -380,15 +386,6 @@ export default function Home() {
   const reduce = useReducedMotion();
   const { greeting, name } = useGreeting(user?.email);
 
-  // Parallax — scroll do container .section (overflow-auto)
-  const scrollRef = useRef<HTMLElement | null>(null);
-  const { scrollY } = useScroll({ container: scrollRef as React.RefObject<HTMLElement> });
-  const auroraY = useTransform(scrollY, [0, 800], [0, -260]);
-  const auroraScale = useTransform(scrollY, [0, 800], [1, 1.18]);
-  const lightsY = useTransform(scrollY, [0, 800], [0, -160]);
-  const heroY = useTransform(scrollY, [0, 600], [0, 320]);
-  const logoY = useTransform(scrollY, [0, 600], [0, 180]);
-  const heroOpacity = useTransform(scrollY, [0, 300, 600], [1, 0.6, 0]);
 
 
 
@@ -505,7 +502,6 @@ export default function Home() {
 
       {/* Section envolvente */}
       <section
-        ref={scrollRef}
         className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto"
         style={{
           background: "var(--sgt-bg-section)",
@@ -513,12 +509,10 @@ export default function Home() {
           boxShadow: "var(--sgt-section-shadow)",
         }}
       >
-        {/* Aurora executiva — parallax sutil */}
-        <motion.div
-          className="pointer-events-none absolute inset-0 overflow-hidden will-change-transform"
+        {/* Aurora executiva */}
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
           style={{
-            y: reduce ? 0 : auroraY,
-            scale: reduce ? 1 : auroraScale,
             backgroundImage: [
               "radial-gradient(ellipse 60% 50% at 20% 25%, rgba(30,58,95,0.18), transparent 65%)",
               "radial-gradient(ellipse 55% 45% at 80% 30%, rgba(180,140,70,0.10), transparent 65%)",
@@ -527,9 +521,9 @@ export default function Home() {
           }}
         />
 
-        {/* Luz âmbar central (parallax médio) */}
-        <motion.div className="pointer-events-none absolute inset-0 will-change-transform"
-          style={{ y: reduce ? 0 : lightsY, background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.05), transparent 70%)" }} />
+        {/* Luz âmbar central */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(245,158,11,0.05), transparent 70%)" }} />
 
 
         <>
@@ -551,9 +545,7 @@ export default function Home() {
           <TodayTicketsPopup />
 
           {/* ── HERO ── */}
-          <motion.section
-            style={reduce ? undefined : { y: heroY, opacity: heroOpacity }}
-            className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10 will-change-transform">
+          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10">
 
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
@@ -598,8 +590,7 @@ export default function Home() {
               initial={reduce ? false : { opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
-              style={reduce ? undefined : { y: logoY }}
-              className="mt-8 flex w-full justify-center will-change-transform"
+              className="mt-8 flex w-full justify-center"
             >
               <SgtLogoSlot className="h-[100px] sm:h-[130px] lg:h-[155px]" />
             </motion.div>
@@ -642,18 +633,14 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 1.6 }}
               className="mt-10 flex flex-col items-center gap-1.5 text-slate-600 hover:text-amber-300 transition-colors"
             >
-              <motion.div
-                animate={reduce ? undefined : { y: [0, 6, 0] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-                className="flex flex-col items-center gap-1.5"
-              >
+              <div className={`flex flex-col items-center gap-1.5 ${reduce ? "" : "animate-bounce"}`}>
                 <span className="text-[9px] font-semibold uppercase tracking-[0.3em]">
                   Role para ver mais
                 </span>
                 <ChevronDown className="h-4 w-4" />
-              </motion.div>
+              </div>
             </motion.button>
-          </motion.section>
+          </section>
 
           {/* ── MÓDULOS PRINCIPAIS ── */}
           <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
