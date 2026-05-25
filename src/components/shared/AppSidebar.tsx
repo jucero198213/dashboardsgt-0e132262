@@ -124,34 +124,42 @@ export function AppSidebar() {
           /* ── COLLAPSED ── */
           if (collapsed) {
             return (
-              <div key={item.id} className="relative flex flex-col items-center py-[2px]">
-                {showSection && <div className="w-8 h-px my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />}
-                {active && (
-                  <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full ${
-                    item.portal ? portalBarActive : "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
-                  }`} />
+              <div key={item.id}>
+                {/* Divider de seção separado do wrapper do botão */}
+                {showSection && (
+                  <div className="flex justify-center">
+                    <div className="w-8 h-px my-1.5" style={{ background: "var(--sgt-border-subtle)" }} />
+                  </div>
                 )}
-                <button
-                  onClick={() => handleClick(item)}
-                  onMouseEnter={(e) => {
-                    const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                    setHovered({ id: item.id, label: item.label, icon: item.icon, active, top: r.top, left: r.left, height: r.height });
-                  }}
-                  aria-label={item.label}
-                  className={`flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200
-                    ${item.portal
-                      ? (active ? portalActive : portalInactive)
-                      : (active
-                          ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
-                          : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300")
+                {/* Wrapper exclusivo do botão — top-1/2 sempre aponta pro centro exato */}
+                <div className="relative flex items-center justify-center py-[2px]">
+                  {active && (
+                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full ${
+                      item.portal ? portalBarActive : "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                    }`} />
+                  )}
+                  <button
+                    onClick={() => handleClick(item)}
+                    onMouseEnter={(e) => {
+                      const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                      setHovered({ id: item.id, label: item.label, icon: item.icon, active, top: r.top, left: r.left, height: r.height });
+                    }}
+                    aria-label={item.label}
+                    className={`flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200 ${
+                      item.portal
+                        ? (active ? portalActive : portalInactive)
+                        : (active
+                            ? "bg-amber-500/20 border-amber-400/40 text-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.25)]"
+                            : "border-transparent text-slate-500 hover:bg-amber-500/10 hover:border-amber-400/20 hover:text-amber-300")
                     }`}
-                >
-                  <Icon className={`h-4 w-4 shrink-0 ${
-                    item.portal
-                      ? (active ? portalIconActive : portalIconInactive)
-                      : (active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "")
-                  }`} />
-                </button>
+                  >
+                    <Icon className={`h-4 w-4 shrink-0 ${
+                      item.portal
+                        ? (active ? portalIconActive : portalIconInactive)
+                        : (active ? "text-amber-300 drop-shadow-[0_0_6px_rgba(245,158,11,0.7)]" : "")
+                    }`} />
+                  </button>
+                </div>
               </div>
             );
           }
