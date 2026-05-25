@@ -8,21 +8,16 @@ export default function VisualRodoparWorkspace() {
   const [key, setKey] = useState(0);
   const [blocked, setBlocked] = useState(false);
 
-  // Detecta falha de rede (connection refused, DNS, etc.)
   const handleError = () => setBlocked(true);
 
-  // Detecta X-Frame-Options / CSP frame-ancestors: após load, tenta
-  // acessar o contentDocument — se estiver bloqueado, o browser esvazia
-  // o iframe e não dispara onError. Usamos um timeout como fallback.
   useEffect(() => {
     setBlocked(false);
     const timer = setTimeout(() => {
       try {
         const doc = iframeRef.current?.contentDocument;
-        // Se não carregou nada (null ou body vazio) após 6 s → bloqueado
         if (!doc || doc.body?.innerHTML === "") setBlocked(true);
       } catch {
-        // SecurityError = cross-origin carregou OK; não está bloqueado
+        // SecurityError = cross-origin carregou OK
       }
     }, 6000);
     return () => clearTimeout(timer);
@@ -36,43 +31,41 @@ export default function VisualRodoparWorkspace() {
       className="flex h-[100dvh] w-full flex-col"
       style={{ backgroundColor: "var(--sgt-bg-base)" }}
     >
-      {/* Topbar */}
+      {/* Topbar integrada — sem URL exposta */}
       <div
-        className="flex shrink-0 items-center gap-3 border-b px-4 py-2"
+        className="flex shrink-0 items-center justify-between border-b px-4 py-2"
         style={{
           borderColor: "var(--sgt-border-subtle)",
           backgroundColor: "var(--sgt-bg-surface)",
         }}
       >
-        <div
-          className="flex-1 truncate rounded-md px-3 py-1.5 font-mono text-xs"
-          style={{
-            backgroundColor: "var(--sgt-bg-card)",
-            color: "var(--sgt-text-secondary)",
-            border: "1px solid var(--sgt-border-subtle)",
-          }}
-          title={URL_DESTINO}
+        <span
+          className="text-sm font-semibold tracking-tight"
+          style={{ color: "var(--sgt-text-primary)" }}
         >
-          {URL_DESTINO}
+          Visual Rodopar
+        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={reload}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Recarregar"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={abrirNovaAba}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Abrir em nova aba"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={reload}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors hover:bg-primary/10"
-          style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-primary)" }}
-          title="Recarregar"
-        >
-          <RotateCw className="h-3.5 w-3.5" />
-          Recarregar
-        </button>
-        <button
-          type="button"
-          onClick={abrirNovaAba}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Nova aba
-        </button>
       </div>
 
       {/* Conteúdo */}
@@ -91,9 +84,8 @@ export default function VisualRodoparWorkspace() {
                 Não foi possível incorporar o Visual Rodopar
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--sgt-text-muted)" }}>
-                O servidor <strong>webcloud2.datapardc.com</strong> recusou a conexão ou
-                bloqueou a exibição em iframe. Isso é uma restrição do próprio site, não
-                do Workspace.
+                O servidor recusou a conexão ou bloqueou a exibição em iframe.
+                Isso é uma restrição do próprio site, não do Workspace.
               </p>
             </div>
             <button
@@ -107,7 +99,6 @@ export default function VisualRodoparWorkspace() {
           </div>
         )}
 
-        {/* Iframe */}
         <iframe
           key={key}
           ref={iframeRef}
