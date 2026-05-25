@@ -343,12 +343,22 @@ function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Fallback: garante visibilidade mesmo se o observer não disparar
+    const fallback = setTimeout(() => setVisible(true), 600);
+
     const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { rootMargin: "-60px" }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          clearTimeout(fallback);
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "0px" }
     );
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => { obs.disconnect(); clearTimeout(fallback); };
   }, []);
 
   return (
@@ -358,7 +368,7 @@ function Reveal({
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.6s ${delay}s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s ${delay}s cubic-bezier(0.25,0.46,0.45,0.94)`,
+        transition: `opacity 0.6s ${delay}s ease-out, transform 0.6s ${delay}s ease-out`,
       }}
     >
       {children}

@@ -23,38 +23,31 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     chunkSizeWarningLimit: 600,
-    target: "es2020",
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          // React core
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/") || id.includes("node_modules/react-router-dom/")) {
-            return "vendor-react";
-          }
-          // Charts
-          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
-            return "vendor-charts";
-          }
-          // Animações (só carregado em Home)
-          if (id.includes("node_modules/framer-motion")) {
-            return "vendor-motion";
-          }
-          // Mapa (só carregado em Operacional)
-          if (id.includes("node_modules/leaflet") || id.includes("node_modules/react-leaflet")) {
-            return "vendor-map";
-          }
+        manualChunks: {
+          // React core — raramente muda, fica em cache por muito tempo
+          "vendor-react":   ["react", "react-dom", "react-router-dom"],
+          // Charts — pesados e raramente mudam
+          "vendor-charts":  ["recharts"],
+          // Animações
+          "vendor-motion":  ["framer-motion"],
+          // Mapa — só carregado em Operacional
+          "vendor-map":     ["leaflet", "react-leaflet"],
+          // UI primitives (Radix)
+          "vendor-radix":   [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-accordion",
+          ],
           // Supabase + React Query
-          if (id.includes("node_modules/@supabase") || id.includes("node_modules/@tanstack")) {
-            return "vendor-data";
-          }
+          "vendor-data":    ["@supabase/supabase-js", "@tanstack/react-query"],
           // Ícones
-          if (id.includes("node_modules/lucide-react")) {
-            return "vendor-icons";
-          }
-          // Radix UI (UI primitives)
-          if (id.includes("node_modules/@radix-ui")) {
-            return "vendor-radix";
-          }
+          "vendor-icons":   ["lucide-react"],
         },
       },
     },
