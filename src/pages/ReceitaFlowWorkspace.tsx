@@ -12,48 +12,42 @@ export default function ReceitaFlowWorkspace() {
       className="flex h-[100dvh] w-full flex-col"
       style={{ backgroundColor: "var(--sgt-bg-base)" }}
     >
-      {/* Topbar */}
+      {/* Topbar integrada — sem URL exposta */}
       <div
-        className="flex shrink-0 items-center gap-3 border-b px-4 py-2"
+        className="flex shrink-0 items-center justify-between border-b px-4 py-2"
         style={{
           borderColor: "var(--sgt-border-subtle)",
           backgroundColor: "var(--sgt-bg-surface)",
         }}
       >
-        <div
-          className="flex-1 truncate rounded-md px-3 py-1.5 font-mono text-xs"
-          style={{
-            backgroundColor: "var(--sgt-bg-card)",
-            color: "var(--sgt-text-secondary)",
-            border: "1px solid var(--sgt-border-subtle)",
-          }}
-          title={URL_DESTINO}
+        <span
+          className="text-sm font-semibold tracking-tight"
+          style={{ color: "var(--sgt-text-primary)" }}
         >
-          {URL_DESTINO}
+          ReceitaFlow
+        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setKey((k) => k + 1)}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Recarregar"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+          </button>
+          <a
+            href={URL_DESTINO}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Abrir em nova aba"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
         </div>
-        <button
-          type="button"
-          onClick={() => setKey((k) => k + 1)}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors hover:bg-primary/10"
-          style={{
-            borderColor: "var(--sgt-border-subtle)",
-            color: "var(--sgt-text-primary)",
-          }}
-          title="Recarregar"
-        >
-          <RotateCw className="h-3.5 w-3.5" />
-          Recarregar
-        </button>
-        <a
-          href={URL_DESTINO}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          title="Abrir em nova aba"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Nova aba
-        </a>
       </div>
 
       {/* Iframe */}
