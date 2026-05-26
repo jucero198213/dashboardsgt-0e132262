@@ -31,6 +31,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { openPortalWindow } from "@/lib/portalWindow";
 
 /* ---------------------------------------------------------------- */
 /*  Logo SGT oficial — PNG vetorizado com fundo transparente.        */
@@ -429,7 +430,10 @@ export default function Home() {
       title: "Visual Rodopar",
       description: "Portal de gestão e monitoramento complementar ao ecossistema Workspace SGT.",
       cta: "Acessar portal",
-      onClick: () => navigate("/visual-rodopar"),
+      onClick: () => {
+        openPortalWindow("https://webcloud2.datapardc.com/", "portal-visual");
+        navigate("/visual-rodopar");
+      },
       tone: "amber" as const,
       pinned: true,
       featured: true,

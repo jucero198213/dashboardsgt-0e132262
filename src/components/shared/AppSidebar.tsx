@@ -5,6 +5,7 @@ import {
   Sun, Moon, Shield, LogOut, Home,
 } from "lucide-react";
 import { APP_NAV, type AppNavItem } from "./appNav";
+import { openPortalWindow } from "@/lib/portalWindow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -43,6 +44,9 @@ export function AppSidebar() {
   }
 
   function handleClick(item: AppNavItem) {
+    if (item.externalUrl) {
+      openPortalWindow(item.externalUrl, item.id);
+    }
     if (item.financeScreen) {
       navigate(`/financeiro?s=${item.financeScreen}`);
     } else if (item.to) {
