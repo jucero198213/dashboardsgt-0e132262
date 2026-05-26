@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
-import { RotateCw, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { RotateCw, ExternalLink, Home, Sparkles } from "lucide-react";
 
 const URL_DESTINO = "https://receitaflow.lovable.app";
 
 export default function ReceitaFlowWorkspace() {
+  const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [key, setKey] = useState(0);
 
@@ -12,7 +14,7 @@ export default function ReceitaFlowWorkspace() {
       className="flex h-[100dvh] w-full flex-col"
       style={{ backgroundColor: "var(--sgt-bg-base)" }}
     >
-      {/* Topbar integrada — sem URL exposta */}
+      {/* Topbar integrada */}
       <div
         className="flex shrink-0 items-center justify-between border-b px-4 py-2"
         style={{
@@ -20,12 +22,25 @@ export default function ReceitaFlowWorkspace() {
           backgroundColor: "var(--sgt-bg-surface)",
         }}
       >
-        <span
-          className="text-sm font-semibold tracking-tight"
-          style={{ color: "var(--sgt-text-primary)" }}
-        >
-          ReceitaFlow
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/home")}
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Voltar ao Início"
+          >
+            <Home className="h-3.5 w-3.5" />
+            Início
+          </button>
+          <span style={{ color: "var(--sgt-border-subtle)" }}>/</span>
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-cyan-400" />
+            <span className="text-sm font-semibold tracking-tight" style={{ color: "var(--sgt-text-primary)" }}>
+              ReceitaFlow
+            </span>
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
           <button
