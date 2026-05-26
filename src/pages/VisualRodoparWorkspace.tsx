@@ -1,8 +1,11 @@
-import { ArrowLeft, Globe } from "lucide-react";
+import { ArrowLeft, Globe, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const URL_DESTINO = "https://webcloud2.datapardc.com/";
 
 export default function VisualRodoparWorkspace() {
+  const navigate = useNavigate();
+
   function handleAbrir() {
     window.location.href = URL_DESTINO;
   }
@@ -18,10 +21,23 @@ export default function VisualRodoparWorkspace() {
         style={{ borderColor: "var(--sgt-border-subtle)", backgroundColor: "var(--sgt-bg-surface)" }}
       >
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-amber-400" />
-          <span className="text-sm font-semibold tracking-tight" style={{ color: "var(--sgt-text-primary)" }}>
-            Visual Rodopar
-          </span>
+          <button
+            type="button"
+            onClick={() => navigate("/home")}
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Voltar ao Início"
+          >
+            <Home className="h-3.5 w-3.5" />
+            Início
+          </button>
+          <span className="text-[var(--sgt-border-subtle)]">/</span>
+          <div className="flex items-center gap-1.5">
+            <Globe className="h-4 w-4 text-amber-400" />
+            <span className="text-sm font-semibold tracking-tight" style={{ color: "var(--sgt-text-primary)" }}>
+              Visual Rodopar
+            </span>
+          </div>
         </div>
       </div>
 

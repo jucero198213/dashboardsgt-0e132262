@@ -1,8 +1,11 @@
-import { ArrowLeft, Monitor } from "lucide-react";
+import { ArrowLeft, Monitor, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const URL_DESTINO = "http://54.232.121.164:9474/#/login";
 
 export default function PortalWrWorkspace() {
+  const navigate = useNavigate();
+
   function handleAbrir() {
     window.location.href = URL_DESTINO;
   }
@@ -18,10 +21,23 @@ export default function PortalWrWorkspace() {
         style={{ borderColor: "var(--sgt-border-subtle)", backgroundColor: "var(--sgt-bg-surface)" }}
       >
         <div className="flex items-center gap-2">
-          <Monitor className="h-4 w-4 text-blue-400" />
-          <span className="text-sm font-semibold tracking-tight" style={{ color: "var(--sgt-text-primary)" }}>
-            Portal WR SGT
-          </span>
+          <button
+            type="button"
+            onClick={() => navigate("/home")}
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium transition-colors hover:bg-white/8"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+            title="Voltar ao Início"
+          >
+            <Home className="h-3.5 w-3.5" />
+            Início
+          </button>
+          <span style={{ color: "var(--sgt-border-subtle)" }}>/</span>
+          <div className="flex items-center gap-1.5">
+            <Monitor className="h-4 w-4 text-blue-400" />
+            <span className="text-sm font-semibold tracking-tight" style={{ color: "var(--sgt-text-primary)" }}>
+              Portal WR SGT
+            </span>
+          </div>
         </div>
       </div>
 
