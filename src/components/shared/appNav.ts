@@ -20,8 +20,6 @@ export type AppNavItem = {
   badgeColor?: "amber" | "rose";
   /** Marca como portal integrado — recebe destaque visual especial */
   portal?: boolean;
-  /** URL externa — abre em janela dedicada (sites que bloqueiam iframe) */
-  externalUrl?: string;
 };
 
 /**
@@ -33,14 +31,7 @@ export type AppNavItem = {
 export const APP_NAV: AppNavItem[] = [
   // ── Portais integrados — sempre em primeiro ──────────────────────────────
   { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais" },
-  {
-    id: "portal-visual",
-    label: "Visual Rodopar",
-    icon: Globe,
-    to: "/visual-rodopar",
-    portal: true,
-    externalUrl: "https://webcloud2.datapardc.com/",
-  },
+  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    to: "/visual-rodopar", portal: true },
   { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  to: "/portal-wr",      portal: true },
 
   // ── Módulos do sistema ────────────────────────────────────────────────────
