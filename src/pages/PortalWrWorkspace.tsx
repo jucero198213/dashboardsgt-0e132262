@@ -1,49 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Monitor } from "lucide-react";
+import { ArrowLeft, Monitor } from "lucide-react";
 
 const URL_DESTINO = "http://54.232.121.164:9474/#/login";
-const WINDOW_NAME = "portal-wr-window";
-
-function abrirJanela(url: string, nome: string) {
-  const w    = screen.availWidth;
-  const h    = screen.availHeight;
-  const left = screen.availLeft ?? 0;
-  const top  = screen.availTop  ?? 0;
-  return window.open(
-    url,
-    nome,
-    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`,
-  );
-}
 
 export default function PortalWrWorkspace() {
-  const windowRef = useRef<Window | null>(null);
-  const [janelaAberta, setJanelaAberta] = useState(false);
-
-  /* Detecta quando o usuário fecha a janela */
-  useEffect(() => {
-    if (!janelaAberta) return;
-    const id = setInterval(() => {
-      if (windowRef.current?.closed) {
-        windowRef.current = null;
-        setJanelaAberta(false);
-      }
-    }, 600);
-    return () => clearInterval(id);
-  }, [janelaAberta]);
-
   function handleAbrir() {
-    if (windowRef.current && !windowRef.current.closed) {
-      windowRef.current.focus();
-      return;
-    }
-    const win = abrirJanela(URL_DESTINO, WINDOW_NAME);
-    if (win) {
-      windowRef.current = win;
-      setJanelaAberta(true);
-    } else {
-      window.open(URL_DESTINO, "_blank", "noopener,noreferrer");
-    }
+    window.location.href = URL_DESTINO;
   }
 
   return (
@@ -62,19 +23,6 @@ export default function PortalWrWorkspace() {
             Portal WR SGT
           </span>
         </div>
-
-        {janelaAberta && (
-          <button
-            type="button"
-            onClick={() => windowRef.current?.focus()}
-            className="inline-flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium transition-colors hover:bg-white/8"
-            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
-            title="Trazer janela para frente"
-          >
-            <Monitor className="h-3.5 w-3.5" />
-            Trazer para frente
-          </button>
-        )}
       </div>
 
       {/* ── Launcher ── */}
@@ -99,19 +47,11 @@ export default function PortalWrWorkspace() {
               Portal WR SGT
             </h1>
             <p className="text-sm leading-relaxed" style={{ color: "var(--sgt-text-muted)" }}>
-              Portal de gestão e operação do sistema integrado. Abre em uma
-              janela dedicada e maximizada — faça o login normalmente e o
-              sistema continuará na mesma janela após o redirecionamento.
+              Portal de gestão e operação do sistema integrado.
+              Ao clicar, o portal abre nesta mesma aba — use o botão
+              voltar do browser para retornar ao Workspace SGT.
             </p>
           </div>
-
-          {/* Badge: janela aberta */}
-          {janelaAberta && (
-            <div className="flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-1.5 text-xs font-semibold text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse" />
-              Janela aberta
-            </div>
-          )}
 
           {/* Botão principal */}
           <button
@@ -119,24 +59,18 @@ export default function PortalWrWorkspace() {
             onClick={handleAbrir}
             className="group inline-flex h-12 items-center gap-2.5 rounded-xl border border-blue-500/40 bg-blue-500/15 px-8 text-sm font-semibold text-blue-300 transition-all hover:-translate-y-0.5 hover:border-blue-500/60 hover:bg-blue-500/25 hover:shadow-[0_8px_28px_rgba(96,165,250,0.25)] active:translate-y-0"
           >
-            {janelaAberta ? (
-              <>
-                <Monitor className="h-4 w-4" />
-                Trazer para frente
-              </>
-            ) : (
-              <>
-                <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                Abrir Portal WR SGT
-              </>
-            )}
+            <Monitor className="h-4 w-4 transition-transform group-hover:scale-110" />
+            Abrir Portal WR SGT
           </button>
 
           {/* Instrução */}
-          <p className="text-[11px] leading-relaxed max-w-xs" style={{ color: "var(--sgt-text-faint)" }}>
-            Para voltar ao Workspace SGT, minimize ou feche a janela do
-            Portal WR SGT — o Workspace continua aberto em segundo plano.
-          </p>
+          <div
+            className="flex items-center gap-2 rounded-xl border px-4 py-3 text-[11px] leading-relaxed max-w-xs"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-faint)" }}
+          >
+            <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
+            Para voltar ao Workspace, clique em <strong>&nbsp;← Voltar&nbsp;</strong> no browser
+          </div>
 
         </div>
       </div>
