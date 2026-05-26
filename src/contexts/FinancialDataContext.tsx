@@ -331,29 +331,6 @@ export function FinancialDataProvider({
     []
   );
 
-  // ─── DW: helper para correspondência de indicadores ────────────────────────
-  const matchesIndicadorDw = (indicatorName: string, row: DwRow): boolean => {
-    const text = [
-      row.NOME_PARCEIRO, row.CENTRO_GASTO, row.CENTRO_CUSTO,
-      row.SINTETICA, row.ANALITICA, row.TIPO_DOCUMENTO,
-    ]
-      .map((v) => (v ?? "").toLowerCase())
-      .join(" ");
-
-    const rules: Record<string, string[]> = {
-      "PMT": ["ativo", "invest", "imobil"],
-      "Diesel":     ["diesel", "oleo diesel", "combustivel"],
-      Folha:             ["folha", "pagto", "salarial", "rh"],
-      Imposto:           ["imposto", "tribut", "fiscal", "taxa"],
-      Pedágio:           ["pedagio", "pedágio"],
-      Administrativo:    ["administrativo", "adm"],
-      Manutenção:        ["manut", "oficina", "peca", "peça", "reparo"],
-
-    };
-    const keywords = rules[indicatorName] ?? [indicatorName.toLowerCase()];
-    return keywords.some((k) => text.includes(k));
-  };
-
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async (force = false) => {
     // Sempre limpa o cache para garantir dados frescos ao atualizar
@@ -623,60 +600,14 @@ export function FinancialDataProvider({
         };
       });
 
-      // ─────────────────────────────────────────────────────────────────────────
-      // INDICADORES — VLR_PARCELA agrupado por CODCUS (código centro de custo)
-      // Base: todos os CP (sem filtro de situação)
-      // ─────────────────────────────────────────────────────────────────────────
-      const indicadorRules: Record<string, string[]> = {
-        "Diesel":     ["21"],
-        "Imposto":         ["23"],
-        "Administrativo":  ["3"],
-        "Pedágio":         ["24"],
-        "Manutenção":      ["4", "5", "6", "7", "25"],
-        "PMT": ["26"],
-        "Folha":           ["9"],
-        "Pneu":            ["28"],
-      };
-
-      // Base indicadores: CP filtrado por DATA_EMISSAO no período selecionado
-      // (indicadores medem despesas EMITIDAS no período, não vencidas/pagas)
-      const baseIndicadores = allCP.filter((r) => {
-        const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
-        return em ? em >= di && em <= df : false;
-      });
-      const totalBaseInd = sumCol(baseIndicadores, "VLR_PARCELA");
-
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
-        ([nome, percentualEsperado], index) => {
-          const codcusList = indicadorRules[nome] ?? [];
-
-          // PMT (CODCUS 26): filtra por DATA_VENCIMENTO
-          // Demais indicadores: filtra por DATA_EMISSAO (baseIndicadores já filtrado)
-          const usaVencimento = nome === "PMT";
-          const pool = usaVencimento
-            ? allCP.filter((r) => {
-                if (r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em PMT
-                const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
-                return ven ? ven >= di && ven <= df : false;
-              })
-            : baseIndicadores;
-
-          const matched = codcusList.length > 0
-            ? pool.filter((r) => {
-                const cod = String(r.CODCUS ?? "").trim();
-                return codcusList.includes(cod);
-              })
-            : [];
-          const matchedTotal = sumCol(matched, "VLR_PARCELA");
-          const percentualReal = totalBaseInd > 0 ? (matchedTotal / totalBaseInd) * 100 : 0;
-          return {
-            id: String(index + 1),
-            nome,
-            percentualReal:   Math.round(percentualReal * 10) / 10,
-            percentualEsperado,
-            valorAbsoluto:    Math.round(matchedTotal * 100) / 100,
-          };
-        }
+        ([nome, percentualEsperado], index) => ({
+          id: String(index + 1),
+          nome,
+          percentualReal: 0,
+          percentualEsperado,
+          valorAbsoluto: 0,
+        })
       );
 
       // ── Dados mensais para gráficos — array vazio inicial, preenchido em background
