@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Globe, Home, ExternalLink } from "lucide-react";
+import { Globe, Home, ArrowLeft } from "lucide-react";
 
 const URL_LOGIN = "https://webcloud2.datapardc.com/";
 
@@ -56,18 +56,27 @@ export default function VisualRodoparWorkspace() {
               Visual Rodopar
             </h1>
             <p className="text-sm leading-relaxed" style={{ color: "var(--sgt-text-muted)" }}>
-              Abre em uma nova aba. O Workspace continua aberto aqui para você alternar entre os dois.
+              Sistema de gestão integrado. Ao clicar, o sistema abre nesta mesma janela —
+              use o botão voltar para retornar ao Workspace SGT.
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => window.open(URL_LOGIN, "_blank", "noopener,noreferrer")}
+            onClick={() => { window.location.href = URL_LOGIN; }}
             className="group inline-flex h-12 items-center gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/15 px-8 text-sm font-semibold text-amber-300 transition-all hover:-translate-y-0.5 hover:border-amber-500/60 hover:bg-amber-500/25 hover:shadow-[0_8px_28px_rgba(245,158,11,0.25)] active:translate-y-0"
           >
-            <ExternalLink className="h-4 w-4 transition-transform group-hover:scale-110" />
+            <Globe className="h-4 w-4 transition-transform group-hover:scale-110" />
             Abrir Visual Rodopar
           </button>
+
+          <div
+            className="flex items-center gap-2 rounded-xl border px-4 py-3 text-[11px] leading-relaxed max-w-xs"
+            style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-faint)" }}
+          >
+            <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
+            Para voltar ao Workspace, clique em <strong>&nbsp;← Voltar&nbsp;</strong> no browser
+          </div>
 
         </div>
       </div>
