@@ -40,7 +40,7 @@ export default function VisualRodoparWorkspace() {
 
   function handleLogin() {
     localStorage.setItem(STORAGE_KEY, "1");
-    window.location.href = URL_LOGIN;
+    window.open(URL_LOGIN, "_blank", "noopener,noreferrer");
   }
 
   function handleReload() {
@@ -137,8 +137,8 @@ export default function VisualRodoparWorkspace() {
               </h1>
               <p className="text-sm leading-relaxed" style={{ color: "var(--sgt-text-muted)" }}>
                 {jaFezLogin
-                  ? "Sua sessão expirou. Faça login novamente para acessar o sistema integrado."
-                  : "Faça login para acessar o Visual Rodopar integrado ao Workspace."}
+                  ? "Sua sessão expirou. Faça login em nova aba, volte aqui e clique em \"Já fiz login\"."
+                  : "Clique em \"Fazer login\" — uma nova aba vai abrir. Após logar, feche a aba e clique em \"Já fiz login\"."}
               </p>
             </div>
 
@@ -152,20 +152,18 @@ export default function VisualRodoparWorkspace() {
                 {jaFezLogin ? "Fazer login novamente" : "Fazer login"}
               </button>
 
-              {jaFezLogin && (
-                <button
-                  type="button"
-                  onClick={handleReload}
-                  className="text-xs underline underline-offset-2"
-                  style={{ color: "var(--sgt-text-faint)" }}
-                >
-                  Já fiz login — tentar novamente
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleReload}
+                className="text-xs underline underline-offset-2"
+                style={{ color: "var(--sgt-text-faint)" }}
+              >
+                Já fiz login — carregar sistema
+              </button>
             </div>
 
             <p className="text-[11px] max-w-xs leading-relaxed" style={{ color: "var(--sgt-text-faint)" }}>
-              Após o login, clique em ← Voltar no browser para retornar ao Workspace com o sistema integrado.
+              O login abre em uma nova aba. Após entrar, feche a nova aba e clique em "Já fiz login" acima.
             </p>
           </div>
         )}
