@@ -315,14 +315,35 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
 }
 
 /* ---------------------------------------------------------------- */
-/*  Abrir Excel/Word Online (Microsoft 365 na web)                   */
+/*  Abrir Excel/Word — prioriza app desktop, fallback para web       */
 /* ---------------------------------------------------------------- */
 function openOfficeApp(app: "excel" | "word") {
-  const url =
-    app === "excel"
-      ? "https://www.office.com/launch/excel"
-      : "https://www.office.com/launch/word";
-  window.open(url, "_blank", "noopener,noreferrer");
+  const protocol = app === "excel" ? "ms-excel://" : "ms-word://";
+  const webUrl   = app === "excel"
+    ? "https://www.office.com/launch/excel"
+    : "https://www.office.com/launch/word";
+
+  let appAbriu = false;
+
+  // Quando o app desktop abre, a janela do browser perde o foco
+  const onBlur = () => { appAbriu = true; };
+  window.addEventListener("blur", onBlur, { once: true });
+
+  // Dispara o protocolo nativo (ms-excel:// / ms-word://)
+  const link = document.createElement("a");
+  link.href = protocol;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Se em 1.5s o foco não saiu → Office não instalado → abre web
+  setTimeout(() => {
+    window.removeEventListener("blur", onBlur);
+    if (!appAbriu) {
+      window.open(webUrl, "_blank", "noopener,noreferrer");
+    }
+  }, 1500);
 }
 
 /* ---------------------------------------------------------------- */
