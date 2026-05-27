@@ -79,6 +79,26 @@ const PORT = parseInt(process.env.PORT || "3001");
 app.use(cors());
 app.use(express.json());
 
+// ── Autenticação por API key ───────────────────────────────────────────────────
+// Todos os endpoints POST exigem o header x-api-key com o valor de API_SECRET.
+// O health check GET / é público (usado pelo painel admin para verificar conexão).
+const API_SECRET = process.env.API_SECRET;
+
+app.use((req, res, next) => {
+  if (req.method === "GET" && req.path === "/") return next();
+
+  if (!API_SECRET) {
+    console.warn("⚠️  API_SECRET não definido no .env — autenticação desabilitada");
+    return next();
+  }
+
+  const key = req.headers["x-api-key"];
+  if (key !== API_SECRET) {
+    return res.status(401).json({ error: "Não autorizado" });
+  }
+  next();
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
   res.json({ status: "ok", message: "DW API Local rodando ✅" });

@@ -390,7 +390,12 @@ async function callEdge<T>(
     "Content-Type": "application/json",
   };
 
-  if (!IS_LOCAL) {
+  if (IS_LOCAL) {
+    const apiKey = (
+      import.meta as { env?: { VITE_DW_API_SECRET?: string } }
+    ).env?.VITE_DW_API_SECRET;
+    if (apiKey) headers["x-api-key"] = apiKey;
+  } else {
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
     headers["apikey"] = SUPABASE_ANON_KEY;
   }
