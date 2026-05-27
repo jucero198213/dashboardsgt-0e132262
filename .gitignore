@@ -24,7 +24,9 @@ dist-ssr
 *.sw?
 
 # Environment variables
-# .env — contains only public Supabase keys, safe to commit
-# .env
+# root .env — contém apenas anon keys públicas do Supabase, seguro commitar
+# dw-api-local/.env — contém senha do SQL Server, NUNCA commitar
+dw-api-local/.env
 .env.local
 .env.production
+.env.*.local
