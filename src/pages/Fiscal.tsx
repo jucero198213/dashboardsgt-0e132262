@@ -211,12 +211,10 @@ export default function Fiscal() {
             </div>
 
             {/* ── MOBILE NAV ── */}
-            <div className="flex sm:hidden items-center justify-between py-1">
-              <div className="flex items-center gap-2">
-                <HomeButton />
-                <span className="text-[15px] font-black dark:text-white text-slate-800">Fiscal</span>
-              </div>
+            <div className="flex sm:hidden items-center gap-2 py-1">
               <MobileNav />
+              <span className="flex-1 text-[15px] font-black dark:text-white text-slate-800">Fiscal</span>
+              <HomeButton />
             </div>
 
             {/* ── KPIs ── */}

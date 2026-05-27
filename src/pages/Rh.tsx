@@ -521,18 +521,16 @@ export default function Rh() {
             </div>
 
             {/* Mobile nav */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div className="flex flex-col leading-none min-w-0">
                   <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">RH</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
+              <HomeButton />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />

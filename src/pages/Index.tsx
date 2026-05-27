@@ -1596,9 +1596,10 @@ const Index = () => {
 
             {/* Mobile: layout empilhado bonito */}
             <div className="flex sm:hidden flex-col gap-2 py-1.5">
-              {/* Linha 1: ícone + título com logo SGT + Menu mobile */}
-              <div className="flex items-center justify-between gap-2 min-w-0">
-                <div className="flex items-center gap-2.5 min-w-0">
+              {/* Linha 1: menu + logo + título + home */}
+              <div className="flex items-center gap-2 min-w-0">
+                <MobileNav />
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                   <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                   <div className="flex flex-col leading-none min-w-0">
@@ -1606,10 +1607,7 @@ const Index = () => {
                     <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fluxo de Caixa</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <HomeButton />
-                  <MobileNav />
-                </div>
+                <HomeButton />
               </div>
 
               {/* Linha 2: badge tempo real */}

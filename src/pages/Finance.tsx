@@ -2869,8 +2869,9 @@ export default function Finance() {
             className="flex sm:hidden flex-shrink-0 flex-col gap-2 px-4 py-2.5 border-b"
             style={{ borderColor: "var(--sgt-border-subtle)" }}
           >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-2">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="h-7 w-auto shrink-0" />
                 <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
                 <div className="flex flex-col leading-none min-w-0">
@@ -2878,10 +2879,7 @@ export default function Finance() {
                   <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">{meta.title}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <HomeButton />
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
               <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />

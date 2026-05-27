@@ -384,19 +384,17 @@ export default function Indicadores() {
 
             {/* Mobile: layout empilhado */}
             <div className="flex sm:hidden flex-col gap-2 py-1.5">
-              {/* Linha 1: ícone + título com logo + Menu mobile */}
-              <div className="flex items-center justify-between gap-2 min-w-0">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                    <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                    <div className="flex flex-col leading-none min-w-0">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                      <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Indicadores</span>
-                    </div>
+              {/* Linha 1: menu + logo + título */}
+              <div className="flex items-center gap-2 min-w-0">
+                <MobileNav />
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                  <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                  <div className="flex flex-col leading-none min-w-0">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Indicadores</span>
                   </div>
                 </div>
-                <MobileNav />
               </div>
 
               {/* Linha 2: badge tempo real */}

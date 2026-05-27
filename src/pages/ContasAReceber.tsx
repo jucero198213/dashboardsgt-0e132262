@@ -450,8 +450,9 @@ export default function ContasAReceber() {
         </div>
 
         {/* Mobile header */}
-        <div className="flex sm:hidden items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex sm:hidden items-center gap-2">
+          <MobileNav />
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
             <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
             <div className="flex flex-col leading-none min-w-0">
@@ -459,11 +460,8 @@ export default function ContasAReceber() {
               <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Contas a Receber</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
-            <HomeButton />
-            <MobileNav />
-          </div>
+          <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
+          <HomeButton />
         </div>
 
         {/* ════════ KPIs ════════ */}

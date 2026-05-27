@@ -467,8 +467,9 @@ export default function FinanciamentoFrota() {
             </div>
 
             {/* ════════ NAVBAR MOBILE ════════ */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
@@ -476,17 +477,14 @@ export default function FinanciamentoFrota() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fin. Frota</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton
-                  onClick={() => { fetchFromDW(); refetch(); }}
-                  isFetching={anyLoading}
-                  loadingPhase={loadingPhase}
-                  progress={progress}
-                  compact
-                />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <UpdateButton
+                onClick={() => { fetchFromDW(); refetch(); }}
+                isFetching={anyLoading}
+                loadingPhase={loadingPhase}
+                progress={progress}
+                compact
+              />
+              <HomeButton />
             </div>
 
             {/* Divisor */}
