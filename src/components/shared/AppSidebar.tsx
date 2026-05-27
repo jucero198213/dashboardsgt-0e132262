@@ -5,6 +5,7 @@ import {
   Sun, Moon, Shield, LogOut, Home,
 } from "lucide-react";
 import { APP_NAV, type AppNavItem } from "./appNav";
+import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -15,6 +16,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAdmin, signOut } = useAuth();
+  const { canAccess } = usePagePermissions();
   const { theme, toggleTheme } = useTheme();
 
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -109,10 +111,10 @@ export function AppSidebar() {
         className="relative flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 scrollbar-none"
         onMouseLeave={() => setHovered(null)}
       >
-        {APP_NAV.map((item, i) => {
+        {APP_NAV.filter((item) => !item.module || canAccess(item.module)).map((item, i, visibleNav) => {
           const Icon = item.icon;
           const active = isItemActive(item);
-          const showSection = item.section && (i === 0 || APP_NAV[i - 1].section !== item.section);
+          const showSection = item.section && (i === 0 || visibleNav[i - 1].section !== item.section);
 
           // Estilos para portais integrados (seção "Portais")
           const portalInactive = "bg-cyan-500/8 border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/15 hover:border-cyan-400/40 hover:text-cyan-200";

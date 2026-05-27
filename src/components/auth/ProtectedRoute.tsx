@@ -1,18 +1,27 @@
 import { Navigate } from "react-router-dom";
 import { useAuth, AppRole } from "@/contexts/AuthContext";
-import { usePagePermissions, AppPage } from "@/hooks/usePagePermissions";
+import { usePagePermissions, AppModule } from "@/hooks/usePagePermissions";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: AppRole;
-  requiredPage?: AppPage;
+  requiredModule?: AppModule;
+  /** @deprecated use requiredModule */
+  requiredPage?: AppModule;
 }
 
-export function ProtectedRoute({ children, requiredRole, requiredPage }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  requiredRole,
+  requiredModule,
+  requiredPage,
+}: ProtectedRouteProps) {
   const { session, role, isLoading } = useAuth();
   const { canAccess, isLoading: permsLoading } = usePagePermissions();
 
-  if (isLoading || (requiredPage && permsLoading)) {
+  const moduleToCheck = requiredModule ?? requiredPage;
+
+  if (isLoading || (moduleToCheck && permsLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#060912]">
         <div className="flex flex-col items-center gap-4">
@@ -23,15 +32,13 @@ export function ProtectedRoute({ children, requiredRole, requiredPage }: Protect
     );
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!session) return <Navigate to="/login" replace />;
 
   if (requiredRole && role !== requiredRole && role !== "admin") {
     return <Navigate to="/home" replace />;
   }
 
-  if (requiredPage && !canAccess(requiredPage)) {
+  if (moduleToCheck && !canAccess(moduleToCheck)) {
     return <Navigate to="/home" replace />;
   }
 

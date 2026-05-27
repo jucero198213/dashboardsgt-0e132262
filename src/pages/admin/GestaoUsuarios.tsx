@@ -1,9 +1,20 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2, BarChart3, TrendingUp } from "lucide-react";
+import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2,
+  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
 
-type AppPage = "dashboard" | "indicadores";
+type AppPage = AppModule;
+
+const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
+  financeiro: { label: "Financeiro", icon: Landmark,    color: "text-amber-300",  border: "border-amber-400/30",  bg: "bg-amber-400/10"  },
+  gestao:     { label: "Gestão",     icon: Briefcase,   color: "text-violet-300", border: "border-violet-400/30", bg: "bg-violet-400/10" },
+  operacao:   { label: "Operação",   icon: Truck,       color: "text-cyan-300",   border: "border-cyan-400/30",   bg: "bg-cyan-400/10"   },
+  compras:    { label: "Compras",    icon: ShoppingCart,color: "text-emerald-300",border: "border-emerald-400/30",bg: "bg-emerald-400/10"},
+  rh:         { label: "RH",         icon: UserCog,     color: "text-pink-300",   border: "border-pink-400/30",   bg: "bg-pink-400/10"   },
+  suporte:    { label: "Suporte",    icon: Headphones,  color: "text-blue-300",   border: "border-blue-400/30",   bg: "bg-blue-400/10"   },
+};
 
 interface SupaUser {
   id: string;
@@ -12,7 +23,7 @@ interface SupaUser {
   last_sign_in_at: string | null;
   role: "admin" | "user";
   confirmed: boolean;
-  pages: Set<AppPage>;
+  modules: Set<AppModule>;
 }
 
 const roleStyle: Record<string, string> = {
@@ -45,11 +56,12 @@ export default function GestaoUsuarios() {
         supabase.from("page_permissions").select("user_id, page"),
       ]);
 
-      const pagesByUser = new Map<string, Set<AppPage>>();
+      const modulesByUser = new Map<string, Set<AppModule>>();
       (pagePerms ?? []).forEach((p) => {
-        const set = pagesByUser.get(p.user_id) ?? new Set<AppPage>();
-        set.add(p.page as AppPage);
-        pagesByUser.set(p.user_id, set);
+        if (!ALL_MODULES.includes(p.page as AppModule)) return;
+        const set = modulesByUser.get(p.user_id) ?? new Set<AppModule>();
+        set.add(p.page as AppModule);
+        modulesByUser.set(p.user_id, set);
       });
 
       const mapped: SupaUser[] = (roles ?? []).map((r, idx) => ({
@@ -59,7 +71,7 @@ export default function GestaoUsuarios() {
         last_sign_in_at: null,
         role:            r.role as "admin" | "user",
         confirmed:       true,
-        pages:           pagesByUser.get(r.user_id) ?? new Set<AppPage>(),
+        modules:         modulesByUser.get(r.user_id) ?? new Set<AppModule>(),
       }));
       if (me && !mapped.find((u) => u.id === me.id)) {
         mapped.unshift({
@@ -67,7 +79,7 @@ export default function GestaoUsuarios() {
           created_at: me.created_at ?? new Date().toISOString(),
           last_sign_in_at: me.last_sign_in_at ?? null,
           role: "admin", confirmed: !!me.email_confirmed_at,
-          pages: new Set<AppPage>(["dashboard", "indicadores"]),
+          modules: new Set<AppModule>(ALL_MODULES),
         });
       }
       setUsers(mapped);
@@ -88,25 +100,25 @@ export default function GestaoUsuarios() {
     setTimeout(() => setFeedback(null), 3000);
   };
 
-  const togglePagePermission = async (userId: string, page: AppPage, currentlyHas: boolean) => {
+  const toggleModule = async (userId: string, mod: AppModule, currentlyHas: boolean) => {
     if (currentlyHas) {
       const { error } = await supabase
         .from("page_permissions")
         .delete()
         .eq("user_id", userId)
-        .eq("page", page);
+        .eq("page", mod);
       if (error) { setFeedback({ msg: "Erro ao revogar permissão.", type: "err" }); return; }
     } else {
       const { error } = await supabase
         .from("page_permissions")
-        .insert({ user_id: userId, page });
+        .insert({ user_id: userId, page: mod });
       if (error) { setFeedback({ msg: "Erro ao conceder permissão.", type: "err" }); return; }
     }
     setUsers((prev) => prev.map((u) => {
       if (u.id !== userId) return u;
-      const next = new Set(u.pages);
-      if (currentlyHas) next.delete(page); else next.add(page);
-      return { ...u, pages: next };
+      const next = new Set(u.modules);
+      if (currentlyHas) next.delete(mod); else next.add(mod);
+      return { ...u, modules: next };
     }));
     setFeedback({ msg: "Permissão atualizada.", type: "ok" });
     setTimeout(() => setFeedback(null), 2000);
@@ -365,7 +377,7 @@ export default function GestaoUsuarios() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--sgt-divider)]">
-                  {["Usuário", "ID", "Criado em", "Role", "Páginas", "Ações"].map((h) => (
+                  {["Usuário", "ID", "Criado em", "Role", "Módulos", "Ações"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
                   ))}
                 </tr>
@@ -400,29 +412,26 @@ export default function GestaoUsuarios() {
                       {u.role === "admin" ? (
                         <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
                       ) : (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => togglePagePermission(u.id, "dashboard", u.pages.has("dashboard"))}
-                            title={u.pages.has("dashboard") ? "Revogar acesso ao Dashboard" : "Conceder acesso ao Dashboard"}
-                            className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
-                              u.pages.has("dashboard")
-                                ? "border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
-                                : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
-                            }`}
-                          >
-                            <BarChart3 className="h-3 w-3" /> Dashboard
-                          </button>
-                          <button
-                            onClick={() => togglePagePermission(u.id, "indicadores", u.pages.has("indicadores"))}
-                            title={u.pages.has("indicadores") ? "Revogar acesso a Indicadores" : "Conceder acesso a Indicadores"}
-                            className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
-                              u.pages.has("indicadores")
-                                ? "border-violet-400/30 bg-violet-400/10 text-violet-300 hover:bg-violet-400/20"
-                                : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
-                            }`}
-                          >
-                            <TrendingUp className="h-3 w-3" /> Indicadores
-                          </button>
+                        <div className="flex flex-wrap gap-1.5">
+                          {ALL_MODULES.map((mod) => {
+                            const meta = MODULE_META[mod];
+                            const ModIcon = meta.icon;
+                            const has = u.modules.has(mod);
+                            return (
+                              <button
+                                key={mod}
+                                onClick={() => toggleModule(u.id, mod, has)}
+                                title={has ? `Revogar ${meta.label}` : `Liberar ${meta.label}`}
+                                className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
+                                  has
+                                    ? `${meta.border} ${meta.bg} ${meta.color} hover:opacity-80`
+                                    : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                                }`}
+                              >
+                                <ModIcon className="h-3 w-3" /> {meta.label}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </td>
