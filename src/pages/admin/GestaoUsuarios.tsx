@@ -373,94 +373,157 @@ export default function GestaoUsuarios() {
             Nenhum usuário encontrado
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--sgt-divider)]">
-                  {["Usuário", "ID", "Criado em", "Role", "Módulos", "Ações"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((u, idx) => (
-                  <tr key={u.id} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
-                          style={{ background: colors[idx % colors.length] }}>
-                          {initials(u.email)}
-                        </div>
-                        <span className="text-sm sgt-text">{u.email}</span>
-                        {u.id === me?.id && (
-                          <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>
-                        )}
+          <>
+            {/* ── Cards mobile (< md) ── */}
+            <div className="md:hidden divide-y divide-[var(--sgt-divider)]">
+              {filtered.map((u, idx) => (
+                <div key={u.id} className="p-4 space-y-3">
+                  {/* Cabeçalho do card */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
+                        style={{ background: colors[idx % colors.length] }}>
+                        {initials(u.email)}
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-mono text-[11px] text-[var(--sgt-text-muted)]">{u.id.substring(0, 8)}…</span>
-                    </td>
-                    <td className="px-4 py-3 text-sm sgt-text-2">
-                      {new Date(u.created_at).toLocaleDateString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {u.role === "admin" ? (
-                        <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm sgt-text">{u.email}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
+                          {u.id === me?.id && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Ações */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {u.role !== "admin" ? (
+                        <button onClick={() => changeRole(u.id, "admin")}
+                          className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                          <Shield className="h-3 w-3" /> Admin
+                        </button>
                       ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          {ALL_MODULES.map((mod) => {
-                            const meta = MODULE_META[mod];
-                            const ModIcon = meta.icon;
-                            const has = u.modules.has(mod);
-                            return (
-                              <button
-                                key={mod}
-                                onClick={() => toggleModule(u.id, mod, has)}
-                                title={has ? `Revogar ${meta.label}` : `Liberar ${meta.label}`}
-                                className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
-                                  has
-                                    ? `${meta.border} ${meta.bg} ${meta.color} hover:opacity-80`
-                                    : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
-                                }`}
-                              >
-                                <ModIcon className="h-3 w-3" /> {meta.label}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
+                          className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 transition-all disabled:opacity-30">
+                          <UserX className="h-3 w-3" /> User
+                        </button>
                       )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {u.role !== "admin" ? (
-                          <button onClick={() => changeRole(u.id, "admin")}
-                            className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
-                            <Shield className="h-3 w-3" /> Admin
-                          </button>
-                        ) : (
-                          <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
-                            className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all disabled:opacity-30">
-                            <UserX className="h-3 w-3" /> User
-                          </button>
-                        )}
-                        {u.id !== me?.id && (
-                          <button onClick={() => setDeleteConfirm(u.id)}
-                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-500/20 transition-all">
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        )}
+                      {u.id !== me?.id && (
+                        <button onClick={() => setDeleteConfirm(u.id)}
+                          className="flex items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 hover:bg-red-500/20 transition-all">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {/* Módulos */}
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)] mb-2">Módulos</p>
+                    {u.role === "admin" ? (
+                      <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {ALL_MODULES.map((mod) => {
+                          const meta = MODULE_META[mod];
+                          const ModIcon = meta.icon;
+                          const has = u.modules.has(mod);
+                          return (
+                            <button key={mod} onClick={() => toggleModule(u.id, mod, has)}
+                              className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-all active:scale-95 ${
+                                has ? `${meta.border} ${meta.bg} ${meta.color}` : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)]"
+                              }`}>
+                              <ModIcon className="h-3.5 w-3.5" /> {meta.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                    </td>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Tabela desktop (≥ md) ── */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--sgt-divider)]">
+                    {["Usuário", "ID", "Criado em", "Role", "Módulos", "Ações"].map((h) => (
+                      <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map((u, idx) => (
+                    <tr key={u.id} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
+                            style={{ background: colors[idx % colors.length] }}>
+                            {initials(u.email)}
+                          </div>
+                          <span className="text-sm sgt-text">{u.email}</span>
+                          {u.id === me?.id && (
+                            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono text-[11px] text-[var(--sgt-text-muted)]">{u.id.substring(0, 8)}…</span>
+                      </td>
+                      <td className="px-4 py-3 text-sm sgt-text-2">
+                        {new Date(u.created_at).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {u.role === "admin" ? (
+                          <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1.5">
+                            {ALL_MODULES.map((mod) => {
+                              const meta = MODULE_META[mod];
+                              const ModIcon = meta.icon;
+                              const has = u.modules.has(mod);
+                              return (
+                                <button key={mod} onClick={() => toggleModule(u.id, mod, has)}
+                                  title={has ? `Revogar ${meta.label}` : `Liberar ${meta.label}`}
+                                  className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
+                                    has ? `${meta.border} ${meta.bg} ${meta.color} hover:opacity-80` : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                                  }`}>
+                                  <ModIcon className="h-3 w-3" /> {meta.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {u.role !== "admin" ? (
+                            <button onClick={() => changeRole(u.id, "admin")}
+                              className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                              <Shield className="h-3 w-3" /> Admin
+                            </button>
+                          ) : (
+                            <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
+                              className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all disabled:opacity-30">
+                              <UserX className="h-3 w-3" /> User
+                            </button>
+                          )}
+                          {u.id !== me?.id && (
+                            <button onClick={() => setDeleteConfirm(u.id)}
+                              className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-500/20 transition-all">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
