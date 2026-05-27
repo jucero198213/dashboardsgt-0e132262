@@ -419,13 +419,16 @@ export default function IndicadorDetalhe() {
       <div className="relative w-full px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
 
           {/* ── Breadcrumb ── */}
-          <div className="flex items-center gap-2">
-            <MobileNav />
-            <nav className="flex min-w-0 flex-1 items-center gap-2 text-xs text-slate-500">
-              <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200 shrink-0">Indicadores</button>
-              <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
-              <span className="truncate text-slate-300">{indicador.nome}</span>
-            </nav>
+          <div className="flex items-center justify-between gap-2">
+            {/* Mobile: ≡ + breadcrumb | Desktop: só breadcrumb */}
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <MobileNav />
+              <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
+                <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200 shrink-0">Indicadores</button>
+                <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
+                <span className="truncate text-slate-300">{indicador.nome}</span>
+              </nav>
+            </div>
             <div className="hidden sm:flex items-center gap-2">
               <HomeButton />
               <UserMenu />

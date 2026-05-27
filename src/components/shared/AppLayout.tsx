@@ -1,15 +1,24 @@
 import { ReactNode } from "react";
-import { AppSidebar } from "./AppSidebar";
+import { AppSidebar, useSidebarWidth } from "./AppSidebar";
 import { BottomNav } from "./BottomNav";
 
-/** Layout global: sidebar overlay + bottom nav mobile + container mobile-safe. */
+/**
+ * Layout global:
+ * - Desktop: sidebar persistente à esquerda (expand/collapse) + paddingLeft dinâmico
+ * - Mobile:  sem sidebar; BottomNav fixo no rodapé + pb-16 no conteúdo
+ */
 export function AppLayout({ children }: { children: ReactNode }) {
+  const width = useSidebarWidth();
   return (
     <>
       <AppSidebar />
       <BottomNav />
-      {/* pb-16 garante que o conteúdo não fique escondido atrás do BottomNav no mobile */}
-      <div className="min-h-[100dvh] w-full max-w-full overflow-x-hidden pb-16 sm:pb-0">
+      <div
+        className="min-h-[100dvh] max-w-full overflow-x-hidden pb-16 sm:pb-0 transition-[padding] duration-300"
+        style={{ paddingLeft: `var(--sgt-sb, 0px)` }}
+      >
+        {/* CSS var calculada em runtime para o paddingLeft no desktop */}
+        <style>{`@media (min-width: 640px){:root{--sgt-sb:${width}px}}`}</style>
         {children}
       </div>
     </>
