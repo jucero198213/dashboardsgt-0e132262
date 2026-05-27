@@ -6,11 +6,8 @@
 //   2. Supabase Edge Function (fallback)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SUPABASE_URL = "https://wtjaajhrjsakmmzvbdim.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-  "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0amFhamhyanNha21tenZiZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTA4NzQsImV4cCI6MjA5MTA2Njg3NH0." +
-  "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
+const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
 const TUNNEL_URL = "https://firefox-fixed-iii-targets.trycloudflare.com";
