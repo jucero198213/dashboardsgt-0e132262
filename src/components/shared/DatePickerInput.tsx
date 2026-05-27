@@ -53,12 +53,26 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
     if (!open && ref.current) {
       const rect = ref.current.getBoundingClientRect();
       const calWidth = 280;
+      const calHeight = 348; // altura aproximada do calendário
+      const margin = 8;
+
+      // Horizontal: alinha pelo botão, recua se ultrapassar a borda direita
       let left = rect.left;
-      // Se transbordar à direita, alinha pela direita do botão
-      if (left + calWidth > window.innerWidth - 8) {
-        left = Math.max(8, window.innerWidth - calWidth - 8);
+      if (left + calWidth > window.innerWidth - margin) {
+        left = Math.max(margin, window.innerWidth - calWidth - margin);
       }
-      setDropPos({ top: rect.bottom + 8, left });
+
+      // Vertical: abre abaixo se couber, acima caso contrário
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceAbove = rect.top - margin;
+      let top: number;
+      if (spaceBelow >= calHeight || spaceBelow >= spaceAbove) {
+        top = rect.bottom + margin;
+      } else {
+        top = Math.max(margin, rect.top - calHeight - margin);
+      }
+
+      setDropPos({ top, left });
     }
     setOpen(!open);
   };
@@ -89,13 +103,14 @@ export function DatePickerInput({ value, onChange, placeholder = "DD/MM/AAAA" }:
       {/* Dropdown */}
       {open && dropPos && (
         <div
-          className="fixed z-[999] overflow-hidden rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          className="fixed z-[999] overflow-auto rounded-[16px] border shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
           style={{
             background: "var(--sgt-bg-overlay)",
             borderColor: "var(--sgt-border-subtle)",
             width: 280,
             top: dropPos.top,
             left: dropPos.left,
+            maxHeight: "min(360px, calc(100dvh - 16px))",
           }}
         >
           {/* Header do calendário */}
