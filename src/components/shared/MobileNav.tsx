@@ -73,7 +73,7 @@ export function MobileNav() {
 
           {/* Header */}
           <div className="flex items-center justify-between border-b px-5 py-4"
-            style={{ borderColor: "var(--sgt-border-subtle)" }}>
+            style={{ borderColor: "var(--sgt-border-subtle)", paddingTop: "max(env(safe-area-inset-top, 0px), 1rem)" }}>
             <div className="flex items-center gap-2">
               <img src={sgtLogo} alt="SGT" className="h-7 w-auto shrink-0 object-contain" />
               <div className="flex flex-col leading-tight">
@@ -205,7 +205,8 @@ export function MobileNav() {
           </nav>
 
           {/* Footer */}
-          <div className="flex flex-col gap-1 border-t p-3" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+          <div className="flex flex-col gap-1 border-t p-3"
+            style={{ borderColor: "var(--sgt-border-subtle)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0.75rem)" }}>
             <button
               type="button"
               onClick={toggleTheme}
