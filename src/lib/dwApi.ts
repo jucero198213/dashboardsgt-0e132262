@@ -13,7 +13,7 @@ const SUPABASE_ANON_KEY =
   "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
-const TUNNEL_URL = "https://focused-fuel-plans-collapse.trycloudflare.com";
+const TUNNEL_URL = "https://firefox-fixed-iii-targets.trycloudflare.com";
 
 const LOCAL_API_URL =
   ((
