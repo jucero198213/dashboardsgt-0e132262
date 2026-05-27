@@ -189,7 +189,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  NULL                                     AS COD_CONTA,
+  NULL                                     AS DATA_LANCAMENTO,
+  NULL                                     AS HISTORICO,
+  NULL                                     AS NOME_CONTA,
+  NULL                                     AS COD_BANCO,
+  NULL                                     AS NOME_BANCO,
+  NULL                                     AS NUM_CHEQUE,
+  NULL                                     AS NUM_AVISO,
+  NULL                                     AS DATA_COMPENSACAO
 FROM PAGDOCI I WITH (NOLOCK)
   LEFT JOIN PAGDOC  P  WITH (NOLOCK)  ON I.CODCLIFOR=P.CODCLIFOR AND I.SERIE=P.SERIE AND I.NUMDOC=P.NUMDOC
   LEFT JOIN PAGRAT  RAT WITH (NOLOCK) ON RAT.CODCLIFOR=P.CODCLIFOR AND RAT.SERIE=P.SERIE AND RAT.NUMDOC=P.NUMDOC
@@ -241,7 +250,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  NULL                                     AS COD_CONTA,
+  NULL                                     AS DATA_LANCAMENTO,
+  NULL                                     AS HISTORICO,
+  NULL                                     AS NOME_CONTA,
+  NULL                                     AS COD_BANCO,
+  NULL                                     AS NOME_BANCO,
+  NULL                                     AS NUM_CHEQUE,
+  NULL                                     AS NUM_AVISO,
+  NULL                                     AS DATA_COMPENSACAO
 FROM PAGDOCI I WITH (NOLOCK)
   LEFT JOIN PAGDOC  P  WITH (NOLOCK)  ON I.CODCLIFOR=P.CODCLIFOR AND I.SERIE=P.SERIE AND I.NUMDOC=P.NUMDOC
   LEFT JOIN PAGRAT  RAT WITH (NOLOCK) ON RAT.CODCLIFOR=P.CODCLIFOR AND RAT.SERIE=P.SERIE AND RAT.NUMDOC=P.NUMDOC
@@ -295,7 +313,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  NULL                                     AS COD_CONTA,
+  NULL                                     AS DATA_LANCAMENTO,
+  NULL                                     AS HISTORICO,
+  NULL                                     AS NOME_CONTA,
+  NULL                                     AS COD_BANCO,
+  NULL                                     AS NOME_BANCO,
+  NULL                                     AS NUM_CHEQUE,
+  NULL                                     AS NUM_AVISO,
+  NULL                                     AS DATA_COMPENSACAO
 FROM PAGDOCI I WITH (NOLOCK)
   LEFT JOIN PAGDOC  P  WITH (NOLOCK)  ON I.CODCLIFOR=P.CODCLIFOR AND I.SERIE=P.SERIE AND I.NUMDOC=P.NUMDOC
   LEFT JOIN PAGRAT  RAT WITH (NOLOCK) ON RAT.CODCLIFOR=P.CODCLIFOR AND RAT.SERIE=P.SERIE AND RAT.NUMDOC=P.NUMDOC
@@ -348,7 +375,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  NULL                                     AS COD_CONTA,
+  NULL                                     AS DATA_LANCAMENTO,
+  NULL                                     AS HISTORICO,
+  NULL                                     AS NOME_CONTA,
+  NULL                                     AS COD_BANCO,
+  NULL                                     AS NOME_BANCO,
+  NULL                                     AS NUM_CHEQUE,
+  NULL                                     AS NUM_AVISO,
+  NULL                                     AS DATA_COMPENSACAO
 FROM RECDOCI I WITH (NOLOCK)
   LEFT JOIN RECDOC  P   WITH (NOLOCK) ON I.NUMDUP=P.NUMDUP
   LEFT JOIN RECRAT  RAT WITH (NOLOCK) ON RAT.NUMDUP=P.NUMDUP
@@ -399,7 +435,16 @@ SELECT
   RAT.CODCGA, CGA.DESCRI AS CENTRO_GASTO,
   RAT.CODCUS, CUS.DESCRI AS CENTRO_CUSTO,
   RAT.SINTET, CLA_SINTET.DESCRI AS SINTETICA,
-  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA
+  RAT.ANALIT, CLA_ANALIT.DESCRI AS ANALITICA,
+  NULL                                     AS COD_CONTA,
+  NULL                                     AS DATA_LANCAMENTO,
+  NULL                                     AS HISTORICO,
+  NULL                                     AS NOME_CONTA,
+  NULL                                     AS COD_BANCO,
+  NULL                                     AS NOME_BANCO,
+  NULL                                     AS NUM_CHEQUE,
+  NULL                                     AS NUM_AVISO,
+  NULL                                     AS DATA_COMPENSACAO
 FROM RECDOCI I WITH (NOLOCK)
   LEFT JOIN RECDOC  P   WITH (NOLOCK) ON I.NUMDUP=P.NUMDUP
   LEFT JOIN RECRAT  RAT WITH (NOLOCK) ON RAT.NUMDUP=P.NUMDUP
