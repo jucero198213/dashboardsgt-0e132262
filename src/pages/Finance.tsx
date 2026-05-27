@@ -1003,7 +1003,7 @@ function ScreenConciliacao() {
       </AnimatedCard>
 
       {/* ══ KPI CARDS ═════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
 
         {/* Extrato Banco */}
         <AnimatedCard delay={0}>
@@ -2217,7 +2217,7 @@ function ScreenBancos() {
     <div className="flex flex-col gap-4">
 
       {/* ── KPIs Consolidados ── */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           {
             label: "Saldo Consolidado",

@@ -620,7 +620,7 @@ export default function Rh() {
             </div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
               {[
                 { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos), sub: "SITUAC = \"A\"", Icon: UserCheck, tone: "emerald" as const, delay: 80 },
                 { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes), sub: "DATADM no intervalo", Icon: UserPlus, tone: "cyan" as const, delay: 120 },
@@ -804,7 +804,7 @@ export default function Rh() {
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas Operacionais</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
                   {[
                     { label: "CNH vencida", count: alertas.cnhVencida, cls: "bg-rose-500/10 border-rose-500/20", dotCls: "bg-rose-400", txtCls: "text-rose-300", valCls: "text-rose-300", severity: true },
                     { label: "CNH vence em 30 dias", count: alertas.cnh30, cls: "bg-amber-500/10 border-amber-500/20", dotCls: "bg-amber-400", txtCls: "text-amber-300", valCls: "text-amber-300", severity: alertas.cnh30 > 0 },
@@ -939,7 +939,7 @@ export default function Rh() {
                 {turnoverFilial.length === 0 ? (
                   <div className="flex h-10 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
                     {turnoverFilial.map(r => {
                       const max = Math.max(...turnoverFilial.map(x => x.pct), 0.1);
                       const cor = r.pct > 6 ? RAW.accent.rose : r.pct > 3 ? RAW.accent.amber : RAW.accent.emerald;

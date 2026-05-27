@@ -616,7 +616,7 @@ export default function Operacional() {
 
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
               {[
                 { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%", Icon: Navigation, tone: "cyan" as const, delay: 80, dialog: "andamento" as const },
                 { label: "Veículos em Rota", value: loading ? "—" : fmtNum(kpis.emRota), sub: "Fora de manutenção", Icon: Truck, tone: "emerald" as const, delay: 120, dialog: "rota" as const },
