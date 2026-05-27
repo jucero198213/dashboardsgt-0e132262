@@ -170,6 +170,11 @@
 /* ── Microinterações globais ── */
 * { -webkit-font-smoothing: antialiased; }
 
+/* ── Touch: app-like feel (sem highlight azul, tap rápido, sem bounce) ── */
+* { -webkit-tap-highlight-color: transparent; }
+button, a, [role="button"], select, input { touch-action: manipulation; }
+html { overscroll-behavior-y: none; }
+
 /* Focus ring acessível */
 button:focus-visible, a:focus-visible {
   outline: 2px solid rgba(34,211,238,0.6);
