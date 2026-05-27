@@ -253,21 +253,100 @@ button:focus-visible, a:focus-visible {
   }
 }
 
-/* ── Mobile: better touch targets ── */
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATION SUITE — v1
+   Regras que cascateiam em TODAS as páginas (cabem em 640px)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Sempre: evita scroll horizontal acidental no app inteiro */
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 @media (max-width: 640px) {
+  /* ─── Touch targets confortáveis ─── */
   button, a, [role="button"], select, input[type="date"] {
-    min-height: 32px;
+    min-height: 36px;
   }
-  
-  /* Prevent zoom on input focus (iOS) */
+
+  /* iOS: evita zoom no foco de inputs */
   input, select, textarea {
     font-size: 16px !important;
   }
-  
-  /* Smoother scrolling on iOS */
+
+  /* Scroll suave em iOS */
   .overflow-x-auto, .overflow-y-auto {
     -webkit-overflow-scrolling: touch;
   }
+
+  /* ─── Tipografia fluida — encolhe headings gigantes ─── */
+  h1 { font-size: clamp(1.4rem, 6.5vw, 2rem) !important; line-height: 1.15 !important; }
+  h2 { font-size: clamp(1.15rem, 5vw, 1.5rem) !important; line-height: 1.2 !important; }
+  h3 { font-size: clamp(1rem, 4.2vw, 1.25rem) !important; line-height: 1.25 !important; }
+
+  /* Valores monetários e KPIs gigantes não estouram */
+  .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+    font-size: clamp(1.5rem, 7vw, 2.25rem) !important;
+    line-height: 1.1 !important;
+  }
+  .text-2xl { font-size: clamp(1.2rem, 5.5vw, 1.5rem) !important; }
+
+  /* ─── Tabelas — força scroll horizontal e fontes compactas ─── */
+  table {
+    font-size: 11px !important;
+  }
+  table th, table td {
+    padding: 6px 8px !important;
+    white-space: nowrap;
+  }
+
+  /* ─── Paddings: encolhe os exageros mais comuns sem quebrar layout ─── */
+  .p-8 { padding: 1rem !important; }
+  .p-10, .p-12 { padding: 1.25rem !important; }
+  .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .px-10, .px-12 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+  .py-10 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+  .py-12, .py-14, .py-16 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .py-20, .py-24 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+
+  /* Gaps grandes em grids — encolhe para respirar sem espremer */
+  .gap-8 { gap: 0.75rem !important; }
+  .gap-10, .gap-12 { gap: 1rem !important; }
+
+  /* Margens verticais excessivas */
+  .mb-10, .mb-12 { margin-bottom: 1.25rem !important; }
+  .mt-10, .mt-12 { margin-top: 1.25rem !important; }
+
+  /* ─── Grids: força quebra em mobile para grids que NÃO declaram responsive ─── */
+  [class~="grid-cols-3"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-4"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-5"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-6"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* ─── Cards / containers — radius compacto ─── */
+  .rounded-\[14px\], .rounded-\[16px\], .rounded-\[20px\] { border-radius: 12px; }
+
+  /* Min-w 0 em filhos de flex/grid para permitir truncate funcionar */
+  .flex > *, .grid > * { min-width: 0; }
+
+  /* ─── Safe area bottom para PWA standalone ─── */
+  body {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px) !important;
+  }
+
+  /* ─── Recharts: encolhe legendas/eixos no mobile ─── */
+  .recharts-cartesian-axis-tick text { font-size: 9px !important; }
+  .recharts-legend-item-text { font-size: 10px !important; }
+  .recharts-tooltip-wrapper { font-size: 11px !important; }
+}
+
+/* Tablet refinements */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: clamp(1.75rem, 4vw, 2.25rem) !important; }
+  .text-5xl, .text-6xl { font-size: clamp(2rem, 5vw, 2.75rem) !important; }
 }
 
 /* Smooth theme transitions */
