@@ -508,6 +508,7 @@ export default function Faturamento() {
 
           {/* ── NAVBAR MOBILE ── */}
           <div className="flex sm:hidden flex-col gap-2 py-1">
+            {/* Linha 1: logo + título + HomeButton + MobileNav */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
@@ -522,11 +523,24 @@ export default function Faturamento() {
                 <MobileNav />
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />
-              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Fim" />
-              <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
+            {/* Linha 2: datas */}
+            <div className="flex items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
             </div>
+            {/* Linha 3: empresa + filial */}
+            <div className="flex items-center gap-2">
+              <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
+                <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            {/* Linha 4: atualizar */}
+            <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
           </div>
 
           <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -542,7 +556,7 @@ export default function Faturamento() {
           <div className="flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 w-full">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch sgt-stagger">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 auto-rows-fr items-stretch sgt-stagger">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
@@ -655,7 +669,7 @@ export default function Faturamento() {
 
                 {/* Column headers */}
                 {isProcessed && rows.length > 0 && (
-                  <div className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)]">
+                  <div className="grid grid-cols-[minmax(0,1fr)_8rem_3.5rem] sm:grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)]">
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600">Grupo</span>
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Faturamento</span>
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Part. %</span>
@@ -683,7 +697,7 @@ export default function Faturamento() {
                       return (
                         <div
                           key={`${r.descri}-${i}`}
-                          className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2.5 items-center transition-colors border-b border-[var(--sgt-divider)] last:border-0"
+                          className="grid grid-cols-[minmax(0,1fr)_8rem_3.5rem] sm:grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2.5 items-center transition-colors border-b border-[var(--sgt-divider)] last:border-0"
                           style={{ background: i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent" }}
                           onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
                           onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}

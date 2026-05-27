@@ -486,26 +486,45 @@ export default function Executivo() {
             </div>
 
             {/* ════════ NAVBAR MOBILE ════════ */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Executivo</span>
+            <div className="flex sm:hidden flex-col gap-2 py-1">
+              {/* Linha 1: logo + título + botões */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                  <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                  <div className="flex flex-col leading-none min-w-0">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Executivo</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <HomeButton />
+                  <MobileNav />
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton
-                  onClick={() => { fetchFromDW(); refetchAll(); }}
-                  isFetching={isFetchingDw || anyLoading}
-                  loadingPhase={loadingPhase}
-                  progress={progress}
-                  compact
-                />
-                <HomeButton />
-                <MobileNav />
+              {/* Linha 2: datas */}
+              <div className="flex items-center gap-2">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
               </div>
+              {/* Linha 3: empresa + filial */}
+              <div className="flex items-center gap-2">
+                <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                  <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiais.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              {/* Linha 4: atualizar */}
+              <UpdateButton
+                onClick={() => { fetchFromDW(); refetchAll(); }}
+                isFetching={isFetchingDw || anyLoading}
+                loadingPhase={loadingPhase}
+                progress={progress}
+              />
             </div>
 
             {/* Divisor */}
