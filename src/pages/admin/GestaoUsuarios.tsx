@@ -106,12 +106,12 @@ export default function GestaoUsuarios() {
         .from("page_permissions")
         .delete()
         .eq("user_id", userId)
-        .eq("page", mod);
+        .eq("page", mod as never);
       if (error) { setFeedback({ msg: "Erro ao revogar permissão.", type: "err" }); return; }
     } else {
       const { error } = await supabase
         .from("page_permissions")
-        .insert({ user_id: userId, page: mod });
+        .insert({ user_id: userId, page: mod } as never);
       if (error) { setFeedback({ msg: "Erro ao conceder permissão.", type: "err" }); return; }
     }
     setUsers((prev) => prev.map((u) => {
