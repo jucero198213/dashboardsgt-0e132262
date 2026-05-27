@@ -111,7 +111,25 @@ export default function Monitoramento() {
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile cards (< md) */}
+          <div className="md:hidden divide-y divide-[var(--sgt-divider)]">
+            {filtered.map((l, i) => (
+              <div key={i} className="flex items-start gap-3 px-4 py-3">
+                <div className="flex flex-col items-center shrink-0 pt-0.5 gap-1.5">
+                  <Circle className={`h-2 w-2 fill-current ${l.status === "OK" ? "text-emerald-400" : "text-red-400"}`} />
+                  <span className="font-mono text-[10px] text-[var(--sgt-text-muted)]">{l.time}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold sgt-text truncate">{l.user}</p>
+                  <p className="text-[11px] text-[var(--sgt-text-muted)] truncate">{l.module}</p>
+                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold shrink-0 ${actionColor[l.action]}`}>{l.action}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table (≥ md) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--sgt-divider)]">
