@@ -2,23 +2,41 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type AppPage = "dashboard" | "indicadores";
+export type AppModule =
+  | "financeiro"
+  | "gestao"
+  | "operacao"
+  | "compras"
+  | "rh"
+  | "suporte";
+
+export const ALL_MODULES: AppModule[] = [
+  "financeiro",
+  "gestao",
+  "operacao",
+  "compras",
+  "rh",
+  "suporte",
+];
+
+/** @deprecated use AppModule */
+export type AppPage = AppModule;
 
 interface UsePagePermissionsResult {
-  permissions: Set<AppPage>;
+  permissions: Set<AppModule>;
   isLoading: boolean;
-  canAccess: (page: AppPage) => boolean;
+  canAccess: (module: AppModule) => boolean;
   refresh: () => Promise<void>;
 }
 
 /**
- * Hook que carrega as páginas que o usuário atual pode acessar.
- * - Admins têm acesso a tudo (não precisa de registro).
+ * Hook que carrega os módulos que o usuário atual pode acessar.
+ * - Admins têm acesso a tudo automaticamente.
  * - Usuários comuns: lê de page_permissions onde user_id = auth.uid().
  */
 export function usePagePermissions(): UsePagePermissionsResult {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
-  const [permissions, setPermissions] = useState<Set<AppPage>>(new Set());
+  const [permissions, setPermissions] = useState<Set<AppModule>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -28,7 +46,7 @@ export function usePagePermissions(): UsePagePermissionsResult {
       return;
     }
     if (isAdmin) {
-      setPermissions(new Set<AppPage>(["dashboard", "indicadores"]));
+      setPermissions(new Set<AppModule>(ALL_MODULES));
       setIsLoading(false);
       return;
     }
@@ -42,7 +60,13 @@ export function usePagePermissions(): UsePagePermissionsResult {
       console.error("Erro ao buscar permissões:", error);
       setPermissions(new Set());
     } else {
-      setPermissions(new Set((data ?? []).map((r) => r.page as AppPage)));
+      setPermissions(
+        new Set(
+          (data ?? [])
+            .map((r) => r.page as AppModule)
+            .filter((m): m is AppModule => ALL_MODULES.includes(m as AppModule))
+        )
+      );
     }
     setIsLoading(false);
   }, [user, isAdmin]);
@@ -52,7 +76,7 @@ export function usePagePermissions(): UsePagePermissionsResult {
   }, [authLoading, load]);
 
   const canAccess = useCallback(
-    (page: AppPage) => isAdmin || permissions.has(page),
+    (module: AppModule) => isAdmin || permissions.has(module),
     [isAdmin, permissions]
   );
 

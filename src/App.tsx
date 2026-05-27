@@ -77,25 +77,32 @@ const App = () => (
                 <Route path="/"         element={<Navigate to="/login" replace />} />
                 <Route path="/login"    element={<Login />} />
                 <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute requiredPage="dashboard"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
-                <Route path="/contas-a-receber" element={<ProtectedRoute requiredPage="dashboard"><AppLayout><ContasAReceber /></AppLayout></ProtectedRoute>} />
-                <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="dashboard"><AppLayout><ContasAPagar /></AppLayout></ProtectedRoute>} />
-                <Route path="/indicadores"      element={<ProtectedRoute requiredPage="indicadores"><AppLayout><Indicadores /></AppLayout></ProtectedRoute>} />
-                <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="indicadores"><AppLayout><IndicadorDetalhe /></AppLayout></ProtectedRoute>} />
-                <Route path="/financiamento-frota" element={<ProtectedRoute><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
-                <Route path="/faturamento" element={<ProtectedRoute><AppLayout><Faturamento /></AppLayout></ProtectedRoute>} />
-                <Route path="/frota" element={<ProtectedRoute><AppLayout><Frota /></AppLayout></ProtectedRoute>} />
-                <Route path="/manutencao" element={<ProtectedRoute><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
+                {/* ── Financeiro ── */}
+                <Route path="/dashboard"        element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
+                <Route path="/contas-a-receber" element={<ProtectedRoute requiredModule="financeiro"><AppLayout><ContasAReceber /></AppLayout></ProtectedRoute>} />
+                <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredModule="financeiro"><AppLayout><ContasAPagar /></AppLayout></ProtectedRoute>} />
+                <Route path="/financeiro"       element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
+                <Route path="/fiscal"           element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
+                {/* ── Gestão ── */}
+                <Route path="/indicadores"      element={<ProtectedRoute requiredModule="gestao"><AppLayout><Indicadores /></AppLayout></ProtectedRoute>} />
+                <Route path="/indicadores/:id"  element={<ProtectedRoute requiredModule="gestao"><AppLayout><IndicadorDetalhe /></AppLayout></ProtectedRoute>} />
+                <Route path="/executivo"        element={<ProtectedRoute requiredModule="gestao"><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
+                <Route path="/faturamento"      element={<ProtectedRoute requiredModule="gestao"><AppLayout><Faturamento /></AppLayout></ProtectedRoute>} />
+                {/* ── Operação ── */}
+                <Route path="/operacional"      element={<ProtectedRoute requiredModule="operacao"><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
+                <Route path="/frota"            element={<ProtectedRoute requiredModule="operacao"><AppLayout><Frota /></AppLayout></ProtectedRoute>} />
+                <Route path="/financiamento-frota" element={<ProtectedRoute requiredModule="operacao"><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
+                <Route path="/manutencao"       element={<ProtectedRoute requiredModule="operacao"><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
+                <Route path="/abastecimento"    element={<ProtectedRoute requiredModule="operacao"><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
+                {/* ── Compras ── */}
+                <Route path="/compras"          element={<ProtectedRoute requiredModule="compras"><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
+                {/* ── RH ── */}
+                <Route path="/rh"               element={<ProtectedRoute requiredModule="rh"><AppLayout><Rh /></AppLayout></ProtectedRoute>} />
+                {/* ── Suporte ── */}
+                <Route path="/chamados"         element={<ProtectedRoute requiredModule="suporte"><AppLayout><Chamados /></AppLayout></ProtectedRoute>} />
+                {/* ── Admin / misc ── */}
                 <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
-                <Route path="/chamados" element={<ProtectedRoute><AppLayout><Chamados /></AppLayout></ProtectedRoute>} />
-                <Route path="/compras"      element={<ProtectedRoute><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
-                <Route path="/abastecimento" element={<ProtectedRoute><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
-                <Route path="/rh"           element={<ProtectedRoute><AppLayout><Rh /></AppLayout></ProtectedRoute>} />
-                <Route path="/operacional"  element={<ProtectedRoute><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
-                <Route path="/executivo"    element={<ProtectedRoute><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
-                <Route path="/financeiro"  element={<ProtectedRoute><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
-                <Route path="/fiscal"     element={<ProtectedRoute><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
+                <Route path="/admin"            element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
                 <Route path="/sgt"              element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/visual-rodopar"  element={<ProtectedRoute><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/portal-wr"       element={<ProtectedRoute><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
