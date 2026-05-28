@@ -433,13 +433,6 @@ export default function Abastecimento() {
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-300">Tempo real</span>
-              </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
@@ -463,8 +456,14 @@ export default function Abastecimento() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Abastecimento</span>
                 </div>
               </div>
-              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
               <HomeButton />
+            </div>
+
+            {/* Mobile: datas + atualizar */}
+            <div className="flex sm:hidden items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -487,7 +486,7 @@ export default function Abastecimento() {
             )}
 
             {/* ════════ FILTROS LOCAIS ════════ */}
-            <AnimatedCard delay={60}>
+            <div className="hidden sm:block"><AnimatedCard delay={60}>
               <div
                 className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
                 style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
@@ -550,7 +549,7 @@ export default function Abastecimento() {
                   {fmtNum(registros.length)} registros
                 </div>
               </div>
-            </AnimatedCard>
+            </AnimatedCard></div>
 
             {/* ════════════════════════════════════════════════════════════════
                 SEÇÃO 1 — INDICADORES E ANÁLISE DE CONSUMO
