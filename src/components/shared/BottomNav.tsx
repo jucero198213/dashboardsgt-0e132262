@@ -4,7 +4,7 @@ import {
   Home, Menu, Shield, LogOut, Sun, Moon, X, User, ChevronRight,
   Briefcase, Banknote, LineChart, MapPin, Truck, Car, Wrench, Fuel,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
-  ShoppingCart, UserCog, Sparkles,
+  ShoppingCart, UserCog, Sparkles, Activity, TrendingUp,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +31,7 @@ const CONTEXT_NAV: Record<string, NavItem[]> = {
   ],
   gestao: [
     { id: "exec", icon: Briefcase,       label: "Executivo",    to: "/executivo",           module: "gestao" },
+    { id: "fat",  icon: Banknote,        label: "Faturamento",  to: "/faturamento",          module: "gestao" },
     { id: "ind",  icon: LineChart,       label: "Indicadores",  to: "/indicadores",         module: "gestao" },
   ],
   operacao: [
@@ -41,10 +42,12 @@ const CONTEXT_NAV: Record<string, NavItem[]> = {
     { id: "abast", icon: Fuel,           label: "Abastecimento",to: "/abastecimento",        module: "operacao" },
   ],
   financeiro: [
-    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",     to: "/financeiro",                    module: "financeiro" },
-    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",      to: "/financeiro?s=pagar",             module: "financeiro" },
-    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",    to: "/financeiro?s=receber",           module: "financeiro" },
-    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação",to: "/financeiro?s=conciliacao",      module: "financeiro" },
+    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",      to: "/financeiro",                    module: "financeiro" },
+    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",       to: "/financeiro?s=pagar",             module: "financeiro" },
+    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",     to: "/financeiro?s=receber",           module: "financeiro" },
+    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação", to: "/financeiro?s=conciliacao",       module: "financeiro" },
+    { id: "fin-rl",  icon: Activity,        label: "Realizado",   to: "/dashboard",                      module: "financeiro" },
+    { id: "fin-pv",  icon: TrendingUp,      label: "Previsto",    to: "/financeiro?s=previsto",          module: "financeiro" },
   ],
   compras: [
     { id: "compras", icon: ShoppingCart, label: "Compras",      to: "/compras",             module: "compras" },
@@ -121,6 +124,11 @@ export function BottomNav() {
       const cur = new URLSearchParams(location.search).get("s") ?? "painel";
       return location.pathname === path && cur === s;
     }
+    // /financeiro sem ?s= só ativa quando s não está definido ou é "painel"
+    if (item.to === "/financeiro") {
+      const cur = new URLSearchParams(location.search).get("s");
+      return location.pathname === "/financeiro" && (!cur || cur === "painel");
+    }
     return location.pathname === item.to || location.pathname.startsWith(item.to + "/");
   }
 
@@ -153,16 +161,18 @@ export function BottomNav() {
         <NavTab icon={Home} label="Início" active={isHome} onClick={() => navigate("/home")} />
 
         {/* Itens dinâmicos — roláveis */}
-        <div className="flex flex-1 overflow-x-auto scrollbar-none">
-          {visibleItems.map(item => (
-            <NavTab
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={isActive(item)}
-              onClick={() => navigate(item.to)}
-            />
-          ))}
+        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none">
+          <div className="flex h-full">
+            {visibleItems.map(item => (
+              <NavTab
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                active={isActive(item)}
+                onClick={() => navigate(item.to)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* MENU — fixo à direita */}
