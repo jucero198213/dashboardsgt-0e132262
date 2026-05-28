@@ -2823,16 +2823,6 @@ export default function Finance() {
             </div>
 
 
-
-            {/* Badge tempo real */}
-            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo Real</span>
-            </div>
-
             <div className="h-5 w-px shrink-0 bg-[var(--sgt-divider)]" />
 
             {/* Filtros */}
