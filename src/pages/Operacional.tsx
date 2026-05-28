@@ -178,7 +178,7 @@ export default function Operacional() {
   // Dialog de detalhamento dos KPIs
   const [kpiDialog, setKpiDialog] = useState<null | "andamento" | "rota" | "manutencao" | "atraso">(null);
   // View da seção "Viagens em Andamento" — padrão Bancos (Cards / Tabela)
-  const [viagensView, setViagensView] = useState<"cards" | "tabela">("cards");
+  const [viagensView, setViagensView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -479,6 +479,43 @@ export default function Operacional() {
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // ── Analytics da seção (deriva de tabelaBuscada → respeita a busca) ──────────
+  const viagensAnalytics = useMemo(() => {
+    const base = tabelaBuscada;
+    const n = base.length;
+
+    const sitMap = new Map<string, number>();
+    base.forEach(v => { const k = v.descSituacao ?? "Não informado"; sitMap.set(k, (sitMap.get(k) ?? 0) + 1); });
+    const porSituacao = [...sitMap.entries()].sort((a, b) => b[1] - a[1]);
+
+    const rotaMap = new Map<string, number>();
+    base.forEach(v => { const k = v.rota || "—"; rotaMap.set(k, (rotaMap.get(k) ?? 0) + 1); });
+    const topRotas = [...rotaMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const motMap = new Map<string, number>();
+    base.forEach(v => { const k = v.motorista ?? "Não informado"; motMap.set(k, (motMap.get(k) ?? 0) + 1); });
+    const topMotoristas = [...motMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "Não iniciada", min: 0, max: 0, cor: RAW.accent.rose },
+      { label: "1–39%", min: 1, max: 39, cor: RAW.accent.amber },
+      { label: "40–79%", min: 40, max: 79, cor: RAW.accent.emerald },
+      { label: "80–99%", min: 80, max: 99, cor: RAW.accent.cyan },
+      { label: "Concluída", min: 100, max: 100, cor: RAW.accent.violet },
+    ];
+    const faixas = faixasDef.map(f => ({ ...f, qtd: base.filter(v => v.percCompleto >= f.min && v.percCompleto <= f.max).length }));
+
+    const comSaida = base.filter(v => v.datSaiReal && v.datSaiOriginal);
+    const atrasadas = comSaida.filter(v => v.temAtraso).length;
+    const pontuais = comSaida.length - atrasadas;
+    const pctPontual = comSaida.length > 0 ? (pontuais / comSaida.length) * 100 : 0;
+    const atrasos = comSaida.filter(v => v.temAtraso && v.minAtrasoSaida != null).map(v => v.minAtrasoSaida!);
+    const mediaAtraso = atrasos.length > 0 ? Math.round(atrasos.reduce((s, a) => s + a, 0) / atrasos.length) : 0;
+    const emManut = base.filter(v => v.emManutencao).length;
+
+    return { n, porSituacao, topRotas, topMotoristas, faixas, pontuais, atrasadas, pctPontual, mediaAtraso, emManut };
+  }, [tabelaBuscada]);
+
   // ── TONE_COLORS → migrado para KPI_STYLE (padrão SGT, nível de módulo) ────────
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -637,7 +674,7 @@ export default function Operacional() {
                       onClick={() => clickable && setKpiDialog(dialog)}
                       className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${s.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${s.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5 ${clickable ? "cursor-pointer" : ""}`}
                     >
-                      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${s.stripe}`} />
+                      <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${s.stripe}`} />
                       <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
                         style={{ background: `radial-gradient(circle at 100% 100%, rgba(${s.rgb},0.10), transparent 65%)` }} />
                       <div className="relative flex h-full flex-col">
@@ -923,6 +960,7 @@ export default function Operacional() {
                       {([
                         { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
                         { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
                       ]).map(t => {
                         const Icon = t.icon;
                         const active = viagensView === t.id;
@@ -1157,8 +1195,154 @@ export default function Operacional() {
                 </div>
                 )}
 
+                {/* ══════════ VIEW: ANALYTICS ══════════ */}
+                {viagensView === "analytics" && (
+                  <div className="p-3">
+                    {viagensAnalytics.n === 0 ? (
+                      <div className="py-8 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Progresso das viagens */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Progresso das Viagens</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.faixas.map(f => {
+                                const max = Math.max(...viagensAnalytics.faixas.map(x => x.qtd), 1);
+                                const pct = (f.qtd / max) * 100;
+                                return (
+                                  <div key={f.label} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[100px] shrink-0">{f.label}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: f.cor }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Pontualidade na saída */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Pontualidade na Saída</span>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-end justify-between mb-3">
+                                <div>
+                                  <p className="text-[28px] font-black leading-none text-emerald-300 tabular-nums">{viagensAnalytics.pctPontual.toFixed(0)}%</p>
+                                  <p className="text-[10px] text-slate-500 mt-1">saídas no prazo</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[10px] uppercase tracking-[0.15em] text-slate-600">Atraso médio</p>
+                                  <p className="text-[18px] font-bold text-rose-300 tabular-nums">{viagensAnalytics.mediaAtraso} <span className="text-[11px] font-medium text-slate-500">min</span></p>
+                                </div>
+                              </div>
+                              <div className="flex gap-1 h-2.5 rounded-full overflow-hidden mb-2" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${viagensAnalytics.pctPontual}%` }} />
+                                <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(viagensAnalytics.pontuais + viagensAnalytics.atrasadas) > 0 ? 100 - viagensAnalytics.pctPontual : 0}%` }} />
+                              </div>
+                              <div className="flex items-center justify-between text-[10px] font-medium">
+                                <span className="text-emerald-300">{viagensAnalytics.pontuais} pontuais</span>
+                                <span className="text-rose-300">{viagensAnalytics.atrasadas} atrasadas</span>
+                              </div>
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top Rotas */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Rotas</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.topRotas.map(([rota, qtd], i) => {
+                                const max = viagensAnalytics.topRotas[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={rota}>{rota}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-amber-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top Motoristas */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Users className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Motoristas</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.topMotoristas.map(([nome, qtd], i) => {
+                                const max = viagensAnalytics.topMotoristas[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={nome}>{nome}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-violet-400/70 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-violet-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Distribuição por situação — largura total */}
+                        <AnimatedCard delay={240} className="lg:col-span-2">
+                          <div className="rounded-[14px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Distribuição por Situação</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.porSituacao.map(([sit, qtd], i) => {
+                                const max = viagensAnalytics.porSituacao[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                const cor = [RAW.accent.cyan, RAW.accent.emerald, RAW.accent.amber, RAW.accent.rose, RAW.accent.violet][i % 5];
+                                const share = viagensAnalytics.n > 0 ? (qtd / viagensAnalytics.n) * 100 : 0;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[160px] truncate shrink-0" title={sit}>{sit}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: cor }} />
+                                    </div>
+                                    <span className="text-[10px] text-slate-600 w-10 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {viagensView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
