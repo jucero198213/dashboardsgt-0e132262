@@ -504,13 +504,6 @@ export default function Rh() {
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Recursos Humanos</span>
                 </div>
               </div>
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">Tempo real</span>
-              </div>
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
@@ -529,8 +522,14 @@ export default function Rh() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">RH</span>
                 </div>
               </div>
-              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
               <HomeButton />
+            </div>
+
+            {/* Mobile: datas + atualizar */}
+            <div className="flex sm:hidden items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim} onChange={v => setDwFilter("dataFim", v)} placeholder="Data fim" />
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -551,7 +550,7 @@ export default function Rh() {
             )}
 
             {/* ════ FILTROS ════ */}
-            <AnimatedCard delay={60}>
+            <div className="hidden sm:block"><AnimatedCard delay={60}>
               <div className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2" style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
                 <Filter className="w-3.5 h-3.5 text-emerald-400/60 shrink-0" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
@@ -608,7 +607,7 @@ export default function Rh() {
                 )}
                 <div className="ml-auto text-[10px] text-slate-500">{fmtNum(filtrados.length)} colaboradores</div>
               </div>
-            </AnimatedCard>
+            </AnimatedCard></div>
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 1 — INDICADORES DE QUADRO
