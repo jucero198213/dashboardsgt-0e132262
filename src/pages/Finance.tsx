@@ -2881,7 +2881,7 @@ export default function Finance() {
               </div>
               <HomeButton />
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />
               <DatePickerInput value={dwFilter.dataFim}   onChange={v => setDwFilter("dataFim", v)}   placeholder="Fim" />
               <UpdateButton onClick={fetchFromDW} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
