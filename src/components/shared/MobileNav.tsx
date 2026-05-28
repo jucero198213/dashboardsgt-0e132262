@@ -68,7 +68,7 @@ export function MobileNav() {
 
       <SheetContent
         side="left"
-        className="w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)] [&>button:first-child]:hidden"
+        className="w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)]"
         style={{ borderColor: "var(--sgt-border-medium)", color: "var(--sgt-text-primary)" }}
       >
         <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
