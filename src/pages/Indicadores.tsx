@@ -349,16 +349,6 @@ export default function Indicadores() {
                 </div>
               </div>
 
-              {/* Badge tempo real */}
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
-              </div>
-
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros + Atualizar + Voltar */}
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
@@ -397,26 +387,11 @@ export default function Indicadores() {
                 </div>
               </div>
 
-              {/* Linha 2: badge tempo real */}
-              <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
-                </div>
-              </div>
-
               {/* Linha 3: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
-                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                  className={`inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25"} disabled:cursor-not-allowed`}>
-                  <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                  {isFetchingDw ? "..." : "Atualizar"}
-                </button>
+                <UpdateButton onClick={() => void handleUpdate()} isFetching={isFetchingDw} compact />
               </div>
 
               {/* Linha 4: selects */}
