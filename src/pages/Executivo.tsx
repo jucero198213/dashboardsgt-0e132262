@@ -500,10 +500,16 @@ export default function Executivo() {
                 </div>
                 <HomeButton />
               </div>
-              {/* Linha 2: datas */}
+              {/* Linha 2: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <UpdateButton
+                  onClick={() => { fetchFromDW(); refetchAll(); }}
+                  isFetching={isFetchingDw || anyLoading}
+                  loadingPhase={loadingPhase}
+                  progress={progress}
+                />
               </div>
               {/* Linha 3: empresa + filial */}
               <div className="flex items-center gap-2">
@@ -516,13 +522,6 @@ export default function Executivo() {
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiais.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              {/* Linha 4: atualizar */}
-              <UpdateButton
-                onClick={() => { fetchFromDW(); refetchAll(); }}
-                isFetching={isFetchingDw || anyLoading}
-                loadingPhase={loadingPhase}
-                progress={progress}
-              />
             </div>
 
             {/* Divisor */}
