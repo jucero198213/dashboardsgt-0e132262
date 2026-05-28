@@ -5,6 +5,7 @@ import {
   Briefcase, Banknote, LineChart, MapPin, Truck, Car, Wrench, Fuel,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
   ShoppingCart, UserCog, Sparkles, Activity, TrendingUp,
+  Building2, Users, Tag, Landmark,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,13 +59,24 @@ const CONTEXT_NAV: Record<string, NavItem[]> = {
   receitaflow: [
     { id: "rf",      icon: Sparkles,     label: "ReceitaFlow",  to: "/receitaflow" },
   ],
+  "outras-analises": [
+    { id: "oa-forn", icon: Building2, label: "Fornecedores", to: "/financeiro?s=fornecedores", module: "financeiro" },
+    { id: "oa-cli",  icon: Users,     label: "Clientes",     to: "/financeiro?s=clientes",     module: "financeiro" },
+    { id: "oa-cat",  icon: Tag,       label: "Categorias",   to: "/financeiro?s=categorias",   module: "financeiro" },
+    { id: "oa-ban",  icon: Landmark,  label: "Bancos",       to: "/financeiro?s=bancos",        module: "financeiro" },
+  ],
 };
 
 // ─── Detecta contexto pela rota ──────────────────────────────────────────────
-function getNavContext(pathname: string): string {
+function getNavContext(pathname: string, search: string): string {
   if (["/executivo", "/faturamento", "/indicadores"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "gestao";
   if (["/operacional", "/frota", "/financiamento-frota", "/manutencao", "/abastecimento"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "operacao";
-  if (pathname.startsWith("/financeiro") || pathname.startsWith("/dashboard") || pathname.startsWith("/contas-a")) return "financeiro";
+  if (pathname.startsWith("/financeiro")) {
+    const s = new URLSearchParams(search).get("s");
+    if (s === "fornecedores" || s === "clientes" || s === "categorias" || s === "bancos") return "outras-analises";
+    return "financeiro";
+  }
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/contas-a")) return "financeiro";
   if (pathname.startsWith("/compras")) return "compras";
   if (pathname.startsWith("/rh")) return "rh";
   if (pathname.startsWith("/receitaflow")) return "receitaflow";
@@ -106,7 +118,7 @@ export function BottomNav() {
   const { canAccess } = usePagePermissions();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const ctx = getNavContext(location.pathname);
+  const ctx = getNavContext(location.pathname, location.search);
   const allItems = CONTEXT_NAV[ctx] ?? CONTEXT_NAV.default;
 
   // filtra por permissão de módulo
