@@ -376,13 +376,6 @@ export default function Compras() {
               </div>
             </div>
 
-            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
-            </div>
 
             <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
 
@@ -449,14 +442,14 @@ export default function Compras() {
                 <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Compras</span>
               </div>
             </div>
-            <UpdateButton
-              onClick={fetchFromDW}
-              isFetching={isFetchingDw}
-              loadingPhase={loadingPhase}
-              progress={progress}
-              compact
-            />
             <HomeButton />
+          </div>
+
+          {/* Mobile: datas + atualizar */}
+          <div className="flex sm:hidden items-center gap-2">
+            <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
+            <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+            <UpdateButton onClick={fetchFromDW} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
           </div>
 
           {/* ════════ KPIs ════════ */}
