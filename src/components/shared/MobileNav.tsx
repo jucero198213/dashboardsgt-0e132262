@@ -54,17 +54,21 @@ export function MobileNav() {
       <SheetTrigger asChild>
         <button
           type="button"
-          aria-label="Abrir menu"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.04] transition-all active:scale-90 hover:border-white/[0.18] hover:bg-white/[0.08] sm:hidden shrink-0"
           style={{ WebkitTapHighlightColor: "transparent" }}
         >
-          <Menu className="h-[18px] w-[18px] text-slate-400" />
+          {open ? (
+            <X className="h-[18px] w-[18px] text-slate-400" />
+          ) : (
+            <Menu className="h-[18px] w-[18px] text-slate-400" />
+          )}
         </button>
       </SheetTrigger>
 
       <SheetContent
         side="left"
-        className="w-[85vw] max-w-[340px] border-l p-0 [background:var(--sgt-menu-bg)]"
+        className="w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)] [&>button:first-child]:hidden"
         style={{ borderColor: "var(--sgt-border-medium)", color: "var(--sgt-text-primary)" }}
       >
         <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
@@ -83,15 +87,7 @@ export function MobileNav() {
                 <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">Menu</span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Fechar menu"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border transition-all active:scale-95"
-              style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-input-bg)", color: "var(--sgt-text-secondary)" }}
-            >
-              <X className="h-4 w-4" />
-            </button>
+
           </div>
 
           {/* User info */}
