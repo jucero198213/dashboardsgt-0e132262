@@ -521,10 +521,11 @@ export default function Faturamento() {
               </div>
               <HomeButton />
             </div>
-            {/* Linha 2: datas */}
+            {/* Linha 2: datas + atualizar */}
             <div className="flex items-center gap-2">
               <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
               <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+              <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
             </div>
             {/* Linha 3: empresa + filial */}
             <div className="flex items-center gap-2">
@@ -537,8 +538,6 @@ export default function Faturamento() {
                 <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            {/* Linha 4: atualizar */}
-            <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
           </div>
 
           <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
