@@ -25,6 +25,7 @@ import {
   Banknote,
   MapPin,
   UserCog,
+  PieChart,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -514,6 +515,15 @@ export default function Home() {
       cta: "Acessar RH",
       onClick: () => navigate("/rh"),
       tone: "rose" as const,      // rosa = pessoas/equipe
+    },
+    {
+      key: "outras-analises",
+      icon: PieChart,
+      title: "Outras Análises",
+      description: "Visões financeiras por fornecedor, cliente, banco e categoria de custo.",
+      cta: "Acessar análises",
+      onClick: () => navigate("/financeiro?s=fornecedores"),
+      tone: "amber" as const,     // dourado = análise financeira
     },
   ];
 
