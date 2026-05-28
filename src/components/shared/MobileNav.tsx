@@ -63,7 +63,7 @@ export function MobileNav() {
       </SheetTrigger>
 
       <SheetContent
-        side="right"
+        side="left"
         className="w-[85vw] max-w-[340px] border-l p-0 [background:var(--sgt-menu-bg)]"
         style={{ borderColor: "var(--sgt-border-medium)", color: "var(--sgt-text-primary)" }}
       >
