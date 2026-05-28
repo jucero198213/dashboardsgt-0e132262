@@ -162,8 +162,8 @@ export function BottomNav() {
       {/* ── Full nav sheet (abre pelo botão Menu) ── */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
-          side="right"
-          className="sm:hidden w-[85vw] max-w-[340px] border-l p-0 [background:var(--sgt-menu-bg)]"
+          side="left"
+          className="sm:hidden w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)]"
           style={{ borderColor: "var(--sgt-border-medium)", color: "var(--sgt-text-primary)" }}
         >
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
