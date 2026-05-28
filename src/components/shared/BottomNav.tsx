@@ -73,13 +73,13 @@ function getNavContext(pathname: string): string {
 
 // ─── Tab individual ───────────────────────────────────────────────────────────
 function NavTab({
-  icon: Icon, label, active, onClick,
-}: { icon: React.ElementType; label: string; active: boolean; onClick: () => void }) {
+  icon: Icon, label, active, onClick, fill = false,
+}: { icon: React.ElementType; label: string; active: boolean; onClick: () => void; fill?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="relative flex w-[60px] shrink-0 flex-col items-center justify-center gap-[3px] py-2 transition-all active:scale-90"
+      className={`relative flex flex-col items-center justify-center gap-[3px] py-2 transition-all active:scale-90 ${fill ? "flex-1" : "w-[72px] shrink-0"}`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       {active && (
@@ -158,11 +158,21 @@ export function BottomNav() {
         }}
       >
         {/* INÍCIO — fixo à esquerda */}
-        <NavTab icon={Home} label="Início" active={isHome} onClick={() => navigate("/home")} />
+        <NavTab icon={Home} label="Início" active={isHome} onClick={() => navigate("/home")} fill={false} />
 
-        {/* Itens dinâmicos — roláveis */}
-        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none">
-          <div className="flex h-full">
+        {/* Itens dinâmicos — max 3 visíveis, scroll com gradient */}
+        <div className="relative flex-1 min-w-0">
+          {/* Gradient direita — indica mais itens */}
+          {visibleItems.length > 3 && (
+            <div
+              className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 z-10"
+              style={{ background: "linear-gradient(to left, var(--sgt-menu-bg), transparent)" }}
+            />
+          )}
+          <div
+            className="flex h-full overflow-x-auto"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+          >
             {visibleItems.map(item => (
               <NavTab
                 key={item.id}
@@ -170,6 +180,7 @@ export function BottomNav() {
                 label={item.label}
                 active={isActive(item)}
                 onClick={() => navigate(item.to)}
+                fill={visibleItems.length <= 3}
               />
             ))}
           </div>
