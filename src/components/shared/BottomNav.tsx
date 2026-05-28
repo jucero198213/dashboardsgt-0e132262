@@ -147,15 +147,19 @@ export function BottomNav() {
         {/* Menu — abre full nav */}
         <button
           type="button"
-          onClick={() => setMenuOpen(true)}
+          onClick={() => setMenuOpen(v => !v)}
           className="relative flex flex-1 flex-col items-center justify-center gap-[3px] py-2 transition-all active:scale-90"
           style={{ WebkitTapHighlightColor: "transparent" }}
         >
           {isMenuActive && (
             <span className="absolute top-1.5 h-[3px] w-8 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
           )}
-          <Menu className="h-[22px] w-[22px] text-slate-500" />
-          <span className="text-[9px] font-bold uppercase tracking-[0.08em] leading-none text-slate-600">Menu</span>
+          {menuOpen ? (
+            <X className={"h-[22px] w-[22px] transition-all duration-200 " + (isMenuActive ? "text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] scale-110" : "text-slate-500")} />
+          ) : (
+            <Menu className={"h-[22px] w-[22px] transition-all duration-200 " + (isMenuActive ? "text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] scale-110" : "text-slate-500")} />
+          )}
+          <span className={"text-[9px] font-bold uppercase tracking-[0.08em] leading-none transition-colors " + (isMenuActive ? "text-amber-400" : "text-slate-600")}>Menu</span>
         </button>
       </nav>
 
@@ -163,7 +167,7 @@ export function BottomNav() {
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="left"
-          className="sm:hidden w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)]"
+          className="sm:hidden w-[85vw] max-w-[340px] border-r p-0 [background:var(--sgt-menu-bg)] [&>button:first-child]:hidden"
           style={{ borderColor: "var(--sgt-border-medium)", color: "var(--sgt-text-primary)" }}
         >
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
