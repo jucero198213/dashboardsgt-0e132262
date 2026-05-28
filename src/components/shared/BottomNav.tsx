@@ -154,8 +154,8 @@ export function BottomNav() {
           {isMenuActive && (
             <span className="absolute top-1.5 h-[3px] w-8 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
           )}
-          <Menu className={"h-[22px] w-[22px] transition-all duration-200 " + (isMenuActive ? "text-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] scale-110" : "text-slate-500")} />
-          <span className={"text-[9px] font-bold uppercase tracking-[0.08em] leading-none transition-colors " + (isMenuActive ? "text-amber-400" : "text-slate-600")}>Menu</span>
+          <Menu className="h-[22px] w-[22px] text-slate-500" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.08em] leading-none text-slate-600">Menu</span>
         </button>
       </nav>
 
@@ -182,15 +182,7 @@ export function BottomNav() {
                   <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">Menu</span>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Fechar menu"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border transition-all active:scale-95"
-                style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-input-bg)", color: "var(--sgt-text-secondary)" }}
-              >
-                <X className="h-4 w-4" />
-              </button>
+
             </div>
 
             {/* User info */}
