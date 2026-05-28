@@ -467,10 +467,8 @@ export default function ContasAPagar() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {kpis.map((k, i) => (
             <AnimatedCard key={k.label} delay={i * 60}>
-              <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
-                <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
-                  style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
+              <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
+                <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />
                 <div className="relative flex h-full flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>

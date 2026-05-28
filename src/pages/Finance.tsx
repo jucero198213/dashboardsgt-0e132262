@@ -170,7 +170,7 @@ function KpiCard({ label, value, sub, icon: Icon, stripe, iconBg, iconTxt, glow,
   return (
     <AnimatedCard delay={delay}>
       <div className={`group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.35)]`}>
-        <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${stripe}`} />
+        <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${stripe}`} />
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">{label}</p>
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${iconBg} ${iconTxt}`}>

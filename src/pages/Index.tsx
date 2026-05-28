@@ -1651,9 +1651,8 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
                     {/* RECEBIDO */}
-                    <div onClick={() => navigate("/contas-a-receber")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_55%)]" />
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                    <div onClick={() => navigate("/contas-a-receber")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/70 to-emerald-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
 
                         {/* Topo/Esquerda — valor principal */}
@@ -1722,9 +1721,8 @@ const Index = () => {
                     </div>
 
                     {/* PAGO */}
-                    <div onClick={() => navigate("/contas-a-pagar")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.10),transparent_55%)]" />
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
+                    <div onClick={() => navigate("/contas-a-pagar")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-rose-400/70 to-rose-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
 
                         {/* Topo/Esquerda — valor principal */}
@@ -1867,9 +1865,8 @@ const Index = () => {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch h-full">
 
                     {/* SALDO LÍQUIDO — destaque cyan */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border-[1.5px] border-cyan-400/35 [background:linear-gradient(135deg,rgba(34,211,238,0.06),var(--sgt-bg-card))] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400 to-cyan-300/40" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(34,211,238,0.18), transparent 65%)" }} />
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 to-cyan-300/40" />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-300">Saldo Líquido</span>
@@ -1897,9 +1894,8 @@ const Index = () => {
                     </div>
 
                     {/* INADIMPLÊNCIA — % em destaque, valor absoluto e docs como subtítulo */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-red-400/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-red-400/60 to-red-700/20" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.12), transparent 65%)" }} />
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-red-400/60 to-red-700/20" />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-red-300/85">Inadimplência</span>
@@ -1926,9 +1922,8 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${cpTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
-                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${cpTone.text} opacity-50`} />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${cpTone.glow}, transparent 65%)` }} />
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${cpTone.text} opacity-50`} />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${cpTone.text} opacity-90`}>% Realização CP</span>
@@ -1955,9 +1950,8 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${crTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
-                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${crTone.text} opacity-50`} />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${crTone.glow}, transparent 65%)` }} />
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${crTone.text} opacity-50`} />
                       <div className="relative flex h-full flex-col gap-2">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${crTone.text} opacity-90`}>% Realização CR</span>

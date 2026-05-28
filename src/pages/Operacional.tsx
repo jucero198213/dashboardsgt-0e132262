@@ -672,11 +672,9 @@ export default function Operacional() {
                   <AnimatedCard key={label} delay={delay}>
                     <div
                       onClick={() => clickable && setKpiDialog(dialog)}
-                      className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${s.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${s.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5 ${clickable ? "cursor-pointer" : ""}`}
+                      className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${s.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5 ${clickable ? "cursor-pointer" : ""}`}
                     >
                       <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${s.stripe}`} />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
-                        style={{ background: `radial-gradient(circle at 100% 100%, rgba(${s.rgb},0.10), transparent 65%)` }} />
                       <div className="relative flex h-full flex-col">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{label}</p>

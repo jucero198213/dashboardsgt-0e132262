@@ -630,9 +630,8 @@ export default function Rh() {
                 const t = TC[tone];
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300 hover:-translate-y-[3px]`} style={{ background: "var(--sgt-bg-card)" }}>
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
                       <div className="relative flex h-full flex-col">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
@@ -843,9 +842,8 @@ export default function Rh() {
                 const t = TC[tone];
                 return (
                   <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
+                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300 hover:-translate-y-[3px]`} style={{ background: "var(--sgt-bg-card)" }}>
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
                       <div className="relative flex h-full flex-col">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>

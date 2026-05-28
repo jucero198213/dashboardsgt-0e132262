@@ -557,9 +557,9 @@ export default function Faturamento() {
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-amber-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.10),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber-400/70 to-amber-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(245,158,11,0.10), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -585,9 +585,9 @@ export default function Faturamento() {
 
               {/* Média por dia útil */}
               <AnimatedCard delay={60}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400/70 to-cyan-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -614,9 +614,9 @@ export default function Faturamento() {
 
               {/* Provisão */}
               <AnimatedCard delay={120}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/70 to-emerald-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">

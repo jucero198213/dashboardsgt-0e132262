@@ -611,10 +611,10 @@ export default function Abastecimento() {
                 return (
                   <AnimatedCard key={label} delay={delay}>
                     <div
-                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`}
+                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300 hover:-translate-y-[3px]`}
                       style={{ background: "var(--sgt-bg-card)" }}
                     >
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
+                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
@@ -627,8 +627,6 @@ export default function Abastecimento() {
                           <Icon className={`w-4 h-4 ${t.icon}`} />
                         </div>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]"
-                        style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
                     </div>
                   </AnimatedCard>
                 );
