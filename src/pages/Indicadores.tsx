@@ -408,10 +408,15 @@ export default function Indicadores() {
                 </div>
               </div>
 
-              {/* Linha 3: datas */}
+              {/* Linha 3: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+                <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
+                  className={`inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[12px] font-semibold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25"} disabled:cursor-not-allowed`}>
+                  <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
+                  {isFetchingDw ? "..." : "Atualizar"}
+                </button>
               </div>
 
               {/* Linha 4: selects */}
@@ -425,13 +430,6 @@ export default function Indicadores() {
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
-
-              {/* Linha 5: botão atualizar */}
-              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.15)]" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25"} disabled:cursor-not-allowed`}>
-                <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>Atualizando…</span><span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span>) : ("Atualizar")}
-              </button>
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
