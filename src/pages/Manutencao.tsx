@@ -562,13 +562,6 @@ export default function Manutencao() {
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-violet-400/20 bg-violet-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-300">DW Conectado</span>
-              </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
@@ -601,8 +594,14 @@ export default function Manutencao() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Manutenção</span>
                 </div>
               </div>
-              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={manutCooldown} />
               <HomeButton />
+            </div>
+
+            {/* Mobile: datas + atualizar */}
+            <div className="flex sm:hidden items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={manutCooldown} />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -625,7 +624,7 @@ export default function Manutencao() {
             )}
 
             {/* ════════ FILTROS LOCAIS ════════ */}
-            <AnimatedCard delay={60}>
+            <div className="hidden sm:block"><AnimatedCard delay={60}>
               <div
                 className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
                 style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
@@ -709,7 +708,7 @@ export default function Manutencao() {
                   {fmtNum(ordens.length)} OS • {fmtNum(dadosFiltrados.length)} itens
                 </div>
               </div>
-            </AnimatedCard>
+            </AnimatedCard></div>
 
             {/* ════════ KPI ROW (5 cards) ════════ */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
