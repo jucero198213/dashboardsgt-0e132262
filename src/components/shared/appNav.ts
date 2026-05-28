@@ -48,8 +48,8 @@ export const APP_NAV: AppNavItem[] = [
   { id: "fin-relatorios",   label: "Relatórios",       icon: FileBarChart,    financeScreen: "relatorios",   module: "financeiro" },
   { id: "ext-fiscal",       label: "Fiscal",           icon: Scale,           to: "/fiscal",                 module: "financeiro" },
 
-  // ── Cadastros (sub-módulo de Financeiro) ──────────────────────────────────
-  { id: "fin-fornecedores", label: "Fornecedores",     icon: Building2,       financeScreen: "fornecedores", section: "Cadastros", module: "financeiro" },
+  // ── Outras Análises (visões financeiras por dimensão) ─────────────────────
+  { id: "fin-fornecedores", label: "Fornecedores",     icon: Building2,       financeScreen: "fornecedores", section: "Outras Análises", module: "financeiro" },
   { id: "fin-clientes",     label: "Clientes",         icon: Users,           financeScreen: "clientes",     module: "financeiro" },
   { id: "fin-categorias",   label: "Categorias",       icon: Tag,             financeScreen: "categorias",   module: "financeiro" },
   { id: "fin-bancos",       label: "Bancos",           icon: Landmark,        financeScreen: "bancos",       module: "financeiro" },
