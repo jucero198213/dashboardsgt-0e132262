@@ -4,7 +4,7 @@ import {
   X, ChevronLeft, ChevronRight, Filter, FileText,
   Activity, MapPin, Truck, Wrench, Clock, TrendingUp,
   Navigation, Users, BarChart3, Zap, AlertCircle,
-  CheckCircle2, RefreshCw,
+  CheckCircle2, RefreshCw, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -81,6 +81,16 @@ const getSituacStyle = (raw: string | null) => {
     (k === "ATRASADO" && raw.toUpperCase().includes("ATRASO"))
   );
   return SITUAC_STYLE[key ?? "AGUARDANDO"] ?? SITUAC_STYLE["AGUARDANDO"];
+};
+
+// ─── KPI tone → estilo (padrão SGT — telas financeiras) ────────────────────────
+// Classes 100% estáticas para o Tailwind compilar (nada de via-[${var}] dinâmico).
+const KPI_STYLE: Record<string, { stripe: string; border: string; glow: string; iconBg: string; iconTxt: string; rgb: string }> = {
+  cyan:    { stripe: "from-cyan-400/60 to-cyan-700/20",       border: "border-cyan-400/[0.12]",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",  iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    rgb: "6,182,212"   },
+  emerald: { stripe: "from-emerald-400/60 to-emerald-700/20", border: "border-emerald-400/[0.12]", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", rgb: "16,185,129"  },
+  amber:   { stripe: "from-amber-400/60 to-amber-700/20",     border: "border-amber-400/[0.12]",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",   iconTxt: "text-amber-300",   rgb: "251,191,36"  },
+  rose:    { stripe: "from-rose-400/60 to-rose-700/20",       border: "border-rose-400/[0.12]",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",  iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-orange-300",  rgb: "244,63,94"   },
+  violet:  { stripe: "from-violet-400/60 to-violet-700/20",   border: "border-violet-400/[0.12]",  glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]", iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]", iconTxt: "text-violet-300",  rgb: "139,92,246"  },
 };
 
 // ─── Tooltip dark ─────────────────────────────────────────────────────────────
@@ -167,6 +177,8 @@ export default function Operacional() {
 
   // Dialog de detalhamento dos KPIs
   const [kpiDialog, setKpiDialog] = useState<null | "andamento" | "rota" | "manutencao" | "atraso">(null);
+  // View da seção "Viagens em Andamento" — padrão Bancos (Cards / Tabela)
+  const [viagensView, setViagensView] = useState<"cards" | "tabela">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -467,14 +479,7 @@ export default function Operacional() {
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TC = {
-    cyan: { border: "border-cyan-400/20", icon: "text-cyan-300", bg: "bg-cyan-400/[0.08]", glow: RAW.accent.cyan, sub: "text-cyan-400" },
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-    amber: { border: "border-amber-400/20", icon: "text-amber-300", bg: "bg-amber-400/[0.08]", glow: RAW.accent.amber, sub: "text-amber-400" },
-    rose: { border: "border-rose-400/20", icon: "text-rose-300", bg: "bg-rose-400/[0.08]", glow: RAW.accent.rose, sub: "text-rose-400" },
-    violet: { border: "border-violet-400/20", icon: "text-violet-300", bg: "bg-violet-400/[0.08]", glow: RAW.accent.violet, sub: "text-violet-400" },
-  };
+  // ── TONE_COLORS → migrado para KPI_STYLE (padrão SGT, nível de módulo) ────────
 
   // ─────────────────────────────────────────────────────────────────────────────
   //  RENDER
@@ -624,27 +629,27 @@ export default function Operacional() {
                 { label: "Com Atraso na Saída", value: loading ? "—" : fmtNum(kpis.comAtraso), sub: "SAIDA_REAL > ORIGINAL", Icon: AlertCircle, tone: "rose" as const, delay: 200, dialog: "atraso" as const },
                 { label: "Conclusão Média", value: loading ? "—" : fmtPct(kpis.avgPerc), sub: "AVG(PERC_COMPLETO)", Icon: TrendingUp, tone: "violet" as const, delay: 240, dialog: null },
               ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
-                const t = TC[tone];
+                const s = KPI_STYLE[tone];
                 const clickable = !!dialog;
                 return (
                   <AnimatedCard key={label} delay={delay}>
                     <div
                       onClick={() => clickable && setKpiDialog(dialog)}
-                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border} ${clickable ? "cursor-pointer" : ""}`}
-                      style={{ background: "var(--sgt-bg-card)" }}
+                      className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${s.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${s.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5 ${clickable ? "cursor-pointer" : ""}`}
                     >
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 mb-2">{label}</p>
-                          <p className={`text-[28px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}{clickable && " · clique p/ detalhes"}</p>
+                      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${s.stripe}`} />
+                      <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
+                        style={{ background: `radial-gradient(circle at 100% 100%, rgba(${s.rgb},0.10), transparent 65%)` }} />
+                      <div className="relative flex h-full flex-col">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{label}</p>
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${s.iconBg} ${s.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
+                            <Icon className="h-3.5 w-3.5" />
+                          </div>
                         </div>
-                        <div className={`shrink-0 rounded-xl p-2.5 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-5 h-5 ${t.icon}`} />
-                        </div>
+                        <p className={`mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up ${loading ? "animate-pulse" : ""}`}>{value}</p>
+                        <p className="mt-2.5 text-[10px] font-medium tracking-[0.12em] text-slate-500">{sub}{clickable && " · clique p/ detalhes"}</p>
                       </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
                     </div>
                   </AnimatedCard>
                 );
@@ -902,18 +907,131 @@ export default function Operacional() {
                   <span className="rounded-full border border-cyan-400/20 bg-cyan-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-cyan-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
-                      placeholder="Buscar veículo, motorista, rota..."
-                      className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
-                    />
+                  <div className="ml-auto flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }}
+                        placeholder="Buscar veículo, motorista, rota..."
+                        className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
+                      />
+                    </div>
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = viagensView === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => setViagensView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-cyan-400/15 text-cyan-200" : "text-slate-500 hover:text-slate-300"}`}
+                          >
+                            <Icon className="h-3 w-3" /> {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
+                {/* ══════════ VIEW: CARDS (padrão Bancos) ══════════ */}
+                {viagensView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-8 text-center text-[12px] text-slate-600">Nenhum registro encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((v, i) => {
+                          const sit = getSituacStyle(v.descSituacao);
+                          const atMin = v.minAtrasoSaida;
+                          const progCor = v.emManutencao
+                            ? RAW.accent.violet
+                            : v.percCompleto >= 80 ? RAW.accent.cyan
+                              : v.percCompleto >= 40 ? RAW.accent.emerald
+                                : RAW.accent.amber;
+                          return (
+                            <AnimatedCard key={`${v.id}-${i}`} delay={i * 40}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-cyan-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: veículo + situação */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="font-mono text-[15px] font-bold text-cyan-300">{v.veiculo}</span>
+                                    {v.veiculo2 && <span className="text-[9px] text-slate-600 block">+{v.veiculo2}</span>}
+                                  </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                    {v.descSituacao ?? "—"}
+                                  </span>
+                                </div>
+
+                                {/* Motorista + rota */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Users className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[12px] text-slate-300 truncate">{v.motorista ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mb-3">
+                                  <MapPin className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[10px] text-slate-500 truncate">{v.rota}</span>
+                                </div>
+
+                                {/* Progresso */}
+                                <div className="mt-auto">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-600">Concluído</span>
+                                    <span className="text-[11px] font-bold" style={{ color: progCor }}>{v.percCompleto}%</span>
+                                  </div>
+                                  <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${v.percCompleto}%`, background: progCor }} />
+                                  </div>
+                                </div>
+
+                                {/* Footer: saída real + manutenção */}
+                                <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="w-3 h-3 text-slate-600" />
+                                    {v.datSaiReal ? (
+                                      <span className={`text-[10px] font-medium ${v.temAtraso ? "text-rose-300" : "text-emerald-300"}`}>
+                                        {fmtHora(v.datSaiReal)}
+                                        {atMin !== null && atMin !== 0 && (
+                                          <span className={`ml-1 text-[8px] font-bold ${atMin > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                                            {atMin > 0 ? `+${atMin}min` : `${atMin}min`}
+                                          </span>
+                                        )}
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-slate-600">Sem saída</span>
+                                    )}
+                                  </div>
+                                  {v.emManutencao && (
+                                    <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[8px] font-bold text-violet-300 ring-1 ring-violet-500/30">MANUT.</span>
+                                  )}
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ══════════ VIEW: TABELA ══════════ */}
+                {viagensView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -1037,6 +1155,7 @@ export default function Operacional() {
                     </tbody>
                   </table>
                 </div>
+                )}
 
                 {/* Paginação */}
                 {tabelaOrdenada.length > PAGE_SIZE && (
