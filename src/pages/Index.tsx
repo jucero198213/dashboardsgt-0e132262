@@ -1610,24 +1610,14 @@ const Index = () => {
                 <HomeButton />
               </div>
 
-              {/* Linha 2: badge tempo real */}
-              <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
-                </div>
-              </div>
-
-              {/* Linha 2: datas */}
+              {/* Linha 2: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
               </div>
 
-              {/* Linha 3: selects + botão */}
+              {/* Linha 3: selects */}
               <div className="flex items-center gap-2">
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
                   <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
@@ -1637,11 +1627,6 @@ const Index = () => {
                   <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
-              </div>
-
-              {/* Linha 4: botão atualizar */}
-              <div className="flex items-center gap-2">
-                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
               </div>
             </div>
 
