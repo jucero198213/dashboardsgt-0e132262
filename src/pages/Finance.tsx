@@ -984,89 +984,20 @@ function ScreenConciliacao() {
 
       {/* ══ KPI CARDS ═════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
-
-        {/* Extrato Banco */}
         <AnimatedCard delay={0}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-blue-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(59,130,246,0.18)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-blue-400/70 to-blue-700/20" />
-            <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-blue-400" />
-            <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Extrato Banco</p>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-blue-300 text-[clamp(1.1rem,1.7vw,1.45rem)] overflow-hidden text-ellipsis whitespace-nowrap">
-              {fmtK(totalExtrato)}
-            </p>
-            <p className="mt-1.5 text-[10px] font-medium tracking-[0.08em]" style={{ color: "var(--sgt-text-muted)" }}>
-              {lancamentos.length} lançamentos
-            </p>
-          </div>
+          <KpiCard label="Extrato Banco" value={fmtK(totalExtrato)} subtitle={`${lancamentos.length} lançamentos`} icon={Landmark} tone="blue" />
         </AnimatedCard>
-
-        {/* Total ERP */}
         <AnimatedCard delay={50}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px]" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-slate-400/40 to-transparent" />
-            <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Total ERP</p>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-[clamp(1.1rem,1.7vw,1.45rem)] overflow-hidden text-ellipsis whitespace-nowrap" style={{ color: "var(--sgt-text-primary)" }}>
-              {fmtK(totalErp)}
-            </p>
-            <p className="mt-1.5 text-[10px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>
-              <span className="font-bold text-rose-400">−{fmtK(totalExtrato - totalErp)}</span> diferença bruta
-            </p>
-          </div>
+          <KpiCard label="Total ERP" value={fmtK(totalErp)} subtitle={`−${fmtK(totalExtrato - totalErp)} diferença bruta`} icon={Building2} tone="cyan" />
         </AnimatedCard>
-
-        {/* Conciliado */}
         <AnimatedCard delay={100}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-emerald-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(16,185,129,0.18)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
-            <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-emerald-400" />
-            <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Conciliado</p>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-emerald-300 text-[clamp(1.1rem,1.7vw,1.45rem)] overflow-hidden text-ellipsis whitespace-nowrap">
-              {fmtK(totalConc)}
-            </p>
-            <div className="mt-2">
-              <p className="mb-1 text-[9px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>
-                {lancamentos.filter(l => l.status === "Conciliado").length} pares · {taxaConc.toFixed(1)}%
-              </p>
-              <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                <div className="h-full rounded-full bg-emerald-400 transition-all duration-1000" style={{ width: `${taxaConc.toFixed(1)}%` }} />
-              </div>
-            </div>
-          </div>
+          <KpiCard label="Conciliado" value={fmtK(totalConc)} subtitle={`${lancamentos.filter(l => l.status === "Conciliado").length} pares · ${taxaConc.toFixed(1)}%`} icon={CheckCircle} tone="emerald" />
         </AnimatedCard>
-
-        {/* Divergências */}
         <AnimatedCard delay={150}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-rose-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(244,63,94,0.18)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
-            <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-rose-400" />
-            <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Divergências</p>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-rose-300 text-[clamp(1.3rem,2.0vw,1.8rem)]">
-              {qtdDiverg}
-            </p>
-            <p className="mt-1.5 text-[10px] font-medium" style={{ color: "var(--sgt-text-muted)" }}>
-              {fmtK(impactoDiverg)} impacto total
-            </p>
-          </div>
+          <KpiCard label="Divergências" value={String(qtdDiverg)} subtitle={`${fmtK(impactoDiverg)} impacto total`} icon={AlertTriangle} tone="rose" />
         </AnimatedCard>
-
-        {/* Taxa de Conciliação */}
         <AnimatedCard delay={200}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-amber-400/[0.16] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(245,158,11,0.20)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
-            <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-amber-400" />
-            <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Taxa Conciliação</p>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-amber-300 text-[clamp(1.3rem,2.0vw,1.8rem)]">
-              {taxaConc.toFixed(1)}%
-            </p>
-            <div className="mt-2">
-              <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-                <div className="h-full rounded-full bg-amber-400 transition-all duration-1000" style={{ width: `${taxaConc.toFixed(1)}%` }} />
-              </div>
-              <p className="mt-1 text-[9px] font-bold text-rose-400">
-                Meta: 95% · −{(95 - taxaConc).toFixed(1)} p.p.
-              </p>
-            </div>
-          </div>
+          <KpiCard label="Taxa Conciliação" value={`${taxaConc.toFixed(1)}%`} subtitle={`Meta: 95% · −${(95 - taxaConc).toFixed(1)} p.p.`} icon={TrendingUp} tone="amber" />
         </AnimatedCard>
       </div>
 
