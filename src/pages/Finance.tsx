@@ -260,7 +260,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
     { label: "Resultado Líquido",  value: fmtK(Math.abs(saldo)),     sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
   ];
 
-  if (isFetchingDw) return <SkeletonLoader label="Carregando painel financeiro..." />;
+  if (isFetchingDw) return <SkeletonLoader label="Carregando Painel Financeiro..." />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -1781,7 +1781,7 @@ function ScreenCategorias() {
     );
   };
 
-  if (isFetchingDw) return <SkeletonLoader label="Carregando categorias..." />;
+  if (isFetchingDw) return <SkeletonLoader label="Carregando Categorias..." />;
 
   if (total === 0) return (
     <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
@@ -2705,7 +2705,7 @@ function ScreenBancos() {
 type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "previsto" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
 const NAV: { id: string; label: string; icon: React.ElementType; badge?: number; badgeColor?: "amber" | "rose"; section?: string; externalTo?: string }[] = [
-  { id: "painel",       label: "Painel",           icon: LayoutDashboard, section: "Financeiro" },
+  { id: "painel",       label: "Painel Financeiro",icon: LayoutDashboard, section: "Financeiro" },
   { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle },
   { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle },
   { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
