@@ -5,7 +5,7 @@ import {
   Calendar, ChevronUp, ChevronDown, BarChart3,
   DollarSign, Hash, X, ChevronLeft, ChevronRight,
   Filter, Layers, Droplets, Gauge, MapPin, FileText,
-  Activity, Car, Users, Zap,
+  Activity, Car, Users, Zap, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -129,6 +129,8 @@ export default function Abastecimento() {
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+  // View dos registros — padrão Bancos (Cards / Tabela / Analytics)
+  const [abastView, setAbastView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -386,6 +388,38 @@ export default function Abastecimento() {
 
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // ── Analytics dos registros (deriva de tabelaOrdenada → respeita filtros + busca) ──
+  const abastAnalytics = useMemo(() => {
+    const base = tabelaOrdenada;
+    const n = base.length;
+
+    const combMap = new Map<string, { valor: number; litros: number }>();
+    base.forEach(r => {
+      const k = r.tipoCombustivel ?? "Não informado";
+      const cur = combMap.get(k) ?? { valor: 0, litros: 0 };
+      cur.valor += r.vlrtot || 0; cur.litros += r.quanti || 0;
+      combMap.set(k, cur);
+    });
+    const porCombustivel = [...combMap.entries()].sort((a, b) => b[1].valor - a[1].valor);
+
+    const veiMap = new Map<string, number>();
+    base.forEach(r => { veiMap.set(r.veiculo, (veiMap.get(r.veiculo) ?? 0) + (r.vlrtot || 0)); });
+    const topVeiculos = [...veiMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const postoMap = new Map<string, number>();
+    base.forEach(r => { const k = r.posto ?? "—"; postoMap.set(k, (postoMap.get(k) ?? 0) + (r.vlrtot || 0)); });
+    const topPostos = [...postoMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const estMap = new Map<string, number>();
+    base.forEach(r => { const k = r.estado ?? "—"; estMap.set(k, (estMap.get(k) ?? 0) + 1); });
+    const porEstado = [...estMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const custoTotal = base.reduce((s, r) => s + (r.vlrtot || 0), 0);
+    const litrosTotal = base.reduce((s, r) => s + (r.quanti || 0), 0);
+
+    return { n, porCombustivel, topVeiculos, topPostos, porEstado, custoTotal, litrosTotal };
+  }, [tabelaOrdenada]);
 
   // ── TONE_COLORS ─────────────────────────────────────────────────────────────
   const TONE_COLORS = {
@@ -888,19 +922,39 @@ export default function Abastecimento() {
                   <span className="rounded-full border border-orange-400/20 bg-amber-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-orange-300">
                     {fmtNum(tabelaFiltrada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
-                      placeholder="Buscar veículo, motorista, posto..."
-                      className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-amber-500/30 focus:outline-none transition-all w-[210px]"
-                    />
+                  <div className="ml-auto flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }}
+                        placeholder="Buscar veículo, motorista, posto..."
+                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-amber-500/30 focus:outline-none transition-all w-[210px]"
+                      />
+                    </div>
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = abastView === t.id;
+                        return (
+                          <button key={t.id} onClick={() => setAbastView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" /> {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 {/* Tabela */}
+                {abastView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -1025,9 +1079,192 @@ export default function Abastecimento() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ════════ VIEW: CARDS ════════ */}
+                {abastView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhum registro encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((r, i) => {
+                          const deltaKmL = r.media && r.medfab && r.medfab > 0 ? ((r.media - r.medfab) / r.medfab) * 100 : null;
+                          return (
+                            <AnimatedCard key={`${r.codaba}-${i}`} delay={Math.min(i, 12) * 30}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-amber-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: veículo + combustível */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="font-mono text-[14px] font-bold text-orange-300">{r.veiculo}</span>
+                                    {(r.marca || r.modelo) && <span className="block text-[9px] text-slate-600 truncate">{[r.marca, r.modelo].filter(Boolean).join(" · ")}</span>}
+                                  </div>
+                                  {r.tipoCombustivel && (
+                                    <span className="shrink-0 rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-orange-300">
+                                      {r.tipoCombustivel}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Motorista + data */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Users className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[11px] text-slate-300 truncate">{r.motorista ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mb-3">
+                                  <Calendar className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[10px] text-slate-500">{fmtData(r.datref)}</span>
+                                  {r.posto && <span className="text-[10px] text-slate-600 truncate">· {r.posto}</span>}
+                                </div>
+
+                                {/* Métricas */}
+                                <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Litros</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-cyan-300">{r.quanti > 0 ? `${r.quanti.toFixed(0)}L` : "—"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">km/L</p>
+                                    <p className={`text-[11px] font-bold tabular-nums ${deltaKmL !== null && deltaKmL < -5 ? "text-rose-300" : deltaKmL !== null && deltaKmL > 5 ? "text-emerald-300" : "text-slate-300"}`}>
+                                      {r.media && r.media > 0 ? r.media.toFixed(1) : "—"}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Valor</p>
+                                    <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtBRL(r.vlrtot)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ════════ VIEW: ANALYTICS ════════ */}
+                {abastView === "analytics" && (
+                  <div className="p-3">
+                    {abastAnalytics.n === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Custo por combustível */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Droplets className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Combustível</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.porCombustivel.map(([comb, d], idx) => {
+                                const max = abastAnalytics.porCombustivel[0]?.[1].valor ?? 1;
+                                const cor = [RAW.accent.amber, RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet, RAW.accent.rose][idx % 5];
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[110px] truncate shrink-0" title={comb}>{comb}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(d.valor / max) * 100}%`, background: cor }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums w-[64px] text-right shrink-0" style={{ color: cor }}>{fmtBRL(d.valor)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Maiores consumidores (veículos) */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Car className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Maiores Consumidores</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.topVeiculos.map(([vei, val], idx) => {
+                                const max = abastAnalytics.topVeiculos[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-mono text-slate-400 w-[100px] truncate shrink-0">{vei}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-cyan-200 w-[64px] text-right shrink-0">{fmtBRL(val)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top postos */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Postos</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.topPostos.map(([posto, val], idx) => {
+                                const max = abastAnalytics.topPostos[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={posto}>{posto}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-emerald-200 w-[64px] text-right shrink-0">{fmtBRL(val)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Por estado */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Gauge className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Abastecimentos por Estado</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.porEstado.map(([est, qtd], idx) => {
+                                const max = abastAnalytics.porEstado[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[80px] truncate shrink-0">{est}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-violet-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-violet-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {abastView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
