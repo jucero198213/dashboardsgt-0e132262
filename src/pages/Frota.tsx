@@ -4,7 +4,7 @@ import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
   Calendar, MapPin, ChevronUp, ChevronDown,
   CheckCircle2, AlertCircle, DollarSign, Hash, X,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, LayoutGrid, Table2, BarChart3
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -497,6 +497,8 @@ export default function Frota() {
   const [search, setSearch] = useState("");
   const [sortCol, setSortCol] = useState<keyof VeiculoEnriquecido>("custoManut");
   const [sortAsc, setSortAsc] = useState(false);
+  // View da tabela de veículos — padrão Bancos (Cards / Tabela / Analytics)
+  const [frotaView, setFrotaView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // Paginação tabela
   const PAGE_SIZE = 50;
@@ -722,6 +724,34 @@ export default function Frota() {
         : String(vb ?? "").localeCompare(String(va ?? ""));
     });
   }, [frotaFiltrada, sortCol, sortAsc]);
+
+  // ── Analytics da tabela de veículos (deriva de tabelaOrdenada → respeita filtros + busca) ──
+  const frotaAnalytics = useMemo(() => {
+    const base = tabelaOrdenada;
+    const n = base.length;
+
+    const marcaMap = new Map<string, number>();
+    base.forEach(v => { const k = v.marca ?? "Sem marca"; marcaMap.set(k, (marcaMap.get(k) ?? 0) + 1); });
+    const porMarca = [...marcaMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const muniMap = new Map<string, number>();
+    base.forEach(v => { const k = v.municipio ?? "Não informado"; muniMap.set(k, (muniMap.get(k) ?? 0) + 1); });
+    const topMunicipios = [...muniMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "Até 5 anos", min: 0, max: 5, cor: RAW.accent.emerald },
+      { label: "5–10 anos", min: 6, max: 10, cor: RAW.accent.cyan },
+      { label: "10–15 anos", min: 11, max: 15, cor: RAW.accent.amber },
+      { label: "15+ anos", min: 16, max: 999, cor: RAW.accent.rose },
+    ];
+    const faixasIdade = faixasDef.map(f => ({ ...f, qtd: base.filter(v => v.idade !== null && v.idade >= f.min && v.idade <= f.max).length }));
+
+    const topCusto = [...base].filter(v => v.custoManut > 0).sort((a, b) => b.custoManut - a.custoManut).slice(0, 8);
+    const custoTotal = base.reduce((s, v) => s + (v.custoManut || 0), 0);
+    const comOrdens = base.filter(v => v.qtdOrdens > 0).length;
+
+    return { n, porMarca, topMunicipios, faixasIdade, topCusto, custoTotal, comOrdens };
+  }, [tabelaOrdenada]);
 
   const COLS = [
     { key: "codvei",       label: "Código",        align: "left",   numeric: false, responsive: "" },
@@ -1032,10 +1062,29 @@ export default function Frota() {
               <span className="text-[11px] text-slate-500">
                 {fmtNum(tabelaOrdenada.length)} de {fmtNum(frotaEnriquecida.length)} veículos
               </span>
+
+              {/* Toggle de visualização — padrão tela Bancos */}
+              <div className="ml-auto flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5">
+                {([
+                  { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                  { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                  { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                ]).map(t => {
+                  const Icon = t.icon;
+                  const active = frotaView === t.id;
+                  return (
+                    <button key={t.id} onClick={() => setFrotaView(t.id)}
+                      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
+                      <Icon className="h-3 w-3" /> {t.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* ════════ TABELA ════════ */}
+            {/* ════════ TABELA / CARDS / ANALYTICS ════════ */}
             <div className="flex-1 min-h-[400px] overflow-auto rounded-lg border border-[var(--sgt-border-subtle)]">
+              {frotaView === "tabela" && (
               <table className="w-full text-[12px]">
                 <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
                   <tr>
@@ -1118,7 +1167,201 @@ export default function Frota() {
                   )}
                 </tbody>
               </table>
-              {!isFetchingDw && tabelaOrdenada.length > 0 && (() => {
+              )}
+
+              {/* ════════ VIEW: CARDS ════════ */}
+              {frotaView === "cards" && (
+                <div className="p-3">
+                  {isFetchingDw ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                          <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                          <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                          <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : tabelaOrdenada.length === 0 ? (
+                    <div className="py-12 text-center text-slate-500">
+                      <Truck className="mx-auto h-8 w-8 mb-2 opacity-40" />
+                      <p>Nenhum veículo encontrado com os filtros aplicados</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((v, i) => {
+                        const sit = SITUACAO_STYLE[v.situacao] ?? SITUACAO_STYLE.INATIVO;
+                        const marcaCor = getMarcaColor(v.marca);
+                        return (
+                          <AnimatedCard key={v.codvei} delay={Math.min(i, 12) * 30}>
+                            <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-amber-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                              {/* Header: código + situação */}
+                              <div className="flex items-start justify-between gap-2 mb-2.5">
+                                <div className="min-w-0">
+                                  <span className="font-mono text-[15px] font-bold text-amber-300">{v.codvei}</span>
+                                  {v.frota && <span className="block text-[9px] text-slate-600">Frota {v.frota}</span>}
+                                </div>
+                                <span className={`shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                  {v.situacao}
+                                </span>
+                              </div>
+
+                              {/* Marca + modelo */}
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="h-2 w-2 rounded-full shrink-0" style={{ background: marcaCor.color }} />
+                                <span className="text-[12px] font-semibold text-slate-200 truncate">{v.marca ?? "—"}</span>
+                                {v.anofab && <span className="text-[10px] text-slate-600 shrink-0">· {v.anofab}</span>}
+                              </div>
+                              <div className="flex items-center gap-1.5 mb-3">
+                                <span className="text-[11px] text-slate-500 truncate" title={v.modelo ?? ""}>{v.modelo ?? "—"}</span>
+                              </div>
+
+                              {/* Métricas */}
+                              <div className="mt-auto grid grid-cols-2 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Idade</p>
+                                  <p className={`text-[13px] font-bold tabular-nums ${v.idade !== null && v.idade > 15 ? "text-rose-300" : "text-slate-200"}`}>
+                                    {v.idade !== null ? `${v.idade} anos` : "—"}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Custo manut.</p>
+                                  <p className="text-[13px] font-bold tabular-nums text-rose-200">{v.custoManut > 0 ? fmtBRL(v.custoManut) : "—"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Ordens</p>
+                                  <p className="text-[13px] font-bold tabular-nums text-slate-200">
+                                    {v.qtdOrdens > 0 ? fmtNum(v.qtdOrdens) : "—"}
+                                    {v.ordensAbertas > 0 && <span className="ml-1 text-[8px] px-1 rounded bg-amber-400/20 text-amber-200">{v.ordensAbertas} ab.</span>}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Últ. manut.</p>
+                                  <p className="text-[11px] font-medium text-slate-400">{fmtData(v.ultimaManut)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </AnimatedCard>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ════════ VIEW: ANALYTICS ════════ */}
+              {frotaView === "analytics" && (
+                <div className="p-3">
+                  {frotaAnalytics.n === 0 ? (
+                    <div className="py-12 text-center text-slate-500">Sem dados para análise</div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                      {/* Frota por marca */}
+                      <AnimatedCard>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <Truck className="w-3.5 h-3.5 text-amber-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Frota por Marca</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.porMarca.map(([marca, qtd], idx) => {
+                              const max = frotaAnalytics.porMarca[0]?.[1] ?? 1;
+                              const cor = getMarcaColor(marca).color;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[120px] truncate shrink-0" title={marca}>{marca}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qtd / max) * 100}%`, background: cor }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Faixa de idade */}
+                      <AnimatedCard delay={60}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Faixa de Idade</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.faixasIdade.map(f => {
+                              const max = Math.max(...frotaAnalytics.faixasIdade.map(x => x.qtd), 1);
+                              return (
+                                <div key={f.label} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[100px] shrink-0">{f.label}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(f.qtd / max) * 100}%`, background: f.cor }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Top municípios */}
+                      <AnimatedCard delay={120}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Municípios</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.topMunicipios.map(([muni, qtd], idx) => {
+                              const max = frotaAnalytics.topMunicipios[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={muni}>{muni}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums text-emerald-300 w-8 text-right shrink-0">{qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Maiores custos de manutenção */}
+                      <AnimatedCard delay={180}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <DollarSign className="w-3.5 h-3.5 text-rose-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Maiores Custos de Manutenção</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.topCusto.length === 0 ? (
+                              <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                            ) : frotaAnalytics.topCusto.map((v, idx) => {
+                              const max = frotaAnalytics.topCusto[0]?.custoManut ?? 1;
+                              return (
+                                <div key={v.codvei} className="flex items-center gap-3">
+                                  <span className="text-[11px] font-mono text-slate-400 w-[90px] truncate shrink-0">{v.codvei}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(v.custoManut / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-rose-200 w-[72px] text-right shrink-0">{fmtBRL(v.custoManut)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {frotaView !== "analytics" && !isFetchingDw && tabelaOrdenada.length > 0 && (() => {
                 const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
                 const curPage = Math.min(page, totalPages);
                 const from = (curPage - 1) * PAGE_SIZE + 1;
