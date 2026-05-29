@@ -4,7 +4,7 @@ import {
   ChevronUp, ChevronDown, X, ChevronLeft, ChevronRight,
   Filter, AlertTriangle, FileText, Activity,
   UserCheck, UserMinus, UserPlus, Clock, ShieldAlert,
-  BarChart3, Hash, Calendar,
+  BarChart3, Hash, Calendar, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -134,6 +134,8 @@ export default function Rh() {
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+  // View de colaboradores — padrão Bancos (Cards / Tabela / Analytics)
+  const [colabView, setColabView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -448,6 +450,37 @@ export default function Rh() {
 
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // ── Analytics de colaboradores (deriva de tabelaBuscada → respeita filtros + busca) ──
+  const colabAnalytics = useMemo(() => {
+    const base = tabelaBuscada;
+    const n = base.length;
+
+    const funcMap = new Map<string, number>();
+    base.forEach(c => { const k = c.funcao ?? "Não informada"; funcMap.set(k, (funcMap.get(k) ?? 0) + 1); });
+    const porFuncao = [...funcMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const filMap = new Map<string, number>();
+    base.forEach(c => { const k = c.codFilial ?? "—"; filMap.set(k, (filMap.get(k) ?? 0) + 1); });
+    const porFilial = [...filMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const cnhMap = new Map<string, number>();
+    base.forEach(c => { if (c.catCnh) cnhMap.set(c.catCnh, (cnhMap.get(c.catCnh) ?? 0) + 1); });
+    const porCnh = [...cnhMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "< 1 ano", min: 0, max: 0.999, cor: RAW.accent.cyan },
+      { label: "1–3 anos", min: 1, max: 3, cor: RAW.accent.emerald },
+      { label: "3–5 anos", min: 3.001, max: 5, cor: RAW.accent.amber },
+      { label: "5–10 anos", min: 5.001, max: 10, cor: RAW.accent.violet },
+      { label: "10+ anos", min: 10.001, max: 999, cor: RAW.accent.rose },
+    ];
+    const tempoCasa = faixasDef.map(f => ({ ...f, qtd: base.filter(c => c.ativo && c.anosEmpresa !== null && c.anosEmpresa >= f.min && c.anosEmpresa <= f.max).length }));
+
+    const cnhVencer = base.filter(c => c.ativo && c.temCnh && c.diasCnhVencer !== null && c.diasCnhVencer <= 60).length;
+
+    return { n, porFuncao, porFilial, porCnh, tempoCasa, cnhVencer };
+  }, [tabelaBuscada]);
 
   // ── TONE_COLORS ─────────────────────────────────────────────────────────────
   const TC = {
@@ -1008,18 +1041,38 @@ export default function Rh() {
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
-                      placeholder="Buscar nome, matrícula, função..."
-                      className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-emerald-500/30 focus:outline-none transition-all w-[210px]"
-                    />
+                  <div className="ml-auto flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }}
+                        placeholder="Buscar nome, matrícula, função..."
+                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-emerald-500/30 focus:outline-none transition-all w-[210px]"
+                      />
+                    </div>
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = colabView === t.id;
+                        return (
+                          <button key={t.id} onClick={() => setColabView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-emerald-400/15 text-emerald-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" /> {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
+                {colabView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -1096,9 +1149,191 @@ export default function Rh() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ════════ VIEW: CARDS ════════ */}
+                {colabView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhum colaborador encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((c, i) => {
+                          const ativo = c.situacao === "A";
+                          return (
+                            <AnimatedCard key={`${c.codmot}-${i}`} delay={Math.min(i, 12) * 30}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-emerald-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: nome + situação */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="text-[13px] font-bold text-slate-100 truncate block" title={c.nome}>{c.nome}</span>
+                                    <span className="font-mono text-[10px] text-emerald-300">{c.codmot}</span>
+                                  </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${ativo ? "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30" : "bg-rose-500/10 text-rose-300 ring-rose-500/30"}`}>
+                                    {ativo ? "Ativo" : c.situacao === "I" ? "Inativo" : c.situacao ?? "—"}
+                                  </span>
+                                </div>
+
+                                {/* Função + filial */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <UserCheck className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[11px] text-slate-300 truncate" title={c.funcao ?? ""}>{c.funcao ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-3 text-[10px] text-slate-500">
+                                  <span>Filial {c.codFilial ?? "—"}</span>
+                                  {c.tipoFunc && <span className="text-cyan-400/80 uppercase tracking-[0.1em]">· {c.tipoFunc}</span>}
+                                </div>
+
+                                {/* Métricas */}
+                                <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Admissão</p>
+                                    <p className="text-[10px] font-medium text-slate-300">{fmtData(c.datAdm)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Tempo casa</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-slate-200">{ativo && c.anosEmpresa !== null ? fmtAnos(c.anosEmpresa) : "—"}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">CNH</p>
+                                    <p className="text-[11px] font-bold text-emerald-300">{c.catCnh ?? "—"}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ════════ VIEW: ANALYTICS ════════ */}
+                {colabView === "analytics" && (
+                  <div className="p-3">
+                    {colabAnalytics.n === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Por função */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Users className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Função</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porFuncao.map(([func, qtd], idx) => {
+                                const max = colabAnalytics.porFuncao[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={func}>{func}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-emerald-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Por filial */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Filial</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porFilial.map(([fil, qtd], idx) => {
+                                const max = colabAnalytics.porFilial[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-mono text-slate-400 w-[80px] truncate shrink-0">Filial {fil}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Tempo de casa */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Clock className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Tempo de Casa (ativos)</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.tempoCasa.map(f => {
+                                const max = Math.max(...colabAnalytics.tempoCasa.map(x => x.qtd), 1);
+                                return (
+                                  <div key={f.label} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[90px] shrink-0">{f.label}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(f.qtd / max) * 100}%`, background: f.cor }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* CNH por categoria */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">CNH por Categoria</span>
+                              {colabAnalytics.cnhVencer > 0 && (
+                                <span className="ml-auto rounded-full bg-rose-500/10 px-2 py-0.5 text-[9px] font-bold text-rose-300 ring-1 ring-rose-500/30">{colabAnalytics.cnhVencer} a vencer (60d)</span>
+                              )}
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porCnh.length === 0 ? (
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem CNH registrada</p>
+                              ) : colabAnalytics.porCnh.map(([cat, qtd], idx) => {
+                                const max = colabAnalytics.porCnh[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-bold text-slate-300 w-[60px] shrink-0">Cat. {cat}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-amber-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {colabView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
