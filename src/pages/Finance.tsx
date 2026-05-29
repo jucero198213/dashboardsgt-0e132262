@@ -2705,7 +2705,7 @@ function ScreenBancos() {
 type ScreenId = "painel" | "pagar" | "receber" | "conciliacao" | "fluxo" | "previsto" | "relatorios" | "fornecedores" | "clientes" | "categorias" | "bancos";
 
 const NAV: { id: string; label: string; icon: React.ElementType; badge?: number; badgeColor?: "amber" | "rose"; section?: string; externalTo?: string }[] = [
-  { id: "painel",       label: "Painel",           icon: LayoutDashboard, section: "Financeiro" },
+  { id: "painel",       label: "Painel Financeiro",icon: LayoutDashboard, section: "Financeiro" },
   { id: "pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle },
   { id: "receber",      label: "Contas a Receber", icon: ArrowUpCircle },
   { id: "conciliacao",  label: "Conciliação",      icon: RefreshCcw },
