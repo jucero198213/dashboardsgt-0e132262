@@ -16,7 +16,7 @@ import sgtLogo from "@/assets/sgt-logo.png";
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, role, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { canAccess } = usePagePermissions();
   const navigate = useNavigate();
@@ -25,9 +25,11 @@ export function MobileNav() {
   const close = () => setOpen(false);
   const go = (path: string) => { close(); navigate(path); };
 
-  // Filtra pelo módulo (sem módulo = visível para todos)
+  // Filtra pelo módulo (sem módulo = visível para todos) e oculta portais externos para diretoria
   const visibleItems = APP_NAV.filter(
-    (item) => !item.module || canAccess(item.module)
+    (item) =>
+      (!item.module || canAccess(item.module)) &&
+      (role !== "diretoria" || !["portal-visual", "portal-wr"].includes(item.id))
   );
 
   // Agrupa por seção mantendo a ordem original
@@ -221,7 +223,9 @@ export function MobileNav() {
                     <p className="mt-0.5 flex items-center gap-1 text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>
                       {isAdmin
                         ? <><Shield className="h-3 w-3 text-red-400" />Administrador</>
-                        : <><User className="h-3 w-3" />Usuário</>}
+                        : role === "diretoria"
+                          ? <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-violet-400 border border-violet-500/20">Diretoria</span>
+                          : <><User className="h-3 w-3" />Usuário</>}
                     </p>
                   </div>
                   <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${userOpen ? "-rotate-90" : "rotate-90"}`} />

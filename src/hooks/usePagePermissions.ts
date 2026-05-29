@@ -50,6 +50,12 @@ export function usePagePermissions(): UsePagePermissionsResult {
       setIsLoading(false);
       return;
     }
+    // Diretoria: acesso automático somente ao módulo gestão (sem consulta ao DB)
+    if (role === "diretoria") {
+      setPermissions(new Set<AppModule>(["gestao"]));
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     const { data, error } = await supabase
       .from("page_permissions")

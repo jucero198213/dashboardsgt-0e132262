@@ -15,7 +15,7 @@ const STORAGE_KEY = "sgt-sidebar-collapsed";
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, role, signOut } = useAuth();
   const { canAccess } = usePagePermissions();
   const { theme, toggleTheme } = useTheme();
 
@@ -111,7 +111,10 @@ export function AppSidebar() {
         className="relative flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 scrollbar-none"
         onMouseLeave={() => setHovered(null)}
       >
-        {APP_NAV.filter((item) => !item.module || canAccess(item.module)).map((item, i, visibleNav) => {
+        {APP_NAV.filter((item) =>
+          (!item.module || canAccess(item.module)) &&
+          (role !== "diretoria" || !["portal-visual", "portal-wr"].includes(item.id))
+        ).map((item, i, visibleNav) => {
           const Icon = item.icon;
           const active = isItemActive(item);
           const showSection = item.section && (i === 0 || visibleNav[i - 1].section !== item.section);
@@ -219,6 +222,7 @@ export function AppSidebar() {
         collapsed={collapsed}
         email={user?.email ?? ""}
         isAdmin={isAdmin}
+        role={role}
         theme={theme}
         onToggleTheme={toggleTheme}
         onGoAdmin={() => navigate("/admin")}
@@ -259,11 +263,12 @@ export function AppSidebar() {
 }
 
 function UserFooter({
-  collapsed, email, isAdmin, theme, onToggleTheme, onGoAdmin, onSignOut,
+  collapsed, email, isAdmin, role, theme, onToggleTheme, onGoAdmin, onSignOut,
 }: {
   collapsed: boolean;
   email: string;
   isAdmin: boolean;
+  role: string | null;
   theme: "dark" | "light";
   onToggleTheme: () => void;
   onGoAdmin: () => void;
@@ -297,7 +302,9 @@ function UserFooter({
         {!collapsed && (
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[11px] font-medium truncate" style={{ color: "var(--sgt-text-primary)" }}>{shortEmail}</p>
-            <p className="text-[9px] text-slate-500 mt-0.5">{isAdmin ? "Administrador" : "Usuário"}</p>
+            <p className="text-[9px] text-slate-500 mt-0.5">
+              {isAdmin ? "Administrador" : role === "diretoria" ? "Diretoria" : "Usuário"}
+            </p>
           </div>
         )}
       </button>

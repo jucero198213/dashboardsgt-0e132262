@@ -113,7 +113,7 @@ function NavTab({
 export function BottomNav() {
   const navigate   = useNavigate();
   const location   = useLocation();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, role, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { canAccess } = usePagePermissions();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -145,8 +145,11 @@ export function BottomNav() {
     return location.pathname === item.to || location.pathname.startsWith(item.to + "/");
   }
 
-  // ── Seções do drawer (mesmo lógica do MobileNav) ──────────────────────────
-  const navItems = APP_NAV.filter(i => !i.module || canAccess(i.module));
+  // ── Seções do drawer (mesmo lógica do MobileNav) — oculta portais externos para diretoria ──
+  const navItems = APP_NAV.filter(i =>
+    (!i.module || canAccess(i.module)) &&
+    (role !== "diretoria" || !["portal-visual", "portal-wr"].includes(i.id))
+  );
   const sections: { title: string; items: typeof navItems }[] = [];
   navItems.forEach((item) => {
     const t = item.section ?? sections[sections.length - 1]?.title ?? "Geral";
@@ -362,7 +365,9 @@ export function BottomNav() {
                       <p className="mt-0.5 flex items-center gap-1 text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>
                         {isAdmin
                           ? <><Shield className="h-3 w-3 text-red-400" />Administrador</>
-                          : <><User className="h-3 w-3" />Usuário</>}
+                          : role === "diretoria"
+                            ? <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-violet-400 border border-violet-500/20">Diretoria</span>
+                            : <><User className="h-3 w-3" />Usuário</>}
                       </p>
                     </div>
                     <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${userOpen ? "-rotate-90" : "rotate-90"}`} />

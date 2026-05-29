@@ -414,8 +414,9 @@ function useGreeting(email?: string) {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { canAccess } = usePagePermissions();
+  const isDiretoria = role === "diretoria";
   const reduce = useReducedMotion();
   const { greeting, name } = useGreeting(user?.email);
 
@@ -696,14 +697,16 @@ export default function Home() {
               </h2>
             </Reveal>
 
-            {/* Cards fixados — Visual Rodopar, Portal WR SGT, Chamados */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
-              {pinnedModules.map((m, i) => (
-                <Reveal key={m.key} delay={i * 0.12} className="h-full">
-                  <ModuleCard data={m} index={0} />
-                </Reveal>
-              ))}
-            </div>
+            {/* Cards fixados — Visual Rodopar, Portal WR SGT, Chamados (oculto para diretoria) */}
+            {!isDiretoria && (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
+                {pinnedModules.map((m, i) => (
+                  <Reveal key={m.key} delay={i * 0.12} className="h-full">
+                    <ModuleCard data={m} index={0} />
+                  </Reveal>
+                ))}
+              </div>
+            )}
 
             {/* Separador Módulos do sistema */}
             <Reveal delay={0.05} className="mb-8">
@@ -717,11 +720,13 @@ export default function Home() {
             </Reveal>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {moduleCards.map((m, i) => (
-                <Reveal key={m.key} delay={i * 0.1} className="h-full">
-                  <ModuleCard data={m} index={0} />
-                </Reveal>
-              ))}
+              {moduleCards
+                .filter((m) => !isDiretoria || m.key === "gestao")
+                .map((m, i) => (
+                  <Reveal key={m.key} delay={i * 0.1} className="h-full">
+                    <ModuleCard data={m} index={0} />
+                  </Reveal>
+                ))}
             </div>
           </section>
 

@@ -21,14 +21,15 @@ interface SupaUser {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
-  role: "admin" | "user";
+  role: "admin" | "user" | "diretoria";
   confirmed: boolean;
   modules: Set<AppModule>;
 }
 
 const roleStyle: Record<string, string> = {
-  admin: "bg-red-500/10 text-red-400 border border-red-500/20",
-  user:  "bg-slate-500/10 sgt-text-2 border border-[var(--sgt-border-subtle)]",
+  admin:     "bg-red-500/10 text-red-400 border border-red-500/20",
+  diretoria: "bg-violet-500/10 text-violet-400 border border-violet-500/20",
+  user:      "bg-slate-500/10 sgt-text-2 border border-[var(--sgt-border-subtle)]",
 };
 
 const initials = (email: string) => email.substring(0, 2).toUpperCase();
@@ -43,7 +44,7 @@ export default function GestaoUsuarios() {
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
-  const [newRole, setNewRole] = useState<"user" | "admin">("user");
+  const [newRole, setNewRole] = useState<"user" | "admin" | "diretoria">("user");
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -69,7 +70,7 @@ export default function GestaoUsuarios() {
         email:           r.user_id === me?.id ? (me?.email ?? "—") : `usuário-${idx + 1}@sgtlog.com.br`,
         created_at:      r.created_at,
         last_sign_in_at: null,
-        role:            r.role as "admin" | "user",
+        role:            r.role as "admin" | "user" | "diretoria",
         confirmed:       true,
         modules:         modulesByUser.get(r.user_id) ?? new Set<AppModule>(),
       }));
@@ -92,7 +93,7 @@ export default function GestaoUsuarios() {
 
   useEffect(() => { load(); }, []);
 
-  const changeRole = async (userId: string, newRole: "admin" | "user") => {
+  const changeRole = async (userId: string, newRole: "admin" | "user" | "diretoria") => {
     const { error } = await supabase.from("user_roles").upsert({ user_id: userId, role: newRole });
     if (error) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
     setFeedback({ msg: "Role atualizada com sucesso.", type: "ok" });
@@ -296,7 +297,7 @@ export default function GestaoUsuarios() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setNewRole("user")}
-                        className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
                           newRole === "user"
                             ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
                             : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
@@ -305,14 +306,24 @@ export default function GestaoUsuarios() {
                         Usuário
                       </button>
                       <button
+                        onClick={() => setNewRole("diretoria")}
+                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+                          newRole === "diretoria"
+                            ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
+                        }`}
+                      >
+                        Diretoria
+                      </button>
+                      <button
                         onClick={() => setNewRole("admin")}
-                        className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
                           newRole === "admin"
                             ? "border-red-500/30 bg-red-500/10 text-red-400"
                             : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
                         }`}
                       >
-                        Administrador
+                        Admin
                       </button>
                     </div>
                   </div>
@@ -395,16 +406,33 @@ export default function GestaoUsuarios() {
                     </div>
                     {/* Ações */}
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {u.role !== "admin" ? (
-                        <button onClick={() => changeRole(u.id, "admin")}
-                          className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
-                          <Shield className="h-3 w-3" /> Admin
-                        </button>
-                      ) : (
+                      {u.role === "admin" ? (
                         <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
                           className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 transition-all disabled:opacity-30">
                           <UserX className="h-3 w-3" /> User
                         </button>
+                      ) : u.role === "diretoria" ? (
+                        <>
+                          <button onClick={() => changeRole(u.id, "user")}
+                            className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+                            <UserX className="h-3 w-3" /> User
+                          </button>
+                          <button onClick={() => changeRole(u.id, "admin")}
+                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                            <Shield className="h-3 w-3" /> Admin
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => changeRole(u.id, "diretoria")}
+                            className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                            Dir.
+                          </button>
+                          <button onClick={() => changeRole(u.id, "admin")}
+                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                            <Shield className="h-3 w-3" /> Admin
+                          </button>
+                        </>
                       )}
                       {u.id !== me?.id && (
                         <button onClick={() => setDeleteConfirm(u.id)}
@@ -419,6 +447,11 @@ export default function GestaoUsuarios() {
                     <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)] mb-2">Módulos</p>
                     {u.role === "admin" ? (
                       <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                    ) : u.role === "diretoria" ? (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-violet-400">
+                        <Briefcase className="h-3.5 w-3.5" />
+                        Gestão — automático
+                      </span>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {ALL_MODULES.map((mod) => {
@@ -478,6 +511,11 @@ export default function GestaoUsuarios() {
                       <td className="px-4 py-3">
                         {u.role === "admin" ? (
                           <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                        ) : u.role === "diretoria" ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2 py-1 text-[10px] font-semibold text-violet-400">
+                            <Briefcase className="h-3 w-3" />
+                            Gestão — automático
+                          </span>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {ALL_MODULES.map((mod) => {
@@ -499,16 +537,33 @@ export default function GestaoUsuarios() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          {u.role !== "admin" ? (
-                            <button onClick={() => changeRole(u.id, "admin")}
-                              className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
-                              <Shield className="h-3 w-3" /> Admin
-                            </button>
-                          ) : (
+                          {u.role === "admin" ? (
                             <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
                               className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all disabled:opacity-30">
                               <UserX className="h-3 w-3" /> User
                             </button>
+                          ) : u.role === "diretoria" ? (
+                            <>
+                              <button onClick={() => changeRole(u.id, "user")}
+                                className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+                                <UserX className="h-3 w-3" /> User
+                              </button>
+                              <button onClick={() => changeRole(u.id, "admin")}
+                                className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                                <Shield className="h-3 w-3" /> Admin
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => changeRole(u.id, "diretoria")}
+                                className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                                Dir.
+                              </button>
+                              <button onClick={() => changeRole(u.id, "admin")}
+                                className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                                <Shield className="h-3 w-3" /> Admin
+                              </button>
+                            </>
                           )}
                           {u.id !== me?.id && (
                             <button onClick={() => setDeleteConfirm(u.id)}
