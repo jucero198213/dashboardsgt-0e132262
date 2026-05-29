@@ -55,7 +55,7 @@ export const APP_NAV: AppNavItem[] = [
   { id: "fin-bancos",       label: "Bancos",           icon: Landmark,        financeScreen: "bancos",       module: "financeiro" },
 
   // ── Gestão ────────────────────────────────────────────────────────────────
-  { id: "ext-executivo",    label: "Painel Executivo", icon: Briefcase,       to: "/executivo",              section: "Gestão",    module: "gestao" },
+  { id: "ext-executivo",    label: "Painel Executivo", icon: Briefcase,       to: "/executivo",              section: "Diretoria", module: "gestao" },
   { id: "ext-indicadores",  label: "Indicadores",      icon: LineChartIcon,   to: "/indicadores",                                   module: "gestao" },
   { id: "ext-faturamento",  label: "Faturamento",      icon: Banknote,        to: "/faturamento",                                   module: "gestao" },
 

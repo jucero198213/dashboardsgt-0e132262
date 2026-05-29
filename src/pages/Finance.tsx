@@ -2719,7 +2719,7 @@ const NAV: { id: string; label: string; icon: React.ElementType; badge?: number;
   { id: "bancos",       label: "Bancos",           icon: Landmark },
 
   // ── Acessos externos ────────────────────────────────────────────────
-  { id: "ext-executivo",    label: "Painel Executivo",       icon: Briefcase,       section: "Gestão",     externalTo: "/executivo" },
+  { id: "ext-executivo",    label: "Painel Executivo",       icon: Briefcase,       section: "Diretoria",  externalTo: "/executivo" },
   { id: "ext-indicadores",  label: "Indicadores",            icon: LineChartIcon,   externalTo: "/indicadores" },
   { id: "ext-faturamento",  label: "Faturamento",            icon: Banknote,        externalTo: "/faturamento" },
 
