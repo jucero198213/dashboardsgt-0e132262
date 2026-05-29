@@ -968,20 +968,6 @@ function ScreenConciliacao() {
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ══ ALERT BANNER ══════════════════════════════════════════════════════ */}
-      <AnimatedCard delay={0}>
-        <div className="flex items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
-          <p className="flex-1 text-[12px] leading-relaxed" style={{ color: "var(--sgt-text-secondary)" }}>
-            <span className="font-bold text-amber-300">Atenção:</span>{" "}
-            23 lançamentos do Sicoob estão há mais de 72h sem correspondência no ERP. Revisar antes do fechamento mensal.
-          </p>
-          <button className="shrink-0 text-[11px] font-bold text-amber-400 underline underline-offset-2 transition-colors hover:text-amber-300">
-            Ver pendências →
-          </button>
-        </div>
-      </AnimatedCard>
-
       {/* ══ KPI CARDS ═════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
         <AnimatedCard delay={0}>
@@ -1000,6 +986,20 @@ function ScreenConciliacao() {
           <KpiCard label="Taxa Conciliação" value={`${taxaConc.toFixed(1)}%`} subtitle={`Meta: 95% · −${(95 - taxaConc).toFixed(1)} p.p.`} icon={TrendingUp} tone="amber" />
         </AnimatedCard>
       </div>
+
+      {/* ══ ALERT BANNER ══════════════════════════════════════════════════════ */}
+      <AnimatedCard delay={220}>
+        <div className="flex items-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+          <p className="flex-1 text-[12px] leading-relaxed" style={{ color: "var(--sgt-text-secondary)" }}>
+            <span className="font-bold text-amber-300">Atenção:</span>{" "}
+            23 lançamentos do Sicoob estão há mais de 72h sem correspondência no ERP. Revisar antes do fechamento mensal.
+          </p>
+          <button className="shrink-0 text-[11px] font-bold text-amber-400 underline underline-offset-2 transition-colors hover:text-amber-300">
+            Ver pendências →
+          </button>
+        </div>
+      </AnimatedCard>
 
       {/* ══ BARRA DE AÇÕES ════════════════════════════════════════════════════ */}
       <AnimatedCard delay={240}>
