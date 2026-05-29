@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Home, Menu, Shield, LogOut, Sun, Moon, X, User, ChevronRight,
+  Home, Menu, Shield, LogOut, Sun, Moon, User, ChevronRight,
   Briefcase, Banknote, LineChart, MapPin, Truck, Car, Wrench, Fuel,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
   ShoppingCart, UserCog, Sparkles, Activity, TrendingUp,

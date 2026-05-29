@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
 
-type AppPage = AppModule;
 
 const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
   financeiro: { label: "Financeiro", icon: Landmark,    color: "text-amber-300",  border: "border-amber-400/30",  bg: "bg-amber-400/10"  },

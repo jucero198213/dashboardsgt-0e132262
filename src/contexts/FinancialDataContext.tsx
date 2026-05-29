@@ -533,18 +533,6 @@ export function FinancialDataProvider({
         dedup(crParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r)), 0)
       );
 
-      // ── Debug (visível no console do browser) ────────────────────────────────
-      console.log("[DW] Rows totais:", data.length,
-        "| allCP:", allCP.length, "| allCR:", allCR.length
-      );
-      console.log("[DW] CP → A PAGAR:", totalPagar,
-        "| PAGO:", valorPago,
-        "| SALDO:", saldoAPagar
-      );
-      console.log("[DW] CR → A RECEBER:", totalAReceber,
-        "| RECEBIDO:", valorRecebido,
-        "| SALDO:", totalReceber
-      );
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {

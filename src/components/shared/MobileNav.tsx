@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, Home, Shield, LogOut, Sun, Moon, X, User, ChevronRight } from "lucide-react";
+import { Menu, Home, Shield, LogOut, Sun, Moon, User, ChevronRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";

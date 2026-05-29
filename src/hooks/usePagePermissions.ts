@@ -19,8 +19,6 @@ export const ALL_MODULES: AppModule[] = [
   "suporte",
 ];
 
-/** @deprecated use AppModule */
-export type AppPage = AppModule;
 
 interface UsePagePermissionsResult {
   permissions: Set<AppModule>;
@@ -76,10 +74,6 @@ export function usePagePermissions(): UsePagePermissionsResult {
     }
     setIsLoading(false);
   }, [user, isAdmin, role]);
-
-  useEffect(() => {
-    if (!authLoading) load();
-  }, [authLoading, load]);
 
   useEffect(() => {
     if (!authLoading) load();
