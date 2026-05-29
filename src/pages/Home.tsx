@@ -484,9 +484,9 @@ export default function Home() {
     {
       key: "gestao",
       icon: BarChart3,
-      title: "Gestão",
+      title: "Diretoria",
       description: "Painel executivo, indicadores estratégicos e faturamento consolidado.",
-      cta: "Acessar gestão",
+      cta: "Acessar diretoria",
       onClick: () => navigate("/executivo"),
       tone: "violet" as const,    // violeta = inteligência/estratégia
     },
