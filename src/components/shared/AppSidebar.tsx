@@ -56,7 +56,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col border-r transition-all duration-300 ${
+      className={`hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col border-r rounded-tr-2xl rounded-br-2xl transition-all duration-300 ${
         collapsed ? "w-[56px]" : "w-[210px]"
       }`}
       style={{
@@ -67,7 +67,7 @@ export function AppSidebar() {
     >
       {/* ── HEADER: Logo + Toggle ── */}
       <div
-        className={`flex items-center border-b shrink-0 px-2 py-2.5 ${collapsed ? "flex-col gap-1.5" : "justify-between gap-2"}`}
+        className={`flex items-center border-b shrink-0 px-2 ${collapsed ? "flex-col gap-1.5 py-2.5" : "justify-between gap-2 h-14"}`}
         style={{ borderColor: "var(--sgt-border-subtle)" }}
       >
         <img
@@ -288,7 +288,7 @@ function UserFooter({
       <button
         onClick={() => setOpen(o => !o)}
         title={email || "Usuário"}
-        className={`group flex items-center gap-2.5 w-full transition-all duration-150 hover:bg-[var(--sgt-row-hover)]
+        className={`group flex items-center gap-2.5 w-full rounded-br-2xl transition-all duration-150 hover:bg-[var(--sgt-row-hover)]
           ${collapsed ? "justify-center px-2 py-3" : "px-3 py-3"}`}
       >
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 text-[12px] font-bold text-amber-300">
