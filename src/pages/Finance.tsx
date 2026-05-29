@@ -1727,23 +1727,13 @@ function ScreenCategorias() {
           </SectionCard>
         </AnimatedCard>
 
-        <KpiCard
-          label="Total Despesas"
-          value={fmtK(totalDesp)}
-          sub={`${despesas.length} centros · ${total>0?(totalDesp/total*100).toFixed(0):0}% do total`}
-          icon={TrendingDown}
-          {...KPI_TONES.rose}
-          delay={60}
-        />
+        <AnimatedCard delay={60}>
+          <KpiCard label="Total Despesas" value={fmtK(totalDesp)} subtitle={`${despesas.length} centros · ${total>0?(totalDesp/total*100).toFixed(0):0}% do total`} icon={TrendingDown} tone="rose" />
+        </AnimatedCard>
 
-        <KpiCard
-          label="Total Receitas"
-          value={fmtK(totalRec)}
-          sub={`${receitas.length} centros · ${total>0?(totalRec/total*100).toFixed(0):0}% do total`}
-          icon={TrendingUp}
-          {...KPI_TONES.emerald}
-          delay={120}
-        />
+        <AnimatedCard delay={120}>
+          <KpiCard label="Total Receitas" value={fmtK(totalRec)} subtitle={`${receitas.length} centros · ${total>0?(totalRec/total*100).toFixed(0):0}% do total`} icon={TrendingUp} tone="emerald" />
+        </AnimatedCard>
       </div>
 
       {/* Filtros */}

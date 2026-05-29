@@ -5,7 +5,7 @@ import {
   ChevronUp, Filter, Download,
 } from "lucide-react";
 import { HomeButton } from "@/components/shared/HomeButton";
-import { KpiCard as SharedKpiCard, KPI_TONES } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -55,25 +55,6 @@ function StatusBadge({ status, divergencia }: { status: StatusComparacao; diverg
       <Icon className="h-2.5 w-2.5" />
       {cfg.label}
     </span>
-  );
-}
-
-// ─── KPI card ─────────────────────────────────────────────────────────────────
-
-function KpiCard({ label, value, sub, color }: {
-  label: string; value: string | number; sub?: string;
-  color: "emerald" | "amber" | "rose" | "slate";
-}) {
-  // Adaptador: delega pro componente único do sistema (mapeia cor -> tom).
-  const tone = color === "slate" ? undefined : KPI_TONES[color];
-  return (
-    <SharedKpiCard
-      label={label}
-      value={value}
-      sub={sub}
-      stripe={tone?.stripe}
-      subClassName="text-slate-500"
-    />
   );
 }
 
@@ -212,16 +193,16 @@ export default function Fiscal() {
             {/* ── KPIs ── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
               <AnimatedCard delay={0}>
-                <KpiCard label="Total de NFs" value={total || "—"} sub="NF-e + NFS-e" color="slate" />
+                <KpiCard label="Total de NFs" value={String(total || "—")} subtitle="NF-e + NFS-e" icon={FileText} tone="cyan" />
               </AnimatedCard>
               <AnimatedCard delay={60}>
-                <KpiCard label="Conferidas" value={conferidas || "—"} sub={total ? `${((conferidas/total)*100).toFixed(0)}% do total` : "Aguardando dados"} color="emerald" />
+                <KpiCard label="Conferidas" value={String(conferidas || "—")} subtitle={total ? `${((conferidas/total)*100).toFixed(0)}% do total` : "Aguardando dados"} icon={CheckCircle2} tone="emerald" />
               </AnimatedCard>
               <AnimatedCard delay={120}>
-                <KpiCard label="Divergências" value={divergencias || "—"} sub={divergencias ? fmtBRL(totalValorDiv) : "Nenhuma encontrada"} color="amber" />
+                <KpiCard label="Divergências" value={String(divergencias || "—")} subtitle={divergencias ? fmtBRL(totalValorDiv) : "Nenhuma encontrada"} icon={AlertTriangle} tone="amber" />
               </AnimatedCard>
               <AnimatedCard delay={180}>
-                <KpiCard label="Não encontradas" value={naoEncontradas || "—"} sub="Constam na planilha, sem NF" color="rose" />
+                <KpiCard label="Não encontradas" value={String(naoEncontradas || "—")} subtitle="Constam na planilha, sem NF" icon={XCircle} tone="rose" />
               </AnimatedCard>
             </div>
 
