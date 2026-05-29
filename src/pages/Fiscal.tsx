@@ -5,6 +5,7 @@ import {
   ChevronUp, Filter, Download,
 } from "lucide-react";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { KpiCard as SharedKpiCard, KPI_TONES } from "@/components/shared/KpiCard";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -63,25 +64,16 @@ function KpiCard({ label, value, sub, color }: {
   label: string; value: string | number; sub?: string;
   color: "emerald" | "amber" | "rose" | "slate";
 }) {
-  const cls = {
-    emerald: { val: "text-emerald-300", border: "border-emerald-400/15", dot: "bg-emerald-400" },
-    amber:   { val: "text-amber-300",   border: "border-amber-400/15",   dot: "bg-amber-400"   },
-    rose:    { val: "text-rose-300",    border: "border-rose-400/15",    dot: "bg-rose-400"    },
-    slate:   { val: "text-slate-300",   border: "border-slate-500/15",   dot: "bg-slate-400"   },
-  }[color];
-
+  // Adaptador: delega pro componente único do sistema (mapeia cor -> tom).
+  const tone = color === "slate" ? undefined : KPI_TONES[color];
   return (
-    <div
-      className={`flex flex-col gap-1 rounded-[14px] border p-4 min-h-[120px] ${cls.border}`}
-      style={{ background: "var(--sgt-bg-card)" }}
-    >
-      <div className="flex items-center gap-2">
-        <span className={`h-1.5 w-1.5 rounded-full ${cls.dot}`} />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</span>
-      </div>
-      <p className={`mt-auto pt-2 text-[28px] font-black tabular-nums leading-none tracking-tight ${cls.val}`}>{value}</p>
-      {sub && <p className="text-[11px] text-slate-500">{sub}</p>}
-    </div>
+    <SharedKpiCard
+      label={label}
+      value={value}
+      sub={sub}
+      stripe={tone?.stripe}
+      subClassName="text-slate-500"
+    />
   );
 }
 

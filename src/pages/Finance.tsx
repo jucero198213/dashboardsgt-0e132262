@@ -23,7 +23,7 @@ import {
 } from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard, KPI_TONES } from "@/components/shared/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -1798,39 +1798,23 @@ function ScreenCategorias() {
           </SectionCard>
         </AnimatedCard>
 
-        <AnimatedCard delay={60}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-rose-400/60 to-rose-700/20" />
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Despesas</p>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-rose-400/[0.08] border border-rose-400/[0.15] text-rose-300">
-                <TrendingDown className="h-3.5 w-3.5" />
-              </div>
-            </div>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{fmtK(totalDesp)}</p>
-            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{despesas.length} centros de custo</p>
-            <div className="mt-2 h-1.5 rounded-full bg-rose-400/10 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-rose-400/60" style={{ width: `${total>0?(totalDesp/total*100).toFixed(0):0}%` }} />
-            </div>
-          </div>
-        </AnimatedCard>
+        <KpiCard
+          label="Total Despesas"
+          value={fmtK(totalDesp)}
+          sub={`${despesas.length} centros · ${total>0?(totalDesp/total*100).toFixed(0):0}% do total`}
+          icon={TrendingDown}
+          {...KPI_TONES.rose}
+          delay={60}
+        />
 
-        <AnimatedCard delay={120}>
-          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/60 to-emerald-700/20" />
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Receitas</p>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-emerald-400/[0.08] border border-emerald-400/[0.15] text-emerald-300">
-                <TrendingUp className="h-3.5 w-3.5" />
-              </div>
-            </div>
-            <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{fmtK(totalRec)}</p>
-            <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{receitas.length} centros de custo</p>
-            <div className="mt-2 h-1.5 rounded-full bg-emerald-400/10 overflow-hidden">
-              <div className="h-1.5 rounded-full bg-emerald-400/60" style={{ width: `${total>0?(totalRec/total*100).toFixed(0):0}%` }} />
-            </div>
-          </div>
-        </AnimatedCard>
+        <KpiCard
+          label="Total Receitas"
+          value={fmtK(totalRec)}
+          sub={`${receitas.length} centros · ${total>0?(totalRec/total*100).toFixed(0):0}% do total`}
+          icon={TrendingUp}
+          {...KPI_TONES.emerald}
+          delay={120}
+        />
       </div>
 
       {/* Filtros */}
