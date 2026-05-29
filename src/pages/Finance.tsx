@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/shared/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -163,26 +164,7 @@ function SkeletonLoader({ label }: { label?: string }) {
 }
 
 // ─── KPI CARD ─────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, sub, icon: Icon, stripe, iconBg, iconTxt, glow, delay = 0 }: {
-  label: string; value: string; sub: string;
-  icon: React.ElementType; stripe: string; iconBg: string; iconTxt: string; glow: string; delay?: number;
-}) {
-  return (
-    <AnimatedCard delay={delay}>
-      <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.35)]`}>
-        <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${stripe}`} />
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">{label}</p>
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${iconBg} ${iconTxt}`}>
-            <Icon className="h-3.5 w-3.5" />
-          </div>
-        </div>
-        <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{value}</p>
-        <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{sub}</p>
-      </div>
-    </AnimatedCard>
-  );
-}
+// KpiCard agora vem de @/components/shared/KpiCard (componente único do sistema)
 
 // ─── TABLE HEADER ROW ──────────────────────────────────────────────────────────
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
