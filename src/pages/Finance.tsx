@@ -1781,7 +1781,7 @@ function ScreenCategorias() {
     );
   };
 
-  if (isFetchingDw) return <SkeletonLoader label="Carregando categorias..." />;
+  if (isFetchingDw) return <SkeletonLoader label="Carregando Categorias..." />;
 
   if (total === 0) return (
     <div className="flex flex-col items-center justify-center py-20 text-slate-600 gap-3">
