@@ -12,6 +12,7 @@ import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/shared/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -485,21 +486,7 @@ export default function Compras() {
           {/* ════════ KPIs ════════ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {kpis.map((k, i) => (
-              <AnimatedCard key={k.label} delay={i * 60}>
-                <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
-                  <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />
-                  <div className="relative flex h-full flex-col">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 leading-tight">{k.label}</p>
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
-                        <k.icon className="h-3.5 w-3.5" />
-                      </div>
-                    </div>
-                    <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
-                    <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
-                  </div>
-                </div>
-              </AnimatedCard>
+              <KpiCard key={k.label} {...k} subClassName={k.sub2} delay={i * 60} />
             ))}
           </div>
 

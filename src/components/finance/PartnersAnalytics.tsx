@@ -8,6 +8,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell,
 } from "recharts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { KpiCard } from "@/components/shared/KpiCard";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 export interface PartnerRow {
@@ -381,22 +382,9 @@ export function PartnersAnalytics({ kind, partners, isLoading, emptyHint }: Prop
           { label: "Volume", value: fmtK(totalVolume), sub: "no período", icon: BarChart3, stripe: "from-violet-400/60 to-violet-700/20", iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]", iconTxt: "text-violet-300", glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]" },
           { label: "Em aberto (qtd)", value: String(totalAbertos), sub: "títulos pendentes", icon: Clock, stripe: "from-amber-400/60 to-amber-700/20", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]", iconTxt: "text-amber-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
           { label: "Vencido", value: fmtK(totalVencido), sub: `${partners.filter(p => p.vencido > 0).length} ${noun}`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-        ] as const).map(k => {
-          const Icon = k.icon;
-          return (
-            <div key={k.label} className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.35)]`}>
-              <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">{k.label}</p>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${k.iconBg} ${k.iconTxt}`}>
-                  <Icon className="h-3.5 w-3.5" />
-                </div>
-              </div>
-              <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.3rem,2.2vw,1.7rem)] overflow-hidden text-ellipsis whitespace-nowrap">{k.value}</p>
-              <p className="mt-2 text-[10px] font-medium tracking-[0.1em] text-slate-500">{k.sub}</p>
-            </div>
-          );
-        })}
+        ] as const).map(k => (
+          <KpiCard key={k.label} {...k} />
+        ))}
       </div>
 
       {/* Insights */}
