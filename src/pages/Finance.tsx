@@ -260,7 +260,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
     { label: "Resultado Líquido",  value: fmtK(Math.abs(saldo)),     sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
   ];
 
-  if (isFetchingDw) return <SkeletonLoader label="Carregando painel financeiro..." />;
+  if (isFetchingDw) return <SkeletonLoader label="Carregando Painel Financeiro..." />;
 
   return (
     <div className="flex flex-col gap-4">
