@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard, KPI_TONES } from "@/components/shared/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -640,29 +641,18 @@ export default function Abastecimento() {
                   tone: "emerald" as const,
                   delay: 240,
                 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TONE_COLORS[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div
-                      className={`group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 min-h-[120px] transition-all duration-300 hover:-translate-y-[3px]`}
-                      style={{ background: "var(--sgt-bg-card)" }}
-                    >
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
-                        <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-4 h-4 ${t.icon}`} />
-                        </div>
-                      </div>
-                      <p className={`mt-auto pt-2.5 text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>
-                        {value}
-                      </p>
-                      <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+              ].map(({ label, value, sub, Icon, tone, delay }) => (
+                <KpiCard
+                  key={label}
+                  label={label}
+                  value={value}
+                  sub={sub}
+                  icon={Icon}
+                  {...KPI_TONES[tone]}
+                  delay={delay}
+                  loading={loading}
+                />
+              ))}
             </div>
 
             {/* ── Gráficos Linha 1: Evolução de Custo + Distribuição Combustível ── */}

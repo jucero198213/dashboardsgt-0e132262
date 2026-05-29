@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/shared/KpiCard";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -545,25 +546,19 @@ export default function FinanciamentoFrota() {
                     subTxt: "text-rose-400/70",
                   },
                 ].map((k, i) => (
-                  <AnimatedCard key={k.label} delay={i * 60}>
-                    <div
-                      className={`group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 flex flex-col gap-3 min-h-[120px]`}
-                      style={{ background: "var(--sgt-bg-card)", boxShadow: "0 2px 20px rgba(0,0,0,0.4)" }}
-                    >
-                      <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl border ${k.iconBg} ${k.iconTxt}`}>
-                        <k.icon className="h-4 w-4" />
-                      </div>
-                      <div className="mt-auto">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{k.label}</p>
-                        {isLoading
-                          ? <div className="mt-2 h-6 w-28 animate-pulse rounded-lg bg-white/5" />
-                          : <p className="mt-1 text-[22px] font-black tracking-tight sgt-text leading-tight">{k.value}</p>
-                        }
-                        <p className={`mt-0.5 text-[11px] ${k.subTxt}`}>{k.sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
+                  <KpiCard
+                    key={k.label}
+                    label={k.label}
+                    value={isLoading ? "—" : k.value}
+                    sub={k.sub}
+                    icon={k.icon}
+                    stripe={k.stripe}
+                    iconBg={`border ${k.iconBg}`}
+                    iconTxt={k.iconTxt}
+                    subClassName={k.subTxt}
+                    delay={i * 60}
+                    loading={isLoading}
+                  />
                 ))}
               </div>
 
