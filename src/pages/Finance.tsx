@@ -1818,7 +1818,7 @@ function ScreenCategorias() {
 
         <AnimatedCard delay={60}>
           <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/60 to-rose-700/20" />
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-rose-400/60 to-rose-700/20" />
             <div className="flex items-start justify-between gap-2">
               <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Despesas</p>
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-rose-400/[0.08] border border-rose-400/[0.15] text-rose-300">
@@ -1835,7 +1835,7 @@ function ScreenCategorias() {
 
         <AnimatedCard delay={120}>
           <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/60 to-emerald-700/20" />
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/60 to-emerald-700/20" />
             <div className="flex items-start justify-between gap-2">
               <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Receitas</p>
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 bg-emerald-400/[0.08] border border-emerald-400/[0.15] text-emerald-300">
