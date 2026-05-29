@@ -554,7 +554,7 @@ export default function FinanciamentoFrota() {
                       <div className={`flex h-9 w-9 items-center justify-center rounded-xl border ${k.iconBg} ${k.iconTxt}`}>
                         <k.icon className="h-4 w-4" />
                       </div>
-                      <div>
+                      <div className="mt-auto">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{k.label}</p>
                         {isLoading
                           ? <div className="mt-2 h-6 w-28 animate-pulse rounded-lg bg-white/5" />

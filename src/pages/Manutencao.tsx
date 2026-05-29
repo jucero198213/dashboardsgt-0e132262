@@ -785,22 +785,20 @@ export default function Manutencao() {
                 return (
                   <AnimatedCard key={label} delay={delay}>
                     <div
-                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 min-h-[120px] transition-all duration-300`}
+                      className={`group relative flex flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 min-h-[120px] transition-all duration-300`}
                       style={{ background: "var(--sgt-bg-card)" }}
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
                       <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
-                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>
-                            {value}
-                          </p>
-                          <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
-                        </div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
                         <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
                           <Icon className={`w-4 h-4 ${t.icon}`} />
                         </div>
                       </div>
+                      <p className={`mt-auto pt-2.5 text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>
+                        {value}
+                      </p>
+                      <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
                     </div>
                   </AnimatedCard>
                 );

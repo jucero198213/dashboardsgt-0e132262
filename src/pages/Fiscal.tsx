@@ -79,7 +79,7 @@ function KpiCard({ label, value, sub, color }: {
         <span className={`h-1.5 w-1.5 rounded-full ${cls.dot}`} />
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</span>
       </div>
-      <p className={`text-[28px] font-black tabular-nums leading-none tracking-tight ${cls.val}`}>{value}</p>
+      <p className={`mt-auto pt-2 text-[28px] font-black tabular-nums leading-none tracking-tight ${cls.val}`}>{value}</p>
       {sub && <p className="text-[11px] text-slate-500">{sub}</p>}
     </div>
   );
