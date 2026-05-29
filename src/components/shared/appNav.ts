@@ -39,7 +39,7 @@ export const APP_NAV: AppNavItem[] = [
   { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  to: "/portal-wr",      portal: true },
 
   // ── Financeiro ────────────────────────────────────────────────────────────
-  { id: "fin-painel",       label: "Painel",           icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", module: "financeiro" },
+  { id: "fin-painel",       label: "Painel Financeiro",icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", module: "financeiro" },
   { id: "fin-pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, financeScreen: "pagar",        module: "financeiro" },
   { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   financeScreen: "receber",      module: "financeiro" },
   { id: "fin-conciliacao",  label: "Conciliação",      icon: RefreshCcw,      financeScreen: "conciliacao",  module: "financeiro" },
