@@ -94,8 +94,20 @@ export default function GestaoUsuarios() {
   useEffect(() => { load(); }, []);
 
   const changeRole = async (userId: string, newRole: "admin" | "user" | "diretoria") => {
-    const { error } = await supabase.from("user_roles").upsert({ user_id: userId, role: newRole });
-    if (error) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
+    // Delete all existing role rows for this user, then insert the new one.
+    // (upsert without an id always INSERTs, creating duplicate rows and
+    //  breaking maybeSingle() in fetchRole)
+    const { error: delErr } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId);
+    if (delErr) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
+
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: newRole });
+    if (insErr) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
+
     setFeedback({ msg: "Role atualizada com sucesso.", type: "ok" });
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
     setTimeout(() => setFeedback(null), 3000);
