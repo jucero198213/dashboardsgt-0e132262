@@ -1049,7 +1049,7 @@ export default function Rh() {
                         value={search}
                         onChange={e => { setSearch(e.target.value); setPage(1); }}
                         placeholder="Buscar nome, matrícula, função..."
-                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-emerald-500/30 focus:outline-none transition-all w-[210px]"
+                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-emerald-500/30 focus:outline-none transition-all w-[160px] sm:w-[210px]"
                       />
                     </div>
                     {/* Toggle de visualização — padrão tela Bancos */}
@@ -1064,7 +1064,7 @@ export default function Rh() {
                         return (
                           <button key={t.id} onClick={() => setColabView(t.id)}
                             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-emerald-400/15 text-emerald-200" : "text-slate-500 hover:text-slate-300"}`}>
-                            <Icon className="h-3 w-3" /> {t.label}
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
                       })}

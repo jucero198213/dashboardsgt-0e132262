@@ -1075,7 +1075,7 @@ export default function Frota() {
                   return (
                     <button key={t.id} onClick={() => setFrotaView(t.id)}
                       className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
-                      <Icon className="h-3 w-3" /> {t.label}
+                      <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
                     </button>
                   );
                 })}

@@ -1179,7 +1179,7 @@ export default function Manutencao() {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Buscar OS, veículo, fornecedor..."
-                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-violet-500/30 focus:outline-none transition-all w-[200px]"
+                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-violet-500/30 focus:outline-none transition-all w-[160px] sm:w-[200px]"
                       />
                     </div>
                     {/* Toggle de visualização — padrão tela Bancos */}
@@ -1194,7 +1194,7 @@ export default function Manutencao() {
                         return (
                           <button key={t.id} onClick={() => setOsView(t.id)}
                             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
-                            <Icon className="h-3 w-3" /> {t.label}
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
                       })}

@@ -930,7 +930,7 @@ export default function Abastecimento() {
                         value={search}
                         onChange={e => { setSearch(e.target.value); setPage(1); }}
                         placeholder="Buscar veículo, motorista, posto..."
-                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-amber-500/30 focus:outline-none transition-all w-[210px]"
+                        className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-amber-500/30 focus:outline-none transition-all w-[160px] sm:w-[210px]"
                       />
                     </div>
                     {/* Toggle de visualização — padrão tela Bancos */}
@@ -945,7 +945,7 @@ export default function Abastecimento() {
                         return (
                           <button key={t.id} onClick={() => setAbastView(t.id)}
                             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
-                            <Icon className="h-3 w-3" /> {t.label}
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
                       })}

@@ -699,12 +699,12 @@ export default function Operacional() {
               {/* Mapa de posições — ocupa 2/3 */}
               <AnimatedCard delay={300} className="lg:col-span-2">
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center justify-between mb-3 shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 shrink-0">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Posições em Tempo Real</span>
                     </div>
-                    <div className="flex items-center gap-4 text-[11px]">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-[11px]">
                       {[
                         { label: "Em rota", color: RAW.accent.cyan },
                         { label: "Aguardando", color: RAW.accent.amber },
@@ -950,7 +950,7 @@ export default function Operacional() {
                         value={search}
                         onChange={e => { setSearch(e.target.value); setPage(1); }}
                         placeholder="Buscar veículo, motorista, rota..."
-                        className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
+                        className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[160px] sm:w-[210px]"
                       />
                     </div>
                     {/* Toggle de visualização — padrão tela Bancos */}
@@ -968,7 +968,7 @@ export default function Operacional() {
                             onClick={() => setViagensView(t.id)}
                             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-cyan-400/15 text-cyan-200" : "text-slate-500 hover:text-slate-300"}`}
                           >
-                            <Icon className="h-3 w-3" /> {t.label}
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
                       })}
