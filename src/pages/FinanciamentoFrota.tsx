@@ -547,7 +547,7 @@ export default function FinanciamentoFrota() {
                 ].map((k, i) => (
                   <AnimatedCard key={k.label} delay={i * 60}>
                     <div
-                      className={`group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 flex flex-col gap-3`}
+                      className={`group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 flex flex-col gap-3 min-h-[120px]`}
                       style={{ background: "var(--sgt-bg-card)", boxShadow: "0 2px 20px rgba(0,0,0,0.4)" }}
                     >
                       <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />

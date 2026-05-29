@@ -785,7 +785,7 @@ export default function Manutencao() {
                 return (
                   <AnimatedCard key={label} delay={delay}>
                     <div
-                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300`}
+                      className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 min-h-[120px] transition-all duration-300`}
                       style={{ background: "var(--sgt-bg-card)" }}
                     >
                       <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />

@@ -912,7 +912,7 @@ export default function Frota() {
                 },
               ].map((k, i) => (
                 <AnimatedCard key={k.label} delay={i * 60}>
-                  <div className={`group relative flex min-h-[100px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
+                  <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${k.stripe}`} />
                     <div className="relative flex h-full flex-col">
                       <div className="flex items-start justify-between gap-2">

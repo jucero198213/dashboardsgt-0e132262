@@ -169,7 +169,7 @@ function KpiCard({ label, value, sub, icon: Icon, stripe, iconBg, iconTxt, glow,
 }) {
   return (
     <AnimatedCard delay={delay}>
-      <div className={`group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.35)]`}>
+      <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.35)]`}>
         <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${stripe}`} />
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">{label}</p>
@@ -1007,7 +1007,7 @@ function ScreenConciliacao() {
 
         {/* Extrato Banco */}
         <AnimatedCard delay={0}>
-          <div className="group relative flex min-h-[112px] flex-col overflow-hidden rounded-[16px] border border-blue-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(59,130,246,0.18)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-blue-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(59,130,246,0.18)]">
             <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-blue-400/70 to-blue-700/20" />
             <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-blue-400" />
             <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Extrato Banco</p>
@@ -1022,7 +1022,7 @@ function ScreenConciliacao() {
 
         {/* Total ERP */}
         <AnimatedCard delay={50}>
-          <div className="group relative flex min-h-[112px] flex-col overflow-hidden rounded-[16px] border bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px]" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px]" style={{ borderColor: "var(--sgt-border-subtle)" }}>
             <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-slate-400/40 to-transparent" />
             <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Total ERP</p>
             <p className="mt-auto pt-2 font-black leading-none tracking-[-0.04em] text-[clamp(1.1rem,1.7vw,1.45rem)] overflow-hidden text-ellipsis whitespace-nowrap" style={{ color: "var(--sgt-text-primary)" }}>
@@ -1036,7 +1036,7 @@ function ScreenConciliacao() {
 
         {/* Conciliado */}
         <AnimatedCard delay={100}>
-          <div className="group relative flex min-h-[112px] flex-col overflow-hidden rounded-[16px] border border-emerald-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(16,185,129,0.18)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-emerald-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(16,185,129,0.18)]">
             <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
             <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-emerald-400" />
             <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Conciliado</p>
@@ -1056,7 +1056,7 @@ function ScreenConciliacao() {
 
         {/* Divergências */}
         <AnimatedCard delay={150}>
-          <div className="group relative flex min-h-[112px] flex-col overflow-hidden rounded-[16px] border border-rose-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(244,63,94,0.18)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-rose-400/[0.14] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(244,63,94,0.18)]">
             <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
             <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-rose-400" />
             <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Divergências</p>
@@ -1071,7 +1071,7 @@ function ScreenConciliacao() {
 
         {/* Taxa de Conciliação */}
         <AnimatedCard delay={200}>
-          <div className="group relative flex min-h-[112px] flex-col overflow-hidden rounded-[16px] border border-amber-400/[0.16] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(245,158,11,0.20)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[16px] border border-amber-400/[0.16] bg-[var(--sgt-bg-card)] p-4 shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_6px_32px_rgba(245,158,11,0.20)]">
             <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-[16px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
             <div className="absolute left-0 top-[22%] bottom-[22%] w-[3px] rounded-r-full bg-amber-400" />
             <p className="text-[9px] font-black uppercase tracking-[0.35em]" style={{ color: "var(--sgt-text-muted)" }}>Taxa Conciliação</p>
@@ -1817,7 +1817,7 @@ function ScreenCategorias() {
         </AnimatedCard>
 
         <AnimatedCard delay={60}>
-          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-rose-400/60 to-rose-700/20" />
             <div className="flex items-start justify-between gap-2">
               <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Despesas</p>
@@ -1834,7 +1834,7 @@ function ScreenCategorias() {
         </AnimatedCard>
 
         <AnimatedCard delay={120}>
-          <div className="group relative flex min-h-[110px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+          <div className="group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 h-full transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/60 to-emerald-700/20" />
             <div className="flex items-start justify-between gap-2">
               <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-500 leading-tight">Total Receitas</p>

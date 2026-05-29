@@ -72,7 +72,7 @@ function KpiCard({ label, value, sub, color }: {
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-[14px] border p-4 ${cls.border}`}
+      className={`flex flex-col gap-1 rounded-[14px] border p-4 min-h-[120px] ${cls.border}`}
       style={{ background: "var(--sgt-bg-card)" }}
     >
       <div className="flex items-center gap-2">
