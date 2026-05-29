@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -482,15 +483,6 @@ export default function Rh() {
     return { n, porFuncao, porFilial, porCnh, tempoCasa, cnhVencer };
   }, [tabelaBuscada]);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TC = {
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-    cyan: { border: "border-cyan-400/20", icon: "text-cyan-300", bg: "bg-cyan-400/[0.08]", glow: RAW.accent.cyan, sub: "text-cyan-400" },
-    rose: { border: "border-rose-400/20", icon: "text-rose-300", bg: "bg-rose-400/[0.08]", glow: RAW.accent.rose, sub: "text-rose-400" },
-    amber: { border: "border-amber-400/20", icon: "text-amber-300", bg: "bg-amber-400/[0.08]", glow: RAW.accent.amber, sub: "text-amber-400" },
-    violet: { border: "border-violet-400/20", icon: "text-violet-300", bg: "bg-violet-400/[0.08]", glow: RAW.accent.violet, sub: "text-violet-400" },
-  };
-
   // ── Helper: badge CNH ────────────────────────────────────────────────────────
   const cnhBadge = (dias: number | null, temCnh: boolean) => {
     if (!temCnh) return <span className="text-[10px] text-slate-500">—</span>;
@@ -653,32 +645,21 @@ export default function Rh() {
 
             {/* KPI Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
-              {[
-                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos), sub: "SITUAC = \"A\"", Icon: UserCheck, tone: "emerald" as const, delay: 80 },
-                { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes), sub: "DATADM no intervalo", Icon: UserPlus, tone: "cyan" as const, delay: 120 },
-                { label: "Demissões no Período", value: loading ? "—" : fmtNum(kpis.demissoes), sub: `Turnover: ${fmtPct(kpis.turnover)}`, Icon: UserMinus, tone: "rose" as const, delay: 160 },
-                { label: "CNH a Vencer (30d)", value: loading ? "—" : fmtNum(kpis.cnh30), sub: "VENCHA ≤ hoje + 30 dias", Icon: ShieldAlert, tone: "amber" as const, delay: 200 },
-                { label: "Tempo Médio de Casa", value: loading ? "—" : fmtAnos(kpis.mediaAnos), sub: "AVG(hoje − DATADM) ativos", Icon: Clock, tone: "violet" as const, delay: 240 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TC[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300 hover:-translate-y-[3px]`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
-                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
-                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
-                          </div>
-                        </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+              <AnimatedCard delay={80}>
+                <KpiCard label="Colaboradores Ativos" value={loading ? "—" : fmtNum(kpis.ativos)} subtitle='SITUAC = "A"' icon={UserCheck} tone="emerald" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Admissões no Período" value={loading ? "—" : fmtNum(kpis.admissoes)} subtitle="DATADM no intervalo" icon={UserPlus} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Demissões no Período" value={loading ? "—" : fmtNum(kpis.demissoes)} subtitle={`Turnover: ${fmtPct(kpis.turnover)}`} icon={UserMinus} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="CNH a Vencer (30d)" value={loading ? "—" : fmtNum(kpis.cnh30)} subtitle="VENCHA ≤ hoje + 30 dias" icon={ShieldAlert} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="Tempo Médio de Casa" value={loading ? "—" : fmtAnos(kpis.mediaAnos)} subtitle="AVG(hoje − DATADM) ativos" icon={Clock} tone="violet" loading={loading} />
+              </AnimatedCard>
             </div>
 
             {/* ════════════════════════════════════════════════════════
@@ -866,31 +847,18 @@ export default function Rh() {
 
             {/* KPIs Turnover */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { label: "Turnover no Período", value: loading ? "—" : fmtPct(kpis.turnover), sub: "Dem ÷ Ativos × 100", Icon: TrendingDown, tone: "rose" as const, delay: 460 },
-                { label: "Saldo Líquido", value: loading ? "—" : (kpisTurnover.saldo >= 0 ? `+${kpisTurnover.saldo}` : `${kpisTurnover.saldo}`), sub: "Admissões − Demissões", Icon: TrendingUp, tone: "cyan" as const, delay: 480 },
-                { label: "Motivo + Frequente", value: loading ? "—" : kpisTurnover.topMotivo.slice(0, 16), sub: "MOTBAI top 1", Icon: FileText, tone: "amber" as const, delay: 500 },
-                { label: "Perm. Média Demitidos", value: loading ? "—" : fmtAnos(kpisTurnover.mediaAnos), sub: "AVG(DATBAI − DATADM)", Icon: Clock, tone: "violet" as const, delay: 520 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TC[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] p-3.5 transition-all duration-300 hover:-translate-y-[3px]`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-r" style={{ background: t.glow }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
-                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
-                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
-                          </div>
-                        </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+              <AnimatedCard delay={460}>
+                <KpiCard label="Turnover no Período" value={loading ? "—" : fmtPct(kpis.turnover)} subtitle="Dem ÷ Ativos × 100" icon={TrendingDown} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={480}>
+                <KpiCard label="Saldo Líquido" value={loading ? "—" : (kpisTurnover.saldo >= 0 ? `+${kpisTurnover.saldo}` : `${kpisTurnover.saldo}`)} subtitle="Admissões − Demissões" icon={TrendingUp} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={500}>
+                <KpiCard label="Motivo + Frequente" value={loading ? "—" : kpisTurnover.topMotivo.slice(0, 16)} subtitle="MOTBAI top 1" icon={FileText} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={520}>
+                <KpiCard label="Perm. Média Demitidos" value={loading ? "—" : fmtAnos(kpisTurnover.mediaAnos)} subtitle="AVG(DATBAI − DATADM)" icon={Clock} tone="violet" loading={loading} />
+              </AnimatedCard>
             </div>
 
             {/* Evolução Mensal + Motivo Demissão */}

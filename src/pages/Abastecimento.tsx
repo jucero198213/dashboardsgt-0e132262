@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard, KPI_TONES } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -422,15 +422,6 @@ export default function Abastecimento() {
     return { n, porCombustivel, topVeiculos, topPostos, porEstado, custoTotal, litrosTotal };
   }, [tabelaOrdenada]);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TONE_COLORS = {
-    rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
-    amber:   { border: "border-orange-400/20",   icon: "text-orange-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
-    violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
-    cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-  };
-
   // ═══════════════════════════════════════════════════════════════════════════
   //  RENDER
   // ═══════════════════════════════════════════════════════════════════════════
@@ -597,62 +588,21 @@ export default function Abastecimento() {
 
             {/* ── KPI Cards (5) ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-              {[
-                {
-                  label: "Custo Total",
-                  value: loading ? "—" : fmtK(kpis.totalCusto),
-                  sub: loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`,
-                  Icon: DollarSign,
-                  tone: "amber" as const,
-                  delay: 80,
-                },
-                {
-                  label: "Volume Total",
-                  value: loading ? "—" : fmtLitros(kpis.totalLitros),
-                  sub: loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`,
-                  Icon: Droplets,
-                  tone: "cyan" as const,
-                  delay: 120,
-                },
-                {
-                  label: "Abastecimentos",
-                  value: loading ? "—" : fmtNum(kpis.qtdAbast),
-                  sub: loading ? "" : `${distCombustivel.length} tipo(s) de combustível`,
-                  Icon: Hash,
-                  tone: "rose" as const,
-                  delay: 160,
-                },
-                {
-                  label: "Média Consumo",
-                  value: loading ? "—" : fmtMedia(kpis.mediaConsumo),
-                  sub: loading ? "" : kpis.deltaMedia !== null
-                    ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)`
-                    : "Fábrica: —",
-                  Icon: Gauge,
-                  tone: "violet" as const,
-                  delay: 200,
-                },
-                {
-                  label: "KM Rodados",
-                  value: loading ? "—" : fmtNum(kpis.totalKm) + " km",
-                  sub: loading ? "" : kpis.totalLitros > 0
-                    ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—",
-                  Icon: TrendingUp,
-                  tone: "emerald" as const,
-                  delay: 240,
-                },
-              ].map(({ label, value, sub, Icon, tone, delay }) => (
-                <KpiCard
-                  key={label}
-                  label={label}
-                  value={value}
-                  sub={sub}
-                  icon={Icon}
-                  {...KPI_TONES[tone]}
-                  delay={delay}
-                  loading={loading}
-                />
-              ))}
+              <AnimatedCard delay={80}>
+                <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`} icon={DollarSign} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Volume Total" value={loading ? "—" : fmtLitros(kpis.totalLitros)} subtitle={loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`} icon={Droplets} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Abastecimentos" value={loading ? "—" : fmtNum(kpis.qtdAbast)} subtitle={loading ? "" : `${distCombustivel.length} tipo(s) de combustível`} icon={Hash} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="Média Consumo" value={loading ? "—" : fmtMedia(kpis.mediaConsumo)} subtitle={loading ? "" : kpis.deltaMedia !== null ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)` : "Fábrica: —"} icon={Gauge} tone="violet" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
+              </AnimatedCard>
             </div>
 
             {/* ── Gráficos Linha 1: Evolução de Custo + Distribuição Combustível ── */}

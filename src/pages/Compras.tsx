@@ -12,7 +12,7 @@ import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -85,46 +85,10 @@ export default function Compras() {
     const produtos = new Set(compras.map(c => c.produto)).size;
 
     return [
-      {
-        label: "Total Comprado", value: fmtK(total),
-        sub: "No período", icon: ShoppingCart, color: "cyan", rgb: "6,182,212",
-        stripe: "from-cyan-400/60 to-cyan-700/20",
-        border: "border-cyan-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-        iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-        iconTxt: "text-cyan-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Notas Fiscais", value: fmtNum(notas),
-        sub: "NFs distintas", icon: FileText, color: "emerald", rgb: "16,185,129",
-        stripe: "from-emerald-400/60 to-emerald-700/20",
-        border: "border-emerald-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-        iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
-        iconTxt: "text-emerald-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Fornecedores", value: fmtNum(fornecedores),
-        sub: "Fornecedores ativos", icon: Users, color: "amber", rgb: "251,191,36",
-        stripe: "from-amber-400/60 to-amber-700/20",
-        border: "border-amber-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
-        iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-        iconTxt: "text-amber-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Produtos", value: fmtNum(produtos),
-        sub: "SKUs distintos", icon: Package, color: "violet", rgb: "139,92,246",
-        stripe: "from-violet-400/60 to-violet-700/20",
-        border: "border-violet-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
-        iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
-        iconTxt: "text-violet-300",
-        sub2: "text-slate-500",
-      },
+      { label: "Total Comprado",  value: fmtK(total),          subtitle: "No período",          icon: ShoppingCart, tone: "cyan"    as const },
+      { label: "Notas Fiscais",   value: fmtNum(notas),        subtitle: "NFs distintas",        icon: FileText,     tone: "emerald" as const },
+      { label: "Fornecedores",    value: fmtNum(fornecedores), subtitle: "Fornecedores ativos",  icon: Users,        tone: "amber"   as const },
+      { label: "Produtos",        value: fmtNum(produtos),     subtitle: "SKUs distintos",       icon: Package,      tone: "violet"  as const },
     ];
   }, [compras]);
 
@@ -486,7 +450,9 @@ export default function Compras() {
           {/* ════════ KPIs ════════ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {kpis.map((k, i) => (
-              <KpiCard key={k.label} {...k} subClassName={k.sub2} delay={i * 60} />
+              <AnimatedCard key={k.label} delay={i * 60}>
+                <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isLoading} />
+              </AnimatedCard>
             ))}
           </div>
 

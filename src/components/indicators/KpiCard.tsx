@@ -1,16 +1,22 @@
-import { LucideIcon } from "lucide-react";
+import React from "react";
 import { CountUp } from "@/components/shared/CountUp";
+
+export type KpiTone = "emerald" | "amber" | "cyan" | "violet" | "rose" | "orange" | "blue";
 
 interface KpiCardProps {
   label: string;
   value: string;
   rawValue?: number;
   subtitle?: string;
-  icon: LucideIcon;
-  tone: "emerald" | "amber" | "cyan" | "violet" | "rose";
+  icon: React.ElementType;
+  tone: KpiTone;
+  loading?: boolean;
+  onClick?: () => void;
 }
 
-const toneMap = {
+const toneMap: Record<KpiTone, {
+  stripe: string; border: string; glow: string; iconBg: string; sub: string; spot: string;
+}> = {
   emerald: {
     stripe:  "from-emerald-400/60 to-emerald-700/20",
     border:  "border-emerald-400/[0.12]",
@@ -51,24 +57,46 @@ const toneMap = {
     sub:     "text-rose-500/80",
     spot:    "rgba(244,63,94,0.10)",
   },
+  orange: {
+    stripe:  "from-orange-400/60 to-orange-700/20",
+    border:  "border-orange-400/[0.12]",
+    glow:    "hover:shadow-[0_4px_40px_rgba(249,115,22,0.18)]",
+    iconBg:  "bg-orange-400/[0.08] border border-orange-400/[0.15] text-orange-300",
+    sub:     "text-orange-500/80",
+    spot:    "rgba(249,115,22,0.10)",
+  },
+  blue: {
+    stripe:  "from-blue-400/60 to-blue-700/20",
+    border:  "border-blue-400/[0.12]",
+    glow:    "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]",
+    iconBg:  "bg-blue-400/[0.08] border border-blue-400/[0.15] text-blue-300",
+    sub:     "text-blue-500/80",
+    spot:    "rgba(59,130,246,0.10)",
+  },
 };
 
-export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: KpiCardProps) {
+export function KpiCard({
+  label, value, rawValue, subtitle, icon: Icon, tone, loading, onClick,
+}: KpiCardProps) {
   const t = toneMap[tone];
   const isCurrency = value.startsWith("R$");
   const isPercent  = value.endsWith("%");
 
   return (
-    <div className={`group relative flex h-full min-h-[110px] sm:min-h-[130px] md:min-h-[150px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
+    <div
+      onClick={onClick}
+      className={`group relative flex h-full min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}${onClick ? " cursor-pointer" : ""}`}
+    >
+      {/* LEFT stripe */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${t.stripe}`} />
 
-      {/* Stripe de cor no topo */}
-      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
+      {/* Spot glow */}
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
+        style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }}
+      />
 
-      {/* Spot glow no canto inferior direito */}
-      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
-        style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
-
-      <div className="relative flex h-full flex-col p-3 sm:p-5">
+      <div className="relative flex h-full flex-col p-3 sm:p-4">
         {/* Label + ícone */}
         <div className="flex items-start justify-between gap-2">
           <p className="text-[9px] font-bold uppercase tracking-[0.35em] dark:text-slate-600 text-slate-500 leading-tight">
@@ -80,7 +108,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
         </div>
 
         {/* Valor — protagonista */}
-        <p className="mt-auto pt-2 sm:pt-3 md:pt-4 text-[16px] sm:text-[20px] md:text-[28px] lg:text-[30px] font-black leading-none tracking-[-0.05em] [color:var(--sgt-text-primary)] break-words">
+        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-[1.15] tracking-[-0.05em] [color:var(--sgt-text-primary)]${loading ? " animate-pulse" : ""}`}>
           {rawValue !== undefined && isCurrency ? (
             <CountUp value={rawValue} format="brl" />
           ) : rawValue !== undefined && isPercent ? (
@@ -92,7 +120,7 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
 
         {/* Subtítulo */}
         {subtitle && (
-          <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.15em] ${t.sub}`}>
+          <p className={`mt-1.5 text-[10px] font-medium ${t.sub}`}>
             {subtitle}
           </p>
         )}

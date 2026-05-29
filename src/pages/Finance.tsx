@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import type { ContaPagar, ContaReceber } from "@/data/mockData";
@@ -23,7 +23,7 @@ import {
 } from "recharts";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard, KPI_TONES } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -163,8 +163,6 @@ function SkeletonLoader({ label }: { label?: string }) {
   );
 }
 
-// ─── KPI CARD ─────────────────────────────────────────────────────────────────
-// KpiCard agora vem de @/components/shared/KpiCard (componente único do sistema)
 
 // ─── TABLE HEADER ROW ──────────────────────────────────────────────────────────
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -236,10 +234,10 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
   const atrasadosReceber  = contasReceber.filter(c => dsReceber(c) === "Em Atraso").reduce((s,c) => s+c.valor, 0);
 
   const kpis = [
-    { label: "Movimentação Bancos", value: fmtK(saldoBancos), sub: `${nFiliais || 0} filial${nFiliais !== 1 ? "is" : ""} · período`,                             icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
-    { label: "A Pagar (abertas)",  value: fmtK(totalPagar),          sub: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos`,   icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
-    { label: "A Receber (abertas)",value: fmtK(totalReceber),        sub: `${contasReceber.filter(c => dsReceber(c) !== "Recebido").length} títulos`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
-    { label: "Resultado Líquido",  value: fmtK(Math.abs(saldo)),     sub: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
+    { label: "Movimentação Bancos", value: fmtK(saldoBancos), subtitle: `${nFiliais || 0} filial${nFiliais !== 1 ? "is" : ""} · período`, icon: Landmark,    tone: "cyan"    as const },
+    { label: "A Pagar (abertas)",   value: fmtK(totalPagar),          subtitle: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos`,     icon: TrendingDown, tone: "rose"    as const },
+    { label: "A Receber (abertas)", value: fmtK(totalReceber),        subtitle: `${contasReceber.filter(c => dsReceber(c) !== "Recebido").length} títulos`, icon: TrendingUp, tone: "emerald" as const },
+    { label: "Resultado Líquido",   value: fmtK(Math.abs(saldo)),     subtitle: saldo >= 0 ? "Posição favorável" : "Posição desfavorável",     icon: BarChart3,    tone: "amber"   as const },
   ];
 
   if (isFetchingDw) return <SkeletonLoader label="Carregando Painel Financeiro..." />;
@@ -247,7 +245,7 @@ function ScreenPainel({ onNavigate }: { onNavigate?: (id: ScreenId) => void }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+        {kpis.map((k, i) => <AnimatedCard key={k.label} delay={i * 60}><KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} /></AnimatedCard>)}
       </div>
 
       {(vencidosPagar > 0 || atrasadosReceber > 0) && (
@@ -450,10 +448,10 @@ function ScreenPagar() {
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
 
   const kpis = [
-    { label: "Total a Pagar", value: fmtK(totalPagar), sub: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos em aberto`, icon: Wallet,        stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"   },
-    { label: "Vencido",       value: fmtK(vencido),    sub: `${contasPagar.filter(c => dsPagar(c) === "Vencido").length} títulos em atraso`, icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
-    { label: "Vence Hoje",    value: fmtK(hojeVal),    sub: `${contasPagar.filter(c => dsPagar(c) === "Vence Hoje").length} títulos para hoje`, icon: Clock,      stripe: "from-amber-400/60 to-amber-700/20",  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",  iconTxt: "text-amber-300",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]"  },
-    { label: "Pago no Mês",   value: fmtK(pago),       sub: `${contasPagar.filter(c => ["Pago","Pago Parcial"].includes(dsPagar(c))).length} títulos quitados`, icon: CheckCircle, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+    { label: "Total a Pagar", value: fmtK(totalPagar), subtitle: `${contasPagar.filter(c => dsPagar(c) !== "Pago").length} títulos em aberto`,              icon: Wallet,        tone: "blue"    as const },
+    { label: "Vencido",       value: fmtK(vencido),    subtitle: `${contasPagar.filter(c => dsPagar(c) === "Vencido").length} títulos em atraso`,            icon: AlertTriangle, tone: "rose"    as const },
+    { label: "Vence Hoje",    value: fmtK(hojeVal),    subtitle: `${contasPagar.filter(c => dsPagar(c) === "Vence Hoje").length} títulos para hoje`,         icon: Clock,         tone: "amber"   as const },
+    { label: "Pago no Mês",   value: fmtK(pago),       subtitle: `${contasPagar.filter(c => ["Pago","Pago Parcial"].includes(dsPagar(c))).length} títulos quitados`, icon: CheckCircle, tone: "emerald" as const },
   ];
 
   if (isFetchingDw) return <SkeletonLoader label="Carregando contas a pagar..." />;
@@ -461,7 +459,7 @@ function ScreenPagar() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+        {kpis.map((k, i) => <AnimatedCard key={k.label} delay={i * 60}><KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} /></AnimatedCard>)}
       </div>
 
       {/* Gráficos aging + top fornecedores */}
@@ -627,10 +625,10 @@ function ScreenReceber() {
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
 
   const kpis = [
-    { label: "Total a Receber",  value: fmtK(totalReceber), sub: `${contasReceber.filter(c => !["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos em aberto`, icon: TrendingUp,   stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]"  },
-    { label: "Em Atraso",        value: fmtK(emAtraso),     sub: `${contasReceber.filter(c => dsReceber(c) === "Em Atraso").length} clientes inadimplentes`,  icon: AlertTriangle, stripe: "from-rose-400/60 to-rose-700/20",    iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-rose-300",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]"   },
-    { label: "Previsto no Mês",  value: fmtK(previsto),     sub: `${contasReceber.filter(c => ["Pendente","Vence Hoje"].includes(dsReceber(c))).length} vencimentos`,            icon: Clock,         stripe: "from-blue-400/60 to-blue-700/20",    iconBg: "bg-blue-400/[0.08] border border-blue-400/[0.15]",    iconTxt: "text-blue-300",    glow: "hover:shadow-[0_4px_40px_rgba(59,130,246,0.18)]"  },
-    { label: "Recebido no Mês",  value: fmtK(recebido),     sub: `${contasReceber.filter(c => ["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos liquidados`, icon: CheckCircle,  stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
+    { label: "Total a Receber", value: fmtK(totalReceber), subtitle: `${contasReceber.filter(c => !["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos em aberto`, icon: TrendingUp,   tone: "emerald" as const },
+    { label: "Em Atraso",       value: fmtK(emAtraso),     subtitle: `${contasReceber.filter(c => dsReceber(c) === "Em Atraso").length} clientes inadimplentes`,                        icon: AlertTriangle, tone: "rose"    as const },
+    { label: "Previsto no Mês", value: fmtK(previsto),     subtitle: `${contasReceber.filter(c => ["Pendente","Vence Hoje"].includes(dsReceber(c))).length} vencimentos`,               icon: Clock,         tone: "blue"    as const },
+    { label: "Recebido no Mês", value: fmtK(recebido),     subtitle: `${contasReceber.filter(c => ["Recebido","Recebido Parcial"].includes(dsReceber(c))).length} títulos liquidados`,  icon: CheckCircle,   tone: "emerald" as const },
   ];
 
   if (isFetchingDw) return <SkeletonLoader label="Carregando contas a receber..." />;
@@ -638,7 +636,7 @@ function ScreenReceber() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+        {kpis.map((k, i) => <AnimatedCard key={k.label} delay={i * 60}><KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} /></AnimatedCard>)}
       </div>
 
       {/* Gráficos aging + top clientes */}
@@ -1925,10 +1923,10 @@ function ScreenPrevisto() {
   const LIMITE        = 100000;
 
   const kpis = [
-    { label: "Saldo Atual",       value: fmtK(saldoAtual),    sub: "Posição bancária atual",   icon: Landmark,     stripe: "from-cyan-400/60 to-cyan-700/20",    iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]"   },
-    { label: "Entradas Previstas", value: fmtK(totalEntradas), sub: `${eventosPrevistos.filter(e => e.tipo === "Entrada").length} títulos a receber`, icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]" },
-    { label: "Saídas Previstas",   value: fmtK(totalSaidas),   sub: `${eventosPrevistos.filter(e => e.tipo === "Saída").length} títulos a pagar`,    icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20", iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]" },
-    { label: "Saldo Projetado",    value: fmtK(saldoFinal),    sub: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, stripe: saldoFinal >= saldoAtual ? "from-amber-400/60 to-amber-700/20" : "from-rose-400/60 to-rose-700/20", iconBg: saldoFinal >= saldoAtual ? "bg-amber-400/[0.08] border border-amber-400/[0.15]" : "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: saldoFinal >= saldoAtual ? "text-amber-300" : "text-rose-300", glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]" },
+    { label: "Saldo Atual",        value: fmtK(saldoAtual),    subtitle: "Posição bancária atual",                                                                        icon: Landmark,    tone: "cyan"    as const },
+    { label: "Entradas Previstas", value: fmtK(totalEntradas), subtitle: `${eventosPrevistos.filter(e => e.tipo === "Entrada").length} títulos a receber`,                 icon: TrendingUp,  tone: "emerald" as const },
+    { label: "Saídas Previstas",   value: fmtK(totalSaidas),   subtitle: `${eventosPrevistos.filter(e => e.tipo === "Saída").length} títulos a pagar`,                     icon: TrendingDown, tone: "rose"   as const },
+    { label: "Saldo Projetado",    value: fmtK(saldoFinal),    subtitle: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, tone: (saldoFinal >= saldoAtual ? "amber" : "rose") as "amber" | "rose" },
   ];
 
   if (isFetchingDw) return <SkeletonLoader label="Calculando projeção de caixa..." />;
@@ -1936,7 +1934,7 @@ function ScreenPrevisto() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+        {kpis.map((k, i) => <AnimatedCard key={k.label} delay={i * 60}><KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} /></AnimatedCard>)}
       </div>
 
       {diasCriticos > 0 && (
@@ -2185,31 +2183,10 @@ function ScreenBancos() {
       {/* ── KPIs Consolidados ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          {
-            label: "Saldo Consolidado",
-            value: fmtBRL(saldoTotal),
-            sub: `${contas.length} conta${contas.length !== 1 ? "s" : ""} ativas`,
-            icon: Landmark, stripe: "from-cyan-400/60 to-cyan-700/20",
-            iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]", iconTxt: "text-cyan-300",
-            glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-          },
-          {
-            label: "Entradas no Período",
-            value: fmtK(contas.reduce((s, c) => s + c.entradas_mes, 0)),
-            sub: `Créditos no período`,
-            icon: TrendingUp, stripe: "from-emerald-400/60 to-emerald-700/20",
-            iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300",
-            glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-          },
-          {
-            label: "Saídas no Período",
-            value: fmtK(contas.reduce((s, c) => s + c.saidas_mes, 0)),
-            sub: `Débitos no período`,
-            icon: TrendingDown, stripe: "from-rose-400/60 to-rose-700/20",
-            iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]", iconTxt: "text-rose-300",
-            glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-          },
-        ].map((k, i) => <KpiCard key={k.label} {...k} delay={i * 60} />)}
+          { label: "Saldo Consolidado",  value: fmtBRL(saldoTotal),                                      subtitle: `${contas.length} conta${contas.length !== 1 ? "s" : ""} ativas`, icon: Landmark,    tone: "cyan"    as const },
+          { label: "Entradas no Período", value: fmtK(contas.reduce((s, c) => s + c.entradas_mes, 0)),   subtitle: "Créditos no período",                                              icon: TrendingUp,  tone: "emerald" as const },
+          { label: "Saídas no Período",   value: fmtK(contas.reduce((s, c) => s + c.saidas_mes,  0)),    subtitle: "Débitos no período",                                               icon: TrendingDown, tone: "rose"   as const },
+        ].map((k, i) => <AnimatedCard key={k.label} delay={i * 60}><KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} /></AnimatedCard>)}
       </div>
 
       {/* ── View Mode Toggle ── */}

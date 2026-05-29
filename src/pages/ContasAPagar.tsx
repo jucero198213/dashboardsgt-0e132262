@@ -8,7 +8,7 @@ import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -297,48 +297,10 @@ export default function ContasAPagar() {
   }, [contasPagar]);
 
   const kpis = [
-    {
-      label: "Valor Previsto", value: fmtK(resumoPagar.valorAPagar),
-      sub: "Total a pagar", icon: DollarSign, color: "cyan", rgb: "6,182,212",
-      stripe: "from-cyan-400/60 to-cyan-700/20",
-      border: "border-cyan-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-      iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-      iconTxt: "text-cyan-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Valor Pago", value: fmtK(resumoPagar.valorPago),
-      sub: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`,
-      icon: CheckCircle, color: "emerald", rgb: "16,185,129",
-      stripe: "from-emerald-400/60 to-emerald-700/20",
-      border: "border-emerald-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-      iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
-      iconTxt: "text-emerald-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Saldo em Aberto", value: fmtK(resumoPagar.saldoAPagar),
-      sub: "Pendente", icon: Clock, color: "amber", rgb: "251,191,36",
-      stripe: "from-amber-400/60 to-amber-700/20",
-      border: "border-amber-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
-      iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-      iconTxt: "text-amber-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Vencidos", value: fmtK(totalVencido),
-      sub: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`,
-      icon: AlertTriangle, color: "rose", rgb: "244,63,94",
-      stripe: "from-rose-400/60 to-rose-700/20",
-      border: "border-rose-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-      iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
-      iconTxt: "text-orange-300",
-      sub2: "text-slate-500",
-    },
+    { label: "Valor Previsto",  value: fmtK(resumoPagar.valorAPagar), subtitle: "Total a pagar",  icon: DollarSign,   tone: "cyan"    as const },
+    { label: "Valor Pago",      value: fmtK(resumoPagar.valorPago),   subtitle: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`, icon: CheckCircle, tone: "emerald" as const },
+    { label: "Saldo em Aberto", value: fmtK(resumoPagar.saldoAPagar), subtitle: "Pendente",       icon: Clock,        tone: "amber"   as const },
+    { label: "Vencidos",        value: fmtK(totalVencido),            subtitle: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`, icon: AlertTriangle, tone: "rose" as const },
   ];
 
   // ── Dados para gráficos ────────────────────────────────────────────────────
@@ -467,7 +429,9 @@ export default function ContasAPagar() {
         {/* ════════ KPIs ════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {kpis.map((k, i) => (
-            <KpiCard key={k.label} {...k} subClassName={k.sub2} delay={i * 60} />
+            <AnimatedCard key={k.label} delay={i * 60}>
+              <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} />
+            </AnimatedCard>
           ))}
         </div>
         <InsightsSection

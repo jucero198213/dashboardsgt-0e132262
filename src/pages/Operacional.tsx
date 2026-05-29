@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -82,16 +82,6 @@ const getSituacStyle = (raw: string | null) => {
     (k === "ATRASADO" && raw.toUpperCase().includes("ATRASO"))
   );
   return SITUAC_STYLE[key ?? "AGUARDANDO"] ?? SITUAC_STYLE["AGUARDANDO"];
-};
-
-// ─── KPI tone → estilo (padrão SGT — telas financeiras) ────────────────────────
-// Classes 100% estáticas para o Tailwind compilar (nada de via-[${var}] dinâmico).
-const KPI_STYLE: Record<string, { stripe: string; border: string; glow: string; iconBg: string; iconTxt: string; rgb: string }> = {
-  cyan:    { stripe: "from-cyan-400/60 to-cyan-700/20",       border: "border-cyan-400/[0.12]",    glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",  iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",    iconTxt: "text-cyan-300",    rgb: "6,182,212"   },
-  emerald: { stripe: "from-emerald-400/60 to-emerald-700/20", border: "border-emerald-400/[0.12]", glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]", iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]", iconTxt: "text-emerald-300", rgb: "16,185,129"  },
-  amber:   { stripe: "from-amber-400/60 to-amber-700/20",     border: "border-amber-400/[0.12]",   glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]", iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",   iconTxt: "text-amber-300",   rgb: "251,191,36"  },
-  rose:    { stripe: "from-rose-400/60 to-rose-700/20",       border: "border-rose-400/[0.12]",    glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",  iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",    iconTxt: "text-orange-300",  rgb: "244,63,94"   },
-  violet:  { stripe: "from-violet-400/60 to-violet-700/20",   border: "border-violet-400/[0.12]",  glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]", iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]", iconTxt: "text-violet-300",  rgb: "139,92,246"  },
 };
 
 // ─── Tooltip dark ─────────────────────────────────────────────────────────────
@@ -660,31 +650,21 @@ export default function Operacional() {
 
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
-              {[
-                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%", Icon: Navigation, tone: "cyan" as const, delay: 80, dialog: "andamento" as const },
-                { label: "Veículos em Rota", value: loading ? "—" : fmtNum(kpis.emRota), sub: "Fora de manutenção", Icon: Truck, tone: "emerald" as const, delay: 120, dialog: "rota" as const },
-                { label: "Em Manutenção", value: loading ? "—" : fmtNum(kpis.emManutencao), sub: "EM_MANUTENCAO = S", Icon: Wrench, tone: "amber" as const, delay: 160, dialog: "manutencao" as const },
-                { label: "Com Atraso na Saída", value: loading ? "—" : fmtNum(kpis.comAtraso), sub: "SAIDA_REAL > ORIGINAL", Icon: AlertCircle, tone: "rose" as const, delay: 200, dialog: "atraso" as const },
-                { label: "Conclusão Média", value: loading ? "—" : fmtPct(kpis.avgPerc), sub: "AVG(PERC_COMPLETO)", Icon: TrendingUp, tone: "violet" as const, delay: 240, dialog: null },
-              ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
-                const s = KPI_STYLE[tone];
-                return (
-                  <KpiCard
-                    key={label}
-                    label={label}
-                    value={value}
-                    sub={dialog ? `${sub} · clique p/ detalhes` : sub}
-                    icon={Icon}
-                    stripe={s.stripe}
-                    iconBg={s.iconBg}
-                    iconTxt={s.iconTxt}
-                    glow={s.glow}
-                    delay={delay}
-                    loading={loading}
-                    onClick={dialog ? () => setKpiDialog(dialog) : undefined}
-                  />
-                );
-              })}
+              <AnimatedCard delay={80}>
+                <KpiCard label="Viagens em Andamento" value={loading ? "—" : fmtNum(kpis.emAndamento)} subtitle="0% < PERC < 100% · clique p/ detalhes" icon={Navigation} tone="cyan" loading={loading} onClick={() => setKpiDialog("andamento")} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Veículos em Rota" value={loading ? "—" : fmtNum(kpis.emRota)} subtitle="Fora de manutenção · clique p/ detalhes" icon={Truck} tone="emerald" loading={loading} onClick={() => setKpiDialog("rota")} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Em Manutenção" value={loading ? "—" : fmtNum(kpis.emManutencao)} subtitle="EM_MANUTENCAO = S · clique p/ detalhes" icon={Wrench} tone="amber" loading={loading} onClick={() => setKpiDialog("manutencao")} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="Com Atraso na Saída" value={loading ? "—" : fmtNum(kpis.comAtraso)} subtitle="SAIDA_REAL > ORIGINAL · clique p/ detalhes" icon={AlertCircle} tone="rose" loading={loading} onClick={() => setKpiDialog("atraso")} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="Conclusão Média" value={loading ? "—" : fmtPct(kpis.avgPerc)} subtitle="AVG(PERC_COMPLETO)" icon={TrendingUp} tone="violet" loading={loading} />
+              </AnimatedCard>
             </div>
 
 

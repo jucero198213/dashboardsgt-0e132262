@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -496,70 +496,18 @@ export default function FinanciamentoFrota() {
 
               {/* ── KPI Cards ── */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
-                {[
-                  {
-                    label: "Contratos ativos",
-                    value: fmtN(kpis.totalContratos),
-                    sub:   "financiamentos vigentes",
-                    icon:  Truck,
-                    stripe: "from-cyan-500/25 via-cyan-400/10 to-transparent",
-                    border: "border-cyan-400/20",
-                    glow:   "rgba(6,182,212,0.10)",
-                    iconBg: "bg-cyan-400/10 border-cyan-400/25",
-                    iconTxt:"text-cyan-300",
-                    subTxt: "text-cyan-400/70",
-                  },
-                  {
-                    label: "Compromisso mensal",
-                    value: fmt(kpis.compromissoMensal),
-                    sub:   "parcela + juros ou valor pago no periodo",
-                    icon:  CreditCard,
-                    stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
-                    border: "border-amber-400/20",
-                    glow:   "rgba(245,158,11,0.10)",
-                    iconBg: "bg-amber-400/10 border-amber-400/25",
-                    iconTxt:"text-amber-300",
-                    subTxt: "text-amber-400/70",
-                  },
-                  {
-                    label: "Parcelas em aberto",
-                    value: fmt(kpis.parcelasAbertas),
-                    sub:   "valor total em aberto no periodo",
-                    icon:  FileText,
-                    stripe: "from-violet-500/25 via-violet-400/10 to-transparent",
-                    border: "border-violet-400/20",
-                    glow:   "rgba(139,92,246,0.10)",
-                    iconBg: "bg-violet-400/10 border-violet-400/25",
-                    iconTxt:"text-violet-300",
-                    subTxt: "text-violet-400/70",
-                  },
-                  {
-                    label: "Juros acumulados",
-                    value: fmt(kpis.jurosTotal),
-                    sub:   "total de juros no período",
-                    icon:  TrendingDown,
-                    stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
-                    border: "border-rose-400/20",
-                    glow:   "rgba(244,63,94,0.10)",
-                    iconBg: "bg-rose-400/10 border-rose-400/25",
-                    iconTxt:"text-rose-300",
-                    subTxt: "text-rose-400/70",
-                  },
-                ].map((k, i) => (
-                  <KpiCard
-                    key={k.label}
-                    label={k.label}
-                    value={isLoading ? "—" : k.value}
-                    sub={k.sub}
-                    icon={k.icon}
-                    stripe={k.stripe}
-                    iconBg={`border ${k.iconBg}`}
-                    iconTxt={k.iconTxt}
-                    subClassName={k.subTxt}
-                    delay={i * 60}
-                    loading={isLoading}
-                  />
-                ))}
+                <AnimatedCard delay={0}>
+                  <KpiCard label="Contratos ativos" value={fmtN(kpis.totalContratos)} subtitle="financiamentos vigentes" icon={Truck} tone="cyan" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={60}>
+                  <KpiCard label="Compromisso mensal" value={fmt(kpis.compromissoMensal)} subtitle="parcela + juros ou valor pago no periodo" icon={CreditCard} tone="amber" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={120}>
+                  <KpiCard label="Parcelas em aberto" value={fmt(kpis.parcelasAbertas)} subtitle="valor total em aberto no periodo" icon={FileText} tone="violet" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={180}>
+                  <KpiCard label="Juros acumulados" value={fmt(kpis.jurosTotal)} subtitle="total de juros no período" icon={TrendingDown} tone="rose" loading={isLoading} />
+                </AnimatedCard>
               </div>
 
               {/* ── Split: Distribuição por banco + Tabela ── */}

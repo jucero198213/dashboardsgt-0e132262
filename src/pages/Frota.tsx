@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -866,54 +866,18 @@ export default function Frota() {
 
             {/* ════════ KPI ROW (4 cards) ════════ */}
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0 sgt-stagger">
-              {[
-                {
-                  label: "Frota Ativa", value: isFetchingDw ? "—" : fmtNum(kpis.ativos),
-                  sub: `${fmtNum(kpis.total)} no recorte`,
-                  icon: Truck, color: "cyan", rgb: "6,182,212",
-                  stripe: "from-cyan-400/60 to-cyan-700/20",
-                  border: "border-cyan-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-                  iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-                  iconTxt: "text-rose-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Idade Média", value: isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
-                  sub: "veículos ativos",
-                  icon: Calendar, color: "violet", rgb: "139,92,246",
-                  stripe: "from-violet-400/60 to-violet-700/20",
-                  border: "border-violet-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
-                  iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
-                  iconTxt: "text-violet-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Custo de Manutenção", value: isFetchingDw ? "—" : fmtK(kpis.custoTotal),
-                  sub: `${fmtNum(kpis.totalOrdens)} ordens`,
-                  icon: Wrench, color: "rose", rgb: "244,63,94",
-                  stripe: "from-rose-400/60 to-rose-700/20",
-                  border: "border-rose-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-                  iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
-                  iconTxt: "text-rose-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Custo Médio / Veículo", value: isFetchingDw ? "—" : fmtK(kpis.custoMedio),
-                  sub: `${fmtNum(kpis.ordensAbertas)} ordens abertas`,
-                  icon: DollarSign, color: "amber", rgb: "245,158,11",
-                  stripe: "from-amber-400/60 to-amber-700/20",
-                  border: "border-amber-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",
-                  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-                  iconTxt: "text-amber-300",
-                  sub2: "text-slate-500",
-                },
-              ].map((k, i) => (
-                <KpiCard key={k.label} {...k} subClassName={k.sub2} delay={i * 60} />
-              ))}
+              <AnimatedCard delay={0}>
+                <KpiCard label="Frota Ativa" value={isFetchingDw ? "—" : fmtNum(kpis.ativos)} subtitle={`${fmtNum(kpis.total)} no recorte`} icon={Truck} tone="cyan" />
+              </AnimatedCard>
+              <AnimatedCard delay={60}>
+                <KpiCard label="Idade Média" value={isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`} subtitle="veículos ativos" icon={Calendar} tone="violet" />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Custo de Manutenção" value={isFetchingDw ? "—" : fmtK(kpis.custoTotal)} subtitle={`${fmtNum(kpis.totalOrdens)} ordens`} icon={Wrench} tone="rose" />
+              </AnimatedCard>
+              <AnimatedCard delay={180}>
+                <KpiCard label="Custo Médio / Veículo" value={isFetchingDw ? "—" : fmtK(kpis.custoMedio)} subtitle={`${fmtNum(kpis.ordensAbertas)} ordens abertas`} icon={DollarSign} tone="amber" />
+              </AnimatedCard>
             </div>
 
             {/* ════════ GRÁFICOS - LINHA 1 ════════ */}

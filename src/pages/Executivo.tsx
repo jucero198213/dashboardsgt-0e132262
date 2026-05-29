@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -71,60 +72,6 @@ const PALETTE: Record<
   rose:    { border: "border-rose-400/20",    stripe: "from-rose-500/25 via-rose-400/10 to-transparent",    iconBg: "bg-rose-400/10 border-rose-400/25",    iconTxt: "text-rose-300",    glow: "rgba(244,63,94,0.10)",    sub: "text-rose-400/70"    },
   orange:  { border: "border-orange-400/20",  stripe: "from-orange-500/25 via-orange-400/10 to-transparent",  iconBg: "bg-orange-400/10 border-orange-400/25",  iconTxt: "text-orange-300",  glow: "rgba(251,146,60,0.10)",  sub: "text-orange-400/70"  },
 };
-
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-
-function KpiCard({
-  icon: Icon,
-  label,
-  value,
-  sub,
-  tone,
-  loading,
-  onClick,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  sub?: string;
-  tone: Tone;
-  loading?: boolean;
-  onClick?: () => void;
-}) {
-  const p = PALETTE[tone];
-  return (
-    <div
-      onClick={onClick}
-      className={`relative overflow-hidden rounded-2xl border ${p.border} p-4 flex flex-col gap-3 h-full transition-all duration-200 ${
-        onClick ? "cursor-pointer hover:brightness-110 hover:-translate-y-0.5" : ""
-      }`}
-      style={{ background: "var(--sgt-bg-card)", boxShadow: `0 0 20px ${p.glow}` }}
-    >
-      {/* Stripe no topo */}
-      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${p.stripe}`} />
-
-      <div className={`flex h-9 w-9 items-center justify-center rounded-xl border ${p.iconBg} ${p.iconTxt}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{label}</p>
-        {loading ? (
-          <div className="mt-2 h-6 w-28 animate-pulse rounded-lg bg-white/5" />
-        ) : (
-          <p className="mt-1 text-[22px] font-black tracking-tight sgt-text leading-tight">{value}</p>
-        )}
-        {sub && !loading && (
-          <p className={`mt-0.5 text-[11px] ${p.sub}`}>{sub}</p>
-        )}
-      </div>
-
-      {onClick && (
-        <ArrowRight className={`absolute right-4 bottom-4 h-4 w-4 opacity-20 ${p.iconTxt}`} />
-      )}
-    </div>
-  );
-}
 
 // ─── Alerta item ──────────────────────────────────────────────────────────────
 
@@ -541,7 +488,7 @@ export default function Executivo() {
                       icon={TrendingUp}
                       label="Faturamento do mês"
                       value={fmt(fatMes)}
-                      sub={fatDia != null ? `Hoje: ${fmt(fatDia)}` : undefined}
+                      subtitle={fatDia != null ? `Hoje: ${fmt(fatDia)}` : undefined}
                       tone="amber"
                       loading={qFat.isLoading}
                       onClick={() => navigate("/faturamento")}
@@ -552,7 +499,7 @@ export default function Executivo() {
                       icon={DollarSign}
                       label="A Receber (CR)"
                       value={fmt(finKpis.totalCR)}
-                      sub="títulos no período"
+                      subtitle="títulos no período"
                       tone="emerald"
                       loading={qFin.isLoading}
                       onClick={() => navigate("/contas-a-receber")}
@@ -563,7 +510,7 @@ export default function Executivo() {
                       icon={DollarSign}
                       label="A Pagar (CP)"
                       value={fmt(finKpis.totalCP)}
-                      sub="títulos no período"
+                      subtitle="títulos no período"
                       tone="rose"
                       loading={qFin.isLoading}
                       onClick={() => navigate("/contas-a-pagar")}
@@ -574,7 +521,7 @@ export default function Executivo() {
                       icon={finKpis.saldo >= 0 ? TrendingUp : TrendingDown}
                       label="Saldo líquido"
                       value={fmt(finKpis.saldo)}
-                      sub="CR − CP"
+                      subtitle="CR − CP"
                       tone={finKpis.saldo >= 0 ? "cyan" : "rose"}
                       loading={qFin.isLoading}
                     />
@@ -593,7 +540,7 @@ export default function Executivo() {
                       icon={Truck}
                       label="Frota ativa"
                       value={`${frotaKpis.pct}%`}
-                      sub={`${frotaKpis.ativos} de ${frotaKpis.total} veículos`}
+                      subtitle={`${frotaKpis.ativos} de ${frotaKpis.total} veículos`}
                       tone="emerald"
                       loading={qFrota.isLoading}
                       onClick={() => navigate("/frota")}
@@ -604,7 +551,7 @@ export default function Executivo() {
                       icon={Navigation}
                       label="Viagens em andamento"
                       value={fmtN(operKpis.emViagem)}
-                      sub={`${operKpis.pctMedio}% concluído (média)`}
+                      subtitle={`${operKpis.pctMedio}% concluído (média)`}
                       tone="cyan"
                       loading={qOper.isLoading}
                       onClick={() => navigate("/em-desenvolvimento/operacional")}
@@ -615,7 +562,7 @@ export default function Executivo() {
                       icon={Wrench}
                       label="Custo manutenção"
                       value={fmt(manutKpis.custo)}
-                      sub={`${manutKpis.emAndamento} ordens em andamento`}
+                      subtitle={`${manutKpis.emAndamento} ordens em andamento`}
                       tone="orange"
                       loading={qManut.isLoading}
                       onClick={() => navigate("/manutencao")}
@@ -626,7 +573,7 @@ export default function Executivo() {
                       icon={Fuel}
                       label="Custo abastecimento"
                       value={fmt(abastKpis.custoTotal)}
-                      sub={`${abastKpis.litros.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} L · média ${abastKpis.mediaGeral.toFixed(2)} km/L`}
+                      subtitle={`${abastKpis.litros.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} L · média ${abastKpis.mediaGeral.toFixed(2)} km/L`}
                       tone="amber"
                       loading={qAbast.isLoading}
                       onClick={() => navigate("/em-desenvolvimento/abastecimento")}

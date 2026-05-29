@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
-import { KpiCard, KPI_TONES } from "@/components/shared/KpiCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -740,59 +740,21 @@ export default function Manutencao() {
 
             {/* ════════ KPI ROW (5 cards) ════════ */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-              {[
-                {
-                  label: "Ordens de Serviço",
-                  value: loading ? "—" : fmtNum(kpis.totalOS),
-                  sub: `${fmtNum(kpis.abertas)} em andamento`,
-                  Icon: Hash,
-                  tone: "violet" as const,
-                  delay: 80,
-                },
-                {
-                  label: "Custo de Peças",
-                  value: loading ? "—" : fmtK(kpis.totalPecas),
-                  sub: kpis.totalCusto > 0 ? `${((kpis.totalPecas / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—",
-                  Icon: Package,
-                  tone: "cyan" as const,
-                  delay: 120,
-                },
-                {
-                  label: "Mão de Obra",
-                  value: loading ? "—" : fmtK(kpis.totalMO),
-                  sub: kpis.totalCusto > 0 ? `${((kpis.totalMO / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—",
-                  Icon: Users,
-                  tone: "emerald" as const,
-                  delay: 160,
-                },
-                {
-                  label: "Custo Total",
-                  value: loading ? "—" : fmtK(kpis.totalCusto),
-                  sub: `${fmtNum(kpis.externas)} ext • ${fmtNum(kpis.internas)} int`,
-                  Icon: DollarSign,
-                  tone: "amber" as const,
-                  delay: 200,
-                },
-                {
-                  label: "Custo Médio / OS",
-                  value: loading ? "—" : fmtK(kpis.custoMedioOS),
-                  sub: `base: ${fmtNum(kpis.totalOS)} ordens`,
-                  Icon: BarChart3,
-                  tone: "rose" as const,
-                  delay: 240,
-                },
-              ].map(({ label, value, sub, Icon, tone, delay }) => (
-                <KpiCard
-                  key={label}
-                  label={label}
-                  value={value}
-                  sub={sub}
-                  icon={Icon}
-                  {...KPI_TONES[tone]}
-                  delay={delay}
-                  loading={loading}
-                />
-              ))}
+              <AnimatedCard delay={80}>
+                <KpiCard label="Ordens de Serviço" value={loading ? "—" : fmtNum(kpis.totalOS)} subtitle={`${fmtNum(kpis.abertas)} em andamento`} icon={Hash} tone="violet" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Custo de Peças" value={loading ? "—" : fmtK(kpis.totalPecas)} subtitle={kpis.totalCusto > 0 ? `${((kpis.totalPecas / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—"} icon={Package} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Mão de Obra" value={loading ? "—" : fmtK(kpis.totalMO)} subtitle={kpis.totalCusto > 0 ? `${((kpis.totalMO / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—"} icon={Users} tone="emerald" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={`${fmtNum(kpis.externas)} ext • ${fmtNum(kpis.internas)} int`} icon={DollarSign} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="Custo Médio / OS" value={loading ? "—" : fmtK(kpis.custoMedioOS)} subtitle={`base: ${fmtNum(kpis.totalOS)} ordens`} icon={BarChart3} tone="rose" loading={loading} />
+              </AnimatedCard>
             </div>
             <InsightsSection
               setor="manutencao"
