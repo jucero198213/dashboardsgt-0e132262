@@ -105,7 +105,7 @@ export default function GestaoUsuarios() {
 
     const { error: insErr } = await supabase
       .from("user_roles")
-      .insert({ user_id: userId, role: newRole });
+      .insert({ user_id: userId, role: newRole } as any);
     if (insErr) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
 
     setFeedback({ msg: "Role atualizada com sucesso.", type: "ok" });
