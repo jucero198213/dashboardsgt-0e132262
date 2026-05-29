@@ -15,6 +15,7 @@ import sgtLogo from "@/assets/sgt-logo.png";
  */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { canAccess } = usePagePermissions();
@@ -85,26 +86,6 @@ export function MobileNav() {
             </div>
 
           </div>
-
-          {/* User info */}
-          {user && (
-            <div className="flex items-center gap-3 border-b px-5 py-3"
-              style={{ borderColor: "var(--sgt-border-subtle)" }}>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-500/10 text-[13px] font-bold text-cyan-300">
-                {initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[12px] font-semibold" style={{ color: "var(--sgt-text-primary)" }}>
-                  {user.email}
-                </p>
-                <p className="mt-0.5 flex items-center gap-1 text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>
-                  {isAdmin
-                    ? <><Shield className="h-3 w-3 text-red-400" />Administrador</>
-                    : <><User className="h-3 w-3" />Usuário</>}
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Navegação */}
           <nav className="flex-1 overflow-y-auto py-2 scrollbar-none">
@@ -180,67 +161,74 @@ export function MobileNav() {
               </div>
             ))}
 
-            {/* Admin */}
-            {isAdmin && (
-              <div className="px-3 pt-2 pb-1">
-                <div className="mb-3 h-px" style={{ background: "var(--sgt-divider)" }} />
-                <p className="px-1 pb-2 text-[9px] font-semibold uppercase tracking-[0.22em]"
-                  style={{ color: "var(--sgt-text-muted)" }}>
-                  Administração
-                </p>
-                <button
-                  type="button"
-                  onClick={() => go("/admin")}
-                  className="flex w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2.5 text-left transition-all active:scale-[0.98] hover:bg-white/[0.04] hover:border-[var(--sgt-border-subtle)]"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-400/20 bg-red-400/10">
-                    <Shield className="h-4 w-4 text-red-400" />
-                  </div>
-                  <span className="flex-1 text-[13px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>
-                    Painel Administrativo
-                  </span>
+          </nav>
+
+          {/* ── User footer ── */}
+          <div className="border-t shrink-0" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+
+            {/* Opções — visíveis ao expandir */}
+            {userOpen && (
+              <div className="flex flex-col gap-0.5 border-b px-3 py-2"
+                style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-section)" }}>
+                {/* Tema */}
+                <button type="button" onClick={toggleTheme}
+                  className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all active:scale-[0.98] hover:bg-white/[0.04]">
+                  {theme === "dark" ? (
+                    <><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-amber-400/25 bg-amber-400/10">
+                      <Sun className="h-3.5 w-3.5 text-amber-400" /></div>
+                    <span className="text-[12px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>Tema claro</span></>
+                  ) : (
+                    <><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-400/10">
+                      <Moon className="h-3.5 w-3.5 text-cyan-400" /></div>
+                    <span className="text-[12px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>Tema escuro</span></>
+                  )}
+                </button>
+                {/* Admin */}
+                {isAdmin && (
+                  <button type="button" onClick={() => go("/admin")}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all active:scale-[0.98] hover:bg-white/[0.04]">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-red-400/20 bg-red-400/10">
+                      <Shield className="h-3.5 w-3.5 text-red-400" /></div>
+                    <span className="text-[12px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>Área Administrativa</span>
+                  </button>
+                )}
+                {/* Sair */}
+                <button type="button" onClick={() => { close(); signOut(); }}
+                  className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all active:scale-[0.98] hover:bg-rose-500/[0.08]">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-rose-400/25 bg-rose-400/10">
+                    <LogOut className="h-3.5 w-3.5 text-rose-400" /></div>
+                  <span className="text-[12px] font-semibold text-rose-300">Sair</span>
                 </button>
               </div>
             )}
-          </nav>
 
-          {/* Footer */}
-          <div className="flex flex-col gap-1 border-t p-3"
-            style={{ borderColor: "var(--sgt-border-subtle)", paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0.75rem)" }}>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all active:scale-[0.98] hover:bg-white/[0.04]"
-            >
-              {theme === "dark" ? (
-                <>
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-400/25 bg-amber-400/10">
-                    <Sun className="h-3.5 w-3.5 text-amber-400" />
-                  </div>
-                  <span className="text-[12px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>Tema claro</span>
-                </>
-              ) : (
-                <>
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-400/25 bg-cyan-400/10">
-                    <Moon className="h-3.5 w-3.5 text-cyan-400" />
-                  </div>
-                  <span className="text-[12px] font-medium" style={{ color: "var(--sgt-text-secondary)" }}>Tema escuro</span>
-                </>
-              )}
-            </button>
-
+            {/* Card do usuário */}
             {user && (
-              <button
-                type="button"
-                onClick={() => { close(); signOut(); }}
-                className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all active:scale-[0.98] hover:bg-rose-500/[0.08]"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-400/25 bg-rose-400/10">
-                  <LogOut className="h-3.5 w-3.5 text-rose-400" />
-                </div>
-                <span className="text-[12px] font-semibold text-rose-300">Sair</span>
-              </button>
+              <div style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 0px)" }}>
+                <button
+                  type="button"
+                  onClick={() => setUserOpen(o => !o)}
+                  className="flex w-full items-center gap-3 px-4 py-3 transition-all active:scale-[0.98] hover:bg-white/[0.03]"
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 text-[13px] font-bold text-amber-300">
+                    {initials}
+                  </span>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="truncate text-[12px] font-semibold" style={{ color: "var(--sgt-text-primary)" }}>
+                      {user.email}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>
+                      {isAdmin
+                        ? <><Shield className="h-3 w-3 text-red-400" />Administrador</>
+                        : <><User className="h-3 w-3" />Usuário</>}
+                    </p>
+                  </div>
+                  <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${userOpen ? "-rotate-90" : "rotate-90"}`} />
+                </button>
+              </div>
             )}
+
           </div>
 
         </div>
