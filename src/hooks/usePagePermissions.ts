@@ -28,14 +28,8 @@ interface UsePagePermissionsResult {
   canAccess: (module: AppModule) => boolean;
   refresh: () => Promise<void>;
 }
-
-/**
- * Hook que carrega os módulos que o usuário atual pode acessar.
- * - Admins têm acesso a tudo automaticamente.
- * - Usuários comuns: lê de page_permissions onde user_id = auth.uid().
- */
 export function usePagePermissions(): UsePagePermissionsResult {
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, role, isLoading: authLoading } = useAuth();
   const [permissions, setPermissions] = useState<Set<AppModule>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,6 +37,12 @@ export function usePagePermissions(): UsePagePermissionsResult {
     if (!user) {
       setPermissions(new Set());
       setIsLoading(false);
+      return;
+    }
+    // Aguarda a role ser determinada antes de decidir permissões
+    // (evita race onde isAdmin=false momentaneamente e redireciona)
+    if (role === null) {
+      setIsLoading(true);
       return;
     }
     if (isAdmin) {
@@ -69,7 +69,11 @@ export function usePagePermissions(): UsePagePermissionsResult {
       );
     }
     setIsLoading(false);
-  }, [user, isAdmin]);
+  }, [user, isAdmin, role]);
+
+  useEffect(() => {
+    if (!authLoading) load();
+  }, [authLoading, load]);
 
   useEffect(() => {
     if (!authLoading) load();
