@@ -144,7 +144,7 @@ export function AppSidebar() {
             onMouseEnter2={undefined}
           >
             <Icon className="w-4 h-4 shrink-0"
-              style={active ? { color: "#1B1304" } : { opacity: 0.6 }} />
+              style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
           </button>
         </div>
       );
@@ -215,7 +215,7 @@ export function AppSidebar() {
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
             <Home className="w-4 h-4 shrink-0"
-              style={isHomeActive ? { color: "#1B1304" } : { opacity: 0.6 }} />
+              style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
           </button>
         </div>
       );
@@ -271,7 +271,7 @@ export function AppSidebar() {
     return (
       <div key={`sec-${label}`}
            className="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.12em]"
-           style={{ color: "var(--sgt-text-faint)", fontFamily: "var(--sgt-font-body)" }}>
+           style={{ color: "var(--sgt-text-muted)", fontFamily: "var(--sgt-font-body)" }}>
         {label}
       </div>
     );
