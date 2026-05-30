@@ -588,14 +588,14 @@ export default function Home() {
           <TodayTicketsPopup />
 
           {/* ── HERO ── */}
-          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10">
+          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center overflow-x-hidden px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10">
 
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
 
               {/* "BEM-VINDO AO" — visível, claro, espaçado */}
               <motion.span
-                className="block text-[clamp(0.7rem,1.3vw,1rem)] font-semibold uppercase tracking-[0.5em] text-slate-300/70 mb-4"
+                className="block text-[clamp(0.65rem,2.5vw,1rem)] font-semibold uppercase tracking-[0.35em] text-slate-300/70 mb-4 sm:tracking-[0.5em]"
                 initial={reduce ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.3 }}
@@ -607,7 +607,7 @@ export default function Home() {
               <span
                 className="block font-black tracking-[-0.04em] bg-clip-text text-transparent"
                 style={{
-                  fontSize: "clamp(4.5rem,13vw,11rem)",
+                  fontSize: "clamp(2.5rem,15vw,11rem)",
                   backgroundImage: "linear-gradient(135deg, #fffbeb 0%, #fcd34d 30%, #f59e0b 60%, #ea580c 100%)",
                   filter: "drop-shadow(0 0 32px rgba(245,158,11,0.28)) drop-shadow(0 4px 16px rgba(234,88,12,0.15))",
                   lineHeight: 1,
