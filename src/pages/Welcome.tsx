@@ -358,7 +358,7 @@ export default function Welcome() {
         @media(min-width:768px){
           .wlc-root  {display:grid;grid-template-columns:52% 48%;grid-template-rows:auto 1fr}
           .wlc-header{grid-column:1;grid-row:1;padding:52px 64px 0}
-          .wlc-hero  {grid-column:2;grid-row:1/3;padding:40px 52px 40px 28px;border-left:1px solid rgba(245,166,35,.06);background:linear-gradient(135deg,rgba(245,166,35,.024) 0%,transparent 60%);flex-direction:column;align-items:center;justify-content:center}
+          .wlc-hero  {grid-column:2;grid-row:1/3;max-height:none;padding:40px 52px 40px 28px;border-left:1px solid rgba(245,166,35,.06);background:linear-gradient(135deg,rgba(245,166,35,.024) 0%,transparent 60%);flex-direction:column;align-items:center;justify-content:center}
           .wlc-bottom{grid-column:1;grid-row:2;padding:0 64px 52px;display:flex;flex-direction:column;justify-content:flex-end}
           .wlc-slides{max-width:420px}
           .wlc-slide {padding:22px 22px 18px;border-radius:22px}
