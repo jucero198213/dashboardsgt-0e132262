@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import sgtLogo from "@/assets/sgt-logo-clean.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,14 +10,17 @@ export default function Login() {
   const { session, isLoading, signIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email,       setEmail]       = useState("");
   const [password,    setPassword]    = useState("");
   const [showPass,    setShowPass]    = useState(false);
   const [error,       setError]       = useState<string | null>(null);
   const [submitting,  setSubmitting]  = useState(false);
 
-  // Primeiro acesso
-  const [mode, setMode] = useState<"login" | "first-access">("login");
+  // Primeiro acesso — inicializa pelo query param ?mode=first-access
+  const [mode, setMode] = useState<"login" | "first-access">(
+    searchParams.get("mode") === "first-access" ? "first-access" : "login"
+  );
   const [faEmail, setFaEmail] = useState("");
   const [faCode, setFaCode] = useState("");
   const [faPassword, setFaPassword] = useState("");

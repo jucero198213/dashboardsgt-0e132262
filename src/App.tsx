@@ -37,6 +37,7 @@ const SgtWorkspace            = lazy(() => import("./pages/SgtWorkspace"));
 const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspace"));
 const PortalWrWorkspace       = lazy(() => import("./pages/PortalWrWorkspace"));
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
+const Welcome                 = lazy(() => import("./pages/Welcome"));
 
 // ── Loading screen mínimo (sem flash, sem layout shift) ───────────────────────
 function PageLoader() {
@@ -74,7 +75,8 @@ const App = () => (
           <FinancialDataProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/"         element={<Navigate to="/login" replace />} />
+                <Route path="/"         element={<Welcome />} />
+                <Route path="/welcome"  element={<Welcome />} />
                 <Route path="/login"    element={<Login />} />
                 <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 {/* ── Financeiro ── */}
