@@ -303,7 +303,7 @@ export default function Welcome() {
 
         /* Seções mobile */
         .wlc-header{z-index:10;padding:36px 26px 0;display:flex;align-items:center;gap:10px}
-        .wlc-hero  {z-index:10;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 36px 4px;position:relative}
+        .wlc-hero  {z-index:10;flex:1 1 0;min-height:0;max-height:46vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 36px 4px;position:relative}
         .wlc-bottom{z-index:10;padding:0 26px 20px}
 
         /* Carrossel */
