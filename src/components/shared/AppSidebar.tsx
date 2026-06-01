@@ -89,14 +89,6 @@ export function AppSidebar() {
   }
 
   function goItem(item: AppNavItem) {
-    if (item.portal) {
-      // Portais abrem em modal: adiciona ?portal=ID preservando params existentes
-      const portalId = item.id.replace("portal-", "");
-      const current  = new URLSearchParams(location.search);
-      current.set("portal", portalId);
-      navigate(`${location.pathname}?${current.toString()}`);
-      return;
-    }
     if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
     else if (item.to)        navigate(item.to);
   }

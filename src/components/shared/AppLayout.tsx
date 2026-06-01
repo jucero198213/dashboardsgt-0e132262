@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { AppSidebar, useSidebarWidth } from "./AppSidebar";
 import { BottomNav } from "./BottomNav";
-import { PortalModal } from "./PortalModal";
 
 /**
  * Layout global:
@@ -14,7 +13,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <>
       <AppSidebar />
       <BottomNav />
-      <PortalModal />
       <div
         className="min-h-[100dvh] max-w-full overflow-x-hidden pb-16 sm:pb-0 transition-[padding] duration-300"
         style={{ paddingLeft: `var(--sgt-sb, 0px)` }}
