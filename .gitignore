@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Tauri — binários compilados (não versionar)
+src-tauri/target/
+src-tauri/gen/
+
 # Environment variables
 # root .env — contém apenas anon keys públicas do Supabase, seguro commitar
 # dw-api-local/.env — contém senha do SQL Server, NUNCA commitar
