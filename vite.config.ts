@@ -24,10 +24,6 @@ export default defineConfig(({ mode }) => ({
   build: {
     chunkSizeWarningLimit: 600,
     rollupOptions: {
-      // Pacotes Tauri são runtime-only no app desktop — não bundlar no build web
-      external: [
-        /^@tauri-apps\/.*/,
-      ],
       output: {
         manualChunks: {
           // React core — raramente muda, fica em cache por muito tempo
