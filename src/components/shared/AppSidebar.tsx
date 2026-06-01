@@ -123,16 +123,22 @@ export function AppSidebar() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
     window.dispatchEvent(new CustomEvent("sgt-sidebar-toggle", { detail: { collapsed } }));
+    if (collapsed) {
+      // Zera todos os acordeões ao recolher — evita transição quebrada na re-expansão
+      setOpenAcc({});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed]);
 
   useEffect(() => {
+    if (collapsed) return; // sidebar recolhido não precisa recalcular
     const upd: Record<string, boolean> = {};
     ACCORDION_GROUPS.forEach(g => {
       if (visible(g.ids).some(item => isActive(item))) upd[g.key] = true;
     });
     if (Object.keys(upd).length) setOpenAcc(p => ({ ...p, ...upd }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, collapsed]);
 
   function toggleAcc(key: string) {
     if (!collapsed) setOpenAcc(p => ({ ...p, [key]: !p[key] }));
