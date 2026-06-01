@@ -53,6 +53,24 @@ const CHIP_ACTIVE: React.CSSProperties = {
   border:     "1px solid rgba(245,166,35,0.45)",
   boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 18px rgba(245,166,35,0.30)",
 };
+// Portais — destaque cyan (diferencia do âmbar padrão)
+const PORTAL_PILL: React.CSSProperties = {
+  background:   "rgba(6,182,212,0.07)",
+  border:       "1px solid rgba(6,182,212,0.20)",
+  borderRadius: "9999px",
+  color:        "rgba(103,232,249,0.90)",
+  fontWeight:   500,
+  padding:      "8px 16px",
+};
+const PORTAL_PILL_HOVER: React.CSSProperties = {
+  background: "rgba(6,182,212,0.13)",
+  border:     "1px solid rgba(6,182,212,0.32)",
+  color:      "rgba(165,243,252,0.95)",
+};
+const PORTAL_CHIP: React.CSSProperties = {
+  background: "rgba(6,182,212,0.09)",
+  border:     "1px solid rgba(6,182,212,0.22)",
+};
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export function AppSidebar() {
@@ -140,10 +158,16 @@ export function AppSidebar() {
             className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${active ? " sgt-nav-active-chip" : ""}`}
             style={active
               ? { ...CHIP_ACTIVE }
-              : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
+              : item.portal
+                ? { ...PORTAL_CHIP, color: "rgba(103,232,249,0.80)" }
+                : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
             <Icon className="w-4 h-4 shrink-0"
-              style={active ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
+              style={active
+                ? { color: "#F5A623", opacity: 1 }
+                : item.portal
+                  ? { color: "rgba(103,232,249,0.80)", opacity: 1 }
+                  : { opacity: 0.6 }} />
           </button>
         </div>
       );
@@ -154,33 +178,47 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? " sgt-nav-active-pill" : ""}`}
+          className={`w-full flex items-center gap-3 text-[14px] transition-all duration-150${active ? " font-bold sgt-nav-active-pill" : " font-medium"}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
-            : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
-                border: "1px solid transparent", background: "transparent",
-                padding: "8px 16px" }}
+            : item.portal
+              ? { ...PORTAL_PILL }
+              : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
+                  border: "1px solid transparent", background: "transparent",
+                  padding: "8px 16px" }}
           onMouseEnter={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "rgba(255,255,255,0.03)";
-              b.style.color      = "var(--sgt-text-primary)";
+              if (item.portal) {
+                Object.assign(b.style, PORTAL_PILL_HOVER);
+              } else {
+                b.style.background = "rgba(255,255,255,0.03)";
+                b.style.color      = "var(--sgt-text-primary)";
+              }
             }
           }}
           onMouseLeave={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "transparent";
-              b.style.color      = "var(--sgt-text-secondary)";
+              if (item.portal) {
+                Object.assign(b.style, PORTAL_PILL);
+              } else {
+                b.style.background = "transparent";
+                b.style.color      = "var(--sgt-text-secondary)";
+              }
             }
           }}
         >
           <Icon className="w-4 h-4 shrink-0"
-            style={active ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
+            style={active
+              ? { color: "#F5A623", opacity: 1 }
+              : item.portal
+                ? { color: "rgba(103,232,249,0.85)", opacity: 1 }
+                : { opacity: 0.6 }} />
           <span className="flex-1 text-left truncate">{item.label}</span>
           {item.portal && !active && (
-            <svg className="w-3 h-3 shrink-0 opacity-30" viewBox="0 0 12 12" fill="none"
-                 stroke="currentColor" strokeWidth="1.5">
+            <svg className="w-3 h-3 shrink-0" viewBox="0 0 12 12" fill="none"
+                 stroke="rgba(103,232,249,0.50)" strokeWidth="1.5">
               <path d="M3 9l6-6M6 3h3v3"/>
             </svg>
           )}
