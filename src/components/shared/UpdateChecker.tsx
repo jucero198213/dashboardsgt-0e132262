@@ -21,7 +21,7 @@ export function UpdateChecker() {
 
     const check = async () => {
       try {
-        const { check: checkUpdate } = await import("@tauri-apps/plugin-updater");
+        const { check: checkUpdate } = await import(/* @vite-ignore */ "@tauri-apps/plugin-updater");
         const result = await checkUpdate();
         if (result?.available) {
           setUpdate({ version: result.version, notes: result.body ?? null });
@@ -41,8 +41,8 @@ export function UpdateChecker() {
     if (!update) return;
     setInstalling(true);
     try {
-      const { check: checkUpdate } = await import("@tauri-apps/plugin-updater");
-      const { relaunch }           = await import("@tauri-apps/plugin-process");
+      const { check: checkUpdate } = await import(/* @vite-ignore */ "@tauri-apps/plugin-updater");
+      const { relaunch }           = await import(/* @vite-ignore */ "@tauri-apps/plugin-process");
       const result = await checkUpdate();
       if (!result?.available) return;
       let downloaded = 0, total = 0;
