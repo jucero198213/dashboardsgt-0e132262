@@ -366,8 +366,8 @@ export function AppSidebar() {
 
       {/* ── NAVEGAÇÃO ────────────────────────────────────────────────────── */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 flex flex-col"
-        style={{ scrollbarWidth: "none" }}
+        className="flex-1 min-h-0 overflow-y-auto py-1 flex flex-col"
+        style={{ scrollbarWidth: "none", overflowX: "visible" }}
         onMouseLeave={() => setFlyout(null)}
       >
         {/* Início */}
@@ -424,13 +424,16 @@ export function AppSidebar() {
 
               {/* Corpo: quando recolhida, sempre visível (ícones); quando expandida, animado */}
               <div
-                className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
-                style={{
-                  maxHeight: collapsed ? "none" : (isOpen ? "400px" : "0px"),
-                  overflow:  collapsed ? "visible" : "hidden",
-                }}
+                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                style={{ gridTemplateRows: collapsed ? "1fr" : (isOpen ? "1fr" : "0fr") }}
               >
-                {items.map(item => renderItem(item))}
+                {/* overflow-hidden necessário para a animação de colapso;
+                    padding + margin negativa dão espaço pro box-shadow não ser clipado */}
+                <div className="overflow-hidden">
+                  <div className="py-6 -my-6">
+                    {items.map(item => renderItem(item))}
+                  </div>
+                </div>
               </div>
             </div>
           );
