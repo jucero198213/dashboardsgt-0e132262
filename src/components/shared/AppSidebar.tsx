@@ -41,16 +41,16 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 
 // ── Estilos inline ────────────────────────────────────────────────────────────
 const PILL_ACTIVE: React.CSSProperties = {
-  background:   "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.92) 42%,rgba(120,66,6,0.12) 100%)",
-  border:       "1px solid rgba(245,166,35,0.55)",
-  boxShadow:    "0 0 20px rgba(245,166,35,0.18),0 0 22px rgba(245,166,35,0.28),inset 0 1px 0 rgba(255,255,255,0.10)",
+  background:   "linear-gradient(95deg, rgba(245,166,35,0.18) 0%, rgba(245,166,35,0.10) 100%)",
+  border:       "1px solid rgba(245,166,35,0.40)",
+  boxShadow:    "0 0 20px rgba(245,166,35,0.18),0 0 22px rgba(245,166,35,0.28),inset 0 1px 0 rgba(255,255,255,0.06)",
   borderRadius: "9999px",
-  color:        "#1B1304",
+  color:        "#F5A623",
   fontWeight:   700,
 };
 const CHIP_ACTIVE: React.CSSProperties = {
-  background: "linear-gradient(135deg,#F5A623 0%,rgba(199,126,26,0.95) 100%)",
-  border:     "1px solid rgba(245,166,35,0.6)",
+  background: "rgba(245,166,35,0.16)",
+  border:     "1px solid rgba(245,166,35,0.45)",
   boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 18px rgba(245,166,35,0.30)",
 };
 
@@ -143,7 +143,7 @@ export function AppSidebar() {
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
             <Icon className="w-4 h-4 shrink-0"
-              style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
+              style={active ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
           </button>
         </div>
       );
@@ -176,7 +176,7 @@ export function AppSidebar() {
           }}
         >
           <Icon className="w-4 h-4 shrink-0"
-            style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
+            style={active ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
           <span className="flex-1 text-left truncate">{item.label}</span>
           {item.portal && !active && (
             <svg className="w-3 h-3 shrink-0 opacity-30" viewBox="0 0 12 12" fill="none"
@@ -188,7 +188,7 @@ export function AppSidebar() {
             <>
               <span className="sgt-live-dot" />
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                   stroke="#1B1304" strokeWidth="2">
+                   stroke="#F5A623" strokeWidth="2">
                 <path d="M4.5 2.5L8 6l-3.5 3.5"/>
               </svg>
             </>
@@ -217,7 +217,7 @@ export function AppSidebar() {
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
             <Home className="w-4 h-4 shrink-0"
-              style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
+              style={isHomeActive ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
           </button>
         </div>
       );
@@ -248,13 +248,13 @@ export function AppSidebar() {
           }}
         >
           <Home className="w-4 h-4 shrink-0"
-            style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
+            style={isHomeActive ? { color: "#F5A623", opacity: 1 } : { opacity: 0.6 }} />
           <span className="flex-1 text-left">Início</span>
           {isHomeActive && (
             <>
               <span className="sgt-live-dot" />
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                   stroke="#1B1304" strokeWidth="2">
+                   stroke="#F5A623" strokeWidth="2">
                 <path d="M4.5 2.5L8 6l-3.5 3.5"/>
               </svg>
             </>
@@ -454,7 +454,7 @@ export function AppSidebar() {
             borderRadius: "9999px",
             ...(flyout.active ? {
               background: "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.95) 70%)",
-              color:      "#1B1304",
+              color:      "#F5A623",
               border:     "1px solid rgba(245,166,35,0.6)",
               boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 20px rgba(245,166,35,0.30)",
             } : {
@@ -466,9 +466,9 @@ export function AppSidebar() {
           }}
         >
           {(() => { const FIcon = flyout.icon; return <FIcon className="w-4 h-4 shrink-0"
-            style={flyout.active ? { color: "#1B1304" } : {}} />; })()}
+            style={flyout.active ? { color: "#F5A623" } : {}} />; })()}
           <span>{flyout.label}</span>
-          {flyout.active && <ChevronRight className="w-3 h-3 shrink-0" style={{ color: "#1B1304" }} />}
+          {flyout.active && <ChevronRight className="w-3 h-3 shrink-0" style={{ color: "#F5A623" }} />}
         </div>
       )}
     </aside>
