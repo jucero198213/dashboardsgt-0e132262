@@ -141,7 +141,7 @@ export function AppSidebar() {
             style={active
               ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
-            onMouseEnter2={undefined}
+            
           >
             <Icon className="w-4 h-4 shrink-0"
               style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
