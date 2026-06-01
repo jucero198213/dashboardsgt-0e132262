@@ -36,5 +36,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "COLE_SUA_CHAVE_PUBLICA_AQUI",
+      "endpoints": [
+        "https://github.com/Pedroauj/Workspace-SGT/releases/latest/download/latest.json"
+      ],
+      "dialog": false
+    }
   }
 }

@@ -9,6 +9,7 @@ import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/shared/AppLayout";
+import { UpdateChecker } from "@/components/shared/UpdateChecker";
 
 // ── Lazy loading — cada página é um chunk separado ───────────────────────────
 const Index              = lazy(() => import("./pages/Index"));
@@ -70,6 +71,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <UpdateChecker />
       <BrowserRouter>
         <AuthProvider>
           <FinancialDataProvider>
