@@ -41,17 +41,17 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 
 // ── Estilos inline ────────────────────────────────────────────────────────────
 const PILL_ACTIVE: React.CSSProperties = {
-  background:   "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.92) 42%,rgba(120,66,6,0.12) 100%)",
+  background:   "linear-gradient(95deg, #F5A623 0%, #D4891A 100%)",
   border:       "1px solid rgba(245,166,35,0.55)",
-  boxShadow:    "0 0 20px rgba(245,166,35,0.18),0 0 22px rgba(245,166,35,0.28),inset 0 1px 0 rgba(255,255,255,0.10)",
+  boxShadow:    "0 0 12px rgba(245,166,35,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
 };
 const CHIP_ACTIVE: React.CSSProperties = {
-  background: "linear-gradient(135deg,#F5A623 0%,rgba(199,126,26,0.95) 100%)",
-  border:     "1px solid rgba(245,166,35,0.6)",
-  boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 18px rgba(245,166,35,0.30)",
+  background: "linear-gradient(135deg, #F5A623 0%, #D4891A 100%)",
+  border:     "1px solid rgba(245,166,35,0.60)",
+  boxShadow:  "0 0 10px rgba(245,166,35,0.22)",
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -79,6 +79,7 @@ export function AppSidebar() {
   const isHomeActive = location.pathname === "/home";
 
   function isActive(item: AppNavItem): boolean {
+    if (item.externalUrl) return false;
     if (item.financeScreen)
       return location.pathname === "/financeiro" && finScreen === item.financeScreen;
     if (item.to) {
@@ -89,8 +90,9 @@ export function AppSidebar() {
   }
 
   function goItem(item: AppNavItem) {
-    if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
-    else if (item.to)        navigate(item.to);
+    if (item.externalUrl)        window.open(item.externalUrl, "_blank", "noopener,noreferrer");
+    else if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
+    else if (item.to)            navigate(item.to);
   }
 
   function visible(ids: string[]): AppNavItem[] {
@@ -105,16 +107,19 @@ export function AppSidebar() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
     window.dispatchEvent(new CustomEvent("sgt-sidebar-toggle", { detail: { collapsed } }));
+    if (collapsed) setOpenAcc({});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed]);
 
   useEffect(() => {
+    if (collapsed) return;
     const upd: Record<string, boolean> = {};
     ACCORDION_GROUPS.forEach(g => {
       if (visible(g.ids).some(item => isActive(item))) upd[g.key] = true;
     });
     if (Object.keys(upd).length) setOpenAcc(p => ({ ...p, ...upd }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, collapsed]);
 
   function toggleAcc(key: string) {
     if (!collapsed) setOpenAcc(p => ({ ...p, [key]: !p[key] }));
@@ -353,8 +358,8 @@ export function AppSidebar() {
 
       {/* ── NAVEGAÇÃO ────────────────────────────────────────────────────── */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 flex flex-col"
-        style={{ scrollbarWidth: "none" }}
+        className="flex-1 min-h-0 overflow-y-auto py-1 flex flex-col"
+        style={{ scrollbarWidth: "none", overflowX: "visible" }}
         onMouseLeave={() => setFlyout(null)}
       >
         {/* Início */}
@@ -397,27 +402,22 @@ export function AppSidebar() {
                     }}
                   >
                     <span>{group.label}</span>
-                    <span style={{
-                      fontFamily: "var(--sgt-font-mono)", fontSize: 9,
-                      color: "var(--sgt-text-muted)", background: "rgba(255,255,255,0.04)",
-                      border: "1px solid var(--sgt-border-subtle)", padding: "0 5px",
-                      borderRadius: "9999px", lineHeight: "1.7",
-                    }}>{items.length}</span>
                     <ChevronDown className="ml-auto w-3 h-3 transition-transform duration-200"
                       style={{ color: "var(--sgt-text-muted)",
                                transform: isOpen ? "rotate(180deg)" : "none" }} />
                   </button>
               }
 
-              {/* Corpo: quando recolhida, sempre visível (ícones); quando expandida, animado */}
+              {/* Corpo: grid-template-rows para animação sem overflow-hidden no pai */}
               <div
-                className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
-                style={{
-                  maxHeight: collapsed ? "none" : (isOpen ? "400px" : "0px"),
-                  overflow:  collapsed ? "visible" : "hidden",
-                }}
+                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                style={{ gridTemplateRows: collapsed ? "1fr" : (isOpen ? "1fr" : "0fr") }}
               >
-                {items.map(item => renderItem(item))}
+                <div className="overflow-hidden">
+                  <div className="py-6 -my-6">
+                    {items.map(item => renderItem(item))}
+                  </div>
+                </div>
               </div>
             </div>
           );
