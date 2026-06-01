@@ -137,11 +137,10 @@ export function AppSidebar() {
             }}
             onMouseLeave={() => setFlyout(null)}
             aria-label={item.label}
-            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
+            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${active ? " sgt-nav-active-chip" : ""}`}
             style={active
               ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
-            onMouseEnter2={undefined}
           >
             <Icon className="w-4 h-4 shrink-0"
               style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
@@ -155,7 +154,7 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? " sgt-nav-active-pill" : ""}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -186,10 +185,13 @@ export function AppSidebar() {
             </svg>
           )}
           {active && (
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                 stroke="#1B1304" strokeWidth="2">
-              <path d="M4.5 2.5L8 6l-3.5 3.5"/>
-            </svg>
+            <>
+              <span className="sgt-live-dot" />
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
+                   stroke="#1B1304" strokeWidth="2">
+                <path d="M4.5 2.5L8 6l-3.5 3.5"/>
+              </svg>
+            </>
           )}
         </button>
       </div>
@@ -210,7 +212,7 @@ export function AppSidebar() {
             }
             onMouseLeave={() => setFlyout(null)}
             aria-label="Início"
-            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
+            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${isHomeActive ? " sgt-nav-active-chip" : ""}`}
             style={isHomeActive ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
@@ -224,7 +226,7 @@ export function AppSidebar() {
       <div className="mx-3 mt-3 mb-1">
         <button
           onClick={() => navigate("/home")}
-          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${isHomeActive ? " sgt-nav-active-pill" : ""}`}
           style={isHomeActive
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -249,10 +251,13 @@ export function AppSidebar() {
             style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
           <span className="flex-1 text-left">Início</span>
           {isHomeActive && (
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                 stroke="#1B1304" strokeWidth="2">
-              <path d="M4.5 2.5L8 6l-3.5 3.5"/>
-            </svg>
+            <>
+              <span className="sgt-live-dot" />
+              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
+                   stroke="#1B1304" strokeWidth="2">
+                <path d="M4.5 2.5L8 6l-3.5 3.5"/>
+              </svg>
+            </>
           )}
         </button>
       </div>
