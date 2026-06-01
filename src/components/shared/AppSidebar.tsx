@@ -162,7 +162,7 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className={`w-full flex items-center gap-3 text-[14px] transition-all duration-150${active ? " font-bold sgt-nav-active-pill" : " font-medium"}`}
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? " sgt-nav-active-pill" : ""}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
