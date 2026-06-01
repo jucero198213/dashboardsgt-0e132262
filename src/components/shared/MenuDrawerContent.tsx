@@ -36,8 +36,9 @@ export function MenuDrawerContent({ onClose }: { onClose: () => void }) {
 
   const go = (item: AppNavItem) => {
     onClose();
-    if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
-    else if (item.to) navigate(item.to);
+    if (item.externalUrl)        window.open(item.externalUrl, "_blank", "noopener,noreferrer");
+    else if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
+    else if (item.to)            navigate(item.to);
   };
 
   const s = new URLSearchParams(location.search).get("s") ?? "painel";
