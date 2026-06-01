@@ -41,17 +41,17 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 
 // ── Estilos inline ────────────────────────────────────────────────────────────
 const PILL_ACTIVE: React.CSSProperties = {
-  background:   "linear-gradient(95deg, #F5A623 0%, #D4891A 100%)",
+  background:   "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.92) 42%,rgba(120,66,6,0.12) 100%)",
   border:       "1px solid rgba(245,166,35,0.55)",
-  boxShadow:    "0 0 12px rgba(245,166,35,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
+  boxShadow:    "0 0 20px rgba(245,166,35,0.18),0 0 22px rgba(245,166,35,0.28),inset 0 1px 0 rgba(255,255,255,0.10)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
 };
 const CHIP_ACTIVE: React.CSSProperties = {
-  background: "linear-gradient(135deg, #F5A623 0%, #D4891A 100%)",
-  border:     "1px solid rgba(245,166,35,0.60)",
-  boxShadow:  "0 0 10px rgba(245,166,35,0.22)",
+  background: "linear-gradient(135deg,#F5A623 0%,rgba(199,126,26,0.95) 100%)",
+  border:     "1px solid rgba(245,166,35,0.6)",
+  boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 18px rgba(245,166,35,0.30)",
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -79,7 +79,6 @@ export function AppSidebar() {
   const isHomeActive = location.pathname === "/home";
 
   function isActive(item: AppNavItem): boolean {
-    if (item.externalUrl) return false;
     if (item.financeScreen)
       return location.pathname === "/financeiro" && finScreen === item.financeScreen;
     if (item.to) {
@@ -90,8 +89,7 @@ export function AppSidebar() {
   }
 
   function goItem(item: AppNavItem) {
-    if (item.externalUrl)    window.open(item.externalUrl, "_blank", "noopener,noreferrer");
-    else if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
+    if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
     else if (item.to)        navigate(item.to);
   }
 
@@ -107,22 +105,16 @@ export function AppSidebar() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
     window.dispatchEvent(new CustomEvent("sgt-sidebar-toggle", { detail: { collapsed } }));
-    if (collapsed) {
-      // Zera todos os acordeões ao recolher — evita transição quebrada na re-expansão
-      setOpenAcc({});
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed]);
 
   useEffect(() => {
-    if (collapsed) return; // sidebar recolhido não precisa recalcular
     const upd: Record<string, boolean> = {};
     ACCORDION_GROUPS.forEach(g => {
       if (visible(g.ids).some(item => isActive(item))) upd[g.key] = true;
     });
     if (Object.keys(upd).length) setOpenAcc(p => ({ ...p, ...upd }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.search, collapsed]);
+  }, [location.pathname, location.search]);
 
   function toggleAcc(key: string) {
     if (!collapsed) setOpenAcc(p => ({ ...p, [key]: !p[key] }));
@@ -145,10 +137,11 @@ export function AppSidebar() {
             }}
             onMouseLeave={() => setFlyout(null)}
             aria-label={item.label}
-            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${active ? "" : ""}`}
+            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
             style={active
               ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
+            
           >
             <Icon className="w-4 h-4 shrink-0"
               style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
@@ -162,7 +155,7 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? "" : ""}`}
+          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -217,7 +210,7 @@ export function AppSidebar() {
             }
             onMouseLeave={() => setFlyout(null)}
             aria-label="Início"
-            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${isHomeActive ? "" : ""}`}
+            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
             style={isHomeActive ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
@@ -231,7 +224,7 @@ export function AppSidebar() {
       <div className="mx-3 mt-3 mb-1">
         <button
           onClick={() => navigate("/home")}
-          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${isHomeActive ? "" : ""}`}
+          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
           style={isHomeActive
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -256,13 +249,10 @@ export function AppSidebar() {
             style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
           <span className="flex-1 text-left">Início</span>
           {isHomeActive && (
-            <>
-              <span className="sgt-live-dot" />
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                   stroke="#1B1304" strokeWidth="2">
-                <path d="M4.5 2.5L8 6l-3.5 3.5"/>
-              </svg>
-            </>
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
+                 stroke="#1B1304" strokeWidth="2">
+              <path d="M4.5 2.5L8 6l-3.5 3.5"/>
+            </svg>
           )}
         </button>
       </div>
@@ -363,8 +353,8 @@ export function AppSidebar() {
 
       {/* ── NAVEGAÇÃO ────────────────────────────────────────────────────── */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto py-1 flex flex-col"
-        style={{ scrollbarWidth: "none", overflowX: "visible" }}
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-1 flex flex-col"
+        style={{ scrollbarWidth: "none" }}
         onMouseLeave={() => setFlyout(null)}
       >
         {/* Início */}
@@ -407,6 +397,12 @@ export function AppSidebar() {
                     }}
                   >
                     <span>{group.label}</span>
+                    <span style={{
+                      fontFamily: "var(--sgt-font-mono)", fontSize: 9,
+                      color: "var(--sgt-text-muted)", background: "rgba(255,255,255,0.04)",
+                      border: "1px solid var(--sgt-border-subtle)", padding: "0 5px",
+                      borderRadius: "9999px", lineHeight: "1.7",
+                    }}>{items.length}</span>
                     <ChevronDown className="ml-auto w-3 h-3 transition-transform duration-200"
                       style={{ color: "var(--sgt-text-muted)",
                                transform: isOpen ? "rotate(180deg)" : "none" }} />
@@ -415,16 +411,13 @@ export function AppSidebar() {
 
               {/* Corpo: quando recolhida, sempre visível (ícones); quando expandida, animado */}
               <div
-                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                style={{ gridTemplateRows: collapsed ? "1fr" : (isOpen ? "1fr" : "0fr") }}
+                className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+                style={{
+                  maxHeight: collapsed ? "none" : (isOpen ? "400px" : "0px"),
+                  overflow:  collapsed ? "visible" : "hidden",
+                }}
               >
-                {/* overflow-hidden necessário para a animação de colapso;
-                    padding + margin negativa dão espaço pro box-shadow não ser clipado */}
-                <div className="overflow-hidden">
-                  <div className="py-6 -my-6">
-                    {items.map(item => renderItem(item))}
-                  </div>
-                </div>
+                {items.map(item => renderItem(item))}
               </div>
             </div>
           );
@@ -455,7 +448,7 @@ export function AppSidebar() {
             transform:    "translateY(-50%)",
             borderRadius: "9999px",
             ...(flyout.active ? {
-              background: "linear-gradient(95deg,#F5A623 0%,#D4891A 100%)",
+              background: "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.95) 70%)",
               color:      "#1B1304",
               border:     "1px solid rgba(245,166,35,0.6)",
               boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 20px rgba(245,166,35,0.30)",
@@ -526,7 +519,7 @@ function UserFooter({
         onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
       >
         <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl text-[12px] font-bold"
-              style={{ border: "1px solid rgba(245,166,35,0.25)", background: "rgba(245,166,35,0.10)", color: "#1B1304" }}>
+              style={{ border: "1px solid rgba(245,166,35,0.25)", background: "rgba(245,166,35,0.10)", color: "#F5A623" }}>
           {initial}
         </span>
         {!collapsed && (
