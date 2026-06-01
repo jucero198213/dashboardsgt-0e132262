@@ -43,7 +43,7 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 const PILL_ACTIVE: React.CSSProperties = {
   background:   "linear-gradient(95deg, #F5A623 0%, #D4891A 100%)",
   border:       "1px solid rgba(245,166,35,0.55)",
-  boxShadow:    "0 0 20px rgba(245,166,35,0.18),0 0 22px rgba(245,166,35,0.28),inset 0 1px 0 rgba(255,255,255,0.10)",
+  boxShadow:    "0 0 12px rgba(245,166,35,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
@@ -51,7 +51,7 @@ const PILL_ACTIVE: React.CSSProperties = {
 const CHIP_ACTIVE: React.CSSProperties = {
   background: "linear-gradient(135deg, #F5A623 0%, #D4891A 100%)",
   border:     "1px solid rgba(245,166,35,0.60)",
-  boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 18px rgba(245,166,35,0.30)",
+  boxShadow:  "0 0 10px rgba(245,166,35,0.22)",
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ export function AppSidebar() {
             }}
             onMouseLeave={() => setFlyout(null)}
             aria-label={item.label}
-            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${active ? " sgt-nav-active-chip" : ""}`}
+            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${active ? "" : ""}`}
             style={active
               ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
@@ -162,7 +162,7 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? " sgt-nav-active-pill" : ""}`}
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${active ? "" : ""}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -193,13 +193,10 @@ export function AppSidebar() {
             </svg>
           )}
           {active && (
-            <>
-              <span className="sgt-live-dot" />
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
-                   stroke="#1B1304" strokeWidth="2">
-                <path d="M4.5 2.5L8 6l-3.5 3.5"/>
-              </svg>
-            </>
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 12 12" fill="none"
+                 stroke="#1B1304" strokeWidth="2">
+              <path d="M4.5 2.5L8 6l-3.5 3.5"/>
+            </svg>
           )}
         </button>
       </div>
@@ -220,7 +217,7 @@ export function AppSidebar() {
             }
             onMouseLeave={() => setFlyout(null)}
             aria-label="Início"
-            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${isHomeActive ? " sgt-nav-active-chip" : ""}`}
+            className={`flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150${isHomeActive ? "" : ""}`}
             style={isHomeActive ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
           >
@@ -234,7 +231,7 @@ export function AppSidebar() {
       <div className="mx-3 mt-3 mb-1">
         <button
           onClick={() => navigate("/home")}
-          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${isHomeActive ? " sgt-nav-active-pill" : ""}`}
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100${isHomeActive ? "" : ""}`}
           style={isHomeActive
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
