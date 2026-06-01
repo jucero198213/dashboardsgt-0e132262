@@ -16,6 +16,8 @@ export type AppNavItem = {
   financeScreen?: string;
   /** Rota interna do workspace */
   to?: string;
+  /** URL externa — abre em nova aba em vez de navegar internamente */
+  externalUrl?: string;
   section?: string;
   badge?: number;
   badgeColor?: "amber" | "rose";
@@ -35,8 +37,8 @@ export type AppNavItem = {
 export const APP_NAV: AppNavItem[] = [
   // ── Portais integrados — visíveis para todos ─────────────────────────────
   { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais" },
-  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    to: "/visual-rodopar", portal: true },
-  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  to: "/portal-wr",      portal: true },
+  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    externalUrl: "https://webcloud2.datapardc.com/software/html5.html", portal: true },
+  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  externalUrl: "http://54.232.121.164:9474/#/login",                  portal: true },
 
   // ── Financeiro ────────────────────────────────────────────────────────────
   { id: "fin-painel",       label: "Painel Financeiro",icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", module: "financeiro" },

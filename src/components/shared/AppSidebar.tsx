@@ -79,6 +79,7 @@ export function AppSidebar() {
   const isHomeActive = location.pathname === "/home";
 
   function isActive(item: AppNavItem): boolean {
+    if (item.externalUrl) return false;
     if (item.financeScreen)
       return location.pathname === "/financeiro" && finScreen === item.financeScreen;
     if (item.to) {
@@ -89,7 +90,8 @@ export function AppSidebar() {
   }
 
   function goItem(item: AppNavItem) {
-    if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
+    if (item.externalUrl)    window.open(item.externalUrl, "_blank", "noopener,noreferrer");
+    else if (item.financeScreen) navigate(`/financeiro?s=${item.financeScreen}`);
     else if (item.to)        navigate(item.to);
   }
 
