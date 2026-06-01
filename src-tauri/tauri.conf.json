@@ -43,7 +43,7 @@
       "endpoints": [
         "https://github.com/Pedroauj/Workspace-SGT/releases/latest/download/latest.json"
       ],
-      "dialog": false
+      "dialog": true
     }
   }
 }
