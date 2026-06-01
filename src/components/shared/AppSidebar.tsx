@@ -410,12 +410,6 @@ export function AppSidebar() {
                     }}
                   >
                     <span>{group.label}</span>
-                    <span style={{
-                      fontFamily: "var(--sgt-font-mono)", fontSize: 9,
-                      color: "var(--sgt-text-muted)", background: "rgba(255,255,255,0.04)",
-                      border: "1px solid var(--sgt-border-subtle)", padding: "0 5px",
-                      borderRadius: "9999px", lineHeight: "1.7",
-                    }}>{items.length}</span>
                     <ChevronDown className="ml-auto w-3 h-3 transition-transform duration-200"
                       style={{ color: "var(--sgt-text-muted)",
                                transform: isOpen ? "rotate(180deg)" : "none" }} />
