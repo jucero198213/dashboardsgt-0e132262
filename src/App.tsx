@@ -9,6 +9,7 @@ import { FinancialDataProvider } from "@/contexts/FinancialDataContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/shared/AppLayout";
+import ScrollToTop from "@/components/shared/ScrollToTop";
 
 // ── Lazy loading — cada página é um chunk separado ───────────────────────────
 const Index              = lazy(() => import("./pages/Index"));
