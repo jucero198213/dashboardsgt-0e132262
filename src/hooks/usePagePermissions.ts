@@ -8,7 +8,10 @@ export type AppModule =
   | "operacao"
   | "compras"
   | "rh"
-  | "suporte";
+  | "suporte"
+  | "portal-receitaflow"
+  | "portal-visual"
+  | "portal-wr";
 
 export const ALL_MODULES: AppModule[] = [
   "financeiro",
@@ -17,6 +20,9 @@ export const ALL_MODULES: AppModule[] = [
   "compras",
   "rh",
   "suporte",
+  "portal-receitaflow",
+  "portal-visual",
+  "portal-wr",
 ];
 
 

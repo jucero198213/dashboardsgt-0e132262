@@ -36,9 +36,9 @@ export type AppNavItem = {
  */
 export const APP_NAV: AppNavItem[] = [
   // ── Portais integrados — visíveis para todos ─────────────────────────────
-  { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais" },
-  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    externalUrl: "https://webcloud2.datapardc.com/software/html5.html", portal: true },
-  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  externalUrl: "http://54.232.121.164:9474/#/login",                  portal: true },
+  { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais", module: "portal-receitaflow" },
+  { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    externalUrl: "https://webcloud2.datapardc.com/software/html5.html", portal: true, module: "portal-visual" },
+  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  externalUrl: "http://54.232.121.164:9474/#/login",                  portal: true, module: "portal-wr"     },
 
   // ── Financeiro ────────────────────────────────────────────────────────────
   { id: "fin-painel",       label: "Painel Financeiro",icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", module: "financeiro" },

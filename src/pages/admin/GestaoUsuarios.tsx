@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2,
-  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones } from "lucide-react";
+  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, Monitor } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
@@ -12,7 +12,10 @@ const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; c
   operacao:   { label: "Operação",   icon: Truck,       color: "text-cyan-300",   border: "border-cyan-400/30",   bg: "bg-cyan-400/10"   },
   compras:    { label: "Compras",    icon: ShoppingCart,color: "text-emerald-300",border: "border-emerald-400/30",bg: "bg-emerald-400/10"},
   rh:         { label: "RH",         icon: UserCog,     color: "text-pink-300",   border: "border-pink-400/30",   bg: "bg-pink-400/10"   },
-  suporte:    { label: "Suporte",    icon: Headphones,  color: "text-blue-300",   border: "border-blue-400/30",   bg: "bg-blue-400/10"   },
+  suporte:             { label: "Suporte",         icon: Headphones, color: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/10"    },
+  "portal-receitaflow":{ label: "ReceitaFlow",     icon: Sparkles,   color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "portal-visual":     { label: "Visual Rodopar",  icon: Globe,      color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "portal-wr":         { label: "Portal WR SGT",   icon: Monitor,    color: "text-emerald-300", border: "border-emerald-400/30", bg: "bg-emerald-400/10" },
 };
 
 interface SupaUser {
