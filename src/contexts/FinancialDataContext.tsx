@@ -588,14 +588,53 @@ export function FinancialDataProvider({
         };
       });
 
+      // ── INDICADORES — VLR_PARCELA agrupado por CODCUS ────────────────────────
+      const indicadorRules: Record<string, string[]> = {
+        "Diesel":         ["21"],
+        "Imposto":        ["23"],
+        "Administrativo": ["3"],
+        "Pedágio":        ["24"],
+        "Manutenção":     ["4", "5", "6", "7", "25"],
+        "PMT":            ["26"],
+        "Folha":          ["9"],
+        "Pneu":           ["28"],
+      };
+
+      // Base: CP filtrado por DATA_EMISSAO no período
+      const baseIndicadores = allCP.filter((r) => {
+        const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
+        return em ? em >= di && em <= df : false;
+      });
+      const totalBaseInd = sumCol(baseIndicadores, "VLR_PARCELA");
+
       const indicadores: IndicadorComparativo[] = Object.entries(EXPECTED_INDICATORS).map(
-        ([nome, percentualEsperado], index) => ({
-          id: String(index + 1),
-          nome,
-          percentualReal: 0,
-          percentualEsperado,
-          valorAbsoluto: 0,
-        })
+        ([nome, percentualEsperado], index) => {
+          const codcusList = indicadorRules[nome] ?? [];
+
+          // PMT (CODCUS 26): filtra por DATA_VENCIMENTO; demais: DATA_EMISSAO
+          const usaVencimento = nome === "PMT";
+          const pool = usaVencimento
+            ? allCP.filter((r) => {
+                if (r.TIPO_DOCUMENTO === "NFE") return false;
+                const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
+                return ven ? ven >= di && ven <= df : false;
+              })
+            : baseIndicadores;
+
+          const matched = codcusList.length > 0
+            ? pool.filter((r) => codcusList.includes(String(r.CODCUS ?? "").trim()))
+            : [];
+          const matchedTotal = sumCol(matched, "VLR_PARCELA");
+          const percentualReal = totalBaseInd > 0 ? (matchedTotal / totalBaseInd) * 100 : 0;
+
+          return {
+            id:                 String(index + 1),
+            nome,
+            percentualReal:     Math.round(percentualReal * 10) / 10,
+            percentualEsperado,
+            valorAbsoluto:      Math.round(matchedTotal * 100) / 100,
+          };
+        }
       );
 
       // ── Dados mensais para gráficos — array vazio inicial, preenchido em background
