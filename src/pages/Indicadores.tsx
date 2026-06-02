@@ -582,8 +582,9 @@ export default function Indicadores() {
                   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
                 const maxFrete = Math.max(...faturamento.map((r) => r.FRETE_TOTAL ?? 0), 1);
                 const BAR_COLORS = [
-                  "#fbbf24", "#f59e0b", "#fcd34d", "#d97706",
-                  "#fde68a", "#b45309", "#f59e0b", "#fbbf24",
+                  "#fbbf24", "#60a5fa", "#34d399", "#f472b6",
+                  "#a78bfa", "#22d3ee", "#fb923c", "#f87171",
+                  "#4ade80", "#818cf8", "#38bdf8", "#e879f9",
                 ];
 
                 return (
