@@ -72,6 +72,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <FinancialDataProvider>
             <Suspense fallback={<PageLoader />}>
