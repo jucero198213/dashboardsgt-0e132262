@@ -54,10 +54,19 @@ export default function GestaoUsuarios() {
   const load = async () => {
     setLoading(true);
     try {
-      const [{ data: roles }, { data: pagePerms }] = await Promise.all([
+      const [{ data: roles }, { data: pagePerms }, listRes] = await Promise.all([
         supabase.from("user_roles").select("user_id, role, created_at"),
         supabase.from("page_permissions").select("user_id, page"),
+        supabase.functions.invoke("list-users"),
       ]);
+
+      // Mapa de emails reais vindos da Edge Function
+      const emailMap = new Map<string, string>();
+      if (!listRes.error && listRes.data?.users) {
+        (listRes.data.users as { id: string; email: string }[]).forEach(u => {
+          emailMap.set(u.id, u.email);
+        });
+      }
 
       const modulesByUser = new Map<string, Set<AppModule>>();
       (pagePerms ?? []).forEach((p) => {
@@ -67,9 +76,9 @@ export default function GestaoUsuarios() {
         modulesByUser.set(p.user_id, set);
       });
 
-      const mapped: SupaUser[] = (roles ?? []).map((r, idx) => ({
+      const mapped: SupaUser[] = (roles ?? []).map((r) => ({
         id:              r.user_id,
-        email:           r.user_id === me?.id ? (me?.email ?? "—") : `usuário-${idx + 1}@sgtlog.com.br`,
+        email:           emailMap.get(r.user_id) ?? me?.email ?? "—",
         created_at:      r.created_at,
         last_sign_in_at: null,
         role:            r.role as "admin" | "user" | "diretoria",
