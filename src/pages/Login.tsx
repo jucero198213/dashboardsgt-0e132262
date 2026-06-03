@@ -64,8 +64,13 @@ export default function Login() {
         body: { email: faEmail, code: faCode, password: faPassword },
       });
       if (error) {
-        // Erro de invocação (função não deployada, erro de rede, etc.)
-        setFaError(`Erro ao chamar o serviço: ${error.message || "verifique se a função está deployada no Supabase."}`);
+        // Tenta extrair a mensagem real do body da resposta
+        let msg = "Erro ao definir senha. Tente novamente.";
+        try {
+          const body = await (error as any).context?.json?.();
+          if (body?.error) msg = body.error;
+        } catch { /* ignora */ }
+        setFaError(msg);
       } else if (data?.error) {
         setFaError(data.error);
       } else {
