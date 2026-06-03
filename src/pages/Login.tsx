@@ -63,18 +63,20 @@ export default function Login() {
       const { data, error } = await supabase.functions.invoke("first-access", {
         body: { email: faEmail, code: faCode, password: faPassword },
       });
-      if (error || data?.error) {
-        setFaError(data?.error || "Erro ao definir senha.");
+      if (error) {
+        // Erro de invocação (função não deployada, erro de rede, etc.)
+        setFaError(`Erro ao chamar o serviço: ${error.message || "verifique se a função está deployada no Supabase."}`);
+      } else if (data?.error) {
+        setFaError(data.error);
       } else {
         setFaSuccess(true);
-        // Sign in automatically
         setTimeout(async () => {
           await signIn(faEmail, faPassword);
           navigate("/home");
         }, 1500);
       }
-    } catch {
-      setFaError("Erro inesperado. Tente novamente.");
+    } catch (e: any) {
+      setFaError(`Erro inesperado: ${e?.message || "Tente novamente."}`);
     } finally {
       setFaLoading(false);
     }
