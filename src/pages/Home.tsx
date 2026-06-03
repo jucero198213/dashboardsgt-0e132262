@@ -721,7 +721,21 @@ export default function Home() {
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {moduleCards
-                .filter((m) => !isDiretoria || m.key === "gestao")
+                .filter((m) => {
+                  const moduleMap: Record<string, "portal-receitaflow" | "financeiro" | "gestao" | "operacao" | "compras" | "rh" | "suporte"> = {
+                    "receitaflow": "portal-receitaflow",
+                    "financeiro": "financeiro",
+                    "gestao": "gestao",
+                    "operacao": "operacao",
+                    "compras": "compras",
+                    "rh": "rh",
+                    "suporte": "suporte",
+                    "outras-analises": "financeiro",
+                  };
+                  const mod = moduleMap[m.key];
+                  if (!mod) return true;
+                  return canAccess(mod);
+                })
                 .map((m, i) => (
                   <Reveal key={m.key} delay={i * 0.1} className="h-full">
                     <ModuleCard data={m} index={0} />
