@@ -59,15 +59,15 @@ export function KpiCard({
     <AnimatedCard delay={delay} className={className}>
       <div
         onClick={onClick}
-        className={`group relative flex h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] ${clickable ? "cursor-pointer" : ""}`}
+        className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 transition-all duration-300 hover:-translate-y-[3px] ${glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] ${clickable ? "cursor-pointer" : ""}`}
       >
         {/* Acento semântico — lateral esquerda */}
         <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${stripe}`} />
 
-        <div className="relative flex h-full flex-col">
+        <div className="relative flex flex-col h-full">
           {/* Topo: label + ícone */}
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight line-clamp-2">{label}</p>
             {Icon && (
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${iconBg} ${iconTxt} transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function KpiCard({
           </div>
 
           {/* Valor — alinhado à base */}
-          <p className={`mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.2vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up ${loading ? "animate-pulse" : ""}`}>
+          <p className={`mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.1rem,3.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up ${loading ? "animate-pulse" : ""}`}>
             {value}
           </p>
 
