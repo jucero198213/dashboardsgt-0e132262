@@ -1822,17 +1822,23 @@ function ScreenPrevisto() {
   const projecao = useMemo(() => {
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
-    const dias: { dia: string; entradas: number; saidas: number; saldo: number }[] = [];
+    const dias: { dia: string; entradas: number; saidas: number; saldo: number; receberAcum: number; pagarAcum: number }[] = [];
     let saldo = saldoAtual;
+    let receberAcum = 0;
+    let pagarAcum = 0;
     const cur = new Date(hoje);
+    let idx = 0;
     while (cur <= limit) {
       const key  = cur.toISOString().slice(0,10);
       const label = cur.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
       const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s,e) => s+e.valor, 0);
       const saidas   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor), 0);
       saldo += entradas - saidas;
-      if (entradas > 0 || saidas > 0 || dias.length % 5 === 0) dias.push({ dia: label, entradas, saidas, saldo });
+      receberAcum += entradas;
+      pagarAcum   += saidas;
+      if (entradas > 0 || saidas > 0 || idx % 5 === 0) dias.push({ dia: label, entradas, saidas, saldo, receberAcum, pagarAcum });
       cur.setDate(cur.getDate() + 1);
+      idx++;
     }
     return dias;
   }, [horizonte, eventosPrevistos, saldoAtual]);
