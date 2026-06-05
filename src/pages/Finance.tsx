@@ -1911,7 +1911,6 @@ function ScreenPrevisto() {
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full bg-cyan-400/70" />Saldo projetado</span>
             <span className="flex items-center gap-1.5"><span className="h-px w-4 bg-emerald-500/60" />A receber (acum.)</span>
             <span className="flex items-center gap-1.5"><span className="h-px w-4 bg-rose-500/60" />A pagar (acum.)</span>
-            <span className="flex items-center gap-1.5"><span className="h-px w-4 border-t-2 border-dashed border-rose-500/50" />Limite de atenção (R$ 100k)</span>
           </div>
 
         </SectionCard>
