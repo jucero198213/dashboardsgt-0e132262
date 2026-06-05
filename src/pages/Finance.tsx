@@ -1901,7 +1901,6 @@ function ScreenPrevisto() {
                 <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={36} />
                 <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "saldo" ? "Saldo projetado" : n === "receberAcum" ? "A receber (acum.)" : n === "pagarAcum" ? "A pagar (acum.)" : n]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
-                <ReferenceLine y={LIMITE} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={1} />
                 <Line type="monotone" dataKey="receberAcum" stroke="#10b981" strokeWidth={1} strokeOpacity={0.55} dot={false} name="receberAcum" />
                 <Line type="monotone" dataKey="pagarAcum"   stroke="#f43f5e" strokeWidth={1} strokeOpacity={0.55} dot={false} name="pagarAcum" />
                 <Area type="monotone" dataKey="saldo" stroke="#22d3ee" strokeWidth={2.2} fill="url(#gradSaldoPrev)" dot={false} name="saldo" />
