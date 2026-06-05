@@ -1847,7 +1847,6 @@ function ScreenPrevisto() {
   const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor), 0);
   const saldoFinal    = saldoAtual + totalEntradas - totalSaidas;
   const diasCriticos  = projecao.filter(d => d.saldo < 100000).length;
-  const LIMITE        = 100000;
 
   const kpis = [
     { label: "Saldo Atual",        value: fmtK(saldoAtual),    subtitle: "Posição bancária atual",                                                                        icon: Landmark,    tone: "cyan"    as const },
