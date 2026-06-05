@@ -1847,7 +1847,6 @@ function ScreenPrevisto() {
   const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor), 0);
   const saldoFinal    = saldoAtual + totalEntradas - totalSaidas;
   const diasCriticos  = projecao.filter(d => d.saldo < 100000).length;
-  const LIMITE        = 100000;
 
   const kpis = [
     { label: "Saldo Atual",        value: fmtK(saldoAtual),    subtitle: "Posição bancária atual",                                                                        icon: Landmark,    tone: "cyan"    as const },
@@ -1902,7 +1901,6 @@ function ScreenPrevisto() {
                 <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={36} />
                 <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "saldo" ? "Saldo projetado" : n === "receberAcum" ? "A receber (acum.)" : n === "pagarAcum" ? "A pagar (acum.)" : n]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} />
-                <ReferenceLine y={LIMITE} stroke="#ef4444" strokeDasharray="3 3" strokeWidth={1} />
                 <Line type="monotone" dataKey="receberAcum" stroke="#10b981" strokeWidth={1} strokeOpacity={0.55} dot={false} name="receberAcum" />
                 <Line type="monotone" dataKey="pagarAcum"   stroke="#f43f5e" strokeWidth={1} strokeOpacity={0.55} dot={false} name="pagarAcum" />
                 <Area type="monotone" dataKey="saldo" stroke="#22d3ee" strokeWidth={2.2} fill="url(#gradSaldoPrev)" dot={false} name="saldo" />
@@ -1913,7 +1911,6 @@ function ScreenPrevisto() {
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full bg-cyan-400/70" />Saldo projetado</span>
             <span className="flex items-center gap-1.5"><span className="h-px w-4 bg-emerald-500/60" />A receber (acum.)</span>
             <span className="flex items-center gap-1.5"><span className="h-px w-4 bg-rose-500/60" />A pagar (acum.)</span>
-            <span className="flex items-center gap-1.5"><span className="h-px w-4 border-t-2 border-dashed border-rose-500/50" />Limite de atenção (R$ 100k)</span>
           </div>
 
         </SectionCard>
