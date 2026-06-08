@@ -49,8 +49,8 @@ export default function Login() {
 
   const handleFirstAccess = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (faPassword.length < 6) {
-      setFaError("A senha deve ter no mínimo 6 caracteres.");
+    if (faPassword.length !== 6) {
+      setFaError("A senha deve ter exatamente 6 caracteres.");
       return;
     }
     if (faPassword !== faConfirm) {
@@ -194,7 +194,8 @@ export default function Login() {
                         value={faPassword}
                         onChange={(e) => setFaPassword(e.target.value)}
                         required
-                        placeholder="Mínimo 6 caracteres"
+                        maxLength={6}
+                        placeholder="6 caracteres"
                         className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-12 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
                       />
                       <button type="button" onClick={() => setFaShowPass(!faShowPass)}
@@ -213,6 +214,7 @@ export default function Login() {
                         value={faConfirm}
                         onChange={(e) => setFaConfirm(e.target.value)}
                         required
+                        maxLength={6}
                         placeholder="Repita a senha"
                         className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
                       />

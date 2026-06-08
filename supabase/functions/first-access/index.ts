@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "A senha deve ter no mínimo 6 caracteres" }), {
+    if (password.length !== 6) {
+      return new Response(JSON.stringify({ error: "A senha deve ter exatamente 6 caracteres" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
