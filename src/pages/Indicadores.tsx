@@ -78,6 +78,13 @@ const INDICATOR_IDENTITY: Record<string, {
     bgColor: "rgba(52,211,153,0.10)",
     label: "Borracharia",
   },
+  "Investimento Frota": {
+    icon: Truck,
+    color: "#2dd4bf",
+    colorRgb: "45,212,191",
+    bgColor: "rgba(45,212,191,0.10)",
+    label: "Frota",
+  },
 };
 
 // ─── Dados mockados do card ADM (substituir por API futuramente) ─────────────
@@ -155,7 +162,7 @@ function FlipAdmCard({ delay }: { delay: number }) {
           }}
         />
 
-        <div className="relative flex flex-col flex-1 p-4 xl:p-5">
+        <div className="relative flex flex-col flex-1 p-4 lg:p-3 xl:p-4">
           {/* TOPO: ícone + nome + badge */}
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
@@ -180,9 +187,9 @@ function FlipAdmCard({ delay }: { delay: number }) {
           </div>
 
           {/* CENTRO: ring + percentual */}
-          <div className="flex flex-1 items-center justify-center py-3">
-            <div className="relative h-36 w-36">
-              <svg viewBox="0 0 36 36" className="h-36 w-36 -rotate-90" style={{ overflow: "visible" }}>
+          <div className="flex flex-1 items-center justify-center py-2">
+            <div className="relative h-36 w-36 lg:h-24 lg:w-24 xl:h-28 xl:w-28">
+              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90" style={{ overflow: "visible" }}>
                 <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
                 <circle cx="18" cy="18" r="14" fill="none"
                   stroke={`rgba(${d.colorRgb},0.10)`}
@@ -197,8 +204,8 @@ function FlipAdmCard({ delay }: { delay: number }) {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
                 <span
-                  className="font-extrabold leading-none tabular-nums tracking-[-0.03em]"
-                  style={{ color: d.color, fontSize: "1.7rem" }}
+                  className="font-extrabold leading-none tabular-nums tracking-[-0.03em] text-[1.7rem] lg:text-[1.1rem] xl:text-[1.3rem]"
+                  style={{ color: d.color }}
                 >
                   {`${d.percentual.toFixed(1)}%`}
                 </span>
@@ -421,9 +428,9 @@ export default function Indicadores() {
 
               {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 4x2 desktop */}
               <div className="flex flex-col flex-1 min-w-0 lg:min-h-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-2.5 sm:gap-3 flex-1 lg:min-h-0 lg:h-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3 gap-2.5 sm:gap-3 flex-1 lg:min-h-0 lg:h-full">
                   {(isFetchingDw && !isProcessed
-                    ? Array.from({ length: 8 }).map((_, i) => (
+                    ? Array.from({ length: 9 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
                       ))
                     : (() => {
@@ -476,7 +483,7 @@ export default function Indicadores() {
                                   ? "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.05), transparent 60%)"
                                   : "radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.05), transparent 60%)" }} />
 
-                              <div className="relative flex flex-col flex-1 p-4 xl:p-5">
+                              <div className="relative flex flex-col flex-1 p-4 lg:p-3 xl:p-4">
 
                                 {/* TOPO: nome + ícone + badge */}
                                 <div className="flex items-start justify-between gap-2">
@@ -502,9 +509,9 @@ export default function Indicadores() {
                                 </div>
 
                                 {/* CENTRO: ring grande + percentual dominante */}
-                                <div className="flex flex-1 items-center justify-center py-3">
-                                  <div className="relative h-36 w-36">
-                                    <svg viewBox="0 0 36 36" className="h-36 w-36 -rotate-90" style={{ overflow: "visible" }}>
+                                <div className="flex flex-1 items-center justify-center py-2">
+                                  <div className="relative h-36 w-36 lg:h-24 lg:w-24 xl:h-28 xl:w-28">
+                                    <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90" style={{ overflow: "visible" }}>
                                       <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
                                       <circle cx="18" cy="18" r="14" fill="none"
                                         stroke={`rgba(${identity.colorRgb},0.10)`}
@@ -518,11 +525,8 @@ export default function Indicadores() {
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                                      <span className="font-extrabold leading-none tabular-nums tracking-[-0.03em]"
-                                        style={{
-                                          color: identity.color,
-                                          fontSize: percFat >= 100 ? "1.4rem" : "1.7rem",
-                                        }}>
+                                      <span className={`font-extrabold leading-none tabular-nums tracking-[-0.03em] ${percFat >= 100 ? "text-[1.4rem] lg:text-[0.95rem] xl:text-[1.1rem]" : "text-[1.7rem] lg:text-[1.1rem] xl:text-[1.3rem]"}`}
+                                        style={{ color: identity.color }}>
                                         {percFat > 999 ? "999+" : `${percFat.toFixed(1)}%`}
                                       </span>
                                       <div className="my-1 h-px w-8 bg-white/10" />

@@ -57,6 +57,8 @@ const EXPECTED_INDICATORS: Record<string, number> = {
   "Administrativo":    5,
   "Manutenção":       15,
   "Pneu":              2,
+  // Sem regra de CODCUS ainda — fica zerado até o backend ser ligado
+  "Investimento Frota": 5,
 };
 
 const defaultKpiExtra: KpiExtra = {

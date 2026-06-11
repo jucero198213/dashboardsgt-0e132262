@@ -38,6 +38,7 @@ const SUBTITLES: Record<string, string> = {
   "Pedágio":         "Custos com pedágios nas rotas operacionais",
   "Administrativo":  "Despesas administrativas gerais e de escritório",
   "Manutenção":      "Manutenção preventiva e corretiva de veículos e equipamentos",
+  "Investimento Frota": "Investimentos em renovação e ampliação da frota",
 };
 
 // ─── Design system executivo — sem azul de template ─────────────────────────
@@ -217,6 +218,17 @@ const HEADER_CFG: Record<string, HeaderCfg> = {
     codcus: "C. Custo 04 · 05 · 06 · 07 · 25",
     badgeClass: "border-amber-400/20 bg-amber-400/10 text-amber-300",
     badgeText: "Indicador Estratégico",
+  },
+  "Investimento Frota": {
+    veilRgba: "rgba(45,212,191,0.13)",
+    stripe: "from-teal-400/60 to-teal-700/20",
+    border: "border-teal-400/[0.12]",
+    dotColor: "bg-teal-400", infoLabel: "INVESTIMENTO EM FROTA",
+    infoValue: "Renovação e Ampliação", infoValueColor: "text-teal-300",
+    extras: [{ text: "Aquisição de veículos e implementos", color: "text-slate-400" }, { text: "Aguardando integração com o DW", color: "text-slate-500" }],
+    codcus: "C. Custo —",
+    badgeClass: "border-teal-400/20 bg-teal-400/10 text-teal-300",
+    badgeText: "Investimento Estratégico",
   },
 };
 
