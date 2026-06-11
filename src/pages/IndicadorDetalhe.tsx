@@ -37,6 +37,7 @@ const SUBTITLES: Record<string, string> = {
   "Imposto":         "Tributos, impostos e contribuições fiscais do período",
   "Pedágio":         "Custos com pedágios nas rotas operacionais",
   "Administrativo":  "Despesas administrativas gerais e de escritório",
+  "ADM Frota":       "Despesas administrativas ligadas à operação da frota",
   "Manutenção":      "Manutenção preventiva e corretiva de veículos e equipamentos",
   "Investimento Frota": "Investimentos em renovação e ampliação da frota",
 };
@@ -217,6 +218,17 @@ const HEADER_CFG: Record<string, HeaderCfg> = {
     extras: [{ text: "Peças, mão de obra e oficinas", color: "text-slate-400" }, { text: "Veículos e equipamentos", color: "text-slate-500" }],
     codcus: "C. Custo 04 · 05 · 06 · 07 · 25",
     badgeClass: "border-amber-400/20 bg-amber-400/10 text-amber-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "ADM Frota": {
+    veilRgba: "rgba(125,211,252,0.13)",
+    stripe: "from-sky-400/60 to-sky-700/20",
+    border: "border-sky-400/[0.12]",
+    dotColor: "bg-sky-400", infoLabel: "ADMINISTRATIVO DE FROTA",
+    infoValue: "Gestão Operacional", infoValueColor: "text-sky-300",
+    extras: [{ text: "Licenciamento, documentação e taxas", color: "text-slate-400" }, { text: "Aguardando integração com o DW", color: "text-slate-500" }],
+    codcus: "C. Custo —",
+    badgeClass: "border-sky-400/20 bg-sky-400/10 text-sky-300",
     badgeText: "Indicador Estratégico",
   },
   "Investimento Frota": {

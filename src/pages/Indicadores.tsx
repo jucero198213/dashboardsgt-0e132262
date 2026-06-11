@@ -61,8 +61,15 @@ const INDICATOR_IDENTITY: Record<string, {
     color: "#94a3b8",
     colorRgb: "148,163,184",
     bgColor: "rgba(148,163,184,0.10)",
-    label: "Gestão",
-    displayName: "ADM",
+    label: "Corporativo",
+    displayName: "ADM Empresa",
+  },
+  "ADM Frota": {
+    icon: Truck,
+    color: "#7dd3fc",
+    colorRgb: "125,211,252",
+    bgColor: "rgba(125,211,252,0.10)",
+    label: "Frota",
   },
   "Manutenção": {
     icon: Wrench,
@@ -86,194 +93,6 @@ const INDICATOR_IDENTITY: Record<string, {
     label: "Frota",
   },
 };
-
-// ─── Dados mockados do card ADM (substituir por API futuramente) ─────────────
-const ADM_FLIP_MOCK = {
-  empresa: {
-    displayName: "ADM EMPRESA",
-    label: "Corporativo",
-    percentual: 0.0,
-    valor: 0,
-    meta: 2,
-    color: "#94a3b8",
-    colorRgb: "148,163,184",
-    bgColor: "rgba(148,163,184,0.10)",
-    Icon: Briefcase,
-    ctaLabel: "Ver ADM Frota →",
-  },
-  frota: {
-    displayName: "ADM FROTA",
-    label: "Frota",
-    percentual: 0.0,
-    valor: 0,
-    meta: 3,
-    color: "#7dd3fc",
-    colorRgb: "125,211,252",
-    bgColor: "rgba(125,211,252,0.10)",
-    Icon: Truck,
-    ctaLabel: "Ver ADM Empresa →",
-  },
-} as const;
-
-// ─── Card reversível ADM (frente = empresa, verso = frota) ───────────────────
-function FlipAdmCard({ delay }: { delay: number }) {
-  const [flipped, setFlipped] = useState(false);
-
-  function CardFace({
-    side,
-    isBack,
-  }: {
-    side: keyof typeof ADM_FLIP_MOCK;
-    isBack: boolean;
-  }) {
-    const d = ADM_FLIP_MOCK[side];
-    const { Icon } = d;
-    const abaixoDaMeta = d.percentual < d.meta;
-    const progress = Math.min((d.percentual / Math.max(d.meta, 0.1)) * 100, 100);
-    const statusColor = abaixoDaMeta ? "#34d399" : "#f87171";
-    const diffLabel = abaixoDaMeta
-      ? `−${(d.meta - d.percentual).toFixed(1)}% p/ meta`
-      : `+${(d.percentual - d.meta).toFixed(1)}% acima`;
-
-    return (
-      <div
-        className="absolute inset-0 flex flex-col rounded-[14px] sm:rounded-[16px] border overflow-hidden"
-        style={{
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
-          transform: isBack ? "rotateY(180deg)" : "rotateY(0deg)",
-          background: "var(--sgt-bg-card)",
-          borderColor: abaixoDaMeta ? "rgba(52,211,153,0.2)" : "rgba(248,113,113,0.2)",
-        }}
-      >
-        {/* Linha de acento no topo */}
-        <div
-          className="h-[2px] w-full shrink-0"
-          style={{ background: `linear-gradient(90deg, ${d.color}, rgba(${d.colorRgb},0.2))` }}
-        />
-
-        {/* Glow de fundo */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: abaixoDaMeta
-              ? "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.05), transparent 60%)"
-              : "radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.05), transparent 60%)",
-          }}
-        />
-
-        <div className="relative flex flex-col flex-1 p-4 lg:p-3 xl:p-4">
-          {/* TOPO: ícone + nome + badge */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                style={{ background: d.bgColor }}
-              >
-                <Icon className="h-3.5 w-3.5" style={{ color: d.color }} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] dark:text-slate-300 text-slate-600 truncate">
-                  {d.displayName}
-                </p>
-                <p className="text-[10px] font-medium mt-0.5" style={{ color: `rgba(${d.colorRgb},0.6)` }}>
-                  {d.label}
-                </p>
-              </div>
-            </div>
-            <span className="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-bold border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">
-              OK
-            </span>
-          </div>
-
-          {/* CENTRO: ring + percentual */}
-          <div className="flex flex-1 items-center justify-center py-2">
-            <div className="relative h-36 w-36 lg:h-24 lg:w-24 xl:h-28 xl:w-28">
-              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90" style={{ overflow: "visible" }}>
-                <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
-                <circle cx="18" cy="18" r="14" fill="none"
-                  stroke={`rgba(${d.colorRgb},0.10)`}
-                  strokeWidth="2.5" strokeDasharray="87.9 0" />
-                <circle cx="18" cy="18" r="14" fill="none"
-                  stroke={d.color}
-                  strokeWidth="2.5" strokeLinecap="round"
-                  strokeDasharray={`${progress * 0.879} 87.9`}
-                  className="transition-all duration-700"
-                  style={{ filter: `drop-shadow(0 0 2px ${d.color}) drop-shadow(0 0 3px rgba(${d.colorRgb},0.3))` }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                <span
-                  className="font-extrabold leading-none tabular-nums tracking-[-0.03em] text-[1.7rem] lg:text-[1.1rem] xl:text-[1.3rem]"
-                  style={{ color: d.color }}
-                >
-                  {`${d.percentual.toFixed(1)}%`}
-                </span>
-                <div className="my-1 h-px w-8 bg-white/10" />
-                <span className="text-[11px] font-bold tabular-nums tracking-[-0.02em] dark:text-slate-200 text-slate-700">
-                  R$ {d.valor.toFixed(0)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* RODAPÉ: meta + barra + CTA flip */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-semibold dark:text-slate-500 text-slate-400">
-                Meta: <span className="dark:text-slate-300 text-slate-600">{d.meta}%</span>
-              </span>
-              <span className="text-[10px] font-bold tabular-nums" style={{ color: statusColor }}>
-                {diffLabel}
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width: `${Math.min(progress, 100)}%`,
-                  background: d.color,
-                  boxShadow: `0 0 6px rgba(${d.colorRgb},0.5)`,
-                }}
-              />
-            </div>
-            {/* CTA de virada — único ponto de interação */}
-            <div className="flex justify-end">
-              <button
-                onClick={(e) => { e.stopPropagation(); setFlipped((f) => !f); }}
-                className="flex items-center gap-1 text-[10px] font-semibold opacity-50 hover:opacity-100 transition-opacity duration-300"
-                style={{ color: d.color }}
-              >
-                {d.ctaLabel}
-                <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <AnimatedCard delay={delay} className="h-full">
-      {/* Perspective wrapper */}
-      <div className="relative h-full" style={{ perspective: "1000px" }}>
-        {/* Inner flip container */}
-        <div
-          className="relative h-full w-full"
-          style={{
-            transformStyle: "preserve-3d",
-            transition: "transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1)",
-            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-          }}
-        >
-          <CardFace side="empresa" isBack={false} />
-          <CardFace side="frota"   isBack={true}  />
-        </div>
-      </div>
-    </AnimatedCard>
-  );
-}
 
 export default function Indicadores() {
   const { indicadores, isFetchingDw, isProcessed, faturamento, dwFilter, setDwFilter, fetchFromDW, filiais, empresas, dwError } = useFinancialData();
@@ -426,11 +245,11 @@ export default function Indicadores() {
             {/* CONTEÚDO */}
             <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-3">
 
-              {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 4x2 desktop */}
+              {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 5x2 desktop */}
               <div className="flex flex-col flex-1 min-w-0 lg:min-h-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3 gap-2.5 sm:gap-3 flex-1 lg:min-h-0 lg:h-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:grid-rows-2 gap-2.5 sm:gap-3 flex-1 min-h-0 xl:h-full">
                   {(isFetchingDw && !isProcessed
-                    ? Array.from({ length: 9 }).map((_, i) => (
+                    ? Array.from({ length: 10 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
                       ))
                     : (() => {
@@ -455,11 +274,6 @@ export default function Indicadores() {
                         const Icon = identity.icon;
                         const statusColor = abaixoDaMeta ? "#34d399" : "#f87171";
                         const statusRgb = abaixoDaMeta ? "52,211,153" : "248,113,113";
-
-                        // Card reversível para Administrativo
-                        if (ind.nome === "Administrativo") {
-                          return <FlipAdmCard key={ind.id} delay={idx * 60} />;
-                        }
 
                         return (
                           <AnimatedCard key={ind.id} delay={idx * 60} className="h-full">

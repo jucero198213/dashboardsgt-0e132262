@@ -55,6 +55,8 @@ const EXPECTED_INDICATORS: Record<string, number> = {
   "Imposto":           5,
   "Pedágio":           5,
   "Administrativo":    5,
+  // Sem regra de CODCUS ainda — fica zerado até o backend ser ligado
+  "ADM Frota":         3,
   "Manutenção":       15,
   "Pneu":              2,
   // Sem regra de CODCUS ainda — fica zerado até o backend ser ligado
