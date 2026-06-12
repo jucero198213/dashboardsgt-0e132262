@@ -1005,6 +1005,7 @@ app.post("/dw-abastecimento", async (req, res) => {
       ABA.CODABA                AS codaba,
       MOT.NOMMOT                AS motorista,
       POS.DESCRI                AS posto,
+      POS.CODPON                AS codpon,
       POS.ESTADO                AS estado,
       ABA.VLRTOT                AS vlrtot,
       ABA.QUANTI                AS quanti,

@@ -311,6 +311,7 @@ export interface AbastecimentoRow {
   codaba:            string | number | null;
   motorista:         string | null;
   posto:             string | null;
+  codpon:            string | number | null;
   estado:            string | null;
   vlrtot:            number | null;
   quanti:            number | null;

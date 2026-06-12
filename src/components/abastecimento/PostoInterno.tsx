@@ -3,47 +3,34 @@ import { RAW } from "@/lib/theme";
 import sgtLogo from "@/assets/sgt-logo.png";
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  MOCK — Saldo do tanque interno da empresa
-//  Para conectar ao banco depois: substituir este objeto pela resposta da
-//  API mantendo o mesmo formato (todas as telas leem apenas daqui).
+//  MOCK — Estoque do tanque interno (ETAPA 2 — pendente de fonte de dados)
+//  Saldo, capacidade e recargas dependem do registro de ENTRADA de diesel
+//  (não disponível no DW hoje). Substituir este objeto pela fonte real.
 // ═══════════════════════════════════════════════════════════════════════════
 export const SALDO_TANQUE_MOCK = {
   combustivel:              "Diesel S10",
   capacidadeLitros:         15400,
   saldoAtualLitros:         11550,
-  consumoMedioDiarioLitros: 850,
   recebidoMesLitros:        16000,
-  abastecidoMesLitros:      8900,
-  abastecidoDiaLitros:      850,
   ultimaRecargaData:        "08/06/2026",
   ultimaRecargaLitros:      8000,
-  ultimaPlacaAbastecida:    "RDO1A23",
-  ultimaPlacaLitros:        480,
-  ultimaPlacaDataHora:      "10/06/2026 14:32",
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  MOCK — Últimas movimentações do tanque interno
-//  Mesma regra: substituir pelo retorno da API mantendo o formato.
-// ═══════════════════════════════════════════════════════════════════════════
-export const MOVIMENTACOES_TANQUE_MOCK: {
-  dataHora: string;
-  tipo: "Recarga" | "Abastecimento Frota";
-  volumeLitros: number;
-  responsavel: string;
-  status: "Concluído" | "Em validação";
-}[] = [
-  { dataHora: "10/06/2026 14:32", tipo: "Abastecimento Frota", volumeLitros: 480,   responsavel: "RDO1A23 · Carlos Mendes",   status: "Concluído" },
-  { dataHora: "10/06/2026 08:15", tipo: "Abastecimento Frota", volumeLitros: 370,   responsavel: "RDO4B56 · João Pereira",    status: "Concluído" },
-  { dataHora: "08/06/2026 10:47", tipo: "Recarga",             volumeLitros: 8000,  responsavel: "Distribuidora Ipiranga SA", status: "Concluído" },
-];
+// ─── Dados reais vindos do DW (RODABA · postos SGT) ──────────────────────────
+export interface PostoInternoDados {
+  abastecidoPeriodoLitros: number;
+  abastecidoDiaLitros:     number;
+  diaReferencia:           string | null;
+  ultimaPlaca: { placa: string; litros: number; data: string } | null;
+  movimentacoes: { data: string; volumeLitros: number; responsavel: string }[];
+}
 
-const fmtL = (v: number) => `${v.toLocaleString("pt-BR")} L`;
+const fmtL = (v: number) => `${Math.round(v).toLocaleString("pt-BR")} L`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Posto de combustível corporativo — desenho 100% CSS (sem ícones/imagens)
 // ─────────────────────────────────────────────────────────────────────────────
-export function PostoInterno() {
+export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
   const t = SALDO_TANQUE_MOCK;
   const pct = Math.max(0, Math.min(100, (t.saldoAtualLitros / t.capacidadeLitros) * 100));
 
@@ -233,10 +220,12 @@ export function PostoInterno() {
 
                 {/* Display digital */}
                 <div className="mx-4 mt-4 rounded-xl border border-amber-400/25 bg-black/70 p-4 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)]">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                    Abastecido no dia{dados.diaReferencia ? ` · ${dados.diaReferencia.slice(0, 5)}` : ""}
+                  </p>
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="font-mono text-[34px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
-                      {t.abastecidoDiaLitros.toLocaleString("pt-BR")}
+                      {Math.round(dados.abastecidoDiaLitros).toLocaleString("pt-BR")}
                     </p>
                     <p className="text-[11px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
                   </div>
@@ -282,10 +271,10 @@ export function PostoInterno() {
           {/* ═════════ PAINEL DE STATUS ═════════ */}
           <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:pb-16">
             {[
-              { label: "Total Recebido (Mês)",   valor: fmtL(t.recebidoMesLitros),   destaque: "#fbbf24" },
-              { label: "Total Abastecido (Mês)", valor: fmtL(t.abastecidoMesLitros), destaque: "#94a3b8" },
-              { label: "Última Recarga",         valor: fmtL(t.ultimaRecargaLitros), destaque: "#a78bfa", sub: `em ${t.ultimaRecargaData}` },
-              { label: "Última Placa Abastecida", valor: t.ultimaPlacaAbastecida, destaque: "#22d3ee", sub: `${fmtL(t.ultimaPlacaLitros)} · ${t.ultimaPlacaDataHora}`, glow: true },
+              { label: "Total Recebido (Mês)",       valor: fmtL(t.recebidoMesLitros),              destaque: "#fbbf24" },
+              { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros),    destaque: "#94a3b8" },
+              { label: "Última Recarga",             valor: fmtL(t.ultimaRecargaLitros),            destaque: "#a78bfa", sub: `em ${t.ultimaRecargaData}` },
+              { label: "Última Placa Abastecida",    valor: dados.ultimaPlaca?.placa ?? "—",        destaque: "#22d3ee", sub: dados.ultimaPlaca ? `${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}` : "Sem registros no período", glow: true },
             ].map(c => (
               <div
                 key={c.label}
@@ -316,7 +305,7 @@ export function PostoInterno() {
             <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-white/[0.07]">
-                  {["Data/Hora", "Tipo", "Volume (L)", "Responsável / Fornecedor", "Status"].map((h, i) => (
+                  {["Data", "Tipo", "Volume (L)", "Veículo / Motorista", "Status"].map((h, i) => (
                     <th
                       key={h}
                       className={`px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 ${i === 2 ? "text-right" : i === 4 ? "text-center" : "text-left"}`}
@@ -327,50 +316,43 @@ export function PostoInterno() {
                 </tr>
               </thead>
               <tbody>
-                {MOVIMENTACOES_TANQUE_MOCK.map((m, i) => {
-                  const recarga = m.tipo === "Recarga";
-                  return (
+                {dados.movimentacoes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-[12px] text-slate-600">
+                      Nenhum abastecimento interno no período selecionado
+                    </td>
+                  </tr>
+                ) : (
+                  dados.movimentacoes.map((m, i) => (
                     <tr
                       key={i}
                       className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.025]"
                     >
                       <td className="px-4 py-2.5">
-                        <span className="text-[12px] tabular-nums text-slate-400">{m.dataHora}</span>
+                        <span className="text-[12px] tabular-nums text-slate-400">{m.data}</span>
                       </td>
                       <td className="px-4 py-2.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${
-                            recarga
-                              ? "border-emerald-400/25 bg-emerald-500/[0.08] text-emerald-300"
-                              : "border-amber-400/25 bg-amber-500/[0.08] text-amber-300"
-                          }`}
-                        >
-                          <span className={`h-1 w-1 rounded-full ${recarga ? "bg-emerald-400" : "bg-amber-400"}`} />
-                          {m.tipo}
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/[0.08] px-2.5 py-1 text-[10px] font-bold text-amber-300">
+                          <span className="h-1 w-1 rounded-full bg-amber-400" />
+                          Abastecimento Frota
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <span className={`font-mono text-[12px] font-bold tabular-nums ${recarga ? "text-emerald-300" : "text-amber-300"}`}>
-                          {recarga ? "+" : "−"}{m.volumeLitros.toLocaleString("pt-BR")} L
+                        <span className="font-mono text-[12px] font-bold tabular-nums text-amber-300">
+                          −{Math.round(m.volumeLitros).toLocaleString("pt-BR")} L
                         </span>
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="text-[12px] text-slate-300">{m.responsavel}</span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        <span
-                          className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
-                            m.status === "Concluído"
-                              ? "border-emerald-400/20 bg-emerald-500/[0.06] text-emerald-400/90"
-                              : "border-slate-400/20 bg-slate-500/[0.08] text-slate-400"
-                          }`}
-                        >
-                          {m.status}
+                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.06] px-2 py-0.5 text-[9px] font-semibold text-emerald-400/90">
+                          Concluído
                         </span>
                       </td>
                     </tr>
-                  );
-                })}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -379,7 +361,7 @@ export function PostoInterno() {
         {/* Nota de integração */}
         <div className="mt-3 flex items-center justify-center">
           <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1 text-[9px] text-slate-600">
-            Saldo e movimentações com dados simulados — aguardando integração com o banco
+            Abastecimentos com dados reais do DW · Saldo do tanque e recargas simulados — aguardando fonte de entradas
           </span>
         </div>
       </div>

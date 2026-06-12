@@ -89,11 +89,12 @@ const ABAS: { id: AbaAbastecimento; label: string }[] = [
   { id: "externo", label: "Abastecimento Externo" },
 ];
 
-// ─── MOCK Abastecimento Externo ──────────────────────────────────────────────
-// A aba Externo usa o mesmo layout/pipeline da Geral. Por enquanto reaproveita
-// os dados do DW como mock estrutural. Quando o backend diferenciar interno x
-// externo, basta preencher esta constante (ou trocá-la por um fetch próprio).
-const MOCK_DADOS_EXTERNO: AbastecimentoRow[] | null = null;
+// ─── Identificação do posto interno ──────────────────────────────────────────
+// Bombas próprias da SGT no Rodopar: "SGT LOGISTICA LTDA (POSTO MATRIZ)" e
+// "SGT". Tudo que começa com SGT é considerado abastecimento interno; o
+// restante é externo (postos de rua).
+const isAbastecimentoInterno = (d: AbastecimentoRow) =>
+  String(d.posto ?? "").trim().toUpperCase().startsWith("SGT");
 
 // ─── Tipo para registros agregados ───────────────────────────────────────────
 interface AbastecimentoAgregado {
@@ -219,12 +220,46 @@ export default function Abastecimento() {
   }, [dados]);
 
   // ── Fonte de dados por aba ───────────────────────────────────────────────────
-  // Geral/Interno: dados do DW. Externo: MOCK_DADOS_EXTERNO quando disponível
-  // (hoje cai nos dados gerais — estrutura pronta para a fonte real).
+  // Geral: tudo · Interno: só bombas SGT · Externo: só postos de rua
   const dadosAba = useMemo(() => {
-    if (abaAtiva === "externo" && MOCK_DADOS_EXTERNO) return MOCK_DADOS_EXTERNO;
+    if (abaAtiva === "interno") return dados.filter(isAbastecimentoInterno);
+    if (abaAtiva === "externo") return dados.filter(d => !isAbastecimentoInterno(d));
     return dados;
   }, [dados, abaAtiva]);
+
+  // ── Dados reais do posto interno (independem da aba ativa) ──────────────────
+  const postoInternoDados = useMemo(() => {
+    const internos = dados
+      .filter(isAbastecimentoInterno)
+      .filter(d => d.datref)
+      .sort((a, b) => String(b.datref).localeCompare(String(a.datref)));
+
+    const totalPeriodo = internos.reduce((s, d) => s + (d.quanti ?? 0), 0);
+
+    // Dia mais recente com abastecimento interno no período
+    const ultimoDia = internos[0]?.datref ? String(internos[0].datref).slice(0, 10) : null;
+    const litrosUltimoDia = ultimoDia
+      ? internos.filter(d => String(d.datref).startsWith(ultimoDia)).reduce((s, d) => s + (d.quanti ?? 0), 0)
+      : 0;
+
+    const ultima = internos[0];
+
+    return {
+      abastecidoPeriodoLitros: totalPeriodo,
+      abastecidoDiaLitros:     litrosUltimoDia,
+      diaReferencia:           ultimoDia ? fmtData(ultimoDia) : null,
+      ultimaPlaca: ultima ? {
+        placa:  String(ultima.veiculo ?? "—"),
+        litros: ultima.quanti ?? 0,
+        data:   fmtData(ultima.datref),
+      } : null,
+      movimentacoes: internos.slice(0, 5).map(d => ({
+        data:        fmtData(d.datref),
+        volumeLitros: d.quanti ?? 0,
+        responsavel: `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
+      })),
+    };
+  }, [dados]);
 
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
@@ -641,7 +676,7 @@ export default function Abastecimento() {
             {/* ════════════════════════════════════════════════════════════════
                 ABA INTERNO — Posto próprio (substitui gráficos e tabela)
             ════════════════════════════════════════════════════════════════ */}
-            {abaAtiva === "interno" && <PostoInterno />}
+            {abaAtiva === "interno" && <PostoInterno dados={postoInternoDados} />}
 
             {/* ════════ ABAS GERAL / EXTERNO — visão completa ════════ */}
             {abaAtiva !== "interno" && (<>
