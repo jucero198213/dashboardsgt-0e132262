@@ -4,7 +4,7 @@ import {
   Fuel, RefreshCw, Search, TrendingUp, TrendingDown,
   Calendar, ChevronUp, ChevronDown, BarChart3,
   DollarSign, Hash, X, ChevronLeft, ChevronRight,
-  Filter, Layers, Droplets, Gauge, MapPin, FileText,
+  Layers, Droplets, Gauge, MapPin, FileText,
   Activity, Car, Users, Zap, LayoutGrid, Table2,
 } from "lucide-react";
 import {
@@ -492,6 +492,35 @@ export default function Abastecimento() {
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+
+                {/* Filtros locais — mesmo padrão das demais telas */}
+                <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[120px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Frota" /></SelectTrigger>
+                  <SelectContent>{frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[90px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Combustível" /></SelectTrigger>
+                  <SelectContent>{combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[95px] max-w-[150px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Motorista" /></SelectTrigger>
+                  <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[70px] max-w-[100px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Estado" /></SelectTrigger>
+                  <SelectContent>{estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}</SelectContent>
+                </Select>
+
+                {(filtroFrota !== "Todos" || filtroCombustivel !== "Todos" || filtroMotorista !== "Todos" || filtroEstado !== "Todos") && (
+                  <button
+                    onClick={() => { setFiltroFrota("Todos"); setFiltroCombustivel("Todos"); setFiltroMotorista("Todos"); setFiltroEstado("Todos"); setPage(1); }}
+                    className="flex h-8 items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-500/[0.08] px-2.5 text-[11px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all shrink-0"
+                  >
+                    <X className="w-3 h-3" /> Limpar
+                  </button>
+                )}
+
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               </div>
 
@@ -517,6 +546,26 @@ export default function Abastecimento() {
               <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
               <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
               <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
+            </div>
+
+            {/* Mobile: filtros locais */}
+            <div className="grid sm:hidden grid-cols-2 gap-2">
+              <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Frota" /></SelectTrigger>
+                <SelectContent>{frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Combustível" /></SelectTrigger>
+                <SelectContent>{combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Motorista" /></SelectTrigger>
+                <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+                <SelectContent>{estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -560,72 +609,6 @@ export default function Abastecimento() {
                 })}
               </div>
             </AnimatedCard>
-
-            {/* ════════ FILTROS LOCAIS ════════ */}
-            <div className="hidden sm:block"><AnimatedCard delay={60}>
-              <div
-                className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
-                style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
-              >
-                <Filter className="w-3.5 h-3.5 text-amber-400/60 shrink-0" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
-                <div className="h-4 w-px bg-white/[0.07] shrink-0" />
-
-                {/* Frota */}
-                <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[80px] max-w-[130px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Frota" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Combustível */}
-                <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Combustível" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Motorista */}
-                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[100px] max-w-[160px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Motorista" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Estado */}
-                <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[70px] max-w-[100px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Limpar filtros */}
-                {(filtroFrota !== "Todos" || filtroCombustivel !== "Todos" || filtroMotorista !== "Todos" || filtroEstado !== "Todos") && (
-                  <button
-                    onClick={() => { setFiltroFrota("Todos"); setFiltroCombustivel("Todos"); setFiltroMotorista("Todos"); setFiltroEstado("Todos"); setPage(1); }}
-                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
-                  >
-                    <X className="w-2.5 h-2.5" /> Limpar
-                  </button>
-                )}
-
-                <div className="ml-auto text-[10px] text-slate-500">
-                  {fmtNum(registros.length)} registros
-                </div>
-              </div>
-            </AnimatedCard></div>
 
             {/* ════════════════════════════════════════════════════════════════
                 SEÇÃO 1 — INDICADORES E ANÁLISE DE CONSUMO
