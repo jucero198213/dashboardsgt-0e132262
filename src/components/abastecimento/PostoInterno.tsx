@@ -8,14 +8,14 @@ import { RAW } from "@/lib/theme";
 // ═══════════════════════════════════════════════════════════════════════════
 export const SALDO_TANQUE_MOCK = {
   combustivel:              "Diesel S10",
-  capacidadeLitros:         60000,
-  saldoAtualLitros:         45000,
-  consumoMedioDiarioLitros: 3200,
-  recebidoMesLitros:        45000,
-  abastecidoMesLitros:      32450,
+  capacidadeLitros:         15400,
+  saldoAtualLitros:         11550,
+  consumoMedioDiarioLitros: 850,
+  recebidoMesLitros:        16000,
+  abastecidoMesLitros:      8900,
   abastecidoDiaLitros:      850,
   ultimaRecargaData:        "08/06/2026",
-  ultimaRecargaLitros:      20000,
+  ultimaRecargaLitros:      8000,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -31,7 +31,7 @@ export const MOVIMENTACOES_TANQUE_MOCK: {
 }[] = [
   { dataHora: "10/06/2026 14:32", tipo: "Abastecimento Frota", volumeLitros: 480,   responsavel: "RDO1A23 · Carlos Mendes",   status: "Concluído" },
   { dataHora: "10/06/2026 08:15", tipo: "Abastecimento Frota", volumeLitros: 370,   responsavel: "RDO4B56 · João Pereira",    status: "Concluído" },
-  { dataHora: "08/06/2026 10:47", tipo: "Recarga",             volumeLitros: 20000, responsavel: "Distribuidora Ipiranga SA", status: "Concluído" },
+  { dataHora: "08/06/2026 10:47", tipo: "Recarga",             volumeLitros: 8000,  responsavel: "Distribuidora Ipiranga SA", status: "Concluído" },
 ];
 
 const fmtL = (v: number) => `${v.toLocaleString("pt-BR")} L`;
