@@ -79,10 +79,22 @@ export function PostoInterno() {
           85%  { opacity: 0.35; }
           100% { transform: translateY(-220px) scale(1.2); opacity: 0; }
         }
+        /* Promove elementos animados para camadas próprias da GPU (evita
+           repaints no Safari/WebKit) */
+        .sgt-anim {
+          will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
+        }
+        /* Acessibilidade + economia: desliga as animações decorativas
+           quando o sistema pede menos movimento */
+        @media (prefers-reduced-motion: reduce) {
+          .sgt-anim { animation: none !important; }
+        }
       `}</style>
 
       <div
-        className="rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6 backdrop-blur-sm"
+        className="rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"
         style={{ background: "var(--sgt-bg-card)" }}
       >
         {/* ── Header da seção ── */}
@@ -108,34 +120,34 @@ export function PostoInterno() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-6 w-32 rounded-full border border-white/10 bg-gradient-to-b from-slate-700/70 to-slate-800/70 z-10" />
 
               {/* Corpo do tanque (vidro) */}
-              <div className="relative h-[420px] w-[300px] overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.025] backdrop-blur shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[420px] w-[300px] overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.025] shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]" style={{ contain: "paint" }}>
 
                 {/* Líquido — preenchimento proporcional ao saldo */}
                 <div
-                  className="absolute inset-x-0 bottom-0 transition-all duration-1000 ease-out"
+                  className="sgt-anim absolute inset-x-0 bottom-0"
                   style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
                 >
                   {/* Superfície ondulando — duas elipses largas balançando em oposição */}
                   <div
-                    className="absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-400/70 to-amber-400/0"
+                    className="sgt-anim absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-400/70 to-amber-400/0"
                     style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
                   />
                   <div
-                    className="absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-300/30"
+                    className="sgt-anim absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-300/30"
                     style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
                   />
                   {/* Brilho suave acompanhando a superfície */}
                   <div
-                    className="absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-200/35 blur-[2px]"
+                    className="sgt-anim absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-200/30"
                     style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
                   />
                   {/* Corpo do diesel */}
                   <div className="h-full w-full bg-gradient-to-b from-amber-400/70 via-amber-500/55 to-amber-700/65" />
                   {/* Bolhas subindo */}
-                  <div className="absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
-                  <div className="absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
-                  <div className="absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
-                  <div className="absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
+                  <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
+                  <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
+                  <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
+                  <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
                 </div>
 
                 {/* Brilho de vidro */}
@@ -192,11 +204,11 @@ export function PostoInterno() {
             <div className="relative h-3.5 w-44 overflow-hidden rounded-full border border-white/10 bg-slate-800/80">
               {/* Pulso de combustível percorrendo o duto */}
               <div
-                className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
+                className="sgt-anim absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
                 style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }}
               />
               <div
-                className="absolute inset-y-0 w-1/4 rounded-full bg-gradient-to-r from-transparent via-amber-300/40 to-transparent"
+                className="sgt-anim absolute inset-y-0 w-1/4 rounded-full bg-gradient-to-r from-transparent via-amber-300/40 to-transparent"
                 style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }}
               />
             </div>
@@ -214,12 +226,12 @@ export function PostoInterno() {
               </div>
 
               {/* Corpo da bomba */}
-              <div className="relative h-[380px] w-[230px] overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[380px] w-[230px] overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
                 {/* Faixa de identidade */}
                 <div className="h-2.5 w-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
 
                 {/* Placa com a logo */}
-                <div className="mx-4 mt-4 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] py-3 backdrop-blur-sm">
+                <div className="mx-4 mt-4 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] py-3">
                   <img
                     src={sgtLogo}
                     alt="SGT"
@@ -272,7 +284,7 @@ export function PostoInterno() {
             ].map(c => (
               <div
                 key={c.label}
-                className="rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 backdrop-blur transition-all duration-300 hover:border-white/[0.18]"
+                className="rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 transition-colors duration-300 hover:border-white/[0.18]"
                 style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
               >
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
@@ -295,7 +307,7 @@ export function PostoInterno() {
             <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
           </div>
 
-          <div className="overflow-x-auto rounded-[12px] border border-white/10 bg-white/[0.015] backdrop-blur-sm">
+          <div className="overflow-x-auto rounded-[12px] border border-white/10 bg-white/[0.015]">
             <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-white/[0.07]">
