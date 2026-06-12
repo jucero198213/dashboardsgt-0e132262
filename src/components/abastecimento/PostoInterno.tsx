@@ -17,6 +17,9 @@ export const SALDO_TANQUE_MOCK = {
   abastecidoDiaLitros:      850,
   ultimaRecargaData:        "08/06/2026",
   ultimaRecargaLitros:      8000,
+  ultimaPlacaAbastecida:    "RDO1A23",
+  ultimaPlacaLitros:        480,
+  ultimaPlacaDataHora:      "10/06/2026 14:32",
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -43,9 +46,6 @@ const fmtL = (v: number) => `${v.toLocaleString("pt-BR")} L`;
 export function PostoInterno() {
   const t = SALDO_TANQUE_MOCK;
   const pct = Math.max(0, Math.min(100, (t.saldoAtualLitros / t.capacidadeLitros) * 100));
-  const autonomiaDias = t.consumoMedioDiarioLitros > 0
-    ? Math.floor(t.saldoAtualLitros / t.consumoMedioDiarioLitros)
-    : 0;
 
   const nivel = pct < 25
     ? { cor: "#f87171", rgb: "248,113,113", label: "Nível crítico" }
@@ -238,7 +238,7 @@ export function PostoInterno() {
               { label: "Total Recebido (Mês)",   valor: fmtL(t.recebidoMesLitros),   destaque: "#fbbf24" },
               { label: "Total Abastecido (Mês)", valor: fmtL(t.abastecidoMesLitros), destaque: "#94a3b8" },
               { label: "Última Recarga",         valor: fmtL(t.ultimaRecargaLitros), destaque: "#a78bfa", sub: `em ${t.ultimaRecargaData}` },
-              { label: "Autonomia Estimada",     valor: `~ ${autonomiaDias} dias restantes`, destaque: "#22d3ee", sub: `Consumo médio: ${fmtL(t.consumoMedioDiarioLitros)}/dia`, glow: true },
+              { label: "Última Placa Abastecida", valor: t.ultimaPlacaAbastecida, destaque: "#22d3ee", sub: `${fmtL(t.ultimaPlacaLitros)} · ${t.ultimaPlacaDataHora}`, glow: true },
             ].map(c => (
               <div
                 key={c.label}
