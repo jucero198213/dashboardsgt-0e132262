@@ -217,14 +217,6 @@ export function PostoInterno() {
           {/* ═════════ BOMBA CORPORATIVA ═════════ */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              {/* Mangueira (curva) */}
-              <div className="absolute -right-12 top-24 h-52 w-16 rounded-br-[48px] border-b-[6px] border-r-[6px] border-slate-600/90" />
-              {/* Bico de abastecimento */}
-              <div className="absolute -right-[58px] top-14 flex flex-col items-center">
-                <div className="h-11 w-5 rounded-t-md border border-white/10 bg-gradient-to-b from-slate-500/90 to-slate-600/90" />
-                <div className="-mt-0.5 h-4 w-7 rounded-sm border border-white/10 bg-slate-600/90" />
-              </div>
-
               {/* Corpo da bomba */}
               <div className="relative h-[380px] w-[230px] overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
                 {/* Faixa de identidade */}
@@ -241,11 +233,13 @@ export function PostoInterno() {
 
                 {/* Display digital */}
                 <div className="mx-4 mt-4 rounded-xl border border-amber-400/25 bg-black/70 p-4 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)]">
-                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
-                  <p className="font-mono text-[34px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
-                    {t.abastecidoDiaLitros.toLocaleString("pt-BR")}
-                  </p>
-                  <p className="mt-1 text-right text-[11px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="font-mono text-[34px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
+                      {t.abastecidoDiaLitros.toLocaleString("pt-BR")}
+                    </p>
+                    <p className="text-[11px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
+                  </div>
                 </div>
 
                 {/* Teclado decorativo */}
@@ -255,9 +249,6 @@ export function PostoInterno() {
                   ))}
                 </div>
 
-                {/* Slot do bico */}
-                <div className="absolute right-3 top-32 h-24 w-2.5 rounded-full border border-white/[0.06] bg-black/50" />
-
                 {/* Rodapé da bomba */}
                 <div className="absolute inset-x-0 bottom-0 flex h-10 items-center justify-center border-t border-white/[0.06] bg-black/30">
                   <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Bomba 01 · Uso interno</span>
@@ -266,6 +257,20 @@ export function PostoInterno() {
 
               {/* Base da bomba */}
               <div className="mx-auto -mt-0.5 h-4 w-[260px] rounded-b-xl border border-white/[0.08] bg-slate-800/90" />
+
+              {/* ── Mangueira — segmentos alinhados ───────────────────────────
+                  linha vertical em x=260..266 (centro 263); o bico (w-5,
+                  right -43px) fica centrado no mesmo eixo; o cotovelo
+                  horizontal entra no corpo da bomba. */}
+              {/* Cotovelo inferior (entra no corpo) */}
+              <div className="absolute right-[-36px] bottom-[74px] h-[6px] w-[48px] rounded-full bg-slate-600/90" />
+              {/* Segmento vertical */}
+              <div className="absolute right-[-36px] top-[100px] bottom-[74px] w-[6px] rounded-full bg-slate-600/90" />
+              {/* Bico de abastecimento (na ponta superior da linha) */}
+              <div className="absolute right-[-43px] top-[60px] flex w-5 flex-col items-center">
+                <div className="h-11 w-5 rounded-t-md border border-white/10 bg-gradient-to-b from-slate-500/90 to-slate-600/90" />
+                <div className="-mt-0.5 h-4 w-7 rounded-sm border border-white/10 bg-slate-600/90" />
+              </div>
             </div>
 
             <div className="text-center">
