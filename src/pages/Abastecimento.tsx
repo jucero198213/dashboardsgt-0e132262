@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
-import { fetchAbastecimento, type AbastecimentoRow } from "@/lib/dwApi";
+import { fetchAbastecimento, fetchTanqueInterno, type AbastecimentoRow, type TanqueInternoResponse } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { PostoInterno } from "@/components/abastecimento/PostoInterno";
@@ -130,6 +130,7 @@ export default function Abastecimento() {
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [dados, setDados]             = useState<AbastecimentoRow[]>([]);
+  const [tanque, setTanque]           = useState<TanqueInternoResponse | null>(null);
   const [loading, setLoading]         = useState(false);
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
@@ -176,11 +177,20 @@ export default function Abastecimento() {
     }, 120);
 
     try {
-      const res = await fetchAbastecimento({
-        dataInicio: dwFilter.dataInicio,
-        dataFim:    dwFilter.dataFim,
-      });
+      // Tanque interno em paralelo — se o endpoint ainda não existir no
+      // servidor local, a tela segue funcionando (cai no fallback simulado)
+      const [res, tanqueRes] = await Promise.all([
+        fetchAbastecimento({
+          dataInicio: dwFilter.dataInicio,
+          dataFim:    dwFilter.dataFim,
+        }),
+        fetchTanqueInterno({
+          dataInicio: dwFilter.dataInicio,
+          dataFim:    dwFilter.dataFim,
+        }).catch(() => null),
+      ]);
       setDados(res.data ?? []);
+      setTanque(tanqueRes);
       cooldown.start();
     } catch (err) {
       setError((err as Error).message ?? "Erro ao carregar dados");
@@ -244,6 +254,41 @@ export default function Abastecimento() {
 
     const ultima = internos[0];
 
+    // Recargas (entradas NFI) e saldo — vindos do /dw-tanque-interno
+    const recargas = (tanque?.recargas ?? []).filter(r => r.data);
+    const recebidoPeriodoLitros = tanque
+      ? recargas.reduce((s, r) => s + (r.litros ?? 0), 0)
+      : null;
+    const ultimaRecarga = recargas.length > 0 ? {
+      data:       fmtData(recargas[0].data),
+      litros:     recargas[0].litros ?? 0,
+      fornecedor: recargas[0].fornecedor,
+    } : null;
+    const saldoAtualLitros = tanque
+      ? tanque.totais.entradas_total - tanque.totais.saidas_total
+      : null;
+
+    // Movimentações: saídas (abastecimentos) + entradas (recargas), recentes
+    const movimentacoes = [
+      ...internos.slice(0, 6).map(d => ({
+        raw:          String(d.datref),
+        data:         fmtData(d.datref),
+        tipo:         "Abastecimento Frota" as const,
+        volumeLitros: d.quanti ?? 0,
+        responsavel:  `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
+      })),
+      ...recargas.slice(0, 4).map(r => ({
+        raw:          String(r.data),
+        data:         fmtData(r.data),
+        tipo:         "Recarga" as const,
+        volumeLitros: r.litros ?? 0,
+        responsavel:  r.fornecedor ?? "Distribuidora",
+      })),
+    ]
+      .sort((a, b) => b.raw.localeCompare(a.raw))
+      .slice(0, 6)
+      .map(({ raw: _raw, ...m }) => m);
+
     return {
       abastecidoPeriodoLitros: totalPeriodo,
       abastecidoDiaLitros:     litrosUltimoDia,
@@ -253,13 +298,12 @@ export default function Abastecimento() {
         litros: ultima.quanti ?? 0,
         data:   fmtData(ultima.datref),
       } : null,
-      movimentacoes: internos.slice(0, 5).map(d => ({
-        data:        fmtData(d.datref),
-        volumeLitros: d.quanti ?? 0,
-        responsavel: `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
-      })),
+      recebidoPeriodoLitros,
+      ultimaRecarga,
+      saldoAtualLitros,
+      movimentacoes,
     };
-  }, [dados]);
+  }, [dados, tanque]);
 
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {

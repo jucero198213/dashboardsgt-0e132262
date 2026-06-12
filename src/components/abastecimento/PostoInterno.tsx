@@ -2,27 +2,29 @@ import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { RAW } from "@/lib/theme";
 import sgtLogo from "@/assets/sgt-logo.png";
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  MOCK — Estoque do tanque interno (ETAPA 2 — pendente de fonte de dados)
-//  Saldo, capacidade e recargas dependem do registro de ENTRADA de diesel
-//  (não disponível no DW hoje). Substituir este objeto pela fonte real.
-// ═══════════════════════════════════════════════════════════════════════════
-export const SALDO_TANQUE_MOCK = {
-  combustivel:              "Diesel S10",
-  capacidadeLitros:         15400,
-  saldoAtualLitros:         11550,
-  recebidoMesLitros:        16000,
-  ultimaRecargaData:        "08/06/2026",
-  ultimaRecargaLitros:      8000,
+// ─── Configuração física do tanque (propriedade do equipamento) ───────────────
+export const TANQUE_CONFIG = {
+  combustivel:      "Diesel S10",
+  capacidadeLitros: 15400,
 };
 
-// ─── Dados reais vindos do DW (RODABA · postos SGT) ──────────────────────────
+// ─── Dados reais vindos do DW ────────────────────────────────────────────────
+//  Saídas: RODABA (postos SGT) · Entradas: notas NFI (diesel a granel)
+//  Campos null = endpoint /dw-tanque-interno indisponível (servidor antigo)
 export interface PostoInternoDados {
   abastecidoPeriodoLitros: number;
   abastecidoDiaLitros:     number;
   diaReferencia:           string | null;
   ultimaPlaca: { placa: string; litros: number; data: string } | null;
-  movimentacoes: { data: string; volumeLitros: number; responsavel: string }[];
+  recebidoPeriodoLitros:   number | null;
+  ultimaRecarga: { data: string; litros: number; fornecedor: string | null } | null;
+  saldoAtualLitros:        number | null;
+  movimentacoes: {
+    data: string;
+    tipo: "Recarga" | "Abastecimento Frota";
+    volumeLitros: number;
+    responsavel: string;
+  }[];
 }
 
 const fmtL = (v: number) => `${Math.round(v).toLocaleString("pt-BR")} L`;
@@ -31,8 +33,12 @@ const fmtL = (v: number) => `${Math.round(v).toLocaleString("pt-BR")} L`;
 //  Posto de combustível corporativo — desenho 100% CSS (sem ícones/imagens)
 // ─────────────────────────────────────────────────────────────────────────────
 export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
-  const t = SALDO_TANQUE_MOCK;
-  const pct = Math.max(0, Math.min(100, (t.saldoAtualLitros / t.capacidadeLitros) * 100));
+  const saldoReal = dados.saldoAtualLitros != null;
+  // Saldo exibido limitado ao intervalo físico do tanque
+  const saldoLitros = saldoReal
+    ? Math.max(0, Math.min(TANQUE_CONFIG.capacidadeLitros, dados.saldoAtualLitros!))
+    : 0;
+  const pct = Math.max(0, Math.min(100, (saldoLitros / TANQUE_CONFIG.capacidadeLitros) * 100));
 
   const nivel = pct < 25
     ? { cor: "#f87171", rgb: "248,113,113", label: "Nível crítico" }
@@ -157,7 +163,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                     {pct.toFixed(0)}%
                   </span>
                   <span className="text-[15px] font-bold tabular-nums text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
-                    {fmtL(t.saldoAtualLitros)} / {fmtL(t.capacidadeLitros)}
+                    {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                   </span>
                   <span
                     className="mt-1 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
@@ -181,7 +187,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
 
             <div className="text-center">
               <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
-              <p className="text-[12px] font-semibold text-amber-400/70 mt-1">{t.combustivel}</p>
+              <p className="text-[12px] font-semibold text-amber-400/70 mt-1">{TANQUE_CONFIG.combustivel}</p>
             </div>
           </div>
 
@@ -271,9 +277,9 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
           {/* ═════════ PAINEL DE STATUS ═════════ */}
           <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:pb-16">
             {[
-              { label: "Total Recebido (Mês)",       valor: fmtL(t.recebidoMesLitros),              destaque: "#fbbf24" },
+              { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
               { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros),    destaque: "#94a3b8" },
-              { label: "Última Recarga",             valor: fmtL(t.ultimaRecargaLitros),            destaque: "#a78bfa", sub: `em ${t.ultimaRecargaData}` },
+              { label: "Última Recarga",             valor: dados.ultimaRecarga ? fmtL(dados.ultimaRecarga.litros) : "—", destaque: "#a78bfa", sub: dados.ultimaRecarga ? `em ${dados.ultimaRecarga.data}${dados.ultimaRecarga.fornecedor ? ` · ${dados.ultimaRecarga.fornecedor.split(" ")[0]}` : ""}` : "Sem recargas no período" },
               { label: "Última Placa Abastecida",    valor: dados.ultimaPlaca?.placa ?? "—",        destaque: "#22d3ee", sub: dados.ultimaPlaca ? `${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}` : "Sem registros no período", glow: true },
             ].map(c => (
               <div
@@ -305,7 +311,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
             <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-white/[0.07]">
-                  {["Data", "Tipo", "Volume (L)", "Veículo / Motorista", "Status"].map((h, i) => (
+                  {["Data", "Tipo", "Volume (L)", "Responsável / Fornecedor", "Status"].map((h, i) => (
                     <th
                       key={h}
                       className={`px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 ${i === 2 ? "text-right" : i === 4 ? "text-center" : "text-left"}`}
@@ -323,35 +329,44 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                     </td>
                   </tr>
                 ) : (
-                  dados.movimentacoes.map((m, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.025]"
-                    >
-                      <td className="px-4 py-2.5">
-                        <span className="text-[12px] tabular-nums text-slate-400">{m.data}</span>
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/[0.08] px-2.5 py-1 text-[10px] font-bold text-amber-300">
-                          <span className="h-1 w-1 rounded-full bg-amber-400" />
-                          Abastecimento Frota
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <span className="font-mono text-[12px] font-bold tabular-nums text-amber-300">
-                          −{Math.round(m.volumeLitros).toLocaleString("pt-BR")} L
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <span className="text-[12px] text-slate-300">{m.responsavel}</span>
-                      </td>
-                      <td className="px-4 py-2.5 text-center">
-                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.06] px-2 py-0.5 text-[9px] font-semibold text-emerald-400/90">
-                          Concluído
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  dados.movimentacoes.map((m, i) => {
+                    const recarga = m.tipo === "Recarga";
+                    return (
+                      <tr
+                        key={i}
+                        className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.025]"
+                      >
+                        <td className="px-4 py-2.5">
+                          <span className="text-[12px] tabular-nums text-slate-400">{m.data}</span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${
+                              recarga
+                                ? "border-emerald-400/25 bg-emerald-500/[0.08] text-emerald-300"
+                                : "border-amber-400/25 bg-amber-500/[0.08] text-amber-300"
+                            }`}
+                          >
+                            <span className={`h-1 w-1 rounded-full ${recarga ? "bg-emerald-400" : "bg-amber-400"}`} />
+                            {m.tipo}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className={`font-mono text-[12px] font-bold tabular-nums ${recarga ? "text-emerald-300" : "text-amber-300"}`}>
+                            {recarga ? "+" : "−"}{Math.round(m.volumeLitros).toLocaleString("pt-BR")} L
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className="text-[12px] text-slate-300">{m.responsavel}</span>
+                        </td>
+                        <td className="px-4 py-2.5 text-center">
+                          <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.06] px-2 py-0.5 text-[9px] font-semibold text-emerald-400/90">
+                            Concluído
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -361,7 +376,9 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
         {/* Nota de integração */}
         <div className="mt-3 flex items-center justify-center">
           <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1 text-[9px] text-slate-600">
-            Abastecimentos com dados reais do DW · Saldo do tanque e recargas simulados — aguardando fonte de entradas
+            {saldoReal
+              ? "Dados reais do DW · Saldo = entradas NFI − abastecimentos nas bombas SGT"
+              : "Abastecimentos reais do DW · Saldo e recargas aguardando reinício do servidor local (endpoint /dw-tanque-interno)"}
           </span>
         </div>
       </div>

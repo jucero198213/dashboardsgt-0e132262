@@ -43,6 +43,10 @@ const ENDPOINT_ABASTECIMENTO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-abastecimento`
   : `${SUPABASE_URL}/functions/v1/dw-abastecimento`;
 
+const ENDPOINT_TANQUE_INTERNO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-tanque-interno`
+  : `${SUPABASE_URL}/functions/v1/dw-tanque-interno`;
+
 const ENDPOINT_RH = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-rh`
   : `${SUPABASE_URL}/functions/v1/dw-rh`;
@@ -545,6 +549,36 @@ export async function fetchAbastecimento(params?: {
 }): Promise<AbastecimentoResponse> {
   const key = `abastecimento:${JSON.stringify(params ?? {})}`;
   return cached(key, () => callEdge<AbastecimentoResponse>(ENDPOINT_ABASTECIMENTO, params ?? {}), TTL_FROTA);
+}
+
+// ─── Tanque interno (recargas NFI + saldo) ────────────────────────────────────
+
+export interface RecargaTanqueRow {
+  data:            string | null;
+  nota_fiscal:     string | number | null;
+  fornecedor:      string | null;
+  litros:          number | null;
+  valor_unitario:  number | null;
+}
+
+export interface TanqueInternoResponse {
+  recargas: RecargaTanqueRow[];
+  totais: {
+    entradas_total: number;
+    saidas_total:   number;
+  };
+}
+
+/**
+ * Recargas do tanque de diesel próprio (notas NFI) no período +
+ * acumulado histórico de entradas/saídas para cálculo do saldo.
+ */
+export async function fetchTanqueInterno(params?: {
+  dataInicio?: string;
+  dataFim?: string;
+}): Promise<TanqueInternoResponse> {
+  const key = `tanque-interno:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<TanqueInternoResponse>(ENDPOINT_TANQUE_INTERNO, params ?? {}), TTL_FROTA);
 }
 
 // ─── Exports públicos: RH ─────────────────────────────────────────────────────

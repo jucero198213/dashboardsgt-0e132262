@@ -1055,6 +1055,80 @@ app.post("/dw-abastecimento", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+// ═══════════════════════════════════════════════════════════════════════════
+//  ENDPOINT: /dw-tanque-interno
+//
+//  Estoque do tanque de diesel próprio (15.400 L):
+//   - recargas: notas tipo NFI (diesel a granel comprado das distribuidoras)
+//     no período informado
+//   - totais: acumulado histórico de entradas (NFI) e saídas (abastecimentos
+//     nas bombas SGT) para cálculo do saldo atual = entradas − saídas
+// ═══════════════════════════════════════════════════════════════════════════
+app.post("/dw-tanque-interno", async (req, res) => {
+  const { dataInicio, dataFim } = req.body ?? {};
+
+  try {
+    const pool = await getPool();
+
+    // Recargas (entradas NFI) do período
+    const reqRecargas = pool.request();
+    reqRecargas.input("dataInicio", sql.Date, dataInicio ? new Date(dataInicio) : null);
+    reqRecargas.input("dataFim",    sql.Date, dataFim    ? new Date(dataFim)    : null);
+
+    const recargas = await reqRecargas.query(`
+      SELECT
+        ENT.DATREF     AS data,
+        ENT.NUMDOC     AS nota_fiscal,
+        CLI.RAZSOC     AS fornecedor,
+        AIE.QTDENT     AS litros,
+        AIE.VLRUNI     AS valor_unitario
+      FROM ESTAIE AIE WITH (NOLOCK)
+      JOIN ESTENT ENT WITH (NOLOCK)
+        ON  AIE.CODCLIFOR = ENT.CODCLIFOR
+        AND AIE.TIPONF    = ENT.TIPONF
+        AND AIE.SERIE     = ENT.SERIE
+        AND AIE.NUMDOC    = ENT.NUMDOC
+      LEFT JOIN RODCLI CLI WITH (NOLOCK) ON AIE.CODCLIFOR = CLI.CODCLIFOR
+      WHERE ENT.TIPONF = 'NFI'
+        AND ENT.SITUAC <> 'C'
+        AND (@dataInicio IS NULL OR ENT.DATREF >= @dataInicio)
+        AND (@dataFim    IS NULL OR ENT.DATREF <= @dataFim)
+      ORDER BY ENT.DATREF DESC
+      OPTION (RECOMPILE)
+    `);
+
+    // Acumulado histórico para saldo do tanque
+    const totais = await pool.request().query(`
+      SELECT
+        (SELECT ISNULL(SUM(AIE.QTDENT), 0)
+           FROM ESTAIE AIE WITH (NOLOCK)
+           JOIN ESTENT ENT WITH (NOLOCK)
+             ON  AIE.CODCLIFOR = ENT.CODCLIFOR
+             AND AIE.TIPONF    = ENT.TIPONF
+             AND AIE.SERIE     = ENT.SERIE
+             AND AIE.NUMDOC    = ENT.NUMDOC
+          WHERE ENT.TIPONF = 'NFI'
+            AND ENT.SITUAC <> 'C')                AS entradas_total,
+        (SELECT ISNULL(SUM(ABA.QUANTI), 0)
+           FROM RODABA ABA WITH (NOLOCK)
+           JOIN RODPOS POS WITH (NOLOCK) ON ABA.CODPON = POS.CODPON
+          WHERE POS.DESCRI LIKE 'SGT%')           AS saidas_total
+      OPTION (RECOMPILE)
+    `);
+
+    return res.json({
+      recargas: recargas.recordset,
+      totais:   totais.recordset[0],
+    });
+  } catch (err) {
+    console.error("[dw-tanque-interno] Erro:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNREFUSED") {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 app.post("/dw-faturamento-resumo", async (_req, res) => {
   try {
     const p = await getPool();
