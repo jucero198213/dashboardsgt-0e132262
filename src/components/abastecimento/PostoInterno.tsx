@@ -55,11 +55,29 @@ export function PostoInterno() {
 
   return (
     <AnimatedCard delay={300}>
-      {/* Keyframe do fluxo do duto — escopo local do componente */}
+      {/* Keyframes locais — fluxo do duto e movimento do líquido */}
       <style>{`
         @keyframes sgt-fuel-flow {
           0%   { transform: translateX(-110%); }
           100% { transform: translateX(330%); }
+        }
+        @keyframes sgt-wave-move {
+          from { background-position-x: 0px; }
+          to   { background-position-x: 48px; }
+        }
+        @keyframes sgt-wave-move-rev {
+          from { background-position-x: 0px; }
+          to   { background-position-x: -64px; }
+        }
+        @keyframes sgt-liquid-bob {
+          0%, 100% { transform: translateY(0px); }
+          50%      { transform: translateY(3px); }
+        }
+        @keyframes sgt-bubble-rise {
+          0%   { transform: translateY(0) scale(1); opacity: 0; }
+          15%  { opacity: 0.55; }
+          85%  { opacity: 0.35; }
+          100% { transform: translateY(-150px) scale(1.2); opacity: 0; }
         }
       `}</style>
 
@@ -95,17 +113,36 @@ export function PostoInterno() {
                 {/* Líquido — preenchimento proporcional ao saldo */}
                 <div
                   className="absolute inset-x-0 bottom-0 transition-all duration-1000 ease-out"
-                  style={{ height: `${pct}%` }}
+                  style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
                 >
-                  {/* Superfície do líquido */}
-                  <div className="absolute -top-2.5 inset-x-0 h-5 rounded-[100%] bg-amber-300/40 blur-[6px] animate-pulse" />
-                  <div className="absolute -top-1 inset-x-2 h-2 rounded-[100%] bg-amber-200/50" />
+                  {/* Ondas da superfície — duas camadas em sentidos opostos */}
+                  <div
+                    className="absolute -top-[15px] inset-x-0 h-4"
+                    style={{
+                      backgroundImage: "radial-gradient(circle at 12px 18px, rgba(251,191,36,0.68) 10px, transparent 11px)",
+                      backgroundSize: "24px 16px",
+                      backgroundRepeat: "repeat-x",
+                      animation: "sgt-wave-move 3.2s linear infinite",
+                    }}
+                  />
+                  <div
+                    className="absolute -top-[11px] inset-x-0 h-[14px] opacity-80"
+                    style={{
+                      backgroundImage: "radial-gradient(circle at 16px 16px, rgba(252,211,77,0.5) 11px, transparent 12px)",
+                      backgroundSize: "32px 14px",
+                      backgroundRepeat: "repeat-x",
+                      animation: "sgt-wave-move-rev 5.4s linear infinite",
+                    }}
+                  />
+                  {/* Brilho da superfície */}
+                  <div className="absolute -top-1.5 inset-x-3 h-2 rounded-[100%] bg-amber-200/40 blur-[3px] animate-pulse" />
                   {/* Corpo do diesel */}
                   <div className="h-full w-full bg-gradient-to-b from-amber-400/70 via-amber-500/55 to-amber-700/65" />
-                  {/* Bolhas sutis */}
-                  <div className="absolute bottom-6 left-8 h-2 w-2 rounded-full bg-white/20 animate-pulse" />
-                  <div className="absolute bottom-16 right-10 h-1.5 w-1.5 rounded-full bg-white/15 animate-pulse [animation-delay:300ms]" />
-                  <div className="absolute bottom-28 left-14 h-1 w-1 rounded-full bg-white/15 animate-pulse [animation-delay:700ms]" />
+                  {/* Bolhas subindo */}
+                  <div className="absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
+                  <div className="absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
+                  <div className="absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
+                  <div className="absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
                 </div>
 
                 {/* Brilho de vidro */}
