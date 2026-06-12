@@ -10,11 +10,29 @@ export const SALDO_TANQUE_MOCK = {
   combustivel:              "Diesel S10",
   capacidadeLitros:         60000,
   saldoAtualLitros:         45000,
-  consumoMedioDiarioLitros: 1850,
-  ultimaRecargaData:        "05/06/2026",
-  ultimaRecargaLitros:      28000,
-  abastecidoMesLitros:      12450,
+  consumoMedioDiarioLitros: 3200,
+  recebidoMesLitros:        45000,
+  abastecidoMesLitros:      32450,
+  abastecidoDiaLitros:      850,
+  ultimaRecargaData:        "08/06/2026",
+  ultimaRecargaLitros:      20000,
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MOCK — Últimas movimentações do tanque interno
+//  Mesma regra: substituir pelo retorno da API mantendo o formato.
+// ═══════════════════════════════════════════════════════════════════════════
+export const MOVIMENTACOES_TANQUE_MOCK: {
+  dataHora: string;
+  tipo: "Recarga" | "Abastecimento Frota";
+  volumeLitros: number;
+  responsavel: string;
+  status: "Concluído" | "Em validação";
+}[] = [
+  { dataHora: "10/06/2026 14:32", tipo: "Abastecimento Frota", volumeLitros: 480,   responsavel: "RDO1A23 · Carlos Mendes",   status: "Concluído" },
+  { dataHora: "10/06/2026 08:15", tipo: "Abastecimento Frota", volumeLitros: 370,   responsavel: "RDO4B56 · João Pereira",    status: "Concluído" },
+  { dataHora: "08/06/2026 10:47", tipo: "Recarga",             volumeLitros: 20000, responsavel: "Distribuidora Ipiranga SA", status: "Concluído" },
+];
 
 const fmtL = (v: number) => `${v.toLocaleString("pt-BR")} L`;
 
@@ -36,9 +54,17 @@ export function PostoInterno() {
 
   return (
     <AnimatedCard delay={300}>
+      {/* Keyframe do fluxo do duto — escopo local do componente */}
+      <style>{`
+        @keyframes sgt-fuel-flow {
+          0%   { transform: translateX(-110%); }
+          100% { transform: translateX(330%); }
+        }
+      `}</style>
+
       <div
-        className="rounded-[14px] sm:rounded-[16px] border p-4 sm:p-6"
-        style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
+        className="rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6 backdrop-blur-sm"
+        style={{ background: "var(--sgt-bg-card)" }}
       >
         {/* ── Header da seção ── */}
         <div className="flex items-center gap-2 mb-2">
@@ -63,7 +89,7 @@ export function PostoInterno() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-5 w-24 rounded-full border border-white/10 bg-gradient-to-b from-slate-700/70 to-slate-800/70 z-10" />
 
               {/* Corpo do tanque (vidro) */}
-              <div className="relative h-[300px] w-[210px] overflow-hidden rounded-[26px] border border-white/[0.12] bg-white/[0.025] backdrop-blur shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[300px] w-[210px] overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.025] backdrop-blur shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]">
 
                 {/* Líquido — preenchimento proporcional ao saldo */}
                 <div
@@ -129,11 +155,19 @@ export function PostoInterno() {
             </div>
           </div>
 
-          {/* ═════════ DUTO DE LIGAÇÃO ═════════ */}
+          {/* ═════════ DUTO DE LIGAÇÃO — fluxo animado ═════════ */}
           <div className="hidden lg:flex flex-col items-center gap-1.5 pb-32">
             <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-slate-600">Duto</span>
-            <div className="relative h-2.5 w-28 overflow-hidden rounded-full border border-white/[0.08] bg-slate-800/80">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/45 to-transparent animate-pulse" />
+            <div className="relative h-2.5 w-28 overflow-hidden rounded-full border border-white/10 bg-slate-800/80">
+              {/* Pulso de combustível percorrendo o duto */}
+              <div
+                className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
+                style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }}
+              />
+              <div
+                className="absolute inset-y-0 w-1/4 rounded-full bg-gradient-to-r from-transparent via-amber-300/40 to-transparent"
+                style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }}
+              />
             </div>
           </div>
 
@@ -149,20 +183,20 @@ export function PostoInterno() {
               </div>
 
               {/* Corpo da bomba */}
-              <div className="relative h-[270px] w-[160px] overflow-hidden rounded-[20px] border border-white/[0.12] bg-gradient-to-b from-slate-800/90 to-slate-900/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[270px] w-[160px] overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
                 {/* Faixa de identidade */}
                 <div className="h-2 w-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
 
                 {/* Placa SGT */}
-                <div className="mx-3 mt-3 rounded-md border border-white/[0.06] bg-white/[0.03] py-1.5 text-center">
+                <div className="mx-3 mt-3 rounded-md border border-white/10 bg-white/[0.03] py-1.5 text-center backdrop-blur-sm">
                   <span className="text-[9px] font-black uppercase tracking-[0.32em] text-amber-300">SGT</span>
                 </div>
 
                 {/* Display digital */}
                 <div className="mx-3 mt-3 rounded-lg border border-amber-400/25 bg-black/70 p-3 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)]">
-                  <p className="mb-1 text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no mês</p>
+                  <p className="mb-1 text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
                   <p className="font-mono text-[20px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]">
-                    {t.abastecidoMesLitros.toLocaleString("pt-BR")}
+                    {t.abastecidoDiaLitros.toLocaleString("pt-BR")}
                   </p>
                   <p className="text-right text-[9px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
                 </div>
@@ -194,16 +228,17 @@ export function PostoInterno() {
           </div>
 
           {/* ═════════ PAINEL DE STATUS ═════════ */}
-          <div className="grid w-full max-w-[440px] grid-cols-2 gap-2.5 lg:w-[210px] lg:grid-cols-1 lg:pb-12">
+          <div className="grid w-full max-w-[440px] grid-cols-2 gap-2.5 lg:w-[215px] lg:grid-cols-1 lg:pb-12">
             {[
-              { label: "Saldo Atual",       valor: fmtL(t.saldoAtualLitros),                       destaque: nivel.cor },
-              { label: "Capacidade Total",  valor: fmtL(t.capacidadeLitros),                       destaque: "#94a3b8" },
-              { label: "Autonomia Estimada", valor: `≈ ${autonomiaDias} dias`,                     destaque: "#22d3ee", sub: `${fmtL(t.consumoMedioDiarioLitros)}/dia` },
-              { label: "Última Recarga",    valor: fmtL(t.ultimaRecargaLitros),                    destaque: "#a78bfa", sub: t.ultimaRecargaData },
+              { label: "Total Recebido (Mês)",   valor: fmtL(t.recebidoMesLitros),   destaque: "#fbbf24" },
+              { label: "Total Abastecido (Mês)", valor: fmtL(t.abastecidoMesLitros), destaque: "#94a3b8" },
+              { label: "Última Recarga",         valor: fmtL(t.ultimaRecargaLitros), destaque: "#a78bfa", sub: `em ${t.ultimaRecargaData}` },
+              { label: "Autonomia Estimada",     valor: `~ ${autonomiaDias} dias restantes`, destaque: "#22d3ee", sub: `Consumo médio: ${fmtL(t.consumoMedioDiarioLitros)}/dia`, glow: true },
             ].map(c => (
               <div
                 key={c.label}
-                className="rounded-[12px] border border-white/[0.07] bg-white/[0.025] px-3.5 py-2.5 backdrop-blur transition-all duration-300 hover:border-white/[0.14]"
+                className="rounded-[12px] border border-white/10 bg-white/[0.025] px-3.5 py-2.5 backdrop-blur transition-all duration-300 hover:border-white/[0.18]"
+                style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
               >
                 <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
                 <p className="mt-1 text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]" style={{ color: c.destaque }}>
@@ -215,10 +250,84 @@ export function PostoInterno() {
           </div>
         </div>
 
+        {/* ═════════ ÚLTIMAS MOVIMENTAÇÕES DO TANQUE ═════════ */}
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.6)]" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">
+              Últimas Movimentações do Tanque
+            </span>
+            <div className="flex-1 h-px" style={{ background: RAW.borderDefault }} />
+          </div>
+
+          <div className="overflow-x-auto rounded-[12px] border border-white/10 bg-white/[0.015] backdrop-blur-sm">
+            <table className="w-full min-w-[560px]">
+              <thead>
+                <tr className="border-b border-white/[0.07]">
+                  {["Data/Hora", "Tipo", "Volume (L)", "Responsável / Fornecedor", "Status"].map((h, i) => (
+                    <th
+                      key={h}
+                      className={`px-4 py-2.5 text-[8px] font-bold uppercase tracking-[0.22em] text-slate-500 ${i === 2 ? "text-right" : i === 4 ? "text-center" : "text-left"}`}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {MOVIMENTACOES_TANQUE_MOCK.map((m, i) => {
+                  const recarga = m.tipo === "Recarga";
+                  return (
+                    <tr
+                      key={i}
+                      className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.025]"
+                    >
+                      <td className="px-4 py-2.5">
+                        <span className="text-[11px] tabular-nums text-slate-400">{m.dataHora}</span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-bold ${
+                            recarga
+                              ? "border-emerald-400/25 bg-emerald-500/[0.08] text-emerald-300"
+                              : "border-amber-400/25 bg-amber-500/[0.08] text-amber-300"
+                          }`}
+                        >
+                          <span className={`h-1 w-1 rounded-full ${recarga ? "bg-emerald-400" : "bg-amber-400"}`} />
+                          {m.tipo}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <span className={`font-mono text-[11px] font-bold tabular-nums ${recarga ? "text-emerald-300" : "text-amber-300"}`}>
+                          {recarga ? "+" : "−"}{m.volumeLitros.toLocaleString("pt-BR")} L
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className="text-[11px] text-slate-300">{m.responsavel}</span>
+                      </td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
+                            m.status === "Concluído"
+                              ? "border-emerald-400/20 bg-emerald-500/[0.06] text-emerald-400/90"
+                              : "border-slate-400/20 bg-slate-500/[0.08] text-slate-400"
+                          }`}
+                        >
+                          {m.status}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Nota de integração */}
-        <div className="mt-2 flex items-center justify-center">
+        <div className="mt-3 flex items-center justify-center">
           <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1 text-[9px] text-slate-600">
-            Saldo do tanque com dados simulados — aguardando integração com o banco
+            Saldo e movimentações com dados simulados — aguardando integração com o banco
           </span>
         </div>
       </div>
