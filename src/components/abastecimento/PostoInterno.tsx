@@ -77,7 +77,7 @@ export function PostoInterno() {
           0%   { transform: translateY(0) scale(1); opacity: 0; }
           15%  { opacity: 0.55; }
           85%  { opacity: 0.35; }
-          100% { transform: translateY(-150px) scale(1.2); opacity: 0; }
+          100% { transform: translateY(-220px) scale(1.2); opacity: 0; }
         }
       `}</style>
 
@@ -98,17 +98,17 @@ export function PostoInterno() {
           </span>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-10 lg:gap-12 py-6">
+        <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
           {/* ═════════ TANQUE DE ARMAZENAMENTO ═════════ */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
               {/* Respiro / válvula superior */}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 h-4 w-8 rounded-t-lg border border-white/10 bg-gradient-to-b from-slate-600/80 to-slate-700/80 z-10" />
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-5 w-24 rounded-full border border-white/10 bg-gradient-to-b from-slate-700/70 to-slate-800/70 z-10" />
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 h-5 w-10 rounded-t-lg border border-white/10 bg-gradient-to-b from-slate-600/80 to-slate-700/80 z-10" />
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-6 w-32 rounded-full border border-white/10 bg-gradient-to-b from-slate-700/70 to-slate-800/70 z-10" />
 
               {/* Corpo do tanque (vidro) */}
-              <div className="relative h-[300px] w-[210px] overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.025] backdrop-blur shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[420px] w-[300px] overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.025] backdrop-blur shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]">
 
                 {/* Líquido — preenchimento proporcional ao saldo */}
                 <div
@@ -139,29 +139,29 @@ export function PostoInterno() {
                 </div>
 
                 {/* Brilho de vidro */}
-                <div className="absolute left-4 top-4 bottom-4 w-2.5 rounded-full bg-white/[0.07]" />
-                <div className="absolute left-8 top-6 bottom-10 w-1 rounded-full bg-white/[0.04]" />
+                <div className="absolute left-5 top-5 bottom-5 w-3 rounded-full bg-white/[0.07]" />
+                <div className="absolute left-10 top-8 bottom-12 w-1.5 rounded-full bg-white/[0.04]" />
 
                 {/* Réguas de nível */}
                 {[75, 50, 25].map(m => (
                   <div key={m} className="absolute inset-x-0" style={{ bottom: `${m}%` }}>
-                    <div className="flex items-center gap-1.5 px-2">
+                    <div className="flex items-center gap-2 px-3">
                       <div className="h-px flex-1 bg-white/[0.10]" />
-                      <span className="text-[8px] font-bold tabular-nums text-slate-400/80">{m}%</span>
+                      <span className="text-[10px] font-bold tabular-nums text-slate-400/80">{m}%</span>
                     </div>
                   </div>
                 ))}
 
                 {/* Leitura central */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-                  <span className="text-[36px] font-black leading-none tabular-nums tracking-[-0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <span className="text-[56px] font-black leading-none tabular-nums tracking-[-0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
                     {pct.toFixed(0)}%
                   </span>
-                  <span className="text-[11px] font-bold tabular-nums text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
+                  <span className="text-[15px] font-bold tabular-nums text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
                     {fmtL(t.saldoAtualLitros)} / {fmtL(t.capacidadeLitros)}
                   </span>
                   <span
-                    className="mt-0.5 rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em]"
+                    className="mt-1 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
                     style={{
                       color: nivel.cor,
                       borderColor: `rgba(${nivel.rgb},0.35)`,
@@ -174,22 +174,22 @@ export function PostoInterno() {
               </div>
 
               {/* Pés do tanque */}
-              <div className="flex justify-between px-7 -mt-0.5">
-                <div className="h-5 w-4 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
-                <div className="h-5 w-4 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
+              <div className="flex justify-between px-10 -mt-0.5">
+                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
+                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
               </div>
             </div>
 
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
-              <p className="text-[10px] font-semibold text-amber-400/70 mt-0.5">{t.combustivel}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
+              <p className="text-[12px] font-semibold text-amber-400/70 mt-1">{t.combustivel}</p>
             </div>
           </div>
 
           {/* ═════════ DUTO DE LIGAÇÃO — fluxo animado ═════════ */}
-          <div className="hidden lg:flex flex-col items-center gap-1.5 pb-32">
-            <span className="text-[8px] font-bold uppercase tracking-[0.25em] text-slate-600">Duto</span>
-            <div className="relative h-2.5 w-28 overflow-hidden rounded-full border border-white/10 bg-slate-800/80">
+          <div className="hidden lg:flex flex-col items-center gap-2 pb-48">
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-600">Duto</span>
+            <div className="relative h-3.5 w-44 overflow-hidden rounded-full border border-white/10 bg-slate-800/80">
               {/* Pulso de combustível percorrendo o duto */}
               <div
                 className="absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
@@ -206,64 +206,64 @@ export function PostoInterno() {
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
               {/* Mangueira (curva) */}
-              <div className="absolute -right-9 top-16 h-36 w-12 rounded-br-[36px] border-b-[5px] border-r-[5px] border-slate-600/90" />
+              <div className="absolute -right-12 top-24 h-52 w-16 rounded-br-[48px] border-b-[6px] border-r-[6px] border-slate-600/90" />
               {/* Bico de abastecimento */}
-              <div className="absolute -right-[42px] top-9 flex flex-col items-center">
-                <div className="h-8 w-3.5 rounded-t-md border border-white/10 bg-gradient-to-b from-slate-500/90 to-slate-600/90" />
-                <div className="-mt-0.5 h-3 w-5 rounded-sm border border-white/10 bg-slate-600/90" />
+              <div className="absolute -right-[58px] top-14 flex flex-col items-center">
+                <div className="h-11 w-5 rounded-t-md border border-white/10 bg-gradient-to-b from-slate-500/90 to-slate-600/90" />
+                <div className="-mt-0.5 h-4 w-7 rounded-sm border border-white/10 bg-slate-600/90" />
               </div>
 
               {/* Corpo da bomba */}
-              <div className="relative h-[270px] w-[160px] overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+              <div className="relative h-[380px] w-[230px] overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-b from-slate-800/80 to-slate-900/85 backdrop-blur-sm shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
                 {/* Faixa de identidade */}
-                <div className="h-2 w-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
+                <div className="h-2.5 w-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
 
                 {/* Placa com a logo */}
-                <div className="mx-3 mt-3 flex items-center justify-center rounded-md border border-white/10 bg-white/[0.03] py-2 backdrop-blur-sm">
+                <div className="mx-4 mt-4 flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] py-3 backdrop-blur-sm">
                   <img
                     src={sgtLogo}
                     alt="SGT"
-                    className="block h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]"
+                    className="block h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]"
                   />
                 </div>
 
                 {/* Display digital */}
-                <div className="mx-3 mt-3 rounded-lg border border-amber-400/25 bg-black/70 p-3 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)]">
-                  <p className="mb-1 text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
-                  <p className="font-mono text-[20px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]">
+                <div className="mx-4 mt-4 rounded-xl border border-amber-400/25 bg-black/70 p-4 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)]">
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Abastecido no dia</p>
+                  <p className="font-mono text-[34px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
                     {t.abastecidoDiaLitros.toLocaleString("pt-BR")}
                   </p>
-                  <p className="text-right text-[9px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
+                  <p className="mt-1 text-right text-[11px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
                 </div>
 
                 {/* Teclado decorativo */}
-                <div className="mx-3 mt-3 grid grid-cols-3 gap-1.5">
+                <div className="mx-4 mt-4 grid grid-cols-3 gap-2">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-4 rounded-[4px] border border-white/[0.07] bg-white/[0.04]" />
+                    <div key={i} className="h-6 rounded-[5px] border border-white/[0.07] bg-white/[0.04]" />
                   ))}
                 </div>
 
                 {/* Slot do bico */}
-                <div className="absolute right-2 top-24 h-16 w-2 rounded-full border border-white/[0.06] bg-black/50" />
+                <div className="absolute right-3 top-32 h-24 w-2.5 rounded-full border border-white/[0.06] bg-black/50" />
 
                 {/* Rodapé da bomba */}
-                <div className="absolute inset-x-0 bottom-0 flex h-8 items-center justify-center border-t border-white/[0.06] bg-black/30">
-                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-slate-600">Bomba 01 · Uso interno</span>
+                <div className="absolute inset-x-0 bottom-0 flex h-10 items-center justify-center border-t border-white/[0.06] bg-black/30">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Bomba 01 · Uso interno</span>
                 </div>
               </div>
 
               {/* Base da bomba */}
-              <div className="mx-auto -mt-0.5 h-3 w-[180px] rounded-b-xl border border-white/[0.08] bg-slate-800/90" />
+              <div className="mx-auto -mt-0.5 h-4 w-[260px] rounded-b-xl border border-white/[0.08] bg-slate-800/90" />
             </div>
 
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-[0.26em] text-slate-400">Bomba Corporativa</p>
-              <p className="text-[10px] font-semibold text-slate-600 mt-0.5">Frota própria</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Bomba Corporativa</p>
+              <p className="text-[12px] font-semibold text-slate-600 mt-1">Frota própria</p>
             </div>
           </div>
 
           {/* ═════════ PAINEL DE STATUS ═════════ */}
-          <div className="grid w-full max-w-[440px] grid-cols-2 gap-2.5 lg:w-[215px] lg:grid-cols-1 lg:pb-12">
+          <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:pb-16">
             {[
               { label: "Total Recebido (Mês)",   valor: fmtL(t.recebidoMesLitros),   destaque: "#fbbf24" },
               { label: "Total Abastecido (Mês)", valor: fmtL(t.abastecidoMesLitros), destaque: "#94a3b8" },
@@ -272,14 +272,14 @@ export function PostoInterno() {
             ].map(c => (
               <div
                 key={c.label}
-                className="rounded-[12px] border border-white/10 bg-white/[0.025] px-3.5 py-2.5 backdrop-blur transition-all duration-300 hover:border-white/[0.18]"
+                className="rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 backdrop-blur transition-all duration-300 hover:border-white/[0.18]"
                 style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
               >
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
-                <p className="mt-1 text-[15px] font-black leading-none tabular-nums tracking-[-0.02em]" style={{ color: c.destaque }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
+                <p className="mt-1.5 text-[22px] font-black leading-none tabular-nums tracking-[-0.02em]" style={{ color: c.destaque }}>
                   {c.valor}
                 </p>
-                {c.sub && <p className="mt-1 text-[9px] font-semibold text-slate-600">{c.sub}</p>}
+                {c.sub && <p className="mt-1.5 text-[11px] font-semibold text-slate-600">{c.sub}</p>}
               </div>
             ))}
           </div>
@@ -302,7 +302,7 @@ export function PostoInterno() {
                   {["Data/Hora", "Tipo", "Volume (L)", "Responsável / Fornecedor", "Status"].map((h, i) => (
                     <th
                       key={h}
-                      className={`px-4 py-2.5 text-[8px] font-bold uppercase tracking-[0.22em] text-slate-500 ${i === 2 ? "text-right" : i === 4 ? "text-center" : "text-left"}`}
+                      className={`px-4 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 ${i === 2 ? "text-right" : i === 4 ? "text-center" : "text-left"}`}
                     >
                       {h}
                     </th>
@@ -318,11 +318,11 @@ export function PostoInterno() {
                       className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.025]"
                     >
                       <td className="px-4 py-2.5">
-                        <span className="text-[11px] tabular-nums text-slate-400">{m.dataHora}</span>
+                        <span className="text-[12px] tabular-nums text-slate-400">{m.dataHora}</span>
                       </td>
                       <td className="px-4 py-2.5">
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-bold ${
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${
                             recarga
                               ? "border-emerald-400/25 bg-emerald-500/[0.08] text-emerald-300"
                               : "border-amber-400/25 bg-amber-500/[0.08] text-amber-300"
@@ -333,12 +333,12 @@ export function PostoInterno() {
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <span className={`font-mono text-[11px] font-bold tabular-nums ${recarga ? "text-emerald-300" : "text-amber-300"}`}>
+                        <span className={`font-mono text-[12px] font-bold tabular-nums ${recarga ? "text-emerald-300" : "text-amber-300"}`}>
                           {recarga ? "+" : "−"}{m.volumeLitros.toLocaleString("pt-BR")} L
                         </span>
                       </td>
                       <td className="px-4 py-2.5">
-                        <span className="text-[11px] text-slate-300">{m.responsavel}</span>
+                        <span className="text-[12px] text-slate-300">{m.responsavel}</span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <span
