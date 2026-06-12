@@ -61,13 +61,13 @@ export function PostoInterno() {
           0%   { transform: translateX(-110%); }
           100% { transform: translateX(330%); }
         }
-        @keyframes sgt-wave-move {
-          from { background-position-x: 0px; }
-          to   { background-position-x: 48px; }
+        @keyframes sgt-swell {
+          0%, 100% { transform: translate(0%, 0px); }
+          50%      { transform: translate(3.5%, 2px); }
         }
-        @keyframes sgt-wave-move-rev {
-          from { background-position-x: 0px; }
-          to   { background-position-x: -64px; }
+        @keyframes sgt-swell-rev {
+          0%, 100% { transform: translate(0%, 1px); }
+          50%      { transform: translate(-3.5%, -1.5px); }
         }
         @keyframes sgt-liquid-bob {
           0%, 100% { transform: translateY(0px); }
@@ -115,27 +115,20 @@ export function PostoInterno() {
                   className="absolute inset-x-0 bottom-0 transition-all duration-1000 ease-out"
                   style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
                 >
-                  {/* Ondas da superfície — duas camadas em sentidos opostos */}
+                  {/* Superfície ondulando — duas elipses largas balançando em oposição */}
                   <div
-                    className="absolute -top-[15px] inset-x-0 h-4"
-                    style={{
-                      backgroundImage: "radial-gradient(circle at 12px 18px, rgba(251,191,36,0.68) 10px, transparent 11px)",
-                      backgroundSize: "24px 16px",
-                      backgroundRepeat: "repeat-x",
-                      animation: "sgt-wave-move 3.2s linear infinite",
-                    }}
+                    className="absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-400/70 to-amber-400/0"
+                    style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
                   />
                   <div
-                    className="absolute -top-[11px] inset-x-0 h-[14px] opacity-80"
-                    style={{
-                      backgroundImage: "radial-gradient(circle at 16px 16px, rgba(252,211,77,0.5) 11px, transparent 12px)",
-                      backgroundSize: "32px 14px",
-                      backgroundRepeat: "repeat-x",
-                      animation: "sgt-wave-move-rev 5.4s linear infinite",
-                    }}
+                    className="absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-300/30"
+                    style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
                   />
-                  {/* Brilho da superfície */}
-                  <div className="absolute -top-1.5 inset-x-3 h-2 rounded-[100%] bg-amber-200/40 blur-[3px] animate-pulse" />
+                  {/* Brilho suave acompanhando a superfície */}
+                  <div
+                    className="absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-200/35 blur-[2px]"
+                    style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
+                  />
                   {/* Corpo do diesel */}
                   <div className="h-full w-full bg-gradient-to-b from-amber-400/70 via-amber-500/55 to-amber-700/65" />
                   {/* Bolhas subindo */}
