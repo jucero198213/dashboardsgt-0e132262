@@ -1,5 +1,6 @@
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { RAW } from "@/lib/theme";
+import sgtLogo from "@/assets/sgt-logo.png";
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  MOCK — Saldo do tanque interno da empresa
@@ -187,9 +188,13 @@ export function PostoInterno() {
                 {/* Faixa de identidade */}
                 <div className="h-2 w-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600" />
 
-                {/* Placa SGT */}
-                <div className="mx-3 mt-3 rounded-md border border-white/10 bg-white/[0.03] py-1.5 text-center backdrop-blur-sm">
-                  <span className="text-[9px] font-black uppercase tracking-[0.32em] text-amber-300">SGT</span>
+                {/* Placa com a logo */}
+                <div className="mx-3 mt-3 flex items-center justify-center rounded-md border border-white/10 bg-white/[0.03] py-1.5 backdrop-blur-sm">
+                  <img
+                    src={sgtLogo}
+                    alt="SGT"
+                    className="h-5 w-auto object-contain drop-shadow-[0_0_6px_rgba(251,191,36,0.35)]"
+                  />
                 </div>
 
                 {/* Display digital */}
