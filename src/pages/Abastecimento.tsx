@@ -27,6 +27,7 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { fetchAbastecimento, type AbastecimentoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
+import { PostoInterno } from "@/components/abastecimento/PostoInterno";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -78,6 +79,21 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
     </div>
   );
 };
+
+// ─── Abas da tela ─────────────────────────────────────────────────────────────
+type AbaAbastecimento = "geral" | "interno" | "externo";
+
+const ABAS: { id: AbaAbastecimento; label: string }[] = [
+  { id: "geral",   label: "Geral" },
+  { id: "interno", label: "Abastecimento Interno" },
+  { id: "externo", label: "Abastecimento Externo" },
+];
+
+// ─── MOCK Abastecimento Externo ──────────────────────────────────────────────
+// A aba Externo usa o mesmo layout/pipeline da Geral. Por enquanto reaproveita
+// os dados do DW como mock estrutural. Quando o backend diferenciar interno x
+// externo, basta preencher esta constante (ou trocá-la por um fetch próprio).
+const MOCK_DADOS_EXTERNO: AbastecimentoRow[] | null = null;
 
 // ─── Tipo para registros agregados ───────────────────────────────────────────
 interface AbastecimentoAgregado {
@@ -132,6 +148,9 @@ export default function Abastecimento() {
   const [page, setPage] = useState(1);
   // View dos registros — padrão Bancos (Cards / Tabela / Analytics)
   const [abastView, setAbastView] = useState<"cards" | "tabela" | "analytics">("cards");
+
+  // Aba ativa — Geral / Abastecimento Interno / Abastecimento Externo
+  const [abaAtiva, setAbaAtiva] = useState<AbaAbastecimento>("geral");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -199,16 +218,24 @@ export default function Abastecimento() {
     return ["Todos", ...Array.from(s).sort()];
   }, [dados]);
 
+  // ── Fonte de dados por aba ───────────────────────────────────────────────────
+  // Geral/Interno: dados do DW. Externo: MOCK_DADOS_EXTERNO quando disponível
+  // (hoje cai nos dados gerais — estrutura pronta para a fonte real).
+  const dadosAba = useMemo(() => {
+    if (abaAtiva === "externo" && MOCK_DADOS_EXTERNO) return MOCK_DADOS_EXTERNO;
+    return dados;
+  }, [dados, abaAtiva]);
+
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
-    return dados.filter(d => {
+    return dadosAba.filter(d => {
       if (filtroFrota       !== "Todos" && d.frota           !== filtroFrota)       return false;
       if (filtroCombustivel !== "Todos" && d.tipo_combustivel !== filtroCombustivel) return false;
       if (filtroMotorista   !== "Todos" && d.motorista        !== filtroMotorista)   return false;
       if (filtroEstado      !== "Todos" && d.estado           !== filtroEstado)      return false;
       return true;
     });
-  }, [dados, filtroFrota, filtroCombustivel, filtroMotorista, filtroEstado]);
+  }, [dadosAba, filtroFrota, filtroCombustivel, filtroMotorista, filtroEstado]);
 
   // ── Normalização para tabela ─────────────────────────────────────────────────
   const registros = useMemo<AbastecimentoAgregado[]>(() => {
@@ -511,6 +538,29 @@ export default function Abastecimento() {
               </div>
             )}
 
+            {/* ════════ ABAS — Geral / Interno / Externo ════════ */}
+            <AnimatedCard delay={40}>
+              <div className="flex items-center gap-1 overflow-x-auto rounded-xl border p-1 w-full sm:w-fit"
+                style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
+                {ABAS.map(t => {
+                  const active = abaAtiva === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => { setAbaAtiva(t.id); setPage(1); }}
+                      className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
+                        active
+                          ? "border border-amber-400/35 bg-amber-400/15 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.12)]"
+                          : "border border-transparent text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </AnimatedCard>
+
             {/* ════════ FILTROS LOCAIS ════════ */}
             <div className="hidden sm:block"><AnimatedCard delay={60}>
               <div
@@ -604,6 +654,14 @@ export default function Abastecimento() {
                 <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
               </AnimatedCard>
             </div>
+
+            {/* ════════════════════════════════════════════════════════════════
+                ABA INTERNO — Posto próprio (substitui gráficos e tabela)
+            ════════════════════════════════════════════════════════════════ */}
+            {abaAtiva === "interno" && <PostoInterno />}
+
+            {/* ════════ ABAS GERAL / EXTERNO — visão completa ════════ */}
+            {abaAtiva !== "interno" && (<>
 
             {/* ── Gráficos Linha 1: Evolução de Custo + Distribuição Combustível ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
@@ -1247,6 +1305,8 @@ export default function Abastecimento() {
                 )}
               </div>
             </AnimatedCard>
+
+            </>)}{/* fim abas geral/externo */}
 
           </div>{/* fim gap-3 */}
         </section>
