@@ -1081,19 +1081,19 @@ app.post("/dw-posto-interno", async (req, res) => {
 
     const query = `
 SELECT
-    RAZ.ID_RAZ,
-    RAZ.NUMDOC,
-    RAZ.DATA,
-    RAZ.QTDADE,
-    RAZ.VALOR,
-    CASE WHEN RAZ.ENTSAI = 'S' THEN 'SAIDA' ELSE 'ENTRADA' END AS TIPO,
-    RAZ.FISANT AS SALDO_ANTERIOR,
-    RAZ.SALFIS AS SALDO_ATUAL,
-    RAZ.CODPROD AS PRODUTO,
-    CASE WHEN RAZ.QTDADE > 0 THEN RAZ.VALOR / RAZ.QTDADE ELSE 0 END AS VL_UNIT,
-    RAZ.CODCLIFOR AS CODFORNEC,
-    CLI.RAZSOC    AS FORNECEDOR,
-    RAZ.CODVEI    AS VEICULO
+    RAZ.ID_RAZ                                                        AS id_raz,
+    RAZ.NUMDOC                                                        AS numdoc,
+    RAZ.DATA                                                          AS data,
+    RAZ.QTDADE                                                        AS qtdade,
+    RAZ.VALOR                                                         AS valor,
+    CASE WHEN RAZ.ENTSAI = 'S' THEN 'SAIDA' ELSE 'ENTRADA' END       AS tipo,
+    RAZ.FISANT                                                        AS saldo_anterior,
+    RAZ.SALFIS                                                        AS saldo_atual,
+    RAZ.CODPROD                                                       AS produto,
+    CASE WHEN RAZ.QTDADE > 0 THEN RAZ.VALOR / RAZ.QTDADE ELSE 0 END  AS vl_unit,
+    RAZ.CODCLIFOR                                                     AS codfornec,
+    CLI.RAZSOC                                                        AS fornecedor,
+    RAZ.CODVEI                                                        AS veiculo
 FROM ESTRAZ RAZ
 LEFT OUTER JOIN RODCLI CLI ON RAZ.CODCLIFOR = CLI.CODCLIFOR
 WHERE RAZ.CODPROD = 881
@@ -1104,33 +1104,13 @@ OPTION (RECOMPILE)
 
     const result = await dbReq.query(query);
 
-    // Saldo estimado YTD: ESTRAZ ENTRADA (diesel recebido) - RODABA interno (dispensado)
-    // SALFIS não é confiável (valor acumulado histórico, não saldo físico real)
-    const [ytdEntRes, ytdSaiRes] = await Promise.all([
-      p.request().query(`
-        SELECT COALESCE(SUM(QTDADE), 0) AS ytd_entrada
-        FROM ESTRAZ WITH (NOLOCK)
-        WHERE CODPROD = 881 AND ENTSAI = 'E'
-          AND DATA >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
-      `),
-      p.request().query(`
-        SELECT COALESCE(SUM(ABA.QUANTI), 0) AS ytd_saida
-        FROM RODABA ABA WITH (NOLOCK)
-        LEFT JOIN RODPOS POS WITH (NOLOCK) ON ABA.CODPON = POS.CODPON
-        LEFT JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA  = VEI.CODVEI
-        WHERE UPPER(LTRIM(RTRIM(POS.DESCRI))) LIKE 'SGT%'
-          AND VEI.TIPVEI IN (1, 2, 3, 7, 8, 12)
-          AND ABA.DATREF >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
-      `),
-    ]);
-    const ytd_entrada_litros = Number(ytdEntRes.recordset[0]?.ytd_entrada ?? 0);
-    const ytd_saida_litros   = Number(ytdSaiRes.recordset[0]?.ytd_saida   ?? 0);
-    // Se não houve entradas de diesel no ESTRAZ em 2026 → saldo indisponível (null)
-    const saldo_atual_litros = ytd_entrada_litros > 0
-      ? ytd_entrada_litros - ytd_saida_litros
+    // Saldo = SALFIS do registro mais recente do período (já vem ordenado DESC)
+    // Se o período não tem registros na ESTRAZ → null (exibido como —)
+    const saldo_atual_litros = result.recordset.length > 0
+      ? (result.recordset[0].saldo_atual ?? null)
       : null;
 
-    return res.json({ data: result.recordset, saldo_atual_litros, ytd_entrada_litros, ytd_saida_litros });
+    return res.json({ data: result.recordset, saldo_atual_litros });
 
   } catch (err) {
     console.error("[dw-posto-interno] Erro:", err.message);
