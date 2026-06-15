@@ -1104,14 +1104,33 @@ OPTION (RECOMPILE)
 
     const result = await dbReq.query(query);
 
-    // Saldo atual real: pegar o registro mais recente de qualquer data
-    const saldoResult = await p.request().query(`
-      SELECT TOP 1 SALFIS AS saldo_atual FROM ESTRAZ
-      WHERE CODPROD = 881 ORDER BY ID_RAZ DESC
-    `);
-    const saldo_atual_litros = saldoResult.recordset[0]?.saldo_atual ?? null;
+    // Saldo estimado YTD: ESTRAZ ENTRADA (diesel recebido) - RODABA interno (dispensado)
+    // SALFIS não é confiável (valor acumulado histórico, não saldo físico real)
+    const [ytdEntRes, ytdSaiRes] = await Promise.all([
+      p.request().query(`
+        SELECT COALESCE(SUM(QTDADE), 0) AS ytd_entrada
+        FROM ESTRAZ WITH (NOLOCK)
+        WHERE CODPROD = 881 AND ENTSAI = 'E'
+          AND DATA >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
+      `),
+      p.request().query(`
+        SELECT COALESCE(SUM(ABA.QUANTI), 0) AS ytd_saida
+        FROM RODABA ABA WITH (NOLOCK)
+        LEFT JOIN RODPOS POS WITH (NOLOCK) ON ABA.CODPON = POS.CODPON
+        LEFT JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA  = VEI.CODVEI
+        WHERE UPPER(LTRIM(RTRIM(POS.DESCRI))) LIKE 'SGT%'
+          AND VEI.TIPVEI IN (1, 2, 3, 7, 8, 12)
+          AND ABA.DATREF >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
+      `),
+    ]);
+    const ytd_entrada_litros = Number(ytdEntRes.recordset[0]?.ytd_entrada ?? 0);
+    const ytd_saida_litros   = Number(ytdSaiRes.recordset[0]?.ytd_saida   ?? 0);
+    // Se não houve entradas de diesel no ESTRAZ em 2026 → saldo indisponível (null)
+    const saldo_atual_litros = ytd_entrada_litros > 0
+      ? ytd_entrada_litros - ytd_saida_litros
+      : null;
 
-    return res.json({ data: result.recordset, saldo_atual_litros });
+    return res.json({ data: result.recordset, saldo_atual_litros, ytd_entrada_litros, ytd_saida_litros });
 
   } catch (err) {
     console.error("[dw-posto-interno] Erro:", err.message);

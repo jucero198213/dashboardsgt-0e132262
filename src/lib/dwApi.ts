@@ -378,6 +378,8 @@ export interface PostoInternoRow {
 export interface PostoInternoResponse {
   data:                PostoInternoRow[];
   saldo_atual_litros:  number | null;
+  ytd_entrada_litros:  number;
+  ytd_saida_litros:    number;
 }
 
 // ─── Tipos: COMPRAS ───────────────────────────────────────────────────────────

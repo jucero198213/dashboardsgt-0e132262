@@ -237,50 +237,76 @@ export default function Abastecimento() {
     return dados;
   }, [dados, abaAtiva]);
 
-  // ── Dados reais do posto interno via ESTRAZ (CODPROD=881) ────────────────────
+  // ── Dados do posto interno: ESTRAZ quando disponível, RODABA como fallback ────
   const postoInternoDados = useMemo(() => {
-    const saidas   = postoRows.filter(r => r.tipo === "SAIDA").sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    // ESTRAZ (período selecionado) — pode estar vazio se não houver lançamentos
+    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" ).sort((a, b) => String(b.data).localeCompare(String(a.data)));
     const entradas = postoRows.filter(r => r.tipo === "ENTRADA").sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    const useEstraz = postoRows.length > 0;
 
-    const totalPeriodo = saidas.reduce((s, r) => s + (r.qtdade ?? 0), 0);
+    // Fallback: abastecimentos internos do RODABA (posto SGT) quando ESTRAZ está vazio no período
+    const rodabaInternos = useEstraz
+      ? []
+      : dados.filter(isAbastecimentoInterno).sort((a, b) => String(b.datref).localeCompare(String(a.datref)));
 
-    const ultimoDia = saidas[0]?.data ? String(saidas[0].data).slice(0, 10) : null;
-    const litrosUltimoDia = ultimoDia
+    // Total abastecido no período
+    const totalPeriodo = useEstraz
+      ? saidas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
+      : rodabaInternos.reduce((s, d) => s + (d.quanti ?? 0), 0);
+
+    // Último dia com abastecimento
+    const ultimoDia = useEstraz
+      ? (saidas[0]?.data ? String(saidas[0].data).slice(0, 10) : null)
+      : (rodabaInternos[0]?.datref ? String(rodabaInternos[0].datref).slice(0, 10) : null);
+
+    const litrosUltimoDia = ultimoDia ? (useEstraz
       ? saidas.filter(r => String(r.data).startsWith(ultimoDia)).reduce((s, r) => s + (r.qtdade ?? 0), 0)
-      : 0;
+      : rodabaInternos.filter(d => String(d.datref).startsWith(ultimoDia)).reduce((s, d) => s + (d.quanti ?? 0), 0)
+    ) : 0;
 
-    const ultimaSaida  = saidas[0];
+    // Última placa abastecida
+    const ultimaSaida   = saidas[0];
+    const ultimoRodaba  = rodabaInternos[0];
     const ultimaEntrada = entradas[0];
 
+    // Recargas vêm apenas do ESTRAZ (ENTRADA = NFI de diesel) — RODABA não tem essa info
     const recebidoPeriodoLitros = entradas.length > 0
       ? entradas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
       : null;
-
     const ultimaRecarga = ultimaEntrada ? {
       data:       fmtData(ultimaEntrada.data),
       litros:     ultimaEntrada.qtdade ?? 0,
       fornecedor: ultimaEntrada.fornecedor,
     } : null;
 
-    // Saldo real = SALFIS do registro mais recente da ESTRAZ (vem do servidor)
+    // Saldo: servidor calcula ytd_entrada (ESTRAZ) - ytd_saida (RODABA interno)
+    // Null se ESTRAZ não tem lançamentos de entrada em 2026 → exibido como "—"
     const saldoAtualLitros = postoSaldo;
 
-    const movimentacoes = [
-      ...saidas.slice(0, 6).map(r => ({
-        raw:          String(r.data),
-        data:         fmtData(r.data),
-        tipo:         "Abastecimento Frota" as const,
-        volumeLitros: r.qtdade ?? 0,
-        responsavel:  String(r.veiculo ?? "—"),
-      })),
-      ...entradas.slice(0, 4).map(r => ({
-        raw:          String(r.data),
-        data:         fmtData(r.data),
-        tipo:         "Recarga" as const,
-        volumeLitros: r.qtdade ?? 0,
-        responsavel:  r.fornecedor ?? "Distribuidora",
-      })),
-    ]
+    // Movimentações para a tabela (ESTRAZ preferido; fallback RODABA)
+    const movsBrutos = useEstraz
+      ? [
+          ...saidas.slice(0, 6).map(r => ({
+            raw: String(r.data), data: fmtData(r.data),
+            tipo: "Abastecimento Frota" as const,
+            volumeLitros: r.qtdade ?? 0,
+            responsavel:  String(r.veiculo ?? "—"),
+          })),
+          ...entradas.slice(0, 4).map(r => ({
+            raw: String(r.data), data: fmtData(r.data),
+            tipo: "Recarga" as const,
+            volumeLitros: r.qtdade ?? 0,
+            responsavel:  r.fornecedor ?? "Distribuidora",
+          })),
+        ]
+      : rodabaInternos.slice(0, 10).map(d => ({
+          raw: String(d.datref), data: fmtData(d.datref),
+          tipo: "Abastecimento Frota" as const,
+          volumeLitros: d.quanti ?? 0,
+          responsavel:  `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
+        }));
+
+    const movimentacoes = movsBrutos
       .sort((a, b) => b.raw.localeCompare(a.raw))
       .slice(0, 6)
       .map(({ raw: _raw, ...m }) => m);
@@ -289,17 +315,17 @@ export default function Abastecimento() {
       abastecidoPeriodoLitros: totalPeriodo,
       abastecidoDiaLitros:     litrosUltimoDia,
       diaReferencia:           ultimoDia ? fmtData(ultimoDia) : null,
-      ultimaPlaca: ultimaSaida ? {
-        placa:  String(ultimaSaida.veiculo ?? "—"),
-        litros: ultimaSaida.qtdade ?? 0,
-        data:   fmtData(ultimaSaida.data),
-      } : null,
+      ultimaPlaca: ultimaSaida
+        ? { placa: String(ultimaSaida.veiculo ?? "—"), litros: ultimaSaida.qtdade ?? 0, data: fmtData(ultimaSaida.data) }
+        : ultimoRodaba
+        ? { placa: String(ultimoRodaba.veiculo ?? "—"), litros: ultimoRodaba.quanti ?? 0, data: fmtData(ultimoRodaba.datref) }
+        : null,
       recebidoPeriodoLitros,
       ultimaRecarga,
       saldoAtualLitros,
       movimentacoes,
     };
-  }, [postoRows, postoSaldo]);
+  }, [postoRows, postoSaldo, dados]);
 
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
