@@ -140,31 +140,30 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                 {/* ── Janela de vidro (aro fino) ── */}
                 <div className="absolute inset-[16px] overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.25))] shadow-[inset_0_2px_22px_rgba(0,0,0,0.6)]" style={{ contain: "paint" }}>
 
-                  {/* Líquido translúcido amarelado (combustível) */}
+                  {/* Líquido — diesel translúcido escuro (abafado) */}
                   <div
                     className="sgt-anim absolute inset-x-0 bottom-0"
                     style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
                   >
                     <div
-                      className="sgt-anim absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-300/55 to-amber-300/0"
+                      className="sgt-anim absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-300/30 to-amber-300/0"
                       style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
                     />
                     <div
-                      className="sgt-anim absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-200/25"
+                      className="sgt-anim absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-200/15"
                       style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
                     />
-                    <div
-                      className="sgt-anim absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-100/30"
-                      style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
-                    />
-                    {/* corpo do diesel — translúcido */}
-                    <div className="h-full w-full bg-gradient-to-b from-amber-300/40 via-amber-400/32 to-amber-600/45" />
+                    {/* corpo do diesel — translúcido e escuro */}
+                    <div className="h-full w-full bg-gradient-to-b from-amber-500/18 via-amber-700/18 to-amber-900/30" />
                     {/* bolhas */}
-                    <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
-                    <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
-                    <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
-                    <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
+                    <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
+                    <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/12" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
+                    <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/12" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
+                    <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/10" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
                   </div>
+
+                  {/* Vidro fumê — abafa o combustível p/ harmonizar com a bomba */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 to-black/55" />
 
                   {/* Reflexo do vidro */}
                   <div className="pointer-events-none absolute left-3 top-3 bottom-3 w-2.5 rounded-full bg-white/[0.08]" />
