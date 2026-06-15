@@ -251,17 +251,32 @@ export default function Abastecimento() {
 
   // ── Dados do posto interno: ESTRAZ quando disponível, RODABA como fallback ────
   const postoInternoDados = useMemo(() => {
-    // mssql devolve colunas DATE como objetos JS Date — normaliza para "YYYY-MM-DD"
+    // As datas chegam como string ISO ("2026-06-13T00:00:00.000Z") após o JSON
+    // do Express. Normaliza para "YYYY-MM-DD" sem conversão de fuso horário.
     const toISODate = (d: unknown): string => {
       if (!d) return "";
+      if (typeof d === "string") {
+        const m = d.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (m) return m[1];
+      }
       const dt = d instanceof Date ? d : new Date(String(d));
       return isNaN(dt.getTime()) ? "" : dt.toISOString().slice(0, 10);
     };
+    // Exibe "DD/MM/AAAA" a partir do dia-calendário, sem deslocar por fuso.
+    const fmtBR = (d: unknown): string => {
+      const iso = toISODate(d);
+      if (!iso) return "—";
+      const [y, m, dd] = iso.split("-");
+      return `${dd}/${m}/${y}`;
+    };
 
-    // ESTRAZ (período selecionado) — pode estar vazio se não houver lançamentos
-    // Servidor já retorna ORDER BY DATA DESC, ID_RAZ DESC — filtro preserva a ordem
-    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" );
-    const entradas = postoRows.filter(r => r.tipo === "ENTRADA");
+    // ESTRAZ (período selecionado) — pode estar vazio se não houver lançamentos.
+    // Ordena por data desc (string ISO já ordena corretamente); empates do mesmo
+    // dia preservam a ordem do servidor (ID_RAZ desc) por sort estável.
+    const byDataDesc = (a: PostoInternoRow, b: PostoInternoRow) =>
+      toISODate(b.data).localeCompare(toISODate(a.data));
+    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" ).sort(byDataDesc);
+    const entradas = postoRows.filter(r => r.tipo === "ENTRADA").sort(byDataDesc);
     const useEstraz = postoRows.length > 0;
 
     // Fallback: abastecimentos internos do RODABA (posto SGT) quando ESTRAZ está vazio no período
@@ -277,11 +292,11 @@ export default function Abastecimento() {
     // Último dia com abastecimento
     const ultimoDia = useEstraz
       ? (saidas[0]?.data ? toISODate(saidas[0].data) : null)
-      : (rodabaInternos[0]?.datref ? String(rodabaInternos[0].datref).slice(0, 10) : null);
+      : (rodabaInternos[0]?.datref ? toISODate(rodabaInternos[0].datref) : null);
 
     const litrosUltimoDia = ultimoDia ? (useEstraz
       ? saidas.filter(r => toISODate(r.data) === ultimoDia).reduce((s, r) => s + (r.qtdade ?? 0), 0)
-      : rodabaInternos.filter(d => String(d.datref).startsWith(ultimoDia)).reduce((s, d) => s + (d.quanti ?? 0), 0)
+      : rodabaInternos.filter(d => toISODate(d.datref) === ultimoDia).reduce((s, d) => s + (d.quanti ?? 0), 0)
     ) : 0;
 
     // Última placa abastecida
@@ -294,7 +309,7 @@ export default function Abastecimento() {
       ? entradas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
       : null;
     const ultimaRecarga = ultimaEntrada ? {
-      data:       fmtData(ultimaEntrada.data),
+      data:       fmtBR(ultimaEntrada.data),
       litros:     ultimaEntrada.qtdade ?? 0,
       fornecedor: ultimaEntrada.fornecedor,
     } : null;
@@ -307,20 +322,20 @@ export default function Abastecimento() {
     const movsBrutos = useEstraz
       ? [
           ...saidas.slice(0, 6).map(r => ({
-            raw: toISODate(r.data), data: fmtData(r.data as string),
+            raw: toISODate(r.data), data: fmtBR(r.data),
             tipo: "Abastecimento Frota" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  String(r.veiculo ?? "—"),
           })),
           ...entradas.slice(0, 4).map(r => ({
-            raw: toISODate(r.data), data: fmtData(r.data as string),
+            raw: toISODate(r.data), data: fmtBR(r.data),
             tipo: "Recarga" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  r.fornecedor ?? "Distribuidora",
           })),
         ]
       : rodabaInternos.slice(0, 10).map(d => ({
-          raw: String(d.datref), data: fmtData(d.datref),
+          raw: toISODate(d.datref), data: fmtBR(d.datref),
           tipo: "Abastecimento Frota" as const,
           volumeLitros: d.quanti ?? 0,
           responsavel:  `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
@@ -334,11 +349,11 @@ export default function Abastecimento() {
     return {
       abastecidoPeriodoLitros: totalPeriodo,
       abastecidoDiaLitros:     litrosUltimoDia,
-      diaReferencia:           ultimoDia ? fmtData(ultimoDia) : null,
+      diaReferencia:           ultimoDia ? fmtBR(ultimoDia) : null,
       ultimaPlaca: ultimaSaida
-        ? { placa: String(ultimaSaida.veiculo ?? "—"), litros: ultimaSaida.qtdade ?? 0, data: fmtData(ultimaSaida.data) }
+        ? { placa: String(ultimaSaida.veiculo ?? "—"), litros: ultimaSaida.qtdade ?? 0, data: fmtBR(ultimaSaida.data) }
         : ultimoRodaba
-        ? { placa: String(ultimoRodaba.veiculo ?? "—"), litros: ultimoRodaba.quanti ?? 0, data: fmtData(ultimoRodaba.datref) }
+        ? { placa: String(ultimoRodaba.veiculo ?? "—"), litros: ultimoRodaba.quanti ?? 0, data: fmtBR(ultimoRodaba.datref) }
         : null,
       recebidoPeriodoLitros,
       ultimaRecarga,
