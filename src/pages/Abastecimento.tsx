@@ -6,6 +6,7 @@ import {
   DollarSign, Hash, X, ChevronLeft, ChevronRight,
   Layers, Droplets, Gauge, MapPin, FileText,
   Activity, Car, Users, Zap, LayoutGrid, Table2,
+  Monitor, Minimize2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -155,6 +156,9 @@ export default function Abastecimento() {
   // Aba ativa — Geral / Abastecimento Interno / Abastecimento Externo
   const [abaAtiva, setAbaAtiva] = useState<AbaAbastecimento>("geral");
 
+  // Modo Apresentação / TV (tela cheia imersiva)
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
     if (!force && !cooldown.canFetch) return;
@@ -215,6 +219,25 @@ export default function Abastecimento() {
     if (isInitialLoad.current) { isInitialLoad.current = false; return; }
     carregarDados(true);
   }, [carregarDados]);
+
+  // ── Modo Apresentação / TV — alterna estado + Fullscreen API ─────────────────
+  const togglePresentation = useCallback(async () => {
+    if (!isPresentationMode) {
+      setAbaAtiva("interno");                 // KPIs e posto refletem o interno
+      try { await document.documentElement.requestFullscreen?.(); } catch { /* ignora */ }
+      setIsPresentationMode(true);
+    } else {
+      try { if (document.fullscreenElement) await document.exitFullscreen(); } catch { /* ignora */ }
+      setIsPresentationMode(false);
+    }
+  }, [isPresentationMode]);
+
+  // Sai do modo se o usuário pressionar ESC (sai do fullscreen nativo)
+  useEffect(() => {
+    const onFsChange = () => { if (!document.fullscreenElement) setIsPresentationMode(false); };
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
@@ -681,6 +704,13 @@ export default function Abastecimento() {
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               </div>
 
+              <button
+                onClick={togglePresentation}
+                title="Modo apresentação (TV)"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300"
+              >
+                <Monitor className="h-4 w-4" />
+              </button>
               <HomeButton />
             </div>
 
@@ -1451,6 +1481,55 @@ export default function Abastecimento() {
           </div>{/* fim gap-3 */}
         </section>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODO APRESENTAÇÃO / TV — overlay imersivo em tela cheia
+      ═══════════════════════════════════════════════════════════════════════ */}
+      {isPresentationMode && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col overflow-hidden"
+          style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
+        >
+          {/* Glow de palco atrás da bomba */}
+          <div className="pointer-events-none absolute left-1/2 top-[58%] h-[68vh] w-[52vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
+
+          {/* Botão sair */}
+          <button
+            onClick={togglePresentation}
+            className="absolute right-6 top-5 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
+          >
+            <Minimize2 className="h-4 w-4" /> Sair <span className="text-slate-500">· ESC</span>
+          </button>
+
+          {/* Cabeçalho */}
+          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[2.4vh]">
+            <img src={sgtLogo} alt="SGT" className="h-9 w-auto" />
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
+              <span className="text-[clamp(1.1rem,1.6vw,1.6rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+            </div>
+            <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-3 py-1 text-[10px] font-bold text-emerald-300 lg:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
+            </span>
+          </div>
+
+          {/* KPIs ocupando toda a largura */}
+          <div className="relative z-10 grid grid-cols-2 gap-3 px-[3vw] pt-[1.8vh] sm:grid-cols-3 lg:grid-cols-5">
+            <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`} icon={DollarSign} tone="amber" loading={loading} />
+            <KpiCard label="Volume Total" value={loading ? "—" : fmtLitros(kpis.totalLitros)} subtitle={loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`} icon={Droplets} tone="cyan" loading={loading} />
+            <KpiCard label="Abastecimentos" value={loading ? "—" : fmtNum(kpis.qtdAbast)} subtitle={loading ? "" : `${distCombustivel.length} tipo(s) de combustível`} icon={Hash} tone="rose" loading={loading} />
+            <KpiCard label="Média Consumo" value={loading ? "—" : fmtMedia(kpis.mediaConsumo)} subtitle={loading ? "" : kpis.deltaMedia !== null ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)` : "Fábrica: —"} icon={Gauge} tone="violet" loading={loading} />
+            <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
+          </div>
+
+          {/* Conjunto do posto — centralizado e escalado */}
+          <div className="relative z-10 flex flex-1 items-center justify-center overflow-hidden">
+            <div className="origin-center scale-90 xl:scale-100 2xl:scale-[1.15]">
+              <PostoInterno dados={postoInternoDados} presentation />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

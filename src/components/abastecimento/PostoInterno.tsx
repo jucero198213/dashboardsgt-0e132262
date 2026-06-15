@@ -36,7 +36,7 @@ const fmtL = (v: number) => `${Math.round(v).toLocaleString("pt-BR")} L`;
 // ─────────────────────────────────────────────────────────────────────────────
 //  Posto de combustível corporativo — desenho 100% CSS (sem ícones/imagens)
 // ─────────────────────────────────────────────────────────────────────────────
-export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
+export function PostoInterno({ dados, presentation = false }: { dados: PostoInternoDados; presentation?: boolean }) {
   const saldoReal = dados.saldoAtualLitros != null;
   // Saldo exibido limitado ao intervalo físico do tanque
   const saldoLitros = saldoReal
@@ -113,10 +113,11 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
       `}</style>
 
       <div
-        className="rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"
-        style={{ background: "var(--sgt-bg-card)" }}
+        className={presentation ? "p-2" : "rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"}
+        style={presentation ? undefined : { background: "var(--sgt-bg-card)" }}
       >
         {/* ── Header da seção ── */}
+        {!presentation && (
         <div className="flex items-center gap-2 mb-2">
           <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]" />
           <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">
@@ -128,6 +129,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
             Operacional
           </span>
         </div>
+        )}
 
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
@@ -456,6 +458,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
           </div>
         </div>
 
+        {!presentation && (<>
         {/* ═════════ ÚLTIMAS MOVIMENTAÇÕES DO TANQUE ═════════ */}
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-3">
@@ -555,6 +558,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
               : "Dados do DW indisponíveis no momento (falha ao consultar posto interno)"}
           </span>
         </div>
+        </>)}
       </div>
     </AnimatedCard>
   );
