@@ -210,100 +210,105 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
             </div>
           </div>
 
-          {/* ═════════ BOMBA CORPORATIVA ═════════ */}
+          {/* ═════════ BOMBA CORPORATIVA (estilo clássico com globo) ═════════ */}
           <div className="flex flex-col items-center gap-3">
-            <div className="relative">
+            <div className="relative flex flex-col items-center">
               {/* Halo ambiente atrás da bomba */}
-              <div className="pointer-events-none absolute -inset-8 rounded-[44px] bg-[radial-gradient(ellipse_at_50%_28%,rgba(251,191,36,0.10),transparent_70%)]" />
+              <div className="pointer-events-none absolute -inset-8 rounded-[44px] bg-[radial-gradient(ellipse_at_50%_22%,rgba(251,191,36,0.12),transparent_70%)]" />
 
-              {/* Corpo da bomba */}
-              <div className="relative h-[380px] w-[230px] overflow-hidden rounded-[26px] border border-white/10 bg-gradient-to-b from-slate-700/85 via-slate-800/90 to-slate-950/90 shadow-[0_22px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.07)]">
-                {/* Reflexo de luz lateral (acabamento metálico) */}
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white/[0.06] to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black/25 to-transparent" />
-
-                {/* Faixa de identidade com brilho */}
-                <div className="relative h-3 w-full bg-gradient-to-r from-amber-600 via-amber-300 to-amber-600">
-                  <div className="absolute inset-x-0 top-0 h-1/2 bg-white/25" />
-                </div>
-
-                {/* Placa com a logo (vidro com reflexo) */}
-                <div className="relative mx-4 mt-4 flex items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.01] py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.08] to-transparent" />
-                  <img
-                    src={sgtLogo}
-                    alt="SGT"
-                    className="relative block h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]"
-                  />
-                </div>
-
-                {/* Display digital — estilo LCD com scanlines */}
-                <div className="relative mx-4 mt-4 overflow-hidden rounded-xl border border-amber-400/30 bg-gradient-to-b from-black/90 to-black/70 p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.9),0_0_20px_-6px_rgba(251,191,36,0.45)]">
-                  {/* textura de scanline */}
-                  <div className="pointer-events-none absolute inset-0 opacity-[0.15] bg-[repeating-linear-gradient(0deg,transparent_0px,transparent_2px,rgba(0,0,0,0.6)_3px)]" />
-                  <div className="relative mb-2 flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                      Abastecido no dia{dados.diaReferencia ? ` · ${dados.diaReferencia.slice(0, 5)}` : ""}
-                    </p>
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_7px_rgba(52,211,153,0.9)]" />
-                  </div>
-                  <div className="relative flex items-baseline justify-between gap-1.5">
-                    <p className="min-w-0 flex-1 truncate font-mono text-[30px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_14px_rgba(251,191,36,0.6)]">
-                      {Math.round(dados.abastecidoDiaLitros).toLocaleString("pt-BR")}
-                    </p>
-                    <p className="shrink-0 text-[10px] font-bold tracking-[0.1em] text-amber-500/80">LITROS</p>
-                  </div>
-                </div>
-
-                {/* Mini-indicadores reais da bomba */}
-                <div className="mx-4 mt-4 grid grid-cols-3 gap-2">
-                  {[
-                    {
-                      valor: dados.precoUltimaRecarga != null
-                        ? `${dados.precoUltimaRecarga.toFixed(2).replace(".", ",")}`
-                        : "—",
-                      label: "R$/L recarga",
-                    },
-                    { valor: dados.qtdAbastecimentosDia.toLocaleString("pt-BR"),     label: "Abast. dia" },
-                    { valor: dados.qtdAbastecimentosPeriodo.toLocaleString("pt-BR"), label: "Abast. período" },
-                  ].map(c => (
-                    <div
-                      key={c.label}
-                      className="flex flex-col items-center justify-center rounded-md border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                    >
-                      <span className="font-mono text-[13px] font-bold leading-none tabular-nums text-amber-300/90">{c.valor}</span>
-                      <span className="mt-1 text-[7px] font-bold uppercase tracking-[0.12em] text-slate-500">{c.label}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Rodapé da bomba */}
-                <div className="absolute inset-x-0 bottom-0 flex h-10 items-center justify-center border-t border-white/[0.06] bg-gradient-to-t from-black/55 to-transparent">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Bomba 01 · Uso interno</span>
-                </div>
+              {/* ── Globo iluminado (topper) ── */}
+              <div className="relative z-10 flex h-[118px] w-[118px] flex-col items-center justify-center rounded-full border-[6px] border-amber-500/80 bg-gradient-to-br from-slate-50 to-slate-200 shadow-[0_0_36px_-3px_rgba(251,191,36,0.6),inset_0_2px_8px_rgba(255,255,255,0.85),inset_0_-9px_18px_rgba(0,0,0,0.18)]">
+                {/* brilho de vidro */}
+                <div className="pointer-events-none absolute left-5 top-4 h-7 w-9 rounded-full bg-white/60 blur-[2px]" />
+                <span className="relative text-[8px] font-black uppercase tracking-[0.3em] text-amber-700/80">Posto</span>
+                <img src={sgtLogo} alt="SGT" className="relative my-0.5 h-7 w-auto object-contain" />
+                <span className="relative text-[7px] font-bold uppercase tracking-[0.2em] text-slate-500">Diesel S10</span>
               </div>
+              {/* Pescoço (conecta globo ao corpo) */}
+              <div className="relative z-10 -mt-1 h-5 w-14 rounded-b-sm border-x border-white/10 bg-gradient-to-b from-slate-400/80 to-slate-600/80" />
 
-              {/* Base da bomba */}
-              <div className="mx-auto -mt-0.5 h-5 w-[260px] rounded-b-xl border border-white/[0.08] bg-gradient-to-b from-slate-700/90 to-slate-950/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]" />
+              {/* ── Conjunto do corpo (âncora da mangueira/bico) ── */}
+              <div className="relative -mt-px">
+                {/* Corpo da bomba */}
+                <div className="relative flex h-[360px] w-[230px] flex-col overflow-hidden rounded-t-[20px] rounded-b-[10px] border border-white/10 bg-gradient-to-b from-slate-700/85 via-slate-800/90 to-slate-950/90 shadow-[0_22px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.07)]">
+                  {/* Reflexo de luz lateral (acabamento metálico) */}
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white/[0.06] to-transparent" />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black/25 to-transparent" />
 
-              {/* ── Mangueira — segmentos alinhados ───────────────────────────
-                  linha vertical em x=260..266 (centro 263); o bico (w-[22px],
-                  right -44px) fica centrado no mesmo eixo; o cotovelo
-                  horizontal entra no corpo da bomba. */}
-              {/* Cotovelo inferior (entra no corpo) */}
-              <div className="absolute right-[-36px] bottom-[74px] h-[7px] w-[50px] rounded-full bg-gradient-to-b from-slate-500 to-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-              {/* Segmento vertical */}
-              <div className="absolute right-[-36px] top-[100px] bottom-[74px] w-[7px] rounded-full bg-gradient-to-r from-slate-400 via-slate-500 to-slate-700 shadow-[0_0_4px_rgba(0,0,0,0.4)]" />
-              {/* Bico de abastecimento — pistola (centrado no eixo da mangueira) */}
-              <div className="absolute right-[-44px] top-[46px] flex w-[22px] flex-col items-center">
-                {/* Spout metálico */}
-                <div className="h-9 w-2.5 rounded-t-full border border-white/20 bg-gradient-to-b from-slate-200 via-slate-400 to-slate-500 shadow-[inset_0_0_3px_rgba(255,255,255,0.5)]" />
-                {/* Corpo da pistola */}
-                <div className="relative -mt-1 h-12 w-[22px] rounded-lg rounded-tr-sm border border-amber-200/30 bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_3px_10px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.45)]">
-                  {/* brilho */}
-                  <div className="absolute left-1 top-1 h-3 w-1 rounded-full bg-white/40" />
-                  {/* gatilho */}
-                  <div className="absolute -left-1.5 top-3 h-4 w-2 rounded-l-md border-y border-l border-slate-900/40 bg-slate-800/70" />
+                  {/* "Ombro" superior metálico */}
+                  <div className="mx-3 mt-3 h-1.5 rounded-full bg-white/[0.06]" />
+
+                  {/* Display digital — estilo LCD com scanlines */}
+                  <div className="relative mx-4 mt-3 overflow-hidden rounded-xl border border-amber-400/30 bg-gradient-to-b from-black/90 to-black/70 p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.9),0_0_20px_-6px_rgba(251,191,36,0.45)]">
+                    {/* textura de scanline */}
+                    <div className="pointer-events-none absolute inset-0 opacity-[0.15] bg-[repeating-linear-gradient(0deg,transparent_0px,transparent_2px,rgba(0,0,0,0.6)_3px)]" />
+                    <div className="relative mb-2 flex items-center justify-between">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                        Abastecido no dia{dados.diaReferencia ? ` · ${dados.diaReferencia.slice(0, 5)}` : ""}
+                      </p>
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_7px_rgba(52,211,153,0.9)]" />
+                    </div>
+                    <div className="relative flex items-baseline justify-between gap-1.5">
+                      <p className="min-w-0 flex-1 truncate font-mono text-[30px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_14px_rgba(251,191,36,0.6)]">
+                        {Math.round(dados.abastecidoDiaLitros).toLocaleString("pt-BR")}
+                      </p>
+                      <p className="shrink-0 text-[10px] font-bold tracking-[0.1em] text-amber-500/80">LITROS</p>
+                    </div>
+                  </div>
+
+                  {/* Mini-indicadores reais da bomba */}
+                  <div className="mx-4 mt-3 grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        valor: dados.precoUltimaRecarga != null
+                          ? `${dados.precoUltimaRecarga.toFixed(2).replace(".", ",")}`
+                          : "—",
+                        label: "R$/L recarga",
+                      },
+                      { valor: dados.qtdAbastecimentosDia.toLocaleString("pt-BR"),     label: "Abast. dia" },
+                      { valor: dados.qtdAbastecimentosPeriodo.toLocaleString("pt-BR"), label: "Abast. período" },
+                    ].map(c => (
+                      <div
+                        key={c.label}
+                        className="flex flex-col items-center justify-center rounded-md border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                      >
+                        <span className="font-mono text-[13px] font-bold leading-none tabular-nums text-amber-300/90">{c.valor}</span>
+                        <span className="mt-1 text-[7px] font-bold uppercase tracking-[0.12em] text-slate-500">{c.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Espaço do corpo */}
+                  <div className="flex-1" />
+
+                  {/* Nameplate inferior (estilo placa clássica) */}
+                  <div className="relative mx-4 mb-4 rounded-md border border-white/15 bg-gradient-to-b from-white/[0.10] to-white/[0.02] px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-300">Diesel S10</p>
+                    <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.26em] text-slate-500">Bomba 01 · Uso interno</p>
+                  </div>
+                </div>
+
+                {/* Base da bomba */}
+                <div className="mx-auto -mt-0.5 h-5 w-[260px] rounded-b-xl border border-white/[0.08] bg-gradient-to-b from-slate-700/90 to-slate-950/90 shadow-[0_10px_24px_rgba(0,0,0,0.45)]" />
+
+                {/* ── Mangueira — segmentos alinhados ───────────────────────────
+                    o bico (w-[22px], right -44px) fica centrado no eixo da
+                    linha vertical; o cotovelo horizontal entra no corpo. */}
+                {/* Cotovelo inferior (entra no corpo) */}
+                <div className="absolute right-[-36px] bottom-[74px] h-[7px] w-[50px] rounded-full bg-gradient-to-b from-slate-500 to-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
+                {/* Segmento vertical */}
+                <div className="absolute right-[-36px] top-[100px] bottom-[74px] w-[7px] rounded-full bg-gradient-to-r from-slate-400 via-slate-500 to-slate-700 shadow-[0_0_4px_rgba(0,0,0,0.4)]" />
+                {/* Bico de abastecimento — pistola (centrado no eixo da mangueira) */}
+                <div className="absolute right-[-44px] top-[46px] flex w-[22px] flex-col items-center">
+                  {/* Spout metálico */}
+                  <div className="h-9 w-2.5 rounded-t-full border border-white/20 bg-gradient-to-b from-slate-200 via-slate-400 to-slate-500 shadow-[inset_0_0_3px_rgba(255,255,255,0.5)]" />
+                  {/* Corpo da pistola */}
+                  <div className="relative -mt-1 h-12 w-[22px] rounded-lg rounded-tr-sm border border-amber-200/30 bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_3px_10px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.45)]">
+                    {/* brilho */}
+                    <div className="absolute left-1 top-1 h-3 w-1 rounded-full bg-white/40" />
+                    {/* gatilho */}
+                    <div className="absolute -left-1.5 top-3 h-4 w-2 rounded-l-md border-y border-l border-slate-900/40 bg-slate-800/70" />
+                  </div>
                 </div>
               </div>
             </div>
