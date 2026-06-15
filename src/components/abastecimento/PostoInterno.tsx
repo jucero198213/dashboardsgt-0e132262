@@ -327,8 +327,8 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                     </div>
                   </div>
 
-                  {/* ── Três painéis embutidos (caixas metálicas) ── */}
-                  <div className="mx-3.5 mt-3 grid grid-cols-3 gap-2">
+                  {/* ── Painéis embutidos empilhados (caixas metálicas) ── */}
+                  <div className="mx-3.5 mt-3 flex flex-col gap-2">
                     {[
                       { v: display.precoRecarga,                         l: "R$/L recarga" },
                       { v: display.abastDia.toLocaleString("pt-BR"),     l: "Abast. dia" },
@@ -336,10 +336,10 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                     ].map(c => (
                       <div
                         key={c.l}
-                        className="flex flex-col items-center justify-center rounded-lg border border-black/50 bg-[linear-gradient(180deg,rgba(0,0,0,0.65),rgba(0,0,0,0.88))] py-2 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.06)]"
+                        className="flex items-center justify-between rounded-lg border border-black/50 bg-[linear-gradient(180deg,rgba(0,0,0,0.65),rgba(0,0,0,0.88))] px-3.5 py-2.5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.06)]"
                       >
-                        <span className="font-mono text-[13px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]">{c.v}</span>
-                        <span className="mt-1 text-[6.5px] font-bold uppercase tracking-[0.12em] text-amber-600/60">{c.l}</span>
+                        <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-600/60">{c.l}</span>
+                        <span className="font-mono text-[16px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]">{c.v}</span>
                       </div>
                     ))}
                   </div>
