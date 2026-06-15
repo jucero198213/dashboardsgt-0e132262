@@ -19,6 +19,9 @@ export interface PostoInternoDados {
   recebidoPeriodoLitros:   number | null;
   ultimaRecarga: { data: string; litros: number; fornecedor: string | null } | null;
   saldoAtualLitros:        number | null;
+  precoUltimaRecarga:      number | null;   // R$/L da última entrada de diesel
+  qtdAbastecimentosDia:    number;          // nº de saídas no último dia
+  qtdAbastecimentosPeriodo:number;          // nº de saídas no período
   movimentacoes: {
     data: string;
     tipo: "Recarga" | "Abastecimento Frota";
@@ -252,24 +255,25 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                   </div>
                 </div>
 
-                {/* Teclado — botões com profundidade (2 teclas de destaque) */}
+                {/* Mini-indicadores reais da bomba */}
                 <div className="mx-4 mt-4 grid grid-cols-3 gap-2">
-                  {Array.from({ length: 6 }).map((_, i) => (
+                  {[
+                    {
+                      valor: dados.precoUltimaRecarga != null
+                        ? `${dados.precoUltimaRecarga.toFixed(2).replace(".", ",")}`
+                        : "—",
+                      label: "R$/L recarga",
+                    },
+                    { valor: dados.qtdAbastecimentosDia.toLocaleString("pt-BR"),     label: "Abast. dia" },
+                    { valor: dados.qtdAbastecimentosPeriodo.toLocaleString("pt-BR"), label: "Abast. período" },
+                  ].map(c => (
                     <div
-                      key={i}
-                      className={`h-7 rounded-md border shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_1px_2px_rgba(0,0,0,0.45)] ${
-                        i === 2 || i === 4
-                          ? "border-amber-400/30 bg-gradient-to-b from-amber-400/25 to-amber-500/10"
-                          : "border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.01]"
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Grade de ventilação */}
-                <div className="mx-5 mt-3 flex flex-col gap-1">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-[3px] rounded-full bg-black/40 shadow-[0_1px_0_rgba(255,255,255,0.04)]" />
+                      key={c.label}
+                      className="flex flex-col items-center justify-center rounded-md border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                    >
+                      <span className="font-mono text-[13px] font-bold leading-none tabular-nums text-amber-300/90">{c.valor}</span>
+                      <span className="mt-1 text-[7px] font-bold uppercase tracking-[0.12em] text-slate-500">{c.label}</span>
+                    </div>
                   ))}
                 </div>
 

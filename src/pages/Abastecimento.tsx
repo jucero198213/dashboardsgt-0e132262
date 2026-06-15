@@ -314,6 +314,23 @@ export default function Abastecimento() {
       fornecedor: ultimaEntrada.fornecedor,
     } : null;
 
+    // Preço médio R$/L da última recarga (vl_unit do servidor; fallback valor/qtd)
+    const precoUltimaRecarga = ultimaEntrada
+      ? (ultimaEntrada.vl_unit && ultimaEntrada.vl_unit > 0
+          ? ultimaEntrada.vl_unit
+          : (ultimaEntrada.qtdade && ultimaEntrada.qtdade > 0
+              ? (ultimaEntrada.valor ?? 0) / ultimaEntrada.qtdade
+              : null))
+      : null;
+
+    // Nº de abastecimentos (saídas): no último dia e no período
+    const qtdAbastecimentosDia = ultimoDia
+      ? (useEstraz
+          ? saidas.filter(r => toISODate(r.data) === ultimoDia).length
+          : rodabaInternos.filter(d => toISODate(d.datref) === ultimoDia).length)
+      : 0;
+    const qtdAbastecimentosPeriodo = useEstraz ? saidas.length : rodabaInternos.length;
+
     // Saldo: servidor calcula ytd_entrada (ESTRAZ) - ytd_saida (RODABA interno)
     // Null se ESTRAZ não tem lançamentos de entrada em 2026 → exibido como "—"
     const saldoAtualLitros = postoSaldo;
@@ -358,6 +375,9 @@ export default function Abastecimento() {
       recebidoPeriodoLitros,
       ultimaRecarga,
       saldoAtualLitros,
+      precoUltimaRecarga,
+      qtdAbastecimentosDia,
+      qtdAbastecimentosPeriodo,
       movimentacoes,
     };
   }, [postoRows, postoSaldo, dados]);
