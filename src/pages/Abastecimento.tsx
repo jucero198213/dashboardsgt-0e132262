@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
-import { fetchAbastecimento, fetchPostoInterno, type AbastecimentoRow, type PostoInternoRow } from "@/lib/dwApi";
+import { fetchAbastecimento, fetchPostoInterno, clearDwCache, type AbastecimentoRow, type PostoInternoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { PostoInterno } from "@/components/abastecimento/PostoInterno";
@@ -158,6 +158,11 @@ export default function Abastecimento() {
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
     if (!force && !cooldown.canFetch) return;
+    // Botão "Atualizar" limpa o cache para garantir dados frescos do servidor
+    if (force) {
+      clearDwCache("abastecimento:");
+      clearDwCache("posto-interno:");
+    }
     setLoading(true);
     setError(null);
     setProgress(0);
