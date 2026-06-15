@@ -154,17 +154,17 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                       className="sgt-anim absolute -top-1 left-[-55%] h-4 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-300/45 to-amber-300/0"
                       style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
                     />
-                    {/* corpo do diesel — translúcido */}
-                    <div className="h-full w-full bg-gradient-to-b from-amber-400/32 via-amber-500/28 to-amber-700/40" />
+                    {/* corpo do diesel — âmbar visível */}
+                    <div className="h-full w-full bg-gradient-to-b from-amber-400/70 via-amber-500/60 to-amber-600/70" />
                     {/* bolhas */}
-                    <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
-                    <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
-                    <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
-                    <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/12" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
+                    <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
+                    <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
+                    <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
+                    <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
                   </div>
 
-                  {/* Tinte sutil de vidro (profundidade, sem abafar o nível) */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 to-black/25" />
+                  {/* Tinte bem leve de vidro (só profundidade) */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/5 to-black/15" />
 
                   {/* Reflexo do vidro */}
                   <div className="pointer-events-none absolute left-3 top-3 bottom-3 w-2.5 rounded-full bg-white/[0.08]" />
@@ -180,7 +180,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                   ))}
 
                   {/* Vinheta suave para contraste dos dígitos (sem caixa) */}
-                  <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_52%_40%_at_50%_50%,rgba(0,0,0,0.45),transparent_70%)]" />
+                  <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_54%_42%_at_50%_50%,rgba(0,0,0,0.55),transparent_72%)]" />
 
                   {/* Leitura central — dígitos âmbar direto no vidro */}
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5">
