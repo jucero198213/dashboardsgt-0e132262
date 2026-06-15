@@ -425,33 +425,25 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
           </div>
 
           {/* ═════════ PAINEL DE STATUS ═════════ */}
-          <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:pb-16">
+          <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:self-center">
             {[
               { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
               { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros),    destaque: "#94a3b8" },
               { label: "Última Recarga",             valor: dados.ultimaRecarga ? fmtL(dados.ultimaRecarga.litros) : "—", destaque: "#a78bfa", sub: dados.ultimaRecarga ? `em ${dados.ultimaRecarga.data}${dados.ultimaRecarga.fornecedor ? ` · ${dados.ultimaRecarga.fornecedor.split(" ")[0]}` : ""}` : "Sem recargas no período" },
               { label: "Última Placa Abastecida",    valor: dados.ultimaPlaca?.placa ?? "—",        destaque: "#22d3ee", sub: dados.ultimaPlaca ? `${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}` : "Sem registros no período", glow: true },
-            ].map(c => {
-              const baseShadow = "inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px rgba(0,0,0,0.45)";
-              return (
-                <div
-                  key={c.label}
-                  className="relative overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(160deg,#2a323d,#141a22)] px-5 py-4 transition-colors duration-300 hover:border-white/[0.2]"
-                  style={{ boxShadow: c.glow ? `${baseShadow}, 0 0 24px -8px ${c.destaque}` : baseShadow }}
-                >
-                  {/* faixa de acento na cor da métrica */}
-                  <span className="absolute inset-y-0 left-0 w-[3px]" style={{ background: c.destaque, opacity: 0.85 }} />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{c.label}</p>
-                  <p
-                    className="mt-1.5 text-[22px] font-black leading-none tabular-nums tracking-[-0.02em]"
-                    style={{ color: c.destaque, textShadow: `0 0 12px ${c.destaque}40` }}
-                  >
-                    {c.valor}
-                  </p>
-                  {c.sub && <p className="mt-1.5 text-[11px] font-semibold text-slate-500">{c.sub}</p>}
-                </div>
-              );
-            })}
+            ].map(c => (
+              <div
+                key={c.label}
+                className="rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 transition-colors duration-300 hover:border-white/[0.18]"
+                style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
+                <p className="mt-1.5 text-[22px] font-black leading-none tabular-nums tracking-[-0.02em]" style={{ color: c.destaque }}>
+                  {c.valor}
+                </p>
+                {c.sub && <p className="mt-1.5 text-[11px] font-semibold text-slate-600">{c.sub}</p>}
+              </div>
+            ))}
           </div>
         </div>
 
