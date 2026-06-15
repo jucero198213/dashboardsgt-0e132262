@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Fuel, RefreshCw, Search, TrendingUp, TrendingDown,
@@ -208,6 +208,13 @@ export default function Abastecimento() {
   }, [dwFilter.dataInicio, dwFilter.dataFim]);
 
   useEffect(() => { if (cooldown.canFetch) carregarDados(); }, [cooldown.canFetch]);
+
+  // Recarrega quando o período muda (força bypass de cooldown + limpeza de cache)
+  const isInitialLoad = useRef(true);
+  useEffect(() => {
+    if (isInitialLoad.current) { isInitialLoad.current = false; return; }
+    carregarDados(true);
+  }, [carregarDados]);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
