@@ -218,19 +218,37 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
             </div>
           </div>
 
-          {/* ═════════ DUTO DE LIGAÇÃO — fluxo animado ═════════ */}
-          <div className="hidden lg:flex flex-col items-center gap-2 pb-48">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-600">Duto</span>
-            <div className="relative h-3.5 w-44 overflow-hidden rounded-full border border-white/10 bg-slate-800/80">
-              {/* Pulso de combustível percorrendo o duto */}
-              <div
-                className="sgt-anim absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
-                style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }}
-              />
-              <div
-                className="sgt-anim absolute inset-y-0 w-1/4 rounded-full bg-gradient-to-r from-transparent via-amber-300/40 to-transparent"
-                style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }}
-              />
+          {/* ═════════ DUTO DE TRANSFERÊNCIA — tubo metálico + fluxo ═════════ */}
+          <div className="hidden lg:flex flex-col items-center gap-2.5 pb-48">
+            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Duto de transferência</span>
+            <div className="relative flex items-center">
+              {/* Flange esquerda (conecta ao tanque) */}
+              <div className="z-10 h-9 w-3 rounded-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_5px_rgba(0,0,0,0.4)]" />
+              <div className="z-10 -ml-px h-7 w-1.5 bg-[linear-gradient(180deg,#5a6675,#222a35)]" />
+
+              {/* Tubo metálico cilíndrico */}
+              <div className="relative h-5 w-44 overflow-hidden border-y border-white/10 bg-[linear-gradient(180deg,#3a4453_0%,#5a6675_24%,#2c343f_56%,#13171f_100%)] shadow-[inset_0_-3px_6px_rgba(0,0,0,0.55)]">
+                {/* brilho cilíndrico (topo) */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/25 to-transparent" />
+                {/* canal interno com fluxo de combustível */}
+                <div className="absolute inset-x-0 top-1/2 h-[7px] -translate-y-1/2 overflow-hidden bg-black/55 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]">
+                  <div
+                    className="sgt-anim absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-amber-400/85 to-transparent"
+                    style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }}
+                  />
+                  <div
+                    className="sgt-anim absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-amber-300/50 to-transparent"
+                    style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }}
+                  />
+                </div>
+                {/* braçadeiras (clamps) */}
+                <div className="absolute inset-y-0 left-1/3 w-2 bg-[linear-gradient(180deg,#646f7e,#222a35)] shadow-[inset_1px_0_0_rgba(255,255,255,0.15),inset_-1px_0_0_rgba(0,0,0,0.4)]" />
+                <div className="absolute inset-y-0 left-2/3 w-2 bg-[linear-gradient(180deg,#646f7e,#222a35)] shadow-[inset_1px_0_0_rgba(255,255,255,0.15),inset_-1px_0_0_rgba(0,0,0,0.4)]" />
+              </div>
+
+              {/* Flange direita (conecta à bomba) */}
+              <div className="z-10 -mr-px h-7 w-1.5 bg-[linear-gradient(180deg,#5a6675,#222a35)]" />
+              <div className="z-10 h-9 w-3 rounded-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_5px_rgba(0,0,0,0.4)]" />
             </div>
           </div>
 
