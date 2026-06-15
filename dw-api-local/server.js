@@ -1055,73 +1055,66 @@ app.post("/dw-abastecimento", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-// ═══════════════════════════════════════════════════════════════════════════
-//  ENDPOINT: /dw-tanque-interno
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-posto-interno
+//  Razão de estoque de diesel (CODPROD=881) da ESTRAZ.
+//  Retorna movimentações do período + saldo_atual_litros (registro mais recente).
 //
-//  Estoque do tanque de diesel próprio (15.400 L):
-//   - recargas: notas tipo NFI (diesel a granel comprado das distribuidoras)
-//     no período informado
-//   - totais: acumulado histórico de entradas (NFI) e saídas (abastecimentos
-//     nas bombas SGT) para cálculo do saldo atual = entradas − saídas
-// ═══════════════════════════════════════════════════════════════════════════
-app.post("/dw-tanque-interno", async (req, res) => {
+//  Parâmetros opcionais (body JSON):
+//    dataInicio  {string}  YYYY-MM-DD  (default: 1/jan do ano corrente)
+//    dataFim     {string}  YYYY-MM-DD  (default: hoje)
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-posto-interno", async (req, res) => {
   const { dataInicio, dataFim } = req.body ?? {};
 
   try {
-    const pool = await getPool();
+    const p    = await getPool();
+    const hoje = new Date();
+    const dFim = dataFim    ? new Date(dataFim)    : hoje;
+    const dIni = dataInicio ? new Date(dataInicio)
+                            : new Date(dFim.getFullYear(), 0, 1); // 1/jan padrão
 
-    // Recargas (entradas NFI) do período
-    const reqRecargas = pool.request();
-    reqRecargas.input("dataInicio", sql.Date, dataInicio ? new Date(dataInicio) : null);
-    reqRecargas.input("dataFim",    sql.Date, dataFim    ? new Date(dataFim)    : null);
+    const dbReq = p.request();
+    dbReq.input("dataInicio", sql.Date, dIni);
+    dbReq.input("dataFim",    sql.Date, dFim);
 
-    const recargas = await reqRecargas.query(`
-      SELECT
-        ENT.DATREF     AS data,
-        ENT.NUMDOC     AS nota_fiscal,
-        CLI.RAZSOC     AS fornecedor,
-        AIE.QTDENT     AS litros,
-        AIE.VLRUNI     AS valor_unitario
-      FROM ESTAIE AIE WITH (NOLOCK)
-      JOIN ESTENT ENT WITH (NOLOCK)
-        ON  AIE.CODCLIFOR = ENT.CODCLIFOR
-        AND AIE.TIPONF    = ENT.TIPONF
-        AND AIE.SERIE     = ENT.SERIE
-        AND AIE.NUMDOC    = ENT.NUMDOC
-      LEFT JOIN RODCLI CLI WITH (NOLOCK) ON AIE.CODCLIFOR = CLI.CODCLIFOR
-      WHERE ENT.TIPONF = 'NFI'
-        AND ENT.SITUAC <> 'C'
-        AND (@dataInicio IS NULL OR ENT.DATREF >= @dataInicio)
-        AND (@dataFim    IS NULL OR ENT.DATREF <= @dataFim)
-      ORDER BY ENT.DATREF DESC
-      OPTION (RECOMPILE)
+    const query = `
+SELECT
+    RAZ.ID_RAZ,
+    RAZ.NUMDOC,
+    RAZ.DATA,
+    RAZ.QTDADE,
+    RAZ.VALOR,
+    CASE WHEN RAZ.ENTSAI = 'S' THEN 'SAIDA' ELSE 'ENTRADA' END AS TIPO,
+    RAZ.FISANT AS SALDO_ANTERIOR,
+    RAZ.SALFIS AS SALDO_ATUAL,
+    RAZ.CODPROD AS PRODUTO,
+    CASE WHEN RAZ.QTDADE > 0 THEN RAZ.VALOR / RAZ.QTDADE ELSE 0 END AS VL_UNIT,
+    RAZ.CODCLIFOR AS CODFORNEC,
+    CLI.RAZSOC    AS FORNECEDOR,
+    RAZ.CODVEI    AS VEICULO
+FROM ESTRAZ RAZ
+LEFT OUTER JOIN RODCLI CLI ON RAZ.CODCLIFOR = CLI.CODCLIFOR
+WHERE RAZ.CODPROD = 881
+  AND RAZ.DATA BETWEEN @dataInicio AND @dataFim
+ORDER BY RAZ.DATA DESC, RAZ.ID_RAZ DESC, RAZ.ENTSAI DESC
+OPTION (RECOMPILE)
+    `;
+
+    const result = await dbReq.query(query);
+
+    // Saldo atual real: pegar o registro mais recente de qualquer data
+    const saldoResult = await p.request().query(`
+      SELECT TOP 1 SALFIS AS saldo_atual FROM ESTRAZ
+      WHERE CODPROD = 881 ORDER BY ID_RAZ DESC
     `);
+    const saldo_atual_litros = saldoResult.recordset[0]?.saldo_atual ?? null;
 
-    // Acumulado histórico para saldo do tanque
-    const totais = await pool.request().query(`
-      SELECT
-        (SELECT ISNULL(SUM(AIE.QTDENT), 0)
-           FROM ESTAIE AIE WITH (NOLOCK)
-           JOIN ESTENT ENT WITH (NOLOCK)
-             ON  AIE.CODCLIFOR = ENT.CODCLIFOR
-             AND AIE.TIPONF    = ENT.TIPONF
-             AND AIE.SERIE     = ENT.SERIE
-             AND AIE.NUMDOC    = ENT.NUMDOC
-          WHERE ENT.TIPONF = 'NFI'
-            AND ENT.SITUAC <> 'C')                AS entradas_total,
-        (SELECT ISNULL(SUM(ABA.QUANTI), 0)
-           FROM RODABA ABA WITH (NOLOCK)
-           JOIN RODPOS POS WITH (NOLOCK) ON ABA.CODPON = POS.CODPON
-          WHERE POS.DESCRI LIKE 'SGT%')           AS saidas_total
-      OPTION (RECOMPILE)
-    `);
+    return res.json({ data: result.recordset, saldo_atual_litros });
 
-    return res.json({
-      recargas: recargas.recordset,
-      totais:   totais.recordset[0],
-    });
   } catch (err) {
-    console.error("[dw-tanque-interno] Erro:", err.message);
+    console.error("[dw-posto-interno] Erro:", err.message);
     if (err.code === "ECONNRESET" || err.code === "ECONNREFUSED") {
       await destroyPool();
     }

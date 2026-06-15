@@ -9,8 +9,8 @@ export const TANQUE_CONFIG = {
 };
 
 // ─── Dados reais vindos do DW ────────────────────────────────────────────────
-//  Saídas: RODABA (postos SGT) · Entradas: notas NFI (diesel a granel)
-//  Campos null = endpoint /dw-tanque-interno indisponível (servidor antigo)
+//  Saídas: /dw-abastecimento (postos SGT) · Entradas: /dw-compras (notas NFI)
+//  Campos null = chamada de compras indisponível/falhou
 export interface PostoInternoDados {
   abastecidoPeriodoLitros: number;
   abastecidoDiaLitros:     number;
@@ -377,8 +377,8 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
         <div className="mt-3 flex items-center justify-center">
           <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1 text-[9px] text-slate-600">
             {saldoReal
-              ? "Dados reais do DW · Saldo = entradas NFI − abastecimentos nas bombas SGT"
-              : "Abastecimentos reais do DW · Saldo e recargas aguardando reinício do servidor local (endpoint /dw-tanque-interno)"}
+              ? "Dados reais do DW · Saldo direto da ESTRAZ (SALFIS do registro mais recente — razão de estoque de diesel)"
+              : "Dados do DW indisponíveis no momento (falha ao consultar posto interno)"}
           </span>
         </div>
       </div>

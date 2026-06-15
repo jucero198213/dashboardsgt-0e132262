@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
-import { fetchAbastecimento, fetchTanqueInterno, type AbastecimentoRow, type TanqueInternoResponse } from "@/lib/dwApi";
+import { fetchAbastecimento, fetchPostoInterno, type AbastecimentoRow, type PostoInternoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { PostoInterno } from "@/components/abastecimento/PostoInterno";
@@ -130,7 +130,8 @@ export default function Abastecimento() {
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [dados, setDados]             = useState<AbastecimentoRow[]>([]);
-  const [tanque, setTanque]           = useState<TanqueInternoResponse | null>(null);
+  const [postoRows, setPostoRows]     = useState<PostoInternoRow[]>([]);
+  const [postoSaldo, setPostoSaldo]   = useState<number | null>(null);
   const [loading, setLoading]         = useState(false);
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
@@ -177,20 +178,19 @@ export default function Abastecimento() {
     }, 120);
 
     try {
-      // Tanque interno em paralelo — se o endpoint ainda não existir no
-      // servidor local, a tela segue funcionando (cai no fallback simulado)
-      const [res, tanqueRes] = await Promise.all([
-        fetchAbastecimento({
-          dataInicio: dwFilter.dataInicio,
-          dataFim:    dwFilter.dataFim,
-        }),
-        fetchTanqueInterno({
-          dataInicio: dwFilter.dataInicio,
-          dataFim:    dwFilter.dataFim,
-        }).catch(() => null),
+      // 2 chamadas em paralelo:
+      //   1. abastecimento do período (geral/externo — cards e gráficos)
+      //   2. posto interno: ESTRAZ CODPROD=881 — ENTRADA/SAIDA + saldo real
+      let postoErr: string | null = null;
+      const [res, postoRes] = await Promise.all([
+        fetchAbastecimento({ dataInicio: dwFilter.dataInicio, dataFim: dwFilter.dataFim }),
+        fetchPostoInterno({ dataInicio: dwFilter.dataInicio, dataFim: dwFilter.dataFim })
+          .catch((e: Error) => { postoErr = e?.message ?? "Erro ao carregar posto interno"; return null; }),
       ]);
       setDados(res.data ?? []);
-      setTanque(tanqueRes);
+      setPostoRows(postoRes?.data ?? []);
+      setPostoSaldo(postoRes?.saldo_atual_litros ?? null);
+      if (postoErr) setError(postoErr);
       cooldown.start();
     } catch (err) {
       setError((err as Error).message ?? "Erro ao carregar dados");
@@ -237,51 +237,47 @@ export default function Abastecimento() {
     return dados;
   }, [dados, abaAtiva]);
 
-  // ── Dados reais do posto interno (independem da aba ativa) ──────────────────
+  // ── Dados reais do posto interno via ESTRAZ (CODPROD=881) ────────────────────
   const postoInternoDados = useMemo(() => {
-    const internos = dados
-      .filter(isAbastecimentoInterno)
-      .filter(d => d.datref)
-      .sort((a, b) => String(b.datref).localeCompare(String(a.datref)));
+    const saidas   = postoRows.filter(r => r.tipo === "SAIDA").sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    const entradas = postoRows.filter(r => r.tipo === "ENTRADA").sort((a, b) => String(b.data).localeCompare(String(a.data)));
 
-    const totalPeriodo = internos.reduce((s, d) => s + (d.quanti ?? 0), 0);
+    const totalPeriodo = saidas.reduce((s, r) => s + (r.qtdade ?? 0), 0);
 
-    // Dia mais recente com abastecimento interno no período
-    const ultimoDia = internos[0]?.datref ? String(internos[0].datref).slice(0, 10) : null;
+    const ultimoDia = saidas[0]?.data ? String(saidas[0].data).slice(0, 10) : null;
     const litrosUltimoDia = ultimoDia
-      ? internos.filter(d => String(d.datref).startsWith(ultimoDia)).reduce((s, d) => s + (d.quanti ?? 0), 0)
+      ? saidas.filter(r => String(r.data).startsWith(ultimoDia)).reduce((s, r) => s + (r.qtdade ?? 0), 0)
       : 0;
 
-    const ultima = internos[0];
+    const ultimaSaida  = saidas[0];
+    const ultimaEntrada = entradas[0];
 
-    // Recargas (entradas NFI) e saldo — vindos do /dw-tanque-interno
-    const recargas = (tanque?.recargas ?? []).filter(r => r.data);
-    const recebidoPeriodoLitros = tanque
-      ? recargas.reduce((s, r) => s + (r.litros ?? 0), 0)
+    const recebidoPeriodoLitros = entradas.length > 0
+      ? entradas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
       : null;
-    const ultimaRecarga = recargas.length > 0 ? {
-      data:       fmtData(recargas[0].data),
-      litros:     recargas[0].litros ?? 0,
-      fornecedor: recargas[0].fornecedor,
+
+    const ultimaRecarga = ultimaEntrada ? {
+      data:       fmtData(ultimaEntrada.data),
+      litros:     ultimaEntrada.qtdade ?? 0,
+      fornecedor: ultimaEntrada.fornecedor,
     } : null;
-    const saldoAtualLitros = tanque
-      ? tanque.totais.entradas_total - tanque.totais.saidas_total
-      : null;
 
-    // Movimentações: saídas (abastecimentos) + entradas (recargas), recentes
+    // Saldo real = SALFIS do registro mais recente da ESTRAZ (vem do servidor)
+    const saldoAtualLitros = postoSaldo;
+
     const movimentacoes = [
-      ...internos.slice(0, 6).map(d => ({
-        raw:          String(d.datref),
-        data:         fmtData(d.datref),
+      ...saidas.slice(0, 6).map(r => ({
+        raw:          String(r.data),
+        data:         fmtData(r.data),
         tipo:         "Abastecimento Frota" as const,
-        volumeLitros: d.quanti ?? 0,
-        responsavel:  `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
+        volumeLitros: r.qtdade ?? 0,
+        responsavel:  String(r.veiculo ?? "—"),
       })),
-      ...recargas.slice(0, 4).map(r => ({
+      ...entradas.slice(0, 4).map(r => ({
         raw:          String(r.data),
         data:         fmtData(r.data),
         tipo:         "Recarga" as const,
-        volumeLitros: r.litros ?? 0,
+        volumeLitros: r.qtdade ?? 0,
         responsavel:  r.fornecedor ?? "Distribuidora",
       })),
     ]
@@ -293,17 +289,17 @@ export default function Abastecimento() {
       abastecidoPeriodoLitros: totalPeriodo,
       abastecidoDiaLitros:     litrosUltimoDia,
       diaReferencia:           ultimoDia ? fmtData(ultimoDia) : null,
-      ultimaPlaca: ultima ? {
-        placa:  String(ultima.veiculo ?? "—"),
-        litros: ultima.quanti ?? 0,
-        data:   fmtData(ultima.datref),
+      ultimaPlaca: ultimaSaida ? {
+        placa:  String(ultimaSaida.veiculo ?? "—"),
+        litros: ultimaSaida.qtdade ?? 0,
+        data:   fmtData(ultimaSaida.data),
       } : null,
       recebidoPeriodoLitros,
       ultimaRecarga,
       saldoAtualLitros,
       movimentacoes,
     };
-  }, [dados, tanque]);
+  }, [postoRows, postoSaldo]);
 
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
