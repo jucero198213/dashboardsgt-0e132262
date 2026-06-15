@@ -251,9 +251,17 @@ export default function Abastecimento() {
 
   // ── Dados do posto interno: ESTRAZ quando disponível, RODABA como fallback ────
   const postoInternoDados = useMemo(() => {
+    // mssql devolve colunas DATE como objetos JS Date — normaliza para "YYYY-MM-DD"
+    const toISODate = (d: unknown): string => {
+      if (!d) return "";
+      const dt = d instanceof Date ? d : new Date(String(d));
+      return isNaN(dt.getTime()) ? "" : dt.toISOString().slice(0, 10);
+    };
+
     // ESTRAZ (período selecionado) — pode estar vazio se não houver lançamentos
-    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" ).sort((a, b) => String(b.data).localeCompare(String(a.data)));
-    const entradas = postoRows.filter(r => r.tipo === "ENTRADA").sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    // Servidor já retorna ORDER BY DATA DESC, ID_RAZ DESC — filtro preserva a ordem
+    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" );
+    const entradas = postoRows.filter(r => r.tipo === "ENTRADA");
     const useEstraz = postoRows.length > 0;
 
     // Fallback: abastecimentos internos do RODABA (posto SGT) quando ESTRAZ está vazio no período
@@ -268,11 +276,11 @@ export default function Abastecimento() {
 
     // Último dia com abastecimento
     const ultimoDia = useEstraz
-      ? (saidas[0]?.data ? String(saidas[0].data).slice(0, 10) : null)
+      ? (saidas[0]?.data ? toISODate(saidas[0].data) : null)
       : (rodabaInternos[0]?.datref ? String(rodabaInternos[0].datref).slice(0, 10) : null);
 
     const litrosUltimoDia = ultimoDia ? (useEstraz
-      ? saidas.filter(r => String(r.data).startsWith(ultimoDia)).reduce((s, r) => s + (r.qtdade ?? 0), 0)
+      ? saidas.filter(r => toISODate(r.data) === ultimoDia).reduce((s, r) => s + (r.qtdade ?? 0), 0)
       : rodabaInternos.filter(d => String(d.datref).startsWith(ultimoDia)).reduce((s, d) => s + (d.quanti ?? 0), 0)
     ) : 0;
 
@@ -299,13 +307,13 @@ export default function Abastecimento() {
     const movsBrutos = useEstraz
       ? [
           ...saidas.slice(0, 6).map(r => ({
-            raw: String(r.data), data: fmtData(r.data),
+            raw: toISODate(r.data), data: fmtData(r.data as string),
             tipo: "Abastecimento Frota" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  String(r.veiculo ?? "—"),
           })),
           ...entradas.slice(0, 4).map(r => ({
-            raw: String(r.data), data: fmtData(r.data),
+            raw: toISODate(r.data), data: fmtData(r.data as string),
             tipo: "Recarga" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  r.fornecedor ?? "Distribuidora",
