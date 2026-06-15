@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { RAW } from "@/lib/theme";
 import sgtLogo from "@/assets/sgt-logo.png";
@@ -62,6 +63,14 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
     abastDia:     dados.qtdAbastecimentosDia,                            // ex.: 13
     abastPeriodo: dados.qtdAbastecimentosPeriodo,                        // ex.: 297
   };
+
+  // ─── Movimentações: 6 por padrão, expansível ───────────────────────────────
+  const MOVS_COLAPSADO = 6;
+  const [movsExpandido, setMovsExpandido] = useState(false);
+  const movsVisiveis = movsExpandido
+    ? dados.movimentacoes
+    : dados.movimentacoes.slice(0, MOVS_COLAPSADO);
+  const temMaisMovs = dados.movimentacoes.length > MOVS_COLAPSADO;
 
   return (
     <AnimatedCard delay={300}>
@@ -479,7 +488,7 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                     </td>
                   </tr>
                 ) : (
-                  dados.movimentacoes.map((m, i) => {
+                  movsVisiveis.map((m, i) => {
                     const recarga = m.tipo === "Recarga";
                     return (
                       <tr
@@ -521,6 +530,21 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
               </tbody>
             </table>
           </div>
+
+          {/* Botão expandir / recolher movimentações */}
+          {temMaisMovs && (
+            <div className="mt-3 flex justify-center">
+              <button
+                onClick={() => setMovsExpandido(v => !v)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-500/[0.08] px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-300 transition-colors hover:border-amber-400/40 hover:bg-amber-500/[0.14]"
+              >
+                {movsExpandido
+                  ? "Ver menos"
+                  : `Ver mais (${dados.movimentacoes.length - MOVS_COLAPSADO})`}
+                <span className={`text-[9px] transition-transform ${movsExpandido ? "rotate-180" : ""}`}>▼</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Nota de integração */}

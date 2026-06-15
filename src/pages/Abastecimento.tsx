@@ -335,23 +335,24 @@ export default function Abastecimento() {
     // Null se ESTRAZ não tem lançamentos de entrada em 2026 → exibido como "—"
     const saldoAtualLitros = postoSaldo;
 
-    // Movimentações para a tabela (ESTRAZ preferido; fallback RODABA)
+    // Movimentações para a tabela (ESTRAZ preferido; fallback RODABA).
+    // Entrega até 60 registros — o componente exibe 6 e expande sob demanda.
     const movsBrutos = useEstraz
       ? [
-          ...saidas.slice(0, 6).map(r => ({
+          ...saidas.slice(0, 50).map(r => ({
             raw: toISODate(r.data), data: fmtBR(r.data),
             tipo: "Abastecimento Frota" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  String(r.veiculo ?? "—"),
           })),
-          ...entradas.slice(0, 4).map(r => ({
+          ...entradas.slice(0, 20).map(r => ({
             raw: toISODate(r.data), data: fmtBR(r.data),
             tipo: "Recarga" as const,
             volumeLitros: r.qtdade ?? 0,
             responsavel:  r.fornecedor ?? "Distribuidora",
           })),
         ]
-      : rodabaInternos.slice(0, 10).map(d => ({
+      : rodabaInternos.slice(0, 60).map(d => ({
           raw: toISODate(d.datref), data: fmtBR(d.datref),
           tipo: "Abastecimento Frota" as const,
           volumeLitros: d.quanti ?? 0,
@@ -360,7 +361,7 @@ export default function Abastecimento() {
 
     const movimentacoes = movsBrutos
       .sort((a, b) => b.raw.localeCompare(a.raw))
-      .slice(0, 6)
+      .slice(0, 60)
       .map(({ raw: _raw, ...m }) => m);
 
     return {
