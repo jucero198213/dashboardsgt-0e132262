@@ -122,89 +122,124 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
 
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
-          {/* ═════════ TANQUE DE ARMAZENAMENTO ═════════ */}
-          <div className="flex flex-col items-center gap-3">
+          {/* ═════════ TANQUE DE ARMAZENAMENTO — industrial dark-chrome ═════════ */}
+          <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              {/* Respiro / válvula superior */}
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 h-5 w-10 rounded-t-lg border border-white/10 bg-gradient-to-b from-slate-600/80 to-slate-700/80 z-10" />
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-6 w-32 rounded-full border border-white/10 bg-gradient-to-b from-slate-700/70 to-slate-800/70 z-10" />
+              {/* Halo quente ambiente (base + arestas) */}
+              <div className="pointer-events-none absolute -inset-8 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_88%,rgba(251,191,36,0.13),transparent_66%)]" />
 
-              {/* Corpo do tanque (vidro) */}
-              <div className="relative h-[420px] w-[300px] overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.025] shadow-[inset_0_2px_18px_rgba(0,0,0,0.5),0_18px_50px_rgba(0,0,0,0.45)]" style={{ contain: "paint" }}>
+              {/* Flange / respiro superior (dark chrome) */}
+              <div className="absolute -top-7 left-1/2 z-20 h-5 w-12 -translate-x-1/2 rounded-t-lg border border-white/10 bg-[linear-gradient(180deg,#3a4453,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]" />
+              <div className="absolute -top-3 left-1/2 z-20 flex h-6 w-36 -translate-x-1/2 items-center justify-center gap-3 rounded-full border border-white/10 bg-[linear-gradient(180deg,#39434f,#222a35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_6px_rgba(0,0,0,0.4)]">
+                {/* parafusos do flange */}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className="h-1 w-1 rounded-full bg-black/50 shadow-[0_0.5px_0_rgba(255,255,255,0.15)]" />
+                ))}
+              </div>
 
-                {/* Líquido — preenchimento proporcional ao saldo */}
-                <div
-                  className="sgt-anim absolute inset-x-0 bottom-0"
-                  style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
-                >
-                  {/* Superfície ondulando — duas elipses largas balançando em oposição */}
-                  <div
-                    className="sgt-anim absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-400/70 to-amber-400/0"
-                    style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
-                  />
-                  <div
-                    className="sgt-anim absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-300/30"
-                    style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
-                  />
-                  {/* Brilho suave acompanhando a superfície */}
-                  <div
-                    className="sgt-anim absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-200/30"
-                    style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
-                  />
-                  {/* Corpo do diesel */}
-                  <div className="h-full w-full bg-gradient-to-b from-amber-400/70 via-amber-500/55 to-amber-700/65" />
-                  {/* Bolhas subindo */}
-                  <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
-                  <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
-                  <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
-                  <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
-                </div>
-
-                {/* Brilho de vidro */}
-                <div className="absolute left-5 top-5 bottom-5 w-3 rounded-full bg-white/[0.07]" />
-                <div className="absolute left-10 top-8 bottom-12 w-1.5 rounded-full bg-white/[0.04]" />
-
-                {/* Réguas de nível */}
-                {[75, 50, 25].map(m => (
-                  <div key={m} className="absolute inset-x-0" style={{ bottom: `${m}%` }}>
-                    <div className="flex items-center gap-2 px-3">
-                      <div className="h-px flex-1 bg-white/[0.10]" />
-                      <span className="text-[10px] font-bold tabular-nums text-slate-400/80">{m}%</span>
-                    </div>
-                  </div>
+              {/* Corpo do tanque — metal fosco antracite */}
+              <div className="relative h-[420px] w-[300px] overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]" style={{ contain: "paint" }}>
+                {/* textura metálica escovada (fosca) */}
+                <div className="pointer-events-none absolute inset-0 opacity-[0.05] bg-[repeating-linear-gradient(90deg,transparent_0,transparent_2px,#ffffff_3px,transparent_4px)]" />
+                {/* reflexos dark-chrome nas bordas */}
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-[18px] bg-gradient-to-r from-white/12 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-[22px] bg-gradient-to-l from-black/45 to-transparent" />
+                {/* costuras de solda verticais */}
+                <div className="pointer-events-none absolute inset-y-6 left-[26px] w-px bg-white/[0.06]" />
+                <div className="pointer-events-none absolute inset-y-6 right-[26px] w-px bg-black/30" />
+                {/* rebites nos cantos da moldura */}
+                {[
+                  "top-3 left-3", "top-3 right-3", "bottom-3 left-3", "bottom-3 right-3",
+                  "top-3 left-1/2 -translate-x-1/2", "bottom-3 left-1/2 -translate-x-1/2",
+                ].map(pos => (
+                  <span key={pos} className={`absolute ${pos} h-1.5 w-1.5 rounded-full bg-[radial-gradient(circle_at_35%_30%,#6b7686,#1a2029)] shadow-[0_1px_1px_rgba(0,0,0,0.5),inset_0_0.5px_0_rgba(255,255,255,0.3)]`} />
                 ))}
 
-                {/* Leitura central */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <span className="text-[56px] font-black leading-none tabular-nums tracking-[-0.04em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
-                    {pct.toFixed(0)}%
-                  </span>
-                  <span className="text-[15px] font-bold tabular-nums text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
-                    {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
-                  </span>
-                  <span
-                    className="mt-1 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
-                    style={{
-                      color: nivel.cor,
-                      borderColor: `rgba(${nivel.rgb},0.35)`,
-                      background: `rgba(${nivel.rgb},0.12)`,
-                    }}
-                  >
-                    {nivel.label}
-                  </span>
+                {/* ── Janela de vidro blindado (bezel cromado) ── */}
+                <div className="absolute inset-[18px] rounded-[26px] border-2 border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[7px] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_14px_rgba(0,0,0,0.5)]">
+                  {/* Vidro + líquido */}
+                  <div className="relative h-full w-full overflow-hidden rounded-[20px] border border-black/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.28))] shadow-[inset_0_2px_20px_rgba(0,0,0,0.65)]" style={{ contain: "paint" }}>
+
+                    {/* Líquido translúcido amarelado (combustível) */}
+                    <div
+                      className="sgt-anim absolute inset-x-0 bottom-0"
+                      style={{ height: `${pct}%`, animation: "sgt-liquid-bob 4.5s ease-in-out infinite" }}
+                    >
+                      <div
+                        className="sgt-anim absolute -top-2 left-[-55%] h-5 w-[210%] rounded-[100%] bg-gradient-to-b from-amber-300/55 to-amber-300/0"
+                        style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
+                      />
+                      <div
+                        className="sgt-anim absolute -top-[5px] left-[-55%] h-4 w-[210%] rounded-[100%] bg-amber-200/25"
+                        style={{ animation: "sgt-swell-rev 9s ease-in-out infinite" }}
+                      />
+                      <div
+                        className="sgt-anim absolute top-[2px] left-[-55%] h-[3px] w-[210%] rounded-[100%] bg-amber-100/30"
+                        style={{ animation: "sgt-swell 6.5s ease-in-out infinite" }}
+                      />
+                      {/* corpo do diesel — translúcido */}
+                      <div className="h-full w-full bg-gradient-to-b from-amber-300/40 via-amber-400/32 to-amber-600/45" />
+                      {/* bolhas */}
+                      <div className="sgt-anim absolute bottom-4 left-8 h-2 w-2 rounded-full bg-white/25" style={{ animation: "sgt-bubble-rise 4.2s ease-in infinite" }} />
+                      <div className="sgt-anim absolute bottom-2 right-10 h-1.5 w-1.5 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 5.6s ease-in infinite", animationDelay: "1.4s" }} />
+                      <div className="sgt-anim absolute bottom-6 left-1/2 h-1 w-1 rounded-full bg-white/20" style={{ animation: "sgt-bubble-rise 6.4s ease-in infinite", animationDelay: "2.8s" }} />
+                      <div className="sgt-anim absolute bottom-3 right-16 h-1 w-1 rounded-full bg-white/15" style={{ animation: "sgt-bubble-rise 4.9s ease-in infinite", animationDelay: "3.5s" }} />
+                    </div>
+
+                    {/* Reflexo do vidro blindado */}
+                    <div className="pointer-events-none absolute left-3 top-3 bottom-3 w-2.5 rounded-full bg-white/[0.10]" />
+                    <div className="pointer-events-none absolute left-7 top-5 bottom-8 w-1 rounded-full bg-white/[0.05]" />
+
+                    {/* Escala lateral — marcas gravadas em metal */}
+                    {[75, 50, 25].map(m => (
+                      <div key={m} className="pointer-events-none absolute inset-x-0 z-[1]" style={{ bottom: `${m}%` }}>
+                        <div className="flex items-center gap-2 px-3">
+                          <div className="h-px flex-1 bg-white/[0.12] shadow-[0_1px_0_rgba(0,0,0,0.45)]" />
+                          <span className="rounded-sm bg-black/35 px-1 font-mono text-[9px] font-bold tabular-nums text-amber-500/75">{m}%</span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Leitura central — dígitos âmbar (instrumento) */}
+                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-amber-400/15 bg-black/35 px-6 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_18px_rgba(0,0,0,0.45)] backdrop-blur-[1.5px]">
+                        <span className="font-mono text-[50px] font-black leading-none tabular-nums tracking-[-0.03em] text-amber-300 [text-shadow:0_0_22px_rgba(251,191,36,0.65),0_0_4px_rgba(251,191,36,0.9)]">
+                          {pct.toFixed(0)}%
+                        </span>
+                        <span className="font-mono text-[13px] font-bold tabular-nums text-amber-400/90 [text-shadow:0_0_8px_rgba(251,191,36,0.4)]">
+                          {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
+                        </span>
+                        <span
+                          className="mt-0.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
+                          style={{
+                            color: nivel.cor,
+                            borderColor: `rgba(${nivel.rgb},0.35)`,
+                            background: `rgba(${nivel.rgb},0.12)`,
+                          }}
+                        >
+                          {nivel.label}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Pés do tanque */}
+              {/* Pés do tanque (dark chrome) */}
               <div className="flex justify-between px-10 -mt-0.5">
-                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
-                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-slate-800/80" />
+                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(180deg,#2a313c,#0e1219)]" />
+                <div className="h-6 w-5 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(180deg,#2a313c,#0e1219)]" />
               </div>
             </div>
 
-            <div className="text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
-              <p className="text-[12px] font-semibold text-amber-400/70 mt-1">{TANQUE_CONFIG.combustivel}</p>
+            {/* Placas de identificação embutidas (metal escuro) */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-4 py-1.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-200 [text-shadow:0_1px_0_rgba(0,0,0,0.7)]">Tanque de Armazenamento</p>
+              </div>
+              <div className="rounded border border-amber-400/20 bg-[linear-gradient(180deg,#2a2418,#15120a)] px-3 py-1 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-400/80">{TANQUE_CONFIG.combustivel}</p>
+              </div>
             </div>
           </div>
 
