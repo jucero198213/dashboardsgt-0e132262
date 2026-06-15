@@ -229,11 +229,11 @@ export function PostoInterno({ dados }: { dados: PostoInternoDados }) {
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
                     Abastecido no dia{dados.diaReferencia ? ` · ${dados.diaReferencia.slice(0, 5)}` : ""}
                   </p>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-mono text-[34px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
+                  <div className="flex items-baseline justify-between gap-1.5">
+                    <p className="min-w-0 flex-1 truncate font-mono text-[28px] font-bold leading-none tabular-nums text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.45)]">
                       {Math.round(dados.abastecidoDiaLitros).toLocaleString("pt-BR")}
                     </p>
-                    <p className="text-[11px] font-bold tracking-[0.18em] text-amber-500/80">LITROS</p>
+                    <p className="shrink-0 text-[10px] font-bold tracking-[0.1em] text-amber-500/80">LITROS</p>
                   </div>
                 </div>
 
