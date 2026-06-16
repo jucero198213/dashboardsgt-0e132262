@@ -304,7 +304,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
                 {/* Corpo da bomba — metal fosco antracite */}
                 <div className={presentation
-                  ? "relative z-10 mx-auto flex h-[310px] w-[200px] flex-col overflow-hidden rounded-t-[20px] rounded-b-[8px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                  ? "relative z-10 mx-auto flex h-[260px] w-[176px] flex-col overflow-hidden rounded-t-[18px] rounded-b-[8px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
                   : "relative z-10 mx-auto flex h-[392px] w-[244px] flex-col overflow-hidden rounded-t-[26px] rounded-b-[10px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
                 }>
                   {/* textura metálica escovada (fosca) */}
