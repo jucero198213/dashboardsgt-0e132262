@@ -136,7 +136,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
         <div className={
           presentation
-            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-2"
+            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-2 lg:gap-0 py-2 [perspective:1400px]"
             : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
         }>
 
@@ -145,7 +145,15 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               painel abaixo é o próprio display (dados ao vivo do DW), montado
               centralizado na face. Rótulos em HTML logo abaixo da imagem.
               Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
-          <div className="flex flex-col items-center">
+          <div
+            className={presentation ? "flex flex-col items-center lg:-mr-12 lg:translate-x-2" : "flex flex-col items-center"}
+            style={presentation ? {
+              transform: "perspective(1400px) translateZ(-90px) translateX(8px) scale(0.92)",
+              transformOrigin: "center right",
+              filter: "brightness(0.86) saturate(0.92) blur(0.3px) drop-shadow(0 18px 28px rgba(0,0,0,0.55))",
+              opacity: 0.95,
+            } : undefined}
+          >
             <div className="relative w-[440px] select-none">
               <img
                 src={tanqueImg}
@@ -193,7 +201,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               mostrando o diesel dourado fluindo. Container estreito (w-[180px])
               + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-center pb-[0px]">
+          <div className={`relative z-0 -mx-16 w-[180px] ${presentation ? "hidden" : "hidden lg:flex"} flex-col items-center justify-center pb-[0px]`}>
             <div className="relative h-[140px] w-full">
               {/* duto simples — tubo reto com visor central de diesel */}
               <div className="absolute inset-x-0 top-[15px] flex -translate-y-1/2 items-center">
@@ -215,7 +223,14 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
 
           {/* ═════════ BOMBA CORPORATIVA — vintage dark-chrome ═════════ */}
-          <div className="flex flex-col items-center gap-4">
+          <div
+            className={presentation ? "relative z-20 flex flex-col items-center gap-4 lg:-ml-10" : "flex flex-col items-center gap-4"}
+            style={presentation ? {
+              transform: "perspective(1400px) translateZ(80px) scale(1.06)",
+              transformOrigin: "center left",
+              filter: "drop-shadow(0 40px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 24px rgba(251,191,36,0.08))",
+            } : undefined}
+          >
             <div className="relative flex flex-col items-center">
               {/* Halo ambiente quente atrás de toda a bomba */}
               <div className="pointer-events-none absolute -inset-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_18%,rgba(251,191,36,0.07),transparent_68%)]" />
