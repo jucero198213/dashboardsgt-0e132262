@@ -1685,9 +1685,9 @@ export default function Abastecimento() {
           {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ──
               Tamanho natural reduzido (1060×540). Multiplicador 0.72 deixa
               tanque/bomba menores e evita que cubram os cards laterais. */}
-          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(4px,0.6vh,10px)] pb-[clamp(8px,1vh,16px)]">
+          <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-[clamp(28px,3vw,48px)]">
             <div
-              className="origin-top"
+              className="origin-center"
               style={{
                 width: 1060,
                 height: 540,
