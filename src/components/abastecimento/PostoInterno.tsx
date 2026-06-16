@@ -148,13 +148,22 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <defs>
                   {/* aço escuro escovado (gunmetal) — gradiente suave do cilindro */}
                   <linearGradient id="tankSteel" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0"    stopColor="#14171b" />
-                    <stop offset="0.16" stopColor="#23282e" />
-                    <stop offset="0.40" stopColor="#3a4047" />
-                    <stop offset="0.50" stopColor="#48505a" />
-                    <stop offset="0.60" stopColor="#373d45" />
-                    <stop offset="0.84" stopColor="#20252b" />
-                    <stop offset="1"    stopColor="#121519" />
+                    <stop offset="0"    stopColor="#0e1216" />
+                    <stop offset="0.13" stopColor="#1f262d" />
+                    <stop offset="0.33" stopColor="#39424c" />
+                    <stop offset="0.45" stopColor="#4e5864" />
+                    <stop offset="0.50" stopColor="#5a646f" />
+                    <stop offset="0.55" stopColor="#48515d" />
+                    <stop offset="0.67" stopColor="#343d46" />
+                    <stop offset="0.86" stopColor="#1b212a" />
+                    <stop offset="1"    stopColor="#0c1014" />
+                  </linearGradient>
+                  {/* iluminação vertical do cilindro (luz no topo, sombra na base) */}
+                  <linearGradient id="tankShade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"    stopColor="#ffffff" stopOpacity="0.12" />
+                    <stop offset="0.16" stopColor="#ffffff" stopOpacity="0" />
+                    <stop offset="0.82" stopColor="#000000" stopOpacity="0" />
+                    <stop offset="1"    stopColor="#000000" stopOpacity="0.34" />
                   </linearGradient>
                   <linearGradient id="tankDome" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0"   stopColor="#9aa6b5" />
@@ -190,64 +199,82 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   <clipPath id="tankBody"><rect x="26" y="104" width="248" height="306" rx="10" /></clipPath>
                 </defs>
 
-                {/* ── TAMPA superior plana (lid sólido) ── */}
-                <ellipse cx="150" cy="104" rx="124" ry="14" fill="url(#tankDome)" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-                <ellipse cx="150" cy="100" rx="104" ry="8" fill="#ffffff" opacity="0.08" />
-                {/* bocal de respiro */}
-                <rect x="138" y="92" width="22" height="14" rx="3" fill="url(#metalRail)" />
-
-                {/* ── GUARDA-CORPO (postes verticais + trilho fino) ── */}
+                {/* ── GUARDA-CORPO (railing detalhado: 2 trilhos + postes) ── */}
                 <g>
+                  <ellipse cx="150" cy="58" rx="116" ry="9" fill="none" stroke="url(#metalRail)" strokeWidth="2" opacity="0.7" />
+                  <ellipse cx="150" cy="78" rx="121" ry="9" fill="none" stroke="url(#metalRail)" strokeWidth="1.6" opacity="0.5" />
                   {[40, 77, 114, 150, 186, 223, 260].map(x => (
-                    <line key={x} x1={x} y1="94" x2={x} y2="64" stroke="url(#metalRail)" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
+                    <line key={x} x1={x} y1="96" x2={x} y2="56" stroke="url(#metalRail)" strokeWidth="2.2" strokeLinecap="round" opacity="0.8" />
                   ))}
-                  <ellipse cx="150" cy="64" rx="116" ry="9" fill="none" stroke="url(#metalRail)" strokeWidth="2" opacity="0.7" />
                 </g>
 
-                {/* ── CORPO CILÍNDRICO (retângulo preenchido) ── */}
+                {/* ── TAMPA superior (lid) + boca de visita (manway) ── */}
+                <ellipse cx="150" cy="106" rx="126" ry="15" fill="#05070a" opacity="0.5" />
+                <ellipse cx="150" cy="104" rx="124" ry="14" fill="url(#tankDome)" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+                <ellipse cx="150" cy="100" rx="106" ry="8" fill="#ffffff" opacity="0.08" />
+                {/* boca de visita central com parafusos */}
+                <ellipse cx="150" cy="98" rx="34" ry="9" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                {[122, 136, 150, 164, 178].map(x => <circle key={x} cx={x} cy="98" r="1.3" fill="#2a313c" />)}
+                {/* respiro lateral */}
+                <rect x="196" y="92" width="9" height="14" rx="2" fill="url(#metalRail)" />
+                <ellipse cx="200.5" cy="92" rx="4.5" ry="2" fill="#aeb9c7" />
+
+                {/* ── CORPO CILÍNDRICO ── */}
                 <rect x="26" y="104" width="248" height="306" rx="10" fill="url(#tankSteel)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
                 <g clipPath="url(#tankBody)">
                   <rect x="26" y="104" width="248" height="306" fill="url(#tankBrushed)" />
-                  {/* faixa especular (reflexo cilíndrico) */}
-                  <rect x="96" y="104" width="40" height="306" fill="url(#tankSpec)" opacity="0.5" />
-                  {/* borda brilhante esquerda + sombra direita */}
-                  <rect x="26" y="104" width="12" height="306" fill="#ffffff" opacity="0.05" />
-                  <rect x="250" y="104" width="24" height="306" fill="#000000" opacity="0.28" />
-                  {/* junção teto/corpo (rim) */}
-                  <rect x="26" y="104" width="248" height="3" fill="#000000" opacity="0.35" />
-                  <rect x="26" y="107" width="248" height="1.5" fill="#ffffff" opacity="0.10" />
-                  {/* anéis de solda (faixas retas) */}
-                  {[200, 300].map(y => (
+                  {/* iluminação vertical (luz no topo / sombra na base) */}
+                  <rect x="26" y="104" width="248" height="306" fill="url(#tankShade)" />
+                  {/* faixa especular cilíndrica (reflexo suave + linha quente) */}
+                  <rect x="86" y="104" width="48" height="306" fill="url(#tankSpec)" opacity="0.5" />
+                  <rect x="104" y="104" width="7" height="306" fill="#ffffff" opacity="0.16" />
+                  {/* borda brilhante esquerda + sombra direita (volume do cilindro) */}
+                  <rect x="26" y="104" width="14" height="306" fill="#ffffff" opacity="0.06" />
+                  <rect x="248" y="104" width="26" height="306" fill="#000000" opacity="0.30" />
+                  {/* junção teto/corpo */}
+                  <rect x="26" y="104" width="248" height="3" fill="#000000" opacity="0.4" />
+                  <rect x="26" y="107" width="248" height="1.5" fill="#ffffff" opacity="0.1" />
+                  {/* anéis de reforço (bandas 3D com luz/sombra + rebites) */}
+                  {[176, 264, 352].map(y => (
                     <g key={y}>
-                      <rect x="26" y={y} width="248" height="1.5" fill="#000000" opacity="0.4" />
-                      <rect x="26" y={y + 1.5} width="248" height="1" fill="#ffffff" opacity="0.08" />
+                      <rect x="26" y={y} width="248" height="6" fill="url(#metalRail)" opacity="0.22" />
+                      <rect x="26" y={y - 1} width="248" height="1.4" fill="#ffffff" opacity="0.14" />
+                      <rect x="26" y={y + 6} width="248" height="1.6" fill="#000000" opacity="0.4" />
+                      {[44, 86, 128, 170, 212, 256].map(rx => <circle key={rx} cx={rx} cy={y + 3} r="1.1" fill="#1a1f27" />)}
                     </g>
+                  ))}
+                  {/* costura vertical soldada + rebites */}
+                  <rect x="214" y="108" width="1.4" height="298" fill="#000000" opacity="0.28" />
+                  {Array.from({ length: 10 }).map((_, i) => <circle key={i} cx="214.7" cy={120 + i * 28} r="1" fill="#0e1216" />)}
+                </g>
+
+                {/* ── ESCADA de acesso (esquerda) com gaiola de segurança ── */}
+                <g>
+                  <line x1="42" y1="56" x2="42" y2="404" stroke="url(#metalRail)" strokeWidth="3.4" strokeLinecap="round" />
+                  <line x1="60" y1="56" x2="60" y2="404" stroke="url(#metalRail)" strokeWidth="3.4" strokeLinecap="round" />
+                  {Array.from({ length: 18 }).map((_, i) => {
+                    const y = 92 + i * 18;
+                    return <line key={i} x1="42" y1={y} x2="60" y2={y} stroke="#c0cad6" strokeOpacity="0.7" strokeWidth="2.3" />;
+                  })}
+                  {[150, 210, 270, 330].map(y => (
+                    <path key={y} d={`M42 ${y} A 18 22 0 0 0 42 ${y + 44}`} fill="none" stroke="#8b97a6" strokeOpacity="0.32" strokeWidth="1.6" />
                   ))}
                 </g>
 
-                {/* ── ESCADA de acesso (esquerda) — rails claros subindo até o topo ── */}
-                <g>
-                  <line x1="42" y1="60" x2="42" y2="402" stroke="url(#metalRail)" strokeWidth="3.5" strokeLinecap="round" />
-                  <line x1="60" y1="60" x2="60" y2="402" stroke="url(#metalRail)" strokeWidth="3.5" strokeLinecap="round" />
-                  {Array.from({ length: 17 }).map((_, i) => {
-                    const y = 96 + i * 18;
-                    return <line key={i} x1="42" y1={y} x2="60" y2={y} stroke="#c0cad6" strokeOpacity="0.75" strokeWidth="2.4" />;
-                  })}
-                </g>
-
-                {/* ── FLANGE de conexão do duto — estende até a borda (x=300).
-                    y=288 → renderiza a ~230px da base, alinhado ao centro do duto. ── */}
+                {/* ── FLANGE de conexão do duto (x até a borda, y=288) ── */}
                 <g transform="translate(274,288)">
-                  <rect x="-4" y="-26" width="12" height="52" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
-                  {[-16, 0, 16].map(y => <circle key={y} cx="2" cy={y} r="2" fill="url(#tankBolt)" />)}
-                  {/* bocal que encosta no duto */}
+                  <rect x="-6" y="-28" width="14" height="56" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                  {[-20, -7, 7, 20].map(y => <circle key={y} cx="1" cy={y} r="2" fill="url(#tankBolt)" />)}
                   <rect x="6" y="-11" width="20" height="22" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                  <rect x="8" y="-9" width="2" height="18" rx="1" fill="#ffffff" opacity="0.4" />
                 </g>
 
-                {/* ── BASE / saia + pés ── */}
-                <rect x="34" y="410" width="232" height="24" rx="4" fill="url(#tankBase)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-                <rect x="64" y="434" width="26" height="30" rx="3" fill="url(#tankBase)" />
-                <rect x="210" y="434" width="26" height="30" rx="3" fill="url(#tankBase)" />
+                {/* ── BASE / saia + plinto + pés ── */}
+                <ellipse cx="150" cy="412" rx="124" ry="12" fill="#000000" opacity="0.3" />
+                <rect x="30" y="404" width="240" height="14" fill="url(#tankBase)" opacity="0.9" />
+                <rect x="34" y="416" width="232" height="22" rx="4" fill="url(#tankBase)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+                <rect x="64" y="438" width="28" height="28" rx="3" fill="url(#tankBase)" />
+                <rect x="208" y="438" width="28" height="28" rx="3" fill="url(#tankBase)" />
               </svg>
 
               {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido).
