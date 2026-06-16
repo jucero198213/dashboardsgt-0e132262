@@ -193,7 +193,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     <stop offset="0" stopColor="#cdd6e1" />
                     <stop offset="1" stopColor="#222933" />
                   </radialGradient>
-                  <clipPath id="tankBody"><rect x="32" y="108" width="236" height="296" rx="12" /></clipPath>
+                  <clipPath id="tankBody"><rect x="32" y="118" width="236" height="286" rx="6" /></clipPath>
                 </defs>
 
                 {/* ── GUARDA-CORPO superior (railing elíptico fino) ── */}
