@@ -98,9 +98,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           85%  { opacity: 0.35; }
           100% { transform: translateY(-220px) scale(1.2); opacity: 0; }
         }
-        /* Fluxo de combustível percorrendo a curva da mangueira (dashoffset) */
-        @keyframes sgt-flow-dash {
-          to { stroke-dashoffset: -40; }
+        /* Diesel viajando pela linha de transferência (dashoffset segue a curva) */
+        @keyframes sgt-diesel-flow {
+          to { stroke-dashoffset: -88; }
         }
         /* Promove elementos animados para camadas próprias da GPU (evita
            repaints no Safari/WebKit) */
@@ -233,90 +233,105 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
           </div>
 
-          {/* ═════════ DUTO DE TRANSFERÊNCIA — mangueira industrial ══════════
-              Mangueira de borracha glossy conectando tanque → bomba. Diesel
-              viaja por dentro como pulsos de luz. Ferrules de metal cromado
-              crimpado nas pontas encostam em cada equipamento.
+          {/* ═════════ LINHA DE TRANSFERÊNCIA ════════════════════════════════
+              Conceito do zero: cada ponta termina numa PORTA BULKHEAD parafusada
+              na parede (placa + bujão cromado) e a mangueira corre entre as duas
+              com sag natural. O diesel desce em glóbulos de luz por dentro.
               Ajuste -mx-* / pb-* apenas para reposicionar. */}
-          <div className="relative z-0 -mx-[68px] hidden lg:flex flex-col items-center gap-2 pb-40">
-            <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Duto de transferência</span>
-            <svg viewBox="0 0 380 132" className="h-[132px] w-[380px] overflow-visible" fill="none">
+          <div className="relative z-0 -mx-[70px] hidden lg:flex flex-col items-center gap-2.5 pb-40">
+            <span className="text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">Linha de transferência</span>
+            <svg viewBox="0 0 360 140" className="h-[140px] w-[360px] overflow-visible" fill="none">
               <defs>
-                {/* borracha glossy — cilindro com banda de brilho */}
-                <linearGradient id="sgt-duto" gradientUnits="userSpaceOnUse" x1="0" y1="26" x2="0" y2="100">
-                  <stop offset="0"    stopColor="#20242b" />
-                  <stop offset="0.30" stopColor="#474f5b" />
-                  <stop offset="0.47" stopColor="#363d47" />
-                  <stop offset="0.52" stopColor="#2a313a" />
-                  <stop offset="0.76" stopColor="#13161c" />
-                  <stop offset="1"    stopColor="#07090c" />
+                {/* borracha glossy do mangote */}
+                <linearGradient id="sgt-pipe" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="116">
+                  <stop offset="0"    stopColor="#262b33" />
+                  <stop offset="0.27" stopColor="#4e5765" />
+                  <stop offset="0.45" stopColor="#39414c" />
+                  <stop offset="0.52" stopColor="#2b323c" />
+                  <stop offset="0.78" stopColor="#13161c" />
+                  <stop offset="1"    stopColor="#070a0e" />
                 </linearGradient>
-                {/* cromo polido — dupla especular */}
-                <linearGradient id="sgt-cuff" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="62">
-                  <stop offset="0"    stopColor="#eef3f8" />
-                  <stop offset="0.20" stopColor="#c0cad6" />
-                  <stop offset="0.40" stopColor="#6c7886" />
-                  <stop offset="0.52" stopColor="#2c343f" />
-                  <stop offset="0.62" stopColor="#5a6674" />
-                  <stop offset="0.82" stopColor="#aab4c2" />
-                  <stop offset="1"    stopColor="#dde4ee" />
+                {/* cromo do bujão/colar */}
+                <linearGradient id="sgt-collar" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="74">
+                  <stop offset="0"    stopColor="#f4f8fc" />
+                  <stop offset="0.20" stopColor="#c6cfdb" />
+                  <stop offset="0.42" stopColor="#73808f" />
+                  <stop offset="0.52" stopColor="#2a323d" />
+                  <stop offset="0.62" stopColor="#5e6a78" />
+                  <stop offset="0.82" stopColor="#b0bac8" />
+                  <stop offset="1"    stopColor="#e4ebf4" />
                 </linearGradient>
+                {/* placa de montagem (metal fosco escuro) */}
+                <linearGradient id="sgt-plate" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="86">
+                  <stop offset="0"   stopColor="#2c333d" />
+                  <stop offset="0.5" stopColor="#1a1f27" />
+                  <stop offset="1"   stopColor="#0b0e13" />
+                </linearGradient>
+                {/* cabeça de parafuso */}
+                <radialGradient id="sgt-bolt" cx="0.35" cy="0.3" r="0.8">
+                  <stop offset="0"   stopColor="#cdd6e1" />
+                  <stop offset="0.5" stopColor="#717d8c" />
+                  <stop offset="1"   stopColor="#222933" />
+                </radialGradient>
               </defs>
 
               {(() => {
-                const D = "M16 40 C 86 40, 112 88, 190 88 C 268 88, 294 40, 364 40";
+                // Mangote correndo de bujão a bujão, com sag natural
+                const D = "M34 52 C 108 52, 132 102, 180 102 C 228 102, 252 52, 326 52";
                 return (
                   <>
-                    {/* halo âmbar ambiente (calor do diesel) */}
-                    <path d={D} stroke="#fbbf24" strokeWidth="20" strokeLinecap="round" opacity="0.10" style={{ filter: "blur(7px)" }} />
-                    {/* sombra projetada */}
-                    <path d={D} stroke="#000000" strokeWidth="22" strokeLinecap="round" opacity="0.45" transform="translate(0,5)" style={{ filter: "blur(4px)" }} />
+                    {/* under-glow âmbar (calor do combustível) */}
+                    <path d={D} stroke="#f59e0b" strokeWidth="22" strokeLinecap="round" opacity="0.09" style={{ filter: "blur(8px)" }} />
+                    {/* contato/sombra ao chão */}
+                    <path d={D} stroke="#000000" strokeWidth="24" strokeLinecap="round" opacity="0.4" transform="translate(0,6)" style={{ filter: "blur(5px)" }} />
 
-                    {/* corpo da mangueira */}
-                    <path d={D} stroke="#05070a" strokeWidth="26" strokeLinecap="round" />
-                    <path d={D} stroke="url(#sgt-duto)" strokeWidth="21" strokeLinecap="round" />
-                    {/* oclusão inferior — dá volume cilíndrico */}
-                    <path d={D} stroke="#05070a" strokeWidth="21" strokeLinecap="round" opacity="0.28" transform="translate(0,4)" />
-                    {/* sheen superior macio + linha de brilho fina */}
-                    <path d={D} stroke="#ffffff" strokeWidth="8" strokeLinecap="round" opacity="0.07" transform="translate(0,-3)" style={{ filter: "blur(2px)" }} />
-                    <path d={D} stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.22" transform="translate(0,-4.5)" />
+                    {/* mangote: contorno → corpo → oclusão → brilhos */}
+                    <path d={D} stroke="#04060a" strokeWidth="30" strokeLinecap="round" />
+                    <path d={D} stroke="url(#sgt-pipe)" strokeWidth="24" strokeLinecap="round" />
+                    <path d={D} stroke="#04060a" strokeWidth="24" strokeLinecap="round" opacity="0.26" transform="translate(0,5)" />
+                    <path d={D} stroke="#ffffff" strokeWidth="9" strokeLinecap="round" opacity="0.06" transform="translate(0,-4)" style={{ filter: "blur(2.5px)" }} />
+                    <path d={D} stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" opacity="0.24" transform="translate(0,-5.5)" />
 
-                    {/* canal interno escuro (sulco onde o diesel passa) */}
-                    <path d={D} stroke="#04060a" strokeWidth="8" strokeLinecap="round" opacity="0.65" />
+                    {/* sulco interno escuro */}
+                    <path d={D} stroke="#03050a" strokeWidth="9" strokeLinecap="round" opacity="0.7" />
 
-                    {/* fluxo de diesel — pulsos de luz viajando por dentro */}
-                    <path d={D} className="sgt-anim" stroke="#fbbf24" strokeWidth="13" strokeLinecap="round" strokeDasharray="5 35" opacity="0.5"
-                      style={{ animation: "sgt-flow-dash 2s linear infinite", filter: "blur(3px)" }} />
-                    <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="5.5" strokeLinecap="round" strokeDasharray="5 35"
-                      style={{ animation: "sgt-flow-dash 2s linear infinite", filter: "drop-shadow(0 0 4px rgba(251,191,36,0.9))" }} />
-                    <path d={D} className="sgt-anim" stroke="#fff7e6" strokeWidth="5.5" strokeLinecap="round" strokeDasharray="5 35"
-                      style={{ animation: "sgt-flow-dash 2s linear infinite", animationDelay: "-1s", filter: "drop-shadow(0 0 4px rgba(251,191,36,0.9))" }} />
+                    {/* diesel — glóbulos de luz descendo a linha */}
+                    <path d={D} className="sgt-anim" stroke="#f59e0b" strokeWidth="15" strokeLinecap="round" strokeDasharray="7 81" opacity="0.45"
+                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "blur(4px)" }} />
+                    <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
+                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
+                    <path d={D} className="sgt-anim" stroke="#fff6df" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
+                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", animationDelay: "-1.6s", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
 
-                    {/* braçadeira de apoio no ponto mais baixo */}
-                    <rect x="186" y="76" width="8" height="24" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
-                    <rect x="187.5" y="77" width="1.6" height="22" rx="0.8" fill="#ffffff" opacity="0.4" />
+                    {/* abraçadeira de apoio no fundo da curva */}
+                    <g transform="translate(180,102)">
+                      <rect x="-5" y="-15" width="10" height="30" rx="3.5" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
+                      <rect x="-3.5" y="-14" width="2" height="28" rx="1" fill="#ffffff" opacity="0.45" />
+                    </g>
                   </>
                 );
               })()}
 
-              {/* ── Ferrule esquerdo — fitting crimpado no tanque ── */}
+              {/* ── Porta bulkhead ESQUERDA (parede do tanque) ── */}
               <g>
-                <rect x="6"  y="29" width="26" height="22" rx="5" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
-                {[12, 17, 22, 27].map(x => <line key={x} x1={x} y1="30" x2={x} y2="50" stroke="rgba(0,0,0,0.35)" strokeWidth="1" />)}
-                <rect x="8" y="31" width="22" height="2" rx="1" fill="#ffffff" opacity="0.55" />
-                {/* porca hexagonal (rosca no tanque) */}
-                <rect x="-6" y="24" width="14" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.7" />
-                <rect x="-4" y="26" width="3" height="28" rx="1.5" fill="#ffffff" opacity="0.5" />
+                <rect x="-2" y="26" width="22" height="52" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <circle cx="8" cy="36" r="2.6" fill="url(#sgt-bolt)" />
+                <circle cx="8" cy="68" r="2.6" fill="url(#sgt-bolt)" />
+                {/* bujão cromado (a mangueira entra aqui) */}
+                <rect x="14" y="40" width="24" height="24" rx="6" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
+                {[20, 26, 32].map(x => <line key={x} x1={x} y1="42" x2={x} y2="62" stroke="rgba(0,0,0,0.32)" strokeWidth="1.1" />)}
+                <rect x="16" y="42" width="22" height="2.4" rx="1.2" fill="#ffffff" opacity="0.6" />
               </g>
 
-              {/* ── Ferrule direito — fitting crimpado na bomba ── */}
+              {/* ── Porta bulkhead DIREITA (parede da bomba) ── */}
               <g>
-                <rect x="348" y="29" width="26" height="22" rx="5" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
-                {[353, 358, 363, 368].map(x => <line key={x} x1={x} y1="30" x2={x} y2="50" stroke="rgba(0,0,0,0.35)" strokeWidth="1" />)}
-                <rect x="350" y="31" width="22" height="2" rx="1" fill="#ffffff" opacity="0.55" />
-                {/* porca hexagonal (rosca na bomba) */}
-                <rect x="372" y="24" width="14" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.7" />
-                <rect x="381" y="26" width="3" height="28" rx="1.5" fill="#ffffff" opacity="0.5" />
+                <rect x="340" y="26" width="22" height="52" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <circle cx="352" cy="36" r="2.6" fill="url(#sgt-bolt)" />
+                <circle cx="352" cy="68" r="2.6" fill="url(#sgt-bolt)" />
+                {/* bujão cromado (a mangueira entra aqui) */}
+                <rect x="322" y="40" width="24" height="24" rx="6" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
+                {[328, 334, 340].map(x => <line key={x} x1={x} y1="42" x2={x} y2="62" stroke="rgba(0,0,0,0.32)" strokeWidth="1.1" />)}
+                <rect x="324" y="42" width="22" height="2.4" rx="1.2" fill="#ffffff" opacity="0.6" />
               </g>
             </svg>
           </div>
