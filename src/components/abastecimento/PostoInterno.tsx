@@ -322,11 +322,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                         </span>
                       </div>
                       {/* Número principal */}
-                      <div className="relative flex items-baseline justify-between gap-1.5">
-                        <span className="min-w-0 flex-1 truncate font-mono text-[34px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]">
+                      <div className="relative flex flex-col gap-0.5">
+                        <span className="font-mono text-[34px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]">
                           {display.litrosDia.toLocaleString("pt-BR")}
                         </span>
-                        <span className="shrink-0 text-[10px] font-bold tracking-[0.12em] text-amber-500/80">LITROS</span>
+                        <span className="text-[10px] font-bold tracking-[0.12em] text-amber-500/80">LITROS</span>
                       </div>
                     </div>
                   </div>
