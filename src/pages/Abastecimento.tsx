@@ -335,6 +335,20 @@ export default function Abastecimento() {
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
+  // Trava scroll global (html/body) enquanto modo apresentação estiver ativo,
+  // evitando qualquer overflow vertical herdado do layout normal.
+  useEffect(() => {
+    if (!isPresentationMode) return;
+    const htmlPrev = document.documentElement.style.overflow;
+    const bodyPrev = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = htmlPrev;
+      document.body.style.overflow = bodyPrev;
+    };
+  }, [isPresentationMode]);
+
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
     const s = new Set<string>();
