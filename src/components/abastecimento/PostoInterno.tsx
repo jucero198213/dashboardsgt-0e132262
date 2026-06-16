@@ -390,28 +390,60 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
           </div>
 
-          {/* ═════════ PAINEL DE STATUS ═════════ */}
-          <div className="grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:self-center">
-            {[
-              { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
-              { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros),    destaque: "#94a3b8" },
-              { label: "Última Recarga",             valor: dados.ultimaRecarga ? fmtL(dados.ultimaRecarga.litros) : "—", destaque: "#a78bfa", sub: dados.ultimaRecarga ? `em ${dados.ultimaRecarga.data}${dados.ultimaRecarga.fornecedor ? ` · ${dados.ultimaRecarga.fornecedor.split(" ")[0]}` : ""}` : "Sem recargas no período" },
-              { label: "Última Placa Abastecida",    valor: dados.ultimaPlaca?.placa ?? "—",        destaque: "#22d3ee", sub: dados.ultimaPlaca ? `${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}` : "Sem registros no período", glow: true },
-            ].map(c => (
-              <div
-                key={c.label}
-                className="rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 transition-colors duration-300 hover:border-white/[0.18]"
-                style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
-                <p className="mt-1.5 text-[22px] font-black leading-none tabular-nums tracking-[-0.02em]" style={{ color: c.destaque }}>
-                  {c.valor}
-                </p>
-                {c.sub && <p className="mt-1.5 text-[11px] font-semibold text-slate-600">{c.sub}</p>}
+          {/* ═════════ PAINEL DE STATUS ═════════
+              Normal: 4 cards (Recebido, Abastecido, Última Recarga, Última Placa).
+              Presentation: 3 cards — Última Recarga + Última Placa viram uma única
+              "Última Movimentação", garantindo encaixe sem scroll. */}
+          {(() => {
+            const recargaSub = dados.ultimaRecarga
+              ? `${fmtL(dados.ultimaRecarga.litros)} · ${dados.ultimaRecarga.data}`
+              : "Sem recargas no período";
+            const placaSub = dados.ultimaPlaca
+              ? `${dados.ultimaPlaca.placa} · ${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}`
+              : "Sem registros no período";
+
+            const cards = presentation
+              ? [
+                  { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
+                  { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros), destaque: "#94a3b8" },
+                  { label: "Última Movimentação",        valor: dados.ultimaPlaca?.placa ?? "—",     destaque: "#22d3ee",
+                    sub: `Recarga: ${recargaSub}\nPlaca: ${placaSub}`, glow: true },
+                ]
+              : [
+                  { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
+                  { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros), destaque: "#94a3b8" },
+                  { label: "Última Recarga",             valor: dados.ultimaRecarga ? fmtL(dados.ultimaRecarga.litros) : "—", destaque: "#a78bfa", sub: dados.ultimaRecarga ? `em ${dados.ultimaRecarga.data}${dados.ultimaRecarga.fornecedor ? ` · ${dados.ultimaRecarga.fornecedor.split(" ")[0]}` : ""}` : "Sem recargas no período" },
+                  { label: "Última Placa Abastecida",    valor: dados.ultimaPlaca?.placa ?? "—", destaque: "#22d3ee", sub: dados.ultimaPlaca ? `${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}` : "Sem registros no período", glow: true },
+                ];
+
+            return (
+              <div className={
+                presentation
+                  ? "flex w-full max-w-[320px] min-h-0 flex-col justify-center gap-3 lg:w-[300px] lg:self-center"
+                  : "grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:self-center"
+              }>
+                {cards.map(c => (
+                  <div
+                    key={c.label}
+                    className={
+                      presentation
+                        ? "rounded-[12px] border border-white/10 bg-white/[0.025] px-4 py-2.5 transition-colors duration-300 hover:border-white/[0.18]"
+                        : "rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 transition-colors duration-300 hover:border-white/[0.18]"
+                    }
+                    style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
+                  >
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
+                    <p className={`mt-1.5 ${presentation ? "text-[18px]" : "text-[22px]"} font-black leading-none tabular-nums tracking-[-0.02em]`} style={{ color: c.destaque }}>
+                      {c.valor}
+                    </p>
+                    {c.sub && <p className="mt-1.5 whitespace-pre-line text-[11px] font-semibold text-slate-600">{c.sub}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </div>
+
 
         {!presentation && (<>
         {/* ═════════ ÚLTIMAS MOVIMENTAÇÕES DO TANQUE ═════════ */}
