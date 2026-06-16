@@ -1709,7 +1709,7 @@ export default function Abastecimento() {
           </div>
 
           {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ── */}
-          <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-[clamp(28px,3vw,48px)]">
+          <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-[clamp(28px,3vw,48px)]">
             <div
               className="origin-center"
               style={{

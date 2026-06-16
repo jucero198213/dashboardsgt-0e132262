@@ -115,7 +115,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
       <div
         className={presentation
-          ? "flex h-full min-h-0 flex-col overflow-hidden p-0"
+          ? "flex h-full min-h-0 flex-col p-0"
           : "rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"}
         style={presentation ? undefined : { background: "var(--sgt-bg-card)" }}
       >
