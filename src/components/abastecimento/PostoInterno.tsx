@@ -255,23 +255,44 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 {/* Backlight — halo quente limpo atrás do disco */}
                 <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.06)_45%,transparent_70%)] blur-md" />
                 {/* Disco de metal polido branco/dourado */}
-                <div className="relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]">
+                <div className={presentation
+                  ? "relative flex h-[100px] w-[100px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
+                  : "relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
+                }>
                   {/* aro dourado interno */}
-                  <div className="pointer-events-none absolute inset-[7px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]" />
+                  <div className={presentation
+                    ? "pointer-events-none absolute inset-[5px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]"
+                    : "pointer-events-none absolute inset-[7px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]"
+                  } />
                   {/* reflexo de vidro */}
-                  <div className="pointer-events-none absolute left-6 top-5 h-7 w-11 -rotate-12 rounded-full bg-white/70 blur-[3px]" />
-                  <span className="relative text-[8px] font-black uppercase tracking-[0.32em] text-amber-800/90">Posto SGT</span>
+                  <div className={presentation
+                    ? "pointer-events-none absolute left-4 top-4 h-5 w-8 -rotate-12 rounded-full bg-white/70 blur-[3px]"
+                    : "pointer-events-none absolute left-6 top-5 h-7 w-11 -rotate-12 rounded-full bg-white/70 blur-[3px]"
+                  } />
+                  <span className={presentation
+                    ? "relative text-[7px] font-black uppercase tracking-[0.32em] text-amber-800/90"
+                    : "relative text-[8px] font-black uppercase tracking-[0.32em] text-amber-800/90"
+                  }>Posto SGT</span>
                   {/* logo tingido de ouro */}
                   <img
                     src={sgtLogo}
                     alt="SGT"
-                    className="relative my-1 h-7 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                    className={presentation
+                      ? "relative my-0.5 h-5 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                      : "relative my-1 h-7 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                    }
                     style={{ filter: "sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(0.92) contrast(1.05)" }}
                   />
-                  <span className="relative text-[7px] font-bold uppercase tracking-[0.28em] text-amber-700/80">Diesel S10</span>
+                  <span className={presentation
+                    ? "relative text-[6px] font-bold uppercase tracking-[0.28em] text-amber-700/80"
+                    : "relative text-[7px] font-bold uppercase tracking-[0.28em] text-amber-700/80"
+                  }>Diesel S10</span>
                 </div>
                 {/* Pescoço cromado escuro conectando disco ao corpo */}
-                <div className="relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]" />
+                <div className={presentation
+                  ? "relative z-10 -mt-1 h-5 w-12 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                  : "relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                } />
               </div>
 
               {/* ───────── CORPO + BASE + MANGUEIRA (âncora) ───────── */}
