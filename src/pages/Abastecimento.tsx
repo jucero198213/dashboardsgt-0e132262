@@ -122,6 +122,102 @@ interface AbastecimentoAgregado {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  INDICADORES DE MERCADO (modo apresentação)
+//  ─────────────────────────────────────────────────────────────────────────────
+//  TODO(integração): conectar aos endpoints reais quando disponíveis:
+//   - ANP    → preço médio Diesel S10 por UF (semanal). Ex.: /dw-mercado/anp
+//   - ABICOM → defasagem PPI do diesel.            Ex.: /dw-mercado/abicom
+//   - ANTT   → status da tabela de piso de frete.  Ex.: /dw-mercado/antt
+//  Enquanto não houver integração, este objeto fornece dados mockados
+//  preservando o contrato (value/formatted/status/updatedAt). O cálculo de
+//  "Diferença vs ANP" é derivado em tempo real abaixo, não hard-coded.
+type IndicatorStatus = "positive" | "neutral" | "warning" | "danger";
+type IndicatorSource = "ANP" | "ABICOM" | "ANTT" | "INTERNO";
+
+const ANP_DIESEL_S10  = 6.12;   // R$/L — TODO: substituir por ANP real
+const PRECO_INTERNO   = 4.89;   // R$/L — TODO: derivar do DW (média da janela)
+const ABICOM_DEFASAGEM = -4.0;  // %    — TODO: substituir por ABICOM real
+
+const diffVsAnpPct = ((PRECO_INTERNO - ANP_DIESEL_S10) / ANP_DIESEL_S10) * 100;
+const diffFormatted = `${diffVsAnpPct >= 0 ? "+" : ""}${diffVsAnpPct.toFixed(1).replace(".", ",")}%`;
+const diffStatus: IndicatorStatus =
+  diffVsAnpPct <= -5 ? "positive" : diffVsAnpPct >= 5 ? "danger" : "neutral";
+const diffLabel =
+  diffVsAnpPct < -1 ? "economia estimada vs ANP"
+  : diffVsAnpPct > 1 ? "acima do mercado"
+  : "alinhado ao mercado";
+
+const abicomStatus: IndicatorStatus =
+  ABICOM_DEFASAGEM <= -5 ? "warning"
+  : ABICOM_DEFASAGEM >= 5 ? "danger"
+  : "neutral";
+const abicomLabel =
+  ABICOM_DEFASAGEM <= -5 ? "pressão de alta"
+  : ABICOM_DEFASAGEM >= 5 ? "pressão de baixa"
+  : "pressão moderada";
+
+interface MarketIndicator {
+  title:     string;
+  value:     string;
+  subtitle:  string;
+  source:    IndicatorSource;
+  status?:   IndicatorStatus;
+  updatedAt?: string;
+}
+
+const marketIndicators: MarketIndicator[] = [
+  { title: "Diesel S10 ANP", value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`, subtitle: "SP · última semana", source: "ANP",    status: "neutral",  updatedAt: "16/06/2026" },
+  { title: "Preço Interno",  value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,  subtitle: "frota própria · posto interno", source: "INTERNO", status: "neutral" },
+  { title: "Diferença vs ANP", value: diffFormatted, subtitle: diffLabel, source: "INTERNO", status: diffStatus },
+  { title: "ABICOM / PPI",   value: `${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`, subtitle: `defasagem diesel · ${abicomLabel}`, source: "ABICOM", status: abicomStatus, updatedAt: "16/06/2026" },
+  { title: "ANTT / Frete",   value: "Vigente", subtitle: "piso mínimo de frete", source: "ANTT", status: "positive", updatedAt: "16/06/2026" },
+];
+
+const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: string }> = {
+  positive: { text: "#34d399", ring: "rgba(52,211,153,0.35)",  dot: "#34d399" },
+  neutral:  { text: "#e2e8f0", ring: "rgba(148,163,184,0.30)", dot: "#94a3b8" },
+  warning:  { text: "#fbbf24", ring: "rgba(251,191,36,0.40)",  dot: "#fbbf24" },
+  danger:   { text: "#f87171", ring: "rgba(248,113,113,0.40)", dot: "#f87171" },
+};
+
+function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral", updatedAt }: MarketIndicator) {
+  const colors = STATUS_COLOR[status];
+  const fallback = value === "--" || value === "—";
+  return (
+    <div
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(10px,1vw,16px)] py-[clamp(8px,1.2vh,14px)] backdrop-blur-sm transition-colors"
+      style={{ borderColor: colors.ring }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{title}</span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em]"
+          style={{ color: colors.text, borderColor: colors.ring, background: "rgba(255,255,255,0.025)" }}
+        >
+          <span className="h-1 w-1 rounded-full" style={{ background: colors.dot }} />
+          {source}
+        </span>
+      </div>
+      <p
+        className="mt-1 truncate text-[clamp(1.05rem,2.1vh,1.75rem)] font-black leading-none tabular-nums tracking-[-0.02em]"
+        style={{ color: fallback ? "#64748b" : colors.text }}
+      >
+        {fallback ? "--" : value}
+      </p>
+      <div className="mt-1 flex items-end justify-between gap-2">
+        <span className="truncate text-[10px] font-semibold text-slate-500">
+          {fallback ? "aguardando atualização" : subtitle}
+        </span>
+        {updatedAt && !fallback && (
+          <span className="shrink-0 text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-600">{updatedAt}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Abastecimento() {
