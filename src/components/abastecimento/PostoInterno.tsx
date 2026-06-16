@@ -403,7 +403,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <svg
                   viewBox="0 0 150 360"
                   className={presentation
-                    ? "pointer-events-none absolute right-[-36px] top-[96px] z-0 h-[290px] w-[120px]"
+                    ? "pointer-events-none absolute right-[-30px] top-[80px] z-0 h-[250px] w-[110px]"
                     : "pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
                   }
                   fill="none"
