@@ -239,7 +239,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               bordas tocarem os dois corpos. A mangueira é desenhada de borda a
               borda (preserveAspectRatio="none" → sempre conecta), e as conexões
               ficam ancoradas/fixas em cada parede (sem distorcer). */}
-          <div className="relative z-0 -mx-16 hidden lg:flex flex-1 flex-col items-center justify-end pb-40">
+          <div className="relative z-0 -mx-16 hidden w-[240px] lg:flex flex-col items-center justify-end pb-40">
             <span className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">Linha de transferência</span>
 
             <div className="relative h-[140px] w-full">
