@@ -403,7 +403,10 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     alinhamento; ajuste right/top apenas para reposicionar. */}
                 <svg
                   viewBox="0 0 150 360"
-                  className="pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
+                  className={presentation
+                    ? "pointer-events-none absolute right-[-36px] top-[96px] z-0 h-[290px] w-[120px]"
+                    : "pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
+                  }
                   fill="none"
                 >
                   <defs>
