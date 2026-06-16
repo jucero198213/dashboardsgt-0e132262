@@ -140,7 +140,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               centralizado na face. Rótulos em HTML logo abaixo da imagem.
               Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
           <div className="flex flex-col items-center">
-            <div className="relative w-[380px] select-none">
+            <div className="relative w-[440px] select-none">
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
@@ -187,7 +187,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               mostrando o diesel dourado fluindo. Container estreito (w-[180px])
               + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[42px]">
+          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[60px]">
             <div className="relative h-[140px] w-full">
               {/* rótulo flutuante acima do duto */}
               <span className="absolute inset-x-0 top-[30px] text-center text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">
