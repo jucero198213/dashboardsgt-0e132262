@@ -136,7 +136,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
         <div className={
           presentation
-            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-2 lg:gap-0 py-2 [perspective:1400px]"
+            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-2 [perspective:1400px]"
             : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
         }>
 
@@ -146,15 +146,15 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               centralizado na face. Rótulos em HTML logo abaixo da imagem.
               Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
           <div
-            className={presentation ? "flex flex-col items-center lg:-mr-12 lg:translate-x-2" : "flex flex-col items-center"}
+            className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(-90px) translateX(8px) scale(0.92)",
+              transform: "perspective(1400px) translateZ(-40px) translateX(2px) scale(0.85)",
               transformOrigin: "center right",
               filter: "brightness(0.86) saturate(0.92) blur(0.3px) drop-shadow(0 18px 28px rgba(0,0,0,0.55))",
               opacity: 0.95,
             } : undefined}
           >
-            <div className="relative w-[440px] select-none">
+            <div className={presentation ? "relative w-[260px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
@@ -163,24 +163,38 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               />
 
               {/* Display dinâmico — painel montado na face limpa do tanque */}
-              <div className="absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]">
-                <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]">
+              <div className={presentation
+                ? "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[10px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-2 py-2 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
+                : "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
+              }>
+                <div className={presentation
+                  ? "font-mono text-[28px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
+                  : "font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
+                }>
                   {pct.toFixed(0)}%
                 </div>
-                <div className="mt-2.5 whitespace-nowrap font-mono text-[13px] font-semibold tabular-nums text-slate-300/90">
+                <div className={presentation
+                  ? "mt-1 whitespace-nowrap font-mono text-[10px] font-semibold tabular-nums text-slate-300/90"
+                  : "mt-2.5 whitespace-nowrap font-mono text-[13px] font-semibold tabular-nums text-slate-300/90"
+                }>
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                 </div>
                 <div
-                  className="mt-3 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+                  className={presentation
+                    ? "mt-1.5 inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                    : "mt-3 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+                  }
                   style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
                 >
                   {nivel.label}
                 </div>
               </div>
 
-              {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
-                  Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
-              <div className="absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[12px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
+              {/* ── Medidor de nível (sight glass) ── */}
+              <div className={presentation
+                ? "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[9px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
+                : "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[12px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
+              }>
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-full bg-[linear-gradient(180deg,#fde047,#f59e0b_55%,#b45309)] shadow-[0_0_10px_rgba(251,191,36,0.7)] transition-[height] duration-700 ease-out"
                   style={{ height: `${pct}%` }}
@@ -190,7 +204,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
 
             {/* Identificação — a imagem nova tem face limpa, sem rótulos */}
-            <div className="mt-3 text-center">
+            <div className={presentation ? "hidden" : "mt-3 text-center"}>
               <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
               <p className="mt-1 text-[12px] font-semibold text-amber-400/70">{TANQUE_CONFIG.combustivel}</p>
             </div>
@@ -224,11 +238,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
           {/* ═════════ BOMBA CORPORATIVA — vintage dark-chrome ═════════ */}
           <div
-            className={presentation ? "relative z-20 flex flex-col items-center gap-4 lg:-ml-10" : "flex flex-col items-center gap-4"}
+            className={presentation ? "relative z-20 flex flex-col items-center gap-3" : "flex flex-col items-center gap-4"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(80px) scale(1.06)",
+              transform: "perspective(1400px) translateZ(40px) scale(1.02)",
               transformOrigin: "center left",
-              filter: "drop-shadow(0 40px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 24px rgba(251,191,36,0.08))",
+              filter: "drop-shadow(0 28px 36px rgba(0,0,0,0.7)) drop-shadow(0 0 16px rgba(251,191,36,0.08))",
             } : undefined}
           >
             <div className="relative flex flex-col items-center">
@@ -240,32 +254,59 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 {/* Backlight — halo quente limpo atrás do disco */}
                 <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.06)_45%,transparent_70%)] blur-md" />
                 {/* Disco de metal polido branco/dourado */}
-                <div className="relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]">
+                <div className={presentation
+                  ? "relative flex h-[84px] w-[84px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
+                  : "relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
+                }>
                   {/* aro dourado interno */}
-                  <div className="pointer-events-none absolute inset-[7px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]" />
+                  <div className={presentation
+                    ? "pointer-events-none absolute inset-[5px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]"
+                    : "pointer-events-none absolute inset-[7px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]"
+                  } />
                   {/* reflexo de vidro */}
-                  <div className="pointer-events-none absolute left-6 top-5 h-7 w-11 -rotate-12 rounded-full bg-white/70 blur-[3px]" />
-                  <span className="relative text-[8px] font-black uppercase tracking-[0.32em] text-amber-800/90">Posto SGT</span>
+                  <div className={presentation
+                    ? "pointer-events-none absolute left-4 top-4 h-5 w-8 -rotate-12 rounded-full bg-white/70 blur-[3px]"
+                    : "pointer-events-none absolute left-6 top-5 h-7 w-11 -rotate-12 rounded-full bg-white/70 blur-[3px]"
+                  } />
+                  <span className={presentation
+                    ? "relative text-[7px] font-black uppercase tracking-[0.32em] text-amber-800/90"
+                    : "relative text-[8px] font-black uppercase tracking-[0.32em] text-amber-800/90"
+                  }>Posto SGT</span>
                   {/* logo tingido de ouro */}
                   <img
                     src={sgtLogo}
                     alt="SGT"
-                    className="relative my-1 h-7 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                    className={presentation
+                      ? "relative my-0.5 h-5 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                      : "relative my-1 h-7 w-auto object-contain drop-shadow-[0_1px_2px_rgba(120,80,0,0.4)]"
+                    }
                     style={{ filter: "sepia(1) saturate(2.4) hue-rotate(-6deg) brightness(0.92) contrast(1.05)" }}
                   />
-                  <span className="relative text-[7px] font-bold uppercase tracking-[0.28em] text-amber-700/80">Diesel S10</span>
+                  <span className={presentation
+                    ? "relative text-[6px] font-bold uppercase tracking-[0.28em] text-amber-700/80"
+                    : "relative text-[7px] font-bold uppercase tracking-[0.28em] text-amber-700/80"
+                  }>Diesel S10</span>
                 </div>
                 {/* Pescoço cromado escuro conectando disco ao corpo */}
-                <div className="relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]" />
+                <div className={presentation
+                  ? "relative z-10 -mt-1 h-4 w-10 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                  : "relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                } />
               </div>
 
               {/* ───────── CORPO + BASE + MANGUEIRA (âncora) ───────── */}
               <div className="relative -mt-px">
                 {/* "Ombro" superior do corpo (dark chrome) */}
-                <div className="mx-auto h-4 w-[206px] rounded-t-[22px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]" />
+                <div className={presentation
+                  ? "mx-auto h-2.5 w-[150px] rounded-t-[16px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
+                  : "mx-auto h-4 w-[206px] rounded-t-[22px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
+                } />
 
                 {/* Corpo da bomba — metal fosco antracite */}
-                <div className="relative z-10 mx-auto flex h-[392px] w-[244px] flex-col overflow-hidden rounded-t-[26px] rounded-b-[10px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]">
+                <div className={presentation
+                  ? "relative z-10 mx-auto flex h-[260px] w-[176px] flex-col overflow-hidden rounded-t-[18px] rounded-b-[8px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                  : "relative z-10 mx-auto flex h-[392px] w-[244px] flex-col overflow-hidden rounded-t-[26px] rounded-b-[10px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                }>
                   {/* textura metálica escovada (fosca) */}
                   <div className="pointer-events-none absolute inset-0 opacity-[0.05] bg-[repeating-linear-gradient(90deg,transparent_0,transparent_2px,#ffffff_3px,transparent_4px)]" />
                   {/* reflexos dark-chrome nas bordas */}
@@ -273,32 +314,38 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   <div className="pointer-events-none absolute inset-y-0 right-0 w-[20px] bg-gradient-to-l from-black/45 to-transparent" />
 
                   {/* ── Bezel cromado escuro do display ── */}
-                  <div className="relative mx-3.5 mt-5 rounded-2xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[6px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]">
+                  <div className={presentation
+                    ? "relative mx-2.5 mt-3.5 rounded-xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[5px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]"
+                    : "relative mx-3.5 mt-5 rounded-2xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[6px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]"
+                  }>
                     {/* Tela retro-digital */}
-                    <div className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-[linear-gradient(180deg,#1a1305_0%,#0a0700_100%)] px-3.5 py-3 shadow-[inset_0_2px_18px_rgba(0,0,0,0.95)]">
+                    <div className="relative overflow-hidden rounded-lg border border-amber-500/20 bg-[linear-gradient(180deg,#1a1305_0%,#0a0700_100%)] px-2.5 py-2 shadow-[inset_0_2px_18px_rgba(0,0,0,0.95)]">
                       {/* scanlines + glow âmbar */}
                       <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(0deg,transparent_0,transparent_2px,rgba(0,0,0,0.7)_3px)]" />
                       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_65%,rgba(251,191,36,0.12),transparent_72%)]" />
                       {/* Linha topo: rótulo + data + LED */}
-                      <div className="relative mb-1.5 flex items-center justify-between gap-2">
-                        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-amber-500/70">Abastecido no dia</span>
+                      <div className="relative mb-1 flex items-center justify-between gap-2">
+                        <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-500/70">Abastecido no dia</span>
                         <span className="flex items-center gap-1.5">
-                          <span className="font-mono text-[9px] font-bold tabular-nums text-amber-400/90 [text-shadow:0_0_6px_rgba(251,191,36,0.5)]">{display.data}</span>
+                          <span className="font-mono text-[8px] font-bold tabular-nums text-amber-400/90 [text-shadow:0_0_6px_rgba(251,191,36,0.5)]">{display.data}</span>
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.95)]" />
                         </span>
                       </div>
                       {/* Número principal */}
                       <div className="relative flex flex-col gap-0.5">
-                        <span className="font-mono text-[34px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]">
+                        <span className={presentation
+                          ? "font-mono text-[26px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]"
+                          : "font-mono text-[34px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]"
+                        }>
                           {display.litrosDia.toLocaleString("pt-BR")}
                         </span>
-                        <span className="text-[10px] font-bold tracking-[0.12em] text-amber-500/80">LITROS</span>
+                        <span className="text-[9px] font-bold tracking-[0.12em] text-amber-500/80">LITROS</span>
                       </div>
                     </div>
                   </div>
 
                   {/* ── Painéis embutidos empilhados (caixas metálicas) ── */}
-                  <div className="mx-3.5 mt-3 flex flex-col gap-2">
+                  <div className="mx-2.5 mt-2.5 flex flex-col gap-1.5">
                     {[
                       { v: display.precoRecarga,                         l: "R$/L recarga" },
                       { v: display.abastDia.toLocaleString("pt-BR"),     l: "Abast. dia" },
@@ -306,10 +353,16 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     ].map(c => (
                       <div
                         key={c.l}
-                        className="flex items-center justify-between rounded-lg border border-black/50 bg-[linear-gradient(180deg,rgba(0,0,0,0.65),rgba(0,0,0,0.88))] px-3.5 py-2.5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.06)]"
+                        className={presentation
+                          ? "flex items-center justify-between rounded-lg border border-black/50 bg-[linear-gradient(180deg,rgba(0,0,0,0.65),rgba(0,0,0,0.88))] px-2.5 py-1.5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.06)]"
+                          : "flex items-center justify-between rounded-lg border border-black/50 bg-[linear-gradient(180deg,rgba(0,0,0,0.65),rgba(0,0,0,0.88))] px-3.5 py-2.5 shadow-[inset_0_2px_8px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.06)]"
+                        }
                       >
                         <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-600/60">{c.l}</span>
-                        <span className="font-mono text-[16px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]">{c.v}</span>
+                        <span className={presentation
+                          ? "font-mono text-[14px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
+                          : "font-mono text-[16px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
+                        }>{c.v}</span>
                       </div>
                     ))}
                   </div>
@@ -318,15 +371,24 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   <div className="flex-1" />
 
                   {/* ── Placa de identificação (metal escuro embutido) ── */}
-                  <div className="relative mx-3.5 mb-4 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]">
+                  <div className={presentation
+                    ? "relative mx-2.5 mb-3 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]"
+                    : "relative mx-3.5 mb-4 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]"
+                  }>
                     <p className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-200 [text-shadow:0_1px_0_rgba(0,0,0,0.7)]">Diesel S10</p>
                     <p className="mt-0.5 text-[8px] font-bold uppercase tracking-[0.22em] text-slate-500">Bomba 01 — Uso Interno</p>
                   </div>
                 </div>
 
                 {/* ── Base metálica escura texturizada ── */}
-                <div className="relative z-10 mx-auto flex w-[300px] flex-col items-center">
-                  <div className="-mt-0.5 h-3 w-[252px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]" />
+                <div className={presentation
+                  ? "relative z-10 mx-auto flex w-[220px] flex-col items-center"
+                  : "relative z-10 mx-auto flex w-[300px] flex-col items-center"
+                }>
+                  <div className={presentation
+                    ? "-mt-0.5 h-2 w-[186px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
+                    : "-mt-0.5 h-3 w-[252px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
+                  } />
                   <div className="relative h-7 w-full overflow-hidden rounded-md border border-black/55 bg-[linear-gradient(180deg,#2a313c,#0e1219)] shadow-[0_16px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]">
                     {/* ranhuras da base */}
                     <div className="absolute inset-0 opacity-30 bg-[repeating-linear-gradient(90deg,transparent_0,transparent_9px,rgba(0,0,0,0.55)_10px,transparent_11px)]" />
@@ -340,7 +402,10 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     alinhamento; ajuste right/top apenas para reposicionar. */}
                 <svg
                   viewBox="0 0 150 360"
-                  className="pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
+                  className={presentation
+                    ? "pointer-events-none absolute right-[-30px] top-[80px] z-0 h-[250px] w-[110px]"
+                    : "pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
+                  }
                   fill="none"
                 >
                   <defs>
@@ -399,7 +464,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
 
             {/* Texto externo flutuante */}
-            <div className="text-center">
+            <div className={presentation ? "hidden" : "text-center"}>
               <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Bomba Corporativa</p>
               <p className="mt-1 text-[12px] font-semibold text-slate-600">Frota própria</p>
             </div>
@@ -444,7 +509,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             return (
               <div className={
                 presentation
-                  ? "flex w-full max-w-[320px] min-h-0 flex-col justify-center gap-3 lg:w-[300px] lg:self-center"
+                  ? "flex w-full max-w-[260px] min-h-0 flex-col justify-center gap-2.5 lg:w-[240px] lg:self-center"
                   : "grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:self-center"
               }>
                 {cards.map(c => (

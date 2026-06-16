@@ -1683,16 +1683,16 @@ export default function Abastecimento() {
           </div>
 
           {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ──
-              Tamanho natural mantido (1180×620). Multiplicador 0.9 reduz
-              tanque/bomba ~10% para dar respiro ao painel em TV. */}
+              Tamanho natural reduzido (1060×540). Multiplicador 0.72 deixa
+              tanque/bomba menores e evita que cubram os cards laterais. */}
           <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(4px,0.6vh,10px)] pb-[clamp(8px,1vh,16px)]">
             <div
               className="origin-top"
               style={{
-                width: 1180,
-                height: 620,
+                width: 1060,
+                height: 540,
                 transform:
-                  "scale(calc(min(calc((100vw - 64px) / 1180), calc((100dvh - 210px) / 620)) * 0.9))",
+                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 240px) / 540)) * 0.72))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
