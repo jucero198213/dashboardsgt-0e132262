@@ -148,20 +148,32 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 draggable={false}
               />
 
-              {/* Display dinâmico sobreposto ao display embutido da imagem */}
-              <div className="absolute left-[50.5%] top-[52.4%] z-10 w-[31%] -translate-x-1/2 -translate-y-1/2 rounded-[10px] bg-[rgba(7,11,17,0.97)] px-3 py-2.5 text-center shadow-[inset_0_2px_14px_rgba(0,0,0,0.9)]">
-                <div className="font-mono text-[34px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_16px_rgba(255,255,255,0.2)]">
+              {/* Display dinâmico sobreposto ao display embutido da imagem.
+                  Posição medida na imagem (centro x≈50.5%, y≈50.5%; conteúdo
+                  ocupa ~40%→61% da altura). bg opaco cobre o "100%" desenhado. */}
+              <div className="absolute left-[50.5%] top-[50.5%] z-10 flex w-[34%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[12px] bg-[rgba(6,10,16,0.98)] px-3 py-3.5 text-center shadow-[inset_0_2px_14px_rgba(0,0,0,0.9)]">
+                <div className="font-mono text-[38px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_16px_rgba(255,255,255,0.2)]">
                   {pct.toFixed(0)}%
                 </div>
-                <div className="mt-1 font-mono text-[11px] font-semibold tabular-nums text-slate-300/90">
+                <div className="mt-1.5 font-mono text-[12px] font-semibold tabular-nums text-slate-300/90">
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                 </div>
                 <div
-                  className="mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  className="mt-2 inline-flex rounded-full border px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
                   style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
                 >
                   {nivel.label}
                 </div>
+              </div>
+
+              {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
+                  Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
+              <div className="absolute left-[70%] top-[30%] bottom-[24%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
+                <div
+                  className="absolute inset-x-0 bottom-0 rounded-full bg-[linear-gradient(180deg,#fde047,#f59e0b_55%,#b45309)] shadow-[0_0_10px_rgba(251,191,36,0.7)] transition-[height] duration-700 ease-out"
+                  style={{ height: `${pct}%` }}
+                />
+                <div className="pointer-events-none absolute inset-y-0 left-[1.5px] w-[2px] rounded-full bg-white/25" />
               </div>
             </div>
           </div>
