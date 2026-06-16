@@ -140,7 +140,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               display "100%" já vêm desenhados na imagem; o overlay cobre o display
               para manter os números reais. Ajuste left/top/w do overlay p/ alinhar. */}
           <div className="flex flex-col items-center">
-            <div className="relative w-[400px] select-none">
+            <div className="relative w-[380px] select-none">
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
@@ -151,15 +151,15 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               {/* Display dinâmico sobreposto ao display embutido da imagem.
                   Posição medida na imagem (centro x≈50.5%, y≈50.5%; conteúdo
                   ocupa ~40%→61% da altura). bg opaco cobre o "100%" desenhado. */}
-              <div className="absolute left-[48.3%] top-[50.9%] z-10 flex w-[40%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[12px] bg-[rgba(6,10,16,0.98)] px-2 py-3 text-center shadow-[inset_0_2px_14px_rgba(0,0,0,0.9)]">
-                <div className="font-mono text-[36px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_16px_rgba(255,255,255,0.2)]">
+              <div className="absolute left-[49%] top-[30%] bottom-[34%] z-10 flex w-[46%] -translate-x-1/2 flex-col items-center justify-center rounded-[14px] bg-[rgba(6,10,16,0.98)] px-2 text-center shadow-[inset_0_2px_16px_rgba(0,0,0,0.9)]">
+                <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]">
                   {pct.toFixed(0)}%
                 </div>
-                <div className="mt-1.5 whitespace-nowrap font-mono text-[12px] font-semibold tabular-nums text-slate-300/90">
+                <div className="mt-2.5 whitespace-nowrap font-mono text-[13px] font-semibold tabular-nums text-slate-300/90">
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                 </div>
                 <div
-                  className="mt-2 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  className="mt-3 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
                   style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
                 >
                   {nivel.label}
@@ -168,7 +168,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
                   Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
-              <div className="absolute left-[76%] top-[31%] bottom-[26%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
+              <div className="absolute left-[83%] top-[34%] bottom-[22%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-full bg-[linear-gradient(180deg,#fde047,#f59e0b_55%,#b45309)] shadow-[0_0_10px_rgba(251,191,36,0.7)] transition-[height] duration-700 ease-out"
                   style={{ height: `${pct}%` }}
@@ -183,7 +183,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               mostrando o diesel dourado fluindo. Container estreito (w-[180px])
               + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-40">
+          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[22px]">
             <div className="relative h-[140px] w-full">
               {/* rótulo flutuante acima do duto */}
               <span className="absolute inset-x-0 top-[30px] text-center text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">
