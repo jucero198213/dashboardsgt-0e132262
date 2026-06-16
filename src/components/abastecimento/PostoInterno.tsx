@@ -212,14 +212,14 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div className="flex flex-col items-center gap-4">
             <div className="relative flex flex-col items-center">
               {/* Halo ambiente quente atrás de toda a bomba */}
-              <div className="pointer-events-none absolute -inset-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_18%,rgba(251,191,36,0.14),transparent_68%)]" />
+              <div className="pointer-events-none absolute -inset-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_18%,rgba(251,191,36,0.07),transparent_68%)]" />
 
               {/* ───────── TOPO: disco backlit SGT ───────── */}
               <div className="relative z-20 flex flex-col items-center">
                 {/* Backlight — halo quente limpo atrás do disco */}
-                <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.45),rgba(251,191,36,0.12)_45%,transparent_70%)] blur-md" />
+                <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.06)_45%,transparent_70%)] blur-md" />
                 {/* Disco de metal polido branco/dourado */}
-                <div className="relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_46px_-2px_rgba(251,191,36,0.6),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]">
+                <div className="relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]">
                   {/* aro dourado interno */}
                   <div className="pointer-events-none absolute inset-[7px] rounded-full border border-amber-400/50 shadow-[inset_0_0_8px_rgba(251,191,36,0.25)]" />
                   {/* reflexo de vidro */}
