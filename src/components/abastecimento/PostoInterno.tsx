@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { RAW } from "@/lib/theme";
 import sgtLogo from "@/assets/sgt-logo.png";
+import tanqueImg from "@/assets/tanque-industrial.png";
 
 // ─── Configuração física do tanque (propriedade do equipamento) ───────────────
 export const TANQUE_CONFIG = {
@@ -133,165 +134,35 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
-          {/* ═════════ TANQUE DE ARMAZENAMENTO — cilíndrico industrial (SVG único) ═══
-              Toda a estrutura (corpo, domo, guarda-corpo, escada, flanges) é
-              desenhada num único <svg> no mesmo viewBox → nada flutua/descola e
-              tudo escala junto. O display fica sobreposto em HTML (texto nítido). */}
-          <div className="flex flex-col items-center gap-4">
-            {/* h:w mantém a proporção 5:8 do viewBox → SVG escala sem distorcer.
-                Tanque propositalmente maior que a bomba (referência). */}
-            <div className="relative h-[576px] w-[360px]">
-              {/* Halo quente sutil (base) */}
-              <div className="pointer-events-none absolute inset-x-[-32px] bottom-[-24px] top-[120px] rounded-[60px] bg-[radial-gradient(ellipse_at_50%_88%,rgba(251,191,36,0.05),transparent_70%)]" />
+          {/* ═════════ TANQUE DE ARMAZENAMENTO — render 3D (imagem) ═══════════
+              A carcaça é uma imagem PNG (match 1:1 da referência). Sobre ela fica
+              apenas o display dinâmico (dados ao vivo do DW). Os rótulos e o
+              display "100%" já vêm desenhados na imagem; o overlay cobre o display
+              para manter os números reais. Ajuste left/top/w do overlay p/ alinhar. */}
+          <div className="flex flex-col items-center">
+            <div className="relative w-[400px] select-none">
+              <img
+                src={tanqueImg}
+                alt="Tanque de Armazenamento — Diesel S10"
+                className="block w-full"
+                draggable={false}
+              />
 
-              <svg viewBox="0 0 300 480" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
-                <defs>
-                  {/* aço gunmetal — sombreamento horizontal do cilindro */}
-                  <linearGradient id="tankSteel" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0"    stopColor="#0a0d11" />
-                    <stop offset="0.14" stopColor="#1a2027" />
-                    <stop offset="0.34" stopColor="#323b45" />
-                    <stop offset="0.48" stopColor="#465059" />
-                    <stop offset="0.52" stopColor="#4c565f" />
-                    <stop offset="0.66" stopColor="#2c343d" />
-                    <stop offset="0.86" stopColor="#141a20" />
-                    <stop offset="1"    stopColor="#06090c" />
-                  </linearGradient>
-                  {/* iluminação vertical (luz no topo, sombra na base) */}
-                  <linearGradient id="tankShade" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0"    stopColor="#ffffff" stopOpacity="0.12" />
-                    <stop offset="0.16" stopColor="#ffffff" stopOpacity="0" />
-                    <stop offset="0.80" stopColor="#000000" stopOpacity="0" />
-                    <stop offset="1"    stopColor="#000000" stopOpacity="0.40" />
-                  </linearGradient>
-                  {/* tampa/topo do cilindro (lit de cima) */}
-                  <linearGradient id="tankLid" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0"   stopColor="#5b6672" />
-                    <stop offset="0.5" stopColor="#3c4651" />
-                    <stop offset="1"   stopColor="#222a33" />
-                  </linearGradient>
-                  <linearGradient id="tankBase" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#1a1f27" />
-                    <stop offset="1" stopColor="#05070a" />
-                  </linearGradient>
-                  <linearGradient id="metalRail" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0"   stopColor="#aeb8c4" />
-                    <stop offset="0.5" stopColor="#5e6874" />
-                    <stop offset="1"   stopColor="#262d36" />
-                  </linearGradient>
-                  {/* reflexo especular do cilindro */}
-                  <linearGradient id="tankSpec" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0"   stopColor="#ffffff" stopOpacity="0" />
-                    <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.5" />
-                    <stop offset="1"   stopColor="#ffffff" stopOpacity="0" />
-                  </linearGradient>
-                  <radialGradient id="tankBolt" cx="0.35" cy="0.3" r="0.8">
-                    <stop offset="0" stopColor="#cdd6e1" />
-                    <stop offset="1" stopColor="#222933" />
-                  </radialGradient>
-                  <clipPath id="tankBody"><rect x="44" y="120" width="212" height="290" /></clipPath>
-                </defs>
-
-                {/* sombra de contato no chão */}
-                <ellipse cx="150" cy="414" rx="116" ry="12" fill="#000000" opacity="0.4" />
-
-                {/* ── CORPO CILÍNDRICO (laterais retas + topo/fundo elípticos) ── */}
-                {/* fundo arredondado */}
-                <ellipse cx="150" cy="410" rx="106" ry="16" fill="url(#tankSteel)" />
-                <ellipse cx="150" cy="410" rx="106" ry="16" fill="#000000" opacity="0.35" />
-                {/* parede do cilindro */}
-                <rect x="44" y="120" width="212" height="290" fill="url(#tankSteel)" />
-                <g clipPath="url(#tankBody)">
-                  <rect x="44" y="120" width="212" height="290" fill="url(#tankShade)" />
-                  {/* faixa especular + linha de luz vertical */}
-                  <rect x="86" y="120" width="48" height="290" fill="url(#tankSpec)" opacity="0.45" />
-                  <rect x="106" y="120" width="5" height="290" fill="#ffffff" opacity="0.12" />
-                  {/* borda clara esquerda + sombra direita */}
-                  <rect x="44" y="120" width="12" height="290" fill="#ffffff" opacity="0.05" />
-                  <rect x="232" y="120" width="24" height="290" fill="#000000" opacity="0.32" />
-                  {/* anéis horizontais (costuras) */}
-                  {[180, 250, 320].map(y => (
-                    <g key={y}>
-                      <rect x="44" y={y}       width="212" height="1.4" fill="#000000" opacity="0.45" />
-                      <rect x="44" y={y + 1.4} width="212" height="1"   fill="#ffffff" opacity="0.08" />
-                    </g>
-                  ))}
-                </g>
-                <rect x="44" y="120" width="212" height="290" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-
-                {/* ── TOPO — rim elíptico (tampa do cilindro) ── */}
-                <ellipse cx="150" cy="120" rx="106" ry="18" fill="url(#tankLid)" stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
-                <ellipse cx="150" cy="116" rx="86" ry="11" fill="#ffffff" opacity="0.06" />
-                {/* boca de visita central + parafusos */}
-                <ellipse cx="150" cy="115" rx="26" ry="7" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.5" />
-                {[130, 140, 150, 160, 170].map(x => <circle key={x} cx={x} cy="115" r="1" fill="#2a313c" />)}
-
-                {/* ── GUARDA-CORPO (cerca metálica sólida pousada no rim) ── */}
-                <g>
-                  {/* postes (atrás do trilho), pousados no rim */}
-                  {[60, 90, 120, 150, 180, 210, 240].map(x => (
-                    <line key={x} x1={x} y1="120" x2={x} y2="78" stroke="url(#metalRail)" strokeWidth="2.4" strokeLinecap="round" />
-                  ))}
-                  {/* trilho superior sólido + linha de brilho */}
-                  <ellipse cx="150" cy="78" rx="103" ry="12" fill="none" stroke="url(#metalRail)" strokeWidth="3" />
-                  <ellipse cx="150" cy="77" rx="103" ry="12" fill="none" stroke="#d4dce6" strokeWidth="0.9" opacity="0.55" />
-                  {/* trilho intermediário */}
-                  <ellipse cx="150" cy="100" rx="104" ry="12" fill="none" stroke="url(#metalRail)" strokeWidth="1.8" opacity="0.75" />
-                </g>
-
-                {/* ── ESCADA lateral esquerda (rails + degraus paralelos + gaiola) ── */}
-                <g>
-                  <line x1="54" y1="126" x2="54" y2="402" stroke="url(#metalRail)" strokeWidth="2.8" strokeLinecap="round" />
-                  <line x1="70" y1="126" x2="70" y2="402" stroke="url(#metalRail)" strokeWidth="2.8" strokeLinecap="round" />
-                  {Array.from({ length: 18 }).map((_, i) => {
-                    const y = 136 + i * 14.5;
-                    return <line key={i} x1="54" y1={y} x2="70" y2={y} stroke="#c8d2de" strokeOpacity="0.85" strokeWidth="2" />;
-                  })}
-                  {[168, 228, 288, 348].map(cy => (
-                    <path key={cy} d={`M54 ${cy - 20} A 15 20 0 0 0 54 ${cy + 20}`} fill="none" stroke="url(#metalRail)" strokeWidth="1.5" opacity="0.6" />
-                  ))}
-                </g>
-
-                {/* ── FLANGE / bocal direito (y=288): alcança a borda x=300 para
-                    encaixar a ponta esquerda do duto sem deixar vão. ── */}
-                <g transform="translate(256,288)">
-                  <rect x="-2" y="-22" width="10" height="44" rx="2" fill="url(#metalRail)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
-                  {[-14, 0, 14].map(y => <circle key={y} cx="3" cy={y} r="1.7" fill="url(#tankBolt)" />)}
-                  <rect x="6" y="-9" width="38" height="18" rx="2" fill="url(#metalRail)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
-                  <rect x="8" y="-7" width="34" height="2" rx="1" fill="#ffffff" opacity="0.3" />
-                </g>
-
-                {/* ── BASE / parafusos inferiores + pés ── */}
-                <ellipse cx="150" cy="410" rx="106" ry="16" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                {[84, 117, 150, 183, 216].map(x => <circle key={x} cx={x} cy="398" r="2" fill="url(#tankBolt)" opacity="0.85" />)}
-                <rect x="66" y="416" width="28" height="26" rx="3" fill="url(#tankBase)" />
-                <rect x="206" y="416" width="28" height="26" rx="3" fill="url(#tankBase)" />
-              </svg>
-
-              {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido).
-                  top-[53.5%] = centro do corpo no viewBox → escala junto com o SVG. ── */}
-              <div className="absolute left-1/2 top-[55%] z-10 w-[206px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/[0.07] bg-[linear-gradient(180deg,rgba(10,14,20,0.92),rgba(4,6,10,0.96))] p-2 shadow-[0_12px_28px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm">
-                <div className="rounded-lg border border-white/[0.06] bg-black/70 px-4 py-3 text-center shadow-[inset_0_2px_18px_rgba(0,0,0,0.92)]">
-                  <div className="font-mono text-[44px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-50 [text-shadow:0_0_18px_rgba(255,255,255,0.18)]">
-                    {pct.toFixed(0)}%
-                  </div>
-                  <div className="mt-1.5 font-mono text-[12px] font-semibold tabular-nums text-slate-300/90">
-                    {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
-                  </div>
-                  <div
-                    className="mt-2 inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
-                    style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
-                  >
-                    {nivel.label}
-                  </div>
+              {/* Display dinâmico sobreposto ao display embutido da imagem */}
+              <div className="absolute left-[50.5%] top-[52.4%] z-10 w-[31%] -translate-x-1/2 -translate-y-1/2 rounded-[10px] bg-[rgba(7,11,17,0.97)] px-3 py-2.5 text-center shadow-[inset_0_2px_14px_rgba(0,0,0,0.9)]">
+                <div className="font-mono text-[34px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_16px_rgba(255,255,255,0.2)]">
+                  {pct.toFixed(0)}%
+                </div>
+                <div className="mt-1 font-mono text-[11px] font-semibold tabular-nums text-slate-300/90">
+                  {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
+                </div>
+                <div
+                  className="mt-1.5 inline-flex rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
+                >
+                  {nivel.label}
                 </div>
               </div>
-            </div>
-
-            {/* Identificação — texto limpo */}
-            <div className="text-center">
-              <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
-              <p className="mt-1 text-[12px] font-semibold text-amber-400/70">{TANQUE_CONFIG.combustivel}</p>
             </div>
           </div>
 
