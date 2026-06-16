@@ -243,7 +243,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   ))}
                 </g>
 
-                {/* ── ESCADA lateral esquerda (fina, com degraus paralelos) ── */}
+                {/* ── ESCADA lateral esquerda ENJAULADA (caged ladder) ── */}
                 <g>
                   {/* dois trilhos verticais rentes ao corpo */}
                   <line x1="48" y1="72" x2="48" y2="402" stroke="url(#metalRail)" strokeWidth="2.2" strokeLinecap="round" />
@@ -253,6 +253,23 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     const y = 84 + i * 14;
                     return <line key={i} x1="48" y1={y} x2="62" y2={y} stroke="#b8c2ce" strokeOpacity="0.7" strokeWidth="1.5" />;
                   })}
+                  {/* GAIOLA de proteção — aros laterais salientes (semi-elipses) */}
+                  {Array.from({ length: 9 }).map((_, i) => {
+                    const cy = 110 + i * 32;
+                    return (
+                      <path
+                        key={`cage-${i}`}
+                        d={`M 48 ${cy - 11} A 13 11 0 0 0 48 ${cy + 11}`}
+                        fill="none"
+                        stroke="url(#metalRail)"
+                        strokeWidth="1.4"
+                        opacity="0.85"
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+                  {/* trilho vertical externo da gaiola */}
+                  <line x1="35" y1="110" x2="35" y2="398" stroke="url(#metalRail)" strokeWidth="1.3" strokeLinecap="round" opacity="0.75" />
                 </g>
 
                 {/* ── FLANGE / bocal inferior direito (conexão do duto) ── */}
@@ -268,11 +285,24 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   })}
                 </g>
 
-                {/* ── BASE / plinto ── */}
-                <ellipse cx="150" cy="410" rx="124" ry="10" fill="#000000" opacity="0.4" />
-                <rect x="32" y="400" width="236" height="14" rx="3" fill="url(#tankBase)" stroke="rgba(255,255,255,0.06)" strokeWidth="1" opacity="0.98" />
-                <rect x="28" y="412" width="244" height="16" rx="4" fill="url(#tankBase)" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                <rect x="28" y="412" width="244" height="1" fill="#ffffff" opacity="0.06" />
+                {/* ── BASE / plinto industrial texturizado ── */}
+                <ellipse cx="150" cy="412" rx="126" ry="11" fill="#000000" opacity="0.45" />
+                {/* lip superior — saliência fundida ao corpo */}
+                <rect x="28" y="400" width="244" height="10" rx="2" fill="url(#tankBase)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+                <rect x="28" y="400" width="244" height="1" fill="#ffffff" opacity="0.10" />
+                {/* plinto principal */}
+                <rect x="22" y="410" width="256" height="22" rx="3" fill="url(#tankBase)" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                {/* nervuras verticais (textura) */}
+                {Array.from({ length: 14 }).map((_, i) => {
+                  const x = 32 + i * 17;
+                  return (
+                    <g key={`rib-${i}`}>
+                      <line x1={x}     y1="414" x2={x}     y2="428" stroke="#000000" strokeOpacity="0.45" strokeWidth="1" />
+                      <line x1={x + 1} y1="414" x2={x + 1} y2="428" stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" />
+                    </g>
+                  );
+                })}
+                <rect x="22" y="430" width="256" height="2" fill="#000000" opacity="0.55" />
               </svg>
 
               {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido).
