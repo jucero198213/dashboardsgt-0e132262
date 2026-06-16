@@ -135,10 +135,10 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
           {/* ═════════ TANQUE DE ARMAZENAMENTO — render 3D (imagem) ═══════════
-              A carcaça é uma imagem PNG (match 1:1 da referência). Sobre ela fica
-              apenas o display dinâmico (dados ao vivo do DW). Os rótulos e o
-              display "100%" já vêm desenhados na imagem; o overlay cobre o display
-              para manter os números reais. Ajuste left/top/w do overlay p/ alinhar. */}
+              A carcaça é uma imagem PNG de face LIMPA (sem display/rótulos). O
+              painel abaixo é o próprio display (dados ao vivo do DW), montado
+              centralizado na face. Rótulos em HTML logo abaixo da imagem.
+              Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
           <div className="flex flex-col items-center">
             <div className="relative w-[380px] select-none">
               <img
@@ -148,10 +148,8 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 draggable={false}
               />
 
-              {/* Display dinâmico sobreposto ao display embutido da imagem.
-                  Posição medida na imagem (centro x≈50.5%, y≈50.5%; conteúdo
-                  ocupa ~40%→61% da altura). bg opaco cobre o "100%" desenhado. */}
-              <div className="absolute left-[49%] top-[30%] bottom-[34%] z-10 flex w-[46%] -translate-x-1/2 flex-col items-center justify-center rounded-[14px] bg-[rgba(6,10,16,0.98)] px-2 text-center shadow-[inset_0_2px_16px_rgba(0,0,0,0.9)]">
+              {/* Display dinâmico — painel montado na face limpa do tanque */}
+              <div className="absolute left-[48%] top-[43%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]">
                 <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]">
                   {pct.toFixed(0)}%
                 </div>
@@ -168,13 +166,19 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
                   Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
-              <div className="absolute left-[83%] top-[34%] bottom-[22%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
+              <div className="absolute left-[85%] top-[24%] bottom-[40%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-full bg-[linear-gradient(180deg,#fde047,#f59e0b_55%,#b45309)] shadow-[0_0_10px_rgba(251,191,36,0.7)] transition-[height] duration-700 ease-out"
                   style={{ height: `${pct}%` }}
                 />
                 <div className="pointer-events-none absolute inset-y-0 left-[1.5px] w-[2px] rounded-full bg-white/25" />
               </div>
+            </div>
+
+            {/* Identificação — a imagem nova tem face limpa, sem rótulos */}
+            <div className="mt-3 text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
+              <p className="mt-1 text-[12px] font-semibold text-amber-400/70">{TANQUE_CONFIG.combustivel}</p>
             </div>
           </div>
 
@@ -183,7 +187,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               mostrando o diesel dourado fluindo. Container estreito (w-[180px])
               + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[22px]">
+          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[42px]">
             <div className="relative h-[140px] w-full">
               {/* rótulo flutuante acima do duto */}
               <span className="absolute inset-x-0 top-[30px] text-center text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">
