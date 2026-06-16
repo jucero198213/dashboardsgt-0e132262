@@ -298,6 +298,7 @@ export default function Abastecimento() {
 
   // Modo Apresentação / TV (tela cheia imersiva)
   const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [tvClock, setTvClock] = useState("");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -392,6 +393,22 @@ export default function Abastecimento() {
       document.body.style.overflow = bodyPrev;
     };
   }, [isPresentationMode]);
+
+  // Relógio em tempo real — atualiza a cada segundo apenas em presentation mode
+  useEffect(() => {
+    if (!isPresentationMode) { setTvClock(""); return; }
+    const tick = () => setTvClock(new Date().toLocaleTimeString("pt-BR"));
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, [isPresentationMode]);
+
+  // Auto-refresh silencioso a cada 5 minutos em presentation mode
+  useEffect(() => {
+    if (!isPresentationMode) return;
+    const iv = setInterval(() => carregarDados(true), 5 * 60 * 1000);
+    return () => clearInterval(iv);
+  }, [isPresentationMode, carregarDados]);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
@@ -1645,11 +1662,14 @@ export default function Abastecimento() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {isPresentationMode && (
         <div
-          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden"
+          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)_auto_auto] overflow-hidden"
           style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
         >
+          {/* Keyframe do ticker */}
+          <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+
           {/* Glow de palco atrás da bomba */}
-          <div className="pointer-events-none absolute left-1/2 top-[62%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
+          <div className="pointer-events-none absolute left-1/2 top-[55%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
 
           {/* Botão sair — propositalmente discreto para TV */}
           <button
@@ -1670,21 +1690,25 @@ export default function Abastecimento() {
               <span className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
               <span className="text-[clamp(0.8rem,1.15vw,1.1rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
+            <div className="ml-auto flex flex-col items-end leading-none">
+              <span className="font-mono text-[clamp(1.0rem,1.6vw,1.45rem)] font-black tabular-nums text-white">{tvClock}</span>
+              <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" })}
+              </span>
+            </div>
           </div>
 
           {/* ── Linha 2: Indicadores externos de mercado ── */}
           <div
             className="relative z-10 grid grid-cols-2 gap-[clamp(10px,1vw,16px)] px-[clamp(28px,3vw,48px)] pt-[clamp(2px,0.4vh,6px)] pb-[clamp(4px,0.6vh,8px)] sm:grid-cols-3 lg:grid-cols-5"
-            style={{ height: "clamp(86px,10vh,112px)" }}
+            style={{ height: "clamp(78px,9vh,100px)" }}
           >
             {marketIndicators.map(m => (
               <MarketIndicatorCard key={m.title} {...m} />
             ))}
           </div>
 
-          {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ──
-              Tamanho natural reduzido (1060×540). Multiplicador 0.72 deixa
-              tanque/bomba menores e evita que cubram os cards laterais. */}
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ── */}
           <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-hidden px-[clamp(28px,3vw,48px)]">
             <div
               className="origin-center"
@@ -1692,11 +1716,83 @@ export default function Abastecimento() {
                 width: 1060,
                 height: 540,
                 transform:
-                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 240px) / 540)) * 0.72))",
+                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 300px) / 540)) * 0.92))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
             </div>
+          </div>
+
+          {/* ── Linha 4: KPI strip em tempo real ── */}
+          <div className="relative z-10 grid grid-cols-4 gap-[clamp(8px,0.8vw,12px)] px-[clamp(28px,3vw,48px)] pb-[clamp(6px,0.7vh,10px)] pt-[clamp(2px,0.3vh,4px)]">
+            {[
+              {
+                label: "Saldo Atual no Tanque",
+                value: postoInternoDados.saldoAtualLitros != null ? fmtLitros(postoInternoDados.saldoAtualLitros) : "—",
+                sub: "diesel S10 · tanque industrial",
+                color: "#fbbf24",
+              },
+              {
+                label: "Abastecido Hoje",
+                value: postoInternoDados.abastecidoDiaLitros > 0 ? fmtLitros(postoInternoDados.abastecidoDiaLitros) : "—",
+                sub: postoInternoDados.diaReferencia ?? "sem registros",
+                color: "#22d3ee",
+              },
+              {
+                label: "Abastecimentos no Período",
+                value: String(postoInternoDados.qtdAbastecimentosPeriodo),
+                sub: postoInternoDados.qtdAbastecimentosDia > 0 ? `${postoInternoDados.qtdAbastecimentosDia} no último dia` : "nenhum hoje",
+                color: "#a78bfa",
+              },
+              {
+                label: "Última Placa Abastecida",
+                value: postoInternoDados.ultimaPlaca?.placa ?? "—",
+                sub: postoInternoDados.ultimaPlaca
+                  ? `${fmtLitros(postoInternoDados.ultimaPlaca.litros)} · ${postoInternoDados.ultimaPlaca.data}`
+                  : "sem registros",
+                color: "#34d399",
+              },
+            ].map(k => (
+              <div key={k.label} className="flex flex-col rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-[clamp(12px,1.1vw,20px)] py-[clamp(6px,0.7vh,10px)]">
+                <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{k.label}</span>
+                <span className="mt-1 font-black tabular-nums leading-tight text-[clamp(0.95rem,1.5vw,1.35rem)]" style={{ color: k.color }}>{k.value}</span>
+                <span className="mt-0.5 truncate text-[10px] font-semibold text-slate-500">{k.sub}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Linha 5: Ticker de movimentações recentes ── */}
+          <div
+            className="relative z-10 flex items-center overflow-hidden border-t border-white/[0.06]"
+            style={{ height: "clamp(28px,3vh,34px)", background: "rgba(255,255,255,0.012)" }}
+          >
+            <div className="flex h-full shrink-0 items-center border-r border-white/[0.08] px-4">
+              <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-amber-400/90">Ao Vivo</span>
+            </div>
+            {postoInternoDados.movimentacoes.length > 0 ? (
+              <div className="relative flex-1 overflow-hidden">
+                <div
+                  className="flex whitespace-nowrap"
+                  style={{ animation: "sgt-ticker 40s linear infinite" }}
+                >
+                  {[...postoInternoDados.movimentacoes, ...postoInternoDados.movimentacoes].map((m, i) => (
+                    <span key={i} className="inline-flex items-center gap-2 px-5 text-[11px]">
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${m.tipo === "Recarga" ? "bg-emerald-400" : "bg-amber-400"}`} />
+                      <span className="font-semibold" style={{ color: m.tipo === "Recarga" ? "#34d399" : "#fbbf24" }}>
+                        {m.tipo === "Recarga" ? "+" : "−"}{Math.round(m.volumeLitros).toLocaleString("pt-BR")} L
+                      </span>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-slate-400">{m.responsavel}</span>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-slate-500">{m.data}</span>
+                      <span className="mx-3 text-slate-700">│</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <span className="px-4 text-[11px] text-slate-600">Nenhuma movimentação no período</span>
+            )}
           </div>
         </div>
       )}
