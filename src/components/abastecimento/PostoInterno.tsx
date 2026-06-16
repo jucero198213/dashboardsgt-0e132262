@@ -149,7 +149,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               />
 
               {/* Display dinâmico — painel montado na face limpa do tanque */}
-              <div className="absolute left-[48%] top-[43%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]">
+              <div className="absolute left-[53%] top-[46%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]">
                 <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]">
                   {pct.toFixed(0)}%
                 </div>
@@ -166,7 +166,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
                   Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
-              <div className="absolute left-[85%] top-[24%] bottom-[40%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
+              <div className="absolute left-[82%] top-[28%] bottom-[26%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]">
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-full bg-[linear-gradient(180deg,#fde047,#f59e0b_55%,#b45309)] shadow-[0_0_10px_rgba(251,191,36,0.7)] transition-[height] duration-700 ease-out"
                   style={{ height: `${pct}%` }}
