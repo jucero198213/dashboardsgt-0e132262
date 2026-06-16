@@ -1523,7 +1523,7 @@ export default function Abastecimento() {
           </div>
 
           {/* Conjunto do posto — centralizado e escalado */}
-          <div className="relative z-10 flex flex-1 items-center justify-center overflow-hidden">
+          <div className="relative z-10 flex flex-1 items-center justify-center">
             <div className="origin-center scale-90 xl:scale-100 2xl:scale-[1.15]">
               <PostoInterno dados={postoInternoDados} presentation />
             </div>
