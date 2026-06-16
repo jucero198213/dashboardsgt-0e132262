@@ -204,7 +204,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
 
             {/* Identificação — a imagem nova tem face limpa, sem rótulos */}
-            <div className="mt-3 text-center">
+            <div className={presentation ? "hidden" : "mt-3 text-center"}>
               <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Tanque de Armazenamento</p>
               <p className="mt-1 text-[12px] font-semibold text-amber-400/70">{TANQUE_CONFIG.combustivel}</p>
             </div>
