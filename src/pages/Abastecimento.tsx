@@ -157,20 +157,58 @@ const abicomLabel =
   : "pressão moderada";
 
 interface MarketIndicator {
-  title:     string;
-  value:     string;
-  subtitle:  string;
-  source:    IndicatorSource;
-  status?:   IndicatorStatus;
-  updatedAt?: string;
+  title:       string;
+  value:       string;
+  bottomLeft:  string;
+  bottomRight: string;
+  source:      IndicatorSource;
+  status?:     IndicatorStatus;
 }
 
+const diffAbsRs = Math.abs(PRECO_INTERNO - ANP_DIESEL_S10);
+const diffAbsRsFmt = `${diffVsAnpPct < 0 ? "−" : "+"}R$ ${diffAbsRs.toFixed(2).replace(".", ",")}/L`;
+
 const marketIndicators: MarketIndicator[] = [
-  { title: "Diesel S10 ANP", value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`, subtitle: "SP · última semana", source: "ANP",    status: "neutral",  updatedAt: "16/06/2026" },
-  { title: "Preço Interno",  value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,  subtitle: "frota própria · posto interno", source: "INTERNO", status: "neutral" },
-  { title: "Diferença vs ANP", value: diffFormatted, subtitle: diffLabel, source: "INTERNO", status: diffStatus },
-  { title: "ABICOM / PPI",   value: `${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`, subtitle: `defasagem diesel · ${abicomLabel}`, source: "ABICOM", status: abicomStatus, updatedAt: "16/06/2026" },
-  { title: "ANTT / Frete",   value: "Vigente", subtitle: "piso mínimo de frete", source: "ANTT", status: "positive", updatedAt: "16/06/2026" },
+  {
+    title: "Diesel S10 ANP",
+    value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "SP · última semana",
+    bottomRight: "Atualizado em 16/06/2026",
+    source: "ANP",
+    status: "neutral",
+  },
+  {
+    title: "Preço Interno",
+    value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "frota própria · posto interno",
+    bottomRight: "média do período",
+    source: "INTERNO",
+    status: "neutral",
+  },
+  {
+    title: "Diferença vs ANP",
+    value: diffFormatted,
+    bottomLeft:  diffVsAnpPct < 0 ? "economia estimada" : "acima do mercado",
+    bottomRight: diffAbsRsFmt,
+    source: "INTERNO",
+    status: diffStatus,
+  },
+  {
+    title: "ABICOM / PPI",
+    value: abicomLabel.charAt(0).toUpperCase() + abicomLabel.slice(1),
+    bottomLeft:  `Diesel: ${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`,
+    bottomRight: "paridade importação",
+    source: "ABICOM",
+    status: abicomStatus,
+  },
+  {
+    title: "ANTT / Frete",
+    value: "Vigente",
+    bottomLeft:  "piso mínimo de frete",
+    bottomRight: "última atualização 16/06",
+    source: "ANTT",
+    status: "positive",
+  },
 ];
 
 const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: string }> = {
@@ -180,16 +218,22 @@ const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: s
   danger:   { text: "#f87171", ring: "rgba(248,113,113,0.40)", dot: "#f87171" },
 };
 
-function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral", updatedAt }: MarketIndicator) {
+function MarketIndicatorCard({ title, value, bottomLeft, bottomRight, source, status = "neutral" }: MarketIndicator) {
   const colors = STATUS_COLOR[status];
   const fallback = value === "--" || value === "—";
+  // Valores textuais longos (ex.: "Pressão moderada") usam fonte menor
+  // para evitar truncamento com reticências.
+  const isLongText = value.length > 10 && !/^[R$\-+−]?\s?\d/.test(value);
+  const valueClass = isLongText
+    ? "text-[clamp(0.95rem,1.6vh,1.35rem)]"
+    : "text-[clamp(1.15rem,2.2vh,1.8rem)]";
   return (
     <div
-      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(10px,1vw,16px)] py-[clamp(8px,1.2vh,14px)] backdrop-blur-sm transition-colors"
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(12px,1.2vw,20px)] py-[clamp(10px,1.3vh,16px)] backdrop-blur-sm"
       style={{ borderColor: colors.ring }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{title}</span>
+        <span className="truncate text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">{title}</span>
         <span
           className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em]"
           style={{ color: colors.text, borderColor: colors.ring, background: "rgba(255,255,255,0.025)" }}
@@ -199,17 +243,17 @@ function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral
         </span>
       </div>
       <p
-        className="mt-1 truncate text-[clamp(1.05rem,2.1vh,1.75rem)] font-black leading-none tabular-nums tracking-[-0.02em]"
+        className={`mt-1 ${valueClass} font-black leading-tight tabular-nums tracking-[-0.02em] whitespace-nowrap`}
         style={{ color: fallback ? "#64748b" : colors.text }}
       >
         {fallback ? "--" : value}
       </p>
-      <div className="mt-1 flex items-end justify-between gap-2">
-        <span className="truncate text-[10px] font-semibold text-slate-500">
-          {fallback ? "aguardando atualização" : subtitle}
+      <div className="mt-1 flex items-end justify-between gap-3">
+        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+          {fallback ? "aguardando atualização" : bottomLeft}
         </span>
-        {updatedAt && !fallback && (
-          <span className="shrink-0 text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-600">{updatedAt}</span>
+        {!fallback && bottomRight && (
+          <span className="shrink-0 text-[10px] font-semibold text-slate-500 text-right">{bottomRight}</span>
         )}
       </div>
     </div>
@@ -1607,48 +1651,48 @@ export default function Abastecimento() {
           {/* Glow de palco atrás da bomba */}
           <div className="pointer-events-none absolute left-1/2 top-[62%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
 
-          {/* Botão sair */}
+          {/* Botão sair — propositalmente discreto para TV */}
           <button
             onClick={togglePresentation}
-            className="absolute right-6 top-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
+            aria-label="Sair do modo apresentação"
+            className="absolute right-4 top-3 z-30 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-transparent px-2.5 py-1 text-[10px] font-medium text-slate-400/70 opacity-25 transition-all duration-200 hover:opacity-100 hover:border-white/30 hover:text-slate-100 focus:opacity-100 focus:outline-none"
           >
-            <Minimize2 className="h-4 w-4" /> Sair <span className="text-slate-500">· ESC</span>
+            <Minimize2 className="h-3 w-3" /> Sair <span className="opacity-60">· ESC</span>
           </button>
 
-          {/* ── Linha 1: Header compacto ── */}
-          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1vh] pb-[0.4vh]">
-            <img src={sgtLogo} alt="SGT" className="h-6 w-auto" />
+          {/* ── Linha 1: Header compacto — TV-first, sem ruído ── */}
+          <div
+            className="relative z-10 flex items-center gap-3 px-[clamp(28px,3vw,48px)]"
+            style={{ paddingTop: "clamp(6px,0.8vh,10px)", paddingBottom: "clamp(4px,0.6vh,8px)" }}
+          >
+            <img src={sgtLogo} alt="SGT" className="h-[clamp(20px,2.6vh,28px)] w-auto" />
             <div className="flex flex-col leading-none">
               <span className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
-              <span className="text-[clamp(0.85rem,1.2vw,1.2rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+              <span className="text-[clamp(0.8rem,1.15vw,1.1rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
-            <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-2.5 py-0.5 text-[9px] font-bold text-emerald-300 lg:inline-flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
-            </span>
           </div>
 
-          {/* ── Linha 2: Indicadores externos de mercado (compactos) ── */}
+          {/* ── Linha 2: Indicadores externos de mercado ── */}
           <div
-            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,0.9vw,14px)] px-[3vw] pt-[0.2vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
-            style={{ height: "clamp(64px,8vh,84px)" }}
+            className="relative z-10 grid grid-cols-2 gap-[clamp(10px,1vw,16px)] px-[clamp(28px,3vw,48px)] pt-[clamp(2px,0.4vh,6px)] pb-[clamp(4px,0.6vh,8px)] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(86px,10vh,112px)" }}
           >
             {marketIndicators.map(m => (
               <MarketIndicatorCard key={m.title} {...m} />
             ))}
           </div>
 
-          {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
-              Mantém o tamanho natural real do conjunto (1180×620) e usa um
-              scale que considera o espaço disponível após header e cards,
-              garantindo que tanque e bomba caibam inteiros em 100dvh. */}
-          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(2px,0.4vh,8px)] pb-[clamp(6px,0.8vh,12px)]">
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ──
+              Tamanho natural mantido (1180×620). Multiplicador 0.9 reduz
+              tanque/bomba ~10% para dar respiro ao painel em TV. */}
+          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(4px,0.6vh,10px)] pb-[clamp(8px,1vh,16px)]">
             <div
               className="origin-top"
               style={{
                 width: 1180,
                 height: 620,
                 transform:
-                  "scale(min(calc((100vw - 48px) / 1180), calc((100dvh - 170px) / 620)))",
+                  "scale(calc(min(calc((100vw - 64px) / 1180), calc((100dvh - 210px) / 620)) * 0.9))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
