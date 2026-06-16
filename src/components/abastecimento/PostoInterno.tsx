@@ -298,7 +298,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               <div className="relative -mt-px">
                 {/* "Ombro" superior do corpo (dark chrome) */}
                 <div className={presentation
-                  ? "mx-auto h-3 w-[170px] rounded-t-[18px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
+                  ? "mx-auto h-2.5 w-[150px] rounded-t-[16px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
                   : "mx-auto h-4 w-[206px] rounded-t-[22px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
                 } />
 
