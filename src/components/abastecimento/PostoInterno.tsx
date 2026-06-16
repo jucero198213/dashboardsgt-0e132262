@@ -147,7 +147,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
           <div
             className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
-            style={presentation ? { filter: "drop-shadow(0 18px 28px rgba(0,0,0,0.55))" } : undefined}
+            style={presentation ? {
+              transform: "perspective(1200px) translateZ(-55px) scale(0.91)",
+              transformOrigin: "center right",
+              filter: "brightness(0.82) saturate(0.88) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
+            } : undefined}
           >
             <div className={presentation ? "relative w-[300px] select-none" : "relative w-[440px] select-none"}>
               <img
@@ -166,7 +170,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   ? "font-mono text-[34px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                   : "font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                 }>
-                  {pct.toFixed(0)}%
+                  {saldoReal ? `${pct.toFixed(0)}%` : "—"}
                 </div>
                 <div className={presentation
                   ? "mt-2 whitespace-nowrap font-mono text-[11px] font-semibold tabular-nums text-slate-300/90"
@@ -174,6 +178,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 }>
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                 </div>
+                {saldoReal && (
                 <div
                   className={presentation
                     ? "mt-2 inline-flex whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
@@ -183,6 +188,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 >
                   {nivel.label}
                 </div>
+                )}
               </div>
 
               {/* ── Medidor de nível (sight glass) ── */}
@@ -235,9 +241,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "relative z-20 flex flex-col items-center gap-3" : "flex flex-col items-center gap-4"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(40px) scale(1.02)",
+              transform: "perspective(1200px) translateZ(70px) scale(1.06)",
               transformOrigin: "center left",
-              filter: "drop-shadow(0 28px 36px rgba(0,0,0,0.7)) drop-shadow(0 0 16px rgba(251,191,36,0.08))",
+              filter: "drop-shadow(0 32px 44px rgba(0,0,0,0.75)) drop-shadow(0 0 24px rgba(251,191,36,0.14)) brightness(1.06)",
             } : undefined}
           >
             <div className="relative flex flex-col items-center">
