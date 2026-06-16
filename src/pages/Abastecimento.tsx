@@ -122,6 +122,102 @@ interface AbastecimentoAgregado {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  INDICADORES DE MERCADO (modo apresentação)
+//  ─────────────────────────────────────────────────────────────────────────────
+//  TODO(integração): conectar aos endpoints reais quando disponíveis:
+//   - ANP    → preço médio Diesel S10 por UF (semanal). Ex.: /dw-mercado/anp
+//   - ABICOM → defasagem PPI do diesel.            Ex.: /dw-mercado/abicom
+//   - ANTT   → status da tabela de piso de frete.  Ex.: /dw-mercado/antt
+//  Enquanto não houver integração, este objeto fornece dados mockados
+//  preservando o contrato (value/formatted/status/updatedAt). O cálculo de
+//  "Diferença vs ANP" é derivado em tempo real abaixo, não hard-coded.
+type IndicatorStatus = "positive" | "neutral" | "warning" | "danger";
+type IndicatorSource = "ANP" | "ABICOM" | "ANTT" | "INTERNO";
+
+const ANP_DIESEL_S10  = 6.12;   // R$/L — TODO: substituir por ANP real
+const PRECO_INTERNO   = 4.89;   // R$/L — TODO: derivar do DW (média da janela)
+const ABICOM_DEFASAGEM = -4.0;  // %    — TODO: substituir por ABICOM real
+
+const diffVsAnpPct = ((PRECO_INTERNO - ANP_DIESEL_S10) / ANP_DIESEL_S10) * 100;
+const diffFormatted = `${diffVsAnpPct >= 0 ? "+" : ""}${diffVsAnpPct.toFixed(1).replace(".", ",")}%`;
+const diffStatus: IndicatorStatus =
+  diffVsAnpPct <= -5 ? "positive" : diffVsAnpPct >= 5 ? "danger" : "neutral";
+const diffLabel =
+  diffVsAnpPct < -1 ? "economia estimada vs ANP"
+  : diffVsAnpPct > 1 ? "acima do mercado"
+  : "alinhado ao mercado";
+
+const abicomStatus: IndicatorStatus =
+  ABICOM_DEFASAGEM <= -5 ? "warning"
+  : ABICOM_DEFASAGEM >= 5 ? "danger"
+  : "neutral";
+const abicomLabel =
+  ABICOM_DEFASAGEM <= -5 ? "pressão de alta"
+  : ABICOM_DEFASAGEM >= 5 ? "pressão de baixa"
+  : "pressão moderada";
+
+interface MarketIndicator {
+  title:     string;
+  value:     string;
+  subtitle:  string;
+  source:    IndicatorSource;
+  status?:   IndicatorStatus;
+  updatedAt?: string;
+}
+
+const marketIndicators: MarketIndicator[] = [
+  { title: "Diesel S10 ANP", value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`, subtitle: "SP · última semana", source: "ANP",    status: "neutral",  updatedAt: "16/06/2026" },
+  { title: "Preço Interno",  value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,  subtitle: "frota própria · posto interno", source: "INTERNO", status: "neutral" },
+  { title: "Diferença vs ANP", value: diffFormatted, subtitle: diffLabel, source: "INTERNO", status: diffStatus },
+  { title: "ABICOM / PPI",   value: `${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`, subtitle: `defasagem diesel · ${abicomLabel}`, source: "ABICOM", status: abicomStatus, updatedAt: "16/06/2026" },
+  { title: "ANTT / Frete",   value: "Vigente", subtitle: "piso mínimo de frete", source: "ANTT", status: "positive", updatedAt: "16/06/2026" },
+];
+
+const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: string }> = {
+  positive: { text: "#34d399", ring: "rgba(52,211,153,0.35)",  dot: "#34d399" },
+  neutral:  { text: "#e2e8f0", ring: "rgba(148,163,184,0.30)", dot: "#94a3b8" },
+  warning:  { text: "#fbbf24", ring: "rgba(251,191,36,0.40)",  dot: "#fbbf24" },
+  danger:   { text: "#f87171", ring: "rgba(248,113,113,0.40)", dot: "#f87171" },
+};
+
+function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral", updatedAt }: MarketIndicator) {
+  const colors = STATUS_COLOR[status];
+  const fallback = value === "--" || value === "—";
+  return (
+    <div
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(10px,1vw,16px)] py-[clamp(8px,1.2vh,14px)] backdrop-blur-sm transition-colors"
+      style={{ borderColor: colors.ring }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{title}</span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em]"
+          style={{ color: colors.text, borderColor: colors.ring, background: "rgba(255,255,255,0.025)" }}
+        >
+          <span className="h-1 w-1 rounded-full" style={{ background: colors.dot }} />
+          {source}
+        </span>
+      </div>
+      <p
+        className="mt-1 truncate text-[clamp(1.05rem,2.1vh,1.75rem)] font-black leading-none tabular-nums tracking-[-0.02em]"
+        style={{ color: fallback ? "#64748b" : colors.text }}
+      >
+        {fallback ? "--" : value}
+      </p>
+      <div className="mt-1 flex items-end justify-between gap-2">
+        <span className="truncate text-[10px] font-semibold text-slate-500">
+          {fallback ? "aguardando atualização" : subtitle}
+        </span>
+        {updatedAt && !fallback && (
+          <span className="shrink-0 text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-600">{updatedAt}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Abastecimento() {
@@ -1484,52 +1580,69 @@ export default function Abastecimento() {
 
       {/* ═══════════════════════════════════════════════════════════════════════
           MODO APRESENTAÇÃO / TV — overlay imersivo em tela cheia
+          Layout: 100vh, sem scroll. Grid 3 linhas: header · indicadores de
+          mercado · área central (tanque · bomba · resumo). A área central usa
+          um wrapper de fit-to-viewport (transform scale) garantindo que
+          tanque e bomba nunca sejam cortados, independente do tamanho da TV.
       ═══════════════════════════════════════════════════════════════════════ */}
       {isPresentationMode && (
         <div
-          className="fixed inset-0 z-[9999] flex flex-col overflow-hidden"
+          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden"
           style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
         >
           {/* Glow de palco atrás da bomba */}
-          <div className="pointer-events-none absolute left-1/2 top-[58%] h-[68vh] w-[52vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
+          <div className="pointer-events-none absolute left-1/2 top-[62%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
 
           {/* Botão sair */}
           <button
             onClick={togglePresentation}
-            className="absolute right-6 top-5 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
+            className="absolute right-6 top-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
           >
             <Minimize2 className="h-4 w-4" /> Sair <span className="text-slate-500">· ESC</span>
           </button>
 
-          {/* Cabeçalho */}
-          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[2.4vh]">
-            <img src={sgtLogo} alt="SGT" className="h-9 w-auto" />
+          {/* ── Linha 1: Header compacto ── */}
+          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1.4vh] pb-[0.6vh]">
+            <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
-              <span className="text-[clamp(1.1rem,1.6vw,1.6rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+              <span className="text-[clamp(0.95rem,1.4vw,1.4rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
             <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-3 py-1 text-[10px] font-bold text-emerald-300 lg:inline-flex">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
             </span>
           </div>
 
-          {/* KPIs ocupando toda a largura */}
-          <div className="relative z-10 grid grid-cols-2 gap-3 px-[3vw] pt-[1.8vh] sm:grid-cols-3 lg:grid-cols-5">
-            <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`} icon={DollarSign} tone="amber" loading={loading} />
-            <KpiCard label="Volume Total" value={loading ? "—" : fmtLitros(kpis.totalLitros)} subtitle={loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`} icon={Droplets} tone="cyan" loading={loading} />
-            <KpiCard label="Abastecimentos" value={loading ? "—" : fmtNum(kpis.qtdAbast)} subtitle={loading ? "" : `${distCombustivel.length} tipo(s) de combustível`} icon={Hash} tone="rose" loading={loading} />
-            <KpiCard label="Média Consumo" value={loading ? "—" : fmtMedia(kpis.mediaConsumo)} subtitle={loading ? "" : kpis.deltaMedia !== null ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)` : "Fábrica: —"} icon={Gauge} tone="violet" loading={loading} />
-            <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
+          {/* ── Linha 2: Indicadores externos de mercado (substitui KPIs internos) ── */}
+          <div
+            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,1vw,16px)] px-[3vw] pt-[0.4vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(76px,11vh,108px)" }}
+          >
+            {marketIndicators.map(m => (
+              <MarketIndicatorCard key={m.title} {...m} />
+            ))}
           </div>
 
-          {/* Conjunto do posto — centralizado e escalado */}
-          <div className="relative z-10 flex flex-1 items-center justify-center">
-            <div className="origin-center scale-90 xl:scale-100 2xl:scale-[1.15]">
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
+              Usa transform: scale(min(...)) para encolher o conjunto até caber
+              tanto na largura quanto na altura disponíveis, sem cortar tanque
+              ou bomba. Tamanho natural do conjunto: ~1240×640px. */}
+          <div className="relative z-10 flex min-h-0 items-center justify-center overflow-hidden">
+            <div
+              className="origin-center"
+              style={{
+                width: 1240,
+                height: 640,
+                transform:
+                  "scale(min(calc((100vw - 60px) / 1240), calc((100dvh - 230px) / 640)))",
+              }}
+            >
               <PostoInterno dados={postoInternoDados} presentation />
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
