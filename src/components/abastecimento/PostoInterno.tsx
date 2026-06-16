@@ -226,25 +226,29 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <ellipse cx="150" cy="115" rx="26" ry="7" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.5" />
                 {[130, 140, 150, 160, 170].map(x => <circle key={x} cx={x} cy="115" r="1" fill="#2a313c" />)}
 
-                {/* ── GUARDA-CORPO (railing em perspectiva pousado no rim) ── */}
+                {/* ── GUARDA-CORPO (cerca metálica sólida pousada no rim) ── */}
                 <g>
-                  <ellipse cx="150" cy="86"  rx="100" ry="13" fill="none" stroke="url(#metalRail)" strokeWidth="2"   opacity="0.85" />
-                  <ellipse cx="150" cy="102" rx="104" ry="15" fill="none" stroke="url(#metalRail)" strokeWidth="1.4" opacity="0.55" />
-                  {[58, 90, 122, 150, 178, 210, 242].map(x => (
-                    <line key={x} x1={x} y1="112" x2={x} y2="84" stroke="url(#metalRail)" strokeWidth="1.8" strokeLinecap="round" opacity="0.85" />
+                  {/* postes (atrás do trilho), pousados no rim */}
+                  {[60, 90, 120, 150, 180, 210, 240].map(x => (
+                    <line key={x} x1={x} y1="120" x2={x} y2="78" stroke="url(#metalRail)" strokeWidth="2.4" strokeLinecap="round" />
                   ))}
+                  {/* trilho superior sólido + linha de brilho */}
+                  <ellipse cx="150" cy="78" rx="103" ry="12" fill="none" stroke="url(#metalRail)" strokeWidth="3" />
+                  <ellipse cx="150" cy="77" rx="103" ry="12" fill="none" stroke="#d4dce6" strokeWidth="0.9" opacity="0.55" />
+                  {/* trilho intermediário */}
+                  <ellipse cx="150" cy="100" rx="104" ry="12" fill="none" stroke="url(#metalRail)" strokeWidth="1.8" opacity="0.75" />
                 </g>
 
                 {/* ── ESCADA lateral esquerda (rails + degraus paralelos + gaiola) ── */}
                 <g>
-                  <line x1="54" y1="128" x2="54" y2="400" stroke="url(#metalRail)" strokeWidth="2.4" strokeLinecap="round" />
-                  <line x1="70" y1="128" x2="70" y2="400" stroke="url(#metalRail)" strokeWidth="2.4" strokeLinecap="round" />
+                  <line x1="54" y1="126" x2="54" y2="402" stroke="url(#metalRail)" strokeWidth="2.8" strokeLinecap="round" />
+                  <line x1="70" y1="126" x2="70" y2="402" stroke="url(#metalRail)" strokeWidth="2.8" strokeLinecap="round" />
                   {Array.from({ length: 18 }).map((_, i) => {
-                    const y = 138 + i * 14.5;
-                    return <line key={i} x1="54" y1={y} x2="70" y2={y} stroke="#c0cad6" strokeOpacity="0.7" strokeWidth="1.6" />;
+                    const y = 136 + i * 14.5;
+                    return <line key={i} x1="54" y1={y} x2="70" y2={y} stroke="#c8d2de" strokeOpacity="0.85" strokeWidth="2" />;
                   })}
-                  {[170, 230, 290, 350].map(cy => (
-                    <path key={cy} d={`M54 ${cy - 20} A 15 20 0 0 0 54 ${cy + 20}`} fill="none" stroke="url(#metalRail)" strokeWidth="1.3" opacity="0.5" />
+                  {[168, 228, 288, 348].map(cy => (
+                    <path key={cy} d={`M54 ${cy - 20} A 15 20 0 0 0 54 ${cy + 20}`} fill="none" stroke="url(#metalRail)" strokeWidth="1.5" opacity="0.6" />
                   ))}
                 </g>
 
