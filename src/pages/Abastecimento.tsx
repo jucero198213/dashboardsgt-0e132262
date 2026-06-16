@@ -1638,17 +1638,17 @@ export default function Abastecimento() {
           </div>
 
           {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
-              Tamanho natural reduzido (1120×540) e desconto de altura maior
-              (180px ≈ header + cards + paddings) para garantir que tanque e
-              bomba caibam inteiros em 100dvh sem nunca gerar scroll. */}
+              Mantém o tamanho natural real do conjunto (1180×620) e usa um
+              scale que considera o espaço disponível após header e cards,
+              garantindo que tanque e bomba caibam inteiros em 100dvh. */}
           <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(2px,0.4vh,8px)] pb-[clamp(6px,0.8vh,12px)]">
             <div
               className="origin-top"
               style={{
-                width: 1120,
-                height: 540,
+                width: 1180,
+                height: 620,
                 transform:
-                  "scale(min(calc((100vw - 48px) / 1120), calc((100dvh - 180px) / 540)))",
+                  "scale(min(calc((100vw - 48px) / 1180), calc((100dvh - 170px) / 620)))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
