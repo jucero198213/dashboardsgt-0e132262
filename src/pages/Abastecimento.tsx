@@ -225,11 +225,11 @@ function MarketIndicatorCard({ title, value, bottomLeft, bottomRight, source, st
   // para evitar truncamento com reticências.
   const isLongText = value.length > 10 && !/^[R$\-+−]?\s?\d/.test(value);
   const valueClass = isLongText
-    ? "text-[clamp(0.95rem,1.6vh,1.35rem)]"
-    : "text-[clamp(1.15rem,2.2vh,1.8rem)]";
+    ? "text-[clamp(1.05rem,1.9vh,1.55rem)]"
+    : "text-[clamp(1.2rem,2.2vh,1.8rem)]";
   return (
     <div
-      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(12px,1.2vw,20px)] py-[clamp(10px,1.3vh,16px)] backdrop-blur-sm"
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(14px,1.3vw,24px)] py-[clamp(8px,1vh,14px)] backdrop-blur-sm"
       style={{ borderColor: colors.ring }}
     >
       <div className="flex items-center justify-between gap-2">
@@ -243,7 +243,7 @@ function MarketIndicatorCard({ title, value, bottomLeft, bottomRight, source, st
         </span>
       </div>
       <p
-        className={`mt-1 ${valueClass} font-black leading-tight tabular-nums tracking-[-0.02em] whitespace-nowrap`}
+        className={`mt-1.5 ${valueClass} font-black leading-tight tabular-nums tracking-[-0.02em] whitespace-nowrap`}
         style={{ color: fallback ? "#64748b" : colors.text }}
       >
         {fallback ? "--" : value}
@@ -1701,7 +1701,7 @@ export default function Abastecimento() {
           {/* ── Linha 2: Indicadores externos de mercado ── */}
           <div
             className="relative z-10 grid grid-cols-2 gap-[clamp(10px,1vw,16px)] px-[clamp(28px,3vw,48px)] pt-[clamp(2px,0.4vh,6px)] pb-[clamp(4px,0.6vh,8px)] sm:grid-cols-3 lg:grid-cols-5"
-            style={{ height: "clamp(78px,9vh,100px)" }}
+            style={{ height: "clamp(110px,13vh,140px)" }}
           >
             {marketIndicators.map(m => (
               <MarketIndicatorCard key={m.title} {...m} />
@@ -1716,7 +1716,7 @@ export default function Abastecimento() {
                 width: 1060,
                 height: 540,
                 transform:
-                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 300px) / 540)) * 0.92))",
+                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 370px) / 540)) * 0.92))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
