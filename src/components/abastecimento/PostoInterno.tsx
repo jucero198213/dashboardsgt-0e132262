@@ -289,7 +289,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 </div>
                 {/* Pescoço cromado escuro conectando disco ao corpo */}
                 <div className={presentation
-                  ? "relative z-10 -mt-1 h-5 w-12 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                  ? "relative z-10 -mt-1 h-4 w-10 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                   : "relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                 } />
               </div>
