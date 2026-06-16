@@ -164,24 +164,24 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* Display dinâmico — painel montado na face limpa do tanque */}
               <div className={presentation
-                ? "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[10px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-2 py-2.5 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
+                ? "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[10px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-2 py-2 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
                 : "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
               }>
                 <div className={presentation
-                  ? "font-mono text-[34px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
+                  ? "font-mono text-[28px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                   : "font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                 }>
                   {pct.toFixed(0)}%
                 </div>
                 <div className={presentation
-                  ? "mt-1.5 whitespace-nowrap font-mono text-[11px] font-semibold tabular-nums text-slate-300/90"
+                  ? "mt-1 whitespace-nowrap font-mono text-[10px] font-semibold tabular-nums text-slate-300/90"
                   : "mt-2.5 whitespace-nowrap font-mono text-[13px] font-semibold tabular-nums text-slate-300/90"
                 }>
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
                 </div>
                 <div
                   className={presentation
-                    ? "mt-2 inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                    ? "mt-1.5 inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
                     : "mt-3 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
                   }
                   style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
@@ -190,10 +190,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 </div>
               </div>
 
-              {/* ── Medidor de nível (sight glass) — preenchimento âmbar até pct% ──
-                  Posição estimada na face direita do corpo; ajuste left/top/bottom. */}
+              {/* ── Medidor de nível (sight glass) ── */}
               <div className={presentation
-                ? "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[10px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
+                ? "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[9px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
                 : "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[12px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
               }>
                 <div
