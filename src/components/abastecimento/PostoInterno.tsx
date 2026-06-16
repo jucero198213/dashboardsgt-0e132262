@@ -188,20 +188,22 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   <clipPath id="tankBody"><rect x="26" y="104" width="248" height="306" rx="10" /></clipPath>
                 </defs>
 
-                {/* ── TETO CÔNICO fechado (soldado ao corpo) ── */}
-                <path d="M26 104 L150 50 L274 104 Z" fill="url(#tankDome)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeLinejoin="round" />
-                {/* arestas de luz no teto */}
-                <path d="M26 104 L150 50" stroke="#ffffff" strokeOpacity="0.18" strokeWidth="1.5" />
-                <path d="M150 50 L150 104" stroke="#000000" strokeOpacity="0.18" strokeWidth="1.5" />
-                {/* bocal de respiro no ápice */}
-                <rect x="142" y="40" width="16" height="14" rx="3" fill="url(#metalRail)" />
-
-                {/* ── GUARDA-CORPO (cerca reta na plataforma do topo) ── */}
-                <g stroke="url(#metalRail)" strokeLinecap="round">
-                  <line x1="36" y1="82" x2="264" y2="82" strokeWidth="3" />
-                  <line x1="40" y1="93" x2="260" y2="93" strokeWidth="2" opacity="0.8" />
-                  {[40, 86, 150, 214, 260].map(x => <line key={x} x1={x} y1="82" x2={x} y2="104" strokeWidth="2.5" />)}
+                {/* ── GUARDA-CORPO (railing em volta do topo plano) ── */}
+                <g>
+                  {/* trilho superior (elipse sutil) */}
+                  <ellipse cx="150" cy="76" rx="118" ry="11" fill="none" stroke="url(#metalRail)" strokeWidth="2" opacity="0.7" />
+                  <ellipse cx="150" cy="88" rx="122" ry="11" fill="none" stroke="url(#metalRail)" strokeWidth="1.5" opacity="0.5" />
+                  {/* postes verticais (pousam na tampa) */}
+                  {[36, 93, 150, 207, 264].map(x => (
+                    <line key={x} x1={x} y1="98" x2={x} y2="72" stroke="url(#metalRail)" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+                  ))}
                 </g>
+
+                {/* ── TAMPA superior plana (lid sólido) ── */}
+                <ellipse cx="150" cy="104" rx="124" ry="14" fill="url(#tankDome)" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+                <ellipse cx="150" cy="100" rx="104" ry="8" fill="#ffffff" opacity="0.08" />
+                {/* bocal de respiro */}
+                <rect x="138" y="92" width="22" height="14" rx="3" fill="url(#metalRail)" />
 
                 {/* ── CORPO CILÍNDRICO (retângulo preenchido) ── */}
                 <rect x="26" y="104" width="248" height="306" rx="10" fill="url(#tankSteel)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
