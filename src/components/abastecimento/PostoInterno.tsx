@@ -397,17 +397,27 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           {(() => {
             const recargaSub = dados.ultimaRecarga
               ? `${fmtL(dados.ultimaRecarga.litros)} · ${dados.ultimaRecarga.data}`
-              : "Sem recargas no período";
+              : "sem registros no período";
             const placaSub = dados.ultimaPlaca
-              ? `${dados.ultimaPlaca.placa} · ${fmtL(dados.ultimaPlaca.litros)} · ${dados.ultimaPlaca.data}`
-              : "Sem registros no período";
+              ? `${dados.ultimaPlaca.placa} · ${fmtL(dados.ultimaPlaca.litros)}${dados.ultimaPlaca.data ? ` · ${dados.ultimaPlaca.data}` : ""}`
+              : "não informada";
 
-            const cards = presentation
+            type CardDef = {
+              label: string;
+              valor?: string;
+              destaque?: string;
+              sub?: string;
+              glow?: boolean;
+              tall?: boolean;
+            };
+
+            const cards: CardDef[] = presentation
               ? [
                   { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
                   { label: "Total Abastecido (Período)", valor: fmtL(dados.abastecidoPeriodoLitros), destaque: "#94a3b8" },
-                  { label: "Última Movimentação",        valor: dados.ultimaPlaca?.placa ?? "—",     destaque: "#22d3ee",
-                    sub: `Recarga: ${recargaSub}\nPlaca: ${placaSub}`, glow: true },
+                  // Última Movimentação — sem valor solto; mostra duas linhas estruturadas
+                  { label: "Última Movimentação", glow: true, tall: true,
+                    sub: `Recarga: ${recargaSub}\nPlaca: ${placaSub}` },
                 ]
               : [
                   { label: "Total Recebido (Período)",   valor: dados.recebidoPeriodoLitros != null ? fmtL(dados.recebidoPeriodoLitros) : "—", destaque: "#fbbf24" },
@@ -427,16 +437,22 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     key={c.label}
                     className={
                       presentation
-                        ? "rounded-[12px] border border-white/10 bg-white/[0.025] px-4 py-2.5 transition-colors duration-300 hover:border-white/[0.18]"
+                        ? "rounded-[12px] border border-white/10 bg-white/[0.025] px-4 py-3 transition-colors duration-300 hover:border-white/[0.18]"
                         : "rounded-[14px] border border-white/10 bg-white/[0.025] px-5 py-4 transition-colors duration-300 hover:border-white/[0.18]"
                     }
                     style={c.glow ? { boxShadow: "0 0 22px -8px rgba(34,211,238,0.35)" } : undefined}
                   >
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{c.label}</p>
-                    <p className={`mt-1.5 ${presentation ? "text-[18px]" : "text-[22px]"} font-black leading-none tabular-nums tracking-[-0.02em]`} style={{ color: c.destaque }}>
-                      {c.valor}
-                    </p>
-                    {c.sub && <p className="mt-1.5 whitespace-pre-line text-[11px] font-semibold text-slate-600">{c.sub}</p>}
+                    {c.valor && (
+                      <p className={`mt-1.5 ${presentation ? "text-[22px]" : "text-[22px]"} font-black leading-none tabular-nums tracking-[-0.02em]`} style={{ color: c.destaque }}>
+                        {c.valor}
+                      </p>
+                    )}
+                    {c.sub && (
+                      <p className={`${c.valor ? "mt-1.5" : "mt-2"} whitespace-pre-line text-[12px] font-semibold leading-snug text-slate-300/85`}>
+                        {c.sub}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
