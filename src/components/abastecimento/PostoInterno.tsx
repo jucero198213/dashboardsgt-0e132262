@@ -464,7 +464,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
 
             {/* Texto externo flutuante */}
-            <div className="text-center">
+            <div className={presentation ? "hidden" : "text-center"}>
               <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-slate-400">Bomba Corporativa</p>
               <p className="mt-1 text-[12px] font-semibold text-slate-600">Frota própria</p>
             </div>
