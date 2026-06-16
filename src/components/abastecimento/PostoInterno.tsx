@@ -138,7 +138,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               desenhada num único <svg> no mesmo viewBox → nada flutua/descola e
               tudo escala junto. O display fica sobreposto em HTML (texto nítido). */}
           <div className="flex flex-col items-center gap-4">
-            <div className="relative h-[480px] w-[300px]">
+            {/* h:w mantém a proporção 5:8 do viewBox → SVG escala sem distorcer.
+                Tanque propositalmente maior que a bomba (referência). */}
+            <div className="relative h-[576px] w-[360px]">
               {/* Halo quente sutil (base) */}
               <div className="pointer-events-none absolute inset-x-[-32px] bottom-[-24px] top-[120px] rounded-[60px] bg-[radial-gradient(ellipse_at_50%_88%,rgba(251,191,36,0.07),transparent_68%)]" />
 
@@ -233,8 +235,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   })}
                 </g>
 
-                {/* ── FLANGE de conexão do duto — estende até a borda (x=300) ── */}
-                <g transform="translate(274,250)">
+                {/* ── FLANGE de conexão do duto — estende até a borda (x=300).
+                    y=288 → renderiza a ~230px da base, alinhado ao centro do duto. ── */}
+                <g transform="translate(274,288)">
                   <rect x="-4" y="-26" width="12" height="52" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
                   {[-16, 0, 16].map(y => <circle key={y} cx="2" cy={y} r="2" fill="url(#tankBolt)" />)}
                   {/* bocal que encosta no duto */}
@@ -247,8 +250,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <rect x="210" y="434" width="26" height="30" rx="3" fill="url(#tankBase)" />
               </svg>
 
-              {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido) ── */}
-              <div className="absolute left-1/2 top-[250px] z-10 w-[188px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[linear-gradient(180deg,#0e1218,#05070a)] p-2.5 shadow-[0_10px_26px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.1)]">
+              {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido).
+                  top-[53.5%] = centro do corpo no viewBox → escala junto com o SVG. ── */}
+              <div className="absolute left-1/2 top-[53.5%] z-10 w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[linear-gradient(180deg,#0e1218,#05070a)] p-2.5 shadow-[0_10px_26px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.1)]">
                 <div className="rounded-lg border border-white/10 bg-black/80 px-4 py-3 text-center shadow-[inset_0_2px_16px_rgba(0,0,0,0.92)]">
                   <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.55)]">
                     {pct.toFixed(0)}%
