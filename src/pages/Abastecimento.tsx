@@ -1651,48 +1651,48 @@ export default function Abastecimento() {
           {/* Glow de palco atrás da bomba */}
           <div className="pointer-events-none absolute left-1/2 top-[62%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
 
-          {/* Botão sair */}
+          {/* Botão sair — propositalmente discreto para TV */}
           <button
             onClick={togglePresentation}
-            className="absolute right-6 top-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
+            aria-label="Sair do modo apresentação"
+            className="absolute right-4 top-3 z-30 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-transparent px-2.5 py-1 text-[10px] font-medium text-slate-400/70 opacity-25 transition-all duration-200 hover:opacity-100 hover:border-white/30 hover:text-slate-100 focus:opacity-100 focus:outline-none"
           >
-            <Minimize2 className="h-4 w-4" /> Sair <span className="text-slate-500">· ESC</span>
+            <Minimize2 className="h-3 w-3" /> Sair <span className="opacity-60">· ESC</span>
           </button>
 
-          {/* ── Linha 1: Header compacto ── */}
-          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1vh] pb-[0.4vh]">
-            <img src={sgtLogo} alt="SGT" className="h-6 w-auto" />
+          {/* ── Linha 1: Header compacto — TV-first, sem ruído ── */}
+          <div
+            className="relative z-10 flex items-center gap-3 px-[clamp(28px,3vw,48px)]"
+            style={{ paddingTop: "clamp(6px,0.8vh,10px)", paddingBottom: "clamp(4px,0.6vh,8px)" }}
+          >
+            <img src={sgtLogo} alt="SGT" className="h-[clamp(20px,2.6vh,28px)] w-auto" />
             <div className="flex flex-col leading-none">
               <span className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
-              <span className="text-[clamp(0.85rem,1.2vw,1.2rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+              <span className="text-[clamp(0.8rem,1.15vw,1.1rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
-            <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-2.5 py-0.5 text-[9px] font-bold text-emerald-300 lg:inline-flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
-            </span>
           </div>
 
-          {/* ── Linha 2: Indicadores externos de mercado (compactos) ── */}
+          {/* ── Linha 2: Indicadores externos de mercado ── */}
           <div
-            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,0.9vw,14px)] px-[3vw] pt-[0.2vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
-            style={{ height: "clamp(64px,8vh,84px)" }}
+            className="relative z-10 grid grid-cols-2 gap-[clamp(10px,1vw,16px)] px-[clamp(28px,3vw,48px)] pt-[clamp(2px,0.4vh,6px)] pb-[clamp(4px,0.6vh,8px)] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(86px,10vh,112px)" }}
           >
             {marketIndicators.map(m => (
               <MarketIndicatorCard key={m.title} {...m} />
             ))}
           </div>
 
-          {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
-              Mantém o tamanho natural real do conjunto (1180×620) e usa um
-              scale que considera o espaço disponível após header e cards,
-              garantindo que tanque e bomba caibam inteiros em 100dvh. */}
-          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(2px,0.4vh,8px)] pb-[clamp(6px,0.8vh,12px)]">
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ──
+              Tamanho natural mantido (1180×620). Multiplicador 0.9 reduz
+              tanque/bomba ~10% para dar respiro ao painel em TV. */}
+          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(4px,0.6vh,10px)] pb-[clamp(8px,1vh,16px)]">
             <div
               className="origin-top"
               style={{
                 width: 1180,
                 height: 620,
                 transform:
-                  "scale(min(calc((100vw - 48px) / 1180), calc((100dvh - 170px) / 620)))",
+                  "scale(calc(min(calc((100vw - 64px) / 1180), calc((100dvh - 210px) / 620)) * 0.9))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
