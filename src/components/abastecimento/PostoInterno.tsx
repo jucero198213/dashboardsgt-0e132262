@@ -201,7 +201,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               mostrando o diesel dourado fluindo. Container estreito (w-[180px])
               + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-center pb-[0px]">
+          <div className={`relative z-0 -mx-16 w-[180px] ${presentation ? "hidden" : "hidden lg:flex"} flex-col items-center justify-center pb-[0px]`}>
             <div className="relative h-[140px] w-full">
               {/* duto simples — tubo reto com visor central de diesel */}
               <div className="absolute inset-x-0 top-[15px] flex -translate-y-1/2 items-center">
