@@ -98,10 +98,6 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           85%  { opacity: 0.35; }
           100% { transform: translateY(-220px) scale(1.2); opacity: 0; }
         }
-        /* Diesel viajando pela linha de transferência (dashoffset segue a curva) */
-        @keyframes sgt-diesel-flow {
-          to { stroke-dashoffset: -88; }
-        }
         /* Promove elementos animados para camadas próprias da GPU (evita
            repaints no Safari/WebKit) */
         .sgt-anim {
@@ -234,102 +230,55 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           </div>
 
           {/* ═════════ LINHA DE TRANSFERÊNCIA ════════════════════════════════
-              Estrutura responsiva: o container ESTICA (flex-1) para preencher o
-              vão entre tanque e bomba; o `-mx-16` cancela o gap do flex para as
-              bordas tocarem os dois corpos. A mangueira é desenhada de borda a
-              borda (preserveAspectRatio="none" → sempre conecta), e as conexões
-              ficam ancoradas/fixas em cada parede (sem distorcer). */}
-          <div className="relative z-0 -mx-16 hidden w-[240px] lg:flex flex-col items-center justify-end pb-40">
-            <span className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">Linha de transferência</span>
-
+              Duto metálico curto, reto e horizontal com visor de vidro central
+              mostrando o diesel dourado fluindo. Container estreito (w-[180px])
+              + `-mx-16` (cancela o gap do flex) mantêm tanque e bomba próximos
+              e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
+          <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-40">
             <div className="relative h-[140px] w-full">
-              {/* defs compartilhados (gradientes) */}
-              <svg width="0" height="0" className="absolute">
-                <defs>
-                  <linearGradient id="sgt-pipe" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="124">
-                    <stop offset="0"    stopColor="#262b33" />
-                    <stop offset="0.27" stopColor="#4e5765" />
-                    <stop offset="0.45" stopColor="#39414c" />
-                    <stop offset="0.52" stopColor="#2b323c" />
-                    <stop offset="0.78" stopColor="#13161c" />
-                    <stop offset="1"    stopColor="#070a0e" />
-                  </linearGradient>
-                  <linearGradient id="sgt-collar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0"    stopColor="#f4f8fc" />
-                    <stop offset="0.20" stopColor="#c6cfdb" />
-                    <stop offset="0.42" stopColor="#73808f" />
-                    <stop offset="0.52" stopColor="#2a323d" />
-                    <stop offset="0.62" stopColor="#5e6a78" />
-                    <stop offset="0.82" stopColor="#b0bac8" />
-                    <stop offset="1"    stopColor="#e4ebf4" />
-                  </linearGradient>
-                  <linearGradient id="sgt-plate" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0"   stopColor="#2c333d" />
-                    <stop offset="0.5" stopColor="#1a1f27" />
-                    <stop offset="1"   stopColor="#0b0e13" />
-                  </linearGradient>
-                  <radialGradient id="sgt-bolt" cx="0.35" cy="0.3" r="0.8">
-                    <stop offset="0"   stopColor="#cdd6e1" />
-                    <stop offset="0.5" stopColor="#717d8c" />
-                    <stop offset="1"   stopColor="#222933" />
-                  </radialGradient>
-                </defs>
-              </svg>
+              {/* rótulo flutuante acima do duto */}
+              <span className="absolute inset-x-0 top-[30px] text-center text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">
+                Linha de transferência
+              </span>
 
-              {/* ── MANGUEIRA — estica de borda a borda do container ── */}
-              <svg viewBox="0 0 360 140" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
-                {(() => {
-                  const D = "M0 70 C 96 70, 120 116, 180 116 C 240 116, 264 70, 360 70";
-                  return (
-                    <>
-                      <path d={D} stroke="#f59e0b" strokeWidth="22" strokeLinecap="round" opacity="0.09" style={{ filter: "blur(8px)" }} />
-                      <path d={D} stroke="#000000" strokeWidth="24" strokeLinecap="round" opacity="0.4" transform="translate(0,6)" style={{ filter: "blur(5px)" }} />
+              {/* duto metálico reto — centralizado verticalmente */}
+              <div className="absolute inset-x-0 top-[70px] flex -translate-y-1/2 items-center">
+                {/* flange esquerda (encosta no tanque) */}
+                <div className="z-10 h-9 w-2.5 shrink-0 rounded-l-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#222a35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_5px_rgba(0,0,0,0.45)]" />
+                <div className="z-10 -ml-px h-7 w-1.5 shrink-0 bg-[linear-gradient(180deg,#5a6675,#1b2129)]" />
 
-                      <path d={D} stroke="#04060a" strokeWidth="30" strokeLinecap="round" />
-                      <path d={D} stroke="url(#sgt-pipe)" strokeWidth="24" strokeLinecap="round" />
-                      <path d={D} stroke="#04060a" strokeWidth="24" strokeLinecap="round" opacity="0.26" transform="translate(0,5)" />
-                      <path d={D} stroke="#ffffff" strokeWidth="9" strokeLinecap="round" opacity="0.06" transform="translate(0,-4)" style={{ filter: "blur(2.5px)" }} />
-                      <path d={D} stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" opacity="0.24" transform="translate(0,-5.5)" />
+                {/* segmento esquerdo do tubo (cilíndrico) */}
+                <div className="relative h-[20px] flex-1 overflow-hidden border-y border-white/10 bg-[linear-gradient(180deg,#5a6675_0%,#aeb9c7_20%,#3a4453_52%,#13171f_100%)]">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
+                </div>
 
-                      <path d={D} stroke="#03050a" strokeWidth="9" strokeLinecap="round" opacity="0.7" />
+                {/* VISOR DE VIDRO central — fluxo de diesel dourado */}
+                <div className="relative z-10 flex h-[32px] w-[60px] shrink-0 items-center justify-center rounded-md border border-white/15 bg-[linear-gradient(180deg,#4a5666,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_3px_8px_rgba(0,0,0,0.5)]">
+                  <div className="relative h-[16px] w-[48px] overflow-hidden rounded-[3px] bg-black/70 shadow-[inset_0_1px_3px_rgba(0,0,0,0.9)]">
+                    {/* diesel dourado (base) */}
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,#fcd34d_0%,#f59e0b_55%,#b45309_100%)] opacity-80" />
+                    {/* pulsos de fluxo */}
+                    <div className="sgt-anim absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-amber-100/90 to-transparent" style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }} />
+                    <div className="sgt-anim absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-white/70 to-transparent" style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }} />
+                    {/* reflexo de vidro */}
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+                  </div>
+                  {/* parafusos do visor */}
+                  <div className="absolute left-1 top-1 h-1 w-1 rounded-full bg-white/30" />
+                  <div className="absolute right-1 top-1 h-1 w-1 rounded-full bg-white/30" />
+                  <div className="absolute bottom-1 left-1 h-1 w-1 rounded-full bg-black/40" />
+                  <div className="absolute bottom-1 right-1 h-1 w-1 rounded-full bg-black/40" />
+                </div>
 
-                      {/* diesel — glóbulos de luz descendo a linha */}
-                      <path d={D} className="sgt-anim" stroke="#f59e0b" strokeWidth="15" strokeLinecap="round" strokeDasharray="7 81" opacity="0.45"
-                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "blur(4px)" }} />
-                      <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
-                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
-                      <path d={D} className="sgt-anim" stroke="#fff6df" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
-                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", animationDelay: "-1.6s", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
-                    </>
-                  );
-                })()}
-              </svg>
+                {/* segmento direito do tubo (cilíndrico) */}
+                <div className="relative h-[20px] flex-1 overflow-hidden border-y border-white/10 bg-[linear-gradient(180deg,#5a6675_0%,#aeb9c7_20%,#3a4453_52%,#13171f_100%)]">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
+                </div>
 
-              {/* abraçadeira de apoio no fundo da curva (centro, sem distorcer) */}
-              <svg viewBox="0 0 16 40" className="absolute left-1/2 top-[116px] h-10 w-4 -translate-x-1/2 -translate-y-1/2 overflow-visible" fill="none">
-                <rect x="3" y="5" width="10" height="30" rx="3.5" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
-                <rect x="4.5" y="6" width="2" height="28" rx="1" fill="#ffffff" opacity="0.45" />
-              </svg>
-
-              {/* ── CONEXÃO ESQUERDA (parede do tanque) — fixa, não distorce ── */}
-              <svg viewBox="0 0 52 96" className="absolute left-0 top-[70px] h-24 w-[52px] -translate-x-1/2 -translate-y-1/2 overflow-visible" fill="none">
-                <rect x="2" y="18" width="18" height="60" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-                <circle cx="11" cy="30" r="3" fill="url(#sgt-bolt)" />
-                <circle cx="11" cy="66" r="3" fill="url(#sgt-bolt)" />
-                <rect x="14" y="33" width="32" height="30" rx="8" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
-                {[22, 29, 36].map(x => <line key={x} x1={x} y1="35" x2={x} y2="61" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2" />)}
-                <rect x="16" y="35.5" width="28" height="2.6" rx="1.3" fill="#ffffff" opacity="0.6" />
-              </svg>
-
-              {/* ── CONEXÃO DIREITA (parede da bomba) — espelhada ── */}
-              <svg viewBox="0 0 52 96" className="absolute right-0 top-[70px] h-24 w-[52px] -translate-y-1/2 translate-x-1/2 -scale-x-100 overflow-visible" fill="none">
-                <rect x="2" y="18" width="18" height="60" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-                <circle cx="11" cy="30" r="3" fill="url(#sgt-bolt)" />
-                <circle cx="11" cy="66" r="3" fill="url(#sgt-bolt)" />
-                <rect x="14" y="33" width="32" height="30" rx="8" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
-                {[22, 29, 36].map(x => <line key={x} x1={x} y1="35" x2={x} y2="61" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2" />)}
-                <rect x="16" y="35.5" width="28" height="2.6" rx="1.3" fill="#ffffff" opacity="0.6" />
-              </svg>
+                {/* flange direita (encosta na bomba) */}
+                <div className="z-10 -mr-px h-7 w-1.5 shrink-0 bg-[linear-gradient(180deg,#5a6675,#1b2129)]" />
+                <div className="z-10 h-9 w-2.5 shrink-0 rounded-r-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#222a35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_5px_rgba(0,0,0,0.45)]" />
+              </div>
             </div>
           </div>
 
