@@ -1662,7 +1662,7 @@ export default function Abastecimento() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {isPresentationMode && (
         <div
-          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)_auto_auto] overflow-hidden"
+          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)_auto_auto]"
           style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
         >
           {/* Keyframe do ticker */}
