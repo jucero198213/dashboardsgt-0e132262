@@ -189,51 +189,24 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               e o duto encaixado entre eles. Ajuste w-* / pb-* para reposicionar. */}
           <div className="relative z-0 -mx-16 hidden w-[180px] lg:flex flex-col items-center justify-end pb-[60px]">
             <div className="relative h-[140px] w-full">
-              {/* rótulo flutuante acima do duto */}
-              <span className="absolute inset-x-0 top-[30px] text-center text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">
-                Duto de transferência
-              </span>
-
-              {/* duto metálico reto — centralizado verticalmente */}
+              {/* duto simples — tubo reto com visor central de diesel */}
               <div className="absolute inset-x-0 top-[70px] flex -translate-y-1/2 items-center">
-                {/* flange esquerda (encosta no tanque) */}
-                <div className="z-10 h-9 w-2.5 shrink-0 rounded-l-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#222a35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_5px_rgba(0,0,0,0.45)]" />
-                <div className="z-10 -ml-px h-7 w-1.5 shrink-0 bg-[linear-gradient(180deg,#5a6675,#1b2129)]" />
+                {/* tubo esquerdo */}
+                <div className="h-[10px] flex-1 rounded-l-sm bg-[linear-gradient(180deg,#8a94a3,#3a4453_55%,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]" />
 
-                {/* segmento esquerdo do tubo (cilíndrico) */}
-                <div className="relative h-[20px] flex-1 overflow-hidden border-y border-white/10 bg-[linear-gradient(180deg,#5a6675_0%,#aeb9c7_20%,#3a4453_52%,#13171f_100%)]">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
+                {/* visor central com fluxo de diesel */}
+                <div className="relative z-10 h-[14px] w-[44px] shrink-0 overflow-hidden rounded-[3px] border border-white/15 bg-black/70 shadow-[inset_0_1px_3px_rgba(0,0,0,0.9)]">
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,#fcd34d_0%,#f59e0b_55%,#b45309_100%)] opacity-85" />
+                  <div className="sgt-anim absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-amber-100/90 to-transparent" style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }} />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                 </div>
 
-                {/* VISOR DE VIDRO central — fluxo de diesel dourado */}
-                <div className="relative z-10 flex h-[32px] w-[60px] shrink-0 items-center justify-center rounded-md border border-white/15 bg-[linear-gradient(180deg,#4a5666,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_3px_8px_rgba(0,0,0,0.5)]">
-                  <div className="relative h-[16px] w-[48px] overflow-hidden rounded-[3px] bg-black/70 shadow-[inset_0_1px_3px_rgba(0,0,0,0.9)]">
-                    {/* diesel dourado (base) */}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,#fcd34d_0%,#f59e0b_55%,#b45309_100%)] opacity-80" />
-                    {/* pulsos de fluxo */}
-                    <div className="sgt-anim absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-amber-100/90 to-transparent" style={{ animation: "sgt-fuel-flow 1.8s linear infinite" }} />
-                    <div className="sgt-anim absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-white/70 to-transparent" style={{ animation: "sgt-fuel-flow 1.8s linear infinite", animationDelay: "0.9s" }} />
-                    {/* reflexo de vidro */}
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
-                  </div>
-                  {/* parafusos do visor */}
-                  <div className="absolute left-1 top-1 h-1 w-1 rounded-full bg-white/30" />
-                  <div className="absolute right-1 top-1 h-1 w-1 rounded-full bg-white/30" />
-                  <div className="absolute bottom-1 left-1 h-1 w-1 rounded-full bg-black/40" />
-                  <div className="absolute bottom-1 right-1 h-1 w-1 rounded-full bg-black/40" />
-                </div>
-
-                {/* segmento direito do tubo (cilíndrico) */}
-                <div className="relative h-[20px] flex-1 overflow-hidden border-y border-white/10 bg-[linear-gradient(180deg,#5a6675_0%,#aeb9c7_20%,#3a4453_52%,#13171f_100%)]">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
-                </div>
-
-                {/* flange direita (encosta na bomba) */}
-                <div className="z-10 -mr-px h-7 w-1.5 shrink-0 bg-[linear-gradient(180deg,#5a6675,#1b2129)]" />
-                <div className="z-10 h-9 w-2.5 shrink-0 rounded-r-sm border border-white/10 bg-[linear-gradient(180deg,#4a5666,#222a35)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_5px_rgba(0,0,0,0.45)]" />
+                {/* tubo direito */}
+                <div className="h-[10px] flex-1 rounded-r-sm bg-[linear-gradient(180deg,#8a94a3,#3a4453_55%,#1b2129)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]" />
               </div>
             </div>
           </div>
+
 
           {/* ═════════ BOMBA CORPORATIVA — vintage dark-chrome ═════════ */}
           <div className="flex flex-col items-center gap-4">
