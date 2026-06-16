@@ -1753,10 +1753,10 @@ export default function Abastecimento() {
                 color: "#34d399",
               },
             ].map(k => (
-              <div key={k.label} className="flex flex-col rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-[clamp(12px,1.1vw,20px)] py-[clamp(6px,0.7vh,10px)]">
-                <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{k.label}</span>
-                <span className="mt-1 font-black tabular-nums leading-tight text-[clamp(0.95rem,1.5vw,1.35rem)]" style={{ color: k.color }}>{k.value}</span>
-                <span className="mt-0.5 truncate text-[10px] font-semibold text-slate-500">{k.sub}</span>
+              <div key={k.label} className="flex flex-col rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-[clamp(14px,1.3vw,24px)] py-[clamp(8px,1vh,14px)]">
+                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">{k.label}</span>
+                <span className="mt-1.5 font-black tabular-nums leading-tight text-[clamp(1.2rem,2vw,1.8rem)]" style={{ color: k.color }}>{k.value}</span>
+                <span className="mt-1 truncate text-[11px] font-semibold text-slate-500">{k.sub}</span>
               </div>
             ))}
           </div>
