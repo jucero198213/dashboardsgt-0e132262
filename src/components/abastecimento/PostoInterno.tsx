@@ -146,15 +146,15 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               centralizado na face. Rótulos em HTML logo abaixo da imagem.
               Ajuste left/top/w do display e left/top/bottom da barra p/ alinhar. */}
           <div
-            className={presentation ? "flex flex-col items-center lg:-mr-12 lg:translate-x-2" : "flex flex-col items-center"}
+            className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(-90px) translateX(8px) scale(0.92)",
+              transform: "perspective(1400px) translateZ(-60px) translateX(4px) scale(0.88)",
               transformOrigin: "center right",
               filter: "brightness(0.86) saturate(0.92) blur(0.3px) drop-shadow(0 18px 28px rgba(0,0,0,0.55))",
               opacity: 0.95,
             } : undefined}
           >
-            <div className="relative w-[440px] select-none">
+            <div className={presentation ? "relative w-[320px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
