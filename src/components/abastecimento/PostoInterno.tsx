@@ -510,7 +510,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             return (
               <div className={
                 presentation
-                  ? "flex w-full max-w-[320px] min-h-0 flex-col justify-center gap-3 lg:w-[300px] lg:self-center"
+                  ? "flex w-full max-w-[260px] min-h-0 flex-col justify-center gap-2.5 lg:w-[240px] lg:self-center"
                   : "grid w-full max-w-[520px] grid-cols-2 gap-3 lg:w-[300px] lg:grid-cols-1 lg:self-center"
               }>
                 {cards.map(c => (
