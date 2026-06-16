@@ -1616,21 +1616,21 @@ export default function Abastecimento() {
           </button>
 
           {/* ── Linha 1: Header compacto ── */}
-          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1.4vh] pb-[0.6vh]">
-            <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
+          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1vh] pb-[0.4vh]">
+            <img src={sgtLogo} alt="SGT" className="h-6 w-auto" />
             <div className="flex flex-col leading-none">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
-              <span className="text-[clamp(0.95rem,1.4vw,1.4rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
+              <span className="text-[clamp(0.85rem,1.2vw,1.2rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
-            <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-3 py-1 text-[10px] font-bold text-emerald-300 lg:inline-flex">
+            <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-2.5 py-0.5 text-[9px] font-bold text-emerald-300 lg:inline-flex">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
             </span>
           </div>
 
-          {/* ── Linha 2: Indicadores externos de mercado (substitui KPIs internos) ── */}
+          {/* ── Linha 2: Indicadores externos de mercado (compactos) ── */}
           <div
-            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,1vw,16px)] px-[3vw] pt-[0.4vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
-            style={{ height: "clamp(76px,11vh,108px)" }}
+            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,0.9vw,14px)] px-[3vw] pt-[0.2vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(64px,8vh,84px)" }}
           >
             {marketIndicators.map(m => (
               <MarketIndicatorCard key={m.title} {...m} />
@@ -1638,17 +1638,17 @@ export default function Abastecimento() {
           </div>
 
           {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
-              Usa transform: scale(min(...)) para encolher o conjunto até caber
-              tanto na largura quanto na altura disponíveis, sem cortar tanque
-              ou bomba. Tamanho natural do conjunto: ~1240×640px. */}
-          <div className="relative z-10 flex min-h-0 items-center justify-center overflow-hidden">
+              Tamanho natural reduzido (1120×540) e desconto de altura maior
+              (180px ≈ header + cards + paddings) para garantir que tanque e
+              bomba caibam inteiros em 100dvh sem nunca gerar scroll. */}
+          <div className="relative z-10 flex min-h-0 items-start justify-center overflow-hidden pt-[clamp(2px,0.4vh,8px)] pb-[clamp(6px,0.8vh,12px)]">
             <div
-              className="origin-center"
+              className="origin-top"
               style={{
-                width: 1240,
-                height: 640,
+                width: 1120,
+                height: 540,
                 transform:
-                  "scale(min(calc((100vw - 60px) / 1240), calc((100dvh - 230px) / 640)))",
+                  "scale(min(calc((100vw - 48px) / 1120), calc((100dvh - 180px) / 540)))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />
