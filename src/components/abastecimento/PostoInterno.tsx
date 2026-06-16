@@ -233,73 +233,91 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             </div>
           </div>
 
-          {/* ═════════ DUTO DE TRANSFERÊNCIA — mangueira tanque → bomba ═══════
-              Mangueira de borracha contínua: as flanges das pontas encostam no
-              tanque (esq.) e na bomba (dir.). As margens negativas cancelam o
-              gap do flex para a mangueira realmente conectar os dois corpos.
+          {/* ═════════ DUTO DE TRANSFERÊNCIA — mangueira industrial ══════════
+              Mangueira de borracha glossy conectando tanque → bomba. Diesel
+              viaja por dentro como pulsos de luz. Ferrules de metal cromado
+              crimpado nas pontas encostam em cada equipamento.
               Ajuste -mx-* / pb-* apenas para reposicionar. */}
-          <div className="relative z-0 -mx-16 hidden lg:flex flex-col items-center gap-2 pb-40">
+          <div className="relative z-0 -mx-[68px] hidden lg:flex flex-col items-center gap-2 pb-40">
             <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-600">Duto de transferência</span>
-            <svg viewBox="0 0 380 120" className="h-[120px] w-[380px] overflow-visible" fill="none">
+            <svg viewBox="0 0 380 132" className="h-[132px] w-[380px] overflow-visible" fill="none">
               <defs>
-                {/* corpo de borracha (cilíndrico vertical) */}
-                <linearGradient id="sgt-duto" gradientUnits="userSpaceOnUse" x1="0" y1="22" x2="0" y2="96">
-                  <stop offset="0"    stopColor="#2c313a" />
-                  <stop offset="0.34" stopColor="#3c434e" />
-                  <stop offset="0.62" stopColor="#15181e" />
-                  <stop offset="1"    stopColor="#0a0c10" />
+                {/* borracha glossy — cilindro com banda de brilho */}
+                <linearGradient id="sgt-duto" gradientUnits="userSpaceOnUse" x1="0" y1="26" x2="0" y2="100">
+                  <stop offset="0"    stopColor="#20242b" />
+                  <stop offset="0.30" stopColor="#474f5b" />
+                  <stop offset="0.47" stopColor="#363d47" />
+                  <stop offset="0.52" stopColor="#2a313a" />
+                  <stop offset="0.76" stopColor="#13161c" />
+                  <stop offset="1"    stopColor="#07090c" />
                 </linearGradient>
-                {/* metal polido das flanges/braçadeiras */}
-                <linearGradient id="sgt-cuff" gradientUnits="userSpaceOnUse" x1="0" y1="16" x2="0" y2="60">
-                  <stop offset="0"    stopColor="#aeb9c7" />
-                  <stop offset="0.5"  stopColor="#5a6675" />
-                  <stop offset="0.55" stopColor="#3b4655" />
-                  <stop offset="1"    stopColor="#1b2129" />
-                </linearGradient>
-                {/* glow do fluxo de diesel */}
-                <linearGradient id="sgt-flow" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0"   stopColor="#fbbf24" stopOpacity="0" />
-                  <stop offset="0.5" stopColor="#fcd34d" stopOpacity="0.95" />
-                  <stop offset="1"   stopColor="#fbbf24" stopOpacity="0" />
+                {/* cromo polido — dupla especular */}
+                <linearGradient id="sgt-cuff" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="62">
+                  <stop offset="0"    stopColor="#eef3f8" />
+                  <stop offset="0.20" stopColor="#c0cad6" />
+                  <stop offset="0.40" stopColor="#6c7886" />
+                  <stop offset="0.52" stopColor="#2c343f" />
+                  <stop offset="0.62" stopColor="#5a6674" />
+                  <stop offset="0.82" stopColor="#aab4c2" />
+                  <stop offset="1"    stopColor="#dde4ee" />
                 </linearGradient>
               </defs>
 
-              {/* curva única (catenária) — base escura → corpo → brilho → trança */}
               {(() => {
-                const D = "M18 38 C 80 38, 116 84, 190 84 C 264 84, 300 38, 362 38";
+                const D = "M16 40 C 86 40, 112 88, 190 88 C 268 88, 294 40, 364 40";
                 return (
                   <>
-                    <path d={D} stroke="#070708" strokeWidth="24" strokeLinecap="round" />
-                    <path d={D} stroke="url(#sgt-duto)" strokeWidth="19" strokeLinecap="round" />
-                    <path d={D} stroke="rgba(255,255,255,0.16)" strokeWidth="3" strokeLinecap="round" transform="translate(0,-3.5)" />
-                    <path d={D} stroke="rgba(0,0,0,0.4)" strokeWidth="19" strokeLinecap="round" strokeDasharray="2.2 7" />
-                    {/* fluxo de diesel percorrendo a mangueira */}
-                    <path
-                      d={D}
-                      className="sgt-anim"
-                      stroke="url(#sgt-flow)"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeDasharray="16 24"
-                      style={{ animation: "sgt-flow-dash 1.5s linear infinite", filter: "drop-shadow(0 0 3px rgba(251,191,36,0.6))" }}
-                    />
+                    {/* halo âmbar ambiente (calor do diesel) */}
+                    <path d={D} stroke="#fbbf24" strokeWidth="20" strokeLinecap="round" opacity="0.10" style={{ filter: "blur(7px)" }} />
+                    {/* sombra projetada */}
+                    <path d={D} stroke="#000000" strokeWidth="22" strokeLinecap="round" opacity="0.45" transform="translate(0,5)" style={{ filter: "blur(4px)" }} />
+
+                    {/* corpo da mangueira */}
+                    <path d={D} stroke="#05070a" strokeWidth="26" strokeLinecap="round" />
+                    <path d={D} stroke="url(#sgt-duto)" strokeWidth="21" strokeLinecap="round" />
+                    {/* oclusão inferior — dá volume cilíndrico */}
+                    <path d={D} stroke="#05070a" strokeWidth="21" strokeLinecap="round" opacity="0.28" transform="translate(0,4)" />
+                    {/* sheen superior macio + linha de brilho fina */}
+                    <path d={D} stroke="#ffffff" strokeWidth="8" strokeLinecap="round" opacity="0.07" transform="translate(0,-3)" style={{ filter: "blur(2px)" }} />
+                    <path d={D} stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.22" transform="translate(0,-4.5)" />
+
+                    {/* canal interno escuro (sulco onde o diesel passa) */}
+                    <path d={D} stroke="#04060a" strokeWidth="8" strokeLinecap="round" opacity="0.65" />
+
+                    {/* fluxo de diesel — pulsos de luz viajando por dentro */}
+                    <path d={D} className="sgt-anim" stroke="#fbbf24" strokeWidth="13" strokeLinecap="round" strokeDasharray="5 35" opacity="0.5"
+                      style={{ animation: "sgt-flow-dash 2s linear infinite", filter: "blur(3px)" }} />
+                    <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="5.5" strokeLinecap="round" strokeDasharray="5 35"
+                      style={{ animation: "sgt-flow-dash 2s linear infinite", filter: "drop-shadow(0 0 4px rgba(251,191,36,0.9))" }} />
+                    <path d={D} className="sgt-anim" stroke="#fff7e6" strokeWidth="5.5" strokeLinecap="round" strokeDasharray="5 35"
+                      style={{ animation: "sgt-flow-dash 2s linear infinite", animationDelay: "-1s", filter: "drop-shadow(0 0 4px rgba(251,191,36,0.9))" }} />
+
+                    {/* braçadeira de apoio no ponto mais baixo */}
+                    <rect x="186" y="76" width="8" height="24" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                    <rect x="187.5" y="77" width="1.6" height="22" rx="0.8" fill="#ffffff" opacity="0.4" />
                   </>
                 );
               })()}
 
-              {/* flange esquerda — bocal de saída no tanque */}
+              {/* ── Ferrule esquerdo — fitting crimpado no tanque ── */}
               <g>
-                <rect x="0"  y="22" width="10" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(255,255,255,0.28)" strokeWidth="0.7" />
-                <rect x="10" y="27" width="8"  height="22" rx="2" fill="url(#sgt-cuff)" stroke="rgba(255,255,255,0.22)" strokeWidth="0.6" />
-              </g>
-              {/* flange direita — entrada na bomba */}
-              <g>
-                <rect x="370" y="22" width="10" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(255,255,255,0.28)" strokeWidth="0.7" />
-                <rect x="362" y="27" width="8"  height="22" rx="2" fill="url(#sgt-cuff)" stroke="rgba(255,255,255,0.22)" strokeWidth="0.6" />
+                <rect x="6"  y="29" width="26" height="22" rx="5" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                {[12, 17, 22, 27].map(x => <line key={x} x1={x} y1="30" x2={x} y2="50" stroke="rgba(0,0,0,0.35)" strokeWidth="1" />)}
+                <rect x="8" y="31" width="22" height="2" rx="1" fill="#ffffff" opacity="0.55" />
+                {/* porca hexagonal (rosca no tanque) */}
+                <rect x="-6" y="24" width="14" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.7" />
+                <rect x="-4" y="26" width="3" height="28" rx="1.5" fill="#ffffff" opacity="0.5" />
               </g>
 
-              {/* braçadeiras na curva */}
-              <ellipse cx="190" cy="84" rx="4" ry="11" fill="url(#sgt-cuff)" opacity="0.9" />
+              {/* ── Ferrule direito — fitting crimpado na bomba ── */}
+              <g>
+                <rect x="348" y="29" width="26" height="22" rx="5" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                {[353, 358, 363, 368].map(x => <line key={x} x1={x} y1="30" x2={x} y2="50" stroke="rgba(0,0,0,0.35)" strokeWidth="1" />)}
+                <rect x="350" y="31" width="22" height="2" rx="1" fill="#ffffff" opacity="0.55" />
+                {/* porca hexagonal (rosca na bomba) */}
+                <rect x="372" y="24" width="14" height="32" rx="3" fill="url(#sgt-cuff)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.7" />
+                <rect x="381" y="26" width="3" height="28" rx="1.5" fill="#ffffff" opacity="0.5" />
+              </g>
             </svg>
           </div>
 
