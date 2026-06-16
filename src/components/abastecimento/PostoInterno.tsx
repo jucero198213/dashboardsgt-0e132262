@@ -240,9 +240,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "relative z-20 flex flex-col items-center gap-3" : "flex flex-col items-center gap-4"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(60px) scale(1.04)",
+              transform: "perspective(1400px) translateZ(40px) scale(1.02)",
               transformOrigin: "center left",
-              filter: "drop-shadow(0 32px 42px rgba(0,0,0,0.7)) drop-shadow(0 0 20px rgba(251,191,36,0.08))",
+              filter: "drop-shadow(0 28px 36px rgba(0,0,0,0.7)) drop-shadow(0 0 16px rgba(251,191,36,0.08))",
             } : undefined}
           >
             <div className="relative flex flex-col items-center">
