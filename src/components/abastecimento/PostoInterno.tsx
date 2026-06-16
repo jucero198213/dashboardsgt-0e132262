@@ -188,22 +188,19 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   <clipPath id="tankBody"><rect x="26" y="104" width="248" height="306" rx="10" /></clipPath>
                 </defs>
 
-                {/* ── GUARDA-CORPO (railing em volta do topo plano) ── */}
-                <g>
-                  {/* trilho superior (elipse sutil) */}
-                  <ellipse cx="150" cy="76" rx="118" ry="11" fill="none" stroke="url(#metalRail)" strokeWidth="2" opacity="0.7" />
-                  <ellipse cx="150" cy="88" rx="122" ry="11" fill="none" stroke="url(#metalRail)" strokeWidth="1.5" opacity="0.5" />
-                  {/* postes verticais (pousam na tampa) */}
-                  {[36, 93, 150, 207, 264].map(x => (
-                    <line key={x} x1={x} y1="98" x2={x} y2="72" stroke="url(#metalRail)" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
-                  ))}
-                </g>
-
                 {/* ── TAMPA superior plana (lid sólido) ── */}
                 <ellipse cx="150" cy="104" rx="124" ry="14" fill="url(#tankDome)" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
                 <ellipse cx="150" cy="100" rx="104" ry="8" fill="#ffffff" opacity="0.08" />
                 {/* bocal de respiro */}
                 <rect x="138" y="92" width="22" height="14" rx="3" fill="url(#metalRail)" />
+
+                {/* ── GUARDA-CORPO (postes verticais + trilho fino) ── */}
+                <g>
+                  {[40, 77, 114, 150, 186, 223, 260].map(x => (
+                    <line key={x} x1={x} y1="94" x2={x} y2="64" stroke="url(#metalRail)" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
+                  ))}
+                  <ellipse cx="150" cy="64" rx="116" ry="9" fill="none" stroke="url(#metalRail)" strokeWidth="2" opacity="0.7" />
+                </g>
 
                 {/* ── CORPO CILÍNDRICO (retângulo preenchido) ── */}
                 <rect x="26" y="104" width="248" height="306" rx="10" fill="url(#tankSteel)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
@@ -226,28 +223,15 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   ))}
                 </g>
 
-                {/* ── ESCADA reta de acesso (lateral esquerda) ── */}
+                {/* ── ESCADA de acesso (esquerda) — rails claros subindo até o topo ── */}
                 <g>
-                  <line x1="44" y1="116" x2="44" y2="398" stroke="url(#metalRail)" strokeWidth="3" strokeLinecap="round" />
-                  <line x1="60" y1="116" x2="60" y2="398" stroke="url(#metalRail)" strokeWidth="3" strokeLinecap="round" />
-                  {Array.from({ length: 15 }).map((_, i) => {
-                    const y = 124 + i * 19;
-                    return <line key={i} x1="44" y1={y} x2="60" y2={y} stroke="#9aa6b5" strokeOpacity="0.6" strokeWidth="2" />;
+                  <line x1="42" y1="60" x2="42" y2="402" stroke="url(#metalRail)" strokeWidth="3.5" strokeLinecap="round" />
+                  <line x1="60" y1="60" x2="60" y2="402" stroke="url(#metalRail)" strokeWidth="3.5" strokeLinecap="round" />
+                  {Array.from({ length: 17 }).map((_, i) => {
+                    const y = 96 + i * 18;
+                    return <line key={i} x1="42" y1={y} x2="60" y2={y} stroke="#c0cad6" strokeOpacity="0.75" strokeWidth="2.4" />;
                   })}
                 </g>
-
-                {/* ── VISOR DE NÍVEL (sight glass) direita ── */}
-                {(() => {
-                  const lvl = Math.max(0, Math.min(100, pct));
-                  const top = 130, bot = 392, h = (bot - top) * (lvl / 100);
-                  return (
-                    <g>
-                      <rect x="244" y={top} width="6" height={bot - top} rx="3" fill="#05070a" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                      <rect x="244" y={bot - h} width="6" height={h} rx="3" fill="url(#tankAmber)" />
-                      <rect x="245" y={top} width="1.5" height={bot - top} fill="#ffffff" opacity="0.2" />
-                    </g>
-                  );
-                })()}
 
                 {/* ── FLANGE de conexão do duto — estende até a borda (x=300) ── */}
                 <g transform="translate(274,250)">
