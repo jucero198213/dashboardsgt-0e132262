@@ -148,13 +148,13 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
             style={presentation ? {
-              transform: "perspective(1400px) translateZ(-60px) translateX(4px) scale(0.88)",
+              transform: "perspective(1400px) translateZ(-40px) translateX(2px) scale(0.85)",
               transformOrigin: "center right",
               filter: "brightness(0.86) saturate(0.92) blur(0.3px) drop-shadow(0 18px 28px rgba(0,0,0,0.55))",
               opacity: 0.95,
             } : undefined}
           >
-            <div className={presentation ? "relative w-[320px] select-none" : "relative w-[440px] select-none"}>
+            <div className={presentation ? "relative w-[260px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
