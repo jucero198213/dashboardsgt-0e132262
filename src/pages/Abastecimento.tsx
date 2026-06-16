@@ -157,20 +157,58 @@ const abicomLabel =
   : "pressão moderada";
 
 interface MarketIndicator {
-  title:     string;
-  value:     string;
-  subtitle:  string;
-  source:    IndicatorSource;
-  status?:   IndicatorStatus;
-  updatedAt?: string;
+  title:       string;
+  value:       string;
+  bottomLeft:  string;
+  bottomRight: string;
+  source:      IndicatorSource;
+  status?:     IndicatorStatus;
 }
 
+const diffAbsRs = Math.abs(PRECO_INTERNO - ANP_DIESEL_S10);
+const diffAbsRsFmt = `${diffVsAnpPct < 0 ? "−" : "+"}R$ ${diffAbsRs.toFixed(2).replace(".", ",")}/L`;
+
 const marketIndicators: MarketIndicator[] = [
-  { title: "Diesel S10 ANP", value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`, subtitle: "SP · última semana", source: "ANP",    status: "neutral",  updatedAt: "16/06/2026" },
-  { title: "Preço Interno",  value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,  subtitle: "frota própria · posto interno", source: "INTERNO", status: "neutral" },
-  { title: "Diferença vs ANP", value: diffFormatted, subtitle: diffLabel, source: "INTERNO", status: diffStatus },
-  { title: "ABICOM / PPI",   value: `${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`, subtitle: `defasagem diesel · ${abicomLabel}`, source: "ABICOM", status: abicomStatus, updatedAt: "16/06/2026" },
-  { title: "ANTT / Frete",   value: "Vigente", subtitle: "piso mínimo de frete", source: "ANTT", status: "positive", updatedAt: "16/06/2026" },
+  {
+    title: "Diesel S10 ANP",
+    value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "SP · última semana",
+    bottomRight: "Atualizado em 16/06/2026",
+    source: "ANP",
+    status: "neutral",
+  },
+  {
+    title: "Preço Interno",
+    value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "frota própria · posto interno",
+    bottomRight: "média do período",
+    source: "INTERNO",
+    status: "neutral",
+  },
+  {
+    title: "Diferença vs ANP",
+    value: diffFormatted,
+    bottomLeft:  diffVsAnpPct < 0 ? "economia estimada" : "acima do mercado",
+    bottomRight: diffAbsRsFmt,
+    source: "INTERNO",
+    status: diffStatus,
+  },
+  {
+    title: "ABICOM / PPI",
+    value: abicomLabel.charAt(0).toUpperCase() + abicomLabel.slice(1),
+    bottomLeft:  `Diesel: ${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`,
+    bottomRight: "paridade importação",
+    source: "ABICOM",
+    status: abicomStatus,
+  },
+  {
+    title: "ANTT / Frete",
+    value: "Vigente",
+    bottomLeft:  "piso mínimo de frete",
+    bottomRight: "última atualização 16/06",
+    source: "ANTT",
+    status: "positive",
+  },
 ];
 
 const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: string }> = {
@@ -180,16 +218,22 @@ const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: s
   danger:   { text: "#f87171", ring: "rgba(248,113,113,0.40)", dot: "#f87171" },
 };
 
-function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral", updatedAt }: MarketIndicator) {
+function MarketIndicatorCard({ title, value, bottomLeft, bottomRight, source, status = "neutral" }: MarketIndicator) {
   const colors = STATUS_COLOR[status];
   const fallback = value === "--" || value === "—";
+  // Valores textuais longos (ex.: "Pressão moderada") usam fonte menor
+  // para evitar truncamento com reticências.
+  const isLongText = value.length > 10 && !/^[R$\-+−]?\s?\d/.test(value);
+  const valueClass = isLongText
+    ? "text-[clamp(0.95rem,1.6vh,1.35rem)]"
+    : "text-[clamp(1.15rem,2.2vh,1.8rem)]";
   return (
     <div
-      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(10px,1vw,16px)] py-[clamp(8px,1.2vh,14px)] backdrop-blur-sm transition-colors"
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(12px,1.2vw,20px)] py-[clamp(10px,1.3vh,16px)] backdrop-blur-sm"
       style={{ borderColor: colors.ring }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500">{title}</span>
+        <span className="truncate text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">{title}</span>
         <span
           className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em]"
           style={{ color: colors.text, borderColor: colors.ring, background: "rgba(255,255,255,0.025)" }}
@@ -199,17 +243,17 @@ function MarketIndicatorCard({ title, value, subtitle, source, status = "neutral
         </span>
       </div>
       <p
-        className="mt-1 truncate text-[clamp(1.05rem,2.1vh,1.75rem)] font-black leading-none tabular-nums tracking-[-0.02em]"
+        className={`mt-1 ${valueClass} font-black leading-tight tabular-nums tracking-[-0.02em] whitespace-nowrap`}
         style={{ color: fallback ? "#64748b" : colors.text }}
       >
         {fallback ? "--" : value}
       </p>
-      <div className="mt-1 flex items-end justify-between gap-2">
-        <span className="truncate text-[10px] font-semibold text-slate-500">
-          {fallback ? "aguardando atualização" : subtitle}
+      <div className="mt-1 flex items-end justify-between gap-3">
+        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+          {fallback ? "aguardando atualização" : bottomLeft}
         </span>
-        {updatedAt && !fallback && (
-          <span className="shrink-0 text-[8px] font-semibold uppercase tracking-[0.16em] text-slate-600">{updatedAt}</span>
+        {!fallback && bottomRight && (
+          <span className="shrink-0 text-[10px] font-semibold text-slate-500 text-right">{bottomRight}</span>
         )}
       </div>
     </div>
