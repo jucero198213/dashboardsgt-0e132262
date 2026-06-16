@@ -234,106 +234,103 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           </div>
 
           {/* ═════════ LINHA DE TRANSFERÊNCIA ════════════════════════════════
-              Conceito do zero: cada ponta termina numa PORTA BULKHEAD parafusada
-              na parede (placa + bujão cromado) e a mangueira corre entre as duas
-              com sag natural. O diesel desce em glóbulos de luz por dentro.
-              Ajuste -mx-* / pb-* apenas para reposicionar. */}
-          <div className="relative z-0 -mx-[70px] hidden lg:flex flex-col items-center gap-2.5 pb-40">
-            <span className="text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">Linha de transferência</span>
-            <svg viewBox="0 0 360 140" className="h-[140px] w-[360px] overflow-visible" fill="none">
-              <defs>
-                {/* borracha glossy do mangote */}
-                <linearGradient id="sgt-pipe" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="116">
-                  <stop offset="0"    stopColor="#262b33" />
-                  <stop offset="0.27" stopColor="#4e5765" />
-                  <stop offset="0.45" stopColor="#39414c" />
-                  <stop offset="0.52" stopColor="#2b323c" />
-                  <stop offset="0.78" stopColor="#13161c" />
-                  <stop offset="1"    stopColor="#070a0e" />
-                </linearGradient>
-                {/* cromo do bujão/colar */}
-                <linearGradient id="sgt-collar" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="74">
-                  <stop offset="0"    stopColor="#f4f8fc" />
-                  <stop offset="0.20" stopColor="#c6cfdb" />
-                  <stop offset="0.42" stopColor="#73808f" />
-                  <stop offset="0.52" stopColor="#2a323d" />
-                  <stop offset="0.62" stopColor="#5e6a78" />
-                  <stop offset="0.82" stopColor="#b0bac8" />
-                  <stop offset="1"    stopColor="#e4ebf4" />
-                </linearGradient>
-                {/* placa de montagem (metal fosco escuro) */}
-                <linearGradient id="sgt-plate" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="86">
-                  <stop offset="0"   stopColor="#2c333d" />
-                  <stop offset="0.5" stopColor="#1a1f27" />
-                  <stop offset="1"   stopColor="#0b0e13" />
-                </linearGradient>
-                {/* cabeça de parafuso */}
-                <radialGradient id="sgt-bolt" cx="0.35" cy="0.3" r="0.8">
-                  <stop offset="0"   stopColor="#cdd6e1" />
-                  <stop offset="0.5" stopColor="#717d8c" />
-                  <stop offset="1"   stopColor="#222933" />
-                </radialGradient>
-              </defs>
+              Estrutura responsiva: o container ESTICA (flex-1) para preencher o
+              vão entre tanque e bomba; o `-mx-16` cancela o gap do flex para as
+              bordas tocarem os dois corpos. A mangueira é desenhada de borda a
+              borda (preserveAspectRatio="none" → sempre conecta), e as conexões
+              ficam ancoradas/fixas em cada parede (sem distorcer). */}
+          <div className="relative z-0 -mx-16 hidden lg:flex flex-1 flex-col items-center justify-end pb-40">
+            <span className="mb-2.5 text-[9px] font-bold uppercase tracking-[0.34em] text-slate-600">Linha de transferência</span>
 
-              {(() => {
-                // Mangote correndo de bujão a bujão, com sag natural
-                const D = "M34 52 C 108 52, 132 102, 180 102 C 228 102, 252 52, 326 52";
-                return (
-                  <>
-                    {/* under-glow âmbar (calor do combustível) */}
-                    <path d={D} stroke="#f59e0b" strokeWidth="22" strokeLinecap="round" opacity="0.09" style={{ filter: "blur(8px)" }} />
-                    {/* contato/sombra ao chão */}
-                    <path d={D} stroke="#000000" strokeWidth="24" strokeLinecap="round" opacity="0.4" transform="translate(0,6)" style={{ filter: "blur(5px)" }} />
+            <div className="relative h-[140px] w-full">
+              {/* defs compartilhados (gradientes) */}
+              <svg width="0" height="0" className="absolute">
+                <defs>
+                  <linearGradient id="sgt-pipe" gradientUnits="userSpaceOnUse" x1="0" y1="46" x2="0" y2="124">
+                    <stop offset="0"    stopColor="#262b33" />
+                    <stop offset="0.27" stopColor="#4e5765" />
+                    <stop offset="0.45" stopColor="#39414c" />
+                    <stop offset="0.52" stopColor="#2b323c" />
+                    <stop offset="0.78" stopColor="#13161c" />
+                    <stop offset="1"    stopColor="#070a0e" />
+                  </linearGradient>
+                  <linearGradient id="sgt-collar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"    stopColor="#f4f8fc" />
+                    <stop offset="0.20" stopColor="#c6cfdb" />
+                    <stop offset="0.42" stopColor="#73808f" />
+                    <stop offset="0.52" stopColor="#2a323d" />
+                    <stop offset="0.62" stopColor="#5e6a78" />
+                    <stop offset="0.82" stopColor="#b0bac8" />
+                    <stop offset="1"    stopColor="#e4ebf4" />
+                  </linearGradient>
+                  <linearGradient id="sgt-plate" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"   stopColor="#2c333d" />
+                    <stop offset="0.5" stopColor="#1a1f27" />
+                    <stop offset="1"   stopColor="#0b0e13" />
+                  </linearGradient>
+                  <radialGradient id="sgt-bolt" cx="0.35" cy="0.3" r="0.8">
+                    <stop offset="0"   stopColor="#cdd6e1" />
+                    <stop offset="0.5" stopColor="#717d8c" />
+                    <stop offset="1"   stopColor="#222933" />
+                  </radialGradient>
+                </defs>
+              </svg>
 
-                    {/* mangote: contorno → corpo → oclusão → brilhos */}
-                    <path d={D} stroke="#04060a" strokeWidth="30" strokeLinecap="round" />
-                    <path d={D} stroke="url(#sgt-pipe)" strokeWidth="24" strokeLinecap="round" />
-                    <path d={D} stroke="#04060a" strokeWidth="24" strokeLinecap="round" opacity="0.26" transform="translate(0,5)" />
-                    <path d={D} stroke="#ffffff" strokeWidth="9" strokeLinecap="round" opacity="0.06" transform="translate(0,-4)" style={{ filter: "blur(2.5px)" }} />
-                    <path d={D} stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" opacity="0.24" transform="translate(0,-5.5)" />
+              {/* ── MANGUEIRA — estica de borda a borda do container ── */}
+              <svg viewBox="0 0 360 140" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
+                {(() => {
+                  const D = "M0 70 C 96 70, 120 116, 180 116 C 240 116, 264 70, 360 70";
+                  return (
+                    <>
+                      <path d={D} stroke="#f59e0b" strokeWidth="22" strokeLinecap="round" opacity="0.09" style={{ filter: "blur(8px)" }} />
+                      <path d={D} stroke="#000000" strokeWidth="24" strokeLinecap="round" opacity="0.4" transform="translate(0,6)" style={{ filter: "blur(5px)" }} />
 
-                    {/* sulco interno escuro */}
-                    <path d={D} stroke="#03050a" strokeWidth="9" strokeLinecap="round" opacity="0.7" />
+                      <path d={D} stroke="#04060a" strokeWidth="30" strokeLinecap="round" />
+                      <path d={D} stroke="url(#sgt-pipe)" strokeWidth="24" strokeLinecap="round" />
+                      <path d={D} stroke="#04060a" strokeWidth="24" strokeLinecap="round" opacity="0.26" transform="translate(0,5)" />
+                      <path d={D} stroke="#ffffff" strokeWidth="9" strokeLinecap="round" opacity="0.06" transform="translate(0,-4)" style={{ filter: "blur(2.5px)" }} />
+                      <path d={D} stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" opacity="0.24" transform="translate(0,-5.5)" />
 
-                    {/* diesel — glóbulos de luz descendo a linha */}
-                    <path d={D} className="sgt-anim" stroke="#f59e0b" strokeWidth="15" strokeLinecap="round" strokeDasharray="7 81" opacity="0.45"
-                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "blur(4px)" }} />
-                    <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
-                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
-                    <path d={D} className="sgt-anim" stroke="#fff6df" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
-                      style={{ animation: "sgt-diesel-flow 3.2s linear infinite", animationDelay: "-1.6s", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
+                      <path d={D} stroke="#03050a" strokeWidth="9" strokeLinecap="round" opacity="0.7" />
 
-                    {/* abraçadeira de apoio no fundo da curva */}
-                    <g transform="translate(180,102)">
-                      <rect x="-5" y="-15" width="10" height="30" rx="3.5" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
-                      <rect x="-3.5" y="-14" width="2" height="28" rx="1" fill="#ffffff" opacity="0.45" />
-                    </g>
-                  </>
-                );
-              })()}
+                      {/* diesel — glóbulos de luz descendo a linha */}
+                      <path d={D} className="sgt-anim" stroke="#f59e0b" strokeWidth="15" strokeLinecap="round" strokeDasharray="7 81" opacity="0.45"
+                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "blur(4px)" }} />
+                      <path d={D} className="sgt-anim" stroke="#fde68a" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
+                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
+                      <path d={D} className="sgt-anim" stroke="#fff6df" strokeWidth="6" strokeLinecap="round" strokeDasharray="7 81"
+                        style={{ animation: "sgt-diesel-flow 3.2s linear infinite", animationDelay: "-1.6s", filter: "drop-shadow(0 0 5px rgba(251,191,36,0.95))" }} />
+                    </>
+                  );
+                })()}
+              </svg>
 
-              {/* ── Porta bulkhead ESQUERDA (parede do tanque) ── */}
-              <g>
-                <rect x="-2" y="26" width="22" height="52" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-                <circle cx="8" cy="36" r="2.6" fill="url(#sgt-bolt)" />
-                <circle cx="8" cy="68" r="2.6" fill="url(#sgt-bolt)" />
-                {/* bujão cromado (a mangueira entra aqui) */}
-                <rect x="14" y="40" width="24" height="24" rx="6" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
-                {[20, 26, 32].map(x => <line key={x} x1={x} y1="42" x2={x} y2="62" stroke="rgba(0,0,0,0.32)" strokeWidth="1.1" />)}
-                <rect x="16" y="42" width="22" height="2.4" rx="1.2" fill="#ffffff" opacity="0.6" />
-              </g>
+              {/* abraçadeira de apoio no fundo da curva (centro, sem distorcer) */}
+              <svg viewBox="0 0 16 40" className="absolute left-1/2 top-[116px] h-10 w-4 -translate-x-1/2 -translate-y-1/2 overflow-visible" fill="none">
+                <rect x="3" y="5" width="10" height="30" rx="3.5" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.45)" strokeWidth="0.6" />
+                <rect x="4.5" y="6" width="2" height="28" rx="1" fill="#ffffff" opacity="0.45" />
+              </svg>
 
-              {/* ── Porta bulkhead DIREITA (parede da bomba) ── */}
-              <g>
-                <rect x="340" y="26" width="22" height="52" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-                <circle cx="352" cy="36" r="2.6" fill="url(#sgt-bolt)" />
-                <circle cx="352" cy="68" r="2.6" fill="url(#sgt-bolt)" />
-                {/* bujão cromado (a mangueira entra aqui) */}
-                <rect x="322" y="40" width="24" height="24" rx="6" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
-                {[328, 334, 340].map(x => <line key={x} x1={x} y1="42" x2={x} y2="62" stroke="rgba(0,0,0,0.32)" strokeWidth="1.1" />)}
-                <rect x="324" y="42" width="22" height="2.4" rx="1.2" fill="#ffffff" opacity="0.6" />
-              </g>
-            </svg>
+              {/* ── CONEXÃO ESQUERDA (parede do tanque) — fixa, não distorce ── */}
+              <svg viewBox="0 0 52 96" className="absolute left-0 top-[70px] h-24 w-[52px] -translate-x-1/2 -translate-y-1/2 overflow-visible" fill="none">
+                <rect x="2" y="18" width="18" height="60" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <circle cx="11" cy="30" r="3" fill="url(#sgt-bolt)" />
+                <circle cx="11" cy="66" r="3" fill="url(#sgt-bolt)" />
+                <rect x="14" y="33" width="32" height="30" rx="8" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
+                {[22, 29, 36].map(x => <line key={x} x1={x} y1="35" x2={x} y2="61" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2" />)}
+                <rect x="16" y="35.5" width="28" height="2.6" rx="1.3" fill="#ffffff" opacity="0.6" />
+              </svg>
+
+              {/* ── CONEXÃO DIREITA (parede da bomba) — espelhada ── */}
+              <svg viewBox="0 0 52 96" className="absolute right-0 top-[70px] h-24 w-[52px] -translate-y-1/2 translate-x-1/2 -scale-x-100 overflow-visible" fill="none">
+                <rect x="2" y="18" width="18" height="60" rx="6" fill="url(#sgt-plate)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <circle cx="11" cy="30" r="3" fill="url(#sgt-bolt)" />
+                <circle cx="11" cy="66" r="3" fill="url(#sgt-bolt)" />
+                <rect x="14" y="33" width="32" height="30" rx="8" fill="url(#sgt-collar)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.7" />
+                {[22, 29, 36].map(x => <line key={x} x1={x} y1="35" x2={x} y2="61" stroke="rgba(0,0,0,0.32)" strokeWidth="1.2" />)}
+                <rect x="16" y="35.5" width="28" height="2.6" rx="1.3" fill="#ffffff" opacity="0.6" />
+              </svg>
+            </div>
           </div>
 
           {/* ═════════ BOMBA CORPORATIVA — vintage dark-chrome ═════════ */}
