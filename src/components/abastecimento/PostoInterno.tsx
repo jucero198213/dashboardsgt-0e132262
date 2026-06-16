@@ -133,104 +133,150 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
         <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
 
-          {/* ═════════ TANQUE DE ARMAZENAMENTO — cilíndrico industrial ═════════ */}
+          {/* ═════════ TANQUE DE ARMAZENAMENTO — cilíndrico industrial (SVG único) ═══
+              Toda a estrutura (corpo, domo, guarda-corpo, escada, flanges) é
+              desenhada num único <svg> no mesmo viewBox → nada flutua/descola e
+              tudo escala junto. O display fica sobreposto em HTML (texto nítido). */}
           <div className="flex flex-col items-center gap-4">
-            <div className="relative pt-14">
+            <div className="relative h-[480px] w-[300px]">
               {/* Halo quente sutil (base) */}
-              <div className="pointer-events-none absolute -inset-8 top-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_88%,rgba(251,191,36,0.08),transparent_68%)]" />
+              <div className="pointer-events-none absolute inset-x-[-32px] bottom-[-24px] top-[120px] rounded-[60px] bg-[radial-gradient(ellipse_at_50%_88%,rgba(251,191,36,0.07),transparent_68%)]" />
 
-              {/* ── GUARDA-CORPO superior ── */}
-              <div className="absolute left-1/2 top-0 z-30 h-14 w-[236px] -translate-x-1/2">
-                {/* trilho superior (elipse) */}
-                <div className="absolute inset-x-0 top-0 h-5 rounded-[100%] border-2 border-slate-400/55 bg-[linear-gradient(180deg,rgba(150,162,178,0.22),transparent)] shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
-                {/* trilho médio (elipse) */}
-                <div className="absolute inset-x-0 top-[26px] h-3.5 rounded-[100%] border border-slate-400/35" />
-                {/* balaústres verticais */}
-                {[6, 24, 50, 76, 94].map((l, i) => (
-                  <div key={i} className="absolute top-2 h-11 w-[3px] rounded bg-[linear-gradient(180deg,#9aa7b6,#39434f)] shadow-[1px_0_1px_rgba(0,0,0,0.45)]" style={{ left: `${l}%` }} />
-                ))}
-              </div>
+              <svg viewBox="0 0 300 480" className="absolute inset-0 h-full w-full overflow-visible" fill="none">
+                <defs>
+                  {/* aço escuro escovado (gunmetal) — gradiente suave do cilindro */}
+                  <linearGradient id="tankSteel" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0"    stopColor="#14171b" />
+                    <stop offset="0.16" stopColor="#23282e" />
+                    <stop offset="0.40" stopColor="#3a4047" />
+                    <stop offset="0.50" stopColor="#48505a" />
+                    <stop offset="0.60" stopColor="#373d45" />
+                    <stop offset="0.84" stopColor="#20252b" />
+                    <stop offset="1"    stopColor="#121519" />
+                  </linearGradient>
+                  <linearGradient id="tankDome" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"   stopColor="#9aa6b5" />
+                    <stop offset="0.5" stopColor="#5d6877" />
+                    <stop offset="1"   stopColor="#363f4b" />
+                  </linearGradient>
+                  <linearGradient id="tankBase" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#2a313c" />
+                    <stop offset="1" stopColor="#0b0e13" />
+                  </linearGradient>
+                  <linearGradient id="metalRail" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0"   stopColor="#b3bfcd" />
+                    <stop offset="0.5" stopColor="#6c7886" />
+                    <stop offset="1"   stopColor="#2c343f" />
+                  </linearGradient>
+                  <linearGradient id="tankSpec" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0"   stopColor="#ffffff" stopOpacity="0" />
+                    <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.55" />
+                    <stop offset="1"   stopColor="#ffffff" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="tankAmber" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#fcd34d" />
+                    <stop offset="1" stopColor="#b45309" />
+                  </linearGradient>
+                  <radialGradient id="tankBolt" cx="0.35" cy="0.3" r="0.8">
+                    <stop offset="0" stopColor="#cdd6e1" />
+                    <stop offset="1" stopColor="#222933" />
+                  </radialGradient>
+                  <pattern id="tankBrushed" width="3" height="8" patternUnits="userSpaceOnUse">
+                    <line x1="0.5" y1="0" x2="0.5" y2="8" stroke="#ffffff" strokeOpacity="0.03" />
+                    <line x1="2"   y1="0" x2="2"   y2="8" stroke="#000000" strokeOpacity="0.05" />
+                  </pattern>
+                  <clipPath id="tankBody"><rect x="12" y="60" width="276" height="372" rx="14" /></clipPath>
+                </defs>
 
-              {/* ── TOPO / domo do cilindro (elipse) ── */}
-              <div className="absolute left-1/2 top-[44px] z-20 h-10 w-[300px] -translate-x-1/2 rounded-[100%] border border-white/15 bg-[linear-gradient(180deg,#7d8997,#454f5c_60%,#323b47)] shadow-[inset_0_3px_5px_rgba(255,255,255,0.3),0_6px_14px_rgba(0,0,0,0.5)]">
-                {/* bocal de respiro central */}
-                <div className="absolute left-1/2 top-[-11px] h-5 w-9 -translate-x-1/2 rounded-t-md border border-white/10 bg-[linear-gradient(180deg,#6c7987,#2c343f)] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]" />
-              </div>
+                {/* ── GUARDA-CORPO superior ── */}
+                <g stroke="url(#metalRail)" strokeLinecap="round">
+                  <ellipse cx="150" cy="14" rx="106" ry="7" fill="none" strokeWidth="3" />
+                  <ellipse cx="150" cy="38" rx="124" ry="7" fill="none" strokeWidth="2" opacity="0.85" />
+                  {[58, 95, 150, 205, 242].map(x => <line key={x} x1={x} y1="13" x2={x} y2="60" strokeWidth="2.5" />)}
+                </g>
 
-              {/* ── CORPO CILÍNDRICO — aço escuro (gunmetal) ── */}
-              <div
-                className="relative mt-[62px] h-[384px] w-[300px] overflow-hidden rounded-b-[28px] border-x border-b border-white/10 shadow-[0_26px_64px_rgba(0,0,0,0.6)]"
-                style={{ background: "linear-gradient(90deg,#0d1116 0%,#1b232c 10%,#333d49 26%,#525e6d 42%,#737f8f 50%,#4c5765 60%,#313b46 74%,#1a212a 90%,#0c1015 100%)", contain: "paint" }}
-              >
-                {/* sheen vertical (luz vinda de cima) */}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/25" />
-                {/* faixa especular */}
-                <div className="pointer-events-none absolute inset-y-0 left-[43%] w-[8px] bg-white/15 blur-[2px]" />
-
-                {/* anéis de solda (seams) com parafusos */}
-                {[20, 50, 80].map(t => (
-                  <div key={t} className="pointer-events-none absolute inset-x-0" style={{ top: `${t}%` }}>
-                    <div className="h-px bg-black/45" />
-                    <div className="h-px bg-white/12" />
-                  </div>
-                ))}
-
-                {/* ── ESCADA de acesso (lateral esquerda) com gaiola ── */}
-                <div className="absolute bottom-4 left-3 top-4 z-10 w-[22px]">
-                  <div className="absolute inset-y-0 left-0 w-[3px] rounded bg-[linear-gradient(180deg,#8b97a6,#2c343f)] shadow-[1px_0_1px_rgba(0,0,0,0.5)]" />
-                  <div className="absolute inset-y-0 right-0 w-[3px] rounded bg-[linear-gradient(180deg,#8b97a6,#2c343f)] shadow-[1px_0_1px_rgba(0,0,0,0.5)]" />
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <div key={i} className="absolute left-0 right-0 h-[2px] rounded bg-slate-300/55" style={{ top: `${3 + i * 6.2}%` }} />
+                {/* ── CORPO CILÍNDRICO ── */}
+                <ellipse cx="150" cy="432" rx="138" ry="16" fill="url(#tankBase)" />
+                <rect x="12" y="60" width="276" height="372" rx="14" fill="url(#tankSteel)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <g clipPath="url(#tankBody)">
+                  <rect x="12" y="60" width="276" height="372" fill="url(#tankBrushed)" />
+                  {/* faixa especular (reflexo da curva) */}
+                  <rect x="98" y="60" width="40" height="372" fill="url(#tankSpec)" opacity="0.5" />
+                  {/* borda brilhante esquerda + sombra direita */}
+                  <rect x="12" y="60" width="14" height="372" fill="#ffffff" opacity="0.05" />
+                  <rect x="262" y="60" width="26" height="372" fill="#000000" opacity="0.28" />
+                  {/* anéis de solda curvos */}
+                  {[180, 312].map(cy => (
+                    <g key={cy}>
+                      <ellipse cx="150" cy={cy} rx="138" ry="7" fill="none" stroke="#000000" strokeOpacity="0.4" strokeWidth="1.5" />
+                      <ellipse cx="150" cy={cy - 2} rx="138" ry="7" fill="none" stroke="#ffffff" strokeOpacity="0.08" strokeWidth="1" />
+                    </g>
                   ))}
-                  {/* gaiola de segurança (aros) */}
-                  {[14, 38, 62, 86].map(t => (
-                    <div key={t} className="absolute -right-2 h-6 w-4 rounded-r-full border-y border-r border-slate-400/30" style={{ top: `${t}%` }} />
-                  ))}
-                </div>
+                </g>
 
-                {/* ── VISOR DE NÍVEL (sight glass) lateral direita ── */}
-                <div className="absolute bottom-8 right-7 top-8 z-10 w-2 overflow-hidden rounded-full border border-white/15 bg-black/50 shadow-[inset_0_0_4px_rgba(0,0,0,0.8)]">
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-amber-600 to-amber-400/90" style={{ height: `${pct}%` }} />
-                  <div className="pointer-events-none absolute inset-y-0 left-0 w-[2px] bg-white/25" />
-                </div>
+                {/* ── DOMO superior (tampa curva) ── */}
+                <ellipse cx="150" cy="60" rx="139" ry="20" fill="url(#tankDome)" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+                <ellipse cx="150" cy="56" rx="120" ry="13" fill="#ffffff" opacity="0.10" />
+                {/* bocal de respiro */}
+                <rect x="138" y="46" width="24" height="16" rx="3" fill="url(#metalRail)" />
+                <ellipse cx="150" cy="46" rx="12" ry="3.5" fill="#aeb9c7" />
+
+                {/* ── ESCADA de acesso (lateral esquerda) + gaiola ── */}
+                <g>
+                  <line x1="34" y1="92" x2="34" y2="416" stroke="url(#metalRail)" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="50" y1="92" x2="50" y2="416" stroke="url(#metalRail)" strokeWidth="3" strokeLinecap="round" />
+                  {Array.from({ length: 16 }).map((_, i) => {
+                    const y = 100 + i * 20;
+                    return <line key={i} x1="34" y1={y} x2="50" y2={y} stroke="#9aa6b5" strokeOpacity="0.6" strokeWidth="2" />;
+                  })}
+                  {[120, 190, 260, 330].map(y => (
+                    <path key={y} d={`M34 ${y} A 13 18 0 0 0 34 ${y + 36}`} fill="none" stroke="#9aa6b5" strokeOpacity="0.3" strokeWidth="1.5" />
+                  ))}
+                </g>
+
+                {/* ── VISOR DE NÍVEL (sight glass) direita ── */}
+                {(() => {
+                  const lvl = Math.max(0, Math.min(100, pct));
+                  const top = 120, bot = 408, h = (bot - top) * (lvl / 100);
+                  return (
+                    <g>
+                      <rect x="255" y={top} width="6" height={bot - top} rx="3" fill="#05070a" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                      <rect x="255" y={bot - h} width="6" height={h} rx="3" fill="url(#tankAmber)" />
+                      <rect x="256" y={top} width="1.5" height={bot - top} fill="#ffffff" opacity="0.2" />
+                    </g>
+                  );
+                })()}
 
                 {/* ── FLANGE de conexão do duto (direita, meia-altura) ── */}
-                <div className="absolute right-0 top-[54%] z-10 flex h-16 w-3.5 -translate-y-1/2 flex-col items-center justify-around rounded-l-md border-y border-l border-white/20 bg-[linear-gradient(90deg,#5d6977,#2c343f)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                  <div className="h-1 w-1 rounded-full bg-white/30" />
-                  <div className="h-1 w-1 rounded-full bg-white/30" />
-                  <div className="h-1 w-1 rounded-full bg-white/30" />
-                </div>
+                <g transform="translate(288,250)">
+                  <rect x="-3" y="-24" width="11" height="48" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                  {[-15, 0, 15].map(y => <circle key={y} cx="2" cy={y} r="2" fill="url(#tankBolt)" />)}
+                  {/* bocal que recebe o duto */}
+                  <rect x="6" y="-10" width="16" height="20" rx="3" fill="url(#metalRail)" stroke="rgba(0,0,0,0.4)" strokeWidth="0.6" />
+                </g>
 
-                {/* ── DISPLAY INTEGRADO na face do tanque ── */}
-                <div className="absolute left-1/2 top-1/2 z-20 w-[202px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/15 bg-[linear-gradient(180deg,#11151b,#05070a)] p-3 shadow-[0_12px_30px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.12)]">
-                  {/* parafusos do bezel */}
-                  <div className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-white/25" />
-                  <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-white/25" />
-                  <div className="absolute bottom-2 left-2 h-1.5 w-1.5 rounded-full bg-black/50" />
-                  <div className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-black/50" />
-                  {/* tela LED */}
-                  <div className="rounded-xl border border-amber-400/20 bg-black/85 px-4 py-3 text-center shadow-[inset_0_2px_16px_rgba(0,0,0,0.95)]">
-                    <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.55)]">
-                      {pct.toFixed(0)}%
-                    </div>
-                    <div className="mt-1.5 font-mono text-[12px] font-bold tabular-nums text-amber-400/90 [text-shadow:0_0_8px_rgba(251,191,36,0.3)]">
-                      {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
-                    </div>
-                    <div
-                      className="mt-2 inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
-                      style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.35)`, background: `rgba(${nivel.rgb},0.12)` }}
-                    >
-                      {nivel.label}
-                    </div>
+                {/* ── BASE / saia + pés ── */}
+                <rect x="26" y="430" width="248" height="24" rx="4" fill="url(#tankBase)" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+                <rect x="58" y="452" width="26" height="24" rx="3" fill="url(#tankBase)" />
+                <rect x="216" y="452" width="26" height="24" rx="3" fill="url(#tankBase)" />
+              </svg>
+
+              {/* ── DISPLAY INTEGRADO (HTML sobreposto — texto nítido) ── */}
+              <div className="absolute left-1/2 top-[250px] z-10 w-[188px] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-white/10 bg-[linear-gradient(180deg,#0e1218,#05070a)] p-2.5 shadow-[0_10px_26px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.1)]">
+                <div className="rounded-lg border border-white/10 bg-black/80 px-4 py-3 text-center shadow-[inset_0_2px_16px_rgba(0,0,0,0.92)]">
+                  <div className="font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.55)]">
+                    {pct.toFixed(0)}%
+                  </div>
+                  <div className="mt-1.5 font-mono text-[12px] font-bold tabular-nums text-amber-400/90 [text-shadow:0_0_8px_rgba(251,191,36,0.3)]">
+                    {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
+                  </div>
+                  <div
+                    className="mt-2 inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
+                    style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.35)`, background: `rgba(${nivel.rgb},0.12)` }}
+                  >
+                    {nivel.label}
                   </div>
                 </div>
-              </div>
-
-              {/* ── BASE / saia + pés ── */}
-              <div className="relative z-10 mx-auto -mt-2.5 h-6 w-[288px] rounded-b-[12px] border-x border-b border-white/10 bg-[linear-gradient(180deg,#2a313c,#0d1116)]" />
-              <div className="flex justify-between px-12">
-                <div className="h-6 w-6 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(180deg,#2a313c,#0e1219)]" />
-                <div className="h-6 w-6 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(180deg,#2a313c,#0e1219)]" />
               </div>
             </div>
 
