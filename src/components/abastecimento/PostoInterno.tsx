@@ -396,33 +396,37 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                     </linearGradient>
                   </defs>
 
-                  {/* suporte/berço do bocal (dark chrome) */}
-                  <path d="M120 150 q 28 4 25 40" stroke="url(#sgt-chrome)" strokeWidth="7" strokeLinecap="round" />
+                  {/* mangueira — desce do corpo da bomba e segura o bocal ──────
+                      Um único traçado em catenária, da esquerda (saída da bomba)
+                      até o conector do bocal, com base escura + gradiente +
+                      brilho + textura trançada por cima. */}
+                  <path d="M6 44 C -8 120, 26 174, 74 172" stroke="#0a0a0c" strokeWidth="16" strokeLinecap="round" />
+                  <path d="M6 44 C -8 120, 26 174, 74 172" stroke="url(#sgt-hose)" strokeWidth="13" strokeLinecap="round" />
+                  <path d="M6 44 C -8 120, 26 174, 74 172" stroke="rgba(255,255,255,0.16)" strokeWidth="2.5" strokeLinecap="round" transform="translate(-1.5,-1.6)" />
+                  <path d="M6 44 C -8 120, 26 174, 74 172" stroke="rgba(0,0,0,0.5)" strokeWidth="13" strokeLinecap="round" strokeDasharray="1.6 5.5" />
 
-                  {/* mangueira — base escura grossa */}
-                  <path d="M4 60 C -10 150, 30 268, 64 290 C 106 316, 150 244, 128 156" stroke="#0a0a0c" strokeWidth="16" strokeLinecap="round" />
-                  {/* corpo tubular com gradiente */}
-                  <path d="M4 60 C -10 150, 30 268, 64 290 C 106 316, 150 244, 128 156" stroke="url(#sgt-hose)" strokeWidth="13" strokeLinecap="round" />
-                  {/* brilho superior do tubo */}
-                  <path d="M4 60 C -10 150, 30 268, 64 290 C 106 316, 150 244, 128 156" stroke="rgba(255,255,255,0.16)" strokeWidth="2.5" strokeLinecap="round" transform="translate(-1.5,-1.6)" />
-                  {/* textura trançada */}
-                  <path d="M4 60 C -10 150, 30 268, 64 290 C 106 316, 150 244, 128 156" stroke="rgba(0,0,0,0.5)" strokeWidth="13" strokeLinecap="round" strokeDasharray="1.6 5.5" />
+                  {/* ── BOCAL (pistola de abastecimento) ──────────────────────
+                      Desenhado com o bico apontando para baixo; o conector da
+                      mangueira fica no topo e o gatilho na lateral. */}
+                  <g transform="translate(78,168) rotate(12)">
+                    {/* colar conector (a mangueira entra aqui) */}
+                    <rect x="-11" y="-17" width="22" height="21" rx="7" fill="url(#sgt-nozzle)" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" />
 
-                  {/* conector na entrada do bocal */}
-                  <rect x="120" y="150" width="16" height="11" rx="3" fill="url(#sgt-nozzle)" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" transform="rotate(20 128 155)" />
+                    {/* bico — tubo afilado apontando para baixo */}
+                    <path d="M-3 40 C -6 58, -8 74, -5 88 q 2 6 8 4 q 5 -2 4 -8 C 8 64, 9 54, 7 40 Z" fill="url(#sgt-chrome)" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" />
+                    <rect x="-7" y="38" width="17" height="6" rx="3" fill="#aeb9c7" />
+                    <rect x="-6" y="83" width="13" height="5" rx="2.2" fill="#cbd5e1" />
 
-                  {/* BOCAL polido (pistola) */}
-                  <g transform="translate(112,108) rotate(20)">
-                    {/* spout */}
-                    <rect x="15" y="-30" width="7" height="33" rx="3.5" fill="url(#sgt-chrome)" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
-                    {/* corpo */}
-                    <rect x="-5" y="-6" width="31" height="21" rx="8" fill="url(#sgt-nozzle)" stroke="rgba(255,255,255,0.28)" strokeWidth="0.7" />
-                    {/* punho */}
-                    <path d="M-3 13 q -11 18 3 31 q 8 5 11 -4 l -5 -2 q -6 2 -7 -4 q 0 -10 5 -19 z" fill="url(#sgt-nozzle)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" />
+                    {/* corpo / punho */}
+                    <rect x="-15" y="-1" width="34" height="46" rx="15" fill="url(#sgt-nozzle)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+
+                    {/* protetor do gatilho (alça em D) */}
+                    <path d="M17 18 q 16 14 4 34 q -6 8 -14 4" stroke="url(#sgt-chrome)" strokeWidth="4.5" fill="none" strokeLinecap="round" />
                     {/* gatilho */}
-                    <path d="M3 17 q 7 8 13 5" stroke="#111827" strokeWidth="3" fill="none" strokeLinecap="round" />
-                    {/* brilho */}
-                    <rect x="1" y="-3" width="3" height="13" rx="1.5" fill="rgba(255,255,255,0.5)" />
+                    <path d="M14 20 q 8 10 2 22" stroke="#0f172a" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+
+                    {/* brilho no corpo */}
+                    <rect x="-10" y="4" width="6" height="33" rx="3" fill="rgba(255,255,255,0.4)" />
                   </g>
                 </svg>
               </div>
