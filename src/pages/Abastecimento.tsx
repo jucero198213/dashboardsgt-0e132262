@@ -1484,52 +1484,69 @@ export default function Abastecimento() {
 
       {/* ═══════════════════════════════════════════════════════════════════════
           MODO APRESENTAÇÃO / TV — overlay imersivo em tela cheia
+          Layout: 100vh, sem scroll. Grid 3 linhas: header · indicadores de
+          mercado · área central (tanque · bomba · resumo). A área central usa
+          um wrapper de fit-to-viewport (transform scale) garantindo que
+          tanque e bomba nunca sejam cortados, independente do tamanho da TV.
       ═══════════════════════════════════════════════════════════════════════ */}
       {isPresentationMode && (
         <div
-          className="fixed inset-0 z-[9999] flex flex-col overflow-hidden"
+          className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden"
           style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
         >
           {/* Glow de palco atrás da bomba */}
-          <div className="pointer-events-none absolute left-1/2 top-[58%] h-[68vh] w-[52vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
+          <div className="pointer-events-none absolute left-1/2 top-[62%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
 
           {/* Botão sair */}
           <button
             onClick={togglePresentation}
-            className="absolute right-6 top-5 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
+            className="absolute right-6 top-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 text-[12px] font-semibold text-slate-200 backdrop-blur transition-colors hover:bg-white/[0.12]"
           >
             <Minimize2 className="h-4 w-4" /> Sair <span className="text-slate-500">· ESC</span>
           </button>
 
-          {/* Cabeçalho */}
-          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[2.4vh]">
-            <img src={sgtLogo} alt="SGT" className="h-9 w-auto" />
+          {/* ── Linha 1: Header compacto ── */}
+          <div className="relative z-10 flex items-center gap-3 px-[3vw] pt-[1.4vh] pb-[0.6vh]">
+            <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
             <div className="flex flex-col leading-none">
               <span className="text-[10px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
-              <span className="text-[clamp(1.1rem,1.6vw,1.6rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+              <span className="text-[clamp(0.95rem,1.4vw,1.4rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
             </div>
             <span className="ml-auto mr-[120px] hidden items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/[0.08] px-3 py-1 text-[10px] font-bold text-emerald-300 lg:inline-flex">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Operacional
             </span>
           </div>
 
-          {/* KPIs ocupando toda a largura */}
-          <div className="relative z-10 grid grid-cols-2 gap-3 px-[3vw] pt-[1.8vh] sm:grid-cols-3 lg:grid-cols-5">
-            <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`} icon={DollarSign} tone="amber" loading={loading} />
-            <KpiCard label="Volume Total" value={loading ? "—" : fmtLitros(kpis.totalLitros)} subtitle={loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`} icon={Droplets} tone="cyan" loading={loading} />
-            <KpiCard label="Abastecimentos" value={loading ? "—" : fmtNum(kpis.qtdAbast)} subtitle={loading ? "" : `${distCombustivel.length} tipo(s) de combustível`} icon={Hash} tone="rose" loading={loading} />
-            <KpiCard label="Média Consumo" value={loading ? "—" : fmtMedia(kpis.mediaConsumo)} subtitle={loading ? "" : kpis.deltaMedia !== null ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)` : "Fábrica: —"} icon={Gauge} tone="violet" loading={loading} />
-            <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
+          {/* ── Linha 2: Indicadores externos de mercado (substitui KPIs internos) ── */}
+          <div
+            className="relative z-10 grid grid-cols-2 gap-[clamp(8px,1vw,16px)] px-[3vw] pt-[0.4vh] pb-[0.4vh] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(76px,11vh,108px)" }}
+          >
+            {marketIndicators.map(m => (
+              <MarketIndicatorCard key={m.title} {...m} />
+            ))}
           </div>
 
-          {/* Conjunto do posto — centralizado e escalado */}
-          <div className="relative z-10 flex flex-1 items-center justify-center">
-            <div className="origin-center scale-90 xl:scale-100 2xl:scale-[1.15]">
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport ──
+              Usa transform: scale(min(...)) para encolher o conjunto até caber
+              tanto na largura quanto na altura disponíveis, sem cortar tanque
+              ou bomba. Tamanho natural do conjunto: ~1240×640px. */}
+          <div className="relative z-10 flex min-h-0 items-center justify-center overflow-hidden">
+            <div
+              className="origin-center"
+              style={{
+                width: 1240,
+                height: 640,
+                transform:
+                  "scale(min(calc((100vw - 60px) / 1240), calc((100dvh - 230px) / 640)))",
+              }}
+            >
               <PostoInterno dados={postoInternoDados} presentation />
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
