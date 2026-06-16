@@ -114,7 +114,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
       `}</style>
 
       <div
-        className={presentation ? "p-2" : "rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"}
+        className={presentation
+          ? "flex h-full min-h-0 flex-col overflow-hidden p-0"
+          : "rounded-[14px] sm:rounded-[16px] border border-white/10 p-4 sm:p-6"}
         style={presentation ? undefined : { background: "var(--sgt-bg-card)" }}
       >
         {/* ── Header da seção ── */}
@@ -132,7 +134,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
         </div>
         )}
 
-        <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10">
+        <div className={
+          presentation
+            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-2"
+            : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
+        }>
 
           {/* ═════════ TANQUE DE ARMAZENAMENTO — render 3D (imagem) ═══════════
               A carcaça é uma imagem PNG de face LIMPA (sem display/rótulos). O
