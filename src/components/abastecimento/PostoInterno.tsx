@@ -136,7 +136,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
         <div className={
           presentation
-            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-2"
+            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-2 lg:gap-0 py-2 [perspective:1400px]"
             : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
         }>
 
