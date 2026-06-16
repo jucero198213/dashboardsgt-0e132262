@@ -382,11 +382,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
                 {/* ── Base metálica escura texturizada ── */}
                 <div className={presentation
-                  ? "relative z-10 mx-auto flex w-[250px] flex-col items-center"
+                  ? "relative z-10 mx-auto flex w-[220px] flex-col items-center"
                   : "relative z-10 mx-auto flex w-[300px] flex-col items-center"
                 }>
                   <div className={presentation
-                    ? "-mt-0.5 h-2.5 w-[210px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
+                    ? "-mt-0.5 h-2 w-[186px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
                     : "-mt-0.5 h-3 w-[252px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
                   } />
                   <div className="relative h-7 w-full overflow-hidden rounded-md border border-black/55 bg-[linear-gradient(180deg,#2a313c,#0e1219)] shadow-[0_16px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]">
