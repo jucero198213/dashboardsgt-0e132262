@@ -223,7 +223,14 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
 
           {/* ═════════ BOMBA CORPORATIVA — vintage dark-chrome ═════════ */}
-          <div className="flex flex-col items-center gap-4">
+          <div
+            className={presentation ? "relative z-20 flex flex-col items-center gap-4 lg:-ml-10" : "flex flex-col items-center gap-4"}
+            style={presentation ? {
+              transform: "perspective(1400px) translateZ(80px) scale(1.06)",
+              transformOrigin: "center left",
+              filter: "drop-shadow(0 40px 50px rgba(0,0,0,0.7)) drop-shadow(0 0 24px rgba(251,191,36,0.08))",
+            } : undefined}
+          >
             <div className="relative flex flex-col items-center">
               {/* Halo ambiente quente atrás de toda a bomba */}
               <div className="pointer-events-none absolute -inset-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_18%,rgba(251,191,36,0.07),transparent_68%)]" />
