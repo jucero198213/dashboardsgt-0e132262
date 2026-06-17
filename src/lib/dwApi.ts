@@ -373,6 +373,7 @@ export interface PostoInternoRow {
   codfornec:      string | number | null;
   fornecedor:     string | null;
   veiculo:        string | number | null;
+  tipo_nf:        string | null;   // TIPONF — tipo da movimentação (ex.: "INV" = inventário)
 }
 
 export interface PostoInternoResponse {

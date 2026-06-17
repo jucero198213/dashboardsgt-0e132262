@@ -24,6 +24,11 @@ export interface PostoInternoDados {
   precoUltimaRecarga:      number | null;   // R$/L da última entrada de diesel
   qtdAbastecimentosDia:    number;          // nº de saídas no último dia
   qtdAbastecimentosPeriodo:number;          // nº de saídas no período
+  // ── Visor da bomba (exclui movimentações INV) — usados SÓ no display da bomba ──
+  bombaLitrosDia:          number;          // litros abastecidos no último dia (sem INV)
+  bombaQtdDia:             number;          // nº de abastecimentos no último dia (sem INV)
+  bombaQtdPeriodo:         number;          // nº de abastecimentos no período (sem INV)
+  bombaDiaReferencia:      string | null;   // último dia com abastecimento não-INV
   movimentacoes: {
     data: string;
     tipo: "Recarga" | "Abastecimento Frota";
@@ -55,14 +60,16 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
   // TODO(integração): hoje vêm do DW via prop `dados`. Para mockar/preview, basta
   // sobrescrever os campos abaixo. Os valores de referência do layout estão nos
   // comentários (image_2.png).
+  // Visor da bomba: usa os campos "bomba*" (que já desconsideram movimentações
+  // INV). Os demais lugares (KPIs, tanque, cards, ticker) seguem com todos os tipos.
   const display = {
-    litrosDia:    Math.round(dados.abastecidoDiaLitros),                 // ex.: 5.883
-    data:         dados.diaReferencia ?? "—",                            // ex.: 14/06/2026
+    litrosDia:    Math.round(dados.bombaLitrosDia),                      // ex.: 5.883
+    data:         dados.bombaDiaReferencia ?? "—",                       // ex.: 14/06/2026
     precoRecarga: dados.precoUltimaRecarga != null                       // ex.: R$ 4,50
       ? `R$ ${dados.precoUltimaRecarga.toFixed(2).replace(".", ",")}`
       : "—",
-    abastDia:     dados.qtdAbastecimentosDia,                            // ex.: 13
-    abastPeriodo: dados.qtdAbastecimentosPeriodo,                        // ex.: 297
+    abastDia:     dados.bombaQtdDia,                                     // ex.: 13
+    abastPeriodo: dados.bombaQtdPeriodo,                                 // ex.: 297
   };
 
   // ─── Movimentações: 6 por padrão, expansível ───────────────────────────────

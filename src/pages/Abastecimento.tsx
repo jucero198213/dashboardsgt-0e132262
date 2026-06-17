@@ -525,6 +525,25 @@ export default function Abastecimento() {
       : 0;
     const qtdAbastecimentosPeriodo = useEstraz ? saidas.length : rodabaInternos.length;
 
+    // ── VISOR DA BOMBA (somente) — desconsidera movimentações de inventário ──────
+    //   tipo_nf === "INV" são ajustes de inventário, não abastecimentos reais.
+    //   Escopo restrito ao visor: KPIs, tanque, cards laterais e ticker continuam
+    //   contando todos os tipos. O fallback RODABA não tem tipo_nf → usa os totais.
+    const isInv = (r: PostoInternoRow) => String(r.tipo_nf ?? "").trim().toUpperCase() === "INV";
+    const saidasBomba    = saidas.filter(r => !isInv(r));
+    const ultimoDiaBomba = useEstraz
+      ? (saidasBomba[0]?.data ? toISODate(saidasBomba[0].data) : null)
+      : ultimoDia;
+    const bombaLitrosDia = useEstraz
+      ? (ultimoDiaBomba
+          ? saidasBomba.filter(r => toISODate(r.data) === ultimoDiaBomba).reduce((s, r) => s + (r.qtdade ?? 0), 0)
+          : 0)
+      : litrosUltimoDia;
+    const bombaQtdDia = useEstraz
+      ? (ultimoDiaBomba ? saidasBomba.filter(r => toISODate(r.data) === ultimoDiaBomba).length : 0)
+      : qtdAbastecimentosDia;
+    const bombaQtdPeriodo = useEstraz ? saidasBomba.length : qtdAbastecimentosPeriodo;
+
     // Saldo: servidor calcula ytd_entrada (ESTRAZ) - ytd_saida (RODABA interno)
     // Null se ESTRAZ não tem lançamentos de entrada em 2026 → exibido como "—"
     const saldoAtualLitros = postoSaldo;
@@ -573,6 +592,11 @@ export default function Abastecimento() {
       precoUltimaRecarga,
       qtdAbastecimentosDia,
       qtdAbastecimentosPeriodo,
+      // Visor da bomba (exclui INV) — não afeta os campos acima
+      bombaLitrosDia,
+      bombaQtdDia,
+      bombaQtdPeriodo,
+      bombaDiaReferencia: ultimoDiaBomba ? fmtBR(ultimoDiaBomba) : null,
       movimentacoes,
     };
   }, [postoRows, postoSaldo, dados]);
