@@ -1093,7 +1093,8 @@ SELECT
     CASE WHEN RAZ.QTDADE > 0 THEN RAZ.VALOR / RAZ.QTDADE ELSE 0 END  AS vl_unit,
     RAZ.CODCLIFOR                                                     AS codfornec,
     CLI.RAZSOC                                                        AS fornecedor,
-    RAZ.CODVEI                                                        AS veiculo
+    RAZ.CODVEI                                                        AS veiculo,
+    RAZ.TIPONF                                                        AS tipo_nf
 FROM ESTRAZ RAZ
 LEFT OUTER JOIN RODCLI CLI ON RAZ.CODCLIFOR = CLI.CODCLIFOR
 WHERE RAZ.CODPROD = 881
