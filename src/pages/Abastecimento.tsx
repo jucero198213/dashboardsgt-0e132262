@@ -1663,13 +1663,14 @@ export default function Abastecimento() {
       {isPresentationMode && (
         <div
           className="fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)_auto_auto]"
-          style={{ background: "radial-gradient(ellipse 64% 56% at 50% 76%, rgba(180,110,4,0.16), transparent 62%), linear-gradient(180deg,#070b16 0%,#03050d 100%)" }}
+          style={{ background: "radial-gradient(ellipse 85% 46% at 50% 96%, rgba(180,110,4,0.12), transparent 72%), linear-gradient(180deg,#080c17 0%,#03050d 100%)" }}
         >
           {/* Keyframe do ticker */}
           <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
 
-          {/* Glow de palco atrás da bomba */}
-          <div className="pointer-events-none absolute left-1/2 top-[55%] h-[50vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.10),transparent_66%)] blur-2xl" />
+          {/* Luz de chão — larga, baixa e sem borda definida: aterra o tanque e a
+              bomba sem criar uma "poça" emoldurada no meio da tela. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-[6%] h-[46vh] bg-[radial-gradient(ellipse_52%_100%_at_50%_100%,rgba(251,191,36,0.08),transparent_72%)] blur-3xl" />
 
           {/* Botão sair — propositalmente discreto para TV */}
           <button
