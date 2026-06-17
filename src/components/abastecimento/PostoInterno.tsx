@@ -153,7 +153,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               filter: "brightness(0.82) saturate(0.88) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
             } : undefined}
           >
-            <div className={presentation ? "relative w-[300px] select-none" : "relative w-[440px] select-none"}>
+            <div className={presentation ? "relative w-[330px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
