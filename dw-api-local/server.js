@@ -1035,7 +1035,7 @@ app.post("/dw-abastecimento", async (req, res) => {
     LEFT JOIN RODFRO FRO WITH (NOLOCK) ON VEI.CODFRO  = FRO.CODFRO
     WHERE VEI.TIPVEI IN (1, 2, 3, 7, 8, 12)
       AND (@dataInicio IS NULL OR ABA.DATREF >= @dataInicio)
-      AND (@dataFim    IS NULL OR ABA.DATREF <= @dataFim)
+      AND (@dataFim    IS NULL OR ABA.DATREF <  DATEADD(DAY, 1, @dataFim))   -- inclui o dia inteiro do dataFim
     OPTION (RECOMPILE)
   `;
 
