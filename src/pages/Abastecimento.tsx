@@ -1716,7 +1716,7 @@ export default function Abastecimento() {
                 width: 1060,
                 height: 540,
                 transform:
-                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 370px) / 540)) * 0.97))",
+                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 370px) / 540)) * 1.0))",
               }}
             >
               <PostoInterno dados={postoInternoDados} presentation />

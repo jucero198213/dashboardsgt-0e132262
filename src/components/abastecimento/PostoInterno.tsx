@@ -153,7 +153,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               filter: "brightness(0.82) saturate(0.88) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
             } : undefined}
           >
-            <div className={presentation ? "relative w-[330px] select-none" : "relative w-[440px] select-none"}>
+            <div className={presentation ? "relative w-[365px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
@@ -241,9 +241,9 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "relative z-20 flex flex-col items-center gap-3" : "flex flex-col items-center gap-4"}
             style={presentation ? {
-              transform: "perspective(1200px) translateZ(70px) scale(1.06)",
+              transform: "perspective(1200px) translateZ(50px) scale(1.04)",
               transformOrigin: "center left",
-              filter: "drop-shadow(0 32px 44px rgba(0,0,0,0.75)) drop-shadow(0 0 24px rgba(251,191,36,0.14)) brightness(1.06)",
+              filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45)) drop-shadow(0 0 22px rgba(251,191,36,0.13)) brightness(1.06)",
             } : undefined}
           >
             <div className="relative flex flex-col items-center">
@@ -256,7 +256,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.06)_45%,transparent_70%)] blur-md" />
                 {/* Disco de metal polido branco/dourado */}
                 <div className={presentation
-                  ? "relative flex h-[84px] w-[84px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
+                  ? "relative flex h-[104px] w-[104px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
                   : "relative flex h-[128px] w-[128px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
                 }>
                   {/* aro dourado interno */}
@@ -266,7 +266,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   } />
                   {/* reflexo de vidro */}
                   <div className={presentation
-                    ? "pointer-events-none absolute left-4 top-4 h-5 w-8 -rotate-12 rounded-full bg-white/70 blur-[3px]"
+                    ? "pointer-events-none absolute left-5 top-5 h-6 w-10 -rotate-12 rounded-full bg-white/70 blur-[3px]"
                     : "pointer-events-none absolute left-6 top-5 h-7 w-11 -rotate-12 rounded-full bg-white/70 blur-[3px]"
                   } />
                   <span className={presentation
@@ -290,7 +290,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 </div>
                 {/* Pescoço cromado escuro conectando disco ao corpo */}
                 <div className={presentation
-                  ? "relative z-10 -mt-1 h-4 w-10 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
+                  ? "relative z-10 -mt-1 h-5 w-12 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                   : "relative z-10 -mt-1 h-7 w-16 rounded-b-md border-x border-b border-white/10 bg-[linear-gradient(90deg,#1b212b,#3a4554_45%,#4a5666_55%,#1b212b)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
                 } />
               </div>
@@ -299,13 +299,13 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
               <div className="relative -mt-px">
                 {/* "Ombro" superior do corpo (dark chrome) */}
                 <div className={presentation
-                  ? "mx-auto h-2.5 w-[150px] rounded-t-[16px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
+                  ? "mx-auto h-3 w-[174px] rounded-t-[16px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
                   : "mx-auto h-4 w-[206px] rounded-t-[22px] border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4453,#222a35)]"
                 } />
 
                 {/* Corpo da bomba — metal fosco antracite */}
                 <div className={presentation
-                  ? "relative z-10 mx-auto flex h-[260px] w-[176px] flex-col overflow-hidden rounded-t-[18px] rounded-b-[8px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                  ? "relative z-10 mx-auto flex h-[310px] w-[206px] flex-col overflow-hidden rounded-t-[18px] rounded-b-[8px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
                   : "relative z-10 mx-auto flex h-[392px] w-[244px] flex-col overflow-hidden rounded-t-[26px] rounded-b-[10px] border border-white/10 bg-[linear-gradient(108deg,#161b24_0%,#252e3a_16%,#39434f_50%,#212a35_82%,#11151c_100%)] shadow-[0_26px_64px_rgba(0,0,0,0.62),inset_0_1px_0_rgba(255,255,255,0.08)]"
                 }>
                   {/* textura metálica escovada (fosca) */}
@@ -316,7 +316,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
                   {/* ── Bezel cromado escuro do display ── */}
                   <div className={presentation
-                    ? "relative mx-2.5 mt-3.5 rounded-xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[5px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]"
+                    ? "relative mx-3 mt-4 rounded-xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[5px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]"
                     : "relative mx-3.5 mt-5 rounded-2xl border border-white/15 bg-[linear-gradient(160deg,#566273,#2c343f_55%,#12161d)] p-[6px] shadow-[0_5px_16px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.28)]"
                   }>
                     {/* Tela retro-digital */}
@@ -335,7 +335,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                       {/* Número principal */}
                       <div className="relative flex flex-col gap-0.5">
                         <span className={presentation
-                          ? "font-mono text-[26px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]"
+                          ? "font-mono text-[21px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]"
                           : "font-mono text-[34px] font-black leading-none tabular-nums text-amber-300 [text-shadow:0_0_18px_rgba(251,191,36,0.7),0_0_3px_rgba(251,191,36,0.9)]"
                         }>
                           {display.litrosDia.toLocaleString("pt-BR")}
@@ -346,7 +346,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                   </div>
 
                   {/* ── Painéis embutidos empilhados (caixas metálicas) ── */}
-                  <div className="mx-2.5 mt-2.5 flex flex-col gap-1.5">
+                  <div className="mx-3 mt-3 flex flex-col gap-1.5">
                     {[
                       { v: display.precoRecarga,                         l: "R$/L recarga" },
                       { v: display.abastDia.toLocaleString("pt-BR"),     l: "Abast. dia" },
@@ -361,8 +361,8 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                       >
                         <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-600/60">{c.l}</span>
                         <span className={presentation
-                          ? "font-mono text-[14px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
-                          : "font-mono text-[16px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
+                          ? "whitespace-nowrap font-mono text-[14px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
+                          : "whitespace-nowrap font-mono text-[16px] font-bold tabular-nums text-amber-300/90 [text-shadow:0_0_8px_rgba(251,191,36,0.5)]"
                         }>{c.v}</span>
                       </div>
                     ))}
@@ -373,7 +373,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
                   {/* ── Placa de identificação (metal escuro embutido) ── */}
                   <div className={presentation
-                    ? "relative mx-2.5 mb-3 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-2 py-1.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]"
+                    ? "relative mx-3 mb-3 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-2.5 py-1.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]"
                     : "relative mx-3.5 mb-4 rounded-md border border-white/10 bg-[linear-gradient(180deg,#3a4350,#1a2028)] px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-2px_6px_rgba(0,0,0,0.5),0_2px_6px_rgba(0,0,0,0.5)]"
                   }>
                     <p className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-200 [text-shadow:0_1px_0_rgba(0,0,0,0.7)]">Diesel S10</p>
@@ -383,11 +383,11 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
                 {/* ── Base metálica escura texturizada ── */}
                 <div className={presentation
-                  ? "relative z-10 mx-auto flex w-[220px] flex-col items-center"
+                  ? "relative z-10 mx-auto flex w-[256px] flex-col items-center"
                   : "relative z-10 mx-auto flex w-[300px] flex-col items-center"
                 }>
                   <div className={presentation
-                    ? "-mt-0.5 h-2 w-[186px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
+                    ? "-mt-0.5 h-2.5 w-[218px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
                     : "-mt-0.5 h-3 w-[252px] rounded-t-md border-x border-t border-white/10 bg-[linear-gradient(180deg,#3a4350,#222a35)]"
                   } />
                   <div className="relative h-7 w-full overflow-hidden rounded-md border border-black/55 bg-[linear-gradient(180deg,#2a313c,#0e1219)] shadow-[0_16px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]">
@@ -404,7 +404,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 <svg
                   viewBox="0 0 150 360"
                   className={presentation
-                    ? "pointer-events-none absolute right-[-30px] top-[80px] z-0 h-[250px] w-[110px]"
+                    ? "pointer-events-none absolute right-[-36px] top-[96px] z-0 h-[290px] w-[126px]"
                     : "pointer-events-none absolute right-[-46px] top-[120px] z-0 h-[360px] w-[150px]"
                   }
                   fill="none"
