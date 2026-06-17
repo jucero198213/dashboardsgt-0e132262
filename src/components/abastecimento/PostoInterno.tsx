@@ -243,17 +243,14 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
             style={presentation ? {
               transform: "perspective(1200px) translateZ(50px) scale(1.04)",
               transformOrigin: "center left",
-              filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45)) drop-shadow(0 0 22px rgba(251,191,36,0.13)) brightness(1.06)",
+              filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45)) brightness(1.06)",
             } : undefined}
           >
             <div className="relative flex flex-col items-center">
-              {/* Halo ambiente quente atrás de toda a bomba */}
-              <div className="pointer-events-none absolute -inset-10 rounded-[60px] bg-[radial-gradient(ellipse_at_50%_18%,rgba(251,191,36,0.07),transparent_68%)]" />
-
               {/* ───────── TOPO: disco backlit SGT ───────── */}
               <div className="relative z-20 flex flex-col items-center">
-                {/* Backlight — halo quente limpo atrás do disco */}
-                <div className="pointer-events-none absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.06)_45%,transparent_70%)] blur-md" />
+                {/* Backlight sutil — glow embaixo do disco, não sobe acima dele */}
+                <div className="pointer-events-none absolute -inset-x-4 -bottom-4 -top-1 rounded-full bg-[radial-gradient(circle_at_50%_65%,rgba(251,191,36,0.13),transparent_70%)] blur-sm" />
                 {/* Disco de metal polido branco/dourado */}
                 <div className={presentation
                   ? "relative flex h-[104px] w-[104px] flex-col items-center justify-center rounded-full border-[3px] border-amber-200/70 bg-[conic-gradient(from_130deg,#ffffff,#e8edf3,#fef3c7,#fcd34d,#fff7e6,#e8edf3,#ffffff)] shadow-[0_0_30px_-2px_rgba(251,191,36,0.3),inset_0_3px_8px_rgba(255,255,255,0.95),inset_0_-12px_22px_rgba(180,120,20,0.28)]"
