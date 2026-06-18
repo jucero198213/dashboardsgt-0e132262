@@ -73,6 +73,12 @@
     --sgt-warning: #F0A730;
     --sgt-info:    #4A9EFF;
 
+    /* SGT — acento de marca (dark = âmbar) */
+    --sgt-accent:       #fbbf24;
+    --sgt-accent-hover: #f59e0b;
+    --sgt-accent-soft:  rgba(251,191,36,0.12);
+    --sgt-accent-text:  #fbbf24;
+
     /* SGT — tipografia */
     --sgt-font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     --sgt-font-body:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -80,57 +86,64 @@
   }
 
   .light {
-    --background: 220 20% 96%;
-    --foreground: 220 25% 10%;
+    /* ── Tema claro SGT — 60/30/10 (branco · tinta · laranja #FE8005) ── */
+    --background: 220 22% 96%;          /* #F4F5F7 base off-white (60%) */
+    --foreground: 213 31% 13%;          /* #16202E tinta (30%) */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 213 31% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
-    --primary: 188 80% 38%;
+    --popover-foreground: 213 31% 13%;
+    --primary: 30 99% 51%;              /* #FE8005 laranja SGT (10%) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 92%;
-    --secondary-foreground: 220 20% 20%;
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 12% 46%;
-    --accent: 188 80% 38%;
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 213 25% 20%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 215 14% 44%;
+    --accent: 30 99% 51%;               /* acento = laranja */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 68% 48%;
+    --destructive: 352 74% 57%;         /* #E0455A */
     --destructive-foreground: 0 0% 100%;
-    --warning: 38 90% 46%;
+    --warning: 30 99% 51%;
     --warning-foreground: 0 0% 100%;
-    --success: 160 60% 36%;
+    --success: 160 84% 34%;             /* #0E9E6E */
     --success-foreground: 0 0% 100%;
-    --border: 220 15% 86%;
-    --input: 220 15% 86%;
-    --ring: 188 80% 38%;
+    --border: 220 16% 87%;
+    --input: 220 16% 87%;
+    --ring: 30 99% 51%;
     --radius: 0.75rem;
-    --card-elevated: 220 20% 98%;
+    --card-elevated: 220 22% 99%;
 
-    /* SGT tokens — clean light */
-    --sgt-bg-base:        #f0f2f5;
-    --sgt-bg-card:        #ffffff;
-    --sgt-bg-section:     #f7f8fa;
-    --sgt-bg-overlay:     #f7f8fa;
-    --sgt-border-subtle:  rgba(30,40,60,0.09);
-    --sgt-border-medium:  rgba(30,40,60,0.18);
-    --sgt-text-primary:   #0f1623;
-    --sgt-text-secondary: #374151;
-    --sgt-text-muted:     #6b7280;
-    --sgt-text-faint:     #9ca3af;
-    --sgt-input-bg:       rgba(30,40,60,0.03);
-    --sgt-input-border:   rgba(30,40,60,0.14);
-    --sgt-input-hover:    rgba(30,40,60,0.07);
-    --sgt-skeleton-bg:    rgba(30,40,60,0.07);
-    --sgt-divider:        rgba(30,40,60,0.09);
-    --sgt-row-alt:        rgba(30,40,60,0.025);
-    --sgt-row-hover:      rgba(6,182,212,0.06);
-    --sgt-table-head:     rgba(30,40,60,0.04);
-    --sgt-progress-track: rgba(30,40,60,0.09);
+    /* SGT tokens — 60/30/10 */
+    --sgt-bg-base:        #f4f5f7;   /* 60% base off-white */
+    --sgt-bg-card:        #ffffff;   /* superfícies */
+    --sgt-bg-section:     #fafbfc;
+    --sgt-bg-overlay:     #ffffff;
+    --sgt-border-subtle:  rgba(20,30,45,0.08);
+    --sgt-border-medium:  rgba(20,30,45,0.16);
+    --sgt-text-primary:   #16202e;   /* 30% tinta */
+    --sgt-text-secondary: #5a6675;
+    --sgt-text-muted:     #8a94a3;
+    --sgt-text-faint:     #aeb6c2;
+    --sgt-input-bg:       rgba(20,30,45,0.03);
+    --sgt-input-border:   rgba(20,30,45,0.14);
+    --sgt-input-hover:    rgba(20,30,45,0.06);
+    --sgt-skeleton-bg:    rgba(20,30,45,0.07);
+    --sgt-divider:        rgba(20,30,45,0.08);
+    --sgt-row-alt:        rgba(20,30,45,0.022);
+    --sgt-row-hover:      rgba(254,128,5,0.08);   /* hover laranja (10%) */
+    --sgt-table-head:     rgba(20,30,45,0.035);
+    --sgt-progress-track: rgba(20,30,45,0.10);
     --sgt-menu-bg:        #ffffff;
-    --sgt-scrollbar-track:#e5e7eb;
-    --sgt-scrollbar-thumb:#9ca3af;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(6,182,212,0.04), transparent 45%);
-    --sgt-section-shadow: 0 4px 24px rgba(30,40,60,0.08), 0 1px 0 rgba(30,40,60,0.05);
+    --sgt-scrollbar-track:#e8eaee;
+    --sgt-scrollbar-thumb:#c2c8d0;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(254,128,5,0.05), transparent 45%);
+    --sgt-section-shadow: 0 4px 24px rgba(20,30,45,0.07), 0 1px 0 rgba(20,30,45,0.04);
+
+    /* Acento de marca (laranja SGT) — usar nos ajustes página a página */
+    --sgt-accent:       #fe8005;
+    --sgt-accent-hover: #e5730a;
+    --sgt-accent-soft:  rgba(254,128,5,0.12);
+    --sgt-accent-text:  #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
   }
 }
 
