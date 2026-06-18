@@ -387,7 +387,7 @@ export default function Welcome() {
               onError={e=>{e.currentTarget.style.display="none";e.currentTarget.parentElement!.innerHTML=`<span style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-style:italic;font-size:13px;color:#F5A623">S</span>`;}}/>
           </div>
           <div>
-            <p style={{fontSize:10,fontWeight:700,letterSpacing:"0.32em",textTransform:"uppercase",color:"rgba(240,244,248,.42)",lineHeight:1}}>Workspace</p>
+            <p style={{fontSize:10,fontWeight:700,letterSpacing:"0.32em",textTransform:"uppercase",color:"rgba(245,166,35,.85)",lineHeight:1}}>Workspace</p>
             <p style={{fontSize:14,fontWeight:800,color:"#F0F4F8",lineHeight:1.2,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:"-0.3px"}}>SGT Log</p>
           </div>
         </div>

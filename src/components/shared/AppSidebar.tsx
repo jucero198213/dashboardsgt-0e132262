@@ -41,17 +41,17 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 
 // ── Estilos inline ────────────────────────────────────────────────────────────
 const PILL_ACTIVE: React.CSSProperties = {
-  background:   "linear-gradient(95deg, #F5A623 0%, #D4891A 100%)",
-  border:       "1px solid rgba(245,166,35,0.55)",
-  boxShadow:    "0 0 12px rgba(245,166,35,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
+  background:   "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
+  border:       "1px solid color-mix(in srgb, var(--sgt-accent) 55%, transparent)",
+  boxShadow:    "0 0 12px color-mix(in srgb, var(--sgt-accent) 22%, transparent), inset 0 1px 0 rgba(255,255,255,0.10)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
 };
 const CHIP_ACTIVE: React.CSSProperties = {
-  background: "linear-gradient(135deg, #F5A623 0%, #D4891A 100%)",
-  border:     "1px solid rgba(245,166,35,0.60)",
-  boxShadow:  "0 0 10px rgba(245,166,35,0.22)",
+  background: "linear-gradient(135deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
+  border:     "1px solid color-mix(in srgb, var(--sgt-accent) 60%, transparent)",
+  boxShadow:  "0 0 10px color-mix(in srgb, var(--sgt-accent) 22%, transparent)",
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ export function AppSidebar() {
           onMouseEnter={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "rgba(255,255,255,0.03)";
+              b.style.background = "var(--sgt-sidebar-hover)";
               b.style.color      = "var(--sgt-text-primary)";
             }
           }}
@@ -238,7 +238,7 @@ export function AppSidebar() {
           onMouseEnter={e => {
             if (!isHomeActive) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "rgba(255,255,255,0.03)";
+              b.style.background = "var(--sgt-sidebar-hover)";
               b.style.color      = "var(--sgt-text-primary)";
             }
           }}
@@ -448,15 +448,15 @@ export function AppSidebar() {
             transform:    "translateY(-50%)",
             borderRadius: "9999px",
             ...(flyout.active ? {
-              background: "linear-gradient(95deg,#F5A623 0%,rgba(199,126,26,0.95) 70%)",
+              background: "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 70%)",
               color:      "#1B1304",
-              border:     "1px solid rgba(245,166,35,0.6)",
-              boxShadow:  "0 0 20px rgba(245,166,35,0.18),0 0 20px rgba(245,166,35,0.30)",
+              border:     "1px solid color-mix(in srgb, var(--sgt-accent) 60%, transparent)",
+              boxShadow:  "0 0 20px color-mix(in srgb, var(--sgt-accent) 28%, transparent)",
             } : {
-              background: "#1A2540",
+              background: "var(--sgt-flyout-bg)",
               color:      "var(--sgt-text-primary)",
-              border:     "1px solid rgba(255,255,255,0.12)",
-              boxShadow:  "0 4px 8px rgba(0,0,0,0.45)",
+              border:     "1px solid var(--sgt-flyout-border)",
+              boxShadow:  "0 4px 8px rgba(0,0,0,0.25)",
             }),
           }}
         >
@@ -519,7 +519,7 @@ function UserFooter({
         onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
       >
         <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl text-[12px] font-bold"
-              style={{ border: "1px solid rgba(245,166,35,0.25)", background: "rgba(245,166,35,0.10)", color: "#F5A623" }}>
+              style={{ border: "1px solid color-mix(in srgb, var(--sgt-accent) 25%, transparent)", background: "var(--sgt-accent-soft)", color: "var(--sgt-accent-text)" }}>
           {initial}
         </span>
         {!collapsed && (

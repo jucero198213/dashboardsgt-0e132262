@@ -73,11 +73,14 @@
     --sgt-warning: #F0A730;
     --sgt-info:    #4A9EFF;
 
-    /* SGT — acento de marca (dark = âmbar) */
-    --sgt-accent:       #fbbf24;
-    --sgt-accent-hover: #f59e0b;
-    --sgt-accent-soft:  rgba(251,191,36,0.12);
-    --sgt-accent-text:  #fbbf24;
+    /* SGT — acento de marca (dark = âmbar; igual aos valores da sidebar) */
+    --sgt-accent:        #F5A623;
+    --sgt-accent-hover:  #D4891A;
+    --sgt-accent-soft:   rgba(245,166,35,0.12);
+    --sgt-accent-text:   #F5A623;
+    --sgt-sidebar-hover: rgba(255,255,255,0.03);
+    --sgt-flyout-bg:     #1A2540;
+    --sgt-flyout-border: rgba(255,255,255,0.12);
 
     /* SGT — tipografia */
     --sgt-font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
@@ -116,6 +119,7 @@
     /* SGT tokens — 60/30/10 */
     --sgt-bg-base:        #f4f5f7;   /* 60% base off-white */
     --sgt-bg-card:        #ffffff;   /* superfícies */
+    --sgt-bg-surface:     #ffffff;   /* sidebar / workspaces */
     --sgt-bg-section:     #fafbfc;
     --sgt-bg-overlay:     #ffffff;
     --sgt-border-subtle:  rgba(20,30,45,0.08);
@@ -140,10 +144,13 @@
     --sgt-section-shadow: 0 4px 24px rgba(20,30,45,0.07), 0 1px 0 rgba(20,30,45,0.04);
 
     /* Acento de marca (laranja SGT) — usar nos ajustes página a página */
-    --sgt-accent:       #fe8005;
-    --sgt-accent-hover: #e5730a;
-    --sgt-accent-soft:  rgba(254,128,5,0.12);
-    --sgt-accent-text:  #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
+    --sgt-accent:        #fe8005;
+    --sgt-accent-hover:  #e5730a;
+    --sgt-accent-soft:   rgba(254,128,5,0.12);
+    --sgt-accent-text:   #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
+    --sgt-sidebar-hover: rgba(20,30,45,0.05);
+    --sgt-flyout-bg:     #ffffff;
+    --sgt-flyout-border: rgba(20,30,45,0.12);
   }
 }
 
