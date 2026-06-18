@@ -265,6 +265,15 @@ button:focus-visible, a:focus-visible {
   background-color: rgba(30,40,60,0.04) !important;
 }
 
+/* ── Light: hover de cards UNIFICADO — sombra neutra (sem glow colorido) ──
+   Pega qualquer card arredondado com hover:shadow-[...] e também o
+   .sgt-hover-lift, forçando a MESMA sombra neutra no hover. Resolve a
+   incongruência (uns acendiam colorido, outros só sombra). Dark fica intacto. */
+.light [class*="hover:shadow-["][class*="rounded-["]:hover,
+.light .sgt-hover-lift:hover {
+  box-shadow: 0 10px 30px -6px rgba(20, 30, 45, 0.16) !important;
+}
+
 /* ── Mobile: safe areas for PWA standalone ── */
 @supports (padding-top: env(safe-area-inset-top)) {
   body {
