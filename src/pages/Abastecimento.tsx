@@ -1697,7 +1697,7 @@ export default function Abastecimento() {
               para a estação (entrando para abastecer). Brilho rebaixado e leve
               sombra de contato para integrar ao ambiente escuro sem ofuscar.
               z baixo: fica atrás dos cards/cena (z-10). */}
-          <div className="pointer-events-none absolute bottom-[23%] left-[2.5vw] z-[5] w-[clamp(280px,27vw,560px)]">
+          <div className="pointer-events-none absolute bottom-[18%] left-[0.5vw] z-[5] w-[clamp(220px,20vw,420px)]">
             <img
               src={cavaloSgt}
               alt="Caminhão SGT"

@@ -144,7 +144,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
         <div
           className={
             presentation
-              ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-20 py-2 [perspective:1400px]"
+              ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 py-2 [perspective:1400px]"
               : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
           }
           /* TV/apresentação: amplia toda a cena (tanque + bomba + fontes) para
@@ -160,12 +160,12 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
             style={presentation ? {
-              transform: "perspective(1200px) translateZ(-55px) scale(1.0)",
+              transform: "perspective(1200px) translateZ(-55px) scale(0.94)",
               transformOrigin: "center right",
               filter: "brightness(0.84) saturate(0.9) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
             } : undefined}
           >
-            <div className={presentation ? "relative w-[415px] select-none" : "relative w-[440px] select-none"}>
+            <div className={presentation ? "relative w-[388px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
