@@ -81,7 +81,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
   const temMaisMovs = dados.movimentacoes.length > MOVS_COLAPSADO;
 
   return (
-    <AnimatedCard delay={300}>
+    <AnimatedCard delay={300} bare={presentation} hover={!presentation}>
       {/* Keyframes locais — fluxo do duto e movimento do líquido */}
       <style>{`
         @keyframes sgt-fuel-flow {
