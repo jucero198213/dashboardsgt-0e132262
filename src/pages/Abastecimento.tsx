@@ -14,6 +14,7 @@ import {
   AreaChart, Area, Cell,
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
+import cavaloSgt from "@/assets/cavalo_sgt.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -1691,6 +1692,22 @@ export default function Abastecimento() {
         >
           {/* Keyframe do ticker */}
           <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+
+          {/* Caminhão da frota — diorama: assentado à esquerda da cena, virado
+              para a estação (entrando para abastecer). Brilho rebaixado e leve
+              sombra de contato para integrar ao ambiente escuro sem ofuscar.
+              z baixo: fica atrás dos cards/cena (z-10). */}
+          <div className="pointer-events-none absolute bottom-[23%] left-[2.5vw] z-[5] w-[clamp(280px,27vw,560px)]">
+            <img
+              src={cavaloSgt}
+              alt="Caminhão SGT"
+              className="block w-full -scale-x-100"
+              draggable={false}
+              style={{ filter: "brightness(0.78) saturate(0.95) drop-shadow(0 18px 22px rgba(0,0,0,0.55))" }}
+            />
+            {/* sombra de contato no chão */}
+            <div className="absolute -bottom-2 left-[6%] right-[6%] h-5 rounded-[50%] bg-black/55 blur-md" />
+          </div>
 
           {/* Botão sair — propositalmente discreto para TV */}
           <button
