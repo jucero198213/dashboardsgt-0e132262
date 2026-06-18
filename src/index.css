@@ -584,6 +584,7 @@ body, #root {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
   transform: translateX(-100%) skewX(-12deg);
   pointer-events: none;
@@ -597,9 +598,13 @@ body, #root {
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.2s ease;
+  /* mantém o recorte arredondado estável durante o transform (evita cantos
+     quadrados no hover em Chrome/Safari) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 .sgt-hover-lift:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) translateZ(0);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
