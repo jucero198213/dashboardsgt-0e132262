@@ -149,7 +149,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           }
           /* TV/apresentação: amplia toda a cena (tanque + bomba + fontes) para
              aproveitar o espaço vertical livre e melhorar a leitura à distância. */
-          style={presentation ? { transform: "scale(1.3)", transformOrigin: "center center" } : undefined}
+          style={presentation ? { transform: "scale(1.2)", transformOrigin: "center center" } : undefined}
         >
 
           {/* ═════════ TANQUE DE ARMAZENAMENTO — render 3D (imagem) ═══════════

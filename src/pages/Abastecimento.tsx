@@ -1693,20 +1693,23 @@ export default function Abastecimento() {
           {/* Keyframe do ticker */}
           <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
 
-          {/* Caminhão da frota — diorama: estacionado no piso à esquerda, virado
-              para a estação (chegando para abastecer). Apoiado na MESMA linha de
-              chão da bomba/tanque, com sombra de contato elíptica sob as rodas e
-              brilho graduado para casar com a luz da cena. z-[5]: à frente do
-              fundo, atrás da cena/cards (z-10). */}
-          <div className="pointer-events-none absolute bottom-[14.5%] left-[1.5vw] z-[5] w-[clamp(250px,21vw,440px)]">
+          {/* Caminhão da frota — elemento de AMBIENTE, recuado para o fundo:
+              escuro, dessaturado e com a base derretendo no chão (mask gradient)
+              para deixar de parecer foto colada e virar contexto da cena.
+              z-[4]: atrás da cena/cards (z-10). */}
+          <div className="pointer-events-none absolute bottom-[13%] left-[2.5vw] z-[4] w-[clamp(200px,17vw,370px)]">
             {/* sombra de contato no chão (sob as rodas) */}
-            <div className="absolute bottom-[2%] left-[8%] right-[8%] h-[14px] rounded-[50%] bg-black/60 blur-lg" />
+            <div className="absolute bottom-[1%] left-[10%] right-[10%] h-[12px] rounded-[50%] bg-black/55 blur-lg" />
             <img
               src={cavaloSgt}
               alt="Caminhão SGT"
               className="relative block w-full -scale-x-100"
               draggable={false}
-              style={{ filter: "brightness(0.86) saturate(0.96) drop-shadow(0 10px 14px rgba(0,0,0,0.5))" }}
+              style={{
+                filter: "brightness(0.58) saturate(0.7) contrast(0.95) drop-shadow(0 8px 12px rgba(0,0,0,0.5))",
+                WebkitMaskImage: "linear-gradient(to bottom, #000 88%, transparent 100%)",
+                maskImage: "linear-gradient(to bottom, #000 88%, transparent 100%)",
+              }}
             />
           </div>
 
