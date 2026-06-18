@@ -144,7 +144,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
         <div
           className={
             presentation
-              ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12 py-2 [perspective:1400px]"
+              ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 py-2 [perspective:1400px]"
               : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
           }
           /* TV/apresentação: amplia toda a cena (tanque + bomba + fontes) para
@@ -253,7 +253,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "relative z-20 flex flex-col items-center gap-3" : "flex flex-col items-center gap-4"}
             style={presentation ? {
-              transform: "perspective(1200px) translateZ(50px) scale(1.04)",
+              transform: "perspective(1200px) translateZ(50px) translateY(-22px) scale(1.04)",
               transformOrigin: "center left",
               filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.45)) brightness(1.06)",
             } : undefined}

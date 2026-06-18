@@ -14,7 +14,6 @@ import {
   AreaChart, Area, Cell,
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
-import cavaloSgt from "@/assets/Cavalo-sgt.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -1692,26 +1691,6 @@ export default function Abastecimento() {
         >
           {/* Keyframe do ticker */}
           <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
-
-          {/* Caminhão da frota — elemento de AMBIENTE, recuado para o fundo:
-              escuro, dessaturado e com a base derretendo no chão (mask gradient)
-              para deixar de parecer foto colada e virar contexto da cena.
-              z-[4]: atrás da cena/cards (z-10). */}
-          <div className="pointer-events-none absolute bottom-[13%] left-[2.5vw] z-[4] w-[clamp(200px,17vw,370px)]">
-            {/* sombra de contato no chão (sob as rodas) */}
-            <div className="absolute bottom-[1%] left-[10%] right-[10%] h-[12px] rounded-[50%] bg-black/55 blur-lg" />
-            <img
-              src={cavaloSgt}
-              alt="Caminhão SGT"
-              className="relative block w-full -scale-x-100"
-              draggable={false}
-              style={{
-                filter: "brightness(0.58) saturate(0.7) contrast(0.95) drop-shadow(0 8px 12px rgba(0,0,0,0.5))",
-                WebkitMaskImage: "linear-gradient(to bottom, #000 88%, transparent 100%)",
-                maskImage: "linear-gradient(to bottom, #000 88%, transparent 100%)",
-              }}
-            />
-          </div>
 
           {/* Botão sair — propositalmente discreto para TV */}
           <button
