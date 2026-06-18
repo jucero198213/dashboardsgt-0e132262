@@ -14,7 +14,7 @@ import {
   AreaChart, Area, Cell,
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
-import cavaloSgt from "@/assets/cavalo_sgt.png";
+import cavaloSgt from "@/assets/Cavalo-sgt.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -1693,20 +1693,21 @@ export default function Abastecimento() {
           {/* Keyframe do ticker */}
           <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
 
-          {/* Caminhão da frota — diorama: assentado à esquerda da cena, virado
-              para a estação (entrando para abastecer). Brilho rebaixado e leve
-              sombra de contato para integrar ao ambiente escuro sem ofuscar.
-              z baixo: fica atrás dos cards/cena (z-10). */}
-          <div className="pointer-events-none absolute bottom-[18%] left-[0.5vw] z-[5] w-[clamp(220px,20vw,420px)]">
+          {/* Caminhão da frota — diorama: estacionado no piso à esquerda, virado
+              para a estação (chegando para abastecer). Apoiado na MESMA linha de
+              chão da bomba/tanque, com sombra de contato elíptica sob as rodas e
+              brilho graduado para casar com a luz da cena. z-[5]: à frente do
+              fundo, atrás da cena/cards (z-10). */}
+          <div className="pointer-events-none absolute bottom-[14.5%] left-[1.5vw] z-[5] w-[clamp(250px,21vw,440px)]">
+            {/* sombra de contato no chão (sob as rodas) */}
+            <div className="absolute bottom-[2%] left-[8%] right-[8%] h-[14px] rounded-[50%] bg-black/60 blur-lg" />
             <img
               src={cavaloSgt}
               alt="Caminhão SGT"
-              className="block w-full -scale-x-100"
+              className="relative block w-full -scale-x-100"
               draggable={false}
-              style={{ filter: "brightness(0.78) saturate(0.95) drop-shadow(0 18px 22px rgba(0,0,0,0.55))" }}
+              style={{ filter: "brightness(0.86) saturate(0.96) drop-shadow(0 10px 14px rgba(0,0,0,0.5))" }}
             />
-            {/* sombra de contato no chão */}
-            <div className="absolute -bottom-2 left-[6%] right-[6%] h-5 rounded-[50%] bg-black/55 blur-md" />
           </div>
 
           {/* Botão sair — propositalmente discreto para TV */}
