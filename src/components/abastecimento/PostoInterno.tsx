@@ -160,12 +160,12 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
           <div
             className={presentation ? "flex flex-col items-center" : "flex flex-col items-center"}
             style={presentation ? {
-              transform: "perspective(1200px) translateZ(-55px) scale(0.91)",
+              transform: "perspective(1200px) translateZ(-55px) scale(1.0)",
               transformOrigin: "center right",
-              filter: "brightness(0.82) saturate(0.88) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
+              filter: "brightness(0.84) saturate(0.9) drop-shadow(0 16px 24px rgba(0,0,0,0.6))",
             } : undefined}
           >
-            <div className={presentation ? "relative w-[365px] select-none" : "relative w-[440px] select-none"}>
+            <div className={presentation ? "relative w-[415px] select-none" : "relative w-[440px] select-none"}>
               <img
                 src={tanqueImg}
                 alt="Tanque de Armazenamento — Diesel S10"
@@ -175,17 +175,17 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* Display dinâmico — painel montado na face limpa do tanque */}
               <div className={presentation
-                ? "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[12px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-2.5 py-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
+                ? "absolute left-[52%] top-[48%] z-10 flex w-[50%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3.5 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
                 : "absolute left-[52%] top-[48%] z-10 flex w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-[14px] border border-white/10 bg-[rgba(6,10,16,0.96)] px-3 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_2px_16px_rgba(0,0,0,0.9)]"
               }>
                 <div className={presentation
-                  ? "font-mono text-[34px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
+                  ? "font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                   : "font-mono text-[46px] font-black leading-none tabular-nums tracking-[-0.03em] text-slate-100 [text-shadow:0_0_18px_rgba(255,255,255,0.22)]"
                 }>
                   {saldoReal ? `${pct.toFixed(0)}%` : "—"}
                 </div>
                 <div className={presentation
-                  ? "mt-2 whitespace-nowrap font-mono text-[11px] font-semibold tabular-nums text-slate-300/90"
+                  ? "mt-2.5 whitespace-nowrap font-mono text-[15px] font-semibold tabular-nums text-slate-300/90"
                   : "mt-2.5 whitespace-nowrap font-mono text-[13px] font-semibold tabular-nums text-slate-300/90"
                 }>
                   {saldoReal ? fmtL(saldoLitros) : "—"} / {fmtL(TANQUE_CONFIG.capacidadeLitros)}
@@ -193,7 +193,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
                 {saldoReal && (
                 <div
                   className={presentation
-                    ? "mt-2 inline-flex whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]"
+                    ? "mt-2.5 inline-flex whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em]"
                     : "mt-3 inline-flex whitespace-nowrap rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
                   }
                   style={{ color: nivel.cor, borderColor: `rgba(${nivel.rgb},0.4)`, background: `rgba(${nivel.rgb},0.14)` }}
@@ -205,7 +205,7 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
 
               {/* ── Medidor de nível (sight glass) ── */}
               <div className={presentation
-                ? "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[11px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
+                ? "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[13px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
                 : "absolute left-[82%] top-[22%] bottom-[20%] z-10 w-[12px] -translate-x-1/2 overflow-hidden rounded-full border border-white/20 bg-[rgba(2,4,8,0.6)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.85),0_1px_0_rgba(255,255,255,0.1)]"
               }>
                 <div
