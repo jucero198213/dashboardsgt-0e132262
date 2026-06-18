@@ -141,11 +141,16 @@ export function PostoInterno({ dados, presentation = false }: { dados: PostoInte
         </div>
         )}
 
-        <div className={
-          presentation
-            ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-20 py-2 [perspective:1400px]"
-            : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
-        }>
+        <div
+          className={
+            presentation
+              ? "flex min-h-0 flex-1 flex-col lg:flex-row items-center justify-center gap-6 lg:gap-20 py-2 [perspective:1400px]"
+              : "flex flex-col lg:flex-row items-center lg:items-end justify-center gap-12 lg:gap-16 py-10"
+          }
+          /* TV/apresentação: amplia toda a cena (tanque + bomba + fontes) para
+             aproveitar o espaço vertical livre e melhorar a leitura à distância. */
+          style={presentation ? { transform: "scale(1.3)", transformOrigin: "center center" } : undefined}
+        >
 
           {/* ═════════ TANQUE DE ARMAZENAMENTO — render 3D (imagem) ═══════════
               A carcaça é uma imagem PNG de face LIMPA (sem display/rótulos). O
