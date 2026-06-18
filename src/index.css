@@ -90,7 +90,7 @@
 
   .light {
     /* ── Tema claro SGT — 60/30/10 (branco · tinta · laranja #FE8005) ── */
-    --background: 220 22% 96%;          /* #F4F5F7 base off-white (60%) */
+    --background: 220 21% 92%;          /* #E5E8EE base (escurecida p/ destacar cards) */
     --foreground: 213 31% 13%;          /* #16202E tinta (30%) */
     --card: 0 0% 100%;
     --card-foreground: 213 31% 13%;
@@ -116,11 +116,11 @@
     --radius: 0.75rem;
     --card-elevated: 220 22% 99%;
 
-    /* SGT tokens — 60/30/10 */
-    --sgt-bg-base:        #f4f5f7;   /* 60% base off-white */
-    --sgt-bg-card:        #ffffff;   /* superfícies */
+    /* SGT tokens — 60/30/10 · hierarquia base<section<card p/ destacar cards */
+    --sgt-bg-base:        #e5e8ee;   /* página (mais escura) */
+    --sgt-bg-card:        #ffffff;   /* cards (branco, destacam) */
     --sgt-bg-surface:     #ffffff;   /* sidebar / workspaces */
-    --sgt-bg-section:     #fafbfc;
+    --sgt-bg-section:     #edeff4;   /* painel atrás dos cards (intermediário) */
     --sgt-bg-overlay:     #ffffff;
     --sgt-border-subtle:  rgba(20,30,45,0.08);
     --sgt-border-medium:  rgba(20,30,45,0.16);
