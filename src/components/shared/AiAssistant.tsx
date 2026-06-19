@@ -305,7 +305,6 @@ export function AiAssistant() {
             </button>
           </div>
         </div>
-      )}
 
       <button
         onClick={() => setOpen((o) => !o)}
