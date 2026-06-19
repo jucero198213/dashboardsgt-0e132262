@@ -66,6 +66,7 @@ export function AiAssistant() {
       <div
         role="dialog"
         aria-label="Assistente SGT"
+        className="sgt-ai-popup"
         style={{
           position: "fixed",
           bottom: 80,
