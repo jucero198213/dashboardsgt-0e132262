@@ -34,7 +34,7 @@ const tools = [
     function: {
       name: "get_faturamento_resumo",
       description:
-        "Retorna o resumo de faturamento mais recente da empresa (faturamento do último dia disponível, mês corrente e referência). Use para perguntas como 'qual o faturamento de ontem', 'como está o faturamento', 'quanto faturamos hoje/no mês'.",
+        "Retorna APENAS o acumulado do mês corrente e um snapshot parcial do dia em andamento (NÃO é o faturamento fechado de ontem). Use somente para perguntas genéricas tipo 'como está o faturamento do mês'. NÃO USE para perguntas sobre 'ontem', 'hoje fechado' ou qualquer data específica — para isso use get_faturamento_periodo.",
       parameters: { type: "object", properties: {} },
     },
   },
