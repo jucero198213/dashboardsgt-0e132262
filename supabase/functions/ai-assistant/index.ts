@@ -27,31 +27,35 @@ serve(async (req: Request) => {
       return respond({ error: "messages é obrigatório" }, 400);
     }
 
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) {
-      return respond({ error: "OPENAI_API_KEY não configurada" }, 500);
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableKey) {
+      return respond({ error: "LOVABLE_API_KEY não configurada" }, 500);
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${openaiKey}`,
+        Authorization: `Bearer ${lovableKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...messages.map((m) => ({ role: m.role, content: m.content })),
         ],
-        temperature: 0.5,
-        max_tokens: 800,
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      return respond({ error: `OpenAI error: ${err}` }, 500);
+      if (response.status === 429) {
+        return respond({ error: "Limite de requisições excedido. Tente novamente em instantes." }, 429);
+      }
+      if (response.status === 402) {
+        return respond({ error: "Créditos de IA esgotados. Adicione créditos no workspace." }, 402);
+      }
+      return respond({ error: `AI gateway error: ${err}` }, 500);
     }
 
     const result = await response.json();
