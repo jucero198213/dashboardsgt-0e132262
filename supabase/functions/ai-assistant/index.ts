@@ -75,14 +75,181 @@ const tools = [
     function: {
       name: "get_manutencao_por_veiculo",
       description:
-        "Retorna o ranking de veículos por custo de manutenção em um período (soma de custo + mão de obra + peças por veículo). Use para perguntas como 'qual caminhão gasta mais com manutenção', 'top veículos em oficina', 'gastos de manutenção por placa/frota', 'manutenção corretiva vs preventiva'. Também retorna totais por tipo de serviço (interno/externo).",
+        "Ranking de veículos por custo de manutenção em um período (custo + mão de obra + peças). Use para 'qual caminhão gasta mais com manutenção', 'top veículos em oficina', 'preventiva vs corretiva'. Também retorna totais interno/externo.",
       parameters: {
         type: "object",
         properties: {
           dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 90 dias)" },
           dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
-          top: { type: "number", description: "Quantos veículos retornar no ranking (default 10)" },
+          top: { type: "number", description: "Quantos veículos no ranking (default 10)" },
         },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_top_clientes",
+      description:
+        "Ranking dos clientes/grupos que mais faturaram em um período (a partir de get_faturamento_periodo, ordenado por valor). Use para 'top clientes do mês', 'quais clientes mais faturaram'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD" },
+          dataFim: { type: "string", description: "YYYY-MM-DD" },
+          top: { type: "number", description: "Quantidade no ranking (default 10)" },
+        },
+        required: ["dataInicio", "dataFim"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_vencimentos",
+      description:
+        "Títulos a vencer nos próximos N dias (contas a pagar, a receber ou ambas), agrupados por dia. Use para 'o que vence essa semana', 'contas a pagar dos próximos 7 dias', 'recebimentos previstos'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dias: { type: "number", description: "Janela em dias a partir de hoje (default 7)" },
+          tipo: { type: "string", description: "'pagar' | 'receber' | 'ambos' (default 'ambos')" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_inadimplencia",
+      description:
+        "Contas a receber vencidas e ainda em aberto, com aging (0-30, 31-60, 61-90, 90+ dias) e top devedores. Use para 'inadimplência atual', 'maiores devedores', 'CRs em atraso'.",
+      parameters: {
+        type: "object",
+        properties: {
+          top: { type: "number", description: "Top N devedores (default 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_abastecimento_consumo",
+      description:
+        "Consumo de combustível e média km/L por veículo em um período (gasto total, litros, média). Use para 'consumo médio da frota', 'qual veículo gasta mais diesel', 'custo de combustível'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Top N veículos por gasto (default 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_frota_resumo",
+      description:
+        "Resumo da frota: total de veículos por situação (ativo/inativo/baixado), por classificação, por marca e por idade média. Use para 'quantos veículos temos', 'composição da frota', 'idade média da frota'.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_operacao_snapshot",
+      description:
+        "Snapshot em tempo real das viagens em andamento (quantidade, % completo, veículos em manutenção, situações). Use para 'como está a operação agora', 'quantas viagens em andamento', 'frota em manutenção'.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_compras_resumo",
+      description:
+        "Resumo de compras em um período: valor total, top fornecedores, top grupos/subgrupos de produtos. Use para 'quanto compramos esse mês', 'principais fornecedores', 'gastos com peças/pneus'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Top N fornecedores/grupos (default 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_rh_motoristas",
+      description:
+        "Resumo de motoristas: ativos, demitidos, por filial, CNHs próximas do vencimento (próximos 60 dias). Use para 'quantos motoristas temos', 'CNHs vencendo', 'headcount'.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_bancos_saldos",
+      description:
+        "Saldos atuais e movimentação do período por conta bancária. Use para 'saldo dos bancos', 'quanto temos em caixa', 'movimentação bancária do mês'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default 1º dia do mês corrente)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_financiamento_frota",
+      description:
+        "Parcelas de financiamento de veículos: total em aberto, próximas a vencer, por banco. Use para 'financiamentos de veículos', 'parcelas a pagar', 'dívida bancária da frota'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dias: { type: "number", description: "Janela em dias para 'próximas a vencer' (default 30)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_diesel_posto_interno",
+      description:
+        "Saldo de diesel do posto interno e movimentações (entradas/saídas) no período. Use para 'estoque de diesel', 'quanto temos no posto interno', 'consumo do posto'.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default 1/jan do ano)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_comparativo_faturamento",
+      description:
+        "Compara o faturamento de dois períodos (atual vs anterior) — total, variação absoluta e %. Use para 'mês x mês passado', 'compare este mês com o anterior', 'crescimento de faturamento'.",
+      parameters: {
+        type: "object",
+        properties: {
+          inicioA: { type: "string", description: "Período A início YYYY-MM-DD" },
+          fimA: { type: "string", description: "Período A fim YYYY-MM-DD" },
+          inicioB: { type: "string", description: "Período B (comparação) início YYYY-MM-DD" },
+          fimB: { type: "string", description: "Período B fim YYYY-MM-DD" },
+        },
+        required: ["inicioA", "fimA", "inicioB", "fimB"],
       },
     },
   },
