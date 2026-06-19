@@ -23,18 +23,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchRole = useCallback(async (userId: string) => {
     try {
+      // NÃO usar .maybeSingle(): cadastros antigos podem ter deixado linhas
+      // DUPLICADAS em user_roles (ex.: "user" do signup + "diretoria" adicionada),
+      // e o maybeSingle() dá erro com >1 linha → caía no default "user", fazendo
+      // a diretoria ser tratada como usuário comum. Resolvemos por prioridade.
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .eq("user_id", userId);
 
       if (error) {
         console.error("Erro ao buscar role:", error);
         setRole("user");
         return;
       }
-      setRole((data?.role as AppRole) ?? "user");
+      const roles = (data ?? []).map((r) => r.role as AppRole);
+      if (roles.includes("admin")) setRole("admin");
+      else if (roles.includes("diretoria")) setRole("diretoria");
+      else setRole("user");
     } catch {
       setRole("user");
     }
