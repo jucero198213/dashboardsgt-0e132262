@@ -63,27 +63,30 @@ export function AiAssistant() {
 
   return (
     <>
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Assistente SGT"
-          style={{
-            position: "fixed",
-            bottom: 80,
-            right: 20,
-            width: 360,
-            height: 480,
-            zIndex: 9998,
-            background: "var(--sgt-bg-surface)",
-            border: "1px solid var(--sgt-border-subtle)",
-            borderRadius: 16,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            color: "var(--sgt-text-primary)",
-          }}
-        >
+      <div
+        role="dialog"
+        aria-label="Assistente SGT"
+        style={{
+          position: "fixed",
+          bottom: 80,
+          right: 20,
+          width: 360,
+          height: 480,
+          zIndex: 9998,
+          background: "var(--sgt-bg-surface)",
+          border: "1px solid var(--sgt-border-subtle)",
+          borderRadius: 16,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          color: "var(--sgt-text-primary)",
+          opacity: open ? 1 : 0,
+          transform: open ? "scale(1) translateY(0)" : "scale(0.92) translateY(12px)",
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
           <div
             style={{
               background: gradient,
