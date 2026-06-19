@@ -66,6 +66,7 @@ export function AiAssistant() {
       <div
         role="dialog"
         aria-label="Assistente SGT"
+        className="sgt-ai-popup"
         style={{
           position: "fixed",
           bottom: 80,
@@ -309,6 +310,7 @@ export function AiAssistant() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Abrir assistente"
+        className="sgt-ai-btn"
         style={{
           position: "fixed",
           bottom: 20,
@@ -334,6 +336,18 @@ export function AiAssistant() {
         @keyframes sgt-bounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
           40% { transform: translateY(-4px); opacity: 1; }
+        }
+        @media (max-width: 640px) {
+          .sgt-ai-btn {
+            bottom: 80px !important;
+            right: 12px !important;
+          }
+          .sgt-ai-popup {
+            bottom: 140px !important;
+            right: 12px !important;
+            width: calc(100vw - 24px) !important;
+            height: 60vh !important;
+          }
         }
       `}</style>
     </>
