@@ -815,3 +815,19 @@ body {
 .light [class*="text-emerald-300"]{ color: #059669 !important; }
 .light [class*="text-orange-300"] { color: #c2410c !important; }
 
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile safe-bottom: evita que o botão flutuante da IA e a
+   BottomNav cubram o último item das páginas. Aplica padding
+   no container interno de scroll padrão das páginas SGT.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Padrão: <section><div class="... overflow-auto"> conteúdo */
+  section > div.overflow-auto {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* Container raiz min-h-[100dvh] sem section também (Indicadores etc.) */
+  .sgt-mobile-safe-bottom {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
