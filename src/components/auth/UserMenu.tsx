@@ -58,7 +58,7 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
+          className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-50 min-w-[220px] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
           style={menuStyle}
         >
           {/* User info */}
