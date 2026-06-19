@@ -262,6 +262,7 @@ export function AiAssistant() {
                   ))}
                 </div>
               </div>
+            )}
             {messages.length === 1 && !loading && (
               <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{ fontSize: 11, color: "var(--sgt-text-muted, #888)", padding: "0 4px" }}>
