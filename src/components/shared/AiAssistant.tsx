@@ -7,8 +7,19 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const WELCOME: ChatMessage = {
   role: "assistant",
-  content: "Olá! Sou a assistente do SGT Workspace. Como posso ajudar você hoje?",
+  content:
+    "Olá! Sou a assistente do SGT Workspace. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
 };
+
+const SUGGESTIONS: { label: string; prompt: string }[] = [
+  { label: "📊 Faturamento de ontem", prompt: "Qual foi o faturamento de ontem?" },
+  { label: "📈 Top 5 clientes do mês", prompt: "Quais os 5 clientes que mais faturaram este mês?" },
+  { label: "💰 Contas a pagar da semana", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
+  { label: "📉 Inadimplência atual", prompt: "Qual o total em aberto de contas a receber vencidas?" },
+  { label: "🔧 Caminhão que mais gasta manutenção", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
+  { label: "🛠️ Preventiva vs corretiva", prompt: "Compare os gastos de manutenção preventiva vs corretiva nos últimos 90 dias." },
+  { label: "📅 Faturamento do mês vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
+];
 
 export function AiAssistant() {
   const { role } = useAuth();
