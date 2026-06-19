@@ -110,7 +110,11 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
   try {
     if (name === "get_faturamento_resumo") {
       const data = await dwCall("/dw-faturamento-resumo", {});
-      return summarize(data);
+      return JSON.stringify({
+        ...(data as Record<string, unknown>),
+        _aviso:
+          "daily_revenue.reference_date é a data do snapshot — pode ser o dia em andamento (PARCIAL). NÃO apresente como faturamento fechado de ontem. Para faturamento de uma data específica, use get_faturamento_periodo.",
+      });
     }
     if (name === "get_faturamento_periodo") {
       const data = await dwCall("/dw-financeiro", {
@@ -118,7 +122,14 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         dataInicio: args.dataInicio,
         dataFim: args.dataFim,
       });
-      return summarize(data);
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const total = rows.reduce((s, r) => s + Number(r.FRETE_TOTAL ?? 0), 0);
+      return JSON.stringify({
+        periodo: { dataInicio: args.dataInicio, dataFim: args.dataFim },
+        faturamento_total: total.toFixed(2),
+        qtd_grupos: rows.length,
+        por_grupo: rows,
+      });
     }
     if (name === "get_titulos_financeiros") {
       const data = await dwCall("/dw-financeiro", {
