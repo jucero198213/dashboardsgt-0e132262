@@ -972,18 +972,22 @@ export default function Abastecimento() {
             {/* ════════ ABAS — Geral / Interno / Externo ════════ */}
             <AnimatedCard delay={40}>
               <div className="flex items-center gap-1 overflow-x-auto rounded-xl border p-1 w-full sm:w-fit"
-                style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
+                style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}>
                 {ABAS.map(t => {
                   const active = abaAtiva === t.id;
                   return (
                     <button
                       key={t.id}
                       onClick={() => { setAbaAtiva(t.id); setPage(1); }}
-                      className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
-                        active
-                          ? "border border-amber-400/35 bg-amber-400/15 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.12)]"
-                          : "border border-transparent text-slate-500 hover:text-slate-300"
+                      className={`whitespace-nowrap rounded-lg border px-3.5 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
+                        active ? "" : "border-transparent text-slate-500 hover:text-slate-300"
                       }`}
+                      style={active ? {
+                        borderColor: "color-mix(in srgb, var(--sgt-accent) 35%, transparent)",
+                        background:  "var(--sgt-accent-soft)",
+                        color:       "var(--sgt-accent-text)",
+                        boxShadow:   "0 0 16px color-mix(in srgb, var(--sgt-accent) 18%, transparent)",
+                      } : undefined}
                     >
                       {t.label}
                     </button>
