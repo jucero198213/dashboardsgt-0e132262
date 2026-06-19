@@ -282,6 +282,22 @@ button:focus-visible, a:focus-visible {
   box-shadow: 0 10px 30px -6px rgba(20, 30, 45, 0.16) !important;
 }
 
+/* ── Light: suaviza sombras de repouso pesadas (do dark) ──
+   Catch dos shadow-[...rgba(0,0,0,0.3..0.6)] e troca por uma sombra clara.
+   Exceto dentro do modo TV (.sgt-tv), sempre escuro, que usa as sombras para
+   a profundidade 3D do tanque/bomba. */
+.light [class*="shadow-["][class*="rgba(0,0,0,0.3"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.4"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.5"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.6"]:not(.sgt-tv *) {
+  box-shadow: 0 6px 18px -6px rgba(20, 30, 45, 0.12) !important;
+}
+
+/* ── Light: overlays bg-white/[0.0x] do dark → tinta sutil (senão somem) ── */
+.light [class*="bg-white/[0.0"] {
+  background-color: rgba(20, 30, 45, 0.04) !important;
+}
+
 /* ── Mobile: safe areas for PWA standalone ── */
 @supports (padding-top: env(safe-area-inset-top)) {
   body {
