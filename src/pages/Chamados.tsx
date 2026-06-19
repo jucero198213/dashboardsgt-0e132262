@@ -73,31 +73,49 @@ export default function Chamados() {
         >
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
 
-            {/* Header */}
-            <div className="flex items-center gap-2 md:gap-3 py-1 flex-wrap">
+            {/* Header — compacto no mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 py-1 flex-wrap">
               <button
                 onClick={() => navigate("/home")}
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
                 aria-label="Voltar"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
                 <ClipboardList className="h-4 w-4 text-amber-400" />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Suporte</span>
-                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">
-                  {isAdmin ? "Chamados (todos)" : "Meus chamados"}
+              <div className="flex flex-col leading-none min-w-0 flex-1 sm:flex-initial">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Suporte</span>
+                <span className="text-[14px] sm:text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">
+                  {isAdmin ? "Chamados" : "Meus chamados"}
                 </span>
               </div>
-              <div className="flex-1" />
+              <div className="hidden sm:block flex-1" />
               {isAdmin && (
-                <Button size="sm" variant="outline" onClick={() => navigate("/admin/chamados")} className="border-amber-500/40 text-amber-300">
-                  Ver agenda completa
-                </Button>
+                <>
+                  {/* Mobile: ícone-only */}
+                  <button
+                    onClick={() => navigate("/admin/chamados")}
+                    aria-label="Ver agenda"
+                    className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/[0.08] text-amber-300"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                  </button>
+                  <Button size="sm" variant="outline" onClick={() => navigate("/admin/chamados")} className="hidden sm:inline-flex border-amber-500/40 text-amber-300">
+                    Ver agenda completa
+                  </Button>
+                </>
               )}
-              <Button size="sm" onClick={openNew} className="bg-amber-500 hover:bg-amber-600 text-black">
+              {/* Mobile: ícone-only */}
+              <button
+                onClick={openNew}
+                aria-label="Abrir chamado"
+                className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-black hover:bg-amber-600"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+              <Button size="sm" onClick={openNew} className="hidden sm:inline-flex bg-amber-500 hover:bg-amber-600 text-black">
                 <Plus className="h-4 w-4 mr-1" /> Abrir chamado
               </Button>
               <UserMenu />
