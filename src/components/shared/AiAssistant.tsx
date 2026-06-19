@@ -262,8 +262,38 @@ export function AiAssistant() {
                   ))}
                 </div>
               </div>
+            {messages.length === 1 && !loading && (
+              <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--sgt-text-muted, #888)", padding: "0 4px" }}>
+                  💡 Sugestões para começar:
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={() => sendText(s.prompt)}
+                      style={{
+                        background: "var(--sgt-bg-section)",
+                        color: "var(--sgt-text-primary)",
+                        border: "1px solid var(--sgt-border-subtle)",
+                        borderRadius: 999,
+                        padding: "6px 10px",
+                        fontSize: 11,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sgt-accent-soft, rgba(245,166,35,0.12))")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--sgt-bg-section)")}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
+
 
           <div
             style={{
