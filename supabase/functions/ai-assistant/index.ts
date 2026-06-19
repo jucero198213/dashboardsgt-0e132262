@@ -70,6 +70,22 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_manutencao_por_veiculo",
+      description:
+        "Retorna o ranking de veículos por custo de manutenção em um período (soma de custo + mão de obra + peças por veículo). Use para perguntas como 'qual caminhão gasta mais com manutenção', 'top veículos em oficina', 'gastos de manutenção por placa/frota', 'manutenção corretiva vs preventiva'. Também retorna totais por tipo de serviço (interno/externo).",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 90 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Quantos veículos retornar no ranking (default 10)" },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
