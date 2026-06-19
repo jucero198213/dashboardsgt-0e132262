@@ -406,6 +406,379 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         top_veiculos: ranking,
       });
     }
+    if (name === "get_top_clientes") {
+      const topN = Number(args.top ?? 10);
+      const data = await dwCall("/dw-financeiro", {
+        action: "faturamento",
+        dataInicio: args.dataInicio,
+        dataFim: args.dataFim,
+      });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const ranked = rows
+        .map((r) => ({
+          grupo: r.GRUPO_CLIENTE ?? r.NOME_CLIENTE ?? r.CLIENTE ?? "—",
+          faturamento: Number(r.FRETE_TOTAL ?? 0),
+          ctes: Number(r.QTD_CTES ?? r.QTDE ?? 0),
+        }))
+        .sort((a, b) => b.faturamento - a.faturamento)
+        .slice(0, topN)
+        .map((r) => ({ ...r, faturamento: r.faturamento.toFixed(2) }));
+      const total = rows.reduce((s, r) => s + Number(r.FRETE_TOTAL ?? 0), 0);
+      return JSON.stringify({
+        periodo: { dataInicio: args.dataInicio, dataFim: args.dataFim },
+        faturamento_total: total.toFixed(2),
+        top: ranked,
+      });
+    }
+    if (name === "get_vencimentos") {
+      const dias = Number(args.dias ?? 7);
+      const tipo = String(args.tipo ?? "ambos").toLowerCase();
+      const dataInicio = today();
+      const dataFim = (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + dias);
+        return d.toISOString().slice(0, 10);
+      })();
+      const data = await dwCall("/dw-financeiro", { action: "fetch", dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const hoje = today();
+      const filtrados = rows.filter((r) => {
+        const venc = String(r.DATA_VENCIMENTO ?? "").slice(0, 10);
+        if (!venc || venc < hoje || venc > dataFim) return false;
+        const pago = Number(r.VLR_PAGO ?? 0) >= Number(r.VLR_PARCELA ?? 0);
+        if (pago) return false;
+        if (tipo === "pagar" && r.ORIGEM !== "CP") return false;
+        if (tipo === "receber" && r.ORIGEM !== "CR") return false;
+        return true;
+      });
+      const porDia = new Map<string, { data: string; cp: number; cr: number; qtd: number }>();
+      let totalCP = 0;
+      let totalCR = 0;
+      for (const r of filtrados) {
+        const d = String(r.DATA_VENCIMENTO).slice(0, 10);
+        const v = Number(r.VLR_PARCELA ?? 0) - Number(r.VLR_PAGO ?? 0);
+        const cur = porDia.get(d) ?? { data: d, cp: 0, cr: 0, qtd: 0 };
+        if (r.ORIGEM === "CP") { cur.cp += v; totalCP += v; }
+        else if (r.ORIGEM === "CR") { cur.cr += v; totalCR += v; }
+        cur.qtd++;
+        porDia.set(d, cur);
+      }
+      const agenda = [...porDia.values()]
+        .sort((a, b) => a.data.localeCompare(b.data))
+        .map((d) => ({ data: d.data, qtd: d.qtd, contas_pagar: d.cp.toFixed(2), contas_receber: d.cr.toFixed(2) }));
+      return JSON.stringify({
+        janela: { dataInicio, dataFim, dias },
+        tipo,
+        total_pagar: totalCP.toFixed(2),
+        total_receber: totalCR.toFixed(2),
+        saldo_previsto: (totalCR - totalCP).toFixed(2),
+        agenda,
+      });
+    }
+    if (name === "get_inadimplencia") {
+      const topN = Number(args.top ?? 10);
+      const dataInicio = daysAgo(365);
+      const dataFim = today();
+      const data = await dwCall("/dw-financeiro", { action: "fetch", dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const hojeStr = today();
+      const hoje = new Date(hojeStr);
+      const aging = { "0-30": 0, "31-60": 0, "61-90": 0, "90+": 0 };
+      const porCliente = new Map<string, { cliente: string; em_aberto: number; titulos: number }>();
+      let totalVencido = 0;
+      for (const r of rows) {
+        if (r.ORIGEM !== "CR") continue;
+        const venc = String(r.DATA_VENCIMENTO ?? "").slice(0, 10);
+        if (!venc || venc >= hojeStr) continue;
+        const aberto = Number(r.VLR_PARCELA ?? 0) - Number(r.VLR_PAGO ?? 0);
+        if (aberto <= 0.01) continue;
+        const diasAtraso = Math.floor((hoje.getTime() - new Date(venc).getTime()) / 86400000);
+        if (diasAtraso <= 30) aging["0-30"] += aberto;
+        else if (diasAtraso <= 60) aging["31-60"] += aberto;
+        else if (diasAtraso <= 90) aging["61-90"] += aberto;
+        else aging["90+"] += aberto;
+        totalVencido += aberto;
+        const nome = String(r.NOME_PARCEIRO ?? r.COD_PARCEIRO ?? "—");
+        const cur = porCliente.get(nome) ?? { cliente: nome, em_aberto: 0, titulos: 0 };
+        cur.em_aberto += aberto;
+        cur.titulos++;
+        porCliente.set(nome, cur);
+      }
+      const topDevedores = [...porCliente.values()]
+        .sort((a, b) => b.em_aberto - a.em_aberto)
+        .slice(0, topN)
+        .map((c) => ({ cliente: c.cliente, em_aberto: c.em_aberto.toFixed(2), titulos: c.titulos }));
+      return JSON.stringify({
+        total_vencido: totalVencido.toFixed(2),
+        aging: {
+          "0-30_dias": aging["0-30"].toFixed(2),
+          "31-60_dias": aging["31-60"].toFixed(2),
+          "61-90_dias": aging["61-90"].toFixed(2),
+          "90_mais_dias": aging["90+"].toFixed(2),
+        },
+        top_devedores: topDevedores,
+      });
+    }
+    if (name === "get_abastecimento_consumo") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const topN = Number(args.top ?? 10);
+      const data = await dwCall("/dw-abastecimento", { dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const porVeic = new Map<string, { veiculo: string; gasto: number; litros: number; abastecimentos: number; medias: number[] }>();
+      let totalGasto = 0;
+      let totalLitros = 0;
+      for (const r of rows) {
+        const v = String(r.veiculo ?? "—");
+        const gasto = Number(r.vlrtot ?? 0);
+        const litros = Number(r.quanti ?? 0);
+        totalGasto += gasto;
+        totalLitros += litros;
+        const cur = porVeic.get(v) ?? { veiculo: v, gasto: 0, litros: 0, abastecimentos: 0, medias: [] };
+        cur.gasto += gasto;
+        cur.litros += litros;
+        cur.abastecimentos++;
+        if (Number(r.media ?? 0) > 0) cur.medias.push(Number(r.media));
+        porVeic.set(v, cur);
+      }
+      const ranking = [...porVeic.values()]
+        .sort((a, b) => b.gasto - a.gasto)
+        .slice(0, topN)
+        .map((v) => ({
+          veiculo: v.veiculo,
+          gasto_total: v.gasto.toFixed(2),
+          litros: v.litros.toFixed(2),
+          abastecimentos: v.abastecimentos,
+          media_km_l: v.medias.length ? (v.medias.reduce((s, x) => s + x, 0) / v.medias.length).toFixed(2) : null,
+        }));
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        gasto_total: totalGasto.toFixed(2),
+        litros_total: totalLitros.toFixed(2),
+        qtd_veiculos: porVeic.size,
+        top_veiculos: ranking,
+      });
+    }
+    if (name === "get_frota_resumo") {
+      const data = await dwCall("/dw-frota", {});
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const porSit: Record<string, number> = {};
+      const porClassif: Record<string, number> = {};
+      const porMarca: Record<string, number> = {};
+      const idades: number[] = [];
+      const anoAtual = new Date().getFullYear();
+      for (const r of rows) {
+        const sit = String(r.situacao ?? "—");
+        porSit[sit] = (porSit[sit] ?? 0) + 1;
+        const cl = String(r.classificacao ?? "—");
+        porClassif[cl] = (porClassif[cl] ?? 0) + 1;
+        const m = String(r.marca ?? "—");
+        porMarca[m] = (porMarca[m] ?? 0) + 1;
+        const ano = Number(r.anomod ?? r.anofab ?? 0);
+        if (ano > 1980 && ano <= anoAtual + 1) idades.push(anoAtual - ano);
+      }
+      const idadeMedia = idades.length ? (idades.reduce((s, x) => s + x, 0) / idades.length).toFixed(1) : null;
+      return JSON.stringify({
+        total_veiculos: rows.length,
+        por_situacao: porSit,
+        por_classificacao: porClassif,
+        por_marca: porMarca,
+        idade_media_anos: idadeMedia,
+      });
+    }
+    if (name === "get_operacao_snapshot") {
+      const data = await dwCall("/dw-operacional", {});
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const porSit: Record<string, number> = {};
+      let emManutencao = 0;
+      let somaPerc = 0;
+      let countPerc = 0;
+      for (const r of rows) {
+        const s = String(r.descricao_situacao ?? r.situacao_viagem ?? "—");
+        porSit[s] = (porSit[s] ?? 0) + 1;
+        if (r.em_manutencao === 1 || r.em_manutencao === "1" || r.em_manutencao === true) emManutencao++;
+        const p = Number(r.percentual_completo ?? 0);
+        if (p > 0) { somaPerc += p; countPerc++; }
+      }
+      return JSON.stringify({
+        total_viagens: rows.length,
+        em_manutencao: emManutencao,
+        percentual_medio_completo: countPerc ? (somaPerc / countPerc).toFixed(1) : null,
+        por_situacao: porSit,
+      });
+    }
+    if (name === "get_compras_resumo") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const topN = Number(args.top ?? 10);
+      const data = await dwCall("/dw-compras", { dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const porForn = new Map<string, number>();
+      const porGrupo = new Map<string, number>();
+      const porSubGrupo = new Map<string, number>();
+      let total = 0;
+      for (const r of rows) {
+        const valor = Number(r.quantidade ?? 0) * Number(r.valor_un ?? 0);
+        total += valor;
+        const f = String(r.fornecedor ?? "—");
+        porForn.set(f, (porForn.get(f) ?? 0) + valor);
+        const g = String(r.grupo ?? "—");
+        porGrupo.set(g, (porGrupo.get(g) ?? 0) + valor);
+        const sg = String(r.sub_grupo ?? "—");
+        porSubGrupo.set(sg, (porSubGrupo.get(sg) ?? 0) + valor);
+      }
+      const rank = (m: Map<string, number>) =>
+        [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, topN).map(([k, v]) => ({ nome: k, valor: v.toFixed(2) }));
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        valor_total: total.toFixed(2),
+        qtd_itens: rows.length,
+        top_fornecedores: rank(porForn),
+        top_grupos: rank(porGrupo),
+        top_subgrupos: rank(porSubGrupo),
+      });
+    }
+    if (name === "get_rh_motoristas") {
+      const data = await dwCall("/dw-rh", {});
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const hoje = new Date();
+      const limiteCnh = new Date(); limiteCnh.setDate(limiteCnh.getDate() + 60);
+      let ativos = 0;
+      let demitidos = 0;
+      const porFilial: Record<string, number> = {};
+      const cnhVencendo: Array<{ motorista: string; vencimento: string }> = [];
+      for (const r of rows) {
+        const demissao = r.data_demissao ? new Date(String(r.data_demissao)) : null;
+        if (demissao && demissao <= hoje) demitidos++;
+        else {
+          ativos++;
+          const f = String(r.codigo_filial ?? "—");
+          porFilial[f] = (porFilial[f] ?? 0) + 1;
+        }
+        const venc = r.validade_habilitacao ? new Date(String(r.validade_habilitacao)) : null;
+        if (venc && venc >= hoje && venc <= limiteCnh) {
+          cnhVencendo.push({ motorista: String(r.motorista ?? "—"), vencimento: venc.toISOString().slice(0, 10) });
+        }
+      }
+      return JSON.stringify({
+        total_cadastrados: rows.length,
+        ativos,
+        demitidos,
+        por_filial: porFilial,
+        cnh_vencendo_60d: cnhVencendo.slice(0, 30),
+        qtd_cnh_vencendo_60d: cnhVencendo.length,
+      });
+    }
+    if (name === "get_bancos_saldos") {
+      const data = await dwCall("/dw-bancos", { dataInicio: args.dataInicio, dataFim: args.dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      let saldoTotal = 0;
+      let entradas = 0;
+      let saidas = 0;
+      const contas = rows.map((c) => {
+        const sa = Number(c.saldo_atual ?? 0);
+        const en = Number(c.entradas_mes ?? 0);
+        const sd = Number(c.saidas_mes ?? 0);
+        saldoTotal += sa;
+        entradas += en;
+        saidas += sd;
+        return {
+          banco: c.nome_banco,
+          conta: c.nome_conta,
+          filial: c.nome_filial,
+          saldo_atual: sa.toFixed(2),
+          entradas: en.toFixed(2),
+          saidas: sd.toFixed(2),
+        };
+      });
+      return JSON.stringify({
+        saldo_total: saldoTotal.toFixed(2),
+        entradas_periodo: entradas.toFixed(2),
+        saidas_periodo: saidas.toFixed(2),
+        qtd_contas: rows.length,
+        contas: contas.slice(0, 20),
+      });
+    }
+    if (name === "get_financiamento_frota") {
+      const dias = Number(args.dias ?? 30);
+      const data = await dwCall("/dw-financiamento-frota", {});
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const hojeStr = today();
+      const limite = (() => { const d = new Date(); d.setDate(d.getDate() + dias); return d.toISOString().slice(0, 10); })();
+      let totalAberto = 0;
+      let proximoVencer = 0;
+      const porBanco = new Map<string, number>();
+      let qtdProximas = 0;
+      for (const r of rows) {
+        const sit = String(r.situacao ?? "");
+        const venc = String(r.data_vencimento ?? "").slice(0, 10);
+        const aberto = Number(r.valor_parcela ?? 0) - Number(r.valor_pago ?? 0);
+        if (sit === "A" && aberto > 0.01) {
+          totalAberto += aberto;
+          const b = String(r.banco ?? "—");
+          porBanco.set(b, (porBanco.get(b) ?? 0) + aberto);
+          if (venc >= hojeStr && venc <= limite) {
+            proximoVencer += aberto;
+            qtdProximas++;
+          }
+        }
+      }
+      const topBancos = [...porBanco.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([banco, v]) => ({ banco, em_aberto: v.toFixed(2) }));
+      return JSON.stringify({
+        total_em_aberto: totalAberto.toFixed(2),
+        proximas_a_vencer_dias: dias,
+        valor_proximas_a_vencer: proximoVencer.toFixed(2),
+        qtd_proximas_a_vencer: qtdProximas,
+        por_banco: topBancos,
+      });
+    }
+    if (name === "get_diesel_posto_interno") {
+      const data = await dwCall("/dw-posto-interno", {
+        dataInicio: args.dataInicio,
+        dataFim: args.dataFim,
+      }) as { data?: Array<Record<string, unknown>>; saldo_atual_litros?: number };
+      const rows = data.data ?? [];
+      let entradasL = 0;
+      let saidasL = 0;
+      let entradasV = 0;
+      let saidasV = 0;
+      for (const r of rows) {
+        const q = Number(r.qtdade ?? 0);
+        const v = Number(r.valor ?? 0);
+        if (r.tipo === "ENTRADA") { entradasL += q; entradasV += v; }
+        else if (r.tipo === "SAIDA") { saidasL += q; saidasV += v; }
+      }
+      return JSON.stringify({
+        saldo_atual_litros: data.saldo_atual_litros,
+        entradas_litros: entradasL.toFixed(2),
+        saidas_litros: saidasL.toFixed(2),
+        entradas_valor: entradasV.toFixed(2),
+        saidas_valor: saidasV.toFixed(2),
+        qtd_movimentos: rows.length,
+      });
+    }
+    if (name === "get_comparativo_faturamento") {
+      const sumOf = async (di: string, df: string) => {
+        const d = await dwCall("/dw-financeiro", { action: "faturamento", dataInicio: di, dataFim: df });
+        const rs = ((d as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+        return rs.reduce((s, r) => s + Number(r.FRETE_TOTAL ?? 0), 0);
+      };
+      const [a, b] = await Promise.all([
+        sumOf(args.inicioA as string, args.fimA as string),
+        sumOf(args.inicioB as string, args.fimB as string),
+      ]);
+      const variacao = a - b;
+      const variacaoPct = b !== 0 ? (variacao / b) * 100 : null;
+      return JSON.stringify({
+        periodo_A: { inicio: args.inicioA, fim: args.fimA, faturamento: a.toFixed(2) },
+        periodo_B: { inicio: args.inicioB, fim: args.fimB, faturamento: b.toFixed(2) },
+        variacao_absoluta: variacao.toFixed(2),
+        variacao_percentual: variacaoPct !== null ? variacaoPct.toFixed(2) + "%" : null,
+      });
+    }
     return JSON.stringify({ error: "Tool desconhecida: " + name });
   } catch (e) {
     return JSON.stringify({ error: String(e) });
