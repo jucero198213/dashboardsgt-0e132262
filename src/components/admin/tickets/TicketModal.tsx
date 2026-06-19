@@ -205,10 +205,10 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="data">Data *</Label>
-                <Input
-                  id="data" type="date" value={form.data_chamado}
-                  onChange={(e) => set("data_chamado", e.target.value)}
-                  disabled={!podeEditar}
+                <DatePickerInput
+                  value={form.data_chamado}
+                  onChange={(v) => set("data_chamado", v)}
+                  placeholder="Selecionar"
                 />
               </div>
               <div className="grid gap-2">
