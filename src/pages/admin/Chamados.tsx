@@ -7,6 +7,7 @@ import {
 import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
