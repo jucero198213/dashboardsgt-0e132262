@@ -472,6 +472,8 @@ body, #root {
 }
 
 /* ── Light: additional text contrast fixes ── */
+.light .text-slate-100 { color: #16202e !important; }
+.light .text-slate-200 { color: #1f2937 !important; }
 .light .text-slate-300 { color: #374151 !important; }
 .light .text-slate-400 { color: #374151 !important; }
 .light .text-slate-500 { color: #6b7280 !important; }

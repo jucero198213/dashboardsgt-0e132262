@@ -1467,7 +1467,7 @@ export default function Abastecimento() {
                           const deltaKmL = r.media && r.medfab && r.medfab > 0 ? ((r.media - r.medfab) / r.medfab) * 100 : null;
                           return (
                             <AnimatedCard key={`${r.codaba}-${i}`} delay={Math.min(i, 12) * 30}>
-                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-amber-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[color:var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-[color:var(--sgt-accent-soft)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
                                 {/* Header: veículo + combustível */}
                                 <div className="flex items-start justify-between gap-2 mb-2.5">
                                   <div className="min-w-0">
@@ -1506,7 +1506,7 @@ export default function Abastecimento() {
                                   </div>
                                   <div className="text-right">
                                     <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Valor</p>
-                                    <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtBRL(r.vlrtot)}</p>
+                                    <p className="text-[12px] font-black tabular-nums text-[color:var(--sgt-text-primary)]">{fmtBRL(r.vlrtot)}</p>
                                   </div>
                                 </div>
                               </div>
