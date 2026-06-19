@@ -73,6 +73,10 @@
     --sgt-warning: #F0A730;
     --sgt-info:    #4A9EFF;
 
+    /* SGT — RAW temático (inline styles via objeto RAW) */
+    --sgt-raw-inset:  #090c14;
+    --sgt-raw-border: rgba(255,255,255,0.07);
+
     /* SGT — acento de marca (dark = âmbar; igual aos valores da sidebar) */
     --sgt-accent:        #F5A623;
     --sgt-accent-hover:  #D4891A;
@@ -142,6 +146,10 @@
     --sgt-scrollbar-thumb:#c2c8d0;
     --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(254,128,5,0.05), transparent 45%);
     --sgt-section-shadow: 0 4px 24px rgba(20,30,45,0.07), 0 1px 0 rgba(20,30,45,0.04);
+
+    /* RAW temático — trilhas/divisórias claras (eram dark cravado) */
+    --sgt-raw-inset:  rgba(20,30,45,0.06);
+    --sgt-raw-border: rgba(20,30,45,0.10);
 
     /* Acento de marca (laranja SGT) — usar nos ajustes página a página */
     --sgt-accent:        #fe8005;

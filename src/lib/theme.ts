@@ -15,10 +15,10 @@ export const RAW = {
   surfacePrimary:  "#0b0e1a",   // cards principais
   surfaceSecondary:"#0c0f1c",   // cards dentro da section card
   surfaceElevated: "#0e1120",   // selects, inputs, surfaces elevadas
-  surfaceInset:    "#090c14",   // within cards, table headers
+  surfaceInset:    "var(--sgt-raw-inset)",    // within cards, table headers, tracks (temático)
 
   // Borders
-  borderDefault:   "rgba(255,255,255,0.07)",
+  borderDefault:   "var(--sgt-raw-border)",   // divisórias / bordas sutis (temático)
   borderHover:     "rgba(255,255,255,0.11)",
   borderStrong:    "rgba(255,255,255,0.15)",
 
