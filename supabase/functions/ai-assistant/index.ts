@@ -191,6 +191,11 @@ Datas de referência:
 - Últimos 7 dias: ${daysAgo(7)} até ${today()}
 - Últimos 30 dias: ${daysAgo(30)} até ${today()}
 
+REGRAS CRÍTICAS DE TOOLS:
+- Para faturamento de UMA DATA ESPECÍFICA (ontem, hoje, dia X, semana passada, mês passado) → SEMPRE use get_faturamento_periodo com dataInicio=dataFim=a data pedida. NUNCA use get_faturamento_resumo para isso.
+- get_faturamento_resumo só serve para uma visão geral do mês corrente; o campo daily_revenue pode ser do dia em andamento (parcial) — nunca apresente como "faturamento de ontem".
+- Quando o usuário disser "ontem", use exatamente ${daysAgo(1)} como data.
+
 Quando responder com valores em R$, formate como "R$ 123.456,78". Seja objetivo, profissional, em português brasileiro. Para sugestões/perguntas conceituais que não exigem dados, responda direto sem chamar tools.`;
 
 serve(async (req: Request) => {
