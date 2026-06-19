@@ -34,7 +34,7 @@ const tools = [
     function: {
       name: "get_faturamento_resumo",
       description:
-        "Retorna o resumo de faturamento mais recente da empresa (faturamento do último dia disponível, mês corrente e referência). Use para perguntas como 'qual o faturamento de ontem', 'como está o faturamento', 'quanto faturamos hoje/no mês'.",
+        "Retorna APENAS o acumulado do mês corrente e um snapshot parcial do dia em andamento (NÃO é o faturamento fechado de ontem). Use somente para perguntas genéricas tipo 'como está o faturamento do mês'. NÃO USE para perguntas sobre 'ontem', 'hoje fechado' ou qualquer data específica — para isso use get_faturamento_periodo.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -110,7 +110,11 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
   try {
     if (name === "get_faturamento_resumo") {
       const data = await dwCall("/dw-faturamento-resumo", {});
-      return summarize(data);
+      return JSON.stringify({
+        ...(data as Record<string, unknown>),
+        _aviso:
+          "daily_revenue.reference_date é a data do snapshot — pode ser o dia em andamento (PARCIAL). NÃO apresente como faturamento fechado de ontem. Para faturamento de uma data específica, use get_faturamento_periodo.",
+      });
     }
     if (name === "get_faturamento_periodo") {
       const data = await dwCall("/dw-financeiro", {
@@ -118,7 +122,14 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         dataInicio: args.dataInicio,
         dataFim: args.dataFim,
       });
-      return summarize(data);
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const total = rows.reduce((s, r) => s + Number(r.FRETE_TOTAL ?? 0), 0);
+      return JSON.stringify({
+        periodo: { dataInicio: args.dataInicio, dataFim: args.dataFim },
+        faturamento_total: total.toFixed(2),
+        qtd_grupos: rows.length,
+        por_grupo: rows,
+      });
     }
     if (name === "get_titulos_financeiros") {
       const data = await dwCall("/dw-financeiro", {
@@ -179,6 +190,11 @@ Datas de referência:
 - Ontem: ${daysAgo(1)}
 - Últimos 7 dias: ${daysAgo(7)} até ${today()}
 - Últimos 30 dias: ${daysAgo(30)} até ${today()}
+
+REGRAS CRÍTICAS DE TOOLS:
+- Para faturamento de UMA DATA ESPECÍFICA (ontem, hoje, dia X, semana passada, mês passado) → SEMPRE use get_faturamento_periodo com dataInicio=dataFim=a data pedida. NUNCA use get_faturamento_resumo para isso.
+- get_faturamento_resumo só serve para uma visão geral do mês corrente; o campo daily_revenue pode ser do dia em andamento (parcial) — nunca apresente como "faturamento de ontem".
+- Quando o usuário disser "ontem", use exatamente ${daysAgo(1)} como data.
 
 Quando responder com valores em R$, formate como "R$ 123.456,78". Seja objetivo, profissional, em português brasileiro. Para sugestões/perguntas conceituais que não exigem dados, responda direto sem chamar tools.`;
 
