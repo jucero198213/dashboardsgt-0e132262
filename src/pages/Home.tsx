@@ -86,25 +86,27 @@ interface ModuleCardData {
 
 const TONE: Record<
   string,
-  { iconBg: string; iconText: string; ring: string; cta: string; glow: string; accent: string; hoverShadow: string }
+  { iconBg: string; iconText: string; ring: string; cta: string; glow: string; accent: string; hoverShadow: string; bgLight: string; borderLight: string }
 > = {
   amber: {
     iconBg: "bg-amber-400/10 border border-amber-400/20",
     iconText: "text-amber-300",
-    ring: "hover:border-amber-400/40",
+    ring: "hover:border-amber-400/40 dark:hover:border-amber-400/40 hover:border-amber-300",
     cta: "text-amber-300",
     glow: "from-amber-400/20",
     accent: "from-amber-400/70 via-amber-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,191,36,0.12)]",
+    bgLight: "bg-amber-50", borderLight: "border-amber-200/80",
   },
   violet: {
     iconBg: "bg-violet-400/10 border border-violet-400/20",
     iconText: "text-violet-300",
-    ring: "hover:border-violet-400/40",
+    ring: "hover:border-violet-400/40 dark:hover:border-violet-400/40 hover:border-violet-300",
     cta: "text-violet-300",
     glow: "from-violet-400/20",
     accent: "from-violet-400/70 via-violet-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(167,139,250,0.12)]",
+    bgLight: "bg-violet-50", borderLight: "border-violet-200/80",
   },
   slate: {
     iconBg: "bg-slate-400/10 border border-slate-400/20",
@@ -114,51 +116,57 @@ const TONE: Record<
     glow: "from-slate-400/10",
     accent: "from-slate-400/40 via-slate-400/15 to-transparent",
     hoverShadow: "",
+    bgLight: "bg-white", borderLight: "border-slate-200",
   },
   emerald: {
     iconBg: "bg-emerald-400/10 border border-emerald-400/20",
     iconText: "text-emerald-300",
-    ring: "hover:border-emerald-400/40",
+    ring: "hover:border-emerald-400/40 dark:hover:border-emerald-400/40 hover:border-emerald-300",
     cta: "text-emerald-300",
     glow: "from-emerald-400/20",
     accent: "from-emerald-400/70 via-emerald-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(52,211,153,0.12)]",
+    bgLight: "bg-emerald-50", borderLight: "border-emerald-200/80",
   },
   cyan: {
     iconBg: "bg-cyan-400/10 border border-cyan-400/20",
     iconText: "text-cyan-300",
-    ring: "hover:border-cyan-400/40",
+    ring: "hover:border-cyan-400/40 dark:hover:border-cyan-400/40 hover:border-cyan-300",
     cta: "text-cyan-400",
     glow: "from-cyan-400/20",
     accent: "from-cyan-400/70 via-cyan-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(34,211,238,0.12)]",
+    bgLight: "bg-cyan-50", borderLight: "border-cyan-200/80",
   },
   rose: {
     iconBg: "bg-rose-400/10 border border-rose-400/20",
     iconText: "text-rose-300",
-    ring: "hover:border-rose-400/40",
+    ring: "hover:border-rose-400/40 dark:hover:border-rose-400/40 hover:border-rose-300",
     cta: "text-rose-300",
     glow: "from-rose-400/20",
     accent: "from-rose-400/70 via-rose-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,113,133,0.12)]",
+    bgLight: "bg-rose-50", borderLight: "border-rose-200/80",
   },
   orange: {
     iconBg: "bg-orange-400/10 border border-orange-400/20",
     iconText: "text-orange-300",
-    ring: "hover:border-orange-400/40",
+    ring: "hover:border-orange-400/40 dark:hover:border-orange-400/40 hover:border-orange-300",
     cta: "text-orange-300",
     glow: "from-orange-400/20",
     accent: "from-orange-400/70 via-orange-400/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(251,146,60,0.12)]",
+    bgLight: "bg-orange-50", borderLight: "border-orange-200/80",
   },
   blue: {
     iconBg: "bg-[#4A6FB8]/15 border border-[#4A6FB8]/30",
     iconText: "text-[#A8C0E8]",
-    ring: "hover:border-[#4A6FB8]/50",
+    ring: "hover:border-[#4A6FB8]/50 dark:hover:border-[#4A6FB8]/50 hover:border-blue-300",
     cta: "text-[#A8C0E8]",
     glow: "from-[#4A6FB8]/25",
     accent: "from-[#4A6FB8]/70 via-[#4A6FB8]/30 to-transparent",
     hoverShadow: "hover:shadow-[0_8px_32px_rgba(74,111,184,0.15)]",
+    bgLight: "bg-blue-50", borderLight: "border-blue-200/80",
   },
 };
 
@@ -268,7 +276,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
         data.disabled
           ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
-          : "cursor-pointer dark:border-white/10 border-slate-200 dark:bg-white/[0.04] bg-white hover:dark:bg-white/[0.07] hover:bg-slate-50 dark:hover:border-white/20 hover:border-slate-300"
+          : `cursor-pointer dark:border-white/10 ${tone.borderLight} dark:bg-white/[0.04] ${tone.bgLight} hover:dark:bg-white/[0.07] dark:hover:border-white/20`
       }`}
     >
       {/* Linha de acento no topo */}
@@ -298,7 +306,7 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       {/* Título e descrição */}
       <div className="flex-1 space-y-2">
         <h3 className="text-[18px] font-bold tracking-tight sgt-text">{data.title}</h3>
-        <p className="text-[13.5px] leading-relaxed text-[var(--sgt-text-muted)]">
+        <p className="text-[13.5px] leading-relaxed text-[var(--sgt-text-secondary)]">
           {data.description}
         </p>
       </div>
@@ -782,7 +790,7 @@ export default function Home() {
                   {item.href ? (
                     <motion.a href={item.href} target="_blank" rel="noopener noreferrer"
                       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:bg-[var(--sgt-input-hover)]/60 ${item.hoverCls} h-full`}>
+                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] dark:bg-[var(--sgt-input-bg)]/40 bg-[var(--sgt-bg-card)] p-6 backdrop-blur-sm transition-colors dark:hover:bg-[var(--sgt-input-hover)]/60 hover:bg-[var(--sgt-bg-section)] ${item.hoverCls} h-full`}>
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -795,7 +803,7 @@ export default function Home() {
                   ) : (
                     <motion.button type="button" onClick={item.onClick}
                       whileHover={{ y: -3, transition: { duration: 0.15 } }}
-                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]/40 p-6 backdrop-blur-sm transition-colors hover:bg-[var(--sgt-input-hover)]/60 ${item.hoverCls} text-left cursor-pointer w-full h-full`}>
+                      className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] dark:bg-[var(--sgt-input-bg)]/40 bg-[var(--sgt-bg-card)] p-6 backdrop-blur-sm transition-colors dark:hover:bg-[var(--sgt-input-hover)]/60 hover:bg-[var(--sgt-bg-section)] ${item.hoverCls} text-left cursor-pointer w-full h-full`}>
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
