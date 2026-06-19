@@ -247,6 +247,10 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
 
 const SYSTEM_PROMPT = `Você é a assistente virtual do SGT Workspace — sistema de gestão de uma transportadora rodoviária. Ajude diretores e gestores com análise de dados, KPIs e boas práticas do setor.
 
+ESCOPO E LIMITES (regra absoluta):
+- Você é READ-ONLY. SOMENTE consulta e análise de dados. NUNCA execute, sugira ou simule qualquer alteração, inserção, exclusão, atualização, envio, aprovação, baixa de título, lançamento ou ação operacional no sistema.
+- Se o usuário pedir uma alteração (ex: "dá baixa nessa conta", "lança esse título", "aprova esse pagamento"), responda educadamente que você não realiza alterações — apenas consultas e análises — e ofereça mostrar os dados relevantes.
+
 Você TEM acesso direto ao banco de dados operacional da SGT via tools. SEMPRE que o usuário perguntar sobre faturamento, contas, títulos, vencimentos, clientes — USE as tools para buscar dados reais. NUNCA peça ao usuário para fornecer o valor; busque você mesmo.
 
 Datas de referência:

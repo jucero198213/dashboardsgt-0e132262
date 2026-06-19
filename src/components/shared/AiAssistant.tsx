@@ -7,8 +7,19 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const WELCOME: ChatMessage = {
   role: "assistant",
-  content: "Olá! Sou a assistente do SGT Workspace. Como posso ajudar você hoje?",
+  content:
+    "Olá! Sou a assistente do SGT Workspace. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
 };
+
+const SUGGESTIONS: { label: string; prompt: string }[] = [
+  { label: "📊 Faturamento de ontem", prompt: "Qual foi o faturamento de ontem?" },
+  { label: "📈 Top 5 clientes do mês", prompt: "Quais os 5 clientes que mais faturaram este mês?" },
+  { label: "💰 Contas a pagar da semana", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
+  { label: "📉 Inadimplência atual", prompt: "Qual o total em aberto de contas a receber vencidas?" },
+  { label: "🔧 Caminhão que mais gasta manutenção", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
+  { label: "🛠️ Preventiva vs corretiva", prompt: "Compare os gastos de manutenção preventiva vs corretiva nos últimos 90 dias." },
+  { label: "📅 Faturamento do mês vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
+];
 
 export function AiAssistant() {
   const { role } = useAuth();
@@ -26,8 +37,7 @@ export function AiAssistant() {
 
   if (role !== "admin" && role !== "diretoria") return null;
 
-  const send = async () => {
-    const text = input.trim();
+  const sendText = async (text: string) => {
     if (!text || loading) return;
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
@@ -49,6 +59,8 @@ export function AiAssistant() {
       setLoading(false);
     }
   };
+
+  const send = () => sendText(input.trim());
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -251,7 +263,38 @@ export function AiAssistant() {
                 </div>
               </div>
             )}
+            {messages.length === 1 && !loading && (
+              <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--sgt-text-muted, #888)", padding: "0 4px" }}>
+                  💡 Sugestões para começar:
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={() => sendText(s.prompt)}
+                      style={{
+                        background: "var(--sgt-bg-section)",
+                        color: "var(--sgt-text-primary)",
+                        border: "1px solid var(--sgt-border-subtle)",
+                        borderRadius: 999,
+                        padding: "6px 10px",
+                        fontSize: 11,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sgt-accent-soft, rgba(245,166,35,0.12))")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--sgt-bg-section)")}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+
 
           <div
             style={{
