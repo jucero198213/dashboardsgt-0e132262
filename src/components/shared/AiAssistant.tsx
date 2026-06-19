@@ -310,6 +310,7 @@ export function AiAssistant() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Abrir assistente"
+        className="sgt-ai-btn"
         style={{
           position: "fixed",
           bottom: 20,
