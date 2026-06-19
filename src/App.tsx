@@ -108,8 +108,8 @@ const App = () => (
                 <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
                 <Route path="/admin"            element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
                 <Route path="/sgt"              element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/visual-rodopar"  element={<ProtectedRoute><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/portal-wr"       element={<ProtectedRoute><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/visual-rodopar"  element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/portal-wr"       element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

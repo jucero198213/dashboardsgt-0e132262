@@ -6,6 +6,8 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: AppRole;
   requiredModule?: AppModule;
+  /** perfis que NÃO podem acessar esta rota (ex.: ["diretoria"]) */
+  excludeRoles?: AppRole[];
   /** @deprecated use requiredModule */
   requiredPage?: AppModule;
 }
@@ -14,6 +16,7 @@ export function ProtectedRoute({
   children,
   requiredRole,
   requiredModule,
+  excludeRoles,
   requiredPage,
 }: ProtectedRouteProps) {
   const { session, role, isLoading } = useAuth();
@@ -33,6 +36,12 @@ export function ProtectedRoute({
   }
 
   if (!session) return <Navigate to="/login" replace />;
+
+  // Perfis explicitamente bloqueados nesta rota (ex.: diretoria não acessa
+  // portais). Admin nunca é bloqueado.
+  if (excludeRoles && role && role !== "admin" && excludeRoles.includes(role)) {
+    return <Navigate to="/home" replace />;
+  }
 
   if (requiredRole && role !== requiredRole && role !== "admin") {
     return <Navigate to="/home" replace />;
