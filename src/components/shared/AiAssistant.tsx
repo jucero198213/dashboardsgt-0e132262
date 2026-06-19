@@ -390,14 +390,20 @@ export function AiAssistant() {
         }
         @media (max-width: 640px) {
           .sgt-ai-btn {
-            bottom: 80px !important;
+            bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
             right: 12px !important;
+            width: 44px !important;
+            height: 44px !important;
+            box-shadow: 0 6px 18px rgba(245,166,35,0.45) !important;
           }
           .sgt-ai-popup {
-            bottom: 140px !important;
-            right: 12px !important;
-            width: calc(100vw - 24px) !important;
-            height: 60vh !important;
+            bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+            right: 8px !important;
+            left: 8px !important;
+            top: 8px !important;
+            width: auto !important;
+            height: auto !important;
+            border-radius: 14px !important;
           }
         }
       `}</style>
