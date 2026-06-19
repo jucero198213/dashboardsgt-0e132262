@@ -37,8 +37,7 @@ export function AiAssistant() {
 
   if (role !== "admin" && role !== "diretoria") return null;
 
-  const send = async () => {
-    const text = input.trim();
+  const sendText = async (text: string) => {
     if (!text || loading) return;
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
@@ -60,6 +59,8 @@ export function AiAssistant() {
       setLoading(false);
     }
   };
+
+  const send = () => sendText(input.trim());
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
