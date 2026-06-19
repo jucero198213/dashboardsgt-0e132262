@@ -70,6 +70,22 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_manutencao_por_veiculo",
+      description:
+        "Retorna o ranking de veículos por custo de manutenção em um período (soma de custo + mão de obra + peças por veículo). Use para perguntas como 'qual caminhão gasta mais com manutenção', 'top veículos em oficina', 'gastos de manutenção por placa/frota', 'manutenção corretiva vs preventiva'. Também retorna totais por tipo de serviço (interno/externo).",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 90 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Quantos veículos retornar no ranking (default 10)" },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -173,6 +189,54 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
           valor_recebido: totalRecebido.toFixed(2),
           em_aberto: (totalReceber - totalRecebido).toFixed(2),
         },
+      });
+    }
+    if (name === "get_manutencao_por_veiculo") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(90);
+      const topN = Number(args.top ?? 10);
+      const data = await dwCall("/dw-manutencao", { dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const porVeiculo = new Map<string, { veiculo: string; custo_total: number; ordens: Set<string>; preventiva: number; corretiva: number }>();
+      let totalGeral = 0;
+      let totalInterno = 0;
+      let totalExterno = 0;
+
+      for (const r of rows) {
+        const veic = String(r.veiculo ?? "SEM_VEICULO");
+        const custo = Number(r.custo ?? 0) + Number(r.valormo ?? 0) + Number(r.valorpc ?? 0);
+        totalGeral += custo;
+        if (r.tiposervico === "SERVICOINTERNO") totalInterno += custo;
+        else if (r.tiposervico === "SERVICOEXTERNO") totalExterno += custo;
+
+        const cur = porVeiculo.get(veic) ?? { veiculo: veic, custo_total: 0, ordens: new Set<string>(), preventiva: 0, corretiva: 0 };
+        cur.custo_total += custo;
+        if (r.ordem != null) cur.ordens.add(String(r.ordem));
+        const classif = String(r.classificacao ?? "").toUpperCase();
+        if (classif.includes("PREVENT")) cur.preventiva += custo;
+        else if (classif.includes("CORRET")) cur.corretiva += custo;
+        porVeiculo.set(veic, cur);
+      }
+
+      const ranking = [...porVeiculo.values()]
+        .sort((a, b) => b.custo_total - a.custo_total)
+        .slice(0, topN)
+        .map((v) => ({
+          veiculo: v.veiculo,
+          custo_total: v.custo_total.toFixed(2),
+          qtd_ordens: v.ordens.size,
+          custo_preventiva: v.preventiva.toFixed(2),
+          custo_corretiva: v.corretiva.toFixed(2),
+        }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        total_geral: totalGeral.toFixed(2),
+        total_servico_interno: totalInterno.toFixed(2),
+        total_servico_externo: totalExterno.toFixed(2),
+        qtd_veiculos: porVeiculo.size,
+        top_veiculos: ranking,
       });
     }
     return JSON.stringify({ error: "Tool desconhecida: " + name });
