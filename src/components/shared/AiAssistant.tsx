@@ -14,11 +14,19 @@ const WELCOME: ChatMessage = {
 const SUGGESTIONS: { label: string; prompt: string }[] = [
   { label: "📊 Faturamento de ontem", prompt: "Qual foi o faturamento de ontem?" },
   { label: "📈 Top 5 clientes do mês", prompt: "Quais os 5 clientes que mais faturaram este mês?" },
-  { label: "💰 Contas a pagar da semana", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
-  { label: "📉 Inadimplência atual", prompt: "Qual o total em aberto de contas a receber vencidas?" },
-  { label: "🔧 Caminhão que mais gasta manutenção", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
+  { label: "📅 Mês atual vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
+  { label: "💰 Contas a pagar (7 dias)", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
+  { label: "📉 Inadimplência atual", prompt: "Qual o total de contas a receber vencidas e quem são os maiores devedores?" },
+  { label: "🔧 Caminhão que mais gasta", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
   { label: "🛠️ Preventiva vs corretiva", prompt: "Compare os gastos de manutenção preventiva vs corretiva nos últimos 90 dias." },
-  { label: "📅 Faturamento do mês vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
+  { label: "⛽ Consumo da frota", prompt: "Como está o consumo de combustível da frota nos últimos 30 dias?" },
+  { label: "🛢️ Estoque do posto interno", prompt: "Qual o saldo atual de diesel do posto interno?" },
+  { label: "🚛 Composição da frota", prompt: "Me mostra a composição da frota: total, situação, idade média." },
+  { label: "🗺️ Operação agora", prompt: "Como está a operação em tempo real? Quantas viagens em andamento?" },
+  { label: "🛒 Compras do mês", prompt: "Resumo das compras do mês: total e principais fornecedores." },
+  { label: "👷 Motoristas + CNHs vencendo", prompt: "Quantos motoristas ativos temos e quais CNHs vencem nos próximos 60 dias?" },
+  { label: "🏦 Saldo dos bancos", prompt: "Qual o saldo atual de todas as contas bancárias?" },
+  { label: "🚚 Financiamentos de frota", prompt: "Qual o total em aberto de financiamentos de veículos e o que vence nos próximos 30 dias?" },
 ];
 
 export function AiAssistant() {
