@@ -21,11 +21,15 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
   const showOnRoute = location.pathname === "/home";
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const handler = (e: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
   }, []);
 
   if (!user || !showOnRoute) return null;
