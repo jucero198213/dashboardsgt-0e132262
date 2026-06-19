@@ -804,7 +804,19 @@ REGRAS CRÍTICAS DE TOOLS:
 - get_faturamento_resumo só serve para uma visão geral do mês corrente; o campo daily_revenue pode ser do dia em andamento (parcial) — nunca apresente como "faturamento de ontem".
 - Quando o usuário disser "ontem", use exatamente ${daysAgo(1)} como data.
 
-Quando responder com valores em R$, formate como "R$ 123.456,78". Seja objetivo, profissional, em português brasileiro. Para sugestões/perguntas conceituais que não exigem dados, responda direto sem chamar tools.`;
+GUIA DE TOOLS POR ASSUNTO:
+- Faturamento/Receita → get_faturamento_periodo (data específica), get_faturamento_resumo (mês corrente), get_top_clientes (ranking), get_comparativo_faturamento (período x período).
+- Contas/Títulos/Financeiro → get_titulos_financeiros (totais do período), get_vencimentos (próximos dias), get_inadimplencia (CR vencido com aging).
+- Manutenção → get_manutencao_por_veiculo (ranking, preventiva vs corretiva, interno/externo).
+- Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
+- Frota → get_frota_resumo (composição, idade, situação).
+- Operação em tempo real → get_operacao_snapshot (viagens em andamento, % completo).
+- Compras → get_compras_resumo (fornecedores, grupos, peças/pneus).
+- RH/Motoristas → get_rh_motoristas (headcount, CNH vencendo).
+- Bancos → get_bancos_saldos (saldos e movimentação).
+- Financiamentos de veículos → get_financiamento_frota.
+
+Quando responder com valores em R$, formate como "R$ 123.456,78". Datas em dd/mm/yyyy. Seja objetivo, profissional, em português brasileiro. Use markdown leve (negrito, listas, tabelas pequenas) para clareza. Para sugestões/perguntas conceituais que não exigem dados, responda direto sem chamar tools.`;
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
