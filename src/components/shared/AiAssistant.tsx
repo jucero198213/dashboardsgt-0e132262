@@ -337,6 +337,18 @@ export function AiAssistant() {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
           40% { transform: translateY(-4px); opacity: 1; }
         }
+        @media (max-width: 640px) {
+          .sgt-ai-btn {
+            bottom: 80px !important;
+            right: 12px !important;
+          }
+          .sgt-ai-popup {
+            bottom: 140px !important;
+            right: 12px !important;
+            width: calc(100vw - 24px) !important;
+            height: 60vh !important;
+          }
+        }
       `}</style>
     </>
   );
