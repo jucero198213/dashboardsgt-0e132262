@@ -1,258 +1,414 @@
-import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useRef, useState, KeyboardEvent } from "react";
+import { MessageCircle, X, Send, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+type ChatMessage = { role: "user" | "assistant"; content: string };
 
-const WELCOME: Message = {
+const WELCOME: ChatMessage = {
   role: "assistant",
-  content: "Olá! Sou a assistente do SGT Workspace. Como posso ajudar você hoje?",
+  content:
+    "Olá! Sou a assistente do SGT Workspace. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
 };
+
+const SUGGESTIONS: { label: string; prompt: string }[] = [
+  { label: "📊 Faturamento de ontem", prompt: "Qual foi o faturamento de ontem?" },
+  { label: "📈 Top 5 clientes do mês", prompt: "Quais os 5 clientes que mais faturaram este mês?" },
+  { label: "📅 Mês atual vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
+  { label: "💰 Contas a pagar (7 dias)", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
+  { label: "📉 Inadimplência atual", prompt: "Qual o total de contas a receber vencidas e quem são os maiores devedores?" },
+  { label: "🔧 Caminhão que mais gasta", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
+  { label: "🛠️ Preventiva vs corretiva", prompt: "Compare os gastos de manutenção preventiva vs corretiva nos últimos 90 dias." },
+  { label: "⛽ Consumo da frota", prompt: "Como está o consumo de combustível da frota nos últimos 30 dias?" },
+  { label: "🛢️ Estoque do posto interno", prompt: "Qual o saldo atual de diesel do posto interno?" },
+  { label: "🚛 Composição da frota", prompt: "Me mostra a composição da frota: total, situação, idade média." },
+  { label: "🗺️ Operação agora", prompt: "Como está a operação em tempo real? Quantas viagens em andamento?" },
+  { label: "🛒 Compras do mês", prompt: "Resumo das compras do mês: total e principais fornecedores." },
+  { label: "👷 Motoristas + CNHs vencendo", prompt: "Quantos motoristas ativos temos e quais CNHs vencem nos próximos 60 dias?" },
+  { label: "🏦 Saldo dos bancos", prompt: "Qual o saldo atual de todas as contas bancárias?" },
+  { label: "🚚 Financiamentos de frota", prompt: "Qual o total em aberto de financiamentos de veículos e o que vence nos próximos 30 dias?" },
+];
 
 export function AiAssistant() {
   const { role } = useAuth();
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const isAllowed = role === "admin" || role === "diretoria";
-  if (!isAllowed) return null;
-
-  const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) {
-      scrollToBottom();
-      setTimeout(() => inputRef.current?.focus(), 50);
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [open, messages]);
+  }, [messages, loading, open]);
 
-  const send = async () => {
-    const text = input.trim();
+  if (role !== "admin" && role !== "diretoria") return null;
+
+  const sendText = async (text: string) => {
     if (!text || loading) return;
-
-    const userMsg: Message = { role: "user", content: text };
-    const updated = [...messages, userMsg];
-    setMessages(updated);
+    const next = [...messages, { role: "user" as const, content: text }];
+    setMessages(next);
     setInput("");
     setLoading(true);
-
     try {
       const { data, error } = await supabase.functions.invoke("ai-assistant", {
-        body: { messages: updated.filter((m) => m !== WELCOME) },
+        body: { messages: next },
       });
-
       if (error) throw error;
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data?.reply ?? "Não consegui processar sua solicitação." },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Erro ao conectar com a assistente. Tente novamente." },
+      const reply = (data as { reply?: string })?.reply ?? "Não consegui responder agora.";
+      setMessages((m) => [...m, { role: "assistant", content: reply }]);
+    } catch (e) {
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: "Erro ao consultar a IA. Tente novamente." },
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const onKey = (e: React.KeyboardEvent) => {
+  const send = () => sendText(input.trim());
+
+  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
   };
 
-  const clearChat = () => setMessages([WELCOME]);
+  const clear = () => setMessages([WELCOME]);
+
+  const gradient = "linear-gradient(135deg, var(--sgt-accent), var(--sgt-accent-hover))";
 
   return (
     <>
-      {/* Chat panel */}
-      {open && (
-        <div
-          className="fixed bottom-20 right-5 z-[9998] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-          style={{
-            width: 360,
-            height: 480,
-            background: "var(--sgt-bg-surface)",
-            border: "1px solid var(--sgt-border-subtle)",
-          }}
-        >
-          {/* Header */}
+      <div
+        role="dialog"
+        aria-label="Assistente SGT"
+        className="sgt-ai-popup"
+        style={{
+          position: "fixed",
+          bottom: 80,
+          right: 20,
+          width: 360,
+          height: 480,
+          zIndex: 9998,
+          background: "var(--sgt-bg-surface)",
+          border: "1px solid var(--sgt-border-subtle)",
+          borderRadius: 16,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          color: "var(--sgt-text-primary)",
+          opacity: open ? 1 : 0,
+          transform: open ? "scale(1) translateY(0)" : "scale(0.92) translateY(12px)",
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
           <div
-            className="flex items-center justify-between px-4 py-3 shrink-0"
             style={{
-              background: "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
+              background: gradient,
+              padding: "12px 14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              color: "#fff",
             }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-white text-sm font-semibold">Assistente SGT</span>
-              <span
-                className="h-2 w-2 rounded-full bg-green-300 animate-pulse"
-                title="Online"
-              />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600, fontSize: 14 }}>
+              <MessageCircle size={16} />
+              Assistente SGT
             </div>
-            <div className="flex items-center gap-2">
+            <div style={{ display: "flex", gap: 4 }}>
               <button
-                onClick={clearChat}
-                className="text-white/70 hover:text-white text-xs transition-colors"
+                onClick={clear}
                 title="Limpar conversa"
+                style={{
+                  background: "rgba(255,255,255,0.15)",
+                  border: "none",
+                  color: "#fff",
+                  padding: "4px 8px",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 11,
+                }}
               >
-                Limpar
+                <Trash2 size={12} /> Limpar
               </button>
               <button
                 onClick={() => setOpen(false)}
-                className="text-white/70 hover:text-white transition-colors"
                 title="Fechar"
+                style={{
+                  background: "rgba(255,255,255,0.15)",
+                  border: "none",
+                  color: "#fff",
+                  padding: 4,
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
+                <X size={14} />
               </button>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.role === "assistant" && (
+          <div
+            ref={listRef}
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              background: "var(--sgt-bg-surface)",
+            }}
+          >
+            {messages.map((m, i) =>
+              m.role === "user" ? (
+                <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
                   <div
-                    className="h-6 w-6 rounded-full shrink-0 mr-2 mt-0.5 flex items-center justify-center text-[10px] font-bold"
                     style={{
-                      background: "linear-gradient(135deg, var(--sgt-accent), var(--sgt-accent-hover))",
+                      background: gradient,
                       color: "#fff",
+                      padding: "8px 12px",
+                      borderRadius: "14px 14px 4px 14px",
+                      maxWidth: "80%",
+                      fontSize: 13,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {m.content}
+                  </div>
+                </div>
+              ) : (
+                <div key={i} style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: "50%",
+                      background: gradient,
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
                     IA
                   </div>
-                )}
-                <div
-                  className="max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-relaxed"
-                  style={
-                    msg.role === "user"
-                      ? {
-                          background: "var(--sgt-accent)",
-                          color: "#fff",
-                          borderBottomRightRadius: 4,
-                        }
-                      : {
-                          background: "var(--sgt-bg-section)",
-                          color: "var(--sgt-text-primary)",
-                          borderBottomLeftRadius: 4,
-                        }
-                  }
-                >
-                  {msg.content}
+                  <div
+                    style={{
+                      background: "var(--sgt-bg-section)",
+                      color: "var(--sgt-text-primary)",
+                      padding: "8px 12px",
+                      borderRadius: "14px 14px 14px 4px",
+                      maxWidth: "80%",
+                      fontSize: 13,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                      border: "1px solid var(--sgt-border-subtle)",
+                    }}
+                  >
+                    {m.content}
+                  </div>
                 </div>
-              </div>
-            ))}
-
+              ),
+            )}
             {loading && (
-              <div className="flex justify-start">
+              <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
                 <div
-                  className="h-6 w-6 rounded-full shrink-0 mr-2 mt-0.5 flex items-center justify-center text-[10px] font-bold"
                   style={{
-                    background: "linear-gradient(135deg, var(--sgt-accent), var(--sgt-accent-hover))",
+                    width: 26,
+                    height: 26,
+                    borderRadius: "50%",
+                    background: gradient,
                     color: "#fff",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
                   IA
                 </div>
                 <div
-                  className="rounded-2xl px-4 py-3 flex gap-1 items-center"
-                  style={{ background: "var(--sgt-bg-section)", borderBottomLeftRadius: 4 }}
+                  style={{
+                    background: "var(--sgt-bg-section)",
+                    padding: "10px 14px",
+                    borderRadius: "14px 14px 14px 4px",
+                    border: "1px solid var(--sgt-border-subtle)",
+                    display: "flex",
+                    gap: 4,
+                  }}
                 >
-                  {[0, 1, 2].map((d) => (
+                  {[0, 1, 2].map((i) => (
                     <span
-                      key={d}
-                      className="h-1.5 w-1.5 rounded-full animate-bounce"
+                      key={i}
                       style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
                         background: "var(--sgt-accent)",
-                        animationDelay: `${d * 0.15}s`,
+                        display: "inline-block",
+                        animation: `sgt-bounce 1.2s infinite ${i * 0.15}s`,
                       }}
                     />
                   ))}
                 </div>
               </div>
             )}
-
-            <div ref={bottomRef} />
+            {messages.length === 1 && !loading && (
+              <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ fontSize: 11, color: "var(--sgt-text-muted, #888)", padding: "0 4px" }}>
+                  💡 Sugestões para começar:
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={() => sendText(s.prompt)}
+                      style={{
+                        background: "var(--sgt-bg-section)",
+                        color: "var(--sgt-text-primary)",
+                        border: "1px solid var(--sgt-border-subtle)",
+                        borderRadius: 999,
+                        padding: "6px 10px",
+                        fontSize: 11,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "background 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sgt-accent-soft, rgba(245,166,35,0.12))")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--sgt-bg-section)")}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Input */}
+
           <div
-            className="shrink-0 flex items-center gap-2 px-3 py-3"
-            style={{ borderTop: "1px solid var(--sgt-border-subtle)" }}
+            style={{
+              padding: 10,
+              borderTop: "1px solid var(--sgt-border-subtle)",
+              display: "flex",
+              gap: 6,
+              alignItems: "flex-end",
+              background: "var(--sgt-bg-surface)",
+            }}
           >
-            <input
-              ref={inputRef}
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKey}
               placeholder="Digite sua mensagem..."
-              disabled={loading}
-              className="flex-1 rounded-xl px-3 py-2 text-sm outline-none"
+              rows={1}
               style={{
+                flex: 1,
+                resize: "none",
                 background: "var(--sgt-bg-section)",
                 color: "var(--sgt-text-primary)",
                 border: "1px solid var(--sgt-border-subtle)",
+                borderRadius: 10,
+                padding: "8px 10px",
+                fontSize: 13,
+                outline: "none",
+                maxHeight: 96,
+                fontFamily: "inherit",
               }}
             />
             <button
               onClick={send}
-              disabled={!input.trim() || loading}
-              className="h-9 w-9 rounded-xl flex items-center justify-center transition-opacity disabled:opacity-40"
+              disabled={loading || !input.trim()}
               style={{
-                background: "linear-gradient(135deg, var(--sgt-accent), var(--sgt-accent-hover))",
+                background: gradient,
+                color: "#fff",
+                border: "none",
+                borderRadius: 10,
+                width: 36,
+                height: 36,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+                opacity: loading || !input.trim() ? 0.6 : 1,
+                flexShrink: 0,
               }}
+              aria-label="Enviar"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="m22 2-7 20-4-9-9-4z" />
-                <path d="M22 2 11 13" />
-              </svg>
+              <Send size={15} />
             </button>
           </div>
         </div>
-      )}
 
-      {/* Floating trigger button */}
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-[9998] h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Abrir assistente"
+        className="sgt-ai-btn"
         style={{
-          background: open
-            ? "var(--sgt-text-secondary)"
-            : "linear-gradient(135deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          background: gradient,
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          zIndex: 9998,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 8px 24px rgba(245,166,35,0.4)",
         }}
-        title="Assistente IA"
       >
-        {open ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <path d="M12 2a8 8 0 0 1 8 8c0 3.5-2 6.5-5 7.7V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2.3C6 16.5 4 13.5 4 10a8 8 0 0 1 8-8z" />
-            <circle cx="9" cy="10" r="1" fill="white" />
-            <circle cx="12" cy="10" r="1" fill="white" />
-            <circle cx="15" cy="10" r="1" fill="white" />
-          </svg>
-        )}
+        {open ? <X size={20} /> : <MessageCircle size={20} />}
       </button>
+
+      <style>{`
+        @keyframes sgt-bounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+          40% { transform: translateY(-4px); opacity: 1; }
+        }
+        @media (max-width: 640px) {
+          .sgt-ai-btn {
+            bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+            right: 12px !important;
+            width: 44px !important;
+            height: 44px !important;
+            box-shadow: 0 6px 18px rgba(245,166,35,0.45) !important;
+          }
+          .sgt-ai-popup {
+            bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+            right: 8px !important;
+            left: 8px !important;
+            top: 8px !important;
+            width: auto !important;
+            height: auto !important;
+            border-radius: 14px !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
+
+export default AiAssistant;
