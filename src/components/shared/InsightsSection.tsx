@@ -114,7 +114,7 @@ function InsightModal({ insight, onClose }: { insight: AIInsight; onClose: () =>
                 {cfg.label}
               </span>
             </div>
-            <h3 className="text-[14px] font-bold text-slate-100 leading-snug">{insight.titulo}</h3>
+            <h3 className="text-[14px] font-bold text-[color:var(--sgt-text-primary)] leading-snug">{insight.titulo}</h3>
           </div>
           <button
             onClick={onClose}
@@ -229,7 +229,7 @@ function InsightCard({ insight, onClick }: { insight: AIInsight; onClick: () => 
         <div className={`flex-shrink-0 h-6 w-6 rounded-lg flex items-center justify-center ${cfg.bg} border ${cfg.border} mt-0.5`}>
           <Icon className={`h-3.5 w-3.5 ${cfg.badgeText}`} />
         </div>
-        <p className={`text-[13px] font-semibold text-white/90 leading-snug flex-1 ${temDetalhes ? "pr-14" : ""}`}>
+        <p className={`text-[13px] font-semibold text-[color:var(--sgt-text-primary)] leading-snug flex-1 ${temDetalhes ? "pr-14" : ""}`}>
           {insight.titulo}
         </p>
         <span className={`flex-shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.badge} uppercase tracking-[0.1em] ${temDetalhes ? "opacity-0 group-hover:opacity-0" : ""}`}>
@@ -238,14 +238,14 @@ function InsightCard({ insight, onClick }: { insight: AIInsight; onClick: () => 
       </div>
 
       {/* Descrição */}
-      <p className="text-[12px] text-white/55 leading-relaxed relative z-10">
+      <p className="text-[12px] text-[color:var(--sgt-text-secondary)] leading-relaxed relative z-10">
         {insight.descricao}
       </p>
 
       {/* Impacto */}
       <div className="flex items-center gap-1.5 relative z-10">
-        <Zap className="h-2.5 w-2.5 text-white/25 flex-shrink-0" />
-        <p className="text-[11px] text-white/40 italic">{insight.impacto}</p>
+        <Zap className="h-2.5 w-2.5 text-[color:var(--sgt-text-faint)] flex-shrink-0" />
+        <p className="text-[11px] text-[color:var(--sgt-text-muted)] italic">{insight.impacto}</p>
       </div>
 
       {/* Ação */}
@@ -334,7 +334,7 @@ export function InsightsSection({
         {!loading && insights.length === 0 && !error && (
           <div className="rounded-[14px] border border-white/[0.05] bg-white/[0.015] px-4 py-5 flex flex-col items-center gap-2 text-center">
             <Lightbulb className="h-5 w-5 text-violet-400/40" />
-            <p className="text-[11px] text-white/30">
+            <p className="text-[11px] text-[color:var(--sgt-text-muted)]">
               Clique em "Gerar" para que a IA analise os dados e traga recomendações
             </p>
           </div>
