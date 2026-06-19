@@ -195,13 +195,13 @@ export default function Chamados() {
                   <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Responsável</label>
                   <Input className="h-9 mt-1" placeholder="Buscar" value={filterResp} onChange={(e) => setFilterResp(e.target.value)} />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">De</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataIni} onChange={(e) => setFilterDataIni(e.target.value)} />
+                <div className="flex flex-col">
+                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)] mb-1">De</label>
+                  <DatePickerInput value={filterDataIni} onChange={setFilterDataIni} placeholder="Data início" />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Até</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataFim} onChange={(e) => setFilterDataFim(e.target.value)} />
+                <div className="flex flex-col">
+                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)] mb-1">Até</label>
+                  <DatePickerInput value={filterDataFim} onChange={setFilterDataFim} placeholder="Data fim" />
                 </div>
               </div>
             )}
