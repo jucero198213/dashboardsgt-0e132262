@@ -190,6 +190,7 @@ export function BottomNav() {
                 active={isActive(item)}
                 onClick={() => navigate(item.to)}
                 fill={visibleItems.length <= 3}
+                dense={visibleItems.length >= 5}
               />
             ))}
           </div>
