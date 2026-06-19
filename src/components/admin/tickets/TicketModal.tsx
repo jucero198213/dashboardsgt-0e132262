@@ -14,6 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Trash2, CheckCircle2, Save, Loader2, Lock } from "lucide-react";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { toast } from "sonner";
 import {
   Ticket, TicketInput, TicketPrioridade, TicketStatus,
@@ -204,10 +205,10 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="data">Data *</Label>
-                <Input
-                  id="data" type="date" value={form.data_chamado}
-                  onChange={(e) => set("data_chamado", e.target.value)}
-                  disabled={!podeEditar}
+                <DatePickerInput
+                  value={form.data_chamado}
+                  onChange={(v) => set("data_chamado", v)}
+                  placeholder="Selecionar"
                 />
               </div>
               <div className="grid gap-2">

@@ -83,18 +83,17 @@ function getNavContext(pathname: string, search: string): string {
 
 // ─── Tab individual (visual v2: indicador superior + ícone em wrapper âmbar) ──
 function NavTab({
-  icon: Icon, label, active, onClick, badge, fill = false, isMenu = false,
+  icon: Icon, label, active, onClick, badge, fill = false, isMenu = false, dense = false,
 }: {
   icon: React.ElementType; label: string; active: boolean; onClick: () => void;
-  badge?: number; fill?: boolean; isMenu?: boolean;
+  badge?: number; fill?: boolean; isMenu?: boolean; dense?: boolean;
 }) {
+  const tabWidth = fill ? "" : isMenu ? "w-[56px] shrink-0" : dense ? "w-[60px] shrink-0" : "w-[72px] shrink-0";
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex min-h-[58px] flex-col items-center justify-center gap-[3px] py-2.5 transition-colors active:scale-95 ${
-        fill ? "flex-1" : isMenu ? "w-[60px] shrink-0" : "w-[72px] shrink-0"
-      }`}
+      className={`relative flex min-h-[58px] flex-col items-center justify-center gap-[3px] py-2.5 transition-colors active:scale-95 ${fill ? "flex-1" : tabWidth}`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       {/* Indicador superior */}
@@ -103,7 +102,7 @@ function NavTab({
       }`} />
 
       {/* Wrapper do ícone — preenche âmbar-muted quando ativo */}
-      <span className={`relative flex h-[30px] w-[46px] items-center justify-center rounded-lg transition-colors ${
+      <span className={`relative flex h-[30px] ${dense ? "w-[40px]" : "w-[46px]"} items-center justify-center rounded-lg transition-colors ${
         active ? "bg-amber-400/[0.14]" : "bg-transparent"
       }`}>
         {typeof badge === "number" && badge > 0 && (
@@ -115,7 +114,7 @@ function NavTab({
         <Icon className={`h-[21px] w-[21px] transition-colors ${active ? "text-amber-400" : "text-[var(--sgt-text-muted)]"}`} />
       </span>
 
-      <span className={`text-[10px] font-semibold leading-none transition-colors ${active ? "text-amber-400" : "text-[var(--sgt-text-muted)]"}`}>
+      <span className={`${dense ? "text-[9px]" : "text-[10px]"} font-semibold leading-none transition-colors max-w-full truncate px-0.5 ${active ? "text-amber-400" : "text-[var(--sgt-text-muted)]"}`}>
         {label}
       </span>
     </button>
@@ -191,6 +190,7 @@ export function BottomNav() {
                 active={isActive(item)}
                 onClick={() => navigate(item.to)}
                 fill={visibleItems.length <= 3}
+                dense={visibleItems.length >= 5}
               />
             ))}
           </div>
