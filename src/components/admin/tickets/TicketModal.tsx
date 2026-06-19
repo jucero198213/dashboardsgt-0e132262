@@ -14,6 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Trash2, CheckCircle2, Save, Loader2, Lock } from "lucide-react";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { toast } from "sonner";
 import {
   Ticket, TicketInput, TicketPrioridade, TicketStatus,
