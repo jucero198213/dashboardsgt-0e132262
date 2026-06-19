@@ -43,7 +43,7 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 const PILL_ACTIVE: React.CSSProperties = {
   background:   "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
   border:       "1px solid color-mix(in srgb, var(--sgt-accent) 55%, transparent)",
-  boxShadow:    "0 0 12px color-mix(in srgb, var(--sgt-accent) 22%, transparent), inset 0 1px 0 rgba(255,255,255,0.10)",
+  boxShadow:    "0 0 12px color-mix(in srgb, var(--sgt-accent) 22%, transparent)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
@@ -160,7 +160,7 @@ export function AppSidebar() {
       <div key={item.id} className="mx-3 my-[2px]">
         <button
           onClick={() => goItem(item)}
-          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${active ? "sgt-nav-active" : ""}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
@@ -229,7 +229,7 @@ export function AppSidebar() {
       <div className="mx-3 mt-3 mb-1">
         <button
           onClick={() => navigate("/home")}
-          className="w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100"
+          className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${isHomeActive ? "sgt-nav-active" : ""}`}
           style={isHomeActive
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
             : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",

@@ -549,6 +549,14 @@ body, #root {
 /* Progress bars track */
 .light [style*="rgba(255,255,255,0.12)"] { background: rgba(60,45,30,0.12) !important; }
 .light [style*="rgba(255,255,255,0.10)"] { background: rgba(60,45,30,0.10) !important; }
+
+/* Item ativo da sidebar (expandido) — garante o fill laranja por cima das
+   regras .light [style*=...] acima (que pegavam o box-shadow da pílula por
+   engano e matavam o gradiente do fundo). Especificidade (0,2,1) > (0,2,0). */
+.light button.sgt-nav-active,
+button.sgt-nav-active {
+  background: linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%) !important;
+}
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
