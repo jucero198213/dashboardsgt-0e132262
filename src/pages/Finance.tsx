@@ -2066,61 +2066,30 @@ function ScreenPrevisto() {
         </SectionCard>
       </AnimatedCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <AnimatedCard delay={300}>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
-              <span className="text-[12px] font-semibold text-slate-300">Entradas × Saídas Previstas</span>
-              <span className="ml-2 text-[10px] text-slate-600">Por data de vencimento</span>
-            </div>
-            <div className="px-2 py-3" style={{ height: 180 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
-                  <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "entradas" ? "Entradas" : "Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-                  <Bar dataKey="entradas" name="entradas" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
-                  <Bar dataKey="saidas"   name="saidas"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex gap-4 px-4 pb-3 text-[10px] text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Entradas</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-rose-400" />Saídas</span>
-            </div>
-          </SectionCard>
-        </AnimatedCard>
-
-        <AnimatedCard delay={340}>
-          <SectionCard>
-            <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
-              <span className="text-[12px] font-semibold text-slate-300">Próximos Eventos</span>
-              <span className="ml-2 text-[10px] text-slate-600">Pendentes e a vencer</span>
-            </div>
-            <div className="overflow-y-auto" style={{ maxHeight: 220 }}>
-              {eventosPrevistos.slice(0, 12).map((e, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0 hover:bg-[var(--sgt-row-hover)] transition-colors">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${e.tipo === "Entrada" ? "bg-emerald-400" : "bg-rose-400"}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-slate-300 truncate">{e.desc}</p>
-                    <p className="text-[10px] text-slate-600">{fmtDate(e.data)} · {e.doc}</p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <p className={`text-[12px] font-semibold tabular-nums ${e.tipo === "Entrada" ? "text-emerald-300" : "text-rose-300"}`}>
-                      {e.tipo === "Entrada" ? "+" : "-"}{fmtK(Math.abs(e.valor))}
-                    </p>
-                    <span className={`text-[9px] font-semibold ${e.tipo === "Entrada" ? "text-emerald-600" : "text-rose-600"}`}>{e.tipo}</span>
-                  </div>
-                </div>
-              ))}
-              {eventosPrevistos.length === 0 && (
-                <p className="px-4 py-8 text-center text-[12px] text-slate-600">Nenhum evento previsto no período</p>
-              )}
-            </div>
-          </SectionCard>
-        </AnimatedCard>
-      </div>
+      <AnimatedCard delay={300}>
+        <SectionCard>
+          <div className="px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <span className="text-[12px] font-semibold text-slate-300">Entradas × Saídas Previstas</span>
+            <span className="ml-2 text-[10px] text-slate-600">Por data de vencimento</span>
+          </div>
+          <div className="px-2 py-3" style={{ height: 180 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={projecao.filter(d => d.entradas > 0 || d.saidas > 0)} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="dia" tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={30} />
+                <Tooltip formatter={(v: any, n: string) => [fmtK(v), n === "entradas" ? "Entradas" : "Saídas"]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                <Bar dataKey="entradas" name="entradas" fill="#34d399" fillOpacity={0.75} radius={[3,3,0,0]} />
+                <Bar dataKey="saidas"   name="saidas"   fill="#fb7185" fillOpacity={0.75} radius={[3,3,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex gap-4 px-4 pb-3 text-[10px] text-slate-500">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Entradas</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-rose-400" />Saídas</span>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
 
       {/* ════════════════════════════════════════════════════════════════════
           NOVO CARD 1 — Detalhamento Diário
