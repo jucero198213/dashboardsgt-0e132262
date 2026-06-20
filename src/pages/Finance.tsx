@@ -1855,7 +1855,157 @@ function ScreenPrevisto() {
     { label: "Saldo Projetado",    value: fmtK(saldoFinal),    subtitle: saldoFinal >= saldoAtual ? "↑ Posição favorável" : "↓ Posição desfavorável", icon: BarChart3, tone: (saldoFinal >= saldoAtual ? "amber" : "rose") as "amber" | "rose" },
   ];
 
-  if (isFetchingDw) return <SkeletonLoader label="Calculando projeção de caixa..." />;
+  // ──────────────────────────────────────────────────────────────────────────
+  // NOVOS CARDS (adicionados sem alterar a lógica/JSX acima)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Paleta de categorias (mesma ordem do mockup)
+  const CATEGORY_COLORS = ["#8B5CF6","#F59E0B","#3B82F6","#22D3EE","#F43F5E","#EC4899","#94A3B8","#10B981","#6366F1","#84CC16","#A78BFA","#64748B"];
+
+  // Dias do detalhamento diário: hoje → hoje+horizonte (todos os dias, não só os com movimento)
+  const detalhamentoDiario = useMemo(() => {
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
+    const rows: { iso: string; diaLabel: string; diaSemana: string; saldoAnterior: number; aReceber: number; aPagar: number; saldoDia: number; saldoFinal: number }[] = [];
+    let saldoAcumulado = saldoAtual;
+    const cur = new Date(hoje);
+    while (cur <= limit) {
+      const key = cur.toISOString().slice(0, 10);
+      const aReceber = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
+      const aPagar   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída").reduce((s, e) => s + Math.abs(e.valor), 0);
+      const saldoAnterior = saldoAcumulado;
+      const saldoDia = aReceber - aPagar;
+      saldoAcumulado += saldoDia;
+      rows.push({
+        iso: key,
+        diaLabel: cur.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        diaSemana: cur.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", ""),
+        saldoAnterior, aReceber, aPagar, saldoDia,
+        saldoFinal: saldoAcumulado,
+      });
+      cur.setDate(cur.getDate() + 1);
+    }
+    return rows;
+  }, [horizonte, eventosPrevistos, saldoAtual]);
+
+  const totalDiarioReceber = detalhamentoDiario.reduce((s, d) => s + d.aReceber, 0);
+  const totalDiarioPagar   = detalhamentoDiario.reduce((s, d) => s + d.aPagar, 0);
+  const totalDiarioSaldo   = totalDiarioReceber - totalDiarioPagar;
+
+  // Pagamentos por categoria (CENTRO_CUSTO) — só CP futuro (pendente/vence hoje), no horizonte
+  const pagamentosPorCategoria = useMemo(() => {
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
+    const limitIso = limit.toISOString().slice(0,10);
+    const todayIso = hoje.toISOString().slice(0,10);
+
+    const pool = dwRawData.filter(r => {
+      if (r.ORIGEM !== "CP") return false;
+      const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
+      if (!ven || ven < todayIso || ven > limitIso) return false;
+      const situ = String(r.SITUACAO ?? "").trim().toUpperCase();
+      return situ !== "C"; // exclui compensados/pagos
+    });
+
+    const grupos = new Map<string, number>();
+    for (const r of pool) {
+      const cat = (r.CENTRO_CUSTO ?? "Outros").trim() || "Outros";
+      const val = Math.abs(r.VLR_PARCELA ?? r.VLRDOC ?? 0);
+      grupos.set(cat, (grupos.get(cat) ?? 0) + val);
+    }
+
+    const totalGeral = Array.from(grupos.values()).reduce((s, v) => s + v, 0);
+    return Array.from(grupos.entries())
+      .map(([nome, valor], i) => ({ nome, valor, pct: totalGeral > 0 ? (valor / totalGeral) * 100 : 0, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
+      .sort((a, b) => b.valor - a.valor);
+  }, [dwRawData, horizonte]);
+
+  // Composição diária dos pagamentos (top 6 categorias + "Outros", por dia)
+  const composicaoDiaria = useMemo(() => {
+    const topCats = pagamentosPorCategoria.slice(0, 6).map(c => c.nome);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
+    const todayIso = hoje.toISOString().slice(0,10);
+    const limitIso = limit.toISOString().slice(0,10);
+
+    const pool = dwRawData.filter(r => {
+      if (r.ORIGEM !== "CP") return false;
+      const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
+      if (!ven || ven < todayIso || ven > limitIso) return false;
+      return String(r.SITUACAO ?? "").trim().toUpperCase() !== "C";
+    });
+
+    const cur = new Date(hoje);
+    const dias: Record<string, any>[] = [];
+    while (cur <= limit) {
+      const key = cur.toISOString().slice(0,10);
+      const label = cur.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+      const dayRows = pool.filter(r => (r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null) === key);
+      if (dayRows.length > 0) {
+        const entry: Record<string, any> = { dia: label };
+        let outros = 0;
+        for (const r of dayRows) {
+          const cat = (r.CENTRO_CUSTO ?? "Outros").trim() || "Outros";
+          const val = Math.abs(r.VLR_PARCELA ?? r.VLRDOC ?? 0);
+          if (topCats.includes(cat)) entry[cat] = (entry[cat] ?? 0) + val;
+          else outros += val;
+        }
+        if (outros > 0) entry["Outros"] = outros;
+        dias.push(entry);
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return dias;
+  }, [dwRawData, horizonte, pagamentosPorCategoria]);
+
+  const composicaoCategorias = [...pagamentosPorCategoria.slice(0, 6).map(c => c.nome), "Outros"];
+
+  // Detalhamento dos recebimentos — por cliente e por dia
+  const recebimentosPorCliente = useMemo(() => {
+    const grupos = new Map<string, { valor: number; titulos: number }>();
+    for (const c of contasReceber.filter(c => ["Pendente", "Vence Hoje"].includes(dsReceber(c)))) {
+      const atual = grupos.get(c.cliente) ?? { valor: 0, titulos: 0 };
+      grupos.set(c.cliente, { valor: atual.valor + c.valor, titulos: atual.titulos + 1 });
+    }
+    const totalGeral = Array.from(grupos.values()).reduce((s, v) => s + v.valor, 0);
+    return Array.from(grupos.entries())
+      .map(([cliente, d], i) => ({ cliente, ...d, pct: totalGeral > 0 ? (d.valor / totalGeral) * 100 : 0, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 8);
+  }, [contasReceber]);
+
+  const recebimentosPorDia = useMemo(() => {
+    return detalhamentoDiario.slice(0, 7).map(d => {
+      const evs = eventosPrevistos.filter(e => e.data === d.iso && e.tipo === "Entrada");
+      const descSet = new Map<string, number>();
+      for (const e of evs) descSet.set(e.desc, (descSet.get(e.desc) ?? 0) + 1);
+      const desc = Array.from(descSet.entries()).map(([nome, qtd]) => `${nome} (${qtd} tít.)`).join(" + ");
+      return { ...d, desc: desc || "—" };
+    });
+  }, [detalhamentoDiario, eventosPrevistos]);
+
+  // Visão por dia — breakdown de categoria por dia (próximos 7 dias do horizonte)
+  const visaoPorDia = useMemo(() => {
+    const todayIso = new Date(); todayIso.setHours(0,0,0,0);
+    return detalhamentoDiario.slice(0, 7).map(d => {
+      const dayRows = dwRawData.filter(r => {
+        if (r.ORIGEM !== "CP") return false;
+        const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
+        if (ven !== d.iso) return false;
+        return String(r.SITUACAO ?? "").trim().toUpperCase() !== "C";
+      });
+      const grupos = new Map<string, number>();
+      for (const r of dayRows) {
+        const cat = (r.CENTRO_CUSTO ?? "Outros").trim() || "Outros";
+        grupos.set(cat, (grupos.get(cat) ?? 0) + Math.abs(r.VLR_PARCELA ?? r.VLRDOC ?? 0));
+      }
+      const totalDia = Array.from(grupos.values()).reduce((s, v) => s + v, 0);
+      const cats = Array.from(grupos.entries())
+        .map(([nome, valor]) => ({ nome, valor, pct: totalDia > 0 ? Math.round((valor / totalDia) * 100) : 0 }))
+        .sort((a, b) => b.valor - a.valor);
+      return { ...d, categorias: cats };
+    });
+  }, [detalhamentoDiario, dwRawData]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -1971,6 +2121,233 @@ function ScreenPrevisto() {
           </SectionCard>
         </AnimatedCard>
       </div>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          NOVO CARD 1 — Detalhamento Diário
+      ════════════════════════════════════════════════════════════════════ */}
+      <AnimatedCard delay={380}>
+        <SectionCard>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-400/10">
+              <LayoutDashboard className="h-3.5 w-3.5 text-blue-300" />
+            </span>
+            <span className="text-[13px] font-semibold text-slate-200">Detalhamento Diário</span>
+            <span className="ml-1 text-[10px] text-slate-600">Próximos {horizonte} dias</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px]">
+              <thead>
+                <tr>
+                  <Th>Dia</Th>
+                  <Th className="text-right">Saldo Anterior</Th>
+                  <Th className="text-right">A Receber</Th>
+                  <Th className="text-right">A Pagar</Th>
+                  <Th className="text-right">Saldo Dia</Th>
+                  <Th className="text-right">Saldo Final</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {detalhamentoDiario.map((d, i) => (
+                  <tr key={d.iso} className={`border-t border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors ${i % 2 === 1 ? "bg-white/[0.012]" : ""}`}>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${d.saldoDia > 0 ? "bg-emerald-400" : d.saldoDia < 0 ? "bg-rose-400" : "bg-slate-600"}`} />
+                        <span className="text-[11px] font-medium text-slate-300 capitalize">{d.diaSemana} {d.diaLabel}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-[11px] text-slate-500 tabular-nums">{fmtBRL(d.saldoAnterior)}</td>
+                    <td className="px-3 py-2.5 text-right text-[11px] font-medium text-emerald-300 tabular-nums">{d.aReceber > 0 ? fmtBRL(d.aReceber) : <span className="text-slate-600">—</span>}</td>
+                    <td className="px-3 py-2.5 text-right text-[11px] font-medium text-rose-300 tabular-nums">{d.aPagar > 0 ? fmtBRL(d.aPagar) : <span className="text-slate-600">—</span>}</td>
+                    <td className={`px-3 py-2.5 text-right text-[11px] font-semibold tabular-nums ${d.saldoDia > 0 ? "text-emerald-300" : d.saldoDia < 0 ? "text-rose-300" : "text-slate-500"}`}>
+                      {d.saldoDia > 0 ? "+" : d.saldoDia < 0 ? "- " : ""}{fmtBRL(Math.abs(d.saldoDia)).replace("R$ ", "R$ ")}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-[11px] font-bold text-cyan-300 tabular-nums">{fmtBRL(d.saldoFinal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-[var(--sgt-border-subtle)] bg-white/[0.02]">
+                  <td className="px-3 py-2.5 text-[11px] font-bold text-slate-300">Total</td>
+                  <td className="px-3 py-2.5" />
+                  <td className="px-3 py-2.5 text-right text-[11px] font-bold text-emerald-300 tabular-nums">{fmtBRL(totalDiarioReceber)}</td>
+                  <td className="px-3 py-2.5 text-right text-[11px] font-bold text-rose-300 tabular-nums">{fmtBRL(totalDiarioPagar)}</td>
+                  <td className={`px-3 py-2.5 text-right text-[11px] font-bold tabular-nums ${totalDiarioSaldo >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                    {totalDiarioSaldo >= 0 ? "+" : "- "}{fmtBRL(Math.abs(totalDiarioSaldo))}
+                  </td>
+                  <td className="px-3 py-2.5 text-right text-[11px] font-bold text-amber-300 tabular-nums">{fmtBRL(detalhamentoDiario.at(-1)?.saldoFinal ?? saldoAtual)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          NOVO CARD 2 — Pagamentos por Categoria + Composição Diária
+      ════════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AnimatedCard delay={420}>
+          <SectionCard>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-400/10">
+                <LayoutGrid className="h-3.5 w-3.5 text-violet-300" />
+              </span>
+              <span className="text-[13px] font-semibold text-slate-200">Pagamentos por Categoria</span>
+            </div>
+            <div className="px-4 py-3 max-h-[360px] overflow-y-auto">
+              {pagamentosPorCategoria.length === 0 && (
+                <p className="py-8 text-center text-[12px] text-slate-600">Sem pagamentos no horizonte selecionado</p>
+              )}
+              {pagamentosPorCategoria.map((c) => (
+                <div key={c.nome} className="flex items-center gap-3 py-2">
+                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: c.color }} />
+                  <span className="flex-1 min-w-0 truncate text-[12px] text-slate-300">{c.nome}</span>
+                  <span className="shrink-0 text-[12px] font-semibold text-slate-200 tabular-nums">{fmtK(c.valor)}</span>
+                  <span className="shrink-0 w-10 text-right text-[10px] text-slate-500 tabular-nums">{c.pct.toFixed(1)}%</span>
+                  <div className="hidden sm:block w-20 shrink-0 h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${Math.max(c.pct, 2)}%`, background: c.color }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+
+        <AnimatedCard delay={460}>
+          <SectionCard>
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--sgt-divider)]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/10">
+                <BarChart3 className="h-3.5 w-3.5 text-amber-300" />
+              </span>
+              <span className="text-[13px] font-semibold text-slate-200">Composição Diária dos Pagamentos</span>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-4 pt-2 pb-1">
+              {composicaoCategorias.map((cat, i) => (
+                <span key={cat} className="flex items-center gap-1.5 text-[9px] text-slate-500">
+                  <span className="h-1.5 w-1.5 rounded-sm" style={{ background: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
+                  {cat}
+                </span>
+              ))}
+            </div>
+            <div className="px-2 py-2" style={{ height: 220 }}>
+              {composicaoDiaria.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-[12px] text-slate-600">Sem dados no período</div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={composicaoDiaria} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis dataKey="dia" tick={{ fontSize: 9, fill: "#475569" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: "#475569" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} width={34} />
+                    <Tooltip formatter={(v: any, n: string) => [fmtK(v), n]} contentStyle={{ background: "var(--sgt-bg-card)", border: "0.5px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                    {composicaoCategorias.map((cat, i) => (
+                      <Bar key={cat} dataKey={cat} stackId="cat" fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} fillOpacity={0.85} radius={i === composicaoCategorias.length - 1 ? [3,3,0,0] : [0,0,0,0]} />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </SectionCard>
+        </AnimatedCard>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          NOVO CARD 3 — Detalhamento dos Recebimentos
+      ════════════════════════════════════════════════════════════════════ */}
+      <AnimatedCard delay={500}>
+        <SectionCard>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-400/10">
+              <TrendingUp className="h-3.5 w-3.5 text-emerald-300" />
+            </span>
+            <span className="text-[13px] font-semibold text-slate-200">Detalhamento dos Recebimentos</span>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-[var(--sgt-divider)]">
+            {/* Por cliente */}
+            <div className="px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">Por Cliente</p>
+              {recebimentosPorCliente.length === 0 && (
+                <p className="py-6 text-center text-[12px] text-slate-600">Nenhum recebimento previsto</p>
+              )}
+              {recebimentosPorCliente.map((r) => (
+                <div key={r.cliente} className="flex items-center gap-3 py-2.5 border-t border-[var(--sgt-divider)] first:border-0">
+                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: r.color }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-[12px] text-slate-300">{r.cliente}</p>
+                    <p className="text-[10px] text-slate-600">{r.titulos} título{r.titulos > 1 ? "s" : ""}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-[12px] font-semibold text-emerald-300 tabular-nums">{fmtBRL(r.valor)}</p>
+                    <p className="text-[10px] text-slate-600">{r.pct.toFixed(1)}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Por dia */}
+            <div className="px-4 py-3">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500">Por Dia</p>
+              {recebimentosPorDia.map((d) => (
+                <div key={d.iso} className="flex items-center justify-between gap-3 py-2.5 border-t border-[var(--sgt-divider)] first:border-0">
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-medium text-slate-300 capitalize">{d.diaSemana} {d.diaLabel}</p>
+                    <p className="truncate text-[10px] text-slate-600">{d.desc}</p>
+                  </div>
+                  <span className={`shrink-0 text-[12px] font-semibold tabular-nums ${d.aReceber > 0 ? "text-emerald-300" : "text-slate-600"}`}>
+                    {d.aReceber > 0 ? fmtBRL(d.aReceber) : "R$ 0,00"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionCard>
+      </AnimatedCard>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          NOVO CARD 4 — Visão por Dia
+      ════════════════════════════════════════════════════════════════════ */}
+      <AnimatedCard delay={540}>
+        <SectionCard>
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--sgt-divider)]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-400/10">
+              <FileBarChart className="h-3.5 w-3.5 text-rose-300" />
+            </span>
+            <span className="text-[13px] font-semibold text-slate-200">Visão por Dia</span>
+          </div>
+          <div className="divide-y divide-[var(--sgt-divider)]">
+            {visaoPorDia.map((d) => (
+              <div key={d.iso} className="relative px-4 py-3.5 pl-5">
+                <span className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${d.saldoDia >= 0 ? "bg-emerald-400/70" : "bg-rose-400/70"}`} />
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p className="text-[13px] font-semibold text-slate-200 capitalize">{d.diaSemana} {d.diaLabel}</p>
+                  <div className="shrink-0 text-right">
+                    <p className={`text-[14px] font-bold tabular-nums ${d.saldoDia >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                      {d.saldoDia >= 0 ? "+ " : "- "}{fmtBRL(Math.abs(d.saldoDia))}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mb-2.5 text-[11px]">
+                  <span className="flex items-center gap-1.5 text-emerald-400"><TrendingUp className="h-3 w-3" />Receb.: {fmtBRL(d.aReceber)}</span>
+                  <span className="flex items-center gap-1.5 text-rose-400"><TrendingDown className="h-3 w-3" />Pagam.: {fmtBRL(d.aPagar)}</span>
+                  <span className="ml-auto text-slate-500">Saldo: <span className="font-semibold text-cyan-300">{fmtBRL(d.saldoFinal)}</span></span>
+                </div>
+                {d.categorias.length > 0 ? (
+                  <div className="space-y-1">
+                    {d.categorias.map((c) => (
+                      <div key={c.nome} className="flex items-center gap-2">
+                        <span className="flex-1 min-w-0 truncate text-[11px] text-slate-400">{c.nome}</span>
+                        <span className="shrink-0 text-[11px] text-slate-300 tabular-nums">{fmtK(c.valor)}</span>
+                        <span className="shrink-0 w-9 text-right text-[10px] text-slate-600">{c.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-600">Sem pagamentos neste dia</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      </AnimatedCard>
     </div>
   );
 }
