@@ -1801,8 +1801,10 @@ function ScreenCategorias() {
 
 // ─── TELA PREVISTO ────────────────────────────────────────────────────────────
 function ScreenPrevisto() {
-  const { contasPagar, contasReceber, dwRawData, isFetchingDw } = useFinancialData();
-  const [horizonte, setHorizonte] = useState<30 | 60 | 90>(30);
+  const { contasPagar, contasReceber, dwRawData, isFetchingDw, dwFilter } = useFinancialData();
+  // Período vem do filtro global do topo da página (mesmo dwFilter usado nas demais telas)
+  const periodoInicio = dwFilter.dataInicio; // "YYYY-MM-DD"
+  const periodoFim     = dwFilter.dataFim;    // "YYYY-MM-DD"
   // Saldo de partida = movimentação líquida bancária acumulada do período
   const saldoAtual = useMemo(() =>
     dwRawData.filter(r => r.ORIGEM === "LB_C" || r.ORIGEM === "LB_D")
@@ -1813,22 +1815,24 @@ function ScreenPrevisto() {
   [dwRawData]);
 
   const eventosPrevistos = useMemo(() => [
-    ...contasPagar.filter(c => dsPagar(c) === "Pendente" || dsPagar(c) === "Vence Hoje")
+    ...contasPagar.filter(c => (dsPagar(c) === "Pendente" || dsPagar(c) === "Vence Hoje") && c.vencimento >= periodoInicio && c.vencimento <= periodoFim)
         .map(c => ({ data: c.vencimento, valor: -c.valor, tipo: "Saída" as const, desc: c.fornecedor, doc: c.documento ?? "" })),
-    ...contasReceber.filter(c => dsReceber(c) === "Pendente" || dsReceber(c) === "Vence Hoje")
+    ...contasReceber.filter(c => (dsReceber(c) === "Pendente" || dsReceber(c) === "Vence Hoje") && c.vencimento >= periodoInicio && c.vencimento <= periodoFim)
         .map(c => ({ data: c.vencimento, valor: c.valor,  tipo: "Entrada" as const, desc: c.cliente,    doc: c.documento ?? "" })),
-  ].sort((a, b) => a.data.localeCompare(b.data)), [contasPagar, contasReceber]);
+  ].sort((a, b) => a.data.localeCompare(b.data)), [contasPagar, contasReceber, periodoInicio, periodoFim]);
 
   const projecao = useMemo(() => {
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
+    const inicio = new Date(periodoInicio + "T00:00:00");
+    const fim    = new Date(periodoFim    + "T00:00:00");
     const dias: { dia: string; entradas: number; saidas: number; saldo: number; receberAcum: number; pagarAcum: number }[] = [];
     let saldo = saldoAtual;
     let receberAcum = 0;
     let pagarAcum = 0;
-    const cur = new Date(hoje);
+    const cur = new Date(inicio);
     let idx = 0;
-    while (cur <= limit) {
+    const totalDias = Math.max(1, Math.round((fim.getTime() - inicio.getTime()) / 86400000));
+    const stepSkip = Math.max(1, Math.round(totalDias / 18)); // ~18 pontos rotulados no eixo quando o período é longo
+    while (cur <= fim) {
       const key  = cur.toISOString().slice(0,10);
       const label = cur.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
       const entradas = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s,e) => s+e.valor, 0);
@@ -1836,12 +1840,12 @@ function ScreenPrevisto() {
       saldo += entradas - saidas;
       receberAcum += entradas;
       pagarAcum   += saidas;
-      if (entradas > 0 || saidas > 0 || idx % 5 === 0) dias.push({ dia: label, entradas, saidas, saldo, receberAcum, pagarAcum });
+      if (entradas > 0 || saidas > 0 || idx % stepSkip === 0) dias.push({ dia: label, entradas, saidas, saldo, receberAcum, pagarAcum });
       cur.setDate(cur.getDate() + 1);
       idx++;
     }
     return dias;
-  }, [horizonte, eventosPrevistos, saldoAtual]);
+  }, [periodoInicio, periodoFim, eventosPrevistos, saldoAtual]);
 
   const totalEntradas = eventosPrevistos.filter(e => e.tipo === "Entrada").reduce((s,e) => s+e.valor, 0);
   const totalSaidas   = eventosPrevistos.filter(e => e.tipo === "Saída"  ).reduce((s,e) => s+Math.abs(e.valor), 0);
@@ -1862,14 +1866,14 @@ function ScreenPrevisto() {
   // Paleta de categorias (mesma ordem do mockup)
   const CATEGORY_COLORS = ["#8B5CF6","#F59E0B","#3B82F6","#22D3EE","#F43F5E","#EC4899","#94A3B8","#10B981","#6366F1","#84CC16","#A78BFA","#64748B"];
 
-  // Dias do detalhamento diário: hoje → hoje+horizonte (todos os dias, não só os com movimento)
+  // Dias do detalhamento diário: dataInicio → dataFim do filtro global (todos os dias, não só os com movimento)
   const detalhamentoDiario = useMemo(() => {
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
+    const inicio = new Date(periodoInicio + "T00:00:00");
+    const fim    = new Date(periodoFim    + "T00:00:00");
     const rows: { iso: string; diaLabel: string; diaSemana: string; saldoAnterior: number; aReceber: number; aPagar: number; saldoDia: number; saldoFinal: number }[] = [];
     let saldoAcumulado = saldoAtual;
-    const cur = new Date(hoje);
-    while (cur <= limit) {
+    const cur = new Date(inicio);
+    while (cur <= fim) {
       const key = cur.toISOString().slice(0, 10);
       const aReceber = eventosPrevistos.filter(e => e.data === key && e.tipo === "Entrada").reduce((s, e) => s + e.valor, 0);
       const aPagar   = eventosPrevistos.filter(e => e.data === key && e.tipo === "Saída").reduce((s, e) => s + Math.abs(e.valor), 0);
@@ -1886,23 +1890,18 @@ function ScreenPrevisto() {
       cur.setDate(cur.getDate() + 1);
     }
     return rows;
-  }, [horizonte, eventosPrevistos, saldoAtual]);
+  }, [periodoInicio, periodoFim, eventosPrevistos, saldoAtual]);
 
   const totalDiarioReceber = detalhamentoDiario.reduce((s, d) => s + d.aReceber, 0);
   const totalDiarioPagar   = detalhamentoDiario.reduce((s, d) => s + d.aPagar, 0);
   const totalDiarioSaldo   = totalDiarioReceber - totalDiarioPagar;
 
-  // Pagamentos por categoria (CENTRO_CUSTO) — só CP futuro (pendente/vence hoje), no horizonte
+  // Pagamentos por categoria (CENTRO_CUSTO) — CP futuro (pendente/vence hoje), dentro do período do filtro
   const pagamentosPorCategoria = useMemo(() => {
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
-    const limitIso = limit.toISOString().slice(0,10);
-    const todayIso = hoje.toISOString().slice(0,10);
-
     const pool = dwRawData.filter(r => {
       if (r.ORIGEM !== "CP") return false;
       const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
-      if (!ven || ven < todayIso || ven > limitIso) return false;
+      if (!ven || ven < periodoInicio || ven > periodoFim) return false;
       const situ = String(r.SITUACAO ?? "").trim().toUpperCase();
       return situ !== "C"; // exclui compensados/pagos
     });
@@ -1918,26 +1917,24 @@ function ScreenPrevisto() {
     return Array.from(grupos.entries())
       .map(([nome, valor], i) => ({ nome, valor, pct: totalGeral > 0 ? (valor / totalGeral) * 100 : 0, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
       .sort((a, b) => b.valor - a.valor);
-  }, [dwRawData, horizonte]);
+  }, [dwRawData, periodoInicio, periodoFim]);
 
   // Composição diária dos pagamentos (top 6 categorias + "Outros", por dia)
   const composicaoDiaria = useMemo(() => {
     const topCats = pagamentosPorCategoria.slice(0, 6).map(c => c.nome);
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limit = new Date(hoje); limit.setDate(limit.getDate() + horizonte);
-    const todayIso = hoje.toISOString().slice(0,10);
-    const limitIso = limit.toISOString().slice(0,10);
+    const inicio = new Date(periodoInicio + "T00:00:00");
+    const fim    = new Date(periodoFim    + "T00:00:00");
 
     const pool = dwRawData.filter(r => {
       if (r.ORIGEM !== "CP") return false;
       const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
-      if (!ven || ven < todayIso || ven > limitIso) return false;
+      if (!ven || ven < periodoInicio || ven > periodoFim) return false;
       return String(r.SITUACAO ?? "").trim().toUpperCase() !== "C";
     });
 
-    const cur = new Date(hoje);
+    const cur = new Date(inicio);
     const dias: Record<string, any>[] = [];
-    while (cur <= limit) {
+    while (cur <= fim) {
       const key = cur.toISOString().slice(0,10);
       const label = cur.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
       const dayRows = pool.filter(r => (r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null) === key);
@@ -1956,14 +1953,14 @@ function ScreenPrevisto() {
       cur.setDate(cur.getDate() + 1);
     }
     return dias;
-  }, [dwRawData, horizonte, pagamentosPorCategoria]);
+  }, [dwRawData, periodoInicio, periodoFim, pagamentosPorCategoria]);
 
   const composicaoCategorias = [...pagamentosPorCategoria.slice(0, 6).map(c => c.nome), "Outros"];
 
-  // Detalhamento dos recebimentos — por cliente e por dia
+  // Detalhamento dos recebimentos — por cliente e por dia, dentro do período do filtro
   const recebimentosPorCliente = useMemo(() => {
     const grupos = new Map<string, { valor: number; titulos: number }>();
-    for (const c of contasReceber.filter(c => ["Pendente", "Vence Hoje"].includes(dsReceber(c)))) {
+    for (const c of contasReceber.filter(c => ["Pendente", "Vence Hoje"].includes(dsReceber(c)) && c.vencimento >= periodoInicio && c.vencimento <= periodoFim)) {
       const atual = grupos.get(c.cliente) ?? { valor: 0, titulos: 0 };
       grupos.set(c.cliente, { valor: atual.valor + c.valor, titulos: atual.titulos + 1 });
     }
@@ -1972,7 +1969,7 @@ function ScreenPrevisto() {
       .map(([cliente, d], i) => ({ cliente, ...d, pct: totalGeral > 0 ? (d.valor / totalGeral) * 100 : 0, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }))
       .sort((a, b) => b.valor - a.valor)
       .slice(0, 8);
-  }, [contasReceber]);
+  }, [contasReceber, periodoInicio, periodoFim]);
 
   const recebimentosPorDia = useMemo(() => {
     return detalhamentoDiario.slice(0, 7).map(d => {
@@ -1984,9 +1981,8 @@ function ScreenPrevisto() {
     });
   }, [detalhamentoDiario, eventosPrevistos]);
 
-  // Visão por dia — breakdown de categoria por dia (próximos 7 dias do horizonte)
+  // Visão por dia — breakdown de categoria por dia (primeiros 7 dias do período)
   const visaoPorDia = useMemo(() => {
-    const todayIso = new Date(); todayIso.setHours(0,0,0,0);
     return detalhamentoDiario.slice(0, 7).map(d => {
       const dayRows = dwRawData.filter(r => {
         if (r.ORIGEM !== "CP") return false;
@@ -2018,7 +2014,7 @@ function ScreenPrevisto() {
           <div className="flex items-center gap-3 rounded-[12px] border border-amber-400/20 bg-amber-400/[0.06] px-4 py-3">
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
             <p className="text-[12px] font-semibold text-amber-300">
-              {diasCriticos} dia{diasCriticos > 1 ? "s" : ""} com saldo projetado abaixo de R$ 100k no horizonte selecionado
+              {diasCriticos} dia{diasCriticos > 1 ? "s" : ""} com saldo projetado abaixo de R$ 100k no período selecionado
             </p>
           </div>
         </AnimatedCard>
@@ -2030,12 +2026,6 @@ function ScreenPrevisto() {
             <div>
               <span className="text-[12px] font-semibold text-slate-300">Evolução do Saldo Projetado</span>
               <span className="ml-2 text-[10px] text-slate-600">Baseado em títulos pendentes</span>
-            </div>
-            <div className="flex gap-1">
-              {([30, 60, 90] as const).map(h => (
-                <button key={h} onClick={() => setHorizonte(h)}
-                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${horizonte === h ? "bg-amber-500/20 border border-amber-500/30 text-amber-300" : "border border-[var(--sgt-border-subtle)] text-slate-500 hover:text-slate-300"}`}>{h}d</button>
-              ))}
             </div>
           </div>
           <div className="px-2 py-3" style={{ height: 200 }}>
@@ -2101,7 +2091,7 @@ function ScreenPrevisto() {
               <LayoutDashboard className="h-3.5 w-3.5 text-blue-300" />
             </span>
             <span className="text-[13px] font-semibold text-slate-200">Detalhamento Diário</span>
-            <span className="ml-1 text-[10px] text-slate-600">Próximos {horizonte} dias</span>
+            <span className="ml-1 text-[10px] text-slate-600">{detalhamentoDiario.length} dia{detalhamentoDiario.length !== 1 ? "s" : ""} no período</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px]">
@@ -2165,7 +2155,7 @@ function ScreenPrevisto() {
             </div>
             <div className="px-4 py-3 max-h-[360px] overflow-y-auto">
               {pagamentosPorCategoria.length === 0 && (
-                <p className="py-8 text-center text-[12px] text-slate-600">Sem pagamentos no horizonte selecionado</p>
+                <p className="py-8 text-center text-[12px] text-slate-600">Sem pagamentos no período selecionado</p>
               )}
               {pagamentosPorCategoria.map((c) => (
                 <div key={c.nome} className="flex items-center gap-3 py-2">
