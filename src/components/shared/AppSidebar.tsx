@@ -41,17 +41,17 @@ const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
 
 // ── Estilos inline ────────────────────────────────────────────────────────────
 const PILL_ACTIVE: React.CSSProperties = {
-  background:   "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
-  border:       "1px solid color-mix(in srgb, var(--sgt-accent) 55%, transparent)",
-  boxShadow:    "0 0 12px color-mix(in srgb, var(--sgt-accent) 22%, transparent)",
+  background:   "linear-gradient(95deg, var(--sb-accent) 0%, var(--sb-accent-hover) 100%)",
+  border:       "1px solid color-mix(in srgb, var(--sb-accent) 55%, transparent)",
+  boxShadow:    "0 0 12px color-mix(in srgb, var(--sb-accent) 22%, transparent)",
   borderRadius: "9999px",
   color:        "#1B1304",
   fontWeight:   700,
 };
 const CHIP_ACTIVE: React.CSSProperties = {
-  background: "linear-gradient(135deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%)",
-  border:     "1px solid color-mix(in srgb, var(--sgt-accent) 60%, transparent)",
-  boxShadow:  "0 0 10px color-mix(in srgb, var(--sgt-accent) 22%, transparent)",
+  background: "linear-gradient(135deg, var(--sb-accent) 0%, var(--sb-accent-hover) 100%)",
+  border:     "1px solid color-mix(in srgb, var(--sb-accent) 60%, transparent)",
+  boxShadow:  "0 0 10px color-mix(in srgb, var(--sb-accent) 22%, transparent)",
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ export function AppSidebar() {
             className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
             style={active
               ? { ...CHIP_ACTIVE }
-              : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
+              : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
             
           >
             <Icon className="w-4 h-4 shrink-0"
@@ -163,21 +163,21 @@ export function AppSidebar() {
           className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${active ? "sgt-nav-active" : ""}`}
           style={active
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
-            : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
+            : { color: "var(--sb-text-secondary)", borderRadius: "9999px",
                 border: "1px solid transparent", background: "transparent",
                 padding: "8px 16px" }}
           onMouseEnter={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "var(--sgt-sidebar-hover)";
-              b.style.color      = "var(--sgt-text-primary)";
+              b.style.background = "var(--sb-sidebar-hover)";
+              b.style.color      = "var(--sb-text-primary)";
             }
           }}
           onMouseLeave={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
               b.style.background = "transparent";
-              b.style.color      = "var(--sgt-text-secondary)";
+              b.style.color      = "var(--sb-text-secondary)";
             }
           }}
         >
@@ -217,7 +217,7 @@ export function AppSidebar() {
             aria-label="Início"
             className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
             style={isHomeActive ? { ...CHIP_ACTIVE }
-              : { borderColor: "transparent", color: "var(--sgt-text-secondary)", background: "transparent" }}
+              : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
           >
             <Home className="w-4 h-4 shrink-0"
               style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
@@ -232,21 +232,21 @@ export function AppSidebar() {
           className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${isHomeActive ? "sgt-nav-active" : ""}`}
           style={isHomeActive
             ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
-            : { color: "var(--sgt-text-secondary)", borderRadius: "9999px",
+            : { color: "var(--sb-text-secondary)", borderRadius: "9999px",
                 border: "1px solid transparent", background: "transparent",
                 padding: "8px 16px" }}
           onMouseEnter={e => {
             if (!isHomeActive) {
               const b = e.currentTarget as HTMLButtonElement;
-              b.style.background = "var(--sgt-sidebar-hover)";
-              b.style.color      = "var(--sgt-text-primary)";
+              b.style.background = "var(--sb-sidebar-hover)";
+              b.style.color      = "var(--sb-text-primary)";
             }
           }}
           onMouseLeave={e => {
             if (!isHomeActive) {
               const b = e.currentTarget as HTMLButtonElement;
               b.style.background = "transparent";
-              b.style.color      = "var(--sgt-text-secondary)";
+              b.style.color      = "var(--sb-text-secondary)";
             }
           }}
         >
@@ -269,14 +269,14 @@ export function AppSidebar() {
     if (collapsed) {
       return (
         <div key={`sec-${label}`} className="flex justify-center my-1">
-          <div className="w-6 h-px" style={{ background: "var(--sgt-border-subtle)" }} />
+          <div className="w-6 h-px" style={{ background: "var(--sb-border-subtle)" }} />
         </div>
       );
     }
     return (
       <div key={`sec-${label}`}
            className="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-[0.12em]"
-           style={{ color: "var(--sgt-text-muted)", fontFamily: "var(--sgt-font-body)" }}>
+           style={{ color: "var(--sb-text-muted)", fontFamily: "var(--sgt-font-body)" }}>
         {label}
       </div>
     );
@@ -288,8 +288,8 @@ export function AppSidebar() {
       className="hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col transition-all duration-300"
       style={{
         width:        collapsed ? SB_W_COLLAPSED : SB_W_EXPANDED,
-        background:   "var(--sgt-bg-surface)",
-        borderRight:  "1px solid var(--sgt-border-subtle)",
+        background:   "var(--sb-bg-surface)",
+        borderRight:  "1px solid var(--sb-border-subtle)",
         borderRadius: "0 16px 16px 0",
         boxShadow:    "4px 0 24px rgba(0,0,0,0.25)",
       }}
@@ -300,7 +300,7 @@ export function AppSidebar() {
         className={`flex shrink-0 items-center border-b ${
           collapsed ? "flex-col justify-center gap-3 py-4 px-0" : "justify-between gap-2 px-5 py-5"
         }`}
-        style={{ borderColor: "var(--sgt-border-subtle)" }}
+        style={{ borderColor: "var(--sb-border-subtle)" }}
       >
         {!collapsed && (
           logoErr
@@ -334,16 +334,16 @@ export function AppSidebar() {
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Expandir menu" : "Recolher menu"}
           className="flex items-center justify-center w-7 h-7 rounded-md border shrink-0 transition-all duration-100"
-          style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)", background: "transparent" }}
+          style={{ borderColor: "var(--sb-border-subtle)", color: "var(--sb-text-muted)", background: "transparent" }}
           onMouseEnter={e => {
             const b = e.currentTarget as HTMLButtonElement;
-            b.style.borderColor = "var(--sgt-border-medium)";
-            b.style.color       = "var(--sgt-text-secondary)";
+            b.style.borderColor = "var(--sb-border-medium)";
+            b.style.color       = "var(--sb-text-secondary)";
           }}
           onMouseLeave={e => {
             const b = e.currentTarget as HTMLButtonElement;
-            b.style.borderColor = "var(--sgt-border-subtle)";
-            b.style.color       = "var(--sgt-text-muted)";
+            b.style.borderColor = "var(--sb-border-subtle)";
+            b.style.color       = "var(--sb-text-muted)";
           }}
         >
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
@@ -389,7 +389,7 @@ export function AppSidebar() {
             <div key={group.key}>
               {collapsed
                 ? <div className="flex justify-center my-1">
-                    <div className="w-6 h-px" style={{ background: "var(--sgt-border-subtle)" }} />
+                    <div className="w-6 h-px" style={{ background: "var(--sb-border-subtle)" }} />
                   </div>
                 : <button
                     onClick={() => toggleAcc(group.key)}
@@ -397,13 +397,13 @@ export function AppSidebar() {
                     style={{
                       fontFamily: "var(--sgt-font-body)", fontSize: 10, fontWeight: 700,
                       textTransform: "uppercase", letterSpacing: "0.12em",
-                      color: isOpen ? "var(--sgt-text-muted)" : "var(--sgt-text-faint)",
+                      color: isOpen ? "var(--sb-text-muted)" : "var(--sb-text-faint)",
                       background: "none", border: "none", cursor: "pointer",
                     }}
                   >
                     <span>{group.label}</span>
                     <ChevronDown className="ml-auto w-3 h-3 transition-transform duration-200"
-                      style={{ color: "var(--sgt-text-muted)",
+                      style={{ color: "var(--sb-text-muted)",
                                transform: isOpen ? "rotate(180deg)" : "none" }} />
                   </button>
               }
@@ -448,14 +448,14 @@ export function AppSidebar() {
             transform:    "translateY(-50%)",
             borderRadius: "9999px",
             ...(flyout.active ? {
-              background: "linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 70%)",
+              background: "linear-gradient(95deg, var(--sb-accent) 0%, var(--sb-accent-hover) 70%)",
               color:      "#1B1304",
-              border:     "1px solid color-mix(in srgb, var(--sgt-accent) 60%, transparent)",
-              boxShadow:  "0 0 20px color-mix(in srgb, var(--sgt-accent) 28%, transparent)",
+              border:     "1px solid color-mix(in srgb, var(--sb-accent) 60%, transparent)",
+              boxShadow:  "0 0 20px color-mix(in srgb, var(--sb-accent) 28%, transparent)",
             } : {
-              background: "var(--sgt-flyout-bg)",
-              color:      "var(--sgt-text-primary)",
-              border:     "1px solid var(--sgt-flyout-border)",
+              background: "var(--sb-flyout-bg)",
+              color:      "var(--sb-text-primary)",
+              border:     "1px solid var(--sb-flyout-border)",
               boxShadow:  "0 4px 8px rgba(0,0,0,0.25)",
             }),
           }}
@@ -508,24 +508,24 @@ function UserFooter({
 
   return (
     <div ref={ref} className="relative border-t shrink-0"
-         style={{ borderColor: "var(--sgt-border-subtle)" }}>
+         style={{ borderColor: "var(--sb-border-subtle)" }}>
       <button
         onClick={() => setOpen(o => !o)}
         title={email || "Usuário"}
         className={`flex items-center gap-2.5 w-full transition-all duration-150 ${
           collapsed ? "justify-center px-2 py-3" : "px-4 py-3"
         }`}
-        onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sgt-row-hover)"}
+        onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sb-row-hover)"}
         onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
       >
         <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl text-[12px] font-bold"
-              style={{ border: "1px solid color-mix(in srgb, var(--sgt-accent) 25%, transparent)", background: "var(--sgt-accent-soft)", color: "var(--sgt-accent-text)" }}>
+              style={{ border: "1px solid color-mix(in srgb, var(--sb-accent) 25%, transparent)", background: "var(--sb-accent-soft)", color: "var(--sb-accent-text)" }}>
           {initial}
         </span>
         {!collapsed && (
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-[12px] font-medium truncate" style={{ color: "var(--sgt-text-secondary)" }}>{shortEmail}</p>
-            <p className="text-[10px] mt-0.5" style={{ color: "var(--sgt-text-faint)" }}>{roleLabel}</p>
+            <p className="text-[12px] font-medium truncate" style={{ color: "var(--sb-text-secondary)" }}>{shortEmail}</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--sb-text-faint)" }}>{roleLabel}</p>
           </div>
         )}
       </button>
@@ -535,28 +535,28 @@ function UserFooter({
           className={`absolute z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.5)] ${
             collapsed ? "left-[calc(100%+8px)] bottom-1" : "left-2 right-2 bottom-[calc(100%+6px)]"
           }`}
-          style={{ background: "var(--sgt-menu-bg)", borderColor: "var(--sgt-border-medium)" }}
+          style={{ background: "var(--sb-menu-bg)", borderColor: "var(--sb-border-medium)" }}
         >
           {!collapsed && (
-            <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-              <p className="text-[10px] truncate" style={{ color: "var(--sgt-text-faint)" }}>{email}</p>
+            <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--sb-border-subtle)" }}>
+              <p className="text-[10px] truncate" style={{ color: "var(--sb-text-faint)" }}>{email}</p>
             </div>
           )}
           {menuActions.map(a => (
             <button key={a.label} onClick={a.fn}
               className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[12px] transition-colors"
-              style={{ color: "var(--sgt-text-secondary)" }}
-              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sgt-input-hover)"}
+              style={{ color: "var(--sb-text-secondary)" }}
+              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sb-input-hover)"}
               onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
             >{a.icon}{a.label}</button>
           ))}
-          <div className="h-px mx-2" style={{ background: "var(--sgt-border-subtle)" }} />
+          <div className="h-px mx-2" style={{ background: "var(--sb-border-subtle)" }} />
           <button
             onClick={() => { setOpen(false); onSignOut(); }}
             className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[12px] transition-colors"
-            style={{ color: "var(--sgt-text-secondary)" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--sgt-input-hover)"; (e.currentTarget as HTMLButtonElement).style.color = "#ef4444"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--sgt-text-secondary)"; }}
+            style={{ color: "var(--sb-text-secondary)" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--sb-input-hover)"; (e.currentTarget as HTMLButtonElement).style.color = "#ef4444"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--sb-text-secondary)"; }}
           >
             <LogOut className="h-3.5 w-3.5" />Sair
           </button>
