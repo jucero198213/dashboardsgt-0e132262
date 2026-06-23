@@ -92,13 +92,37 @@
     --sgt-font-mono:    'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
+  /* ── Sidebar (--sb-*): valores FIXOS, sempre escuros ──────────────────────
+     Independente do tema (.light ou .dark), a AppSidebar consome estas
+     variáveis em vez das --sgt-* equivalentes, garantindo que o menu lateral
+     nunca mude de aparência quando o usuário troca para o tema claro. */
+  :root, .dark, .light {
+    --sb-bg-surface:     #0F1520;
+    --sb-border-subtle:  rgba(143,163,187,0.10);
+    --sb-border-medium:  rgba(143,163,187,0.20);
+    --sb-text-primary:   #F0F4F8;
+    --sb-text-secondary: #8FA3BB;
+    --sb-text-muted:     #526272;
+    --sb-text-faint:     #364555;
+    --sb-input-hover:    rgba(143,163,187,0.11);
+    --sb-menu-bg:        #141D2E;
+    --sb-row-hover:      rgba(245,166,35,0.06);
+    --sb-accent:         #F5A623;
+    --sb-accent-hover:   #D4891A;
+    --sb-accent-soft:    rgba(245,166,35,0.12);
+    --sb-accent-text:    #F5A623;
+    --sb-sidebar-hover:  rgba(255,255,255,0.03);
+    --sb-flyout-bg:      #1A2540;
+    --sb-flyout-border:  rgba(255,255,255,0.12);
+  }
+
   .light {
     /* ── Tema claro SGT — 60/30/10 (branco · tinta · laranja #FE8005) ── */
     --background: 220 21% 92%;          /* #E5E8EE base (escurecida p/ destacar cards) */
     --foreground: 213 31% 13%;          /* #16202E tinta (30%) */
-    --card: 0 0% 100%;
+    --card: 0 0% 98.5%;
     --card-foreground: 213 31% 13%;
-    --popover: 0 0% 100%;
+    --popover: 0 0% 98.5%;
     --popover-foreground: 213 31% 13%;
     --primary: 30 99% 51%;              /* #FE8005 laranja SGT (10%) */
     --primary-foreground: 0 0% 100%;
@@ -118,14 +142,14 @@
     --input: 220 16% 87%;
     --ring: 30 99% 51%;
     --radius: 0.75rem;
-    --card-elevated: 220 22% 99%;
+    --card-elevated: 210 20% 97%;
 
     /* SGT tokens — 60/30/10 · hierarquia base<section<card p/ destacar cards */
     --sgt-bg-base:        #e5e8ee;   /* página (mais escura) */
-    --sgt-bg-card:        #ffffff;   /* cards (branco, destacam) */
-    --sgt-bg-surface:     #ffffff;   /* sidebar / workspaces */
+    --sgt-bg-card:        #fafbfc;   /* cards (branco suave, destacam sem ofuscar) */
+    --sgt-bg-surface:     #fafbfc;   /* sidebar / workspaces — não usado pela AppSidebar (ver --sb-*) */
     --sgt-bg-section:     #edeff4;   /* painel atrás dos cards (intermediário) */
-    --sgt-bg-overlay:     #ffffff;
+    --sgt-bg-overlay:     #fafbfc;
     --sgt-border-subtle:  rgba(20,30,45,0.08);
     --sgt-border-medium:  rgba(20,30,45,0.16);
     --sgt-text-primary:   #16202e;   /* 30% tinta */
@@ -141,7 +165,7 @@
     --sgt-row-hover:      rgba(254,128,5,0.08);   /* hover laranja (10%) */
     --sgt-table-head:     rgba(20,30,45,0.035);
     --sgt-progress-track: rgba(20,30,45,0.10);
-    --sgt-menu-bg:        #ffffff;
+    --sgt-menu-bg:        #fafbfc;
     --sgt-scrollbar-track:#e8eaee;
     --sgt-scrollbar-thumb:#c2c8d0;
     --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(254,128,5,0.05), transparent 45%);
@@ -157,7 +181,7 @@
     --sgt-accent-soft:   rgba(254,128,5,0.12);
     --sgt-accent-text:   #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
     --sgt-sidebar-hover: rgba(20,30,45,0.05);
-    --sgt-flyout-bg:     #ffffff;
+    --sgt-flyout-bg:     #fafbfc;
     --sgt-flyout-border: rgba(20,30,45,0.12);
   }
 }
