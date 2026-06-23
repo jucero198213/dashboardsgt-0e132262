@@ -1,1 +1,6 @@
 project_id = "ljslgwtvxonadgtiwdft"
+
+# O webhook do WhatsApp é chamado pela Meta, que não envia JWT do Supabase.
+# Sem isso, a verificação (GET) e as mensagens (POST) tomariam 401.
+[functions.whatsapp-webhook]
+verify_jwt = false
