@@ -14,6 +14,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GRAPH_VERSION = "v21.0";
 
+// IDs de mensagens já processadas. A Meta REENVIA a mesma mensagem quando o
+// webhook demora a responder — sem isto, a mesma pergunta seria respondida
+// várias vezes (spam). Set em memória do processo, com limite de tamanho.
+const processedIds = new Set<string>();
+
 // Instrução de formatação para o canal WhatsApp. O WhatsApp NÃO renderiza
 // tabelas markdown nem cabeçalhos (#) — então pedimos respostas em lista.
 // Negrito no WhatsApp é com *asteriscos simples*, itálico com _underscore_.
@@ -106,42 +111,72 @@ serve(async (req: Request) => {
 
   // ── Mensagem recebida ──────────────────────────────────────────────────────
   if (req.method === "POST") {
+    let payload: Record<string, unknown>;
     try {
-      const payload = await req.json();
-      const value = payload?.entry?.[0]?.changes?.[0]?.value;
-      const message = value?.messages?.[0];
-
-      // Sem mensagem (ex.: notificação de status de entrega) → só confirma 200
-      if (!message || message.type !== "text") {
-        return new Response("ok", { status: 200 });
-      }
-
-      const from: string = message.from; // número de quem enviou (com DDI)
-      const text: string = message.text?.body ?? "";
-
-      // Trava de acesso: só números autorizados são respondidos
-      const allowed = (Deno.env.get("WHATSAPP_ALLOWED_NUMBERS") ?? "")
-        .split(",")
-        .map((n) => n.trim())
-        .filter(Boolean);
-
-      if (allowed.length > 0 && !allowed.includes(from)) {
-        await sendWhatsApp(
-          from,
-          "Este assistente é restrito. Seu número não tem autorização de acesso.",
-        );
-        return new Response("ok", { status: 200 });
-      }
-
-      const reply = await askAI(text);
-      await sendWhatsApp(from, reply);
-      return new Response("ok", { status: 200 });
-    } catch (err) {
-      console.error("Erro no webhook:", err);
-      // Sempre 200 pra Meta não ficar reenviando
+      payload = await req.json();
+    } catch {
       return new Response("ok", { status: 200 });
     }
+
+    const value = (payload as any)?.entry?.[0]?.changes?.[0]?.value;
+    const message = value?.messages?.[0];
+
+    // Sem mensagem de texto (ex.: status de entrega) → só confirma 200
+    if (!message || message.type !== "text") {
+      return new Response("ok", { status: 200 });
+    }
+
+    // Dedup: ignora reenvios da Meta da mesma mensagem
+    const msgId: string = message.id ?? "";
+    if (msgId && processedIds.has(msgId)) {
+      return new Response("ok", { status: 200 });
+    }
+    if (msgId) {
+      processedIds.add(msgId);
+      if (processedIds.size > 500) {
+        processedIds.delete(processedIds.values().next().value as string);
+      }
+    }
+
+    const from: string = message.from;
+    const text: string = message.text?.body ?? "";
+
+    // Processa em SEGUNDO PLANO e responde 200 imediatamente, para a Meta não
+    // reenviar a mensagem enquanto a IA é consultada (causa do spam).
+    const work = handleMessage(from, text);
+    // @ts-ignore EdgeRuntime é injetado pelo runtime do Supabase
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(work);
+    } else {
+      await work; // fallback (ambiente sem waitUntil)
+    }
+
+    return new Response("ok", { status: 200 });
   }
 
   return new Response("Method not allowed", { status: 405 });
 });
+
+// ── Processa uma mensagem: trava de acesso → IA → resposta ───────────────────
+async function handleMessage(from: string, text: string) {
+  try {
+    const allowed = (Deno.env.get("WHATSAPP_ALLOWED_NUMBERS") ?? "")
+      .split(",")
+      .map((n) => n.trim())
+      .filter(Boolean);
+
+    if (allowed.length > 0 && !allowed.includes(from)) {
+      await sendWhatsApp(
+        from,
+        "Este assistente é restrito. Seu número não tem autorização de acesso.",
+      );
+      return;
+    }
+
+    const reply = await askAI(text);
+    await sendWhatsApp(from, reply);
+  } catch (err) {
+    console.error("Erro ao processar mensagem:", err);
+  }
+}
