@@ -89,6 +89,32 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_manutencao_analise",
+      description:
+        "Análise DETALHADA de manutenção em um período, agrupável por várias dimensões e com filtro opcional por tipo de item. Use para perguntas que o ranking por veículo NÃO responde: gasto com pneu/óleo/peça específica, gasto por fornecedor, por mecânico (funcionário), por setor, por situação da ordem (em aberto/concluída), por subgrupo, ou peças vs serviço. Ex.: 'quanto gastamos com pneu', 'qual fornecedor de peças mais faturou', 'gasto por mecânico', 'quais OS estão em aberto', 'top subgrupos de gasto'.",
+      parameters: {
+        type: "object",
+        properties: {
+          agruparPor: {
+            type: "string",
+            description:
+              "Dimensão de agrupamento: 'subgrupo' (tipo de peça/serviço), 'fornecedor', 'funcionario' (mecânico), 'setor', 'tiposervico' (interno/externo), 'situacao' (andamento/concluído), 'veiculo', 'filial' ou 'produto'. Default 'subgrupo'.",
+          },
+          filtroSubgrupo: {
+            type: "string",
+            description:
+              "Opcional. Filtra apenas itens cujo subgrupo ou produto contenha este texto (ex.: 'pneu', 'oleo', 'filtro').",
+          },
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 90 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Quantos grupos retornar (default 15)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_top_clientes",
       description:
         "Ranking dos clientes/grupos que mais faturaram em um período (a partir de get_faturamento_periodo, ordenado por valor). Use para 'top clientes do mês', 'quais clientes mais faturaram'.",
@@ -404,6 +430,63 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         total_servico_externo: totalExterno.toFixed(2),
         qtd_veiculos: porVeiculo.size,
         top_veiculos: ranking,
+      });
+    }
+    if (name === "get_manutencao_analise") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(90);
+      const topN = Number(args.top ?? 15);
+      const filtro = String(args.filtroSubgrupo ?? "").trim().toLowerCase();
+      const validKeys = [
+        "subgrupo", "fornecedor", "funcionario", "setor",
+        "tiposervico", "situacao", "veiculo", "filial", "produto",
+      ];
+      let agruparPor = String(args.agruparPor ?? "subgrupo").toLowerCase();
+      if (!validKeys.includes(agruparPor)) agruparPor = "subgrupo";
+
+      const data = await dwCall("/dw-manutencao", { dataInicio, dataFim });
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      if (filtro) {
+        rows = rows.filter((r) => {
+          const sg = String(r.subgrupo ?? "").toLowerCase();
+          const pr = String(r.produto ?? "").toLowerCase();
+          return sg.includes(filtro) || pr.includes(filtro);
+        });
+      }
+
+      const grupos = new Map<string, { chave: string; custo_total: number; qtd_itens: number; ordens: Set<string> }>();
+      let totalGeral = 0;
+      for (const r of rows) {
+        const chave = String(r[agruparPor] ?? "NÃO INFORMADO") || "NÃO INFORMADO";
+        const custo = Number(r.custo ?? 0);
+        totalGeral += custo;
+        const cur = grupos.get(chave) ?? { chave, custo_total: 0, qtd_itens: 0, ordens: new Set<string>() };
+        cur.custo_total += custo;
+        cur.qtd_itens += 1;
+        if (r.ordem != null) cur.ordens.add(String(r.ordem));
+        grupos.set(chave, cur);
+      }
+
+      const lista = [...grupos.values()]
+        .sort((a, b) => b.custo_total - a.custo_total)
+        .slice(0, topN)
+        .map((g) => ({
+          [agruparPor]: g.chave,
+          custo_total: g.custo_total.toFixed(2),
+          qtd_itens: g.qtd_itens,
+          qtd_ordens: g.ordens.size,
+          participacao:
+            totalGeral > 0 ? ((g.custo_total / totalGeral) * 100).toFixed(1) + "%" : "0%",
+        }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        agrupado_por: agruparPor,
+        filtro_aplicado: filtro || null,
+        custo_total_geral: totalGeral.toFixed(2),
+        qtd_grupos: grupos.size,
+        resultado: lista,
       });
     }
     if (name === "get_top_clientes") {
@@ -807,7 +890,8 @@ REGRAS CRÍTICAS DE TOOLS:
 GUIA DE TOOLS POR ASSUNTO:
 - Faturamento/Receita → get_faturamento_periodo (data específica), get_faturamento_resumo (mês corrente), get_top_clientes (ranking), get_comparativo_faturamento (período x período).
 - Contas/Títulos/Financeiro → get_titulos_financeiros (totais do período), get_vencimentos (próximos dias), get_inadimplencia (CR vencido com aging).
-- Manutenção → get_manutencao_por_veiculo (ranking, preventiva vs corretiva, interno/externo).
+- Manutenção (visão macro) → get_manutencao_por_veiculo (ranking por veículo, preventiva vs corretiva, interno/externo).
+- Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição, idade, situação).
 - Operação em tempo real → get_operacao_snapshot (viagens em andamento, % completo).
