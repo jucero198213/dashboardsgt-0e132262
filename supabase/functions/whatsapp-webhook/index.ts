@@ -14,6 +14,17 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GRAPH_VERSION = "v21.0";
 
+// Instrução de formatação para o canal WhatsApp. O WhatsApp NÃO renderiza
+// tabelas markdown nem cabeçalhos (#) — então pedimos respostas em lista.
+// Negrito no WhatsApp é com *asteriscos simples*, itálico com _underscore_.
+const WHATSAPP_FORMAT_HINT =
+  "Você está respondendo pelo WhatsApp. Regras de formatação OBRIGATÓRIAS: " +
+  "NÃO use tabelas markdown (nada de | ou :---). NÃO use cabeçalhos com #. " +
+  "Para destacar, use negrito do WhatsApp com *um asterisco* de cada lado. " +
+  "Para listas, use uma linha por item começando com '- '. " +
+  "Para itens com valor, use o formato '- *Nome:* valor'. " +
+  "Seja conciso e direto, ideal para leitura no celular.";
+
 // ── Envia uma mensagem de texto de volta pro WhatsApp ────────────────────────
 async function sendWhatsApp(to: string, body: string) {
   const token = Deno.env.get("WHATSAPP_TOKEN");
@@ -63,7 +74,9 @@ async function askAI(userText: string): Promise<string> {
       Authorization: `Bearer ${serviceKey}`,
     },
     body: JSON.stringify({
-      messages: [{ role: "user", content: userText }],
+      messages: [
+        { role: "user", content: `${WHATSAPP_FORMAT_HINT}\n\nPergunta: ${userText}` },
+      ],
     }),
   });
 
