@@ -59,18 +59,47 @@ async function sendWhatsApp(to: string, body: string) {
   }
 }
 
+// Mapa número → nome, lido do secret WHATSAPP_CONTATOS.
+// Formato: "5519997662102:João Pedral;5511988887777:Maria Silva"
+// (separadores aceitos entre contatos: ; ou , — entre número e nome: : ou =)
+function getContato(from: string): string | null {
+  const raw = Deno.env.get("WHATSAPP_CONTATOS") ?? "";
+  if (!raw) return null;
+  for (const part of raw.split(/[;,]/)) {
+    const idx = part.search(/[:=]/);
+    if (idx === -1) continue;
+    const num = part.slice(0, idx).trim();
+    const nome = part.slice(idx + 1).trim();
+    if (num === from) return nome || null;
+  }
+  return null;
+}
+
+// Período do dia no horário de Brasília (America/Sao_Paulo = UTC-3, sem horário de verão).
+function periodoDoDia(): string {
+  const horaBR = (new Date().getUTCHours() - 3 + 24) % 24;
+  if (horaBR >= 5 && horaBR < 12) return "manhã";
+  if (horaBR >= 12 && horaBR < 18) return "tarde";
+  return "noite";
+}
+
 // ── Pergunta pra IA ──────────────────────────────────────────────────────────
 // Reaproveita a Edge Function "ai-assistant" (mesma usada no chat do site):
-// ela já tem o Lovable AI Gateway + todas as ferramentas do DW (faturamento,
-// frota, manutenção, etc.). Assim o WhatsApp ganha a MESMA assistente, com
-// acesso aos dados reais — sem duplicar lógica nem chave de IA aqui.
-async function askAI(userText: string): Promise<string> {
+// ela já tem a OpenAI + todas as ferramentas do DW. Assim o WhatsApp ganha a
+// MESMA assistente, com acesso aos dados reais — sem duplicar lógica aqui.
+async function askAI(userText: string, nome: string | null, periodo: string): Promise<string> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) {
     console.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY ausentes");
     return "Assistente indisponível no momento.";
   }
+
+  const contexto =
+    `[Contexto: conversa via WhatsApp com ${nome ?? "um gestor da SGT"}. ` +
+    `Período atual no Brasil: ${periodo}. Se a pessoa cumprimentar ou estiver ` +
+    `iniciando a conversa, retribua com a saudação do período ("Bom dia"/"Boa tarde"/` +
+    `"Boa noite") tratando-a pelo nome. Não repita a saudação a cada mensagem.]`;
 
   const res = await fetch(`${supabaseUrl}/functions/v1/ai-assistant`, {
     method: "POST",
@@ -80,7 +109,7 @@ async function askAI(userText: string): Promise<string> {
     },
     body: JSON.stringify({
       messages: [
-        { role: "user", content: `${WHATSAPP_FORMAT_HINT}\n\nPergunta: ${userText}` },
+        { role: "user", content: `${WHATSAPP_FORMAT_HINT}\n\n${contexto}\n\nMensagem: ${userText}` },
       ],
     }),
   });
@@ -174,7 +203,8 @@ async function handleMessage(from: string, text: string) {
       return;
     }
 
-    const reply = await askAI(text);
+    const nome = getContato(from);
+    const reply = await askAI(text, nome, periodoDoDia());
     await sendWhatsApp(from, reply);
   } catch (err) {
     console.error("Erro ao processar mensagem:", err);
