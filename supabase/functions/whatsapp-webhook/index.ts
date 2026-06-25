@@ -14,18 +14,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GRAPH_VERSION = "v21.0";
 
-const SYSTEM_PROMPT = `Você é a assistente virtual do SGT Workspace — sistema de gestão interno de uma empresa de transporte e logística rodoviária.
-
-Seu papel é ajudar gestores e a diretoria com:
-- Análise e interpretação de dados financeiros, operacionais e de frota
-- Respostas sobre módulos do sistema (financeiro, frota, manutenção, abastecimento, compras, RH, indicadores)
-- Sugestões estratégicas e operacionais baseadas em contexto de transportadoras
-- Explicações de KPIs, métricas e indicadores do setor
-
-Seja objetivo, profissional e direto. Use linguagem corporativa em português brasileiro.
-Como você está respondendo pelo WhatsApp, mantenha as respostas curtas e diretas (no máximo alguns parágrafos).
-Nunca invente números ou dados que não foram fornecidos.`;
-
 // ── Envia uma mensagem de texto de volta pro WhatsApp ────────────────────────
 async function sendWhatsApp(to: string, body: string) {
   const token = Deno.env.get("WHATSAPP_TOKEN");
@@ -55,34 +43,36 @@ async function sendWhatsApp(to: string, body: string) {
   }
 }
 
-// ── Pergunta pra IA (single-turn) ────────────────────────────────────────────
+// ── Pergunta pra IA ──────────────────────────────────────────────────────────
+// Reaproveita a Edge Function "ai-assistant" (mesma usada no chat do site):
+// ela já tem o Lovable AI Gateway + todas as ferramentas do DW (faturamento,
+// frota, manutenção, etc.). Assim o WhatsApp ganha a MESMA assistente, com
+// acesso aos dados reais — sem duplicar lógica nem chave de IA aqui.
 async function askAI(userText: string): Promise<string> {
-  const openaiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openaiKey) return "Assistente indisponível no momento.";
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) {
+    console.error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY ausentes");
+    return "Assistente indisponível no momento.";
+  }
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch(`${supabaseUrl}/functions/v1/ai-assistant`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${openaiKey}`,
+      Authorization: `Bearer ${serviceKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4.1-mini",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userText },
-      ],
-      temperature: 0.5,
-      max_tokens: 600,
+      messages: [{ role: "user", content: userText }],
     }),
   });
 
   if (!res.ok) {
-    console.error("Erro OpenAI:", await res.text());
+    console.error("Erro ao chamar ai-assistant:", await res.text());
     return "Não consegui processar agora. Tente novamente em instantes.";
   }
   const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "Não consegui responder agora.";
+  return data?.reply ?? "Não consegui responder agora.";
 }
 
 serve(async (req: Request) => {
