@@ -914,10 +914,10 @@ serve(async (req: Request) => {
       return respond({ error: "messages é obrigatório" }, 400);
     }
 
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableKey) return respond({ error: "LOVABLE_API_KEY não configurada" }, 500);
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiKey) return respond({ error: "OPENAI_API_KEY não configurada" }, 500);
 
-    // Conversa para o gateway (system + histórico)
+    // Conversa para a OpenAI (system + histórico)
     const convo: Array<Record<string, unknown>> = [
       { role: "system", content: SYSTEM_PROMPT },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -925,14 +925,14 @@ serve(async (req: Request) => {
 
     // Loop de tool-calling (máx 5 iterações)
     for (let i = 0; i < 5; i++) {
-      const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const resp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${lovableKey}`,
+          Authorization: `Bearer ${openaiKey}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gpt-4.1-mini",
           messages: convo,
           tools,
           tool_choice: "auto",
@@ -945,7 +945,7 @@ serve(async (req: Request) => {
           return respond({ error: "Limite de requisições. Tente em instantes." }, 429);
         if (resp.status === 402)
           return respond({ error: "Créditos de IA esgotados." }, 402);
-        return respond({ error: `AI gateway error: ${err}` }, 500);
+        return respond({ error: `OpenAI error: ${err}` }, 500);
       }
 
       const result = await resp.json();
