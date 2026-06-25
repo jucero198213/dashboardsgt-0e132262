@@ -8,7 +8,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 const WELCOME: ChatMessage = {
   role: "assistant",
   content:
-    "Olá! Sou a assistente do SGT Workspace. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
+    "Olá! Sou a Sofia, assistente de IA da SGT. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
 };
 
 const SUGGESTIONS: { label: string; prompt: string }[] = [
@@ -85,7 +85,7 @@ export function AiAssistant() {
     <>
       <div
         role="dialog"
-        aria-label="Assistente SGT"
+        aria-label="Sofia · Assistente SGT"
         className="sgt-ai-popup"
         style={{
           position: "fixed",
@@ -120,7 +120,7 @@ export function AiAssistant() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600, fontSize: 14 }}>
               <MessageCircle size={16} />
-              Assistente SGT
+              Sofia · SGT
             </div>
             <div style={{ display: "flex", gap: 4 }}>
               <button
