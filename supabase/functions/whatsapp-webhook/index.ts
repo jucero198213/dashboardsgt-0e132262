@@ -19,6 +19,28 @@ const GRAPH_VERSION = "v21.0";
 // várias vezes (spam). Set em memória do processo, com limite de tamanho.
 const processedIds = new Set<string>();
 
+// ── Memória de conversa por número (em memória do processo) ───────────────────
+// Mantém o histórico recente de cada pessoa para a Sofia "lembrar" o papo dentro
+// de uma conversa. Expira após inatividade, então uma nova conversa começa limpa.
+type Turn = { role: "user" | "assistant"; content: string };
+const conversas = new Map<string, { turns: Turn[]; updatedAt: number }>();
+const CONVERSA_TTL_MS = 30 * 60 * 1000; // 30 min sem mensagem → nova conversa
+const MAX_TURNS = 12; // mantém as últimas 12 mensagens (~6 idas e voltas)
+
+function getHistorico(from: string): Turn[] {
+  const c = conversas.get(from);
+  if (!c) return [];
+  if (Date.now() - c.updatedAt > CONVERSA_TTL_MS) {
+    conversas.delete(from);
+    return [];
+  }
+  return c.turns;
+}
+
+function salvarHistorico(from: string, turns: Turn[]) {
+  conversas.set(from, { turns: turns.slice(-MAX_TURNS), updatedAt: Date.now() });
+}
+
 // Instrução de formatação para o canal WhatsApp. O WhatsApp NÃO renderiza
 // tabelas markdown nem cabeçalhos (#) — então pedimos respostas em lista.
 // Negrito no WhatsApp é com *asteriscos simples*, itálico com _underscore_.
@@ -87,7 +109,7 @@ function periodoDoDia(): string {
 // Reaproveita a Edge Function "ai-assistant" (mesma usada no chat do site):
 // ela já tem a OpenAI + todas as ferramentas do DW. Assim o WhatsApp ganha a
 // MESMA assistente, com acesso aos dados reais — sem duplicar lógica aqui.
-async function askAI(userText: string, nome: string | null, periodo: string): Promise<string> {
+async function askAI(historico: Turn[], nome: string | null, periodo: string): Promise<string> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) {
@@ -101,17 +123,22 @@ async function askAI(userText: string, nome: string | null, periodo: string): Pr
     `iniciando a conversa, retribua com a saudação do período ("Bom dia"/"Boa tarde"/` +
     `"Boa noite") tratando-a pelo nome. Não repita a saudação a cada mensagem.]`;
 
+  // Envia o histórico inteiro (para a Sofia lembrar o papo), enriquecendo APENAS
+  // a última mensagem (a atual) com a instrução de formato e o contexto.
+  const payload = historico.map((t, i) => {
+    if (i === historico.length - 1 && t.role === "user") {
+      return { role: "user", content: `${WHATSAPP_FORMAT_HINT}\n\n${contexto}\n\nMensagem: ${t.content}` };
+    }
+    return { role: t.role, content: t.content };
+  });
+
   const res = await fetch(`${supabaseUrl}/functions/v1/ai-assistant`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${serviceKey}`,
     },
-    body: JSON.stringify({
-      messages: [
-        { role: "user", content: `${WHATSAPP_FORMAT_HINT}\n\n${contexto}\n\nMensagem: ${userText}` },
-      ],
-    }),
+    body: JSON.stringify({ messages: payload }),
   });
 
   if (!res.ok) {
@@ -204,7 +231,17 @@ async function handleMessage(from: string, text: string) {
     }
 
     const nome = getContato(from);
-    const reply = await askAI(text, nome, periodoDoDia());
+
+    // Carrega o histórico da conversa, adiciona a mensagem atual, consulta a
+    // Sofia com todo o contexto e guarda a resposta para os próximos turnos.
+    const historico = getHistorico(from);
+    historico.push({ role: "user", content: text });
+
+    const reply = await askAI(historico, nome, periodoDoDia());
+
+    historico.push({ role: "assistant", content: reply });
+    salvarHistorico(from, historico);
+
     await sendWhatsApp(from, reply);
   } catch (err) {
     console.error("Erro ao processar mensagem:", err);
