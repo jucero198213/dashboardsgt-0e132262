@@ -354,6 +354,44 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_titulos_lista",
+      description:
+        "LISTA títulos financeiros individuais (contas a pagar/receber), com parceiro, documento, vencimento, valor e situação. Use para 'quais títulos a pagar do fornecedor X', 'lista os títulos vencidos', 'o que tenho a receber do cliente Y'. Complementa get_titulos_financeiros (que só soma).",
+      parameters: {
+        type: "object",
+        properties: {
+          origem: { type: "string", description: "'CP' (contas a pagar) ou 'CR' (contas a receber). Omita para ambos." },
+          status: { type: "string", description: "'vencido' (vencido e em aberto), 'aberto' (não pago) ou 'pago'. Omita para todos." },
+          parceiro: { type: "string", description: "Opcional. Filtra por nome do fornecedor/cliente (texto contido)." },
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Máximo a listar (default 60)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_bancos_extrato",
+      description:
+        "Extrato (movimentações) de UMA conta bancária num período: lançamentos com data, histórico, valor e tipo (entrada/saída). Requer o código da conta (cod_conta), que vem de get_bancos_saldos — se o usuário citar o banco pelo nome, chame get_bancos_saldos antes para obter o cod_conta. Use para 'extrato do banco X', 'movimentações da conta Y'.",
+      parameters: {
+        type: "object",
+        properties: {
+          codcta: { type: "string", description: "Código da conta (cod_conta retornado por get_bancos_saldos). Obrigatório." },
+          codfil: { type: "number", description: "Código da filial (cod_filial de get_bancos_saldos), se houver." },
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default início do mês)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Máximo de lançamentos (default 80)." },
+        },
+        required: ["codcta"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_operacao_viagens",
       description:
         "LISTA as viagens em tempo real (cliente, motorista, veículo, origem, destino, % completo, previsão de chegada, situação). Use para 'quais viagens estão em andamento', 'cadê o veículo X', 'viagens do cliente Y', 'quais entregas estão atrasando'. Complementa get_operacao_snapshot (que só conta).",
@@ -926,6 +964,94 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         resultado: lista,
       });
     }
+    if (name === "get_titulos_lista") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const topN = Number(args.top ?? 60);
+      const origem = args.origem ? String(args.origem).toUpperCase() : null;
+      const status = args.status ? String(args.status).toLowerCase() : null;
+      const fParceiro = String(args.parceiro ?? "").trim().toLowerCase();
+
+      const data = await dwCall("/dw-financeiro", { action: "fetch", dataInicio, dataFim });
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const hojeStr = today();
+      if (origem) rows = rows.filter((r) => String(r.ORIGEM ?? "") === origem);
+      if (fParceiro) rows = rows.filter((r) => String(r.NOME_PARCEIRO ?? "").toLowerCase().includes(fParceiro));
+      if (status) {
+        rows = rows.filter((r) => {
+          const parcela = Number(r.VLR_PARCELA ?? 0);
+          const pago = Number(r.VLR_PAGO ?? 0);
+          const venc = String(r.DATA_VENCIMENTO ?? "").slice(0, 10);
+          const aberto = pago < parcela - 0.01;
+          if (status === "pago") return !aberto;
+          if (status === "aberto") return aberto;
+          if (status === "vencido") return aberto && venc && venc < hojeStr;
+          return true;
+        });
+      }
+
+      const total = rows.length;
+      const somaParcela = rows.reduce((s, r) => s + Number(r.VLR_PARCELA ?? 0), 0);
+      const lista = rows.slice(0, topN).map((r) => ({
+        parceiro: r.NOME_PARCEIRO,
+        documento: r.DOCUMENTO,
+        parcela: r.PARCELA,
+        origem: r.ORIGEM,
+        vencimento: String(r.DATA_VENCIMENTO ?? "").slice(0, 10),
+        pagamento: r.DATA_PAGAMENTO ? String(r.DATA_PAGAMENTO).slice(0, 10) : null,
+        valor: Number(r.VLR_PARCELA ?? 0).toFixed(2),
+        valor_pago: Number(r.VLR_PAGO ?? 0).toFixed(2),
+        centro_custo: r.CENTRO_CUSTO,
+      }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        filtro: { origem: origem ?? "ambos", status: status ?? "todos", parceiro: fParceiro || null },
+        total_encontrado: total,
+        valor_total: somaParcela.toFixed(2),
+        exibindo: lista.length,
+        titulos: lista,
+      });
+    }
+    if (name === "get_bancos_extrato") {
+      const codcta = String(args.codcta ?? "").trim();
+      if (!codcta) return JSON.stringify({ erro: "codcta é obrigatório. Use get_bancos_saldos para obter o cod_conta." });
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) ||
+        `${dataFim.slice(0, 7)}-01`; // início do mês de dataFim
+      const topN = Number(args.top ?? 80);
+
+      const body: Record<string, unknown> = { codcta, dataInicio, dataFim };
+      if (args.codfil != null) body.codfil = Number(args.codfil);
+      const data = await dwCall("/dw-bancos-extrato", body);
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      let entradas = 0, saidas = 0;
+      for (const r of rows) {
+        const v = Number(r.VLRDOC ?? 0);
+        if (r.DEBCRE === "C") entradas += v; else saidas += v;
+      }
+      const lista = rows.slice(0, topN).map((r) => ({
+        data: String(r.DATA_LANCAMENTO ?? "").slice(0, 10),
+        documento: r.DOCUMENTO,
+        historico: r.HISTORICO,
+        valor: Number(r.VLRDOC ?? 0).toFixed(2),
+        tipo: r.DEBCRE === "C" ? "ENTRADA" : "SAIDA",
+        centro_custo: r.CENTRO_CUSTO,
+        situacao: r.SITUACAO,
+      }));
+
+      return JSON.stringify({
+        conta: codcta,
+        periodo: { dataInicio, dataFim },
+        total_lancamentos: rows.length,
+        total_entradas: entradas.toFixed(2),
+        total_saidas: saidas.toFixed(2),
+        exibindo: lista.length,
+        lancamentos: lista,
+      });
+    }
     if (name === "get_operacao_viagens") {
       const topN = Number(args.top ?? 60);
       const fCliente = String(args.cliente ?? "").trim().toLowerCase();
@@ -1058,6 +1184,8 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
           banco: c.nome_banco,
           conta: c.nome_conta,
           filial: c.nome_filial,
+          cod_conta: c.cod_conta, // usado por get_bancos_extrato
+          cod_filial: c.filial,
           saldo_atual: sa.toFixed(2),
           entradas: en.toFixed(2),
           saidas: sd.toFixed(2),
@@ -1193,7 +1321,8 @@ REGRAS CRÍTICAS DE TOOLS:
 
 GUIA DE TOOLS POR ASSUNTO:
 - Faturamento/Receita → get_faturamento_periodo (data específica), get_faturamento_resumo (mês corrente), get_top_clientes (ranking), get_comparativo_faturamento (período x período).
-- Contas/Títulos/Financeiro → get_titulos_financeiros (totais do período), get_vencimentos (próximos dias), get_inadimplencia (CR vencido com aging).
+- Contas/Títulos/Financeiro → get_titulos_financeiros (totais do período), get_vencimentos (próximos dias), get_inadimplencia (CR vencido com aging). Para LISTAR títulos individuais (por fornecedor/cliente, vencidos, em aberto) → get_titulos_lista.
+- Extrato bancário (movimentações de uma conta) → get_bancos_extrato (precisa do cod_conta de get_bancos_saldos).
 - Manutenção (visão macro) → get_manutencao_por_veiculo (ranking por veículo, preventiva vs corretiva, interno/externo).
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
