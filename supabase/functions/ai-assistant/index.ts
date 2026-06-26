@@ -186,6 +186,26 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_frota_veiculos",
+      description:
+        "LISTA os veículos da frota (não só o resumo), com placa/código, modelo, marca, ano, classificação e situação. Aceita filtro por situação para responder 'quais caminhões estão ATIVOS/INATIVOS/BAIXADOS', 'me lista a frota ativa', 'quais veículos da marca X'. Use sempre que pedirem a LISTA dos veículos, não apenas a contagem.",
+      parameters: {
+        type: "object",
+        properties: {
+          situacao: {
+            type: "string",
+            description: "Filtra por situação: 'ATIVO', 'INATIVO' ou 'BAIXADO'. Omita para trazer todos.",
+          },
+          marca: { type: "string", description: "Opcional. Filtra por marca (texto contido)." },
+          classificacao: { type: "string", description: "Opcional. Filtra por classificação (texto contido)." },
+          top: { type: "number", description: "Máximo de veículos a listar (default 60)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_operacao_snapshot",
       description:
         "Snapshot em tempo real das viagens em andamento (quantidade, % completo, veículos em manutenção, situações). Use para 'como está a operação agora', 'quantas viagens em andamento', 'frota em manutenção'.",
@@ -669,6 +689,37 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         idade_media_anos: idadeMedia,
       });
     }
+    if (name === "get_frota_veiculos") {
+      const situacao = args.situacao ? String(args.situacao).toUpperCase() : null;
+      const topN = Number(args.top ?? 60);
+      const fMarca = String(args.marca ?? "").trim().toLowerCase();
+      const fClassif = String(args.classificacao ?? "").trim().toLowerCase();
+
+      // O endpoint filtra por situação no servidor quando informado.
+      const data = await dwCall("/dw-frota", situacao ? { situacao } : {});
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      if (fMarca) rows = rows.filter((r) => String(r.marca ?? "").toLowerCase().includes(fMarca));
+      if (fClassif) rows = rows.filter((r) => String(r.classificacao ?? "").toLowerCase().includes(fClassif));
+
+      const totalFiltrado = rows.length;
+      const lista = rows.slice(0, topN).map((r) => ({
+        veiculo: r.codvei,
+        modelo: r.modelo,
+        marca: r.marca,
+        ano: r.anomod ?? r.anofab,
+        classificacao: r.classificacao,
+        situacao: r.situacao,
+        municipio: r.municipio,
+      }));
+
+      return JSON.stringify({
+        filtro: { situacao: situacao ?? "todas", marca: fMarca || null, classificacao: fClassif || null },
+        total_encontrado: totalFiltrado,
+        exibindo: lista.length,
+        veiculos: lista,
+      });
+    }
     if (name === "get_operacao_snapshot") {
       const data = await dwCall("/dw-operacional", {});
       const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
@@ -908,7 +959,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Manutenção (visão macro) → get_manutencao_por_veiculo (ranking por veículo, preventiva vs corretiva, interno/externo).
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
-- Frota → get_frota_resumo (composição, idade, situação).
+- Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (viagens em andamento, % completo).
 - Compras → get_compras_resumo (fornecedores, grupos, peças/pneus).
 - RH/Motoristas → get_rh_motoristas (headcount, CNH vencendo).
