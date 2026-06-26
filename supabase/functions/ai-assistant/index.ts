@@ -299,6 +299,75 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_rh_motoristas_lista",
+      description:
+        "LISTA os motoristas/funcionários (nome, função, categoria e validade da CNH, admissão, demissão, filial, situação). Use para 'me lista os motoristas ativos', 'quais CNHs vencem', 'quem foi demitido', 'motoristas da filial X', 'quais motoristas da categoria E'. Diferente de get_rh_motoristas (que só conta).",
+      parameters: {
+        type: "object",
+        properties: {
+          apenasAtivos: { type: "boolean", description: "true = só quem não tem data de demissão. Default false (todos)." },
+          cnhVenceEmDias: { type: "number", description: "Opcional. Só motoristas com CNH vencendo nos próximos N dias (ou já vencida)." },
+          funcao: { type: "string", description: "Opcional. Filtra por função (texto contido)." },
+          top: { type: "number", description: "Máximo a listar (default 80)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_compras_analise",
+      description:
+        "Análise DETALHADA de compras agrupável por dimensão, com filtro opcional por produto. Use para 'quanto comprei de pneu', 'compras por centro de custo', 'top fornecedores', 'compras por grupo/subgrupo de produto'. Complementa get_compras_resumo.",
+      parameters: {
+        type: "object",
+        properties: {
+          agruparPor: { type: "string", description: "'grupo', 'subgrupo', 'fornecedor', 'centro_custo' ou 'produto'. Default 'grupo'." },
+          filtroProduto: { type: "string", description: "Opcional. Filtra itens cujo produto/grupo/subgrupo contenha este texto (ex.: 'pneu', 'oleo')." },
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Quantos grupos retornar (default 15)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_abastecimento_analise",
+      description:
+        "Análise DETALHADA de abastecimento agrupável por dimensão. Use para 'gasto de combustível por veículo/motorista/posto', 'qual posto abastecemos mais', 'consumo por tipo de combustível', 'gasto por frota'. Complementa get_abastecimento_consumo.",
+      parameters: {
+        type: "object",
+        properties: {
+          agruparPor: { type: "string", description: "'veiculo', 'motorista', 'posto', 'tipo_combustivel' ou 'frota'. Default 'veiculo'." },
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          top: { type: "number", description: "Quantos grupos retornar (default 15)." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_operacao_viagens",
+      description:
+        "LISTA as viagens em tempo real (cliente, motorista, veículo, origem, destino, % completo, previsão de chegada, situação). Use para 'quais viagens estão em andamento', 'cadê o veículo X', 'viagens do cliente Y', 'quais entregas estão atrasando'. Complementa get_operacao_snapshot (que só conta).",
+      parameters: {
+        type: "object",
+        properties: {
+          cliente: { type: "string", description: "Opcional. Filtra por cliente (texto contido)." },
+          veiculo: { type: "string", description: "Opcional. Filtra por código do veículo." },
+          situacao: { type: "string", description: "Opcional. Filtra pela descrição da situação da viagem (texto contido)." },
+          top: { type: "number", description: "Máximo a listar (default 60)." },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -720,6 +789,175 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         veiculos: lista,
       });
     }
+    if (name === "get_rh_motoristas_lista") {
+      const topN = Number(args.top ?? 80);
+      const apenasAtivos = args.apenasAtivos === true;
+      const venceDias = args.cnhVenceEmDias != null ? Number(args.cnhVenceEmDias) : null;
+      const fFuncao = String(args.funcao ?? "").trim().toLowerCase();
+
+      const data = await dwCall("/dw-rh", {});
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const hoje = new Date();
+      const diasPara = (d: unknown): number | null => {
+        if (!d) return null;
+        const dt = new Date(d as string);
+        if (isNaN(dt.getTime())) return null;
+        return Math.round((dt.getTime() - hoje.getTime()) / 86400000);
+      };
+
+      if (apenasAtivos) rows = rows.filter((r) => !r.data_demissao);
+      if (fFuncao) rows = rows.filter((r) => String(r.funcao ?? "").toLowerCase().includes(fFuncao));
+      if (venceDias != null) {
+        rows = rows.filter((r) => {
+          const dd = diasPara(r.validade_habilitacao);
+          return dd != null && dd <= venceDias;
+        });
+      }
+
+      const total = rows.length;
+      const lista = rows.slice(0, topN).map((r) => ({
+        motorista: r.motorista,
+        funcao: r.funcao,
+        cnh_categoria: r.categoria_habilitacao,
+        cnh_validade: r.validade_habilitacao,
+        dias_para_vencer_cnh: diasPara(r.validade_habilitacao),
+        admissao: r.data_admissao,
+        demissao: r.data_demissao ?? null,
+        filial: r.codigo_filial,
+        situacao: r.situacao,
+      }));
+
+      return JSON.stringify({
+        filtro: { apenasAtivos, cnhVenceEmDias: venceDias, funcao: fFuncao || null },
+        total_encontrado: total,
+        exibindo: lista.length,
+        motoristas: lista,
+      });
+    }
+    if (name === "get_compras_analise") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const topN = Number(args.top ?? 15);
+      const filtro = String(args.filtroProduto ?? "").trim().toLowerCase();
+      const mapKey: Record<string, string> = {
+        grupo: "grupo", subgrupo: "sub_grupo", sub_grupo: "sub_grupo",
+        fornecedor: "fornecedor", centro_custo: "centro_custo", produto: "produto",
+      };
+      const agruparPor = mapKey[String(args.agruparPor ?? "grupo").toLowerCase()] ?? "grupo";
+
+      const data = await dwCall("/dw-compras", { dataInicio, dataFim });
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      if (filtro) {
+        rows = rows.filter((r) =>
+          String(r.produto ?? "").toLowerCase().includes(filtro) ||
+          String(r.grupo ?? "").toLowerCase().includes(filtro) ||
+          String(r.sub_grupo ?? "").toLowerCase().includes(filtro));
+      }
+
+      const grupos = new Map<string, { chave: string; valor: number; qtd_itens: number }>();
+      let totalGeral = 0;
+      for (const r of rows) {
+        const chave = String(r[agruparPor] ?? "NÃO INFORMADO") || "NÃO INFORMADO";
+        const valor = Number(r.quantidade ?? 0) * Number(r.valor_un ?? 0);
+        totalGeral += valor;
+        const cur = grupos.get(chave) ?? { chave, valor: 0, qtd_itens: 0 };
+        cur.valor += valor;
+        cur.qtd_itens += 1;
+        grupos.set(chave, cur);
+      }
+      const lista = [...grupos.values()]
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, topN)
+        .map((g) => ({
+          [agruparPor]: g.chave,
+          valor_total: g.valor.toFixed(2),
+          qtd_itens: g.qtd_itens,
+          participacao: totalGeral > 0 ? ((g.valor / totalGeral) * 100).toFixed(1) + "%" : "0%",
+        }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        agrupado_por: agruparPor,
+        filtro_produto: filtro || null,
+        valor_total_geral: totalGeral.toFixed(2),
+        qtd_grupos: grupos.size,
+        resultado: lista,
+      });
+    }
+    if (name === "get_abastecimento_analise") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const topN = Number(args.top ?? 15);
+      const validKeys = ["veiculo", "motorista", "posto", "tipo_combustivel", "frota"];
+      let agruparPor = String(args.agruparPor ?? "veiculo").toLowerCase();
+      if (!validKeys.includes(agruparPor)) agruparPor = "veiculo";
+
+      const data = await dwCall("/dw-abastecimento", { dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const grupos = new Map<string, { chave: string; gasto: number; litros: number; qtd: number }>();
+      let gastoGeral = 0, litrosGeral = 0;
+      for (const r of rows) {
+        const chave = String(r[agruparPor] ?? "NÃO INFORMADO") || "NÃO INFORMADO";
+        const gasto = Number(r.vlrtot ?? 0);
+        const litros = Number(r.quanti ?? 0);
+        gastoGeral += gasto; litrosGeral += litros;
+        const cur = grupos.get(chave) ?? { chave, gasto: 0, litros: 0, qtd: 0 };
+        cur.gasto += gasto; cur.litros += litros; cur.qtd += 1;
+        grupos.set(chave, cur);
+      }
+      const lista = [...grupos.values()]
+        .sort((a, b) => b.gasto - a.gasto)
+        .slice(0, topN)
+        .map((g) => ({
+          [agruparPor]: g.chave,
+          gasto_total: g.gasto.toFixed(2),
+          litros: g.litros.toFixed(0),
+          qtd_abastecimentos: g.qtd,
+          preco_medio_litro: g.litros > 0 ? (g.gasto / g.litros).toFixed(2) : null,
+        }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        agrupado_por: agruparPor,
+        gasto_total_geral: gastoGeral.toFixed(2),
+        litros_total_geral: litrosGeral.toFixed(0),
+        resultado: lista,
+      });
+    }
+    if (name === "get_operacao_viagens") {
+      const topN = Number(args.top ?? 60);
+      const fCliente = String(args.cliente ?? "").trim().toLowerCase();
+      const fVeiculo = String(args.veiculo ?? "").trim().toLowerCase();
+      const fSituacao = String(args.situacao ?? "").trim().toLowerCase();
+
+      const data = await dwCall("/dw-operacional", {});
+      let rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      if (fCliente) rows = rows.filter((r) => String(r.CLI_NOMEAB ?? "").toLowerCase().includes(fCliente));
+      if (fVeiculo) rows = rows.filter((r) => String(r.veiculo ?? "").toLowerCase().includes(fVeiculo));
+      if (fSituacao) rows = rows.filter((r) => String(r.descricao_situacao ?? "").toLowerCase().includes(fSituacao));
+
+      const total = rows.length;
+      const lista = rows.slice(0, topN).map((r) => ({
+        cliente: r.CLI_NOMEAB,
+        motorista: r.motorista,
+        veiculo: r.veiculo,
+        origem: r.descricao_origem,
+        destino: r.descricao_destino,
+        percentual_completo: r.percentual_completo,
+        previsao_chegada: r.previsao_chegada,
+        situacao: r.descricao_situacao ?? r.situacao_viagem,
+        em_manutencao: r.em_manutencao === 1 || r.em_manutencao === "1" || r.em_manutencao === true,
+      }));
+
+      return JSON.stringify({
+        filtro: { cliente: fCliente || null, veiculo: fVeiculo || null, situacao: fSituacao || null },
+        total_encontrado: total,
+        exibindo: lista.length,
+        viagens: lista,
+      });
+    }
     if (name === "get_operacao_snapshot") {
       const data = await dwCall("/dw-operacional", {});
       const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
@@ -960,11 +1198,21 @@ GUIA DE TOOLS POR ASSUNTO:
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
-- Operação em tempo real → get_operacao_snapshot (viagens em andamento, % completo).
-- Compras → get_compras_resumo (fornecedores, grupos, peças/pneus).
-- RH/Motoristas → get_rh_motoristas (headcount, CNH vencendo).
+- Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
+- Compras → get_compras_resumo (visão geral). Para detalhe por grupo/subgrupo/fornecedor/centro de custo/produto ou filtrar um item → get_compras_analise.
+- RH/Motoristas → get_rh_motoristas (contagem/headcount, CNH vencendo). Para LISTAR motoristas (nomes, função, CNH, admissão/demissão, filial) ou filtrar ativos/CNH vencendo → get_rh_motoristas_lista.
+- Abastecimento → get_abastecimento_consumo (km/L por veículo). Para gasto por veículo/motorista/posto/combustível/frota → get_abastecimento_analise.
 - Bancos → get_bancos_saldos (saldos e movimentação).
 - Financiamentos de veículos → get_financiamento_frota.
+
+DICIONÁRIO DE DADOS (termos do DW/Rodopar):
+- Situação de veículo: ATIVO (em operação), INATIVO (parado), BAIXADO (vendido/descartado).
+- Manutenção: "preventiva" = planejada/programada; "corretiva" = conserto de falha; serviço INTERNO = oficina própria, EXTERNO = terceirizada. "subgrupo" agrupa o tipo de item (pneu, óleo, filtro...).
+- Títulos: ORIGEM "CP" = Contas a Pagar (saída), "CR" = Contas a Receber (entrada). Vencido = data de vencimento passada e ainda em aberto.
+- Faturamento = receita de frete (FRETE_TOTAL), agrupado por grupo de cliente.
+- CNH: cnh_validade é a data de vencimento da habilitação; dias_para_vencer_cnh negativo = já vencida.
+- Abastecimento: "media" = km/L do veículo; "posto" pode ser externo ou o posto interno da empresa.
+- Sempre que um termo do usuário for ambíguo (ex: "parado"), confirme se é situação de frota, viagem ou veículo em manutenção.
 
 Quando responder com valores em R$, formate como "R$ 123.456,78". Datas em dd/mm/yyyy. Seja objetivo, profissional, em português brasileiro. Use markdown leve (negrito, listas, tabelas pequenas) para clareza. Para sugestões/perguntas conceituais que não exigem dados, responda direto sem chamar tools.`;
 
