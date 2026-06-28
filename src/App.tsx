@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/shared/AppLayout";
 import ScrollToTop from "@/components/shared/ScrollToTop";
+import { RouteTransition } from "@/components/shared/RouteTransition";
 
 // ── Lazy loading — cada página é um chunk separado ───────────────────────────
 const Index              = lazy(() => import("./pages/Index"));
@@ -76,6 +77,7 @@ const App = () => (
         <AuthProvider>
           <FinancialDataProvider>
             <Suspense fallback={<PageLoader />}>
+              <RouteTransition>
               <Routes>
                 <Route path="/"         element={<Welcome />} />
                 <Route path="/welcome"  element={<Welcome />} />
@@ -113,6 +115,7 @@ const App = () => (
                 <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </RouteTransition>
             </Suspense>
           </FinancialDataProvider>
         </AuthProvider>
