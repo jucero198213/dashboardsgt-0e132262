@@ -10,7 +10,7 @@
  */
 import { useEffect, useRef, Suspense } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 const HOME_PATH = "/home";
 
@@ -44,18 +44,18 @@ export function RouteTransition() {
     return <Suspense fallback={<PageFallback />}>{outlet}</Suspense>;
   }
 
+  // motion.div com key por rota: ao trocar a rota saindo da home, ele remonta
+  // e a animação de entrada (initial → animate) dispara de fato. Sem
+  // AnimatePresence/initial=false, que estavam suprimindo o slide.
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={{ x: "100%", opacity: 0.6 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.32, ease: [0.22, 0.68, 0, 1] }}
-        style={{ width: "100%", minHeight: "100dvh" }}
-      >
-        <Suspense fallback={<PageFallback />}>{outlet}</Suspense>
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={location.pathname}
+      initial={{ x: "100%", opacity: 0.6 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.32, ease: [0.22, 0.68, 0, 1] }}
+      style={{ width: "100%", minHeight: "100dvh" }}
+    >
+      <Suspense fallback={<PageFallback />}>{outlet}</Suspense>
+    </motion.div>
   );
 }
