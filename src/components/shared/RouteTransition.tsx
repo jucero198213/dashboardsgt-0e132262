@@ -50,10 +50,10 @@ export function RouteTransition() {
   return (
     <motion.div
       key={location.pathname}
-      initial={{ x: "100%", opacity: 0.6 }}
+      initial={{ x: 28, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.32, ease: [0.22, 0.68, 0, 1] }}
-      style={{ width: "100%", minHeight: "100dvh" }}
+      transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+      style={{ width: "100%", minHeight: "100dvh", willChange: "transform, opacity" }}
     >
       <Suspense fallback={<PageFallback />}>{outlet}</Suspense>
     </motion.div>
