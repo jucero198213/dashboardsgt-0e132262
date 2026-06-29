@@ -586,7 +586,9 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       let totalGeral = 0;
       for (const r of rows) {
         const chave = String(r[agruparPor] ?? "NÃO INFORMADO") || "NÃO INFORMADO";
-        const custo = Number(r.custo ?? 0);
+        // custo (PRECUS) é UNITÁRIO — multiplica pela quantidade, igual a tela
+        // de Manutenção do Workspace (custo * qtd).
+        const custo = Number(r.custo ?? 0) * Number(r.qtd ?? 1);
         totalGeral += custo;
         const cur = grupos.get(chave) ?? { chave, custo_total: 0, qtd_itens: 0, ordens: new Set<string>() };
         cur.custo_total += custo;
@@ -998,13 +1000,18 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       if (fParceiro) rows = rows.filter((r) => String(r.NOME_PARCEIRO ?? "").toLowerCase().includes(fParceiro));
       if (status) {
         rows = rows.filter((r) => {
+          // Mesma regra da tela (calculateStatus): pagamento parcial = "Parcial",
+          // NÃO conta como vencido. Vencido = nada pago E (situação venc OU venc < hoje).
           const parcela = Number(r.VLR_PARCELA ?? 0);
           const pago = Number(r.VLR_PAGO ?? 0);
+          const saldo = parcela - pago;
           const venc = String(r.DATA_VENCIMENTO ?? "").slice(0, 10);
-          const aberto = pago < parcela - 0.01;
-          if (status === "pago") return !aberto;
-          if (status === "aberto") return aberto;
-          if (status === "vencido") return aberto && venc && venc < hojeStr;
+          const sit = String(r.SITUACAO ?? "").toLowerCase();
+          const nadaPago = pago <= 0.01 && saldo > 0.01;
+          const ehVencido = nadaPago && ((sit.includes("venc")) || (!!venc && venc < hojeStr));
+          if (status === "pago") return !nadaPago;            // pago ou parcial
+          if (status === "aberto") return nadaPago && !ehVencido; // em aberto, a vencer
+          if (status === "vencido") return ehVencido;
           return true;
         });
       }
