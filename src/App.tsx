@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -41,18 +41,6 @@ const PortalWrWorkspace       = lazy(() => import("./pages/PortalWrWorkspace"));
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
 const Welcome                 = lazy(() => import("./pages/Welcome"));
 
-// ── Loading screen mínimo (sem flash, sem layout shift) ───────────────────────
-function PageLoader() {
-  return (
-    <div
-      className="flex h-[100dvh] w-full items-center justify-center"
-      style={{ backgroundColor: "var(--sgt-bg-base, #020308)" }}
-    >
-      <div className="h-8 w-8 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
-    </div>
-  );
-}
-
 // ── QueryClient com configurações otimizadas ─────────────────────────────────
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,9 +64,8 @@ const App = () => (
         <ScrollToTop />
         <AuthProvider>
           <FinancialDataProvider>
-            <Suspense fallback={<PageLoader />}>
-              <RouteTransition>
-              <Routes>
+            <Routes>
+              <Route element={<RouteTransition />}>
                 <Route path="/"         element={<Welcome />} />
                 <Route path="/welcome"  element={<Welcome />} />
                 <Route path="/login"    element={<Login />} />
@@ -114,9 +101,8 @@ const App = () => (
                 <Route path="/portal-wr"       element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-              </RouteTransition>
-            </Suspense>
+              </Route>
+            </Routes>
           </FinancialDataProvider>
         </AuthProvider>
       </BrowserRouter>
