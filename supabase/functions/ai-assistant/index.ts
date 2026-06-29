@@ -198,7 +198,7 @@ const tools = [
           },
           tipo: {
             type: "string",
-            description: "Filtra por TIPO de veículo (campo frota): TOCO, TRUCK, BI TRUCK, 3/4, CAVALO, CARRETA, CARRETA SECA, CARRETA REFRIGERADA, REFRIGERADOR. Aceita vários separados por vírgula. Para 'caminhões' use 'TOCO,TRUCK,BI TRUCK,3/4'.",
+            description: "Filtra por TIPO de veículo (campo frota): TOCO, TRUCK, BI TRUCK, 3/4, CAVALO, CARRETA, CARRETA SECA, CARRETA REFRIGERADA, REFRIGERADOR. Aceita vários separados por vírgula. Na SGT: 'caminhão' = 'CAVALO'; 'carreta' = 'CARRETA,CARRETA SECA,CARRETA REFRIGERADA,REFRIGERADOR'.",
           },
           marca: { type: "string", description: "Opcional. Filtra por marca (texto contido)." },
           classificacao: { type: "string", description: "Opcional. Filtra por classificação operacional (NÃO é o tipo do veículo)." },
@@ -1393,11 +1393,13 @@ GUIA DE TOOLS POR ASSUNTO:
 DICIONÁRIO DE DADOS (termos do DW/Rodopar):
 - Situação de veículo: ATIVO (em operação), INATIVO (parado), BAIXADO (vendido/descartado).
 - TIPO DE VEÍCULO está no campo "frota" (parâmetro 'tipo' de get_frota_veiculos), NÃO no campo "classificacao" (que é categoria operacional: VEICULO FROTA, TRANSFERENCIA, CROSS...). Tipos possíveis: TOCO, TRUCK, BI TRUCK, 3/4, CAVALO, CARRETA, CARRETA SECA, CARRETA REFRIGERADA, REFRIGERADOR, PROPRIA, DIRETORIA, ADMINISTRATIVO.
-- MAPEAMENTO DE TERMOS DE VEÍCULO (use o parâmetro tipo de get_frota_veiculos):
-  • "caminhão"/"caminhões" → tipo="TOCO,TRUCK,BI TRUCK,3/4" (caminhões rígidos que carregam carga).
-  • "cavalo"/"cavalo mecânico" → tipo="CAVALO".
-  • "carreta"/"reboque"/"semi-reboque" → tipo="CARRETA,CARRETA SECA,CARRETA REFRIGERADA,REFRIGERADOR".
-  "Caminhão" NUNCA é a frota inteira — é só esse subconjunto de tipos. Combine com situacao=ATIVO quando pedirem "ativos".
+- MAPEAMENTO DE TERMOS DE VEÍCULO (linguagem interna da SGT — use o parâmetro tipo de get_frota_veiculos):
+  • "caminhão"/"caminhões" → tipo="CAVALO". (Na SGT, "caminhão" = cavalo mecânico. NÃO é a frota inteira.)
+  • "cavalo"/"cavalo mecânico" → tipo="CAVALO" (mesmo que caminhão).
+  • "carreta"/"conjunto"/"reboque"/"semi-reboque" → tipo="CARRETA,CARRETA SECA,CARRETA REFRIGERADA,REFRIGERADOR". (Na SGT, "carreta" é o conjunto rebocado.)
+  • TOCO, TRUCK, BI TRUCK, 3/4 são caminhões rígidos — filtre por esses nomes só se o usuário citar o tipo específico.
+- "RODOTREM" é uma COMPOSIÇÃO operacional = 1 cavalo + 2 carretas. NÃO existe um registro único "rodotrem" no cadastro de frota. Se perguntarem "quantos rodotrens", explique que é uma composição (cavalo + 2 carretas) e que o cadastro conta cavalos e carretas separadamente — ofereça o número de cavalos e de carretas, ou pergunte como ele quer estimar. NUNCA invente uma contagem de rodotrens.
+  Combine sempre com situacao=ATIVO quando pedirem "ativos".
 - Manutenção: "preventiva" = planejada/programada; "corretiva" = conserto de falha; serviço INTERNO = oficina própria, EXTERNO = terceirizada. "subgrupo" agrupa o tipo de item (pneu, óleo, filtro...).
 - Títulos: ORIGEM "CP" = Contas a Pagar (saída), "CR" = Contas a Receber (entrada). Vencido = data de vencimento passada e ainda em aberto.
 - Faturamento = receita de frete (FRETE_TOTAL), agrupado por grupo de cliente.
