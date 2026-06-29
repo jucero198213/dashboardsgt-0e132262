@@ -196,8 +196,12 @@ const tools = [
             type: "string",
             description: "Filtra por situação: 'ATIVO', 'INATIVO' ou 'BAIXADO'. Omita para trazer todos.",
           },
+          tipo: {
+            type: "string",
+            description: "Filtra por TIPO de veículo (campo frota): TOCO, TRUCK, BI TRUCK, 3/4, CAVALO, CARRETA, CARRETA SECA, CARRETA REFRIGERADA, REFRIGERADOR. Aceita vários separados por vírgula. Para 'caminhões' use 'TOCO,TRUCK,BI TRUCK,3/4'.",
+          },
           marca: { type: "string", description: "Opcional. Filtra por marca (texto contido)." },
-          classificacao: { type: "string", description: "Opcional. Filtra por classificação (texto contido)." },
+          classificacao: { type: "string", description: "Opcional. Filtra por classificação operacional (NÃO é o tipo do veículo)." },
           top: { type: "number", description: "Máximo de veículos a listar (default 60)." },
         },
       },
@@ -811,6 +815,10 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       const topN = Number(args.top ?? 60);
       const fMarca = String(args.marca ?? "").trim().toLowerCase();
       const fClassif = String(args.classificacao ?? "").trim().toLowerCase();
+      // tipo do veículo = campo "frota" (RODFRO): TOCO, TRUCK, CAVALO, CARRETA...
+      // Aceita lista separada por vírgula (ex.: "toco,truck,bi truck,3/4" = caminhão).
+      const tiposFiltro = String(args.tipo ?? "")
+        .split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
 
       // O endpoint filtra por situação no servidor quando informado.
       const data = await dwCall("/dw-frota", situacao ? { situacao } : {});
@@ -818,6 +826,12 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
 
       if (fMarca) rows = rows.filter((r) => String(r.marca ?? "").toLowerCase().includes(fMarca));
       if (fClassif) rows = rows.filter((r) => String(r.classificacao ?? "").toLowerCase().includes(fClassif));
+      if (tiposFiltro.length) {
+        rows = rows.filter((r) => {
+          const t = String(r.frota ?? "").toLowerCase();
+          return tiposFiltro.some((f) => t.includes(f));
+        });
+      }
 
       // Os JOINs do /dw-frota podem repetir o mesmo veículo em mais de uma linha.
       // Contamos por código de veículo ÚNICO (codvei) para não inflar o total.
@@ -830,8 +844,16 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       });
 
       const totalFiltrado = rows.length;
+      // Distribuição por tipo (campo frota) do conjunto filtrado.
+      const porTipo: Record<string, number> = {};
+      for (const r of rows) {
+        const t = String(r.frota ?? "—");
+        porTipo[t] = (porTipo[t] ?? 0) + 1;
+      }
+
       const lista = rows.slice(0, topN).map((r) => ({
         veiculo: r.codvei,
+        tipo: r.frota, // TOCO, TRUCK, CAVALO, CARRETA...
         modelo: r.modelo,
         marca: r.marca,
         ano: r.anomod ?? r.anofab,
@@ -841,8 +863,14 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       }));
 
       return JSON.stringify({
-        filtro: { situacao: situacao ?? "todas", marca: fMarca || null, classificacao: fClassif || null },
+        filtro: {
+          situacao: situacao ?? "todas",
+          tipo: tiposFiltro.length ? tiposFiltro : null,
+          marca: fMarca || null,
+          classificacao: fClassif || null,
+        },
         total_encontrado: totalFiltrado,
+        por_tipo: porTipo,
         exibindo: lista.length,
         veiculos: lista,
       });
@@ -1364,7 +1392,12 @@ GUIA DE TOOLS POR ASSUNTO:
 
 DICIONÁRIO DE DADOS (termos do DW/Rodopar):
 - Situação de veículo: ATIVO (em operação), INATIVO (parado), BAIXADO (vendido/descartado).
-- TIPOS DE VEÍCULO ≠ "veículo" genérico: a frota tem classificações diferentes (cavalo mecânico, carreta/reboque, truck, utilitário, etc.). "Caminhão" NÃO é sinônimo de "veículo" — é um SUBCONJUNTO. Quando o usuário pedir um tipo específico ("caminhões", "carretas", "cavalos"), use get_frota_veiculos com o parâmetro classificacao filtrando aquele tipo — NUNCA devolva a frota inteira como se fossem todos caminhões. Se você não tiver certeza de qual classificação corresponde ao termo, chame get_frota_resumo (que traz por_classificacao) para ver as classificações reais e/ou pergunte ao usuário qual delas ele considera "caminhão".
+- TIPO DE VEÍCULO está no campo "frota" (parâmetro 'tipo' de get_frota_veiculos), NÃO no campo "classificacao" (que é categoria operacional: VEICULO FROTA, TRANSFERENCIA, CROSS...). Tipos possíveis: TOCO, TRUCK, BI TRUCK, 3/4, CAVALO, CARRETA, CARRETA SECA, CARRETA REFRIGERADA, REFRIGERADOR, PROPRIA, DIRETORIA, ADMINISTRATIVO.
+- MAPEAMENTO DE TERMOS DE VEÍCULO (use o parâmetro tipo de get_frota_veiculos):
+  • "caminhão"/"caminhões" → tipo="TOCO,TRUCK,BI TRUCK,3/4" (caminhões rígidos que carregam carga).
+  • "cavalo"/"cavalo mecânico" → tipo="CAVALO".
+  • "carreta"/"reboque"/"semi-reboque" → tipo="CARRETA,CARRETA SECA,CARRETA REFRIGERADA,REFRIGERADOR".
+  "Caminhão" NUNCA é a frota inteira — é só esse subconjunto de tipos. Combine com situacao=ATIVO quando pedirem "ativos".
 - Manutenção: "preventiva" = planejada/programada; "corretiva" = conserto de falha; serviço INTERNO = oficina própria, EXTERNO = terceirizada. "subgrupo" agrupa o tipo de item (pneu, óleo, filtro...).
 - Títulos: ORIGEM "CP" = Contas a Pagar (saída), "CR" = Contas a Receber (entrada). Vencido = data de vencimento passada e ainda em aberto.
 - Faturamento = receita de frete (FRETE_TOTAL), agrupado por grupo de cliente.
