@@ -1354,6 +1354,7 @@ GUIA DE TOOLS POR ASSUNTO:
 
 DICIONÁRIO DE DADOS (termos do DW/Rodopar):
 - Situação de veículo: ATIVO (em operação), INATIVO (parado), BAIXADO (vendido/descartado).
+- TIPOS DE VEÍCULO ≠ "veículo" genérico: a frota tem classificações diferentes (cavalo mecânico, carreta/reboque, truck, utilitário, etc.). "Caminhão" NÃO é sinônimo de "veículo" — é um SUBCONJUNTO. Quando o usuário pedir um tipo específico ("caminhões", "carretas", "cavalos"), use get_frota_veiculos com o parâmetro classificacao filtrando aquele tipo — NUNCA devolva a frota inteira como se fossem todos caminhões. Se você não tiver certeza de qual classificação corresponde ao termo, chame get_frota_resumo (que traz por_classificacao) para ver as classificações reais e/ou pergunte ao usuário qual delas ele considera "caminhão".
 - Manutenção: "preventiva" = planejada/programada; "corretiva" = conserto de falha; serviço INTERNO = oficina própria, EXTERNO = terceirizada. "subgrupo" agrupa o tipo de item (pneu, óleo, filtro...).
 - Títulos: ORIGEM "CP" = Contas a Pagar (saída), "CR" = Contas a Receber (entrada). Vencido = data de vencimento passada e ainda em aberto.
 - Faturamento = receita de frete (FRETE_TOTAL), agrupado por grupo de cliente.
