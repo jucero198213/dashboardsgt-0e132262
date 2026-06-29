@@ -771,7 +771,15 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
     }
     if (name === "get_frota_resumo") {
       const data = await dwCall("/dw-frota", {});
-      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const rawRows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      // Dedup por veículo: os JOINs podem repetir o mesmo codvei em várias linhas.
+      const vistosFr = new Set<string>();
+      const rows = rawRows.filter((r) => {
+        const id = String(r.codvei ?? "");
+        if (!id || vistosFr.has(id)) return false;
+        vistosFr.add(id);
+        return true;
+      });
       const porSit: Record<string, number> = {};
       const porClassif: Record<string, number> = {};
       const porMarca: Record<string, number> = {};
@@ -808,6 +816,16 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
 
       if (fMarca) rows = rows.filter((r) => String(r.marca ?? "").toLowerCase().includes(fMarca));
       if (fClassif) rows = rows.filter((r) => String(r.classificacao ?? "").toLowerCase().includes(fClassif));
+
+      // Os JOINs do /dw-frota podem repetir o mesmo veículo em mais de uma linha.
+      // Contamos por código de veículo ÚNICO (codvei) para não inflar o total.
+      const vistos = new Set<string>();
+      rows = rows.filter((r) => {
+        const id = String(r.codvei ?? "");
+        if (!id || vistos.has(id)) return false;
+        vistos.add(id);
+        return true;
+      });
 
       const totalFiltrado = rows.length;
       const lista = rows.slice(0, topN).map((r) => ({
