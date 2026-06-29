@@ -985,11 +985,14 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       });
     }
     if (name === "get_titulos_lista") {
+      const status = args.status ? String(args.status).toLowerCase() : null;
       const dataFim = (args.dataFim as string) || today();
-      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      // "vencido"/"aberto" sem período → olha 1 ano atrás (captura atrasados antigos).
+      // Listagem geral → últimos 30 dias.
+      const lookback = status === "vencido" || status === "aberto" ? 365 : 30;
+      const dataInicio = (args.dataInicio as string) || daysAgo(lookback);
       const topN = Number(args.top ?? 60);
       const origem = args.origem ? String(args.origem).toUpperCase() : null;
-      const status = args.status ? String(args.status).toLowerCase() : null;
       const fParceiro = String(args.parceiro ?? "").trim().toLowerCase();
 
       const data = await dwCall("/dw-financeiro", { action: "fetch", dataInicio, dataFim });
