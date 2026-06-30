@@ -115,6 +115,37 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_os_por_veiculo",
+      description:
+        "Lista as ordens de serviço (OS) de manutenção de UM veículo, da mais recente para a mais antiga. Use para 'últimas 5 OS da placa X', 'quais as últimas manutenções do veículo Y', 'histórico de OS do caminhão Z'. Retorna número da OS, data, fornecedor, situação, valor e resumo — para o detalhe item a item, use get_os_detalhe.",
+      parameters: {
+        type: "object",
+        properties: {
+          placa: { type: "string", description: "Código/placa do veículo (CODVEI). Obrigatório." },
+          top: { type: "number", description: "Quantas OS listar, das mais recentes (default 5)." },
+        },
+        required: ["placa"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_os_detalhe",
+      description:
+        "Detalha TUDO que foi feito em UMA ordem de serviço (OS) específica: peças trocadas, serviços executados, quantidades e valores, separando peças (≈NFe) de serviços/mão de obra (≈NFS-e), além de fornecedor, veículo, data e a descrição/solicitação. Use para 'o que foi feito na OS 12345', 'detalha a ordem de serviço X', 'o que essa OS incluiu'.",
+      parameters: {
+        type: "object",
+        properties: {
+          ordem: { type: "number", description: "Número da ordem de serviço (OS). Obrigatório." },
+        },
+        required: ["ordem"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_top_clientes",
       description:
         "Ranking dos clientes/grupos que mais faturaram em um período (a partir de get_faturamento_periodo, ordenado por valor). Use para 'top clientes do mês', 'quais clientes mais faturaram'.",
@@ -620,6 +651,90 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         custo_total_geral: totalGeral.toFixed(2),
         qtd_grupos: grupos.size,
         resultado: lista,
+      });
+    }
+    if (name === "get_os_por_veiculo") {
+      const placa = String(args.placa ?? "").trim();
+      if (!placa) return JSON.stringify({ erro: "placa é obrigatória." });
+      const topN = Number(args.top ?? 5);
+      const data = await dwCall("/dw-manutencao", { veiculo: placa });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      // Cada OS tem várias linhas (uma por item). valormo/valorpc são do nível
+      // da ordem (repetidos por linha) → conta uma vez por OS.
+      const porOS = new Map<string, Record<string, unknown> & { itens: number; total: number }>();
+      for (const r of rows) {
+        const os = String(r.ordem ?? "");
+        if (!os) continue;
+        const cur = porOS.get(os);
+        if (cur) { cur.itens += 1; }
+        else {
+          const mo = Number(r.valormo ?? 0) + Number(r.valormo2 ?? 0);
+          const pc = Number(r.valorpc ?? 0) + Number(r.valorpc2 ?? 0);
+          porOS.set(os, {
+            ordem: r.ordem, data: r.dataordem, veiculo: r.veiculo,
+            fornecedor: r.fornecedor, situacao: r.situacao,
+            solicitacao: r.solicitacao, total: mo + pc, itens: 1,
+          });
+        }
+      }
+      const lista = [...porOS.values()]
+        .sort((a, b) => new Date(String(b.data ?? 0)).getTime() - new Date(String(a.data ?? 0)).getTime())
+        .slice(0, topN)
+        .map((o) => ({
+          ordem: o.ordem,
+          data: String(o.data ?? "").slice(0, 10),
+          veiculo: o.veiculo,
+          fornecedor: o.fornecedor,
+          situacao: o.situacao,
+          qtd_itens: o.itens,
+          valor_total: Number(o.total).toFixed(2),
+          solicitacao: o.solicitacao,
+        }));
+
+      return JSON.stringify({
+        placa,
+        total_os_encontradas: porOS.size,
+        exibindo: lista.length,
+        ordens: lista,
+      });
+    }
+    if (name === "get_os_detalhe") {
+      const ordem = Number(args.ordem ?? 0);
+      if (!ordem) return JSON.stringify({ erro: "ordem (número da OS) é obrigatória." });
+      const data = await dwCall("/dw-manutencao", { ordem });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      if (rows.length === 0) {
+        return JSON.stringify({ ordem, encontrado: false, mensagem: "Nenhuma OS encontrada com esse número." });
+      }
+
+      const h = rows[0];
+      const mo = Number(h.valormo ?? 0) + Number(h.valormo2 ?? 0); // mão de obra (≈ NFS-e)
+      const pc = Number(h.valorpc ?? 0) + Number(h.valorpc2 ?? 0); // peças (≈ NFe)
+
+      const itens = rows.map((r) => ({
+        item: r.produto,
+        subgrupo: r.subgrupo,
+        tipo: String(r.tipoprod ?? "") === "SERVICO" ? "SERVIÇO" : "PEÇA/PRODUTO",
+        quantidade: r.qtd,
+        valor: (Number(r.custo ?? 0) * Number(r.qtd ?? 1)).toFixed(2),
+      }));
+
+      return JSON.stringify({
+        ordem,
+        encontrado: true,
+        veiculo: h.veiculo,
+        fornecedor: h.fornecedor,
+        data: String(h.dataordem ?? "").slice(0, 10),
+        situacao: h.situacao,
+        tipo_servico: h.tiposervico, // interno/externo
+        solicitacao: h.solicitacao,
+        observacao: h.observacao,
+        valor_pecas: pc.toFixed(2),              // ≈ NFe (produtos/peças)
+        valor_servicos_mao_obra: mo.toFixed(2),  // ≈ NFS-e (serviço)
+        valor_total: (mo + pc).toFixed(2),
+        qtd_itens: itens.length,
+        itens,
       });
     }
     if (name === "get_top_clientes") {
@@ -1381,6 +1496,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Extrato bancário (movimentações de uma conta) → get_bancos_extrato (precisa do cod_conta de get_bancos_saldos).
 - Manutenção (visão macro) → get_manutencao_por_veiculo (ranking por veículo, preventiva vs corretiva, interno/externo).
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
+- Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.

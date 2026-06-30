@@ -632,18 +632,22 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
 //  ENDPOINT: /dw-manutencao
 // ─────────────────────────────────────────────────────────────────────────────
 app.post("/dw-manutencao", async (req, res) => {
-  const { dataInicio, dataFim, filial } = req.body;
+  const { dataInicio, dataFim, filial, veiculo, ordem } = req.body;
 
   try {
     const p     = await getPool();
     const dbReq = p.request();
 
-    const dInicio = dataInicio ? new Date(dataInicio) : new Date("2024-01-01");
-    const dFim    = dataFim    ? new Date(dataFim)    : new Date();
+    // Ao buscar uma OS específica, ignora a janela de data (pode ser antiga).
+    const dInicio = ordem ? new Date("2000-01-01")
+                          : (dataInicio ? new Date(dataInicio) : new Date("2024-01-01"));
+    const dFim    = dataFim ? new Date(dataFim) : new Date();
 
     dbReq.input("dataInicio", sql.Date, dInicio);
     dbReq.input("dataFim",    sql.Date, dFim);
     dbReq.input("filial",     sql.VarChar(20), filial || null);
+    dbReq.input("veiculo",    sql.VarChar(20), veiculo || null);
+    dbReq.input("ordem",      sql.Int,         ordem || null);
 
     const query = `
 SELECT
@@ -701,7 +705,9 @@ LEFT JOIN RODCMO  CMO  WITH (NOLOCK) ON  ORD.CODCMO    = CMO.CODCMO
 WHERE
     ORD.DATREF BETWEEN @dataInicio AND @dataFim
     AND ORD.SITUAC NOT IN ('C')
-    AND (@filial IS NULL OR ORD.CODFIL = @filial)
+    AND (@filial  IS NULL OR ORD.CODFIL = @filial)
+    AND (@veiculo IS NULL OR ORD.CODVEI = @veiculo)
+    AND (@ordem   IS NULL OR ORD.CODORD = @ordem)
 OPTION (RECOMPILE)
     `;
 
