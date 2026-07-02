@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 // ── WhatsApp Cloud API webhook ───────────────────────────────────────────────
 // GET  → handshake de verificação da Meta (hub.challenge)
@@ -19,26 +20,42 @@ const GRAPH_VERSION = "v21.0";
 // várias vezes (spam). Set em memória do processo, com limite de tamanho.
 const processedIds = new Set<string>();
 
-// ── Memória de conversa por número (em memória do processo) ───────────────────
-// Mantém o histórico recente de cada pessoa para a Sofia "lembrar" o papo dentro
-// de uma conversa. Expira após inatividade, então uma nova conversa começa limpa.
+// ── Memória de conversa PERSISTENTE (tabela sofia_conversas no Supabase) ──────
+// Guarda o histórico por número no banco → sobrevive a redeploy e cold start.
 type Turn = { role: "user" | "assistant"; content: string };
-const conversas = new Map<string, { turns: Turn[]; updatedAt: number }>();
-const CONVERSA_TTL_MS = 30 * 60 * 1000; // 30 min sem mensagem → nova conversa
-const MAX_TURNS = 12; // mantém as últimas 12 mensagens (~6 idas e voltas)
+const MAX_TURNS = 12;      // últimas 12 mensagens (~6 idas e voltas) no contexto
+const JANELA_MIN = 90;     // considera como "conversa atual" as msgs da última 1h30
 
-function getHistorico(from: string): Turn[] {
-  const c = conversas.get(from);
-  if (!c) return [];
-  if (Date.now() - c.updatedAt > CONVERSA_TTL_MS) {
-    conversas.delete(from);
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+);
+
+async function getHistorico(telefone: string): Promise<Turn[]> {
+  const desde = new Date(Date.now() - JANELA_MIN * 60 * 1000).toISOString();
+  const { data, error } = await supabase
+    .from("sofia_conversas")
+    .select("role, conteudo")
+    .eq("telefone", telefone)
+    .gte("criado_em", desde)
+    .order("criado_em", { ascending: false })
+    .limit(MAX_TURNS);
+  if (error || !data) {
+    if (error) console.error("Erro ao ler histórico:", error.message);
     return [];
   }
-  return c.turns;
+  // veio do mais novo pro mais antigo → inverte pra ordem cronológica
+  return data.reverse().map((r) => ({
+    role: r.role as "user" | "assistant",
+    content: r.conteudo as string,
+  }));
 }
 
-function salvarHistorico(from: string, turns: Turn[]) {
-  conversas.set(from, { turns: turns.slice(-MAX_TURNS), updatedAt: Date.now() });
+async function salvarMensagem(telefone: string, role: "user" | "assistant", conteudo: string) {
+  const { error } = await supabase
+    .from("sofia_conversas")
+    .insert({ telefone, role, conteudo });
+  if (error) console.error("Erro ao salvar mensagem:", error.message);
 }
 
 // Instrução de formatação para o canal WhatsApp. O WhatsApp NÃO renderiza
@@ -232,16 +249,15 @@ async function handleMessage(from: string, text: string) {
 
     const nome = getContato(from);
 
-    // Carrega o histórico da conversa, adiciona a mensagem atual, consulta a
-    // Sofia com todo o contexto e guarda a resposta para os próximos turnos.
-    const historico = getHistorico(from);
-    historico.push({ role: "user", content: text });
+    // Carrega o histórico do banco, persiste a mensagem atual, consulta a Sofia
+    // com todo o contexto e guarda a resposta — tudo na tabela sofia_conversas.
+    const historicoAnterior = await getHistorico(from);
+    await salvarMensagem(from, "user", text);
 
+    const historico = [...historicoAnterior, { role: "user" as const, content: text }];
     const reply = await askAI(historico, nome, periodoDoDia());
 
-    historico.push({ role: "assistant", content: reply });
-    salvarHistorico(from, historico);
-
+    await salvarMensagem(from, "assistant", reply);
     await sendWhatsApp(from, reply);
   } catch (err) {
     console.error("Erro ao processar mensagem:", err);
