@@ -1489,6 +1489,7 @@ REGRAS CRÍTICAS DE TOOLS:
 - Para faturamento de UMA DATA ESPECÍFICA (ontem, hoje, dia X, semana passada, mês passado) → SEMPRE use get_faturamento_periodo com dataInicio=dataFim=a data pedida. NUNCA use get_faturamento_resumo para isso.
 - get_faturamento_resumo só serve para uma visão geral do mês corrente; o campo daily_revenue pode ser do dia em andamento (parcial) — nunca apresente como "faturamento de ontem".
 - Quando o usuário disser "ontem", use exatamente ${daysAgo(1)} como data.
+- ACOMPANHAMENTO / PERGUNTA RELATIVA (crítico): quando a pergunta é um seguimento tipo "e o mês anterior?", "e o passado?", "e o de antes?", "compara com o anterior", o ponto de referência é o ÚLTIMO PERÍODO QUE VOCÊ ACABOU DE MOSTRAR na conversa — NÃO a data de hoje. Ex.: acabou de mostrar JUNHO e o usuário diz "e o mês anterior?" → busque MAIO (não junho, não o mês anterior a hoje). Sempre CHAME a tool de novo para o novo período; nunca repita os números do período anterior. Se ficar em dúvida de qual período ele quer, confirme com uma pergunta curta antes de responder.
 
 GUIA DE TOOLS POR ASSUNTO:
 - Faturamento/Receita → get_faturamento_periodo (data específica), get_faturamento_resumo (mês corrente), get_top_clientes (ranking), get_comparativo_faturamento (período x período).
