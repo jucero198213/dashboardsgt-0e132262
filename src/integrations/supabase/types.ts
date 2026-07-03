@@ -59,6 +59,30 @@ export type Database = {
         }
         Relationships: []
       }
+      sofia_conversas: {
+        Row: {
+          conteudo: string
+          criado_em: string
+          id: number
+          role: string
+          telefone: string
+        }
+        Insert: {
+          conteudo: string
+          criado_em?: string
+          id?: never
+          role: string
+          telefone: string
+        }
+        Update: {
+          conteudo?: string
+          criado_em?: string
+          id?: never
+          role?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           aberto_por: string | null
