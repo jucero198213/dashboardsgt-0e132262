@@ -15,7 +15,7 @@ const respond = (data: unknown, status = 200) =>
 // ── DW API config (mesma URL/secret usados pelo cliente) ─────────────────────
 const DW_API_URL =
   Deno.env.get("DW_API_URL") ||
-  "https://reveals-somehow-html-suggestions.trycloudflare.com";
+  "https://related-secretariat-band-margaret.trycloudflare.com";
 const DW_API_SECRET =
   Deno.env.get("DW_API_SECRET") ||
   "92fdb5856ac33b770f3ea32484dd3222db0fcfe8d56b85919191b8c65ff9e7ab";
