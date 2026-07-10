@@ -27,18 +27,18 @@
     justify-content: center;
     min-height: 100dvh;
     padding: 24px;
-    gap: 28px;
+    gap: 24px;
   }
   header { text-align: center; }
   header .brand { font-size: 13px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
   header .title { font-size: 22px; font-weight: 600; margin-top: 4px; }
+  header .clock { font-size: 14px; color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
 
-  .orb-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .orb-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
   .orb {
-    width: 200px; height: 200px; border-radius: 50%;
+    width: 176px; height: 176px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 88px; transition: all .4s ease;
-    position: relative;
+    font-size: 76px; transition: all .4s ease; position: relative;
   }
   .orb::after {
     content: ""; position: absolute; inset: -14px; border-radius: 50%;
@@ -52,21 +52,25 @@
   @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
-  .status-label { font-size: 34px; font-weight: 700; letter-spacing: .5px; }
-  .status-sub { font-size: 15px; color: var(--muted); margin-top: 6px; }
+  .status-label { font-size: 32px; font-weight: 700; letter-spacing: .5px; text-align: center; }
+  .status-sub { font-size: 15px; color: var(--muted); margin-top: 6px; text-align: center; }
   .state-online   .status-label { color: var(--green); }
   .state-degraded .status-label { color: var(--yellow); }
   .state-offline  .status-label { color: var(--red); }
 
-  .metrics { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .metrics { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 760px; }
   .metric {
     background: var(--card); border: 1px solid rgba(255,255,255,.06);
-    border-radius: 14px; padding: 16px 22px; min-width: 130px; text-align: center;
+    border-radius: 14px; padding: 14px 20px; min-width: 128px; text-align: center;
   }
-  .metric .val { font-size: 24px; font-weight: 600; }
-  .metric .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .metric .val { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .metric .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .metric .val.warn { color: var(--yellow); }
+  .metric .val.bad { color: var(--red); }
 
-  .history { display: flex; gap: 3px; align-items: flex-end; height: 40px; }
+  .history-wrap { text-align: center; }
+  .history-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .history { display: flex; gap: 3px; align-items: flex-end; height: 36px; justify-content: center; }
   .bar { width: 8px; height: 100%; border-radius: 2px; background: #2a3242; }
   .bar.ok { background: var(--green); }
   .bar.deg { background: var(--yellow); }
@@ -79,11 +83,12 @@
   <header>
     <div class="brand">SGT · Data Warehouse</div>
     <div class="title">Status do Servidor</div>
+    <div class="clock" id="clock">—</div>
   </header>
 
   <div class="orb-wrap">
     <div class="orb" id="orb">•••</div>
-    <div style="text-align:center">
+    <div>
       <div class="status-label" id="label">Verificando…</div>
       <div class="status-sub" id="sub">Conectando ao servidor</div>
     </div>
@@ -91,11 +96,17 @@
 
   <div class="metrics">
     <div class="metric"><div class="val" id="ping">—</div><div class="lbl">Resposta</div></div>
+    <div class="metric"><div class="val" id="avg">—</div><div class="lbl">Resp. média</div></div>
     <div class="metric"><div class="val" id="uptime">—</div><div class="lbl">Disponibilidade</div></div>
+    <div class="metric"><div class="val" id="since">—</div><div class="lbl" id="sinceLbl">No ar há</div></div>
+    <div class="metric"><div class="val" id="outages">0</div><div class="lbl">Quedas</div></div>
     <div class="metric"><div class="val" id="last">—</div><div class="lbl">Última checagem</div></div>
   </div>
 
-  <div class="history" id="history"></div>
+  <div class="history-wrap">
+    <div class="history-lbl">Últimas checagens</div>
+    <div class="history" id="history"></div>
+  </div>
 
   <footer>Atualiza a cada 15s · <span id="url"></span></footer>
 
@@ -106,11 +117,15 @@
   const MAX_BARS = 40;
 
   const $ = (id) => document.getElementById(id);
-  document.getElementById("url").textContent = HEALTH_URL;
+  $("url").textContent = HEALTH_URL;
 
-  let history = [];       // "ok" | "deg" | "down"
+  let history = [];          // "ok" | "deg" | "down"
   let checks = 0, ups = 0;
+  let sumMs = 0, msCount = 0;
+  let outages = 0;
   let lastCheckTs = null;
+  let currentUp = null;      // true/false
+  let stateSince = Date.now(); // quando entrou no estado atual (up/down)
 
   function setState(cls, emoji, label, sub) {
     document.body.className = "state-" + cls;
@@ -119,18 +134,25 @@
     $("sub").textContent = sub;
   }
 
+  function fmtDur(ms) {
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return s + "s";
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + "min";
+    const h = Math.floor(m / 60);
+    const rm = m % 60;
+    if (h < 24) return h + "h" + (rm ? " " + rm + "min" : "");
+    const d = Math.floor(h / 24);
+    return d + "d " + (h % 24) + "h";
+  }
+
   function renderHistory() {
     const el = $("history");
     el.innerHTML = "";
-    const start = Math.max(0, history.length - MAX_BARS);
-    for (let i = start; i < history.length; i++) {
+    for (let i = 0; i < MAX_BARS; i++) {
       const b = document.createElement("div");
-      b.className = "bar " + history[i];
-      el.appendChild(b);
-    }
-    for (let i = history.length; i < MAX_BARS; i++) {
-      const b = document.createElement("div");
-      b.className = "bar";
+      const idx = history.length - MAX_BARS + i;
+      b.className = "bar" + (idx >= 0 ? " " + history[idx] : "");
       el.appendChild(b);
     }
   }
@@ -139,6 +161,7 @@
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
     const t0 = performance.now();
+    let up = false;
     try {
       const r = await fetch(HEALTH_URL, { cache: "no-store", signal: ctrl.signal });
       clearTimeout(t);
@@ -146,14 +169,16 @@
       const data = await r.json();
       checks++;
       if (r.ok && data.db) {
-        ups++;
+        up = true; ups++;
+        sumMs += ms; msCount++;
         history.push("ok");
         setState("online", "✓", "ONLINE", "Servidor e banco respondendo normalmente");
+        $("ping").textContent = ms + " ms";
       } else {
         history.push("deg");
         setState("degraded", "!", "INSTÁVEL", "Servidor de pé, mas o banco não respondeu");
+        $("ping").textContent = ms + " ms";
       }
-      $("ping").textContent = ms + " ms";
     } catch (e) {
       clearTimeout(t);
       checks++;
@@ -161,22 +186,46 @@
       setState("offline", "✕", "OFFLINE", "Servidor não respondeu — verifique o túnel/servidor");
       $("ping").textContent = "—";
     }
+
+    // Transição de estado (conta quedas + reinicia o cronômetro "no ar há")
+    if (currentUp === null) { currentUp = up; stateSince = Date.now(); }
+    else if (up !== currentUp) {
+      if (currentUp === true && up === false) outages++;
+      currentUp = up;
+      stateSince = Date.now();
+    }
+
     lastCheckTs = Date.now();
     if (history.length > MAX_BARS) history = history.slice(-MAX_BARS);
     $("uptime").textContent = checks ? Math.round((ups / checks) * 100) + "%" : "—";
+    $("avg").textContent = msCount ? Math.round(sumMs / msCount) + " ms" : "—";
+    $("outages").textContent = outages;
+    $("outages").className = "val" + (outages > 0 ? " bad" : "");
     renderHistory();
   }
 
-  function tickRelative() {
-    if (!lastCheckTs) return;
-    const s = Math.round((Date.now() - lastCheckTs) / 1000);
-    $("last").textContent = s <= 1 ? "agora" : "há " + s + "s";
+  function tick() {
+    const now = new Date();
+    $("clock").textContent = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })
+      + " · " + now.toLocaleTimeString("pt-BR");
+
+    if (lastCheckTs) {
+      const s = Math.round((Date.now() - lastCheckTs) / 1000);
+      $("last").textContent = s <= 1 ? "agora" : "há " + s + "s";
+    }
+    if (currentUp !== null) {
+      $("since").textContent = fmtDur(Date.now() - stateSince);
+      const bad = currentUp === false;
+      $("sinceLbl").textContent = bad ? "Fora do ar há" : "No ar há";
+      $("since").className = "val" + (bad ? " bad" : "");
+    }
   }
 
   renderHistory();
   check();
   setInterval(check, INTERVAL_MS);
-  setInterval(tickRelative, 1000);
+  setInterval(tick, 1000);
+  tick();
 </script>
 </body>
 </html>
