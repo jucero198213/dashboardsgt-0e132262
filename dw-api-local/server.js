@@ -85,7 +85,7 @@ app.use(express.json());
 const API_SECRET = process.env.API_SECRET;
 
 app.use((req, res, next) => {
-  if (req.method === "GET" && req.path === "/") return next();
+  if (req.method === "GET" && (req.path === "/" || req.path === "/health")) return next();
 
   if (!API_SECRET) {
     console.warn("⚠️  API_SECRET não definido no .env — autenticação desabilitada");
@@ -102,6 +102,26 @@ app.use((req, res, next) => {
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (_req, res) => {
   res.json({ status: "ok", message: "DW API Local rodando ✅" });
+});
+
+// Health check completo (servidor + banco) — usado pela tela de status.
+// Público (sem x-api-key) e com CORS liberado.
+app.get("/health", async (_req, res) => {
+  const started = Date.now();
+  let db = false;
+  try {
+    const pool = await getPool();
+    await pool.request().query("SELECT 1");
+    db = true;
+  } catch {
+    db = false;
+  }
+  res.json({
+    server: "ok",
+    db,
+    response_ms: Date.now() - started,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ── Endpoint principal ────────────────────────────────────────────────────────
