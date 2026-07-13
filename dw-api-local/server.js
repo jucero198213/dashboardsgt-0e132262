@@ -8,6 +8,9 @@ const cors    = require("cors");
 const sql     = require("mssql");
 const fs      = require("fs");
 const path    = require("path");
+const https   = require("https");   // consulta à SEFAZ (mTLS com o certificado)
+const zlib    = require("zlib");     // descompacta o docZip da SEFAZ (gzip)
+const { XMLParser } = require("fast-xml-parser"); // parsing do XML da NFe
 
 // ── Carrega .env manualmente (sem depender do dotenv) ─────────────────────────
 const envPath = path.join(__dirname, ".env");
@@ -122,6 +125,144 @@ app.get("/health", async (_req, res) => {
     response_ms: Date.now() - started,
     timestamp: new Date().toISOString(),
   });
+});
+
+// ── Consulta NFe na SEFAZ (NFeDistribuicaoDFe / consChNFe) ─────────────────────
+// Dada a chave de 44 dígitos, usa o certificado A1 (.pfx) da empresa para baixar
+// o XML da nota na SEFAZ e retorna os itens. Requer no .env:
+//   CERT_PFX_PATH  = caminho do .pfx     |  CERT_PFX_SENHA = senha do .pfx
+const CNPJ_EMPRESA = "18797307000120"; // destinatário (SGT LOG matriz)
+
+// Busca recursiva por uma chave dentro do objeto (namespaces já removidos).
+function acharChave(obj, alvo) {
+  if (obj == null || typeof obj !== "object") return undefined;
+  if (Object.prototype.hasOwnProperty.call(obj, alvo)) return obj[alvo];
+  for (const k of Object.keys(obj)) {
+    const r = acharChave(obj[k], alvo);
+    if (r !== undefined) return r;
+  }
+  return undefined;
+}
+
+app.post("/nfe-consulta", (req, res) => {
+  const chave = String(req.body?.chave ?? "").replace(/\D/g, "");
+  if (chave.length !== 44) {
+    return res.status(400).json({ error: "chave inválida — precisa ter 44 dígitos" });
+  }
+
+  const pfxPath  = process.env.CERT_PFX_PATH;
+  const pfxSenha = process.env.CERT_PFX_SENHA;
+  if (!pfxPath || !pfxSenha) {
+    return res.status(500).json({ error: "certificado não configurado (CERT_PFX_PATH / CERT_PFX_SENHA no .env)" });
+  }
+
+  let pfx;
+  try { pfx = fs.readFileSync(pfxPath); }
+  catch (e) { return res.status(500).json({ error: "não consegui ler o certificado: " + e.message }); }
+
+  const cUF = chave.substring(0, 2); // 2 primeiros dígitos da chave = código da UF
+
+  const distDFeInt =
+    `<distDFeInt xmlns="http://www.portalfiscal.inf.br/nfe" versao="1.01">` +
+      `<tpAmb>1</tpAmb>` +
+      `<cUFAutor>${cUF}</cUFAutor>` +
+      `<CNPJ>${CNPJ_EMPRESA}</CNPJ>` +
+      `<consChNFe><chNFe>${chave}</chNFe></consChNFe>` +
+    `</distDFeInt>`;
+
+  const soap =
+    `<?xml version="1.0" encoding="utf-8"?>` +
+    `<soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">` +
+      `<soap12:Body>` +
+        `<nfeDistDFeInteresse xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe">` +
+          `<nfeDadosMsg>${distDFeInt}</nfeDadosMsg>` +
+        `</nfeDistDFeInteresse>` +
+      `</soap12:Body>` +
+    `</soap12:Envelope>`;
+
+  const options = {
+    hostname: "www1.nfe.fazenda.gov.br",
+    port: 443,
+    path: "/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx",
+    method: "POST",
+    pfx,
+    passphrase: pfxSenha,
+    minVersion: "TLSv1.2",
+    headers: {
+      "Content-Type": "application/soap+xml; charset=utf-8",
+      "Content-Length": Buffer.byteLength(soap),
+    },
+  };
+
+  const sefazReq = https.request(options, (sefazRes) => {
+    let body = "";
+    sefazRes.setEncoding("utf-8");
+    sefazRes.on("data", (d) => (body += d));
+    sefazRes.on("end", () => {
+      try {
+        const parser = new XMLParser({ ignoreAttributes: false, removeNSPrefix: true, parseTagValue: false });
+        const parsed = parser.parse(body);
+        const ret = acharChave(parsed, "retDistDFeInt");
+        if (!ret) {
+          return res.status(502).json({ error: "resposta inesperada da SEFAZ", raw: body.slice(0, 800) });
+        }
+        const cStat = ret.cStat, xMotivo = ret.xMotivo;
+
+        let docZips = acharChave(ret, "docZip");
+        if (!docZips) {
+          return res.json({ cStat, xMotivo, chave, encontrado: false,
+            mensagem: `SEFAZ não retornou documento (cStat ${cStat}: ${xMotivo})` });
+        }
+        if (!Array.isArray(docZips)) docZips = [docZips];
+
+        const notas = [];
+        for (const dz of docZips) {
+          const b64 = typeof dz === "string" ? dz : dz["#text"];
+          if (!b64) continue;
+          let xml;
+          try { xml = zlib.gunzipSync(Buffer.from(b64, "base64")).toString("utf-8"); }
+          catch { continue; }
+          const doc = parser.parse(xml);
+          const infNFe = acharChave(doc, "infNFe");
+          if (!infNFe) continue; // pode ser só o "resumo" (resNFe), não a nota completa
+
+          let dets = infNFe.det;
+          if (!dets) continue;
+          if (!Array.isArray(dets)) dets = [dets];
+
+          const itens = dets.map((d) => ({
+            produto:     d.prod?.xProd,
+            ncm:         d.prod?.NCM,
+            quantidade:  d.prod?.qCom,
+            unidade:     d.prod?.uCom,
+            valor_unit:  d.prod?.vUnCom,
+            valor_total: d.prod?.vProd,
+          }));
+
+          notas.push({
+            emitente:         acharChave(infNFe.emit ?? {}, "xNome"),
+            numero_nota:      infNFe.ide?.nNF,
+            serie:            infNFe.ide?.serie,
+            data_emissao:     infNFe.ide?.dhEmi,
+            valor_total_nota: acharChave(infNFe.total ?? {}, "vNF"),
+            qtd_itens:        itens.length,
+            itens,
+          });
+        }
+
+        if (notas.length === 0) {
+          return res.json({ cStat, xMotivo, chave, encontrado: false,
+            mensagem: `SEFAZ respondeu, mas não veio a nota COMPLETA (pode faltar a manifestação do destinatário). cStat ${cStat}: ${xMotivo}` });
+        }
+        return res.json({ cStat, xMotivo, chave, encontrado: true, notas });
+      } catch (e) {
+        return res.status(500).json({ error: "erro ao processar resposta da SEFAZ: " + e.message, raw: body.slice(0, 800) });
+      }
+    });
+  });
+  sefazReq.on("error", (e) => res.status(502).json({ error: "erro na conexão com a SEFAZ: " + e.message }));
+  sefazReq.write(soap);
+  sefazReq.end();
 });
 
 // ── Endpoint principal ────────────────────────────────────────────────────────
@@ -852,7 +993,8 @@ SELECT DISTINCT
     AIE.QTDENT               AS quantidade,
     AIE.VLRUNI               AS valor_un,
     ENT.CODCLIFOR            AS codclifor,
-    CLI.RAZSOC               AS fornecedor
+    CLI.RAZSOC               AS fornecedor,
+    ENT.NFE_ID		     AS Chave
 FROM ESTAIE AIE WITH (NOLOCK)
 LEFT JOIN ESTENT ENT WITH (NOLOCK) ON  AIE.CODCLIFOR = ENT.CODCLIFOR
                                    AND AIE.TIPONF    = ENT.TIPONF
