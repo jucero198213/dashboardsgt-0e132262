@@ -216,15 +216,21 @@ app.post("/nfe-consulta", (req, res) => {
         if (!Array.isArray(docZips)) docZips = [docZips];
 
         const notas = [];
+        const diagnostico = [];
         for (const dz of docZips) {
           const b64 = typeof dz === "string" ? dz : dz["#text"];
+          const schema = (typeof dz === "object" ? dz["@_schema"] : null) || null;
           if (!b64) continue;
           let xml;
           try { xml = zlib.gunzipSync(Buffer.from(b64, "base64")).toString("utf-8"); }
-          catch { continue; }
+          catch (e) { diagnostico.push({ schema, erro: "gunzip: " + e.message }); continue; }
           const doc = parser.parse(xml);
           const infNFe = acharChave(doc, "infNFe");
-          if (!infNFe) continue; // pode ser só o "resumo" (resNFe), não a nota completa
+          if (!infNFe) {
+            // Não é a nota completa (provavelmente resumo/resNFe). Guarda p/ diagnóstico.
+            diagnostico.push({ schema, trecho: xml.slice(0, 500) });
+            continue;
+          }
 
           let dets = infNFe.det;
           if (!dets) continue;
@@ -252,7 +258,8 @@ app.post("/nfe-consulta", (req, res) => {
 
         if (notas.length === 0) {
           return res.json({ cStat, xMotivo, chave, encontrado: false,
-            mensagem: `SEFAZ respondeu, mas não veio a nota COMPLETA (pode faltar a manifestação do destinatário). cStat ${cStat}: ${xMotivo}` });
+            mensagem: `SEFAZ respondeu, mas não veio a nota COMPLETA (pode faltar a manifestação do destinatário). cStat ${cStat}: ${xMotivo}`,
+            diagnostico });
         }
         return res.json({ cStat, xMotivo, chave, encontrado: true, notas });
       } catch (e) {
