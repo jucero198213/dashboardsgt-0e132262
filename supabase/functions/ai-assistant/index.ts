@@ -441,6 +441,21 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_nfe_por_chave",
+      description:
+        "Consulta uma nota fiscal (NFe) na SEFAZ pela chave de acesso (44 dígitos) e retorna fornecedor, CNPJ, valor total e data. Se a nota estiver manifestada, também traz os itens. Use para 'confere a nota da chave X', 'de quem é essa nota', 'qual o valor dessa nota'. ATENÇÃO: a maioria das notas volta como 'resumo' (só fornecedor + valor total, SEM itens) porque não foram manifestadas — nesse caso, informe fornecedor e valor total e avise que os itens não estão disponíveis. Notas antigas (fora da janela da SEFAZ) podem não estar mais disponíveis (encontrado=false).",
+      parameters: {
+        type: "object",
+        properties: {
+          chave: { type: "string", description: "Chave de acesso da NFe (44 dígitos, só números)." },
+        },
+        required: ["chave"],
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -736,6 +751,14 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         qtd_itens: itens.length,
         itens,
       });
+    }
+    if (name === "get_nfe_por_chave") {
+      const chave = String(args.chave ?? "").replace(/\D/g, "");
+      if (chave.length !== 44) {
+        return JSON.stringify({ erro: "chave inválida — a chave da NFe tem 44 dígitos." });
+      }
+      const data = await dwCall("/nfe-consulta", { chave });
+      return JSON.stringify(data);
     }
     if (name === "get_top_clientes") {
       const topN = Number(args.top ?? 10);
@@ -1498,6 +1521,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Manutenção (visão macro) → get_manutencao_por_veiculo (ranking por veículo, preventiva vs corretiva, interno/externo).
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
+- Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
