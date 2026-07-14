@@ -215,53 +215,59 @@ app.post("/nfe-consulta", (req, res) => {
         }
         if (!Array.isArray(docZips)) docZips = [docZips];
 
-        const notas = [];
-        const diagnostico = [];
+        const documentos = [];
         for (const dz of docZips) {
           const b64 = typeof dz === "string" ? dz : dz["#text"];
-          const schema = (typeof dz === "object" ? dz["@_schema"] : null) || null;
           if (!b64) continue;
           let xml;
           try { xml = zlib.gunzipSync(Buffer.from(b64, "base64")).toString("utf-8"); }
-          catch (e) { diagnostico.push({ schema, erro: "gunzip: " + e.message }); continue; }
+          catch { continue; }
           const doc = parser.parse(xml);
+
           const infNFe = acharChave(doc, "infNFe");
-          if (!infNFe) {
-            // Não é a nota completa (provavelmente resumo/resNFe). Guarda p/ diagnóstico.
-            diagnostico.push({ schema, trecho: xml.slice(0, 500) });
+          if (infNFe) {
+            // NOTA COMPLETA — tem os itens
+            let dets = infNFe.det ?? [];
+            if (!Array.isArray(dets)) dets = [dets];
+            documentos.push({
+              tipo: "completa",
+              fornecedor:      acharChave(infNFe.emit ?? {}, "xNome"),
+              cnpj_fornecedor: acharChave(infNFe.emit ?? {}, "CNPJ"),
+              numero_nota:     infNFe.ide?.nNF,
+              data_emissao:    infNFe.ide?.dhEmi,
+              valor_total:     acharChave(infNFe.total ?? {}, "vNF"),
+              qtd_itens:       dets.length,
+              itens: dets.map((d) => ({
+                produto:     d.prod?.xProd,
+                quantidade:  d.prod?.qCom,
+                unidade:     d.prod?.uCom,
+                valor_unit:  d.prod?.vUnCom,
+                valor_total: d.prod?.vProd,
+              })),
+            });
             continue;
           }
 
-          let dets = infNFe.det;
-          if (!dets) continue;
-          if (!Array.isArray(dets)) dets = [dets];
-
-          const itens = dets.map((d) => ({
-            produto:     d.prod?.xProd,
-            ncm:         d.prod?.NCM,
-            quantidade:  d.prod?.qCom,
-            unidade:     d.prod?.uCom,
-            valor_unit:  d.prod?.vUnCom,
-            valor_total: d.prod?.vProd,
-          }));
-
-          notas.push({
-            emitente:         acharChave(infNFe.emit ?? {}, "xNome"),
-            numero_nota:      infNFe.ide?.nNF,
-            serie:            infNFe.ide?.serie,
-            data_emissao:     infNFe.ide?.dhEmi,
-            valor_total_nota: acharChave(infNFe.total ?? {}, "vNF"),
-            qtd_itens:        itens.length,
-            itens,
-          });
+          const resNFe = acharChave(doc, "resNFe");
+          if (resNFe) {
+            // Só o RESUMO — sem itens, mas tem fornecedor + valor total
+            documentos.push({
+              tipo: "resumo",
+              fornecedor:      resNFe.xNome,
+              cnpj_fornecedor: resNFe.CNPJ,
+              data_emissao:    resNFe.dhEmi,
+              valor_total:     resNFe.vNF,
+              protocolo:       resNFe.nProt,
+              aviso: "Só o resumo (sem itens) — nota não manifestada. Dá pra conferir fornecedor e valor total, não os itens.",
+            });
+          }
         }
 
-        if (notas.length === 0) {
+        if (documentos.length === 0) {
           return res.json({ cStat, xMotivo, chave, encontrado: false,
-            mensagem: `SEFAZ respondeu, mas não veio a nota COMPLETA (pode faltar a manifestação do destinatário). cStat ${cStat}: ${xMotivo}`,
-            diagnostico });
+            mensagem: `Documento não disponível (cStat ${cStat}: ${xMotivo})` });
         }
-        return res.json({ cStat, xMotivo, chave, encontrado: true, notas });
+        return res.json({ cStat, xMotivo, chave, encontrado: true, documentos });
       } catch (e) {
         return res.status(500).json({ error: "erro ao processar resposta da SEFAZ: " + e.message, raw: body.slice(0, 800) });
       }
