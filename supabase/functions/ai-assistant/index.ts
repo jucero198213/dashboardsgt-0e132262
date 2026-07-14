@@ -456,6 +456,21 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_os_notas",
+      description:
+        "Retorna a(s) nota(s) fiscal(is) de compra vinculada(s) a uma OS de manutenção: chave da NFe, número, fornecedor e valor lançado no sistema (valor_nota). Use para 'qual a nota da OS X', e como PRIMEIRO passo para conferir uma OS contra a nota real. Depois de obter a chave aqui, chame get_nfe_por_chave para pegar o valor real na SEFAZ e comparar.",
+      parameters: {
+        type: "object",
+        properties: {
+          ordem: { type: "number", description: "Número da ordem de serviço (OS)." },
+        },
+        required: ["ordem"],
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -759,6 +774,18 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       }
       const data = await dwCall("/nfe-consulta", { chave });
       return JSON.stringify(data);
+    }
+    if (name === "get_os_notas") {
+      const ordem = Number(args.ordem ?? 0);
+      if (!ordem) return JSON.stringify({ erro: "ordem (número da OS) é obrigatória." });
+      const data = await dwCall("/dw-os-notas", { ordem });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      return JSON.stringify({
+        ordem,
+        qtd_notas: rows.length,
+        notas: rows,
+        _dica: rows.length ? "Para o valor REAL de cada nota (SEFAZ), chame get_nfe_por_chave com a chave. Compare o valor real com o valor_nota lançado no sistema." : "Nenhuma nota vinculada a essa OS no sistema.",
+      });
     }
     if (name === "get_top_clientes") {
       const topN = Number(args.top ?? 10);
@@ -1522,6 +1549,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
+- CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.

@@ -278,6 +278,39 @@ app.post("/nfe-consulta", (req, res) => {
   sefazReq.end();
 });
 
+// ── Notas fiscais vinculadas a uma OS ─────────────────────────────────────────
+// Dado o número da OS, retorna a(s) chave(s) da(s) NFe da compra dela.
+// Caminho: OS (OSEREQ.CODORD) → itens da requisição (OSEIRE) → nota (ESTENT.NFE_ID)
+app.post("/dw-os-notas", async (req, res) => {
+  const { ordem } = req.body ?? {};
+  if (!ordem) return res.status(400).json({ error: "ordem (número da OS) é obrigatório" });
+  try {
+    const p = await getPool();
+    const dbReq = p.request();
+    dbReq.input("ordem", sql.Int, ordem);
+    const result = await dbReq.query(`
+      SELECT DISTINCT
+        ENT.NFE_ID    AS chave,
+        ENT.NUMDOC    AS numero_nota,
+        ENT.CODCLIFOR AS cod_fornecedor,
+        CLI.RAZSOC    AS fornecedor,
+        ENT.VLRDOC    AS valor_nota
+      FROM OSEIRE IRE WITH (NOLOCK)
+      JOIN OSEREQ REQ WITH (NOLOCK) ON REQ.CODREQ = IRE.CODREQ
+      JOIN ESTENT ENT WITH (NOLOCK) ON ENT.CODCLIFOR = IRE.CODCLIFOR AND ENT.NUMDOC = IRE.NUMDOC
+      LEFT JOIN RODCLI CLI WITH (NOLOCK) ON CLI.CODCLIFOR = ENT.CODCLIFOR
+      WHERE REQ.CODORD = @ordem
+        AND ENT.NFE_ID IS NOT NULL AND LEN(ENT.NFE_ID) = 44
+      OPTION (RECOMPILE)
+    `);
+    return res.json({ ordem, data: result.recordset });
+  } catch (err) {
+    console.error("[dw-os-notas]", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNREFUSED") await destroyPool();
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Endpoint principal ────────────────────────────────────────────────────────
 app.post("/dw-financeiro", async (req, res) => {
   const { action, dataInicio, dataFim, filial, empresa } = req.body;
