@@ -471,6 +471,22 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_conferencia_nfe",
+      description:
+        "Conferência fiscal do período: cruza as NF-e emitidas contra o CNPJ da SGT (dados da SEFAZ, tabela NFEIDIST) com o que foi lançado no sistema, e diz quantas notas estão LANÇADAS, NÃO LANÇADAS e com DIVERGÊNCIA de valor. Use para perguntas como 'quantas notas estão sem lançar', 'quanto falta lançar em junho', 'tem nota pendente?', 'quais fornecedores têm nota não lançada'. Retorna DOIS resumos: 'resumo_pra_lancar' (já desconta notas de entrada e fornecedores desconsiderados como a Minerva — use ESTE por padrão para responder o que falta lançar) e 'resumo_bruto' (inclui tudo, bate com o portal fiscal do Rodopar). Também traz os fornecedores com mais notas não lançadas. SEMPRE informe dataInicio e dataFim do período perguntado (ex: o mês inteiro).",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "Início do período, formato AAAA-MM-DD (por data de emissão da nota)." },
+          dataFim: { type: "string", description: "Fim do período, formato AAAA-MM-DD." },
+        },
+        required: ["dataInicio", "dataFim"],
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -785,6 +801,56 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         qtd_notas: rows.length,
         notas: rows,
         _dica: rows.length ? "Para o valor REAL de cada nota (SEFAZ), chame get_nfe_por_chave com a chave. Compare o valor real com o valor_nota lançado no sistema." : "Nenhuma nota vinculada a essa OS no sistema.",
+      });
+    }
+    if (name === "get_conferencia_nfe") {
+      const dataInicio = args.dataInicio ?? null;
+      const dataFim    = args.dataFim ?? null;
+      const data = await dwCall("/dw-consulta-nfe", { dataInicio, dataFim, limite: 5000 });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const ehEntrada = (r: Record<string, unknown>) => String(r.TPNF) === "0";
+      const ehDesc    = (r: Record<string, unknown>) => Number(r.DESCONSIDERADO) === 1;
+      const val       = (r: Record<string, unknown>) => Number(r.VALOR_NOTA ?? 0);
+      const r2        = (n: number) => Math.round(n * 100) / 100;
+      const cont = (arr: Array<Record<string, unknown>>, sit: string) => arr.filter((r) => r.SITUACAO === sit).length;
+      const soma = (arr: Array<Record<string, unknown>>, sit: string) =>
+        arr.filter((r) => r.SITUACAO === sit).reduce((s, r) => s + val(r), 0);
+
+      // Universo "pra lançar": sem notas de entrada e sem fornecedores desconsiderados
+      const limpo = rows.filter((r) => !ehEntrada(r) && !ehDesc(r));
+
+      // Top fornecedores com notas não lançadas (no universo limpo), por valor
+      const porForn: Record<string, { qtd: number; valor: number }> = {};
+      for (const r of limpo.filter((r) => r.SITUACAO === "NAO_LANCADA")) {
+        const f = String(r.RAZAO_SOCIAL ?? "—");
+        (porForn[f] ??= { qtd: 0, valor: 0 });
+        porForn[f].qtd++;
+        porForn[f].valor += val(r);
+      }
+      const topForn = Object.entries(porForn)
+        .sort((a, b) => b[1].valor - a[1].valor)
+        .slice(0, 8)
+        .map(([fornecedor, v]) => ({ fornecedor, qtd: v.qtd, valor_total: r2(v.valor) }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        resumo_pra_lancar: {
+          total_notas:       limpo.length,
+          lancadas:          cont(limpo, "OK"),
+          nao_lancadas:      cont(limpo, "NAO_LANCADA"),
+          divergentes:       cont(limpo, "DIVERGENTE"),
+          valor_nao_lancado: r2(soma(limpo, "NAO_LANCADA")),
+          valor_divergente:  r2(soma(limpo, "DIVERGENTE")),
+        },
+        resumo_bruto: {
+          total_notas:            rows.length,
+          nao_lancadas:           cont(rows, "NAO_LANCADA"),
+          notas_de_entrada:       rows.filter(ehEntrada).length,
+          notas_desconsideradas:  rows.filter(ehDesc).length,
+        },
+        top_fornecedores_nao_lancadas: topForn,
+        _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período.",
       });
     }
     if (name === "get_top_clientes") {
@@ -1550,6 +1616,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
+- CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
