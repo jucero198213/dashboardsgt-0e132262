@@ -1,8 +1,7 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  Upload, FileSpreadsheet, CheckCircle2, AlertTriangle,
-  XCircle, Search, RefreshCw, FileText, ChevronDown,
-  ChevronUp, Filter, Download,
+  CheckCircle2, AlertTriangle, XCircle, Search, FileText,
+  ChevronDown, ChevronUp, Filter, Download, ShieldCheck,
 } from "lucide-react";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { KpiCard } from "@/components/indicators/KpiCard";
@@ -10,43 +9,38 @@ import { MobileNav } from "@/components/shared/MobileNav";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { UpdateButton } from "@/components/shared/UpdateButton";
+import {
+  fetchConsultaNfe, clearDwCache,
+  type ConsultaNfeRow, type ConsultaNfeResumo,
+} from "@/lib/dwApi";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-type TipoNF = "NF-e" | "NFS-e";
-
-type StatusComparacao = "ok" | "divergencia" | "nao_encontrada" | "pendente";
-
-interface NotaFiscal {
-  id:         string;
-  numero:     string;
-  tipo:       TipoNF;
-  emitente:   string;
-  destinatario: string;
-  valor:      number;
-  dataEmissao: string;
-  chave?:     string;
-  status:     StatusComparacao;
-  divergencia?: string; // descrição da divergência se houver
-}
+type StatusNota = "OK" | "DIVERGENTE" | "NAO_LANCADA";
 
 // ─── Utilitários ──────────────────────────────────────────────────────────────
 
-const fmtBRL = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+const fmtBRL = (v: number | null | undefined) =>
+  v == null
+    ? "—"
+    : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 
-const fmtData = (d: string) => {
+const fmtData = (d: string | null | undefined) => {
   if (!d) return "—";
   const dt = new Date(d);
-  return dt.toLocaleDateString("pt-BR");
+  return isNaN(dt.getTime()) ? "—" : dt.toLocaleDateString("pt-BR");
 };
 
-function StatusBadge({ status, divergencia }: { status: StatusComparacao; divergencia?: string }) {
+const hoje = new Date();
+const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+  .toISOString().slice(0, 10);
+const hojeISO = hoje.toISOString().slice(0, 10);
+
+function StatusBadge({ status }: { status: StatusNota }) {
   const cfg = {
-    ok:            { icon: CheckCircle2, label: "Conferido",      cls: "text-emerald-300 bg-emerald-400/10 border-emerald-400/20" },
-    divergencia:   { icon: AlertTriangle, label: divergencia ?? "Divergência", cls: "text-amber-300 bg-amber-400/10 border-amber-400/20" },
-    nao_encontrada:{ icon: XCircle,       label: "Não encontrada", cls: "text-rose-300 bg-rose-400/10 border-rose-400/20" },
-    pendente:      { icon: RefreshCw,     label: "Pendente",       cls: "text-slate-300 bg-slate-400/10 border-slate-400/20" },
+    OK:          { icon: CheckCircle2,  label: "Conferida",   cls: "text-emerald-300 bg-emerald-400/10 border-emerald-400/20" },
+    DIVERGENTE:  { icon: AlertTriangle, label: "Divergente",  cls: "text-amber-300 bg-amber-400/10 border-amber-400/20" },
+    NAO_LANCADA: { icon: XCircle,       label: "Não lançada", cls: "text-rose-300 bg-rose-400/10 border-rose-400/20" },
   }[status];
 
   const Icon = cfg.icon;
@@ -58,78 +52,96 @@ function StatusBadge({ status, divergencia }: { status: StatusComparacao; diverg
   );
 }
 
+function OrigemBadge({ origem }: { origem: ConsultaNfeRow["ORIGEM"] }) {
+  if (!origem) return null;
+  const label = origem === "COMPRA" ? "Compra" : "Contas a pagar";
+  return (
+    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-bold bg-sky-400/10 text-sky-300">
+      {label}
+    </span>
+  );
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function Fiscal() {
-  const [notas, setNotas]           = useState<NotaFiscal[]>([]);
-  const [planilhaCarregada, setPlanilhaCarregada] = useState(false);
-  const [planilhaNome, setPlanilhaNome]           = useState("");
-  const [isDragging, setIsDragging] = useState(false);
+  const [notas, setNotas]     = useState<ConsultaNfeRow[]>([]);
+  const [resumo, setResumo]   = useState<ConsultaNfeResumo | null>(null);
+  const [dataInicio, setDataInicio] = useState(primeiroDiaMes);
+  const [dataFim, setDataFim]       = useState(hojeISO);
   const [search, setSearch]         = useState("");
-  const [filtroTipo, setFiltroTipo] = useState<"todos" | TipoNF>("todos");
-  const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusComparacao>("todos");
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusNota>("todos");
   const [isLoading, setIsLoading]   = useState(false);
+  const [erro, setErro]             = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [jaBuscou, setJaBuscou]     = useState(false);
+
+  // ── Busca no endpoint /dw-consulta-nfe ─────────────────────────────────────
+  const buscarNotas = useCallback(async (forcarAtualizacao = false) => {
+    setIsLoading(true);
+    setErro(null);
+    try {
+      if (forcarAtualizacao) clearDwCache("consulta-nfe");
+      const res = await fetchConsultaNfe({ dataInicio, dataFim, limite: 5000 });
+      setNotas(res.data ?? []);
+      setResumo(res.resumo ?? null);
+      setJaBuscou(true);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao buscar notas");
+      setNotas([]);
+      setResumo(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dataInicio, dataFim]);
+
+  useEffect(() => { buscarNotas(); }, [buscarNotas]);
 
   // ── Métricas derivadas ─────────────────────────────────────────────────────
-  const total          = notas.length;
-  const conferidas     = notas.filter(n => n.status === "ok").length;
-  const divergencias   = notas.filter(n => n.status === "divergencia").length;
-  const naoEncontradas = notas.filter(n => n.status === "nao_encontrada").length;
+  const total        = resumo?.total ?? notas.length;
+  const conferidas   = resumo?.ok ?? 0;
+  const divergencias = resumo?.divergentes ?? 0;
+  const naoLancadas  = resumo?.nao_lancadas ?? 0;
 
-  const totalValorOK   = notas.filter(n => n.status === "ok").reduce((s, n) => s + n.valor, 0);
-  const totalValorDiv  = notas.filter(n => n.status === "divergencia").reduce((s, n) => s + n.valor, 0);
+  const valorNaoLancado = notas
+    .filter(n => n.SITUACAO === "NAO_LANCADA")
+    .reduce((s, n) => s + Number(n.VALOR_NOTA ?? 0), 0);
+  const valorDivergente = notas
+    .filter(n => n.SITUACAO === "DIVERGENTE")
+    .reduce((s, n) => s + Number(n.VALOR_NOTA ?? 0), 0);
 
   // ── Filtro + busca ─────────────────────────────────────────────────────────
   const notasFiltradas = notas.filter(n => {
     const matchSearch = !search ||
-      n.numero.toLowerCase().includes(search.toLowerCase()) ||
-      n.emitente.toLowerCase().includes(search.toLowerCase()) ||
-      n.destinatario.toLowerCase().includes(search.toLowerCase());
-    const matchTipo   = filtroTipo === "todos" || n.tipo === filtroTipo;
-    const matchStatus = filtroStatus === "todos" || n.status === filtroStatus;
-    return matchSearch && matchTipo && matchStatus;
+      (n.NUMERO_NOTA ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (n.RAZAO_SOCIAL ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (n.CNPJ ?? "").includes(search);
+    const matchStatus = filtroStatus === "todos" || n.SITUACAO === filtroStatus;
+    return matchSearch && matchStatus;
   });
 
-  // ── Upload de planilha ─────────────────────────────────────────────────────
-  const handleFile = useCallback((file: File) => {
-    if (!file) return;
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["xlsx", "xls", "csv"].includes(ext ?? "")) {
-      alert("Formato inválido. Aceito: .xlsx, .xls, .csv");
-      return;
-    }
-    setPlanilhaNome(file.name);
-    setPlanilhaCarregada(true);
-    // TODO: parsear planilha e disparar comparação com endpoint NF
-  }, []);
-
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
-  }, [handleFile]);
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
-  };
-
-  // ── Buscar NFs do endpoint ─────────────────────────────────────────────────
-  const buscarNotas = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: substituir pela chamada real ao endpoint
-      // const res = await fetch("/api/fiscal/notas");
-      // const data = await res.json();
-      // setNotas(data);
-      await new Promise(r => setTimeout(r, 800)); // simula latência
-      setNotas([]); // endpoint ainda não implementado
-    } finally {
-      setIsLoading(false);
-    }
+  // ── Export CSV ─────────────────────────────────────────────────────────────
+  const exportarCsv = () => {
+    const header = "situacao;fornecedor;cnpj;numero_nota;serie;valor_nota;valor_lancado;origem;data_emissao;chave";
+    const linhas = notasFiltradas.map(n => [
+      n.SITUACAO,
+      `"${(n.RAZAO_SOCIAL ?? "").replace(/"/g, "'")}"`,
+      n.CNPJ ?? "",
+      n.NUMERO_NOTA ?? "",
+      n.SERIE_NOTA ?? "",
+      String(n.VALOR_NOTA ?? "").replace(".", ","),
+      String(n.VALOR_LANCADO ?? "").replace(".", ","),
+      n.ORIGEM ?? "",
+      fmtData(n.DATA_EMISSAO),
+      n.CHAVE ?? "",
+    ].join(";"));
+    const blob = new Blob(["﻿" + [header, ...linhas].join("\n")], { type: "text/csv;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `conferencia_nfe_${dataInicio}_${dataFim}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -175,12 +187,29 @@ export default function Fiscal() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">NF-e · NFS-e</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">SEFAZ × Sistema</span>
+              </div>
+
+              {/* Filtro de período */}
+              <div className="flex items-center gap-1.5 ml-2">
+                <input
+                  type="date"
+                  value={dataInicio}
+                  onChange={e => setDataInicio(e.target.value)}
+                  className="h-7 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40"
+                />
+                <span className="text-[10px] text-slate-600">até</span>
+                <input
+                  type="date"
+                  value={dataFim}
+                  onChange={e => setDataFim(e.target.value)}
+                  className="h-7 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40"
+                />
               </div>
 
               <div className="flex-1" />
 
-              <UpdateButton onClick={buscarNotas} isFetching={isLoading} />
+              <UpdateButton onClick={() => buscarNotas(true)} isFetching={isLoading} />
             </div>
 
             {/* ── MOBILE NAV ── */}
@@ -190,102 +219,48 @@ export default function Fiscal() {
               <HomeButton />
             </div>
 
+            {/* ── Período (mobile) ── */}
+            <div className="flex sm:hidden items-center gap-1.5">
+              <input
+                type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
+                className="h-8 flex-1 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none"
+              />
+              <span className="text-[10px] text-slate-600">até</span>
+              <input
+                type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
+                className="h-8 flex-1 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none"
+              />
+            </div>
+
+            {/* ── Erro ── */}
+            {erro && (
+              <div className="flex items-center gap-2 rounded-xl border border-rose-400/20 bg-rose-400/5 px-4 py-2.5">
+                <XCircle className="h-4 w-4 text-rose-400 shrink-0" />
+                <p className="text-[12px] text-rose-300">{erro}</p>
+              </div>
+            )}
+
             {/* ── KPIs ── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
               <AnimatedCard delay={0}>
-                <KpiCard label="Total de NFs" value={String(total || "—")} subtitle="NF-e + NFS-e" icon={FileText} tone="cyan" />
+                <KpiCard label="Notas contra o CNPJ" value={String(total || "—")} subtitle="Registradas na SEFAZ" icon={FileText} tone="cyan" />
               </AnimatedCard>
               <AnimatedCard delay={60}>
-                <KpiCard label="Conferidas" value={String(conferidas || "—")} subtitle={total ? `${((conferidas/total)*100).toFixed(0)}% do total` : "Aguardando dados"} icon={CheckCircle2} tone="emerald" />
+                <KpiCard label="Conferidas" value={String(conferidas || "—")} subtitle={total ? `${((conferidas / total) * 100).toFixed(0)}% lançadas e batendo` : "Aguardando dados"} icon={CheckCircle2} tone="emerald" />
               </AnimatedCard>
               <AnimatedCard delay={120}>
-                <KpiCard label="Divergências" value={String(divergencias || "—")} subtitle={divergencias ? fmtBRL(totalValorDiv) : "Nenhuma encontrada"} icon={AlertTriangle} tone="amber" />
+                <KpiCard label="Divergências" value={String(divergencias || "—")} subtitle={divergencias ? `${fmtBRL(valorDivergente)} em notas` : "Nenhuma encontrada"} icon={AlertTriangle} tone="amber" />
               </AnimatedCard>
               <AnimatedCard delay={180}>
-                <KpiCard label="Não encontradas" value={String(naoEncontradas || "—")} subtitle="Constam na planilha, sem NF" icon={XCircle} tone="rose" />
+                <KpiCard label="Não lançadas" value={String(naoLancadas || "—")} subtitle={naoLancadas ? `${fmtBRL(valorNaoLancado)} sem lançamento` : "Tudo lançado"} icon={XCircle} tone="rose" />
               </AnimatedCard>
             </div>
 
             {/* ── ÁREA PRINCIPAL ── */}
             <div className="flex flex-col xl:flex-row gap-2 flex-1 min-h-0">
 
-              {/* ── COLUNA ESQUERDA — Upload + tabela ── */}
+              {/* ── COLUNA ESQUERDA — tabela ── */}
               <div className="flex flex-col flex-1 min-h-0 gap-2">
-
-                {/* Upload de planilha */}
-                <AnimatedCard delay={60} hover={false}>
-                  <div
-                    className="rounded-[16px] border p-4"
-                    style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <FileSpreadsheet className="h-4 w-4 text-amber-400" />
-                        <span className="text-[13px] font-bold dark:text-white text-slate-800">Planilha de referência</span>
-                      </div>
-                      {planilhaCarregada && (
-                        <button
-                          onClick={() => { setPlanilhaCarregada(false); setPlanilhaNome(""); }}
-                          className="text-[10px] text-slate-500 hover:text-rose-300 transition-colors"
-                        >
-                          Remover
-                        </button>
-                      )}
-                    </div>
-
-                    {planilhaCarregada ? (
-                      <div
-                        className="flex items-center gap-3 rounded-xl border border-emerald-400/20 bg-emerald-400/5 px-4 py-3"
-                      >
-                        <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-semibold text-emerald-300 truncate">{planilhaNome}</p>
-                          <p className="text-[10px] text-slate-500">Planilha carregada — pronto para comparar</p>
-                        </div>
-                        <button
-                          onClick={buscarNotas}
-                          className="ml-auto shrink-0 flex items-center gap-1.5 rounded-lg bg-amber-500/15 border border-amber-400/25 px-3 py-1.5 text-[11px] font-bold text-amber-300 hover:bg-amber-500/25 transition-colors"
-                        >
-                          <RefreshCw className="h-3 w-3" />
-                          Comparar
-                        </button>
-                      </div>
-                    ) : (
-                      <div
-                        onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-                        onDragLeave={() => setIsDragging(false)}
-                        onDrop={onDrop}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed py-8 px-4 cursor-pointer transition-all duration-200 ${
-                          isDragging
-                            ? "border-amber-400/60 bg-amber-400/5"
-                            : "border-white/10 hover:border-amber-400/30 hover:bg-amber-400/[0.03]"
-                        }`}
-                      >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/10 border border-amber-400/20">
-                          <Upload className="h-5 w-5 text-amber-400" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-[13px] font-semibold dark:text-slate-200 text-slate-700">
-                            Arraste a planilha aqui
-                          </p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
-                            ou clique para selecionar · .xlsx, .xls, .csv
-                          </p>
-                        </div>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".xlsx,.xls,.csv"
-                          className="hidden"
-                          onChange={onFileChange}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </AnimatedCard>
-
-                {/* Filtros + tabela */}
                 <AnimatedCard delay={120} hover={false} className="flex-1 min-h-0">
                   <div
                     className="flex flex-col h-full rounded-[16px] border overflow-hidden"
@@ -297,7 +272,7 @@ export default function Fiscal() {
                       style={{ borderColor: "var(--sgt-divider)" }}
                     >
                       <FileText className="h-4 w-4 text-amber-400 shrink-0" />
-                      <span className="text-[13px] font-bold dark:text-white text-slate-800">Notas Fiscais</span>
+                      <span className="text-[13px] font-bold dark:text-white text-slate-800">Conferência de Notas</span>
 
                       <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0 ml-2">
                         {/* Busca */}
@@ -306,26 +281,9 @@ export default function Fiscal() {
                           <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Buscar NF, emitente..."
-                            className="h-7 rounded-lg pl-7 pr-3 text-[11px] bg-white/5 border border-white/10 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400/40 w-[160px]"
+                            placeholder="Buscar NF, fornecedor, CNPJ..."
+                            className="h-7 rounded-lg pl-7 pr-3 text-[11px] bg-white/5 border border-white/10 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400/40 w-[180px]"
                           />
-                        </div>
-
-                        {/* Filtro tipo */}
-                        <div className="flex items-center gap-1">
-                          {(["todos", "NF-e", "NFS-e"] as const).map(t => (
-                            <button
-                              key={t}
-                              onClick={() => setFiltroTipo(t)}
-                              className={`h-7 rounded-lg px-2.5 text-[10px] font-semibold transition-colors ${
-                                filtroTipo === t
-                                  ? "bg-amber-400/15 border border-amber-400/30 text-amber-300"
-                                  : "text-slate-500 hover:text-slate-300 border border-transparent"
-                              }`}
-                            >
-                              {t === "todos" ? "Todos" : t}
-                            </button>
-                          ))}
                         </div>
 
                         {/* Filtro status */}
@@ -337,18 +295,20 @@ export default function Fiscal() {
                             className="h-7 rounded-lg px-2 text-[10px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40"
                           >
                             <option value="todos">Todos status</option>
-                            <option value="ok">Conferidas</option>
-                            <option value="divergencia">Divergências</option>
-                            <option value="nao_encontrada">Não encontradas</option>
-                            <option value="pendente">Pendentes</option>
+                            <option value="OK">Conferidas</option>
+                            <option value="DIVERGENTE">Divergentes</option>
+                            <option value="NAO_LANCADA">Não lançadas</option>
                           </select>
                         </div>
                       </div>
 
                       {notas.length > 0 && (
-                        <button className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-amber-300 transition-colors ml-auto">
+                        <button
+                          onClick={exportarCsv}
+                          className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-amber-300 transition-colors ml-auto"
+                        >
                           <Download className="h-3 w-3" />
-                          Exportar
+                          Exportar CSV
                         </button>
                       )}
                     </div>
@@ -357,107 +317,118 @@ export default function Fiscal() {
                     <div className="flex-1 overflow-y-auto">
                       {isLoading ? (
                         <div className="flex flex-col gap-1 p-3">
-                          {Array.from({ length: 6 }).map((_, i) => (
+                          {Array.from({ length: 8 }).map((_, i) => (
                             <div key={i} className="h-10 rounded-lg animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                           ))}
                         </div>
                       ) : notasFiltradas.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-4 py-16 px-4 text-center">
-                          {!planilhaCarregada ? (
-                            <>
-                              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/8 border border-amber-400/15">
-                                <FileSpreadsheet className="h-6 w-6 text-amber-400/60" />
-                              </div>
-                              <div>
-                                <p className="text-[13px] font-semibold dark:text-slate-300 text-slate-600">Nenhuma planilha carregada</p>
-                                <p className="text-[11px] text-slate-500 mt-1">Importe a planilha de referência para iniciar a comparação com as NFs</p>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-400/8 border border-slate-400/15">
-                                <Search className="h-6 w-6 text-slate-500" />
-                              </div>
-                              <div>
-                                <p className="text-[13px] font-semibold dark:text-slate-300 text-slate-600">Nenhuma nota encontrada</p>
-                                <p className="text-[11px] text-slate-500 mt-1">Verifique os filtros ou clique em Comparar</p>
-                              </div>
-                            </>
-                          )}
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/8 border border-amber-400/15">
+                            <Search className="h-6 w-6 text-amber-400/60" />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-semibold dark:text-slate-300 text-slate-600">
+                              {jaBuscou ? "Nenhuma nota no filtro atual" : "Escolha o período e aguarde a conferência"}
+                            </p>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              {jaBuscou ? "Ajuste a busca, o status ou o período" : "As notas da SEFAZ serão cruzadas com o sistema automaticamente"}
+                            </p>
+                          </div>
                         </div>
                       ) : (
                         <>
                           {/* Cabeçalho colunas */}
                           <div
-                            className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-3 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.18em] text-slate-600 border-b sticky top-0"
+                            className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.18em] text-slate-600 border-b sticky top-0 z-10"
                             style={{ borderColor: "var(--sgt-divider)", background: "var(--sgt-bg-card)" }}
                           >
-                            <span>Tipo</span>
-                            <span>Emitente / Nº</span>
-                            <span className="text-right">Valor</span>
-                            <span>Emissão</span>
+                            <span>Fornecedor / Nº</span>
+                            <span className="text-right">Valor nota</span>
+                            <span className="text-right hidden md:block">Valor lançado</span>
+                            <span className="hidden sm:block">Emissão</span>
                             <span>Status</span>
                           </div>
 
                           {/* Linhas */}
-                          {notasFiltradas.map(n => (
-                            <div key={n.id}>
-                              <button
-                                type="button"
-                                onClick={() => setExpandedRow(expandedRow === n.id ? null : n.id)}
-                                className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-3 w-full px-4 py-3 text-left border-b hover:bg-white/[0.03] transition-colors"
-                                style={{ borderColor: "var(--sgt-divider)" }}
-                              >
-                                <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 self-center ${
-                                  n.tipo === "NF-e"
-                                    ? "bg-amber-400/10 text-amber-300"
-                                    : "bg-violet-400/10 text-violet-300"
-                                }`}>{n.tipo}</span>
-
-                                <div className="flex flex-col min-w-0">
-                                  <span className="text-[12px] font-semibold dark:text-slate-200 text-slate-700 truncate">{n.emitente}</span>
-                                  <span className="text-[10px] text-slate-500">Nº {n.numero}</span>
-                                </div>
-
-                                <span className="text-[12px] font-bold tabular-nums dark:text-slate-200 text-slate-700 self-center text-right">{fmtBRL(n.valor)}</span>
-                                <span className="text-[11px] text-slate-500 self-center">{fmtData(n.dataEmissao)}</span>
-                                <div className="self-center flex items-center gap-1">
-                                  <StatusBadge status={n.status} divergencia={n.divergencia} />
-                                  {expandedRow === n.id
-                                    ? <ChevronUp className="h-3 w-3 text-slate-600" />
-                                    : <ChevronDown className="h-3 w-3 text-slate-600" />
-                                  }
-                                </div>
-                              </button>
-
-                              {/* Linha expandida */}
-                              {expandedRow === n.id && (
-                                <div
-                                  className="px-4 py-3 border-b"
-                                  style={{ borderColor: "var(--sgt-divider)", background: "var(--sgt-row-hover)" }}
+                          {notasFiltradas.map(n => {
+                            const rowId = n.CHAVE ?? `${n.CNPJ}-${n.NUMERO_NOTA}`;
+                            return (
+                              <div key={rowId}>
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedRow(expandedRow === rowId ? null : rowId)}
+                                  className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-3 w-full px-4 py-3 text-left border-b hover:bg-white/[0.03] transition-colors"
+                                  style={{ borderColor: "var(--sgt-divider)" }}
                                 >
-                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[11px]">
-                                    <div>
-                                      <p className="text-slate-500 mb-0.5">Destinatário</p>
-                                      <p className="font-semibold dark:text-slate-300 text-slate-600">{n.destinatario || "—"}</p>
-                                    </div>
-                                    {n.chave && (
-                                      <div className="col-span-2">
-                                        <p className="text-slate-500 mb-0.5">Chave de acesso</p>
-                                        <p className="font-mono text-[9px] dark:text-slate-400 text-slate-500 break-all">{n.chave}</p>
-                                      </div>
-                                    )}
-                                    {n.divergencia && (
-                                      <div>
-                                        <p className="text-slate-500 mb-0.5">Divergência</p>
-                                        <p className="font-semibold text-amber-300">{n.divergencia}</p>
-                                      </div>
-                                    )}
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-[12px] font-semibold dark:text-slate-200 text-slate-700 truncate">{n.RAZAO_SOCIAL ?? "—"}</span>
+                                    <span className="text-[10px] text-slate-500">Nº {n.NUMERO_NOTA ?? "—"} · Série {n.SERIE_NOTA ?? "—"}</span>
                                   </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+
+                                  <span className="text-[12px] font-bold tabular-nums dark:text-slate-200 text-slate-700 self-center text-right">
+                                    {fmtBRL(n.VALOR_NOTA)}
+                                  </span>
+
+                                  <span className={`text-[12px] font-bold tabular-nums self-center text-right hidden md:block ${
+                                    n.SITUACAO === "DIVERGENTE" ? "text-amber-300" : "dark:text-slate-400 text-slate-500"
+                                  }`}>
+                                    {fmtBRL(n.VALOR_LANCADO)}
+                                  </span>
+
+                                  <span className="text-[11px] text-slate-500 self-center hidden sm:block">{fmtData(n.DATA_EMISSAO)}</span>
+
+                                  <div className="self-center flex items-center gap-1">
+                                    <StatusBadge status={n.SITUACAO} />
+                                    {expandedRow === rowId
+                                      ? <ChevronUp className="h-3 w-3 text-slate-600" />
+                                      : <ChevronDown className="h-3 w-3 text-slate-600" />
+                                    }
+                                  </div>
+                                </button>
+
+                                {/* Linha expandida */}
+                                {expandedRow === rowId && (
+                                  <div
+                                    className="px-4 py-3 border-b"
+                                    style={{ borderColor: "var(--sgt-divider)", background: "var(--sgt-row-hover)" }}
+                                  >
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[11px]">
+                                      <div>
+                                        <p className="text-slate-500 mb-0.5">CNPJ do fornecedor</p>
+                                        <p className="font-mono text-[10px] dark:text-slate-300 text-slate-600">{n.CNPJ ?? "—"}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-500 mb-0.5">Lançada como</p>
+                                        <p className="font-semibold dark:text-slate-300 text-slate-600">
+                                          {n.ORIGEM ? <OrigemBadge origem={n.ORIGEM} /> : "—"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-slate-500 mb-0.5">Filial · Recebida em</p>
+                                        <p className="font-semibold dark:text-slate-300 text-slate-600">
+                                          {n.FILIAL ?? "—"} · {fmtData(n.DATA_RECEBIMENTO)}
+                                        </p>
+                                      </div>
+                                      {n.SITUACAO === "DIVERGENTE" && (
+                                        <div>
+                                          <p className="text-slate-500 mb-0.5">Diferença</p>
+                                          <p className="font-semibold text-amber-300 tabular-nums">
+                                            {fmtBRL(Number(n.VALOR_NOTA ?? 0) - Number(n.VALOR_LANCADO ?? 0))}
+                                          </p>
+                                        </div>
+                                      )}
+                                      {n.CHAVE && (
+                                        <div className="col-span-2 sm:col-span-4">
+                                          <p className="text-slate-500 mb-0.5">Chave de acesso</p>
+                                          <p className="font-mono text-[9px] dark:text-slate-400 text-slate-500 break-all">{n.CHAVE}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </>
                       )}
                     </div>
@@ -472,16 +443,15 @@ export default function Fiscal() {
                     className="rounded-[16px] border p-4"
                     style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Resumo da comparação</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Resumo da conferência</p>
 
                     <div className="flex flex-col gap-2">
                       {[
-                        { label: "Conferidas",      value: conferidas,     total, color: "bg-emerald-400",  pctColor: "text-emerald-300" },
-                        { label: "Divergências",     value: divergencias,   total, color: "bg-amber-400",    pctColor: "text-amber-300"   },
-                        { label: "Não encontradas",  value: naoEncontradas, total, color: "bg-rose-400",     pctColor: "text-rose-300"    },
-                        { label: "Pendentes",        value: total - conferidas - divergencias - naoEncontradas, total, color: "bg-slate-500", pctColor: "text-slate-400" },
+                        { label: "Conferidas",   value: conferidas,   color: "bg-emerald-400", pctColor: "text-emerald-300" },
+                        { label: "Divergências", value: divergencias, color: "bg-amber-400",   pctColor: "text-amber-300"   },
+                        { label: "Não lançadas", value: naoLancadas,  color: "bg-rose-400",    pctColor: "text-rose-300"    },
                       ].map(row => {
-                        const pct = total > 0 ? (row.value / row.total) * 100 : 0;
+                        const pct = total > 0 ? (row.value / total) * 100 : 0;
                         return (
                           <div key={row.label}>
                             <div className="flex justify-between items-center mb-1">
@@ -509,34 +479,59 @@ export default function Fiscal() {
                     className="rounded-[16px] border p-4"
                     style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Totais financeiros</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Valores em risco</p>
                     <div className="flex flex-col gap-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[11px] text-slate-400">Valor conferido</span>
-                        <span className="text-[12px] font-bold text-emerald-300 tabular-nums">{total ? fmtBRL(totalValorOK) : "—"}</span>
+                        <span className="text-[11px] text-slate-400">Não lançado</span>
+                        <span className="text-[12px] font-bold text-rose-300 tabular-nums">{total ? fmtBRL(valorNaoLancado) : "—"}</span>
                       </div>
                       <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
                       <div className="flex justify-between items-center">
-                        <span className="text-[11px] text-slate-400">Valor em divergência</span>
-                        <span className="text-[12px] font-bold text-amber-300 tabular-nums">{total ? fmtBRL(totalValorDiv) : "—"}</span>
+                        <span className="text-[11px] text-slate-400">Em divergência</span>
+                        <span className="text-[12px] font-bold text-amber-300 tabular-nums">{total ? fmtBRL(valorDivergente) : "—"}</span>
                       </div>
                     </div>
                   </div>
                 </AnimatedCard>
 
-                {/* Instrução / próximos passos */}
+                {/* Origem dos lançamentos */}
+                {resumo && (
+                  <AnimatedCard delay={170} hover={false}>
+                    <div
+                      className="rounded-[16px] border p-4"
+                      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                    >
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Origem dos lançamentos</p>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] text-slate-400">Compras (estoque)</span>
+                          <span className="text-[12px] font-bold text-sky-300 tabular-nums">{resumo.por_origem.compra}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] text-slate-400">Contas a pagar</span>
+                          <span className="text-[12px] font-bold text-sky-300 tabular-nums">{resumo.por_origem.contas_pagar}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedCard>
+                )}
+
+                {/* Como funciona */}
                 <AnimatedCard delay={200} hover={false}>
                   <div
                     className="rounded-[16px] border border-amber-400/15 p-4"
                     style={{ background: "rgba(251,191,36,0.03)" }}
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/70 mb-2">Como usar</p>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-amber-400/70" />
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400/70">Como funciona</p>
+                    </div>
                     <ol className="flex flex-col gap-2">
                       {[
-                        "Importe a planilha de referência (.xlsx / .csv)",
-                        "Clique em Comparar para buscar as NF-e e NFS-e",
-                        "Revise as divergências na tabela",
-                        "Exporte o relatório para o contador",
+                        "Busca na SEFAZ todas as NF-e emitidas contra o CNPJ da SGT no período",
+                        "Cruza com os lançamentos do sistema (compras e contas a pagar)",
+                        "Aponta o que não foi lançado e o que foi lançado com valor diferente",
+                        "Exporte o CSV para tratar as pendências",
                       ].map((step, i) => (
                         <li key={i} className="flex items-start gap-2 text-[11px] text-slate-400">
                           <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400/10 text-[9px] font-bold text-amber-400 mt-0.5">{i + 1}</span>

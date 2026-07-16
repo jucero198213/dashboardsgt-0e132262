@@ -683,6 +683,58 @@ export async function fetchBankAccounts(params?: {
   );
 }
 
+// ─── Tipos: CONSULTA NFE (conferência fiscal SEFAZ × sistema) ─────────────────
+
+export interface ConsultaNfeRow {
+  FILIAL:           string | number | null;
+  CHAVE:            string | null;
+  CNPJ:             string | null;
+  RAZAO_SOCIAL:     string | null;
+  DATA_EMISSAO:     string | null;
+  VALOR_NOTA:       number | null;
+  DATA_RECEBIMENTO: string | null;
+  NUMERO_NOTA:      string | null;
+  SERIE_NOTA:       string | null;
+  VALOR_LANCADO:    number | null;
+  ORIGEM:           "COMPRA" | "CONTAS_PAGAR" | null;
+  SITUACAO:         "OK" | "DIVERGENTE" | "NAO_LANCADA";
+}
+
+export interface ConsultaNfeResumo {
+  total:         number;
+  ok:            number;
+  nao_lancadas:  number;
+  divergentes:   number;
+  por_origem:    { compra: number; contas_pagar: number };
+}
+
+export interface ConsultaNfeResponse {
+  resumo: ConsultaNfeResumo;
+  data:   ConsultaNfeRow[];
+}
+
+const ENDPOINT_CONSULTA_NFE = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-consulta-nfe`
+  : `${SUPABASE_URL}/functions/v1/dw-consulta-nfe`;
+
+/**
+ * Conferência fiscal: cruza as NF-e emitidas contra o CNPJ (NFEIDIST/SEFAZ)
+ * com o que foi lançado (ESTENT por chave + PAGDOCI por CNPJ+número).
+ */
+export async function fetchConsultaNfe(params?: {
+  dataInicio?: string | null;
+  dataFim?:    string | null;
+  filial?:     string | null;
+  modo?:       "todas" | "nao_lancadas" | "divergentes";
+  limite?:     number;
+}): Promise<ConsultaNfeResponse> {
+  const key = `consulta-nfe:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<ConsultaNfeResponse>(ENDPOINT_CONSULTA_NFE, params ?? {}),
+    TTL_FINANCEIRO,
+  );
+}
+
 // ── Extrato bancário por conta (/dw-bancos-extrato) ──────────────────────────
 const ENDPOINT_BANCOS_EXTRATO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-bancos-extrato`
