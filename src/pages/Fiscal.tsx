@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   CheckCircle2, AlertTriangle, XCircle, Search, FileText,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Download, EyeOff,
+  ExternalLink,
 } from "lucide-react";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { KpiCard } from "@/components/indicators/KpiCard";
@@ -38,6 +39,12 @@ const fmtData = (d: string | null | undefined) => {
 // Marcações pra os filtros
 const isEntrada        = (n: ConsultaNfeRow) => String(n.TPNF) === "0";
 const isDesconsiderado = (n: ConsultaNfeRow) => n.DESCONSIDERADO === 1;
+
+// Atalho pro DANFE: copia a chave e abre o site (usuário cola + captcha + baixa).
+async function copiarEAbrirDanfe(chave: string) {
+  try { await navigator.clipboard.writeText(chave); } catch { /* segue sem clipboard */ }
+  window.open("https://meudanfe.com.br", "_blank", "noopener,noreferrer");
+}
 
 const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const mesLabel = (m: string) => {
@@ -475,6 +482,16 @@ export default function Fiscal() {
                                     <div className="col-span-2 sm:col-span-4">
                                       <p className="text-slate-500 mb-0.5">Chave de acesso</p>
                                       <p className="font-mono text-[9px] dark:text-slate-400 text-slate-500 break-all">{n.CHAVE}</p>
+                                      <button
+                                        onClick={() => copiarEAbrirDanfe(n.CHAVE!)}
+                                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-400/25 bg-amber-400/10 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-400/20 transition-colors"
+                                      >
+                                        <ExternalLink className="h-3 w-3" />
+                                        Gerar DANFE — copia a chave e abre o site
+                                      </button>
+                                      <p className="text-[9px] text-slate-600 mt-1">
+                                        No site: cole a chave (Ctrl+V), resolva o captcha e baixe o PDF da nota com os itens.
+                                      </p>
                                     </div>
                                   )}
                                 </div>
