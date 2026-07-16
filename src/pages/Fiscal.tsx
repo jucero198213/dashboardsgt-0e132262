@@ -405,6 +405,15 @@ export default function Fiscal() {
                                   Nº {n.NUMERO_NOTA ?? "—"} · Série {n.SERIE_NOTA ?? "—"}
                                   {isEntrada(n) && <span className="rounded px-1 py-0.5 text-[8px] font-bold bg-slate-400/15 text-slate-400">ENTRADA</span>}
                                   {isDesconsiderado(n) && <span className="rounded px-1 py-0.5 text-[8px] font-bold bg-purple-400/15 text-purple-300">DESCONSID.</span>}
+                                  {n.SITUACAO === "NAO_LANCADA" && n.DIAS_PARADA != null && Number(n.DIAS_PARADA) > 0 && (
+                                    <span className={`rounded px-1 py-0.5 text-[8px] font-bold ${
+                                      Number(n.DIAS_PARADA) > 15
+                                        ? "bg-rose-400/15 text-rose-300"
+                                        : "bg-amber-400/10 text-amber-300/80"
+                                    }`}>
+                                      PARADA HÁ {n.DIAS_PARADA}D
+                                    </span>
+                                  )}
                                 </span>
                               </div>
 
@@ -440,6 +449,14 @@ export default function Fiscal() {
                                       {n.ORIGEM === "COMPRA" ? "Compra" : n.ORIGEM === "CONTAS_PAGAR" ? "Contas a pagar" : "—"}
                                     </p>
                                   </div>
+                                  {n.SITUACAO !== "NAO_LANCADA" && n.USUARIO_LANCAMENTO && (
+                                    <div>
+                                      <p className="text-slate-500 mb-0.5">Lançada por</p>
+                                      <p className="font-semibold dark:text-slate-300 text-slate-600">
+                                        {n.USUARIO_LANCAMENTO} · {fmtData(n.DATA_LANCAMENTO)}
+                                      </p>
+                                    </div>
+                                  )}
                                   <div>
                                     <p className="text-slate-500 mb-0.5">Valor lançado</p>
                                     <p className={`font-semibold tabular-nums ${n.SITUACAO === "DIVERGENTE" ? "text-amber-300" : "dark:text-slate-300 text-slate-600"}`}>

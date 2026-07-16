@@ -697,6 +697,9 @@ export interface ConsultaNfeRow {
   SERIE_NOTA:       string | null;
   TPNF:             string | number | null;   // 0 = entrada, 1 = saída
   DESCONSIDERADO:   number;                    // 1 = fornecedor desconsiderado (Minerva etc.)
+  USUARIO_LANCAMENTO: string | null;           // quem lançou (última atualização no VR)
+  DATA_LANCAMENTO:  string | null;             // quando lançou
+  DIAS_PARADA:      number | null;             // dias desde o recebimento da nota
   VALOR_LANCADO:    number | null;
   ORIGEM:           "COMPRA" | "CONTAS_PAGAR" | null;
   SITUACAO:         "OK" | "DIVERGENTE" | "NAO_LANCADA";

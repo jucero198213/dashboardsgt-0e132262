@@ -1852,6 +1852,12 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           -- Marcações pra tela filtrar (Opção C): entrada (TPNF=0) e fornecedor
           -- desconsiderado (Minerva etc.). Nenhuma é escondida aqui no servidor.
           CASE WHEN LEFT(${limpaCnpj("D.CNPJ")}, 8) IN (${descInSql}) THEN 1 ELSE 0 END AS DESCONSIDERADO,
+          -- Accountability: quem/quando lançou (USUATU/DATATU registram a última
+          -- atualização — pra nota lançada, é o lançamento) e há quantos dias a
+          -- nota está no sistema (pra medir quanto tempo as pendentes empacam).
+          D.USUATU   AS USUARIO_LANCAMENTO,
+          D.DATATU   AS DATA_LANCAMENTO,
+          DATEDIFF(day, COALESCE(D.DHRECBTO, D.DEMI), GETDATE()) AS DIAS_PARADA,
           -- Valor pra comparar: prioriza o líquido do contas a pagar (VLRLIQ, já
           -- com desconto); só usa o VLRDOC da compra se a nota não estiver no
           -- contas a pagar. Evita falso divergente em nota com desconto.

@@ -478,7 +478,7 @@ const tools = [
     function: {
       name: "get_conferencia_nfe",
       description:
-        "Conferência fiscal do período: cruza as NF-e emitidas contra o CNPJ da SGT (dados da SEFAZ, tabela NFEIDIST) com o que foi lançado no sistema, e diz quantas notas estão LANÇADAS, NÃO LANÇADAS e com DIVERGÊNCIA de valor. Use para perguntas como 'quantas notas estão sem lançar', 'quanto falta lançar em junho', 'tem nota pendente?', 'quais fornecedores têm nota não lançada'. Retorna DOIS resumos: 'resumo_pra_lancar' (já desconta notas de entrada e fornecedores desconsiderados como a Minerva — use ESTE por padrão para responder o que falta lançar) e 'resumo_bruto' (inclui tudo, bate com o portal fiscal do Rodopar). Também traz os fornecedores com mais notas não lançadas. SEMPRE informe dataInicio e dataFim do período perguntado (ex: o mês inteiro).",
+        "Conferência fiscal do período: cruza as NF-e emitidas contra o CNPJ da SGT (dados da SEFAZ, tabela NFEIDIST) com o que foi lançado no sistema, e diz quantas notas estão LANÇADAS, NÃO LANÇADAS e com DIVERGÊNCIA de valor. Use para perguntas como 'quantas notas estão sem lançar', 'quanto falta lançar em junho', 'tem nota pendente?', 'quais fornecedores têm nota não lançada'. Retorna DOIS resumos: 'resumo_pra_lancar' (já desconta notas de entrada e fornecedores desconsiderados como a Minerva — use ESTE por padrão para responder o que falta lançar) e 'resumo_bruto' (inclui tudo, bate com o portal fiscal do Rodopar). Também traz os fornecedores com mais notas não lançadas, o AGING das pendentes (há quantos dias estão paradas), a distribuição por FILIAL e o ranking de QUEM LANÇOU as notas do período. Use também para 'quem lançou as notas', 'tem nota parada há muito tempo?', 'qual filial está com mais pendência'. SEMPRE informe dataInicio e dataFim do período perguntado (ex: o mês inteiro).",
       parameters: {
         type: "object",
         properties: {
@@ -895,6 +895,31 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         .slice(0, 8)
         .map(([fornecedor, v]) => ({ fornecedor, qtd: v.qtd, valor_total: r2(v.valor) }));
 
+      // ── Accountability: há quanto tempo as pendentes empacam, onde e quem lança
+      const naoLancadasRows = limpo.filter((r) => r.SITUACAO === "NAO_LANCADA");
+      const dias = (r: Record<string, unknown>) => Number(r.DIAS_PARADA ?? 0);
+      const aging_nao_lancadas = {
+        ate_7_dias:       naoLancadasRows.filter((r) => dias(r) <= 7).length,
+        de_8_a_15_dias:   naoLancadasRows.filter((r) => dias(r) > 7 && dias(r) <= 15).length,
+        de_16_a_30_dias:  naoLancadasRows.filter((r) => dias(r) > 15 && dias(r) <= 30).length,
+        mais_de_30_dias:  naoLancadasRows.filter((r) => dias(r) > 30).length,
+        mais_antiga_dias: naoLancadasRows.reduce((m, r) => Math.max(m, dias(r)), 0),
+      };
+      const nao_lancadas_por_filial: Record<string, number> = {};
+      for (const r of naoLancadasRows) {
+        const f = `filial_${String(r.FILIAL ?? "?")}`;
+        nao_lancadas_por_filial[f] = (nao_lancadas_por_filial[f] ?? 0) + 1;
+      }
+      const porUsuario: Record<string, number> = {};
+      for (const r of limpo.filter((r) => r.SITUACAO !== "NAO_LANCADA")) {
+        const u = String(r.USUARIO_LANCAMENTO ?? "").trim();
+        if (u) porUsuario[u] = (porUsuario[u] ?? 0) + 1;
+      }
+      const quem_lancou = Object.entries(porUsuario)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([usuario, qtd]) => ({ usuario, qtd_lancadas: qtd }));
+
       return JSON.stringify({
         periodo: { dataInicio, dataFim },
         resumo_pra_lancar: {
@@ -912,7 +937,10 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
           notas_desconsideradas:  rows.filter(ehDesc).length,
         },
         top_fornecedores_nao_lancadas: topForn,
-        _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período.",
+        aging_nao_lancadas,
+        nao_lancadas_por_filial,
+        quem_lancou,
+        _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período. 'aging_nao_lancadas' mostra há quanto tempo as pendentes estão paradas (destaque as com mais de 15/30 dias). 'quem_lancou' é o ranking de usuários que lançaram notas no período (via última atualização no VR). 'nao_lancadas_por_filial' mostra onde as pendências se acumulam.",
       });
     }
     if (name === "preparar_planilha_nfe") {
@@ -1687,7 +1715,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
-- CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
+- CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. A mesma tool responde ACCOUNTABILITY: notas paradas há muito tempo (aging — destaque as 15/30+ dias), pendências por filial e quem lançou as notas (ranking de usuários). Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
 - PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'. REGRA CRÍTICA: o arquivo SÓ é gerado se você chamar preparar_planilha_nfe NA MENSAGEM ATUAL — NUNCA diga "estou enviando a planilha" sem ter acabado de chamar essa tool nesta resposta. Promessas de planilha em mensagens anteriores do histórico NÃO enviaram nada; cada pedido (inclusive repetido, "manda de novo", "não chegou") exige uma NOVA chamada da tool.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
