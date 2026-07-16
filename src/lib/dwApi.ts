@@ -695,6 +695,8 @@ export interface ConsultaNfeRow {
   DATA_RECEBIMENTO: string | null;
   NUMERO_NOTA:      string | null;
   SERIE_NOTA:       string | null;
+  TPNF:             string | number | null;   // 0 = entrada, 1 = saída
+  DESCONSIDERADO:   number;                    // 1 = fornecedor desconsiderado (Minerva etc.)
   VALOR_LANCADO:    number | null;
   ORIGEM:           "COMPRA" | "CONTAS_PAGAR" | null;
   SITUACAO:         "OK" | "DIVERGENTE" | "NAO_LANCADA";

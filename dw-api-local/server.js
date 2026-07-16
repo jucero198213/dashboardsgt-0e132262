@@ -1790,14 +1790,16 @@ OPTION (RECOMPILE)
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ENDPOINT: /dw-consulta-nfe
-//  Conciliação das NF-e destinadas ao CNPJ (NFEIDIST = universo do que DEVERIA
-//  estar lançado) × notas efetivamente lançadas em DUAS fontes:
-//    1. COMPRAS       → ESTENT (TIPONF NFE/NFI, com chave). Casa por CHAVE.
-//    2. CONTAS A PAGAR → PAGDOC (sem chave). Casa por CNPJ do fornecedor + número.
+//  Conciliação das NF-e destinadas ao CNPJ (NFEIDIST).
+//  LANÇADA ou não vem do flag do próprio Rodopar: NFEIDIST.SITUAC_VR
+//    (1 = lançada no VR, 0/null = não lançada) — mesma regra do portal fiscal.
+//  Para detectar DIVERGÊNCIA de valor, cruza com as fontes de lançamento:
+//    • COMPRAS        → ESTENT (TIPONF NFE/NFI) por CHAVE
+//    • CONTAS A PAGAR → PAGDOCI por CNPJ do fornecedor + número (valor líquido)
 //  Classifica cada nota:
-//    • OK           — lançada (compra ou abastecimento) e valor bate
-//    • DIVERGENTE   — lançada, mas valor diferente
-//    • NAO_LANCADA  — não achada em nenhuma das duas fontes
+//    • NAO_LANCADA  — SITUAC_VR = 0
+//    • DIVERGENTE   — lançada (SITUAC_VR=1), mas valor difere do lançado
+//    • OK           — lançada e valor bate (ou sem base de comparação de valor)
 //  Params (todos OPCIONAIS):
 //    dataInicio / dataFim → filtra por data de emissão (DEMI)
 //    filial               → CODFIL
@@ -1828,6 +1830,12 @@ app.post("/dw-consulta-nfe", async (req, res) => {
     const limpaCnpj = (col) =>
       `RIGHT(REPLICATE('0',14) + REPLACE(REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(${col})),'.',''),'/',''),'-',''),' ',''), 14)`;
 
+    // Lista de radicais de CNPJ desconsiderados (Minerva etc.) pro IN do SQL.
+    // Vazio → usa '' (nunca casa, pois radical tem 8 dígitos).
+    const descInSql = NFE_FORNECEDORES_DESCONSIDERADOS.length
+      ? NFE_FORNECEDORES_DESCONSIDERADOS.map((c) => `'${c}'`).join(",")
+      : "''";
+
     const query = `
       WITH BASE AS (
         SELECT
@@ -1840,6 +1848,10 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           D.DHRECBTO AS DATA_RECEBIMENTO,
           D.NOTA     AS NUMERO_NOTA,
           D.SERIE    AS SERIE_NOTA,
+          D.TPNF     AS TPNF,
+          -- Marcações pra tela filtrar (Opção C): entrada (TPNF=0) e fornecedor
+          -- desconsiderado (Minerva etc.). Nenhuma é escondida aqui no servidor.
+          CASE WHEN LEFT(${limpaCnpj("D.CNPJ")}, 8) IN (${descInSql}) THEN 1 ELSE 0 END AS DESCONSIDERADO,
           -- Valor pra comparar: prioriza o líquido do contas a pagar (VLRLIQ, já
           -- com desconto); só usa o VLRDOC da compra se a nota não estiver no
           -- contas a pagar. Evita falso divergente em nota com desconto.
@@ -1849,8 +1861,11 @@ app.post("/dw-consulta-nfe", async (req, res) => {
             WHEN A.CNPJ  IS NOT NULL THEN 'CONTAS_PAGAR'
             ELSE NULL
           END AS ORIGEM,
+          -- LANÇADA ou não vem do flag oficial do Rodopar (SITUAC_VR): mesma
+          -- regra do portal fiscal. O cruzamento ESTENT/PAGDOCI serve só pra
+          -- comparar o valor e apontar DIVERGENTE nas que estão lançadas.
           CASE
-            WHEN C.CHAVE IS NULL AND A.CNPJ IS NULL                        THEN 'NAO_LANCADA'
+            WHEN D.SITUAC_VR = 0 OR D.SITUAC_VR IS NULL                    THEN 'NAO_LANCADA'
             WHEN ABS(D.VNF - COALESCE(A.VLR_ABAST, C.VLR_COMPRA)) > 0.01   THEN 'DIVERGENTE'
             ELSE 'OK'
           END AS SITUACAO
@@ -1883,13 +1898,9 @@ app.post("/dw-consulta-nfe", async (req, res) => {
            AND A.NUMDOC = TRY_CONVERT(BIGINT, D.NOTA)
         WHERE D.VNF > 0
           AND D.XNOME IS NOT NULL
-          -- Exclui notas de ENTRADA (TPNF=0): a empresa não lança esse tipo.
-          -- TPNF nulo fica DENTRO da conferência (melhor mostrar do que esconder).
-          AND (D.TPNF IS NULL OR D.TPNF <> '0')
-          -- Exclui fornecedores desconsiderados (ex: Minerva), pelo radical do CNPJ.
-          ${NFE_FORNECEDORES_DESCONSIDERADOS.length > 0
-            ? `AND LEFT(${limpaCnpj("D.CNPJ")}, 8) NOT IN (${NFE_FORNECEDORES_DESCONSIDERADOS.map((c) => `'${c}'`).join(",")})`
-            : ""}
+          -- Entrada (TPNF=0) e desconsiderados NÃO são escondidos aqui: a tela
+          -- devolve TODAS as notas (marcadas em TPNF/DESCONSIDERADO) e o usuário
+          -- liga/desliga os filtros na interface (Opção C).
           AND (@dataInicio IS NULL OR D.DEMI >= @dataInicio)
           AND (@dataFim    IS NULL OR D.DEMI <  DATEADD(day, 1, @dataFim))
           AND (@filial     IS NULL OR D.CODFIL = @filial)
