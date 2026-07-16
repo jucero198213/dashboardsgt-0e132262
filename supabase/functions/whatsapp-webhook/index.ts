@@ -98,8 +98,12 @@ async function sendWhatsApp(to: string, body: string) {
   }
 }
 
-// ── Envia um documento (ex: planilha CSV) de volta pro WhatsApp ───────────────
-async function sendWhatsAppDocument(to: string, filename: string, conteudo: string, caption: string) {
+// ── Envia um documento (planilha Excel .xlsx) de volta pro WhatsApp ──────────
+// Recebe o conteúdo em base64 (gerado pela ai-assistant com SheetJS) e sobe
+// com o MIME oficial do Excel — formato aceito pela Media API do WhatsApp.
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+async function sendWhatsAppDocument(to: string, filename: string, base64: string, caption: string) {
   const token = Deno.env.get("WHATSAPP_TOKEN");
   const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
   if (!token || !phoneId) {
@@ -107,13 +111,12 @@ async function sendWhatsAppDocument(to: string, filename: string, conteudo: stri
     return;
   }
 
-  // 1. Faz upload do arquivo na Media API do WhatsApp.
-  // Obs: a Media API NÃO aceita "text/csv" (lista restrita de MIME types) —
-  // sobe como "text/plain" mantendo o nome .csv, que abre no Excel igual.
+  // 1. Decodifica o base64 e faz upload na Media API do WhatsApp
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
   const form = new FormData();
   form.append("messaging_product", "whatsapp");
-  form.append("type", "text/plain");
-  form.append("file", new Blob([conteudo], { type: "text/plain" }), filename);
+  form.append("type", XLSX_MIME);
+  form.append("file", new Blob([bytes], { type: XLSX_MIME }), filename);
 
   const up = await fetch(
     `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/media`,
@@ -175,7 +178,7 @@ function periodoDoDia(): string {
 // MESMA assistente, com acesso aos dados reais — sem duplicar lógica aqui.
 interface AiResposta {
   reply: string;
-  planilha?: { filename?: string; csv?: string };
+  planilha?: { filename?: string; xlsx_base64?: string };
 }
 
 async function askAI(historico: Turn[], nome: string | null, periodo: string): Promise<AiResposta> {
@@ -313,11 +316,11 @@ async function handleMessage(from: string, text: string) {
     await sendWhatsApp(from, reply);
 
     // Se a Sofia gerou uma planilha, envia como documento anexo
-    if (planilha?.csv) {
+    if (planilha?.xlsx_base64) {
       await sendWhatsAppDocument(
         from,
-        planilha.filename ?? "conferencia_nfe.csv",
-        planilha.csv,
+        planilha.filename ?? "conferencia_nfe.xlsx",
+        planilha.xlsx_base64,
         "📊 Planilha de conferência fiscal",
       );
     }

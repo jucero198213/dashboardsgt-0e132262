@@ -3,11 +3,14 @@ import { MessageCircle, X, Send, Trash2, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-type Planilha = { filename?: string; csv?: string };
+type Planilha = { filename?: string; xlsx_base64?: string };
 type ChatMessage = { role: "user" | "assistant"; content: string; planilha?: Planilha };
 
-function baixarCsv(filename: string, csv: string) {
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+function baixarXlsx(filename: string, base64: string) {
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: XLSX_MIME });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -235,9 +238,9 @@ export function AiAssistant() {
                     }}
                   >
                     {m.content}
-                    {m.planilha?.csv && (
+                    {m.planilha?.xlsx_base64 && (
                       <button
-                        onClick={() => baixarCsv(m.planilha!.filename ?? "conferencia_nfe.csv", m.planilha!.csv!)}
+                        onClick={() => baixarXlsx(m.planilha!.filename ?? "conferencia_nfe.xlsx", m.planilha!.xlsx_base64!)}
                         style={{
                           marginTop: 8,
                           display: "inline-flex",
@@ -254,7 +257,7 @@ export function AiAssistant() {
                         }}
                       >
                         <Download size={13} />
-                        Baixar planilha (CSV)
+                        Baixar planilha (Excel)
                       </button>
                     )}
                   </div>

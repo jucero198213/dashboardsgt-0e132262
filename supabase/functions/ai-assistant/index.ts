@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// SheetJS (geração de planilhas .xlsx) — CDN oficial com suporte a Deno
+import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -492,7 +494,7 @@ const tools = [
     function: {
       name: "preparar_planilha_nfe",
       description:
-        "Gera e ENVIA ao usuário uma planilha (CSV) com as notas da conferência fiscal do período. Use quando pedirem 'me manda a planilha', 'exporta as notas não lançadas', 'quero em Excel/CSV', 'gera um arquivo com as pendências'. Escolha o tipo: 'nao_lancadas' (padrão), 'divergentes' ou 'todas'. SEMPRE passe dataInicio e dataFim. Depois de chamar, avise ao usuário que a planilha está sendo enviada (no WhatsApp vai como arquivo anexo; no site, como download). Não liste as notas em texto quando gerar a planilha — o arquivo já traz tudo.",
+        "Gera e ENVIA ao usuário uma planilha Excel (.xlsx) com as notas da conferência fiscal do período. Use quando pedirem 'me manda a planilha', 'exporta as notas não lançadas', 'quero em Excel', 'gera um arquivo/planilha com as pendências'. Escolha o tipo: 'nao_lancadas' (padrão), 'divergentes' ou 'todas'. SEMPRE passe dataInicio e dataFim. Depois de chamar, avise ao usuário que a planilha está sendo enviada (no WhatsApp vai como arquivo anexo; no site, como download). Não liste as notas em texto quando gerar a planilha — o arquivo já traz tudo.",
       parameters: {
         type: "object",
         properties: {
@@ -525,9 +527,11 @@ async function dwCall(path: string, body: Record<string, unknown>) {
   }
 }
 
-// Busca as notas da conferência e monta um CSV (universo "pra lançar": sem
-// notas de entrada e sem fornecedores desconsiderados). Retorna nome + conteúdo.
-async function buildPlanilhaNfeCsv(req: { tipo: string; dataInicio: unknown; dataFim: unknown }) {
+// Busca as notas da conferência e monta uma planilha XLSX (universo "pra
+// lançar": sem notas de entrada e sem fornecedores desconsiderados).
+// Retorna { filename, xlsx_base64 } — o WhatsApp aceita XLSX oficialmente
+// (CSV não está na lista de MIME types da Media API).
+async function buildPlanilhaNfeXlsx(req: { tipo: string; dataInicio: unknown; dataFim: unknown }) {
   const modo = req.tipo === "todas" ? "todas" : req.tipo;
   const data = await dwCall("/dw-consulta-nfe", {
     dataInicio: req.dataInicio, dataFim: req.dataFim, modo, limite: 5000,
@@ -535,30 +539,35 @@ async function buildPlanilhaNfeCsv(req: { tipo: string; dataInicio: unknown; dat
   const rows = (((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>)
     .filter((r) => String(r.TPNF) !== "0" && Number(r.DESCONSIDERADO) !== 1);
 
-  const esc = (v: unknown) => `${v ?? ""}`.replace(/"/g, "'");
-  const dec = (v: unknown) => `${v ?? ""}`.replace(".", ",");
-  const dia = (v: unknown) => (v ? String(v).slice(0, 10) : "");
   const situacaoLabel: Record<string, string> = {
     OK: "Lançada", DIVERGENTE: "Divergente", NAO_LANCADA: "Não lançada",
   };
+  const dia = (v: unknown) => (v ? String(v).slice(0, 10) : "");
 
-  const header = "situacao;fornecedor;cnpj;numero_nota;serie;valor_nota;valor_lancado;origem;data_emissao;chave";
-  const linhas = rows.map((r) => [
-    situacaoLabel[String(r.SITUACAO)] ?? String(r.SITUACAO ?? ""),
-    `"${esc(r.RAZAO_SOCIAL)}"`,
-    r.CNPJ ?? "",
-    r.NUMERO_NOTA ?? "",
-    r.SERIE_NOTA ?? "",
-    dec(r.VALOR_NOTA),
-    dec(r.VALOR_LANCADO),
-    r.ORIGEM ?? "",
-    dia(r.DATA_EMISSAO),
-    r.CHAVE ?? "",
-  ].join(";"));
+  const linhas = rows.map((r) => ({
+    "Situação":           situacaoLabel[String(r.SITUACAO)] ?? String(r.SITUACAO ?? ""),
+    "Fornecedor":         String(r.RAZAO_SOCIAL ?? ""),
+    "CNPJ":               String(r.CNPJ ?? ""),
+    "Nº Nota":            String(r.NUMERO_NOTA ?? ""),
+    "Série":              String(r.SERIE_NOTA ?? ""),
+    "Valor Nota (R$)":    Number(r.VALOR_NOTA ?? 0),
+    "Valor Lançado (R$)": r.VALOR_LANCADO == null ? "" : Number(r.VALOR_LANCADO),
+    "Origem":             r.ORIGEM === "COMPRA" ? "Compra" : r.ORIGEM === "CONTAS_PAGAR" ? "Contas a pagar" : "",
+    "Emissão":            dia(r.DATA_EMISSAO),
+    "Chave de acesso":    String(r.CHAVE ?? ""),
+  }));
 
-  const csv = "﻿" + [header, ...linhas].join("\n");
-  const filename = `conferencia_${req.tipo}_${req.dataInicio}_${req.dataFim}.csv`;
-  return { filename, csv, qtd: rows.length };
+  const ws = XLSX.utils.json_to_sheet(linhas);
+  ws["!cols"] = [
+    { wch: 12 }, { wch: 45 }, { wch: 16 }, { wch: 12 }, { wch: 6 },
+    { wch: 14 }, { wch: 16 }, { wch: 15 }, { wch: 11 }, { wch: 46 },
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Conferência NFe");
+  const xlsx_base64 = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
+
+  const filename = `conferencia_${req.tipo}_${req.dataInicio}_${req.dataFim}.xlsx`;
+  return { filename, xlsx_base64, qtd: rows.length };
 }
 
 function summarize(data: unknown, max = 3500): string {
@@ -912,7 +921,7 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       return JSON.stringify({
         ok: true,
         tipo,
-        mensagem: `Certo — a planilha CSV das notas (${tipo.replace("_", " ")}) do período será enviada ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO liste as notas em texto.`,
+        mensagem: `Certo — a planilha Excel (.xlsx) das notas (${tipo.replace("_", " ")}) do período será enviada ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO liste as notas em texto.`,
       });
     }
     if (name === "get_top_clientes") {
@@ -1679,7 +1688,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
-- PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um CSV/Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'.
+- PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
@@ -1765,7 +1774,7 @@ serve(async (req: Request) => {
       if (!toolCalls || toolCalls.length === 0) {
         if (planilhaReq) {
           try {
-            const planilha = await buildPlanilhaNfeCsv(planilhaReq);
+            const planilha = await buildPlanilhaNfeXlsx(planilhaReq);
             return respond({ reply: msg.content ?? "", planilha });
           } catch (_e) {
             return respond({ reply: (msg.content ?? "") + "\n\n(Não consegui gerar a planilha agora, tente de novo.)" });
