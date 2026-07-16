@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   CheckCircle2, AlertTriangle, XCircle, Search, FileText,
-  ChevronDown, ChevronUp, Download, EyeOff,
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Download, EyeOff,
 } from "lucide-react";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { KpiCard } from "@/components/indicators/KpiCard";
@@ -80,6 +80,7 @@ export default function Fiscal() {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [jaBuscou, setJaBuscou]     = useState(false);
   const [tendencia, setTendencia]   = useState<TendenciaNfeRow[]>([]);
+  const [pagina, setPagina]         = useState(1);
 
   // ── Busca no endpoint ──────────────────────────────────────────────────────
   const buscarNotas = useCallback(async (forcar = false) => {
@@ -137,6 +138,15 @@ export default function Fiscal() {
     const matchStatus = filtroStatus === "todos" || n.SITUACAO === filtroStatus;
     return matchSearch && matchStatus;
   });
+
+  // ── Paginação (client-side) ──────────────────────────────────────────────────
+  const POR_PAGINA   = 50;
+  const totalPaginas = Math.max(1, Math.ceil(notasFiltradas.length / POR_PAGINA));
+  const paginaAtual  = Math.min(pagina, totalPaginas);
+  const notasPagina  = notasFiltradas.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
+
+  // Qualquer mudança de filtro/busca/período volta pra página 1
+  useEffect(() => { setPagina(1); }, [search, filtroStatus, ocultarEntrada, ocultarDesconsiderados, dataInicio, dataFim]);
 
   // ── Export CSV ─────────────────────────────────────────────────────────────
   const exportarCsv = () => {
@@ -378,8 +388,8 @@ export default function Fiscal() {
                         <span>Status</span>
                       </div>
 
-                      {/* Linhas */}
-                      {notasFiltradas.map(n => {
+                      {/* Linhas (página atual) */}
+                      {notasPagina.map(n => {
                         const rowId = n.CHAVE ?? `${n.CNPJ}-${n.NUMERO_NOTA}`;
                         return (
                           <div key={rowId}>
@@ -459,6 +469,37 @@ export default function Fiscal() {
                     </>
                   )}
                 </div>
+
+                {/* Rodapé — paginação */}
+                {notasFiltradas.length > POR_PAGINA && (
+                  <div
+                    className="flex items-center justify-between px-3 sm:px-4 py-2 border-t shrink-0"
+                    style={{ borderColor: "var(--sgt-divider)" }}
+                  >
+                    <span className="text-[10px] text-slate-500 tabular-nums">
+                      {(paginaAtual - 1) * POR_PAGINA + 1}–{Math.min(paginaAtual * POR_PAGINA, notasFiltradas.length)} de {notasFiltradas.length}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setPagina(p => Math.max(1, p - 1))}
+                        disabled={paginaAtual === 1}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="text-[10px] text-slate-400 tabular-nums px-1">
+                        pág. {paginaAtual}/{totalPaginas}
+                      </span>
+                      <button
+                        onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+                        disabled={paginaAtual === totalPaginas}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </AnimatedCard>
           </div>
