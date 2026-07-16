@@ -14,8 +14,16 @@
 //  (ver WHATSAPP_ALERTA_TEMPLATE abaixo, opcional).
 // ─────────────────────────────────────────────────────────────────────────────
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const GRAPH_VERSION = "v21.0";
+
+// Grava o alerta na memória da Sofia (sofia_conversas) — assim, quando o
+// usuário responder ao alerta ("me manda a planilha"), ela sabe do contexto.
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+);
 const DW_API_URL = Deno.env.get("DW_API_URL") || "https://dw.dwsgtlog.com";
 const DW_API_SECRET =
   Deno.env.get("DW_API_SECRET") ||
@@ -129,6 +137,13 @@ serve(async (_req) => {
     const enviados: Record<string, boolean> = {};
     for (const to of numeros) {
       enviados[to] = await sendText(to, msg);
+      // Registra o alerta no histórico da conversa — a Sofia "lembra" do que enviou
+      if (enviados[to]) {
+        const { error } = await supabase
+          .from("sofia_conversas")
+          .insert({ telefone: to, role: "assistant", conteudo: msg });
+        if (error) console.error("Erro ao salvar alerta no histórico:", error.message);
+      }
     }
 
     return new Response(

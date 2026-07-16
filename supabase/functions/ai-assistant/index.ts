@@ -1734,7 +1734,14 @@ serve(async (req: Request) => {
 
     // Conversa para a OpenAI (system + histórico)
     const convo: Array<Record<string, unknown>> = [
-      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "system",
+        content:
+          `${SYSTEM_PROMPT}\n\n` +
+          `DATA DE HOJE (Brasília): ${new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10)}. ` +
+          `REGRA DE PERÍODO PADRÃO: quando o usuário NÃO especificar o mês/período (ex: "quantas notas faltam lançar", "me manda a planilha do que falta"), use o MÊS CORRENTE (do dia 1 até hoje). ` +
+          `NUNCA assuma um mês passado só porque ele apareceu antes no histórico — meses anteriores só quando o usuário pedir explicitamente ("de junho") ou o contexto imediato indicar.`,
+      },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
     ];
 
