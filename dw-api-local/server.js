@@ -1788,6 +1788,146 @@ OPTION (RECOMPILE)
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-consulta-nfe
+//  Conciliação das NF-e destinadas ao CNPJ (NFEIDIST = universo do que DEVERIA
+//  estar lançado) × notas efetivamente lançadas em DUAS fontes:
+//    1. COMPRAS       → ESTENT (TIPONF NFE/NFI, com chave). Casa por CHAVE.
+//    2. CONTAS A PAGAR → PAGDOC (sem chave). Casa por CNPJ do fornecedor + número.
+//  Classifica cada nota:
+//    • OK           — lançada (compra ou abastecimento) e valor bate
+//    • DIVERGENTE   — lançada, mas valor diferente
+//    • NAO_LANCADA  — não achada em nenhuma das duas fontes
+//  Params (todos OPCIONAIS):
+//    dataInicio / dataFim → filtra por data de emissão (DEMI)
+//    filial               → CODFIL
+//    modo                 → 'todas' (padrão) | 'nao_lancadas' | 'divergentes'
+//    limite               → TOP N (padrão 1000, teto 5000)
+// ─────────────────────────────────────────────────────────────────────────────
+// Fornecedores cujas notas a SGT DESCONSIDERA (não lança de propósito).
+// Comparação pelo RADICAL do CNPJ (8 primeiros dígitos) — cobre todas as filiais.
+const NFE_FORNECEDORES_DESCONSIDERADOS = [
+  "67620377", // MINERVA S A
+];
+
+app.post("/dw-consulta-nfe", async (req, res) => {
+  const { dataInicio, dataFim, filial, modo, limite } = req.body ?? {};
+
+  try {
+    const p     = await getPool();
+    const dbReq = p.request();
+
+    dbReq.input("dataInicio", sql.DateTime,    dataInicio ? new Date(dataInicio) : null);
+    dbReq.input("dataFim",    sql.DateTime,    dataFim    ? new Date(dataFim)    : null);
+    dbReq.input("filial",     sql.VarChar(20), filial || null);
+    dbReq.input("modo",       sql.VarChar(20), modo || null);
+    dbReq.input("limite",     sql.Int,         Math.min(parseInt(limite, 10) || 1000, 5000));
+
+    // Limpa CNPJ (tira máscara) e padroniza pra 14 dígitos — usado nos 2 lados
+    // do casamento de abastecimento (NFEIDIST.CNPJ × RODPOS.CODCGC).
+    const limpaCnpj = (col) =>
+      `RIGHT(REPLICATE('0',14) + REPLACE(REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(${col})),'.',''),'/',''),'-',''),' ',''), 14)`;
+
+    const query = `
+      WITH BASE AS (
+        SELECT
+          D.CODFIL   AS FILIAL,
+          D.CHNFE    AS CHAVE,
+          D.CNPJ     AS CNPJ,
+          D.XNOME    AS RAZAO_SOCIAL,
+          D.DEMI     AS DATA_EMISSAO,
+          D.VNF      AS VALOR_NOTA,
+          D.DHRECBTO AS DATA_RECEBIMENTO,
+          D.NOTA     AS NUMERO_NOTA,
+          D.SERIE    AS SERIE_NOTA,
+          -- Valor pra comparar: prioriza o líquido do contas a pagar (VLRLIQ, já
+          -- com desconto); só usa o VLRDOC da compra se a nota não estiver no
+          -- contas a pagar. Evita falso divergente em nota com desconto.
+          COALESCE(A.VLR_ABAST, C.VLR_COMPRA) AS VALOR_LANCADO,
+          CASE
+            WHEN C.CHAVE IS NOT NULL THEN 'COMPRA'
+            WHEN A.CNPJ  IS NOT NULL THEN 'CONTAS_PAGAR'
+            ELSE NULL
+          END AS ORIGEM,
+          CASE
+            WHEN C.CHAVE IS NULL AND A.CNPJ IS NULL                        THEN 'NAO_LANCADA'
+            WHEN ABS(D.VNF - COALESCE(A.VLR_ABAST, C.VLR_COMPRA)) > 0.01   THEN 'DIVERGENTE'
+            ELSE 'OK'
+          END AS SITUACAO
+        FROM NFEIDIST D WITH (NOLOCK)
+        -- Fonte 1: COMPRAS (ESTENT) — casa por chave
+        LEFT JOIN (
+          SELECT LTRIM(RTRIM(NFE_ID)) AS CHAVE,
+                 SUM(VLRDOC)          AS VLR_COMPRA
+          FROM ESTENT WITH (NOLOCK)
+          WHERE TIPONF IN ('NFE','NFI')
+            AND SITUAC <> 'C'
+            AND NFE_ID IS NOT NULL
+            AND LEN(LTRIM(RTRIM(NFE_ID))) = 44
+          GROUP BY LTRIM(RTRIM(NFE_ID))
+        ) C ON C.CHAVE = LTRIM(RTRIM(D.CHNFE))
+        -- Fonte 2: CONTAS A PAGAR (PAGDOCI) — casa por CNPJ do fornecedor + número.
+        -- Compara pelo VLRLIQ (valor líquido/devedor, já com desconto) somado por
+        -- nota — evita falso "divergente" em notas com desconto. Ignora canceladas.
+        LEFT JOIN (
+          SELECT ${limpaCnpj("CLI.CODCGC")}     AS CNPJ,
+                 TRY_CONVERT(BIGINT, PI.NUMDOC) AS NUMDOC,
+                 SUM(PI.VLRLIQ)                 AS VLR_ABAST
+          FROM PAGDOCI PI WITH (NOLOCK)
+          JOIN RODCLI CLI WITH (NOLOCK) ON CLI.CODCLIFOR = PI.CODCLIFOR
+          WHERE PI.NUMDOC IS NOT NULL
+            AND TRY_CONVERT(BIGINT, PI.NUMDOC) IS NOT NULL
+            AND PI.SITUAC NOT IN ('C','I')
+          GROUP BY ${limpaCnpj("CLI.CODCGC")}, TRY_CONVERT(BIGINT, PI.NUMDOC)
+        ) A ON A.CNPJ   = ${limpaCnpj("D.CNPJ")}
+           AND A.NUMDOC = TRY_CONVERT(BIGINT, D.NOTA)
+        WHERE D.VNF > 0
+          AND D.XNOME IS NOT NULL
+          -- Exclui notas de ENTRADA (TPNF=0): a empresa não lança esse tipo.
+          -- TPNF nulo fica DENTRO da conferência (melhor mostrar do que esconder).
+          AND (D.TPNF IS NULL OR D.TPNF <> '0')
+          -- Exclui fornecedores desconsiderados (ex: Minerva), pelo radical do CNPJ.
+          ${NFE_FORNECEDORES_DESCONSIDERADOS.length > 0
+            ? `AND LEFT(${limpaCnpj("D.CNPJ")}, 8) NOT IN (${NFE_FORNECEDORES_DESCONSIDERADOS.map((c) => `'${c}'`).join(",")})`
+            : ""}
+          AND (@dataInicio IS NULL OR D.DEMI >= @dataInicio)
+          AND (@dataFim    IS NULL OR D.DEMI <  DATEADD(day, 1, @dataFim))
+          AND (@filial     IS NULL OR D.CODFIL = @filial)
+      )
+      SELECT TOP (@limite) *
+      FROM BASE
+      WHERE @modo IS NULL
+         OR @modo = 'todas'
+         OR (@modo = 'nao_lancadas' AND SITUACAO = 'NAO_LANCADA')
+         OR (@modo = 'divergentes'  AND SITUACAO = 'DIVERGENTE')
+      ORDER BY DATA_EMISSAO DESC
+      OPTION (RECOMPILE)
+    `;
+
+    const result = await dbReq.query(query);
+
+    // Resumo por situação (sobre as linhas retornadas)
+    const resumo = { total: result.recordset.length, ok: 0, nao_lancadas: 0, divergentes: 0,
+                     por_origem: { compra: 0, contas_pagar: 0 } };
+    for (const r of result.recordset) {
+      if      (r.SITUACAO === "OK")          resumo.ok++;
+      else if (r.SITUACAO === "NAO_LANCADA") resumo.nao_lancadas++;
+      else if (r.SITUACAO === "DIVERGENTE")  resumo.divergentes++;
+      if      (r.ORIGEM === "COMPRA")        resumo.por_origem.compra++;
+      else if (r.ORIGEM === "CONTAS_PAGAR")  resumo.por_origem.contas_pagar++;
+    }
+
+    return res.json({ resumo, data: result.recordset });
+
+  } catch (err) {
+    console.error("❌ Erro /dw-consulta-nfe:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
+});
+
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");
