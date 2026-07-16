@@ -1939,6 +1939,54 @@ app.post("/dw-consulta-nfe", async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-consulta-nfe-tendencia
+//  Série MENSAL de notas (universo "pra lançar": sem entrada e sem fornecedores
+//  desconsiderados) — alimenta o gráfico de tendência da tela Fiscal.
+//  Param: meses (padrão 6, teto 24). Lançada/não pelo flag SITUAC_VR do Rodopar.
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-consulta-nfe-tendencia", async (req, res) => {
+  const meses = Math.min(Math.max(parseInt(req.body?.meses, 10) || 6, 1), 24);
+  const agora = new Date();
+  const desde = new Date(agora.getFullYear(), agora.getMonth() - (meses - 1), 1);
+
+  const limpaCnpj = (col) =>
+    `RIGHT(REPLICATE('0',14) + REPLACE(REPLACE(REPLACE(REPLACE(LTRIM(RTRIM(${col})),'.',''),'/',''),'-',''),' ',''), 14)`;
+  const descInSql = NFE_FORNECEDORES_DESCONSIDERADOS.length
+    ? NFE_FORNECEDORES_DESCONSIDERADOS.map((c) => `'${c}'`).join(",")
+    : "''";
+
+  try {
+    const p     = await getPool();
+    const dbReq = p.request();
+    dbReq.input("desde", sql.DateTime, desde);
+
+    const result = await dbReq.query(`
+      SELECT
+        CONVERT(char(7), D.DEMI, 126) AS mes,
+        COUNT(*)                                                                 AS total,
+        SUM(CASE WHEN D.SITUAC_VR = 1 THEN 1 ELSE 0 END)                         AS lancadas,
+        SUM(CASE WHEN D.SITUAC_VR = 0 OR D.SITUAC_VR IS NULL THEN 1 ELSE 0 END)  AS nao_lancadas
+      FROM NFEIDIST D WITH (NOLOCK)
+      WHERE D.VNF > 0
+        AND D.XNOME IS NOT NULL
+        AND (D.TPNF IS NULL OR D.TPNF <> '0')
+        AND LEFT(${limpaCnpj("D.CNPJ")}, 8) NOT IN (${descInSql})
+        AND D.DEMI >= @desde
+      GROUP BY CONVERT(char(7), D.DEMI, 126)
+      ORDER BY mes
+      OPTION (RECOMPILE)
+    `);
+    return res.json({ data: result.recordset });
+  } catch (err) {
+    console.error("❌ Erro /dw-consulta-nfe-tendencia:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
+});
+
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");

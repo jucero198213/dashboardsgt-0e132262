@@ -737,6 +737,29 @@ export async function fetchConsultaNfe(params?: {
   );
 }
 
+// ── Tendência mensal (gráfico) ───────────────────────────────────────────────
+export interface TendenciaNfeRow {
+  mes:          string;   // "yyyy-MM"
+  total:        number;
+  lancadas:     number;
+  nao_lancadas: number;
+}
+
+const ENDPOINT_CONSULTA_NFE_TENDENCIA = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-consulta-nfe-tendencia`
+  : `${SUPABASE_URL}/functions/v1/dw-consulta-nfe-tendencia`;
+
+/** Série mensal de notas (universo "pra lançar") pros últimos N meses. */
+export async function fetchConsultaNfeTendencia(params?: {
+  meses?: number;
+}): Promise<{ data: TendenciaNfeRow[] }> {
+  const key = `consulta-nfe-tend:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<{ data: TendenciaNfeRow[] }>(ENDPOINT_CONSULTA_NFE_TENDENCIA, params ?? {}),
+    TTL_FINANCEIRO,
+  );
+}
+
 // ── Extrato bancário por conta (/dw-bancos-extrato) ──────────────────────────
 const ENDPOINT_BANCOS_EXTRATO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-bancos-extrato`

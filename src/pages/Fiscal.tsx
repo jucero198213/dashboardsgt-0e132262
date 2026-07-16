@@ -11,8 +11,11 @@ import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
-  fetchConsultaNfe, clearDwCache,
-  type ConsultaNfeRow,
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
+} from "recharts";
+import {
+  fetchConsultaNfe, fetchConsultaNfeTendencia, clearDwCache,
+  type ConsultaNfeRow, type TendenciaNfeRow,
 } from "@/lib/dwApi";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -35,6 +38,12 @@ const fmtData = (d: string | null | undefined) => {
 // Marcações pra os filtros
 const isEntrada        = (n: ConsultaNfeRow) => String(n.TPNF) === "0";
 const isDesconsiderado = (n: ConsultaNfeRow) => n.DESCONSIDERADO === 1;
+
+const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const mesLabel = (m: string) => {
+  const [y, mm] = m.split("-");
+  return `${MESES_ABREV[Number(mm) - 1] ?? mm}/${(y ?? "").slice(2)}`;
+};
 
 const hoje = new Date();
 const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
@@ -70,6 +79,7 @@ export default function Fiscal() {
   const [erro, setErro]             = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [jaBuscou, setJaBuscou]     = useState(false);
+  const [tendencia, setTendencia]   = useState<TendenciaNfeRow[]>([]);
 
   // ── Busca no endpoint ──────────────────────────────────────────────────────
   const buscarNotas = useCallback(async (forcar = false) => {
@@ -89,6 +99,12 @@ export default function Fiscal() {
   }, [dataInicio, dataFim]);
 
   useEffect(() => { buscarNotas(); }, [buscarNotas]);
+
+  useEffect(() => {
+    fetchConsultaNfeTendencia({ meses: 6 })
+      .then(r => setTendencia(r.data ?? []))
+      .catch(() => setTendencia([]));
+  }, []);
 
   // ── Toggles: tudo aparece; usuário remove categorias por preferência ────────
   const qtdEntrada        = notas.filter(isEntrada).length;
@@ -235,6 +251,43 @@ export default function Fiscal() {
                 <KpiCard label="Com divergência" value={String(divergentes || "—")} subtitle={divergentes ? fmtBRL(valorDivergente) : "Nenhuma"} icon={AlertTriangle} tone="amber" />
               </AnimatedCard>
             </div>
+
+            {/* ── TENDÊNCIA ── */}
+            {tendencia.length > 1 && (
+              <AnimatedCard delay={210} hover={false}>
+                <div
+                  className="rounded-[16px] border p-3 sm:p-4"
+                  style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                >
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Não lançadas por mês</span>
+                    <span className="text-[10px] text-slate-600">· últimos {tendencia.length} meses (sem entrada/desconsiderados)</span>
+                  </div>
+                  <div style={{ height: 132 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={tendencia.map(t => ({ ...t, label: mesLabel(t.mes) }))}
+                        margin={{ top: 4, right: 8, left: -20, bottom: 0 }}
+                        barSize={24}
+                      >
+                        <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: "#475569", fontSize: 9 }} axisLine={false} tickLine={false} width={30} allowDecimals={false} />
+                        <Tooltip
+                          contentStyle={{ background: "#151922", border: "1px solid #23262d", borderRadius: 8, fontSize: 11 }}
+                          labelStyle={{ color: "#e5e7eb", fontWeight: 600 }}
+                          itemStyle={{ color: "#cbd5e1" }}
+                          cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                          formatter={(v: number, n: string) => [v, n === "nao_lancadas" ? "Não lançadas" : "Lançadas"]}
+                        />
+                        <Bar dataKey="lancadas"     name="lancadas"     stackId="a" fill="#10b981" opacity={0.22} />
+                        <Bar dataKey="nao_lancadas" name="nao_lancadas" stackId="a" fill="#f43f5e" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </AnimatedCard>
+            )}
 
             {/* ── TABELA ── */}
             <AnimatedCard delay={220} hover={false} className="flex-1 min-h-0">
