@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// SheetJS (geração de planilhas .xlsx) — CDN oficial com suporte a Deno
-import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
+// SheetJS (geração de planilhas .xlsx) via npm specifier compatível com Edge Runtime
+import * as XLSX from "npm:xlsx";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
