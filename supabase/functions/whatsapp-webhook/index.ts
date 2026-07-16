@@ -107,11 +107,13 @@ async function sendWhatsAppDocument(to: string, filename: string, conteudo: stri
     return;
   }
 
-  // 1. Faz upload do arquivo na Media API do WhatsApp
+  // 1. Faz upload do arquivo na Media API do WhatsApp.
+  // Obs: a Media API NÃO aceita "text/csv" (lista restrita de MIME types) —
+  // sobe como "text/plain" mantendo o nome .csv, que abre no Excel igual.
   const form = new FormData();
   form.append("messaging_product", "whatsapp");
-  form.append("type", "text/csv");
-  form.append("file", new Blob([conteudo], { type: "text/csv" }), filename);
+  form.append("type", "text/plain");
+  form.append("file", new Blob([conteudo], { type: "text/plain" }), filename);
 
   const up = await fetch(
     `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/media`,
