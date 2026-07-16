@@ -1,9 +1,20 @@
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
-import { MessageCircle, X, Send, Trash2 } from "lucide-react";
+import { MessageCircle, X, Send, Trash2, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
+type Planilha = { filename?: string; csv?: string };
+type ChatMessage = { role: "user" | "assistant"; content: string; planilha?: Planilha };
+
+function baixarCsv(filename: string, csv: string) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const WELCOME: ChatMessage = {
   role: "assistant",
@@ -57,7 +68,8 @@ export function AiAssistant() {
       });
       if (error) throw error;
       const reply = (data as { reply?: string })?.reply ?? "Não consegui responder agora.";
-      setMessages((m) => [...m, { role: "assistant", content: reply }]);
+      const planilha = (data as { planilha?: Planilha })?.planilha;
+      setMessages((m) => [...m, { role: "assistant", content: reply, planilha }]);
     } catch (e) {
       setMessages((m) => [
         ...m,
@@ -223,6 +235,28 @@ export function AiAssistant() {
                     }}
                   >
                     {m.content}
+                    {m.planilha?.csv && (
+                      <button
+                        onClick={() => baixarCsv(m.planilha!.filename ?? "conferencia_nfe.csv", m.planilha!.csv!)}
+                        style={{
+                          marginTop: 8,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          background: "rgba(251,191,36,0.12)",
+                          color: "#fcd34d",
+                          border: "1px solid rgba(251,191,36,0.3)",
+                        }}
+                      >
+                        <Download size={13} />
+                        Baixar planilha (CSV)
+                      </button>
+                    )}
                   </div>
                 </div>
               ),

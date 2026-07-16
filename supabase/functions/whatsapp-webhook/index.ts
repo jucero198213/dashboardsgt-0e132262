@@ -98,6 +98,51 @@ async function sendWhatsApp(to: string, body: string) {
   }
 }
 
+// ── Envia um documento (ex: planilha CSV) de volta pro WhatsApp ───────────────
+async function sendWhatsAppDocument(to: string, filename: string, conteudo: string, caption: string) {
+  const token = Deno.env.get("WHATSAPP_TOKEN");
+  const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+  if (!token || !phoneId) {
+    console.error("WHATSAPP_TOKEN ou WHATSAPP_PHONE_NUMBER_ID não configurados");
+    return;
+  }
+
+  // 1. Faz upload do arquivo na Media API do WhatsApp
+  const form = new FormData();
+  form.append("messaging_product", "whatsapp");
+  form.append("type", "text/csv");
+  form.append("file", new Blob([conteudo], { type: "text/csv" }), filename);
+
+  const up = await fetch(
+    `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/media`,
+    { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form },
+  );
+  if (!up.ok) {
+    console.error("Erro no upload do documento:", await up.text());
+    return;
+  }
+  const mediaId = (await up.json())?.id;
+  if (!mediaId) return;
+
+  // 2. Envia a mensagem de documento referenciando a mídia
+  const res = await fetch(
+    `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/messages`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to,
+        type: "document",
+        document: { id: mediaId, filename, caption },
+      }),
+    },
+  );
+  if (!res.ok) {
+    console.error("Erro ao enviar documento WhatsApp:", await res.text());
+  }
+}
+
 // Mapa número → nome, lido do secret WHATSAPP_CONTATOS.
 // Formato: "5519997662102:João Pedral;5511988887777:Maria Silva"
 // (separadores aceitos entre contatos: ; ou , — entre número e nome: : ou =)
@@ -126,7 +171,12 @@ function periodoDoDia(): string {
 // Reaproveita a Edge Function "ai-assistant" (mesma usada no chat do site):
 // ela já tem a OpenAI + todas as ferramentas do DW. Assim o WhatsApp ganha a
 // MESMA assistente, com acesso aos dados reais — sem duplicar lógica aqui.
-async function askAI(historico: Turn[], nome: string | null, periodo: string): Promise<string> {
+interface AiResposta {
+  reply: string;
+  planilha?: { filename?: string; csv?: string };
+}
+
+async function askAI(historico: Turn[], nome: string | null, periodo: string): Promise<AiResposta> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) {
@@ -160,10 +210,10 @@ async function askAI(historico: Turn[], nome: string | null, periodo: string): P
 
   if (!res.ok) {
     console.error("Erro ao chamar ai-assistant:", await res.text());
-    return "Não consegui processar agora. Tente novamente em instantes.";
+    return { reply: "Não consegui processar agora. Tente novamente em instantes." };
   }
   const data = await res.json();
-  return data?.reply ?? "Não consegui responder agora.";
+  return { reply: data?.reply ?? "Não consegui responder agora.", planilha: data?.planilha };
 }
 
 serve(async (req: Request) => {
@@ -255,10 +305,20 @@ async function handleMessage(from: string, text: string) {
     await salvarMensagem(from, "user", text);
 
     const historico = [...historicoAnterior, { role: "user" as const, content: text }];
-    const reply = await askAI(historico, nome, periodoDoDia());
+    const { reply, planilha } = await askAI(historico, nome, periodoDoDia());
 
     await salvarMensagem(from, "assistant", reply);
     await sendWhatsApp(from, reply);
+
+    // Se a Sofia gerou uma planilha, envia como documento anexo
+    if (planilha?.csv) {
+      await sendWhatsAppDocument(
+        from,
+        planilha.filename ?? "conferencia_nfe.csv",
+        planilha.csv,
+        "📊 Planilha de conferência fiscal",
+      );
+    }
   } catch (err) {
     console.error("Erro ao processar mensagem:", err);
   }
