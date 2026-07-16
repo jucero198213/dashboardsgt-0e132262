@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/shared/MobileNav";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { UpdateButton } from "@/components/shared/UpdateButton";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   fetchConsultaNfe, clearDwCache,
   type ConsultaNfeRow,
@@ -190,15 +191,9 @@ export default function Fiscal() {
               </div>
 
               <div className="flex items-center gap-1.5 ml-2">
-                <input
-                  type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
-                  className="h-7 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40"
-                />
+                <DatePickerInput value={dataInicio} onChange={setDataInicio} />
                 <span className="text-[10px] text-slate-600">até</span>
-                <input
-                  type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
-                  className="h-7 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40"
-                />
+                <DatePickerInput value={dataFim} onChange={setDataFim} />
               </div>
 
               <div className="flex-1" />
@@ -212,15 +207,9 @@ export default function Fiscal() {
               <HomeButton />
             </div>
             <div className="flex sm:hidden items-center gap-1.5">
-              <input
-                type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
-                className="h-8 flex-1 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none"
-              />
+              <DatePickerInput value={dataInicio} onChange={setDataInicio} />
               <span className="text-[10px] text-slate-600">até</span>
-              <input
-                type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
-                className="h-8 flex-1 rounded-lg px-2 text-[11px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none"
-              />
+              <DatePickerInput value={dataFim} onChange={setDataFim} />
             </div>
 
             {/* ── Erro ── */}
