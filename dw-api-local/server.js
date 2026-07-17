@@ -1993,6 +1993,90 @@ app.post("/dw-consulta-nfe-tendencia", async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-custo-veiculo
+//  Custo por veículo no período = MANUTENÇÃO (peças: PRECUS×QTD, mesma fórmula
+//  da tela Manutenção) + COMBUSTÍVEL (RODABA.VLRTOT). Sem receita (a empresa não
+//  atribui faturamento por placa). Ordena do que mais custa pro que menos custa.
+//  Params: dataInicio, dataFim (default últimos 30 dias), veiculo (opcional), limite.
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-custo-veiculo", async (req, res) => {
+  const { dataInicio, dataFim, veiculo, limite } = req.body ?? {};
+  const dFim    = dataFim    ? new Date(dataFim)    : new Date();
+  const dInicio = dataInicio ? new Date(dataInicio) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  try {
+    const p     = await getPool();
+    const dbReq = p.request();
+    dbReq.input("dataInicio", sql.Date,       dInicio);
+    dbReq.input("dataFim",    sql.Date,       dFim);
+    dbReq.input("veiculo",    sql.VarChar(20), veiculo || null);
+    dbReq.input("limite",     sql.Int,         Math.min(parseInt(limite, 10) || 100, 500));
+
+    const query = `
+      WITH MANUT AS (
+        SELECT ORD.CODVEI AS veiculo,
+               SUM(IRE.PRECUS * IRE.QUANTI) AS custo_manutencao,
+               COUNT(DISTINCT ORD.CODORD)   AS qtd_os
+        FROM OSEORD ORD WITH (NOLOCK)
+        JOIN OSEREQ REQ WITH (NOLOCK) ON ORD.CODORD = REQ.CODORD AND ORD.CODFIL = REQ.ORDFIL
+        JOIN OSEIRE IRE WITH (NOLOCK) ON REQ.CODREQ = IRE.CODREQ AND REQ.CODFIL = IRE.CODFIL
+        WHERE ORD.SITUAC <> 'C'
+          AND ORD.DATREF BETWEEN @dataInicio AND @dataFim
+          AND (@veiculo IS NULL OR ORD.CODVEI = @veiculo)
+        GROUP BY ORD.CODVEI
+      ),
+      COMB AS (
+        SELECT VEI.CODVEI AS veiculo,
+               SUM(ABA.VLRTOT) AS custo_combustivel,
+               SUM(ABA.QUANTI) AS litros,
+               COUNT(*)        AS qtd_abastecimentos
+        FROM RODABA ABA WITH (NOLOCK)
+        JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA = VEI.CODVEI
+        WHERE ABA.DATREF BETWEEN @dataInicio AND @dataFim
+          AND (@veiculo IS NULL OR VEI.CODVEI = @veiculo)
+        GROUP BY VEI.CODVEI
+      )
+      SELECT TOP (@limite)
+        COALESCE(M.veiculo, C.veiculo)                              AS veiculo,
+        FRO.DESCRI                                                  AS frota,
+        MCV.DESCRI                                                  AS marca,
+        MDV.DESCRI                                                  AS modelo,
+        CAST(ISNULL(M.custo_manutencao, 0) AS DECIMAL(18,2))        AS custo_manutencao,
+        ISNULL(M.qtd_os, 0)                                         AS qtd_os,
+        CAST(ISNULL(C.custo_combustivel, 0) AS DECIMAL(18,2))       AS custo_combustivel,
+        CAST(ISNULL(C.litros, 0) AS DECIMAL(18,2))                  AS litros,
+        ISNULL(C.qtd_abastecimentos, 0)                            AS qtd_abastecimentos,
+        CAST(ISNULL(M.custo_manutencao,0) + ISNULL(C.custo_combustivel,0) AS DECIMAL(18,2)) AS custo_total
+      FROM MANUT M
+      FULL OUTER JOIN COMB C ON M.veiculo = C.veiculo
+      LEFT JOIN RODVEI VE  WITH (NOLOCK) ON VE.CODVEI  = COALESCE(M.veiculo, C.veiculo)
+      LEFT JOIN RODFRO FRO WITH (NOLOCK) ON VE.CODFRO  = FRO.CODFRO
+      LEFT JOIN RODMCV MCV WITH (NOLOCK) ON VE.CODMCV  = MCV.CODMCV
+      LEFT JOIN RODMDV MDV WITH (NOLOCK) ON VE.CODMDV  = MDV.CODMDV
+      WHERE ISNULL(M.custo_manutencao,0) + ISNULL(C.custo_combustivel,0) > 0
+      ORDER BY custo_total DESC
+      OPTION (RECOMPILE)
+    `;
+
+    const result = await dbReq.query(query);
+    const rows = result.recordset;
+    const totalGeral = rows.reduce((s, r) => s + Number(r.custo_total || 0), 0);
+    return res.json({
+      periodo: { dataInicio: dInicio.toISOString().slice(0, 10), dataFim: dFim.toISOString().slice(0, 10) },
+      total_veiculos: rows.length,
+      custo_total_frota: Math.round(totalGeral * 100) / 100,
+      data: rows,
+    });
+  } catch (err) {
+    console.error("❌ Erro /dw-custo-veiculo:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
+});
+
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");

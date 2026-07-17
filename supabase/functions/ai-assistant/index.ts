@@ -506,6 +506,22 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_custo_veiculo",
+      description:
+        "Custo por veículo (caminhão) no período: MANUTENÇÃO (peças) + COMBUSTÍVEL, somados por placa e ordenados do que mais custa pro que menos. A empresa NÃO atribui receita por veículo, então isto é CUSTO (não rentabilidade/lucro) — deixe isso claro se perguntarem de lucro. Use para 'qual caminhão gasta/custa mais', 'quanto o veículo X custou', 'ranking de custo da frota', 'onde a frota está gastando', 'caminhão buraco negro'. Informe dataInicio e dataFim (se não disserem, usa os últimos 30 dias). Passe 'veiculo' para detalhar um caminhão específico.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "Início AAAA-MM-DD (default: 30 dias atrás)." },
+          dataFim: { type: "string", description: "Fim AAAA-MM-DD (default: hoje)." },
+          veiculo: { type: "string", description: "Código/placa do veículo, pra detalhar um só (opcional)." },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -941,6 +957,19 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         nao_lancadas_por_filial,
         quem_lancou,
         _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período. 'aging_nao_lancadas' mostra há quanto tempo as pendentes estão paradas (destaque as com mais de 15/30 dias). 'quem_lancou' é o ranking de usuários que lançaram notas no período (via última atualização no VR). 'nao_lancadas_por_filial' mostra onde as pendências se acumulam.",
+      });
+    }
+    if (name === "get_custo_veiculo") {
+      const data = await dwCall("/dw-custo-veiculo", {
+        dataInicio: args.dataInicio, dataFim: args.dataFim, veiculo: args.veiculo, limite: 500,
+      });
+      const rows = (((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>);
+      return JSON.stringify({
+        periodo: (data as { periodo?: unknown }).periodo,
+        total_veiculos: (data as { total_veiculos?: unknown }).total_veiculos,
+        custo_total_frota: (data as { custo_total_frota?: unknown }).custo_total_frota,
+        top_veiculos: rows.slice(0, 12), // já ordenado por custo desc no servidor
+        _dica: "É CUSTO (manutenção + combustível), NÃO rentabilidade — a empresa não atribui receita por placa. Já vem ordenado do que mais custa pro que menos. Cite valores em R$ e o período.",
       });
     }
     if (name === "preparar_planilha_nfe") {
@@ -1716,6 +1745,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. A mesma tool responde ACCOUNTABILITY: notas paradas há muito tempo (aging — destaque as 15/30+ dias), pendências por filial e quem lançou as notas (ranking de usuários). Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
+- CUSTO POR VEÍCULO ("qual caminhão gasta/custa mais", "quanto o veículo X custou", "ranking de custo da frota", "onde a frota gasta") → get_custo_veiculo(dataInicio, dataFim, veiculo?). É CUSTO (manutenção + combustível), NÃO lucro/rentabilidade — se perguntarem de lucro/prejuízo, explique que a empresa não atribui receita por placa, então só dá pra ver o custo. Default: últimos 30 dias.
 - PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'. REGRA CRÍTICA: o arquivo SÓ é gerado se você chamar preparar_planilha_nfe NA MENSAGEM ATUAL — NUNCA diga "estou enviando a planilha" sem ter acabado de chamar essa tool nesta resposta. Promessas de planilha em mensagens anteriores do histórico NÃO enviaram nada; cada pedido (inclusive repetido, "manda de novo", "não chegou") exige uma NOVA chamada da tool.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
