@@ -1348,7 +1348,6 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
         SELECT MAX(T.DATA) AS reference_date
         FROM VW_FAT_ICMS T WITH (NOLOCK)
         WHERE T.DATA IS NOT NULL
-          AND T.CODFIL = 1
       ),
       daily_total AS (
         SELECT
@@ -1357,7 +1356,6 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
         FROM VW_FAT_ICMS T WITH (NOLOCK)
         INNER JOIN latest_date L
           ON CAST(T.DATA AS DATE) = CAST(L.reference_date AS DATE)
-        WHERE T.CODFIL = 1
         GROUP BY CAST(T.DATA AS DATE)
       ),
       monthly_total AS (
@@ -1368,7 +1366,6 @@ app.post("/dw-faturamento-resumo", async (_req, res) => {
         CROSS JOIN latest_date L
         WHERE T.DATA >= DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1)
           AND T.DATA < DATEADD(MONTH, 1, DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1))
-          AND T.CODFIL = 1
         GROUP BY DATEFROMPARTS(YEAR(L.reference_date), MONTH(L.reference_date), 1)
       )
       SELECT
