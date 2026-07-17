@@ -522,6 +522,21 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_manutencao_comparativo",
+      description:
+        "Compara o CUSTO DE MANUTENÇÃO de um período com o período anterior de mesma duração e EXPLICA o que puxou a mudança, além de apontar ANOMALIAS (veículos fora do padrão). Use para 'a manutenção subiu ou caiu?', 'por que o custo de manutenção aumentou?', 'teve algum caminhão gastando fora do normal?', 'o que mudou na manutenção esse mês'. Retorna: variação total (%), os veículos e fornecedores que mais subiram/caíram em R$, e os veículos com custo muito acima da média da frota (anomalia estatística). Para RANKING simples de fornecedor/peça/mecânico use get_manutencao_analise; para custo total por caminhão use get_custo_veiculo.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "Início do período atual AAAA-MM-DD (default: 30 dias atrás)." },
+          dataFim: { type: "string", description: "Fim do período atual AAAA-MM-DD (default: hoje)." },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -957,6 +972,66 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         nao_lancadas_por_filial,
         quem_lancou,
         _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período. 'aging_nao_lancadas' mostra há quanto tempo as pendentes estão paradas (destaque as com mais de 15/30 dias). 'quem_lancou' é o ranking de usuários que lançaram notas no período (via última atualização no VR). 'nao_lancadas_por_filial' mostra onde as pendências se acumulam.",
+      });
+    }
+    if (name === "get_manutencao_comparativo") {
+      const dFimS = (args.dataFim as string) || today();
+      const dIniS = (args.dataInicio as string) || daysAgo(30);
+      const iniD = new Date(dIniS), fimD = new Date(dFimS);
+      const durMs = Math.max(fimD.getTime() - iniD.getTime(), 24 * 60 * 60 * 1000);
+      const antFim = new Date(iniD.getTime() - 24 * 60 * 60 * 1000);
+      const antIni = new Date(antFim.getTime() - durMs);
+      const fmt = (d: Date) => d.toISOString().slice(0, 10);
+      const r2 = (n: number) => Math.round(n * 100) / 100;
+
+      const [atualRes, antRes] = await Promise.all([
+        dwCall("/dw-manutencao", { dataInicio: dIniS, dataFim: dFimS }),
+        dwCall("/dw-manutencao", { dataInicio: fmt(antIni), dataFim: fmt(antFim) }),
+      ]);
+      const rowsA = ((atualRes as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+      const rowsB = ((antRes as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const agrega = (rows: Array<Record<string, unknown>>) => {
+        const vei = new Map<string, number>(), forn = new Map<string, number>();
+        let total = 0;
+        for (const r of rows) {
+          const c = Number(r.custo ?? 0) * Number(r.qtd ?? 1);
+          total += c;
+          const v = String(r.veiculo ?? "?"); vei.set(v, (vei.get(v) ?? 0) + c);
+          const f = String(r.fornecedor ?? "?"); forn.set(f, (forn.get(f) ?? 0) + c);
+        }
+        return { total, vei, forn };
+      };
+      const A = agrega(rowsA), B = agrega(rowsB);
+
+      const movers = (mapA: Map<string, number>, mapB: Map<string, number>) => {
+        const chaves = new Set([...mapA.keys(), ...mapB.keys()]);
+        return [...chaves].map((k) => ({
+          nome: k, atual: r2(mapA.get(k) ?? 0), anterior: r2(mapB.get(k) ?? 0),
+          variacao: r2((mapA.get(k) ?? 0) - (mapB.get(k) ?? 0)),
+        })).sort((a, b) => Math.abs(b.variacao) - Math.abs(a.variacao)).slice(0, 6);
+      };
+
+      // Anomalias: veículos com custo atual acima de média + 2 desvios-padrão
+      const custos = [...A.vei.values()].filter((c) => c > 0);
+      const media = custos.length ? custos.reduce((s, c) => s + c, 0) / custos.length : 0;
+      const dp = custos.length ? Math.sqrt(custos.reduce((s, c) => s + (c - media) ** 2, 0) / custos.length) : 0;
+      const limiar = media + 2 * dp;
+      const anomalias = [...A.vei.entries()]
+        .filter(([, c]) => c > limiar && c > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([veiculo, custo]) => ({ veiculo, custo: r2(custo), media_frota: r2(media) }));
+
+      const varPct = B.total > 0 ? r2(((A.total - B.total) / B.total) * 100) : null;
+
+      return JSON.stringify({
+        periodo_atual: { de: dIniS, ate: dFimS, custo_total: r2(A.total), qtd_veiculos: A.vei.size },
+        periodo_anterior: { de: fmt(antIni), ate: fmt(antFim), custo_total: r2(B.total) },
+        variacao_pct: varPct,
+        maiores_variacoes_veiculo: movers(A.vei, B.vei),
+        maiores_variacoes_fornecedor: movers(A.forn, B.forn),
+        anomalias_veiculo: anomalias,
+        _dica: "variacao_pct positivo = subiu. 'maiores_variacoes_*' mostram QUEM puxou a mudança (variacao em R$, + subiu / - caiu). 'anomalias_veiculo' são caminhões com custo muito acima da média da frota no período. Explique o PORQUÊ citando os maiores movimentos. Custo = manutenção (peças×qtd). Valores em R$.",
       });
     }
     if (name === "get_custo_veiculo") {
@@ -1746,6 +1821,8 @@ GUIA DE TOOLS POR ASSUNTO:
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. A mesma tool responde ACCOUNTABILITY: notas paradas há muito tempo (aging — destaque as 15/30+ dias), pendências por filial e quem lançou as notas (ranking de usuários). Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
 - CUSTO POR VEÍCULO ("qual caminhão gasta/custa mais", "quanto o veículo X custou", "ranking de custo da frota", "onde a frota gasta") → get_custo_veiculo(dataInicio, dataFim, veiculo?). É CUSTO (manutenção + combustível), NÃO lucro/rentabilidade — se perguntarem de lucro/prejuízo, explique que a empresa não atribui receita por placa, então só dá pra ver o custo. Default: últimos 30 dias.
+- MANUTENÇÃO SUBIU/CAIU + ANOMALIAS ("a manutenção subiu?", "por que o custo aumentou?", "teve caminhão gastando fora do normal?", "o que mudou na manutenção") → get_manutencao_comparativo(dataInicio, dataFim). Compara com o período anterior e diz QUEM puxou (veículos/fornecedores) + anomalias. Explique o porquê citando os maiores movimentos.
+- RANKING de fornecedor/peça/mecânico de manutenção ("quem são os maiores fornecedores de manutenção", "quanto gastamos com pneu", "gasto por mecânico") → get_manutencao_analise(agruparPor). NÃO use o comparativo pra isso.
 - PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'. REGRA CRÍTICA: o arquivo SÓ é gerado se você chamar preparar_planilha_nfe NA MENSAGEM ATUAL — NUNCA diga "estou enviando a planilha" sem ter acabado de chamar essa tool nesta resposta. Promessas de planilha em mensagens anteriores do histórico NÃO enviaram nada; cada pedido (inclusive repetido, "manda de novo", "não chegou") exige uma NOVA chamada da tool.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
