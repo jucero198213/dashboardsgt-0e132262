@@ -75,12 +75,18 @@ serve(async (_req) => {
     const t = agoraBR();
     const linhas: string[] = [`☀️ *Bom dia!* Resumo SGT — ${t.ddmm}`, ""];
 
-    // 💰 Faturamento (ontem + mês)
+    // 💰 Faturamento (último dia com movimento + mês). Mostra a data real do dia,
+    // pois o endpoint usa MAX(DATA) — pode ser hoje (parcial) ou ontem.
     try {
       const f = await dw("/dw-faturamento-resumo", {});
-      const ontem = Number(f?.daily_revenue?.revenue_value ?? 0);
+      const dr = f?.daily_revenue ?? {};
+      const dia = Number(dr.revenue_value ?? 0);
       const mes = Number(f?.monthly_revenue?.revenue_value ?? 0);
-      linhas.push(`💰 *Faturamento ontem:* ${fmtBRL(ontem)}`);
+      const ref = dr.reference_date ? new Date(String(dr.reference_date)) : null;
+      const lbl = ref && !isNaN(ref.getTime())
+        ? `${String(ref.getUTCDate()).padStart(2, "0")}/${String(ref.getUTCMonth() + 1).padStart(2, "0")}`
+        : "último dia";
+      linhas.push(`💰 *Faturamento (${lbl}):* ${fmtBRL(dia)}`);
       linhas.push(`📈 *Mês até agora:* ${fmtBRL(mes)}`);
     } catch { linhas.push("💰 Faturamento: indisponível agora"); }
 
