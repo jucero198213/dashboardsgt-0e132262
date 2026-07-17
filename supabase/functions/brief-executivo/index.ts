@@ -37,6 +37,19 @@ function agoraBR() {
   };
 }
 
+// Nome do contato pelo número, lido do secret WHATSAPP_CONTATOS (mesmo formato
+// usado pela Sofia): "5519997662102:João;551997662102:João;...".
+function getContato(from: string): string | null {
+  const raw = Deno.env.get("WHATSAPP_CONTATOS") ?? "";
+  if (!raw) return null;
+  for (const part of raw.split(/[;,]/)) {
+    const idx = part.search(/[:=]/);
+    if (idx === -1) continue;
+    if (part.slice(0, idx).trim() === from) return part.slice(idx + 1).trim() || null;
+  }
+  return null;
+}
+
 async function dw(path: string, body: Record<string, unknown>) {
   const r = await fetch(`${DW_API_URL}${path}`, {
     method: "POST",
@@ -73,7 +86,7 @@ serve(async (_req) => {
     }
 
     const t = agoraBR();
-    const linhas: string[] = [`☀️ *Bom dia!* Resumo SGT — ${t.ddmm}`, ""];
+    const linhas: string[] = [];
 
     // 💰 Faturamento (último dia com movimento + mês). Mostra a data real do dia,
     // pois o endpoint usa MAX(DATA) — pode ser hoje (parcial) ou ontem.
@@ -127,10 +140,15 @@ serve(async (_req) => {
 
     linhas.push("");
     linhas.push("_Precisa de detalhe de algo? É só me perguntar._ 🤖");
-    const msg = linhas.join("\n");
+    const corpo = linhas.join("\n");
 
     const enviados: Record<string, boolean> = {};
     for (const to of numeros) {
+      const nome = getContato(to);
+      const saudacao = nome
+        ? `☀️ *Bom dia, ${nome}!* Resumo SGT — ${t.ddmm}`
+        : `☀️ *Bom dia!* Resumo SGT — ${t.ddmm}`;
+      const msg = `${saudacao}\n\n${corpo}`;
       enviados[to] = await sendText(to, msg);
       if (enviados[to]) {
         await supabase.from("sofia_conversas").insert({ telefone: to, role: "assistant", conteudo: msg });
