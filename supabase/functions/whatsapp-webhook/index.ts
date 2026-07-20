@@ -249,8 +249,11 @@ serve(async (req: Request) => {
     const value = (payload as any)?.entry?.[0]?.changes?.[0]?.value;
     const message = value?.messages?.[0];
 
-    // Sem mensagem de texto (ex.: status de entrega) → só confirma 200
-    if (!message || message.type !== "text") {
+    // Aceita texto normal E cliques de botão (respostas rápidas de template,
+    // que chegam como type "button" ou "interactive"). Qualquer outra coisa
+    // (status de entrega, mídia, etc.) → só confirma 200.
+    const TIPOS_ACEITOS = ["text", "button", "interactive"];
+    if (!message || !TIPOS_ACEITOS.includes(message.type)) {
       return new Response("ok", { status: 200 });
     }
 
@@ -267,7 +270,17 @@ serve(async (req: Request) => {
     }
 
     const from: string = message.from;
-    const text: string = message.text?.body ?? "";
+    // Extrai o conteúdo conforme o tipo: texto normal, clique em botão de
+    // template (button.text) ou botão interativo (interactive.button_reply).
+    const text: string =
+      message.text?.body ??
+      message.button?.text ??
+      message.interactive?.button_reply?.title ??
+      message.interactive?.list_reply?.title ??
+      "";
+    if (!text.trim()) {
+      return new Response("ok", { status: 200 });
+    }
 
     // Processa em SEGUNDO PLANO e responde 200 imediatamente, para a Meta não
     // reenviar a mensagem enquanto a IA é consultada (causa do spam).
