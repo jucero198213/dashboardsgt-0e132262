@@ -72,7 +72,14 @@ async function sendText(to: string, body: string): Promise<boolean> {
       body: JSON.stringify({ messaging_product: "whatsapp", to, type: "text", text: { body } }),
     },
   );
-  if (!res.ok) console.error(`Falha ao enviar brief pra ${to}:`, await res.text());
+  const corpoResp = await res.text();
+  if (!res.ok) {
+    console.error(`Falha ao enviar brief pra ${to}:`, corpoResp);
+  } else {
+    // Loga o retorno da Meta (message id + status) — essencial pra diagnosticar
+    // "aceitou mas não entregou" (ex: janela de 24h).
+    console.log(`Brief aceito pela Meta pra ${to}:`, corpoResp);
+  }
   return res.ok;
 }
 
