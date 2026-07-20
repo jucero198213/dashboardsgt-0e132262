@@ -2033,6 +2033,18 @@ app.post("/dw-custo-veiculo", async (req, res) => {
         WHERE ABA.DATREF BETWEEN @dataInicio AND @dataFim
           AND (@veiculo IS NULL OR VEI.CODVEI = @veiculo)
         GROUP BY VEI.CODVEI
+      ),
+      -- Detecta placa usada como "lixeira" no lançamento das notas de combustível
+      POR_DIA AS (
+        SELECT VEI.CODVEI AS veiculo, CAST(ABA.DATREF AS DATE) AS dia, COUNT(*) AS n
+        FROM RODABA ABA WITH (NOLOCK)
+        JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA = VEI.CODVEI
+        WHERE ABA.DATREF BETWEEN @dataInicio AND @dataFim
+        GROUP BY VEI.CODVEI, CAST(ABA.DATREF AS DATE)
+      ),
+      PICO AS (
+        SELECT veiculo, MAX(n) AS max_no_dia, COUNT(*) AS dias_com_abast
+        FROM POR_DIA GROUP BY veiculo
       )
       SELECT TOP (@limite)
         COALESCE(M.veiculo, C.veiculo)                              AS veiculo,
@@ -2044,9 +2056,16 @@ app.post("/dw-custo-veiculo", async (req, res) => {
         CAST(ISNULL(C.custo_combustivel, 0) AS DECIMAL(18,2))       AS custo_combustivel,
         CAST(ISNULL(C.litros, 0) AS DECIMAL(18,2))                  AS litros,
         ISNULL(C.qtd_abastecimentos, 0)                            AS qtd_abastecimentos,
+        ISNULL(PK.max_no_dia, 0)                                   AS max_abast_no_dia,
+        -- 1 = volume/frequência implausível → provável erro de lançamento
+        CASE WHEN ISNULL(C.qtd_abastecimentos, 0) > 0
+              AND ( (CAST(C.qtd_abastecimentos AS FLOAT) / NULLIF(PK.dias_com_abast, 0)) > 1.5
+                    OR ISNULL(PK.max_no_dia, 0) > 4 )
+             THEN 1 ELSE 0 END                                     AS abastecimento_suspeito,
         CAST(ISNULL(M.custo_manutencao,0) + ISNULL(C.custo_combustivel,0) AS DECIMAL(18,2)) AS custo_total
       FROM MANUT M
       FULL OUTER JOIN COMB C ON M.veiculo = C.veiculo
+      LEFT JOIN PICO PK ON PK.veiculo = COALESCE(M.veiculo, C.veiculo)
       LEFT JOIN RODVEI VE  WITH (NOLOCK) ON VE.CODVEI  = COALESCE(M.veiculo, C.veiculo)
       LEFT JOIN RODFRO FRO WITH (NOLOCK) ON VE.CODFRO  = FRO.CODFRO
       LEFT JOIN RODMCV MCV WITH (NOLOCK) ON VE.CODMCV  = MCV.CODMCV

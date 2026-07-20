@@ -1063,12 +1063,23 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         dataInicio: args.dataInicio, dataFim: args.dataFim, veiculo: args.veiculo, limite: 500,
       });
       const rows = (((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>);
+      const top = rows.slice(0, 12); // já ordenado por custo desc no servidor
+      const suspeitos = top.filter((r) => Number(r.abastecimento_suspeito) === 1)
+        .map((r) => String(r.veiculo));
+      const topContaminado = top.length > 0 && Number(top[0].abastecimento_suspeito) === 1;
+
       return JSON.stringify({
         periodo: (data as { periodo?: unknown }).periodo,
         total_veiculos: (data as { total_veiculos?: unknown }).total_veiculos,
         custo_total_frota: (data as { custo_total_frota?: unknown }).custo_total_frota,
-        top_veiculos: rows.slice(0, 12), // já ordenado por custo desc no servidor
-        _dica: "É CUSTO (manutenção + combustível), NÃO rentabilidade — a empresa não atribui receita por placa. Já vem ordenado do que mais custa pro que menos. Cite valores em R$ e o período.",
+        top_veiculos: top,
+        placas_com_abastecimento_suspeito: suspeitos,
+        _alerta: topContaminado
+          ? `ATENÇÃO OBRIGATÓRIA: o 1º colocado (${top[0].veiculo}) tem abastecimento_suspeito=1 — a placa é usada como "lixeira" no lançamento das notas de combustível, então esse gasto NÃO é real dele. NÃO afirme que é o caminhão que mais gasta. Diga que o topo está distorcido por erro de lançamento, cite quais placas estão marcadas, e ofereça o ranking só por MANUTENÇÃO (que é confiável) ou o detalhe via get_qualidade_abastecimento.`
+          : suspeitos.length
+            ? `Atenção: as placas ${suspeitos.join(", ")} têm abastecimento_suspeito=1 (erro de lançamento) — ressalve ao citá-las.`
+            : null,
+        _dica: "É CUSTO (manutenção + combustível), NÃO rentabilidade — a empresa não atribui receita por placa. Já vem ordenado do que mais custa pro que menos. Cite valores em R$ e o período. Sempre respeite o campo _alerta quando ele existir.",
       });
     }
     if (name === "preparar_planilha_nfe") {
