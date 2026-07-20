@@ -2074,6 +2074,105 @@ app.post("/dw-custo-veiculo", async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENDPOINT: /dw-abastecimento-qualidade
+//  Indicador de QUALIDADE do lançamento de abastecimento. Mede dois furos:
+//   1. Registros sem motorista identificado ("A INFORMAR") — combustível sem dono
+//   2. Placas com volume/frequência implausível (placa usada como "lixeira" na
+//      importação das notas) — ex: 16 abastecimentos no mesmo dia, 50+ postos
+//  Params: dataInicio, dataFim (default últimos 30 dias).
+// ─────────────────────────────────────────────────────────────────────────────
+app.post("/dw-abastecimento-qualidade", async (req, res) => {
+  const { dataInicio, dataFim } = req.body ?? {};
+  const dFim    = dataFim    ? new Date(dataFim)    : new Date();
+  const dInicio = dataInicio ? new Date(dataInicio) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  try {
+    const p     = await getPool();
+    const dbReq = p.request();
+    dbReq.input("dataInicio", sql.Date, dInicio);
+    dbReq.input("dataFim",    sql.Date, dFim);
+
+    const result = await dbReq.query(`
+      WITH POR_DIA AS (
+        SELECT VEI.CODVEI AS veiculo, CAST(ABA.DATREF AS DATE) AS dia, COUNT(*) AS n
+        FROM RODABA ABA WITH (NOLOCK)
+        JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA = VEI.CODVEI
+        WHERE ABA.DATREF BETWEEN @dataInicio AND @dataFim
+        GROUP BY VEI.CODVEI, CAST(ABA.DATREF AS DATE)
+      ),
+      PICO AS (
+        SELECT veiculo, MAX(n) AS max_no_dia, COUNT(*) AS dias_com_abast
+        FROM POR_DIA GROUP BY veiculo
+      )
+      SELECT
+        VEI.CODVEI                                    AS veiculo,
+        MDV.DESCRI                                    AS modelo,
+        COUNT(*)                                      AS qtd,
+        CAST(SUM(ABA.QUANTI) AS DECIMAL(18,2))        AS litros,
+        CAST(SUM(ABA.VLRTOT) AS DECIMAL(18,2))        AS valor,
+        SUM(CASE WHEN ISNULL(MOT.NOMMOT,'') = 'A INFORMAR' THEN 1 ELSE 0 END)          AS qtd_sem_motorista,
+        CAST(SUM(CASE WHEN ISNULL(MOT.NOMMOT,'') = 'A INFORMAR' THEN ABA.VLRTOT ELSE 0 END) AS DECIMAL(18,2)) AS valor_sem_motorista,
+        COUNT(DISTINCT ABA.CODPON)                    AS postos_distintos,
+        MAX(PICO.max_no_dia)                          AS max_no_dia,
+        MAX(PICO.dias_com_abast)                      AS dias_com_abast
+      FROM RODABA ABA WITH (NOLOCK)
+      JOIN RODVEI VEI WITH (NOLOCK) ON ABA.PLACA = VEI.CODVEI
+      LEFT JOIN RODMOT MOT WITH (NOLOCK) ON ABA.CODMOT = MOT.CODMOT
+      LEFT JOIN RODMDV MDV WITH (NOLOCK) ON VEI.CODMDV = MDV.CODMDV
+      LEFT JOIN PICO ON PICO.veiculo = VEI.CODVEI
+      WHERE ABA.DATREF BETWEEN @dataInicio AND @dataFim
+      GROUP BY VEI.CODVEI, MDV.DESCRI
+      ORDER BY valor DESC
+      OPTION (RECOMPILE)
+    `);
+
+    const rows = result.recordset;
+    const n = (x) => Number(x || 0);
+    const tot = {
+      registros: rows.reduce((s, r) => s + n(r.qtd), 0),
+      litros:    rows.reduce((s, r) => s + n(r.litros), 0),
+      valor:     rows.reduce((s, r) => s + n(r.valor), 0),
+      registros_sem_motorista: rows.reduce((s, r) => s + n(r.qtd_sem_motorista), 0),
+      valor_sem_motorista:     rows.reduce((s, r) => s + n(r.valor_sem_motorista), 0),
+    };
+    const r2 = (x) => Math.round(x * 100) / 100;
+
+    // Placa suspeita: média > 1,5 abastecimentos/dia ativo OU pico > 4 no mesmo dia
+    const suspeitas = rows
+      .map((r) => ({
+        veiculo: r.veiculo, modelo: r.modelo,
+        litros: n(r.litros), valor: n(r.valor), qtd: n(r.qtd),
+        max_no_dia: n(r.max_no_dia), postos_distintos: n(r.postos_distintos),
+        media_por_dia: r2(n(r.qtd) / Math.max(n(r.dias_com_abast), 1)),
+        qtd_sem_motorista: n(r.qtd_sem_motorista),
+      }))
+      .filter((r) => r.media_por_dia > 1.5 || r.max_no_dia > 4)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 10);
+
+    return res.json({
+      periodo: { dataInicio: dInicio.toISOString().slice(0, 10), dataFim: dFim.toISOString().slice(0, 10) },
+      total_registros: tot.registros,
+      total_litros: r2(tot.litros),
+      total_valor: r2(tot.valor),
+      sem_motorista: {
+        registros: tot.registros_sem_motorista,
+        valor: r2(tot.valor_sem_motorista),
+        pct_registros: tot.registros ? r2((tot.registros_sem_motorista / tot.registros) * 100) : 0,
+        pct_valor: tot.valor ? r2((tot.valor_sem_motorista / tot.valor) * 100) : 0,
+      },
+      placas_suspeitas: suspeitas,
+    });
+  } catch (err) {
+    console.error("❌ Erro /dw-abastecimento-qualidade:", err.message);
+    if (err.code === "ECONNRESET" || err.code === "ECONNABORTED" || err.message?.includes("ECONN")) {
+      await destroyPool();
+    }
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
+});
+
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log("─────────────────────────────────────────");

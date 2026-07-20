@@ -537,6 +537,21 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "get_qualidade_abastecimento",
+      description:
+        "Indicador de QUALIDADE do lançamento de abastecimento — mede furos de controle no cadastro das notas de combustível. Retorna: quanto do combustível está SEM MOTORISTA identificado ('A INFORMAR', em registros, R$ e %), e as PLACAS SUSPEITAS (usadas como 'lixeira' na importação — volume/frequência impossível, ex: vários abastecimentos no mesmo dia em dezenas de postos). Use para 'quanto do combustível está sem identificação', 'tem placa com abastecimento estranho', 'a qualidade do lançamento de abastecimento melhorou?', 'combustível sem dono'. IMPORTANTE: quando falar de custo de combustível por veículo, avise que placas suspeitas distorcem o número.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "Início AAAA-MM-DD (default: 30 dias atrás)." },
+          dataFim: { type: "string", description: "Fim AAAA-MM-DD (default: hoje)." },
+        },
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -972,6 +987,15 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         nao_lancadas_por_filial,
         quem_lancou,
         _dica: "Responda por padrão com 'resumo_pra_lancar' (já desconta notas de entrada e desconsiderados como a Minerva). 'resumo_bruto' inclui tudo e bate com o portal fiscal do Rodopar — cite se o usuário pedir 'todas'. Sempre cite valores em reais (R$) e o período. 'aging_nao_lancadas' mostra há quanto tempo as pendentes estão paradas (destaque as com mais de 15/30 dias). 'quem_lancou' é o ranking de usuários que lançaram notas no período (via última atualização no VR). 'nao_lancadas_por_filial' mostra onde as pendências se acumulam.",
+      });
+    }
+    if (name === "get_qualidade_abastecimento") {
+      const data = await dwCall("/dw-abastecimento-qualidade", {
+        dataInicio: args.dataInicio, dataFim: args.dataFim,
+      });
+      return JSON.stringify({
+        ...(data as Record<string, unknown>),
+        _dica: "'sem_motorista' é combustível lançado sem responsável identificado — furo de controle, cite o % e o valor em R$. 'placas_suspeitas' são placas usadas como 'lixeira' na importação das notas (média_por_dia ou max_no_dia altos, muitos postos): o gasto delas NÃO é real daquele caminhão. Se perguntarem custo por veículo, avise dessa distorção.",
       });
     }
     if (name === "get_manutencao_comparativo") {
@@ -1821,6 +1845,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. A mesma tool responde ACCOUNTABILITY: notas paradas há muito tempo (aging — destaque as 15/30+ dias), pendências por filial e quem lançou as notas (ranking de usuários). Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
 - CUSTO POR VEÍCULO ("qual caminhão gasta/custa mais", "quanto o veículo X custou", "ranking de custo da frota", "onde a frota gasta") → get_custo_veiculo(dataInicio, dataFim, veiculo?). É CUSTO (manutenção + combustível), NÃO lucro/rentabilidade — se perguntarem de lucro/prejuízo, explique que a empresa não atribui receita por placa, então só dá pra ver o custo. Default: últimos 30 dias.
+- QUALIDADE DO ABASTECIMENTO ("quanto do combustível está sem identificação", "tem placa com abastecimento estranho", "combustível sem dono") → get_qualidade_abastecimento. ATENÇÃO GERAL: existem placas usadas como "lixeira" no lançamento das notas de combustível (volume impossível). Por isso, ao responder CUSTO POR VEÍCULO (get_custo_veiculo), se o topo do ranking for um veículo com gasto de combustível fora da curva, AVISE que pode ser erro de lançamento e sugira conferir com get_qualidade_abastecimento — nunca afirme categoricamente "esse é o caminhão que mais gasta" sem essa ressalva.
 - MANUTENÇÃO SUBIU/CAIU + ANOMALIAS ("a manutenção subiu?", "por que o custo aumentou?", "teve caminhão gastando fora do normal?", "o que mudou na manutenção") → get_manutencao_comparativo(dataInicio, dataFim). Compara com o período anterior e diz QUEM puxou (veículos/fornecedores) + anomalias. Explique o porquê citando os maiores movimentos.
 - RANKING de fornecedor/peça/mecânico de manutenção ("quem são os maiores fornecedores de manutenção", "quanto gastamos com pneu", "gasto por mecânico") → get_manutencao_analise(agruparPor). NÃO use o comparativo pra isso.
 - PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'. REGRA CRÍTICA: o arquivo SÓ é gerado se você chamar preparar_planilha_nfe NA MENSAGEM ATUAL — NUNCA diga "estou enviando a planilha" sem ter acabado de chamar essa tool nesta resposta. Promessas de planilha em mensagens anteriores do histórico NÃO enviaram nada; cada pedido (inclusive repetido, "manda de novo", "não chegou") exige uma NOVA chamada da tool.

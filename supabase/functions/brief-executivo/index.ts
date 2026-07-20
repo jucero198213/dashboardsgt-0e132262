@@ -133,7 +133,7 @@ serve(async (_req) => {
     const t = agoraBR();
     const linhas: string[] = [];
     // Valores individuais pros parâmetros do template (sempre 1 linha, nunca vazios)
-    const v = { fatDiaLbl: "—", fatDia: "—", fatMes: "—", viagens: "0", notas: "0", cnhs: "0" };
+    const v = { fatDiaLbl: "—", fatDia: "—", fatMes: "—", viagens: "0", notas: "0", cnhs: "0", combSemId: "—" };
 
     // 💰 Faturamento (último dia com movimento + mês). Mostra a data real do dia,
     // pois o endpoint usa MAX(DATA) — pode ser hoje (parcial) ou ontem.
@@ -168,6 +168,17 @@ serve(async (_req) => {
       const valor = rows.reduce((s, x) => s + Number(x.VALOR_NOTA ?? 0), 0);
       v.notas = String(rows.length);
       linhas.push(`📄 *Fiscal:* ${rows.length} nota(s) a lançar${rows.length ? ` — ${fmtBRL(valor)}` : ""}`);
+    } catch { /* silencia */ }
+
+    // ⛽ Qualidade do abastecimento — combustível sem motorista identificado
+    try {
+      const q = await dw("/dw-abastecimento-qualidade", {});
+      const sm = q?.sem_motorista ?? {};
+      const pct = Number(sm.pct_valor ?? 0);
+      v.combSemId = `${pct.toFixed(0)}% (${fmtBRL(Number(sm.valor ?? 0))})`;
+      if (pct > 0) {
+        linhas.push(`⛽ *Combustível sem identificação:* ${pct.toFixed(0)}% — ${fmtBRL(Number(sm.valor ?? 0))}`);
+      }
     } catch { /* silencia */ }
 
     // 🪪 CNHs vencendo nos próximos 30 dias
