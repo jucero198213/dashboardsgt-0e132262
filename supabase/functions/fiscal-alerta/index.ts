@@ -51,6 +51,54 @@ function periodoBR() {
   };
 }
 
+// Nome do contato pelo número (secret WHATSAPP_CONTATOS, mesmo mapa da Sofia).
+function getContato(from: string): string | null {
+  const raw = Deno.env.get("WHATSAPP_CONTATOS") ?? "";
+  if (!raw) return null;
+  for (const part of raw.split(/[;,]/)) {
+    const idx = part.search(/[:=]/);
+    if (idx === -1) continue;
+    if (part.slice(0, idx).trim() === from) return part.slice(idx + 1).trim() || null;
+  }
+  return null;
+}
+
+// Envia via TEMPLATE aprovado (entrega fora da janela de 24h). false → cai no texto.
+const TEMPLATE_NOME = Deno.env.get("WHATSAPP_FISCAL_TEMPLATE") || "alerta_fiscal_sgt";
+
+async function sendTemplate(to: string, params: string[]): Promise<boolean> {
+  const token = Deno.env.get("WHATSAPP_TOKEN");
+  const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+  if (!token || !phoneId) return false;
+  const res = await fetch(
+    `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/messages`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to,
+        type: "template",
+        template: {
+          name: TEMPLATE_NOME,
+          language: { code: "pt_BR" },
+          components: [{
+            type: "body",
+            parameters: params.map((p) => ({ type: "text", text: (p || "—").replace(/\s+/g, " ").trim() })),
+          }],
+        },
+      }),
+    },
+  );
+  const corpo = await res.text();
+  if (!res.ok) {
+    console.warn(`Template "${TEMPLATE_NOME}" falhou pra ${to} (caindo no texto livre):`, corpo);
+    return false;
+  }
+  console.log(`Template "${TEMPLATE_NOME}" aceito pra ${to}:`, corpo);
+  return true;
+}
+
 // Envia texto livre no WhatsApp. Retorna true/false e loga falhas (ex: janela 24h).
 async function sendText(to: string, body: string): Promise<boolean> {
   const token = Deno.env.get("WHATSAPP_TOKEN");
@@ -134,9 +182,29 @@ serve(async (_req) => {
         `\n\nMe peça _a planilha do que falta lançar_ que eu envio o Excel. 📊`;
     }
 
+    // Maior pendência numa linha só (template não aceita quebra de linha)
+    const maiorPend = top.length
+      ? `${top[0][0]} — ${top[0][1].qtd} nota(s), ${fmtBRL(top[0][1].valor)}`
+      : "nenhuma";
+
     const enviados: Record<string, boolean> = {};
+    const via: Record<string, string> = {};
     for (const to of numeros) {
-      enviados[to] = await sendText(to, msg);
+      const nome = getContato(to) || "diretoria";
+      const params = [
+        nome,
+        `${p.mesNome} (até ${p.diaLabel})`,
+        String(naoLanc.length),
+        fmtBRL(valorNaoLanc),
+        String(diverg.length),
+        fmtBRL(valorDiverg),
+        maiorPend,
+      ];
+      // 1º tenta o template (entrega sempre); se não rolar, cai no texto livre
+      const okTpl = await sendTemplate(to, params);
+      enviados[to] = okTpl ? true : await sendText(to, msg);
+      via[to] = okTpl ? "template" : "texto";
+
       // Registra o alerta no histórico da conversa — a Sofia "lembra" do que enviou
       if (enviados[to]) {
         const { error } = await supabase
@@ -153,6 +221,7 @@ serve(async (_req) => {
         nao_lancadas: naoLanc.length,
         divergentes: diverg.length,
         enviados,
+        via,
       }),
       { headers: { "Content-Type": "application/json" } },
     );

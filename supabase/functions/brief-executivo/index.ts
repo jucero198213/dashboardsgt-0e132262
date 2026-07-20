@@ -37,6 +37,44 @@ function agoraBR() {
   };
 }
 
+// Envia via TEMPLATE aprovado (entrega mesmo fora da janela de 24h).
+// Retorna false se falhar (ex: template ainda em análise) → chamador cai no texto.
+const TEMPLATE_NOME = Deno.env.get("WHATSAPP_BRIEF_TEMPLATE") || "brief_executivo_sgt";
+
+async function sendTemplate(to: string, params: string[]): Promise<boolean> {
+  const token = Deno.env.get("WHATSAPP_TOKEN");
+  const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+  if (!token || !phoneId) return false;
+  const res = await fetch(
+    `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/messages`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to,
+        type: "template",
+        template: {
+          name: TEMPLATE_NOME,
+          language: { code: "pt_BR" },
+          components: [{
+            type: "body",
+            // Parâmetro não pode ser vazio nem ter quebra de linha
+            parameters: params.map((p) => ({ type: "text", text: (p || "—").replace(/\s+/g, " ").trim() })),
+          }],
+        },
+      }),
+    },
+  );
+  const corpo = await res.text();
+  if (!res.ok) {
+    console.warn(`Template "${TEMPLATE_NOME}" falhou pra ${to} (caindo no texto livre):`, corpo);
+    return false;
+  }
+  console.log(`Template "${TEMPLATE_NOME}" aceito pra ${to}:`, corpo);
+  return true;
+}
+
 // Nome do contato pelo número, lido do secret WHATSAPP_CONTATOS (mesmo formato
 // usado pela Sofia): "5519997662102:João;551997662102:João;...".
 function getContato(from: string): string | null {
@@ -94,6 +132,8 @@ serve(async (_req) => {
 
     const t = agoraBR();
     const linhas: string[] = [];
+    // Valores individuais pros parâmetros do template (sempre 1 linha, nunca vazios)
+    const v = { fatDiaLbl: "—", fatDia: "—", fatMes: "—", viagens: "0", notas: "0", cnhs: "0" };
 
     // 💰 Faturamento (último dia com movimento + mês). Mostra a data real do dia,
     // pois o endpoint usa MAX(DATA) — pode ser hoje (parcial) ou ontem.
@@ -106,6 +146,7 @@ serve(async (_req) => {
       const lbl = ref && !isNaN(ref.getTime())
         ? `${String(ref.getUTCDate()).padStart(2, "0")}/${String(ref.getUTCMonth() + 1).padStart(2, "0")}`
         : "último dia";
+      v.fatDiaLbl = lbl; v.fatDia = fmtBRL(dia); v.fatMes = fmtBRL(mes);
       linhas.push(`💰 *Faturamento (${lbl}):* ${fmtBRL(dia)}`);
       linhas.push(`📈 *Mês até agora:* ${fmtBRL(mes)}`);
     } catch { linhas.push("💰 Faturamento: indisponível agora"); }
@@ -114,6 +155,7 @@ serve(async (_req) => {
     try {
       const op = await dw("/dw-operacional", {});
       const viagens = ((op?.data ?? []) as unknown[]).length;
+      v.viagens = String(viagens);
       linhas.push(`🚛 *Operação:* ${viagens} viagem(ns) em andamento`);
     } catch { /* silencia seção */ }
 
@@ -124,6 +166,7 @@ serve(async (_req) => {
       const rows = ((c?.data ?? []) as Array<Record<string, unknown>>)
         .filter((x) => String(x.TPNF) !== "0" && Number(x.DESCONSIDERADO) !== 1 && x.SITUACAO === "NAO_LANCADA");
       const valor = rows.reduce((s, x) => s + Number(x.VALOR_NOTA ?? 0), 0);
+      v.notas = String(rows.length);
       linhas.push(`📄 *Fiscal:* ${rows.length} nota(s) a lançar${rows.length ? ` — ${fmtBRL(valor)}` : ""}`);
     } catch { /* silencia */ }
 
@@ -136,6 +179,7 @@ serve(async (_req) => {
         .map((m) => ({ nome: String(m.motorista ?? "—"), val: m.validade_habilitacao ? new Date(String(m.validade_habilitacao)) : null }))
         .filter((m) => m.val && !isNaN(m.val.getTime()) && m.val >= hoje && m.val <= limite)
         .sort((a, b) => (a.val!.getTime() - b.val!.getTime()));
+      v.cnhs = String(vencendo.length);
       if (vencendo.length) {
         linhas.push(`🪪 *CNHs vencendo (30d):* ${vencendo.length}`);
         for (const v of vencendo.slice(0, 5)) {
@@ -150,19 +194,26 @@ serve(async (_req) => {
     const corpo = linhas.join("\n");
 
     const enviados: Record<string, boolean> = {};
+    const via: Record<string, string> = {};
     for (const to of numeros) {
       const nome = getContato(to);
       const saudacao = nome
         ? `☀️ *Bom dia, ${nome}!* Resumo SGT — ${t.ddmm}`
         : `☀️ *Bom dia!* Resumo SGT — ${t.ddmm}`;
       const msg = `${saudacao}\n\n${corpo}`;
-      enviados[to] = await sendText(to, msg);
+
+      // 1º tenta o template (entrega sempre); se não rolar, cai no texto livre
+      const params = [nome || "diretoria", t.ddmm, v.fatDiaLbl, v.fatDia, v.fatMes, v.viagens, v.notas, v.cnhs];
+      const okTpl = await sendTemplate(to, params);
+      enviados[to] = okTpl ? true : await sendText(to, msg);
+      via[to] = okTpl ? "template" : "texto";
+
       if (enviados[to]) {
         await supabase.from("sofia_conversas").insert({ telefone: to, role: "assistant", conteudo: msg });
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, enviados }),
+    return new Response(JSON.stringify({ ok: true, enviados, via }),
       { headers: { "Content-Type": "application/json" } });
   } catch (err) {
     console.error("brief-executivo:", err);
