@@ -252,7 +252,7 @@ serve(async (req: Request) => {
     // Aceita texto normal E cliques de botão (respostas rápidas de template,
     // que chegam como type "button" ou "interactive"). Qualquer outra coisa
     // (status de entrega, mídia, etc.) → só confirma 200.
-    const TIPOS_ACEITOS = ["text", "button", "interactive"];
+    const TIPOS_ACEITOS = ["text", "button", "interactive", "audio"];
     if (!message || !TIPOS_ACEITOS.includes(message.type)) {
       return new Response("ok", { status: 200 });
     }
@@ -278,13 +278,15 @@ serve(async (req: Request) => {
       message.interactive?.button_reply?.title ??
       message.interactive?.list_reply?.title ??
       "";
-    if (!text.trim()) {
+    // Nota de voz: guarda o id da mídia pra transcrever no processamento em background.
+    const audioId: string = message.type === "audio" ? (message.audio?.id ?? "") : "";
+    if (!text.trim() && !audioId) {
       return new Response("ok", { status: 200 });
     }
 
     // Processa em SEGUNDO PLANO e responde 200 imediatamente, para a Meta não
     // reenviar a mensagem enquanto a IA é consultada (causa do spam).
-    const work = handleMessage(from, text);
+    const work = handleMessage(from, text, audioId);
     // @ts-ignore EdgeRuntime é injetado pelo runtime do Supabase
     if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
       // @ts-ignore
@@ -299,8 +301,49 @@ serve(async (req: Request) => {
   return new Response("Method not allowed", { status: 405 });
 });
 
-// ── Processa uma mensagem: trava de acesso → IA → resposta ───────────────────
-async function handleMessage(from: string, text: string) {
+// ── Transcreve uma nota de voz: baixa a mídia do WhatsApp e usa o Whisper ─────
+async function transcreverAudio(mediaId: string): Promise<string> {
+  const token = Deno.env.get("WHATSAPP_TOKEN");
+  const openaiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!token || !openaiKey) {
+    console.error("WHATSAPP_TOKEN ou OPENAI_API_KEY ausente pra transcrição");
+    return "";
+  }
+  try {
+    // 1. Descobre a URL temporária da mídia
+    const metaRes = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${mediaId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!metaRes.ok) { console.error("Falha ao obter mídia:", await metaRes.text()); return ""; }
+    const meta = await metaRes.json();
+    if (!meta?.url) return "";
+
+    // 2. Baixa o áudio (precisa do mesmo token)
+    const audioRes = await fetch(meta.url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!audioRes.ok) { console.error("Falha ao baixar áudio:", audioRes.status); return ""; }
+    const bytes = new Uint8Array(await audioRes.arrayBuffer());
+    const mime = String(meta.mime_type || "audio/ogg").split(";")[0];
+    const ext = mime.includes("mp4") || mime.includes("mpeg") ? "mp4" : "ogg";
+
+    // 3. Transcreve via Whisper (com dica de idioma pt pra melhor precisão)
+    const form = new FormData();
+    form.append("file", new Blob([bytes], { type: mime }), `audio.${ext}`);
+    form.append("model", "whisper-1");
+    form.append("language", "pt");
+    const trRes = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+      method: "POST", headers: { Authorization: `Bearer ${openaiKey}` }, body: form,
+    });
+    if (!trRes.ok) { console.error("Falha na transcrição:", await trRes.text()); return ""; }
+    const tr = await trRes.json();
+    return String(tr?.text ?? "").trim();
+  } catch (e) {
+    console.error("Erro na transcrição de áudio:", e);
+    return "";
+  }
+}
+
+// ── Processa uma mensagem: trava de acesso → (áudio→texto) → IA → resposta ────
+async function handleMessage(from: string, text: string, audioId = "") {
   try {
     const allowed = (Deno.env.get("WHATSAPP_ALLOWED_NUMBERS") ?? "")
       .split(",")
@@ -315,14 +358,24 @@ async function handleMessage(from: string, text: string) {
       return;
     }
 
+    // Se veio nota de voz, transcreve antes de tratar como pergunta
+    let mensagem = text;
+    if (!mensagem.trim() && audioId) {
+      mensagem = await transcreverAudio(audioId);
+      if (!mensagem.trim()) {
+        await sendWhatsApp(from, "Não consegui entender o áudio 😕 Pode repetir mais devagar ou mandar por texto?");
+        return;
+      }
+    }
+
     const nome = getContato(from);
 
     // Carrega o histórico do banco, persiste a mensagem atual, consulta a Sofia
     // com todo o contexto e guarda a resposta — tudo na tabela sofia_conversas.
     const historicoAnterior = await getHistorico(from);
-    await salvarMensagem(from, "user", text);
+    await salvarMensagem(from, "user", mensagem);
 
-    const historico = [...historicoAnterior, { role: "user" as const, content: text }];
+    const historico = [...historicoAnterior, { role: "user" as const, content: mensagem }];
     const { reply, planilha } = await askAI(historico, nome, periodoDoDia());
 
     await salvarMensagem(from, "assistant", reply);
