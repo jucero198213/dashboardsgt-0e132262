@@ -701,7 +701,7 @@ export default function FinanciamentoFrota() {
                     {/* Tabela */}
                     <div className="flex-1 overflow-auto min-h-0">
                       <table className="w-full text-[11px] border-collapse min-w-[960px]">
-                        <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head, var(--sgt-bg-section))" }}>
+                        <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-bg-card)", boxShadow: "0 1px 0 var(--sgt-border-subtle)" }}>
                           <tr>
                             {(
                               [
