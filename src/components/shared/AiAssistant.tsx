@@ -104,7 +104,7 @@ export function AiAssistant() {
         className="sgt-ai-popup"
         style={{
           position: "fixed",
-          bottom: 80,
+          bottom: 116,
           right: 20,
           width: 360,
           height: 480,
@@ -401,7 +401,7 @@ export function AiAssistant() {
         className="sgt-ai-btn"
         style={{
           position: "fixed",
-          bottom: 20,
+          bottom: 56,
           right: 20,
           width: 48,
           height: 48,
