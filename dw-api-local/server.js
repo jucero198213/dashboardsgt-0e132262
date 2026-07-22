@@ -82,6 +82,37 @@ const PORT = parseInt(process.env.PORT || "3001");
 app.use(cors());
 app.use(express.json());
 
+// ── Rate limiting (sem dependência externa — sliding window por IP) ────────────
+// 60 req/min por origem. Tráfego legítimo (Sofia + tela + brief) nunca chega
+// perto disso; qualquer loop acidental ou varredura é barrado sem derrubar o banco.
+const _rl = new Map(); // ip → [timestamps]
+const RL_MAX = 60;
+const RL_WIN = 60_000; // ms
+
+setInterval(() => {
+  const floor = Date.now() - RL_WIN;
+  for (const [ip, hits] of _rl) {
+    const fresh = hits.filter((t) => t > floor);
+    if (fresh.length === 0) _rl.delete(ip);
+    else _rl.set(ip, fresh);
+  }
+}, RL_WIN).unref();
+
+app.use((req, res, next) => {
+  if (req.method === "GET" && (req.path === "/" || req.path === "/health")) return next();
+  const ip = (req.headers["x-forwarded-for"] ?? "").split(",")[0].trim() || req.socket?.remoteAddress || "?";
+  const now = Date.now();
+  const floor = now - RL_WIN;
+  const hits = (_rl.get(ip) ?? []).filter((t) => t > floor);
+  hits.push(now);
+  _rl.set(ip, hits);
+  if (hits.length > RL_MAX) {
+    console.warn(`🚦 Rate limit atingido para ${ip} (${hits.length} req/min)`);
+    return res.status(429).json({ error: "Muitas requisições — tente novamente em 1 minuto." });
+  }
+  next();
+});
+
 // ── Autenticação por API key ───────────────────────────────────────────────────
 // Todos os endpoints POST exigem o header x-api-key com o valor de API_SECRET.
 // O health check GET / é público (usado pelo painel admin para verificar conexão).

@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Truck, CreditCard, DollarSign, TrendingDown,
   Search, ChevronUp, ChevronDown, ChevronRight,
-  FileText, Landmark, BarChart3,
+  FileText, Landmark, BarChart3, Download,
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -175,6 +175,8 @@ export default function FinanciamentoFrota() {
   const [sortCol, setSortCol]           = useState<keyof Contrato>("banco");
   const [sortAsc, setSortAsc]           = useState(true);
   const [expandedRow, setExpandedRow]   = useState<string | null>(null);
+  const [pagina, setPagina]             = useState(1);
+  const POR_PAGINA = 30;
 
   // ── Query ──────────────────────────────────────────────────────────────────
   const { data: resp, isLoading, refetch } = useQuery({
@@ -358,6 +360,54 @@ export default function FinanciamentoFrota() {
   const maxCompromisso = porBanco[0]?.compromisso ?? 1;
   const totalCompromisso = porBanco.reduce((s, b) => s + b.compromisso, 0) || 1;
 
+  // reset página quando filtro/busca muda
+  const setFiltroComReset = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setPagina(1); };
+
+  const totalPaginas  = Math.max(1, Math.ceil(filtered.length / POR_PAGINA));
+  const paginaSegura  = Math.min(pagina, totalPaginas);
+  const paginados     = filtered.slice((paginaSegura - 1) * POR_PAGINA, paginaSegura * POR_PAGINA);
+
+  // ── Exportar Excel (CSV com BOM — abre corretamente no Excel PT-BR) ─────────
+  const exportarExcel = () => {
+    const fmtCsv = (v: number | null | undefined) =>
+      v == null ? "" : v.toFixed(2).replace(".", ",");
+    const esc = (v: unknown) => {
+      const s = String(v ?? "").replace(/"/g, '""');
+      return s.includes(";") || s.includes('"') || s.includes("\n") ? `"${s}"` : s;
+    };
+
+    const headers = [
+      "Veículo", "Frota", "Banco", "Nº Contrato",
+      "Aquisição (R$)", "Vlr. Contrato (R$)",
+      "Parcelas Pagas", "Total Parcelas", "Progresso (%)",
+      "Vlr. Parcela (R$)", "Juros (R$)", "Situação",
+    ];
+
+    const linhas = filtered.map((c) => [
+      esc(c.veiculo),
+      esc(c.frota ?? ""),
+      esc(c.banco ?? ""),
+      esc(c.contrato ?? ""),
+      fmtCsv(c.valor_aquisicao),
+      fmtCsv(c.valor_contrato),
+      esc(c.parcelas_pagas),
+      esc(c.total_parcelas ?? ""),
+      esc(c.percentual_pago),
+      fmtCsv(c.valor_parcela),
+      fmtCsv(c.juros_total),
+      esc(getSituacaoLabel(c.situacao)),
+    ].join(";"));
+
+    const csv = "﻿" + [headers.join(";"), ...linhas].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `financiamento_frota_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // ── Sort handler ──────────────────────────────────────────────────────────
   const handleSort = (col: keyof Contrato) => {
     if (sortCol === col) setSortAsc(!sortAsc);
@@ -375,7 +425,7 @@ export default function FinanciamentoFrota() {
 
   return (
     <div
-      className="flex flex-col min-h-[100dvh] overflow-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      className="flex flex-col h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
       <BackgroundEffects />
@@ -583,7 +633,7 @@ export default function FinanciamentoFrota() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--sgt-text-muted)]" />
                         <input
                           value={search}
-                          onChange={(e) => setSearch(e.target.value)}
+                          onChange={(e) => { setSearch(e.target.value); setPagina(1); }}
                           placeholder="Veículo, banco, contrato..."
                           className="h-7 rounded-lg pl-7 pr-3 text-[11px] outline-none border w-[180px]"
                           style={{
@@ -597,7 +647,7 @@ export default function FinanciamentoFrota() {
                       <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
                       {/* Banco */}
-                      <Select value={filtroBanco} onValueChange={setFiltroBanco}>
+                      <Select value={filtroBanco} onValueChange={setFiltroComReset(setFiltroBanco)}>
                         <SelectTrigger className="h-7 w-[130px] rounded-lg text-[11px]">
                           <Landmark className="h-3 w-3 mr-1 shrink-0 text-[var(--sgt-text-muted)]" />
                           <SelectValue placeholder="Banco" />
@@ -609,7 +659,7 @@ export default function FinanciamentoFrota() {
                       </Select>
 
                       {/* Frota */}
-                      <Select value={filtroFrota} onValueChange={setFiltroFrota}>
+                      <Select value={filtroFrota} onValueChange={setFiltroComReset(setFiltroFrota)}>
                         <SelectTrigger className="h-7 w-[130px] rounded-lg text-[11px]">
                           <Truck className="h-3 w-3 mr-1 shrink-0 text-[var(--sgt-text-muted)]" />
                           <SelectValue placeholder="Frota" />
@@ -621,7 +671,7 @@ export default function FinanciamentoFrota() {
                       </Select>
 
                       {/* Situação */}
-                      <Select value={filtroSit} onValueChange={setFiltroSit}>
+                      <Select value={filtroSit} onValueChange={setFiltroComReset(setFiltroSit)}>
                         <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px]">
                           <SelectValue placeholder="Situação" />
                         </SelectTrigger>
@@ -631,9 +681,21 @@ export default function FinanciamentoFrota() {
                         </SelectContent>
                       </Select>
 
-                      <span className="ml-auto text-[10px] text-[var(--sgt-text-muted)] shrink-0">
-                        {filtered.length} contrato{filtered.length !== 1 ? "s" : ""}
-                      </span>
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-[var(--sgt-text-muted)]">
+                          {filtered.length} contrato{filtered.length !== 1 ? "s" : ""}
+                        </span>
+                        <button
+                          onClick={exportarExcel}
+                          disabled={filtered.length === 0 || isLoading}
+                          title="Exportar para Excel"
+                          className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-[11px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400/10 hover:border-emerald-400/40 hover:text-emerald-300"
+                          style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+                        >
+                          <Download className="h-3 w-3" />
+                          Excel
+                        </button>
+                      </div>
                     </div>
 
                     {/* Tabela */}
@@ -679,7 +741,7 @@ export default function FinanciamentoFrota() {
                                   ))}
                                 </tr>
                               ))
-                            : filtered.map((c) => {
+                            : paginados.map((c) => {
                                 const { color, rgb } = getBancoColor(c.banco, bancoIndex);
                                 const pct = c.percentual_pago;
                                 const rowKey = String(c.veiculo);
@@ -811,6 +873,39 @@ export default function FinanciamentoFrota() {
                         </div>
                       )}
                     </div>
+
+                    {/* Paginação */}
+                    {!isLoading && totalPaginas > 1 && (
+                      <div
+                        className="flex items-center justify-between px-3 py-2 shrink-0 border-t text-[11px]"
+                        style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+                      >
+                        <span>
+                          {(paginaSegura - 1) * POR_PAGINA + 1}–{Math.min(paginaSegura * POR_PAGINA, filtered.length)} de {filtered.length}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                            disabled={paginaSegura === 1}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border transition-colors disabled:opacity-30 hover:bg-white/[0.06]"
+                            style={{ borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            <ChevronUp className="h-3 w-3 -rotate-90" />
+                          </button>
+                          <span className="w-16 text-center tabular-nums">
+                            {paginaSegura} / {totalPaginas}
+                          </span>
+                          <button
+                            onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                            disabled={paginaSegura === totalPaginas}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border transition-colors disabled:opacity-30 hover:bg-white/[0.06]"
+                            style={{ borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            <ChevronDown className="h-3 w-3 -rotate-90" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </AnimatedCard>
               </div>
