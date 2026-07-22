@@ -70,6 +70,8 @@ Elementos a calibrar:
 - [ ] Arquivo dentro do WebFile
 - [ ] Campo "Nome da Planilha"
 - [ ] Botão "Processar" (importação)
+- [ ] Botão "Cancelar" (fecha o diálogo após processar — aguarda ~1 min antes de clicar)
+- [ ] Botão "Fecha Aviso" (na tela principal, após fechar o diálogo)
 - [ ] Área do canvas Citrix (para drag-and-drop)
 - [ ] Ícone do arquivo no Explorer (para drag-and-drop)
 

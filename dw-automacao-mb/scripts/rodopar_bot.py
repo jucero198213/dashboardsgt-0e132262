@@ -59,6 +59,10 @@ BTN_IMPORTAR_X,    BTN_IMPORTAR_Y    = 750, 500    # botão "Importar Itens"
 BTN_RETICENCIAS_X, BTN_RETICENCIAS_Y = 820, 380    # botão "..."
 CAMPO_NOME_PLAN_X, CAMPO_NOME_PLAN_Y = 700, 420    # campo "Nome da Planilha"
 BTN_PROCESSAR_X,   BTN_PROCESSAR_Y   = 750, 460    # botão "Processar" (importação)
+BTN_CANCELAR_X,    BTN_CANCELAR_Y    = 830, 460    # botão "Cancelar" — fecha o diálogo após processar
+BTN_FECHA_AVISO_X, BTN_FECHA_AVISO_Y = 860, 160    # botão "Fecha Aviso" na tela principal
+
+IMPORTACAO_ESPERA = 70   # segundos de espera após Processar (documentos carregam ~1 min)
 
 # ── Pasta WebFile na janela de seleção ───────────────────────
 WEBFILE_X,         WEBFILE_Y         = 400, 350    # pasta "WebFile on U1UFF3QXTBHUO5"
@@ -224,10 +228,20 @@ def main(args):
     pyautogui.hotkey('ctrl', 'a')
     digitar(nome_planilha, 'nome aba planilha')
 
-    # Processar
-    print("\n[7/7] Processando importação...")
+    # Processar e aguardar documentos carregarem (~1 min)
+    print(f"\n[7/9] Clicando Processar — aguardando {IMPORTACAO_ESPERA}s para documentos carregarem...")
     clicar(BTN_PROCESSAR_X, BTN_PROCESSAR_Y, 'Processar importação')
-    aguardar(5, 'aguardando resultado')
+    aguardar(IMPORTACAO_ESPERA, 'documentos sendo importados (média 1 min)')
+
+    # Cancelar para fechar o diálogo de importação
+    print("\n[8/9] Fechando diálogo de importação (Cancelar)...")
+    clicar(BTN_CANCELAR_X, BTN_CANCELAR_Y, 'Cancelar (fechar diálogo)')
+    aguardar(2, 'diálogo fechando')
+
+    # Fecha Aviso na tela principal
+    print("\n[9/9] Clicando Fecha Aviso...")
+    clicar(BTN_FECHA_AVISO_X, BTN_FECHA_AVISO_Y, 'Fecha Aviso')
+    aguardar(3, 'aviso sendo fechado')
 
     print("\n✅ Rodopar Bot concluído com sucesso!")
     sys.exit(0)
