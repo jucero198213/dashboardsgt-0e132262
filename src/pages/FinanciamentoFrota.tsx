@@ -9,7 +9,12 @@ import {
   Truck, CreditCard, DollarSign, TrendingDown,
   Search, ChevronUp, ChevronDown, ChevronRight,
   FileText, Landmark, BarChart3, Download,
+  LayoutGrid, Table2, AlertTriangle,
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, CartesianGrid,
+} from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
@@ -168,6 +173,8 @@ export default function FinanciamentoFrota() {
     progress,
   } = useFinancialData();
 
+  type ViewMode = "tabela" | "cards" | "analytics";
+  const [viewMode, setViewMode]         = useState<ViewMode>("tabela");
   const [search, setSearch]             = useState("");
   const [filtroBanco, setFiltroBanco]   = useState("__all__");
   const [filtroFrota, setFiltroFrota]   = useState("__all__");
@@ -359,6 +366,20 @@ export default function FinanciamentoFrota() {
 
   const maxCompromisso = porBanco[0]?.compromisso ?? 1;
   const totalCompromisso = porBanco.reduce((s, b) => s + b.compromisso, 0) || 1;
+
+  // ── Dados analytics ──────────────────────────────────────────────────────────
+  const topEmAberto = useMemo(() =>
+    [...filtered].sort((a, b) => b.valor_em_aberto - a.valor_em_aberto).slice(0, 10),
+  [filtered]);
+
+  const situacaoPie = useMemo(() => {
+    const dev = filtered.filter((c) => c.situacao === "D").length;
+    const liq = filtered.filter((c) => c.situacao !== "D").length;
+    return [
+      { name: "Devedor", value: dev, color: "#f59e0b" },
+      { name: "Liquidado", value: liq, color: "#34d399" },
+    ].filter((x) => x.value > 0);
+  }, [filtered]);
 
   // reset página quando filtro/busca muda
   const setFiltroComReset = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setPagina(1); };
@@ -560,8 +581,29 @@ export default function FinanciamentoFrota() {
                 </AnimatedCard>
               </div>
 
-              {/* ── Split: Distribuição por banco + Tabela ── */}
-              <div className="flex flex-col xl:flex-row flex-1 min-h-0 gap-3">
+              {/* ── Toggle de visualização ── */}
+              <div className="flex items-center justify-end shrink-0">
+                <div className="flex items-center gap-0.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5">
+                  {([
+                    { id: "tabela"    as ViewMode, icon: Table2,     label: "Tabela"    },
+                    { id: "cards"     as ViewMode, icon: LayoutGrid,  label: "Cards"     },
+                    { id: "analytics" as ViewMode, icon: BarChart3,   label: "Analytics" },
+                  ]).map(({ id, icon: Icon, label }) => {
+                    const active = viewMode === id;
+                    return (
+                      <button key={id} onClick={() => setViewMode(id)}
+                        className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-[var(--sgt-text-muted)] hover:text-slate-300"}`}>
+                        <Icon className="h-3 w-3" /> {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: TABELA                                          */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "tabela" && <div className="flex flex-col xl:flex-row flex-1 min-h-0 gap-3">
 
                 {/* Painel lateral — Distribuição por banco */}
                 <AnimatedCard delay={300} className="xl:w-[280px] shrink-0">
@@ -908,7 +950,266 @@ export default function FinanciamentoFrota() {
                     )}
                   </div>
                 </AnimatedCard>
-              </div>
+              </div>}
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: CARDS                                            */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "cards" && (
+                <div className="flex-1 overflow-auto min-h-0">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pb-2">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-48 rounded-2xl animate-pulse bg-white/5" />
+                      ))}
+                    </div>
+                  ) : filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-[var(--sgt-text-muted)]">
+                      <DollarSign className="h-8 w-8 opacity-20" />
+                      <p className="text-[13px]">Nenhum contrato encontrado</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pb-2">
+                      {filtered.map((c) => {
+                        const { color, rgb } = getBancoColor(c.banco, bancoIndex);
+                        const pct = c.percentual_pago;
+                        return (
+                          <div
+                            key={c.veiculo}
+                            className="relative overflow-hidden rounded-2xl border flex flex-col gap-3 p-4 transition-colors hover:bg-white/[0.02]"
+                            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            {/* Topo colorido por banco */}
+                            <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl" style={{ background: color }} />
+
+                            {/* Header: placa + banco + situação */}
+                            <div className="flex items-start justify-between gap-2 pt-1">
+                              <div>
+                                <p className="text-[18px] font-black font-mono tracking-widest dark:text-white text-slate-800">{c.veiculo}</p>
+                                <p className="text-[10px] text-[var(--sgt-text-muted)] mt-0.5">{c.frota ?? "—"} · {c.chassi ?? "—"}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1.5">
+                                <span
+                                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border"
+                                  style={{ color, borderColor: `${color}40`, background: `${color}12` }}
+                                >
+                                  {c.banco ?? "—"}
+                                </span>
+                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold border ${getSituacaoBadgeClass(c.situacao)}`}>
+                                  {getSituacaoLabel(c.situacao)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Progresso */}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex justify-between text-[10px]">
+                                <span className="text-[var(--sgt-text-muted)]">Progresso das parcelas</span>
+                                <span className="font-bold tabular-nums" style={{ color }}>{pct}%</span>
+                              </div>
+                              <div className="h-2 w-full rounded-full overflow-hidden bg-white/[0.06]">
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{ width: `${pct}%`, background: color, boxShadow: `0 0 6px rgba(${rgb},0.4)` }}
+                                />
+                              </div>
+                              <p className="text-[10px] text-[var(--sgt-text-muted)] tabular-nums">
+                                {c.parcelas_pagas} pagas · {c.parcelas_abertas} abertas · {c.total_parcelas ?? "?"} total
+                              </p>
+                            </div>
+
+                            {/* Métricas */}
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { label: "Vlr. Contrato",  value: fmt(c.valor_contrato),  accent: "dark:text-slate-200" },
+                                { label: "Parcela Mensal", value: fmt(c.valor_parcela),   accent: "text-amber-300" },
+                                { label: "Em Aberto",      value: fmt(c.valor_em_aberto), accent: c.valor_em_aberto > 0 ? "text-rose-400" : "text-emerald-400" },
+                                { label: "Juros Acum.",    value: fmt(c.juros_total),     accent: "text-rose-400" },
+                              ].map(({ label, value, accent }) => (
+                                <div key={label} className="rounded-xl p-2.5" style={{ background: "var(--sgt-bg-base)" }}>
+                                  <p className="text-[9px] uppercase tracking-[0.16em] text-[var(--sgt-text-muted)] mb-1">{label}</p>
+                                  <p className={`text-[13px] font-black tabular-nums ${accent}`}>{value}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Rodapé */}
+                            <div className="flex items-center justify-between text-[10px] text-[var(--sgt-text-muted)] border-t pt-2" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                              <span>Contrato: <strong className="dark:text-slate-400">{c.contrato ?? "—"}</strong></span>
+                              <span>{c.anofab ?? "—"}/{c.anomod ?? "?"}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: ANALYTICS                                        */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "analytics" && (
+                <div className="flex-1 overflow-auto min-h-0 pb-2">
+                  <div className="flex flex-col gap-4">
+
+                    {/* ── Linha 1: Distribuição por banco + Situação ── */}
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+                      {/* Distribuição por banco — barra horizontal */}
+                      <div
+                        className="xl:col-span-2 rounded-2xl border p-4 flex flex-col gap-3"
+                        style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Compromisso mensal por banco</p>
+                        <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                        <ResponsiveContainer width="100%" height={220}>
+                          <BarChart data={porBanco} layout="vertical" margin={{ left: 80, right: 16, top: 4, bottom: 4 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                            <XAxis type="number" tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: "var(--sgt-text-muted)" }} axisLine={false} tickLine={false} />
+                            <YAxis type="category" dataKey="banco" tick={{ fontSize: 10, fill: "var(--sgt-text-muted)" }} axisLine={false} tickLine={false} width={76} />
+                            <Tooltip
+                              formatter={(v: number) => [fmt(v), "Compromisso"]}
+                              contentStyle={{ background: "var(--sgt-bg-card)", border: "1px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
+                            />
+                            <Bar dataKey="compromisso" radius={[0, 4, 4, 0]}>
+                              {porBanco.map((entry) => {
+                                const { color } = getBancoColor(entry.banco, bancoIndex);
+                                return <Cell key={entry.banco} fill={color} />;
+                              })}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Situação — pizza */}
+                      <div
+                        className="rounded-2xl border p-4 flex flex-col gap-3"
+                        style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Situação dos contratos</p>
+                        <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                        <div className="flex flex-col items-center gap-4 flex-1 justify-center">
+                          <ResponsiveContainer width="100%" height={160}>
+                            <PieChart>
+                              <Pie data={situacaoPie} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3}>
+                                {situacaoPie.map((entry) => (
+                                  <Cell key={entry.name} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(v: number, name: string) => [`${v} contratos`, name]}
+                                contentStyle={{ background: "var(--sgt-bg-card)", border: "1px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="flex flex-col gap-1.5 w-full">
+                            {situacaoPie.map((entry) => (
+                              <div key={entry.name} className="flex items-center justify-between text-[11px]">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2.5 w-2.5 rounded-full" style={{ background: entry.color }} />
+                                  <span className="text-[var(--sgt-text-muted)]">{entry.name}</span>
+                                </div>
+                                <span className="font-bold tabular-nums dark:text-slate-300">{entry.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Linha 2: Top 10 contratos por valor em aberto ── */}
+                    <div
+                      className="rounded-2xl border p-4 flex flex-col gap-3"
+                      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Top contratos por valor em aberto</p>
+                      <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                      {topEmAberto.length === 0 ? (
+                        <p className="text-[12px] text-[var(--sgt-text-muted)] py-4 text-center">Nenhum contrato com valor em aberto</p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {topEmAberto.map((c, i) => {
+                            const { color, rgb } = getBancoColor(c.banco, bancoIndex);
+                            const max = topEmAberto[0].valor_em_aberto || 1;
+                            const barW = (c.valor_em_aberto / max) * 100;
+                            return (
+                              <div key={c.veiculo} className="flex items-center gap-3">
+                                <span className="text-[10px] text-[var(--sgt-text-muted)] tabular-nums w-4 shrink-0">{i + 1}</span>
+                                <span className="font-mono font-bold text-[12px] dark:text-slate-300 w-20 shrink-0">{c.veiculo}</span>
+                                <div className="flex-1 flex items-center gap-2 min-w-0">
+                                  <div className="flex-1 h-2 rounded-full overflow-hidden bg-white/[0.05]">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{ width: `${barW}%`, background: color, boxShadow: `0 0 6px rgba(${rgb},0.35)` }}
+                                    />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums text-rose-400 shrink-0 w-28 text-right">{fmt(c.valor_em_aberto)}</span>
+                                </div>
+                                <span
+                                  className="text-[9px] font-bold rounded-full px-1.5 py-0.5 border shrink-0"
+                                  style={{ color, borderColor: `${color}40`, background: `${color}12` }}
+                                >
+                                  {c.banco ?? "—"}
+                                </span>
+                                {c.situacao === "D" && <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Linha 3: Resumo por filial ── */}
+                    <div
+                      className="rounded-2xl border p-4 flex flex-col gap-3"
+                      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Resumo por filial</p>
+                      <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[11px] border-collapse min-w-[600px]">
+                          <thead>
+                            <tr style={{ color: "var(--sgt-text-muted)" }}>
+                              {["Filial", "Contratos", "Valor em Aberto", "Compromisso Mensal", "Juros Acum.", "% Liquidados"].map((h) => (
+                                <th key={h} className="pb-2 text-left font-bold uppercase tracking-[0.16em] text-[9px]">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(() => {
+                              const por = new Map<string, { count: number; emAberto: number; compromisso: number; juros: number; liq: number }>();
+                              for (const c of filtered) {
+                                const f = c.filial ?? "—";
+                                const cur = por.get(f) ?? { count: 0, emAberto: 0, compromisso: 0, juros: 0, liq: 0 };
+                                por.set(f, {
+                                  count: cur.count + 1,
+                                  emAberto: cur.emAberto + c.valor_em_aberto,
+                                  compromisso: cur.compromisso + (c.valor_parcela ?? 0),
+                                  juros: cur.juros + c.juros_total,
+                                  liq: cur.liq + (c.situacao !== "D" ? 1 : 0),
+                                });
+                              }
+                              return [...por.entries()].sort((a, b) => b[1].emAberto - a[1].emAberto).map(([filial, v]) => (
+                                <tr key={filial} className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                  <td className="py-2 font-semibold dark:text-slate-300">{filial}</td>
+                                  <td className="py-2 tabular-nums text-[var(--sgt-text-muted)]">{v.count}</td>
+                                  <td className="py-2 tabular-nums text-rose-400 font-bold">{fmt(v.emAberto)}</td>
+                                  <td className="py-2 tabular-nums dark:text-slate-300">{fmt(v.compromisso)}</td>
+                                  <td className="py-2 tabular-nums text-rose-400">{fmt(v.juros)}</td>
+                                  <td className="py-2 tabular-nums text-emerald-400">{v.count > 0 ? Math.round((v.liq / v.count) * 100) : 0}%</td>
+                                </tr>
+                              ));
+                            })()}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
             </div>{/* fim conteúdo */}
           </div>
         </section>
