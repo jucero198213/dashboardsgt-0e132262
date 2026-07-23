@@ -11,7 +11,7 @@ const notifier  = require('./modules/notifier');
 
 const POLL_MS     = 2 * 60 * 1000;   // 2 minutos
 const BOT_SCRIPT  = path.join(__dirname, 'scripts', 'rodopar_bot.py');
-const NOME_PLANILHA = process.env.NOME_PLANILHA_MB || 'Sheet1';  // ← confirmar após primeiro teste
+const NOME_PLANILHA = process.env.NOME_PLANILHA_MB || 'DOCUMENTO';  // aba gerada pelo processador MB
 
 let processando = false;
 
@@ -47,7 +47,8 @@ async function processarEmail(email) {
   }
 
   const { caminhoSaida } = rfResult;
-  log.info(`ReceitaFlow OK — planilha: ${caminhoSaida}`);
+  const nomeAba = rfResult.nomeAba || NOME_PLANILHA;
+  log.info(`ReceitaFlow OK — planilha: ${caminhoSaida} (aba "${nomeAba}")`);
 
   // ── 3. Rodopar web login ──────────────────────────────────
   log.info('Etapa: Rodopar login web');
@@ -69,7 +70,7 @@ async function processarEmail(email) {
         '--data-aviso',    dataRecebimento,
         '--valor',         valorBanco,
         '--planilha',      caminhoSaida,
-        '--nome-planilha', NOME_PLANILHA,
+        '--nome-planilha', nomeAba,
       ];
 
       const env = {
