@@ -19,13 +19,17 @@ async function loginWeb() {
   const page = await context.newPage();
 
   try {
-    // ── Tela 1: login web ────────────────────────────────────
+    // ── Tela 1: login web (Citrix StoreFront) ────────────────
+    // Seletores reais confirmados por inspeção do DOM:
+    //   Usuário: #Editbox1 (name=username) · Senha: #Editbox2 (name=Password)
+    //   Login:   #buttonLogOn
     log.info('Rodopar-web: navegando para o login...');
     await page.goto(RDP_URL, { waitUntil: 'networkidle', timeout: 30000 });
 
-    await page.locator('input[name="user"], input[placeholder*="usu" i], input:first-of-type').first().fill(RDP_WEB_USER);
-    await page.locator('input[type="password"]').first().fill(RDP_WEB_PASS);
-    await page.locator('button:has-text("Login"), input[value="Login"]').first().click();
+    await page.locator('#Editbox1').waitFor({ timeout: 20000 });
+    await page.locator('#Editbox1').fill(RDP_WEB_USER);
+    await page.locator('#Editbox2').fill(RDP_WEB_PASS);
+    await page.locator('#buttonLogOn').click();
     log.info('Rodopar-web: login enviado, aguardando próxima tela...');
     await page.waitForLoadState('networkidle', { timeout: 20000 });
 
