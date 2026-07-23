@@ -6,7 +6,6 @@ const log       = require('./modules/logger');
 const imap      = require('./modules/imap-watcher');
 const parser    = require('./modules/email-parser');
 const rf        = require('./modules/receitaflow');
-const rdpWeb    = require('./modules/rodopar-web');
 const notifier  = require('./modules/notifier');
 
 const POLL_MS     = 2 * 60 * 1000;   // 2 minutos
@@ -50,19 +49,9 @@ async function processarEmail(email) {
   const nomeAba = rfResult.nomeAba || NOME_PLANILHA;
   log.info(`ReceitaFlow OK — planilha: ${caminhoSaida} (aba "${nomeAba}")`);
 
-  // ── 3. Rodopar web login ──────────────────────────────────
-  log.info('Etapa: Rodopar login web');
-  let rdp;
-  try {
-    rdp = await rdpWeb.loginWeb();
-  } catch (err) {
-    log.error(`Rodopar login falhou: ${err.message}`);
-    await notifier.erro('Rodopar Login', err.message);
-    return;
-  }
-
-  // ── 4. Rodopar bot (PyAutoGUI) ────────────────────────────
-  log.info('Etapa: Rodopar bot PyAutoGUI');
+  // ── 3. Rodopar (PyAutoGUI faz o fluxo inteiro no Chrome) ───
+  // O bot Python abre o Chrome, faz login web, entra no Citrix e importa.
+  log.info('Etapa: Rodopar bot PyAutoGUI (fluxo completo)');
   try {
     await new Promise((resolve, reject) => {
       const args = [
@@ -73,20 +62,11 @@ async function processarEmail(email) {
         '--nome-planilha', nomeAba,
       ];
 
-      const env = {
-        ...process.env,
-        RDP_APP_USER: process.env.RDP_APP_USER,
-        RDP_APP_PASS: process.env.RDP_APP_PASS,
-      };
-
-      const proc = execFile('python', args, { env, timeout: 5 * 60 * 1000 }, (err, stdout, stderr) => {
+      const proc = execFile('python', args, { env: process.env, timeout: 8 * 60 * 1000 }, (err, stdout, stderr) => {
         if (stdout) log.info(`Bot stdout: ${stdout.trim()}`);
         if (stderr) log.warn(`Bot stderr: ${stderr.trim()}`);
-        if (err) {
-          reject(new Error(stderr || err.message));
-        } else {
-          resolve();
-        }
+        if (err) reject(new Error(stderr || err.message));
+        else resolve();
       });
     });
 
@@ -96,8 +76,6 @@ async function processarEmail(email) {
   } catch (err) {
     log.error(`Rodopar bot falhou: ${err.message}`);
     await notifier.erro('Rodopar Bot', err.message);
-  } finally {
-    await rdp.fechar();
   }
 }
 

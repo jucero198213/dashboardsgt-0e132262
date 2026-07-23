@@ -28,6 +28,17 @@ COORDS_FILE = os.path.join(os.path.dirname(__file__), '..', 'coordenadas.json')
 # Fases seguem a ordem das telas do Rodopar. Cada fase pede pra você navegar
 # até a tela certa antes de capturar os elementos dela.
 FASES = [
+    ("Login WEB do Rodopar (tela do navegador — 1º print). Pode PULAR se já passou dela.", [
+        ("web_user",  "campo Usuário"),
+        ("web_pass",  "campo Senha"),
+        ("web_login", "botão Login"),
+    ]),
+    ("Aviso legal 'Domínio de propriedade legal da Datapar' (2º print). Pode PULAR.", [
+        ("aviso_ok", "botão OK"),
+    ]),
+    ("Menu de Aplicativos (3º print)", [
+        ("prod_sgt", "item 'PROD_SGT'"),
+    ]),
     ("Login do Visual Rodopar (usuário/senha DENTRO do Citrix — 4º print)", [
         ("login_user", "campo Login (usuário)"),
         ("login_pass", "campo Senha"),

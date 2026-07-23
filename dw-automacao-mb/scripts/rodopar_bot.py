@@ -34,6 +34,9 @@ IMPORTACAO_ESPERA = 70      # segundos após "Processar" (documentos carregam ~1
 
 # Todas as chaves que o robô precisa (devem existir no coordenadas.json)
 CHAVES = [
+    'web_user', 'web_pass', 'web_login',
+    'aviso_ok',
+    'prod_sgt',
     'login_user', 'login_pass', 'login_ok',
     'filial_continuar',
     'menu_fluxo', 'menu_moviment', 'menu_avi',
@@ -94,6 +97,12 @@ def aguardar(segundos, motivo=''):
     time.sleep(segundos)
 
 
+def abrir_chrome(url):
+    """Abre o Chrome numa janela nova e maximizada na URL do Rodopar."""
+    print(f"  >> Abrindo Chrome em {url}")
+    subprocess.Popen(f'start chrome --new-window --start-maximized "{url}"', shell=True)
+
+
 def drag_arquivo_para_citrix(coords, caminho_arquivo):
     """Abre o Explorer com o arquivo e arrasta pro canvas do Citrix."""
     subprocess.Popen(f'explorer /select,"{caminho_arquivo}"')
@@ -120,6 +129,31 @@ def main(args):
     print(f"  Planilha   : {args.planilha}")
     print(f"  Nome aba   : {args.nome_planilha}")
     print("=" * 60)
+
+    rdp_url = os.environ.get('RDP_URL', 'https://webcloud2.datapardc.com')
+
+    # ── 0a. Abrir Chrome + Login WEB (tela 1) ────────────────
+    print("\n[0/9] Abrindo Chrome e fazendo login web...")
+    abrir_chrome(rdp_url)
+    aguardar(12, 'Chrome abrindo e carregando a página de login')
+    clicar(coords, 'web_user', 'campo Usuário (web)')
+    limpar_campo()
+    digitar(os.environ.get('RDP_WEB_USER', ''), 'usuário web')
+    clicar(coords, 'web_pass', 'campo Senha (web)')
+    limpar_campo()
+    digitar(os.environ.get('RDP_WEB_PASS', ''), 'senha web')
+    clicar(coords, 'web_login', 'botão Login (web)')
+    aguardar(6, 'aguardando tela de aviso legal')
+
+    # ── 0b. Aviso legal (tela 2) ─────────────────────────────
+    print("\n[0/9] Aviso legal → OK...")
+    clicar(coords, 'aviso_ok', 'OK aviso legal')
+    aguardar(10, 'aguardando menu de aplicativos carregar')
+
+    # ── 0c. PROD_SGT (tela 3) ────────────────────────────────
+    print("\n[0/9] Abrindo PROD_SGT...")
+    clicar(coords, 'prod_sgt', 'PROD_SGT')
+    aguardar(20, 'aguardando Citrix inicializar o Visual Rodopar')
 
     # ── 1. Login Visual Rodopar ──────────────────────────────
     print("\n[1/9] Login Visual Rodopar...")
