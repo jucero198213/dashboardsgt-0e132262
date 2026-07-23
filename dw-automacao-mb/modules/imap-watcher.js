@@ -2,6 +2,28 @@ const imapSimple = require('imap-simple');
 const { simpleParser } = require('mailparser');
 const log = require('./logger');
 
+// Converte HTML em texto simples (quando o e-mail vem só em HTML).
+function stripHtml(html) {
+  if (!html) return '';
+  return String(html)
+    .replace(/<\s*(br|\/p|\/div|\/tr|\/li|\/h[1-6])\s*\/?\s*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/[ \t]+\n/g, '\n')
+    .trim();
+}
+
+// Prefere texto puro; se vazio, cai pro HTML convertido.
+function extrairCorpo(parsed) {
+  if (parsed.text && parsed.text.trim()) return parsed.text;
+  if (parsed.html) return stripHtml(parsed.html);
+  if (parsed.textAsHtml) return stripHtml(parsed.textAsHtml);
+  return '';
+}
+
 const IMAP_CONFIG = {
   imap: {
     user: process.env.IMAP_USER,
@@ -43,7 +65,7 @@ async function buscarEmailsMB() {
       emails.push({
         uid: item.attributes.uid,
         assunto: parsed.subject || '',
-        corpo: parsed.text || '',
+        corpo: extrairCorpo(parsed),
         anexoBuffer: anexo ? anexo.content : null,
         nomeAnexo: anexo ? anexo.filename : null,
       });

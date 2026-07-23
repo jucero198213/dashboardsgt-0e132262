@@ -25,6 +25,9 @@ async function main() {
   const dados = parser.parse(email);
   if (!dados.ok) {
     console.log(`✗ ${dados.erro}\n`);
+    console.log('--- CORPO LIDO (para diagnóstico) ---');
+    console.log(email.corpo ? email.corpo.slice(0, 600) : '(CORPO VAZIO)');
+    console.log('--- FIM DO CORPO ---\n');
     process.exit(1);
   }
   console.log(`✓ DATA_RECEBIMENTO: ${dados.dataRecebimento}`);
