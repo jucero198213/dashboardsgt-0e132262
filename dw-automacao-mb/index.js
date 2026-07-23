@@ -91,7 +91,7 @@ async function processarEmail(email) {
     });
 
     log.info('Rodopar bot concluído com sucesso');
-    await notifier.sucesso(valorBanco, dataRecebimento);
+    await notifier.sucesso(valorBanco, dataRecebimento, { documentos: rfResult.totalDocumentos });
 
   } catch (err) {
     log.error(`Rodopar bot falhou: ${err.message}`);

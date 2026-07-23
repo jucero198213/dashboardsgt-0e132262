@@ -11,8 +11,8 @@
     "playwright": "^1.45.0",
     "imap-simple": "^5.1.0",
     "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.14",
     "dotenv": "^16.4.5",
-    "node-fetch": "^2.7.0",
     "xlsx": "^0.18.5"
   }
 }
