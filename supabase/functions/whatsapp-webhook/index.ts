@@ -249,9 +249,44 @@ serve(async (req: Request) => {
     const value = (payload as any)?.entry?.[0]?.changes?.[0]?.value;
     const message = value?.messages?.[0];
 
+    // ── Callbacks de status (sent/delivered/read/failed) ────────────────────
+    // A Meta envia atualizações de status no MESMO webhook, no array `statuses`.
+    // Logamos cada um pra rastrear entrega e ver o erro real quando failed.
+    const statuses = value?.statuses;
+    if (Array.isArray(statuses) && statuses.length > 0) {
+      for (const s of statuses) {
+        const wamid = s?.id ?? "";
+        const status = s?.status ?? "";
+        const to = s?.recipient_id ?? "";
+        const convo = s?.conversation?.id ?? "";
+        const category = s?.conversation?.origin?.type ?? "";
+        if (status === "failed") {
+          const errs = Array.isArray(s?.errors) ? s.errors : [];
+          for (const e of errs) {
+            console.error(
+              `[WA STATUS] failed wamid=${wamid} to=${to} ` +
+              `code=${e?.code} title="${e?.title ?? ""}" ` +
+              `message="${e?.message ?? ""}" details="${e?.error_data?.details ?? ""}" ` +
+              `href="${e?.href ?? ""}"`,
+            );
+          }
+          if (errs.length === 0) {
+            console.error(`[WA STATUS] failed wamid=${wamid} to=${to} (sem detalhes de erro)`);
+          }
+        } else {
+          console.log(
+            `[WA STATUS] ${status} wamid=${wamid} to=${to}` +
+            (convo ? ` conversation=${convo}` : "") +
+            (category ? ` origin=${category}` : ""),
+          );
+        }
+      }
+      return new Response("ok", { status: 200 });
+    }
+
     // Aceita texto normal E cliques de botão (respostas rápidas de template,
     // que chegam como type "button" ou "interactive"). Qualquer outra coisa
-    // (status de entrega, mídia, etc.) → só confirma 200.
+    // (mídia genérica, etc.) → só confirma 200.
     const TIPOS_ACEITOS = ["text", "button", "interactive", "audio"];
     if (!message || !TIPOS_ACEITOS.includes(message.type)) {
       return new Response("ok", { status: 200 });
