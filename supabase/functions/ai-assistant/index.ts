@@ -1106,16 +1106,7 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         mensagem: `Certo — a planilha Excel (.xlsx) das notas (${tipo.replace("_", " ")}) do período será enviada ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO liste as notas em texto.`,
       });
     }
-    if (name === "preparar_danfe") {
-      const chave = String(args.chave ?? "").replace(/\D/g, "");
-      if (chave.length !== 44) {
-        return JSON.stringify({ ok: false, erro: "Chave inválida — preciso da chave de acesso de 44 dígitos." });
-      }
-      return JSON.stringify({
-        ok: true,
-        mensagem: "Certo — o DANFE (PDF) dessa nota será enviado ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO descreva o conteúdo da nota.",
-      });
-    }
+    // preparar_danfe é tratado direto no loop de tool-calling (gera o PDF na hora)
     if (name === "get_top_clientes") {
       const topN = Number(args.top ?? 10);
       const data = await dwCall("/dw-financeiro", {
@@ -1953,8 +1944,9 @@ serve(async (req: Request) => {
 
     // Pedido de planilha capturado durante o tool-calling (enviado na resposta final)
     let planilhaReq: { tipo: string; dataInicio: unknown; dataFim: unknown } | null = null;
-    // Pedido de DANFE capturado durante o tool-calling (gerado na resposta final)
-    let danfeReq: { chave: string } | null = null;
+    // DANFE gerado durante o tool-calling — o PDF já vem pronto, então a Sofia
+    // sabe se deu certo ANTES de escrever a resposta (não promete o que falhou).
+    let danfeResult: { filename: string; pdf_base64: string } | null = null;
 
     // Loop de tool-calling (máx 5 iterações)
     for (let i = 0; i < 5; i++) {
@@ -1995,23 +1987,8 @@ serve(async (req: Request) => {
             return respond({ reply: (msg.content ?? "") + "\n\n(Não consegui gerar a planilha agora, tente de novo.)" });
           }
         }
-        if (danfeReq) {
-          try {
-            const r = await dwCall("/nfe-danfe", { chave: danfeReq.chave });
-            if (r?.ok && r?.pdf_base64) {
-              return respond({
-                reply: msg.content ?? "",
-                danfe: { filename: r.name ?? `DANFE-${danfeReq.chave}.pdf`, pdf_base64: r.pdf_base64 },
-              });
-            }
-            return respond({ reply: (msg.content ?? "") + "\n\n(Não consegui gerar o DANFE dessa nota agora.)" });
-          } catch (e) {
-            const emsg = String((e as Error)?.message ?? "");
-            let motivo = "Não consegui gerar o DANFE dessa nota agora.";
-            if (emsg.includes(" 404")) motivo = "Essa nota não foi encontrada na base do gerador de DANFE.";
-            else if (emsg.includes(" 402")) motivo = "Sem saldo no serviço de DANFE — avise o financeiro pra recarregar.";
-            return respond({ reply: (msg.content ?? "") + `\n\n(${motivo})` });
-          }
+        if (danfeResult) {
+          return respond({ reply: msg.content ?? "", danfe: danfeResult });
         }
         return respond({ reply: msg.content ?? "" });
       }
@@ -2035,7 +2012,27 @@ serve(async (req: Request) => {
           }
           if (tc.function.name === "preparar_danfe") {
             const ch = String(args.chave ?? "").replace(/\D/g, "");
-            if (ch.length === 44) danfeReq = { chave: ch };
+            let content: string;
+            if (ch.length !== 44) {
+              content = JSON.stringify({ ok: false, erro: "Chave inválida (precisa de 44 dígitos). Avise que não consegui gerar o DANFE e NÃO diga que está enviando." });
+            } else {
+              try {
+                const r = await dwCall("/nfe-danfe", { chave: ch });
+                if (r?.ok && r?.pdf_base64) {
+                  danfeResult = { filename: r.name ?? `DANFE-${ch}.pdf`, pdf_base64: r.pdf_base64 };
+                  content = JSON.stringify({ ok: true, mensagem: "DANFE gerado — está sendo enviado ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO descreva o conteúdo." });
+                } else {
+                  content = JSON.stringify({ ok: false, erro: "DANFE indisponível pra essa nota. Diga que não foi possível gerar e NÃO diga que está enviando." });
+                }
+              } catch (e) {
+                const emsg = String((e as Error)?.message ?? "");
+                let motivo = "Não consegui gerar o DANFE dessa nota. NÃO diga que está enviando.";
+                if (emsg.includes(" 404")) motivo = "Essa nota NÃO está na base do gerador de DANFE (algumas notas simplesmente não retornam). Diga ao usuário que não foi possível gerar o DANFE dessa nota específica e NÃO diga que está enviando nem que vai reenviar.";
+                else if (emsg.includes(" 402")) motivo = "Sem saldo no serviço de DANFE — peça pra avisar o financeiro. NÃO diga que está enviando.";
+                content = JSON.stringify({ ok: false, erro: motivo });
+              }
+            }
+            return { role: "tool", tool_call_id: tc.id, content };
           }
           const out = await execTool(tc.function.name, args);
           return {
