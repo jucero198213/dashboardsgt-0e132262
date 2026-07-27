@@ -763,6 +763,23 @@ export async function fetchConsultaNfeTendencia(params?: {
   );
 }
 
+// ─── DANFE em PDF pela chave (MeuDanfe via servidor DW) ───────────────────────
+const ENDPOINT_NFE_DANFE = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/nfe-danfe`
+  : `${SUPABASE_URL}/functions/v1/nfe-danfe`;
+
+export interface DanfeResponse {
+  ok: boolean;
+  name: string;
+  pdf_base64: string;
+}
+
+/** Gera o DANFE (PDF) de uma nota pela chave. Consulta PAGA — sem cache. */
+export async function fetchDanfe(chave: string): Promise<DanfeResponse> {
+  const limpa = String(chave ?? "").replace(/\D/g, "");
+  return callEdge<DanfeResponse>(ENDPOINT_NFE_DANFE, { chave: limpa });
+}
+
 // ── Extrato bancário por conta (/dw-bancos-extrato) ──────────────────────────
 const ENDPOINT_BANCOS_EXTRATO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-bancos-extrato`

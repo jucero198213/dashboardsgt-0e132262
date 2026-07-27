@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   CheckCircle2, AlertTriangle, XCircle, Search, FileText,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Download, EyeOff,
-  ExternalLink, TrendingUp, Building2,
+  TrendingUp, Building2,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis,
@@ -17,7 +17,7 @@ import { UpdateButton } from "@/components/shared/UpdateButton";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { RAW } from "@/lib/theme";
 import {
-  fetchConsultaNfe, fetchConsultaNfeTendencia, clearDwCache,
+  fetchConsultaNfe, fetchConsultaNfeTendencia, fetchDanfe, clearDwCache,
   type ConsultaNfeRow, type TendenciaNfeRow,
 } from "@/lib/dwApi";
 
@@ -48,11 +48,6 @@ const mesLabel = (m: string) => {
   const [y, mm] = m.split("-");
   return `${MESES_ABREV[Number(mm) - 1] ?? mm}/${(y ?? "").slice(2)}`;
 };
-
-async function copiarEAbrirDanfe(chave: string) {
-  try { await navigator.clipboard.writeText(chave); } catch { /* segue */ }
-  window.open("https://meudanfe.com.br", "_blank", "noopener,noreferrer");
-}
 
 const hoje = new Date();
 const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().slice(0, 10);
@@ -97,6 +92,25 @@ export default function Fiscal() {
   const [jaBuscou, setJaBuscou]     = useState(false);
   const [tendencia, setTendencia]   = useState<TendenciaNfeRow[]>([]);
   const [pagina, setPagina]         = useState(1);
+  const [danfeLoading, setDanfeLoading] = useState<string | null>(null);
+  const [danfeErro, setDanfeErro]   = useState<Record<string, string>>({});
+
+  const gerarDanfe = useCallback(async (chave: string) => {
+    setDanfeLoading(chave);
+    setDanfeErro((e) => ({ ...e, [chave]: "" }));
+    try {
+      const r = await fetchDanfe(chave);
+      if (!r?.pdf_base64) throw new Error("PDF não retornado.");
+      const bytes = Uint8Array.from(atob(r.pdf_base64), (c) => c.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      setDanfeErro((e) => ({ ...e, [chave]: (err as Error)?.message || "Falha ao gerar o DANFE." }));
+    } finally {
+      setDanfeLoading(null);
+    }
+  }, []);
 
   const buscarNotas = useCallback(async (forcar = false) => {
     setIsLoading(true);
@@ -450,11 +464,16 @@ export default function Fiscal() {
                                     <div className="col-span-2 sm:col-span-4">
                                       <p className="text-slate-500 mb-0.5">Chave de acesso</p>
                                       <p className="font-mono text-[9px] dark:text-slate-400 text-slate-500 break-all">{n.CHAVE}</p>
-                                      <button onClick={() => copiarEAbrirDanfe(n.CHAVE!)}
-                                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-400/25 bg-amber-400/10 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-400/20 transition-colors">
-                                        <ExternalLink className="h-3 w-3" />Gerar DANFE — copia a chave e abre o site
+                                      <button onClick={() => gerarDanfe(n.CHAVE!)}
+                                        disabled={danfeLoading === n.CHAVE}
+                                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-amber-400/25 bg-amber-400/10 px-2.5 py-1.5 text-[10px] font-bold text-amber-300 hover:bg-amber-400/20 transition-colors disabled:opacity-60 disabled:cursor-wait">
+                                        <FileText className="h-3 w-3" />{danfeLoading === n.CHAVE ? "Gerando DANFE..." : "Gerar DANFE (PDF)"}
                                       </button>
-                                      <p className="text-[9px] text-slate-600 mt-1">No site: cole a chave (Ctrl+V), resolva o captcha e baixe o PDF com os itens.</p>
+                                      {danfeErro[n.CHAVE] ? (
+                                        <p className="text-[9px] text-rose-400 mt-1">{danfeErro[n.CHAVE]}</p>
+                                      ) : (
+                                        <p className="text-[9px] text-slate-600 mt-1">Gera o PDF completo (com itens) na hora e abre numa nova aba.</p>
+                                      )}
                                     </div>
                                   )}
                                 </div>
