@@ -158,6 +158,86 @@ app.get("/health", async (_req, res) => {
   });
 });
 
+// ── DANFE em PDF pela chave (via MeuDanfe API v2) ─────────────────────────────
+// Recebe { chave } (44 dígitos). Fluxo:
+//   1. PUT /fd/add/{chave}  → busca a nota (cobra R$0,03; grátis se já adicionada)
+//   2. poll do status até OK (aguardando ≥1,5s entre tentativas — <1s bloqueia a conta)
+//   3. GET /fd/get/da/{chave} → DANFE em PDF (base64)
+// Requer MEUDANFE_TOKEN no .env.
+const MEUDANFE_BASE = "https://api.meudanfe.com.br/v2";
+
+app.post("/nfe-danfe", async (req, res) => {
+  const chave = String(req.body?.chave ?? "").replace(/\D/g, "");
+  if (chave.length !== 44) {
+    return res.status(400).json({ error: "Chave inválida (esperado 44 dígitos)." });
+  }
+  const token = process.env.MEUDANFE_TOKEN;
+  if (!token) {
+    return res.status(500).json({ error: "MEUDANFE_TOKEN não configurado no .env." });
+  }
+
+  const headers = { "Api-Key": token, Accept: "application/json" };
+
+  try {
+    // 1. Solicita a busca e faz poll do status (a 1ª chamada cobra; as demais, não)
+    let status = null;
+    let statusMessage = "";
+    for (let tentativa = 0; tentativa < 20; tentativa++) {
+      const r = await fetch(`${MEUDANFE_BASE}/fd/add/${chave}`, { method: "PUT", headers });
+      if (r.status === 401 || r.status === 403) {
+        return res.status(502).json({ error: "Api-Key do MeuDanfe inválida ou substituída." });
+      }
+      if (r.status === 402) {
+        return res.status(402).json({ error: "Saldo insuficiente no MeuDanfe — adicione créditos." });
+      }
+      if (r.status === 400) {
+        return res.status(400).json({ error: "Chave de acesso inválida (MeuDanfe)." });
+      }
+      if (!r.ok) {
+        return res.status(502).json({ error: `MeuDanfe /add retornou HTTP ${r.status}.` });
+      }
+      const j = await r.json();
+      status = j?.status;
+      statusMessage = j?.statusMessage || "";
+      if (status === "OK") break;
+      if (status === "NOT_FOUND") {
+        return res.status(404).json({ error: "Nota não encontrada na base (NOT_FOUND)." });
+      }
+      if (status === "ERROR") {
+        return res.status(502).json({ error: `MeuDanfe retornou ERROR: ${statusMessage}` });
+      }
+      // WAITING / SEARCHING → aguarda e tenta de novo
+      await new Promise((r2) => setTimeout(r2, 1500));
+    }
+
+    if (status !== "OK") {
+      return res.status(504).json({ error: "Tempo esgotado aguardando a consulta no MeuDanfe." });
+    }
+
+    // 2. Baixa o DANFE em PDF (base64)
+    const rd = await fetch(`${MEUDANFE_BASE}/fd/get/da/${chave}`, { method: "GET", headers });
+    if (rd.status === 404) {
+      return res.status(404).json({ error: "DANFE ainda não disponível para essa nota." });
+    }
+    if (!rd.ok) {
+      return res.status(502).json({ error: `MeuDanfe /get/da retornou HTTP ${rd.status}.` });
+    }
+    const jd = await rd.json();
+    if (!jd?.data) {
+      return res.status(502).json({ error: "MeuDanfe não retornou o conteúdo do PDF." });
+    }
+
+    return res.json({
+      ok: true,
+      name: jd.name || `DANFE-${chave}.pdf`,
+      pdf_base64: jd.data,
+    });
+  } catch (err) {
+    console.error("Erro /nfe-danfe:", err.message);
+    return res.status(500).json({ error: "Falha ao gerar o DANFE.", detalhe: err.message });
+  }
+});
+
 // ── Consulta NFe na SEFAZ (NFeDistribuicaoDFe / consChNFe) ─────────────────────
 // Dada a chave de 44 dígitos, usa o certificado A1 (.pfx) da empresa para baixar
 // o XML da nota na SEFAZ e retorna os itens. Requer no .env:
