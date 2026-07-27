@@ -136,4 +136,4 @@ async function emailInvalido(motivo) {
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-module.exports = { sucesso, divergencia, erro, emailInvalido, enviarEmail };
+module.exports = { sucesso, divergencia, erro, emailInvalido, enviarEmail, enviarWhatsApp };
