@@ -42,13 +42,35 @@ async function enviarEmail(assunto, corpo) {
   }
 }
 
-// ── FASE 2 (futura): WhatsApp via Sofia ────────────────────────────────
-// Quando o billing da Meta estiver aprovado, implementar aqui o envio via
-// a infraestrutura da Sofia (edge function / Cloud API) e chamar junto com
-// o e-mail em cada notificação abaixo.
-async function enviarWhatsApp(_mensagem) {
-  // TODO Fase 2: enviar pela Sofia quando billing liberado.
-  return;
+// ── FASE 2: WhatsApp via Sofia (edge function automacao-notificar) ─────
+// Envia o texto como {{1}} do template automacao_baixa_mb. Falha aqui NÃO
+// derruba o e-mail — os dois são independentes.
+const SOFIA_NOTIFY_URL = process.env.SOFIA_NOTIFY_URL || '';
+const AUTOMACAO_NOTIFY_KEY = process.env.AUTOMACAO_NOTIFY_KEY || '';
+
+async function enviarWhatsApp(mensagem) {
+  if (!SOFIA_NOTIFY_URL) return; // Fase 2 desligada enquanto a URL não estiver no .env
+  if (typeof fetch === 'undefined') {
+    log.warn('Notifier(WhatsApp): fetch indisponível (requer Node 18+)');
+    return;
+  }
+  try {
+    const res = await fetch(SOFIA_NOTIFY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-automacao-key': AUTOMACAO_NOTIFY_KEY,
+      },
+      body: JSON.stringify({ mensagem }),
+    });
+    if (!res.ok) {
+      log.warn(`Notifier(WhatsApp): HTTP ${res.status} — ${await res.text()}`);
+    } else {
+      log.info('Notifier(WhatsApp): aviso enviado pela Sofia');
+    }
+  } catch (err) {
+    log.error(`Notifier(WhatsApp): falha — ${err.message}`);
+  }
 }
 
 // ── Notificações de alto nível (interface usada pelo index.js) ─────────
