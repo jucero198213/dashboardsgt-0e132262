@@ -4,3 +4,7 @@ project_id = "ljslgwtvxonadgtiwdft"
 # Sem isso, a verificação (GET) e as mensagens (POST) tomariam 401.
 [functions.whatsapp-webhook]
 verify_jwt = false
+
+# Chamada máquina-a-máquina pela automação do DW (auth por x-automacao-key).
+[functions.automacao-notificar]
+verify_jwt = false
