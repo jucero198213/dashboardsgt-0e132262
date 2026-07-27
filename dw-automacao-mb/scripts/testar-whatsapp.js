@@ -1,27 +1,57 @@
-// Testa o envio de aviso via Sofia/WhatsApp (Fase 2) — isolado.
+// Testa o envio de aviso via Sofia/WhatsApp (Fase 2) — com diagnóstico.
 // Uso: node scripts/testar-whatsapp.js
-// Requer: template automacao_baixa_mb APROVADO, números na allowlist da Meta,
-//         e SOFIA_NOTIFY_URL + AUTOMACAO_NOTIFY_KEY no .env.
+// Mostra o resultado número a número (útil pra saber se o template já aprovou).
 
 require('dotenv').config();
-const notifier = require('../modules/notifier');
 
 async function main() {
+  const url = process.env.SOFIA_NOTIFY_URL;
+  const key = process.env.AUTOMACAO_NOTIFY_KEY || '';
+
   console.log('\n━━━ Teste WhatsApp (Sofia) — Fase 2 ━━━');
-  console.log(`URL:  ${process.env.SOFIA_NOTIFY_URL || '(VAZIO — configure no .env)'}`);
-  console.log(`Chave: ${process.env.AUTOMACAO_NOTIFY_KEY ? '(definida)' : '(FALTANDO)'}`);
-  if (!process.env.SOFIA_NOTIFY_URL) {
-    console.log('\n⚠️  SOFIA_NOTIFY_URL vazio no .env. Preencha e rode de novo.\n');
-    process.exit(1);
+  console.log(`URL:   ${url || '(VAZIO — configure no .env)'}`);
+  console.log(`Chave: ${key ? '(definida)' : '(FALTANDO)'}`);
+  if (!url) {
+    console.log('\n⚠️  SOFIA_NOTIFY_URL vazio no .env.\n');
+    return;
+  }
+  if (typeof fetch === 'undefined') {
+    console.log('\n⚠️  fetch indisponível (requer Node 18+).\n');
+    return;
   }
 
-  console.log('\nEnviando WhatsApp de teste pela Sofia...');
-  await notifier.enviarWhatsApp(
-    '🧪 Teste da Fase 2 — se você recebeu esta mensagem, a Sofia está avisando as baixas MB pelo WhatsApp com sucesso.'
-  );
-  console.log('✓ Comando enviado. Confira o WhatsApp dos números cadastrados.');
-  console.log('  (Se não chegar: veja se o template está APROVADO e os números estão na allowlist da Meta.)\n');
-  process.exit(0);
+  console.log('\nChamando a Edge Function...');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-automacao-key': key },
+    body: JSON.stringify({
+      mensagem: '🧪 Teste da Fase 2 — se você recebeu, a Sofia está avisando as baixas MB pelo WhatsApp.',
+    }),
+  });
+
+  const texto = await res.text();
+  console.log(`\nHTTP ${res.status}`);
+
+  let json;
+  try { json = JSON.parse(texto); } catch { console.log(texto); return; }
+
+  if (Array.isArray(json.resultados)) {
+    console.log('Resultado por número:');
+    for (const r of json.resultados) {
+      const marca = r.ok ? '✓ aceito' : '✗ FALHOU';
+      console.log(`  ${marca}  ${r.to}`);
+      if (!r.ok) console.log(`           → ${r.resp}`);
+    }
+    const todosOk = json.resultados.every((r) => r.ok);
+    console.log(
+      todosOk
+        ? '\n✅ Todos aceitos pela Meta. Confira se chegou nos 3 WhatsApp.'
+        : '\n⚠️  Algum número falhou. Se o erro fala de template, ele ainda não foi APROVADO (aguarde sair de análise).'
+    );
+  } else {
+    console.log(JSON.stringify(json, null, 2));
+  }
+  console.log('');
 }
 
-main().catch((err) => { console.error('FATAL:', err.message); process.exit(1); });
+main().catch((err) => console.error('FATAL:', err.message));
