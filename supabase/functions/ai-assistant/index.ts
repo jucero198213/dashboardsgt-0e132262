@@ -2027,8 +2027,13 @@ serve(async (req: Request) => {
               } catch (e) {
                 const emsg = String((e as Error)?.message ?? "");
                 let motivo = "Não consegui gerar o DANFE dessa nota. NÃO diga que está enviando.";
-                if (emsg.includes(" 404")) motivo = "Essa nota NÃO está na base do gerador de DANFE (algumas notas simplesmente não retornam). Diga ao usuário que não foi possível gerar o DANFE dessa nota específica e NÃO diga que está enviando nem que vai reenviar.";
-                else if (emsg.includes(" 402")) motivo = "Sem saldo no serviço de DANFE — peça pra avisar o financeiro. NÃO diga que está enviando.";
+                if (emsg.includes("NOT_FOUND") || emsg.toLowerCase().includes("não encontrada")) {
+                  motivo = "Essa nota NÃO está na base do gerador de DANFE (algumas notas simplesmente não retornam). Diga que não foi possível gerar o DANFE dessa nota específica e NÃO diga que está enviando nem que vai reenviar.";
+                } else if (emsg.includes(" 402") || emsg.toLowerCase().includes("saldo")) {
+                  motivo = "Sem saldo no serviço de DANFE — peça pra avisar o financeiro. NÃO diga que está enviando.";
+                } else if (emsg.includes(" 404") || emsg.toLowerCase().includes("cannot post")) {
+                  motivo = "O serviço de DANFE está indisponível (o servidor do DW pode estar desatualizado). Diga que não foi possível gerar o DANFE agora e NÃO diga que está enviando.";
+                }
                 content = JSON.stringify({ ok: false, erro: motivo });
               }
             }
