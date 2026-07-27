@@ -4,19 +4,32 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type Planilha = { filename?: string; xlsx_base64?: string };
-type ChatMessage = { role: "user" | "assistant"; content: string; planilha?: Planilha };
+type Danfe = { filename?: string; pdf_base64?: string };
+type ChatMessage = { role: "user" | "assistant"; content: string; planilha?: Planilha; danfe?: Danfe };
 
 const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-function baixarXlsx(filename: string, base64: string) {
+function baixarBase64(filename: string, base64: string, mime: string) {
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-  const blob = new Blob([bytes], { type: XLSX_MIME });
+  const blob = new Blob([bytes], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function baixarXlsx(filename: string, base64: string) {
+  baixarBase64(filename, base64, XLSX_MIME);
+}
+
+function abrirPdf(base64: string) {
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 const WELCOME: ChatMessage = {
@@ -72,7 +85,8 @@ export function AiAssistant() {
       if (error) throw error;
       const reply = (data as { reply?: string })?.reply ?? "Não consegui responder agora.";
       const planilha = (data as { planilha?: Planilha })?.planilha;
-      setMessages((m) => [...m, { role: "assistant", content: reply, planilha }]);
+      const danfe = (data as { danfe?: Danfe })?.danfe;
+      setMessages((m) => [...m, { role: "assistant", content: reply, planilha, danfe }]);
     } catch (e) {
       setMessages((m) => [
         ...m,
@@ -259,6 +273,34 @@ export function AiAssistant() {
                         <Download size={13} />
                         Baixar planilha (Excel)
                       </button>
+                    )}
+                    {m.danfe?.pdf_base64 && (
+                      <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => abrirPdf(m.danfe!.pdf_base64!)}
+                          style={{
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            padding: "6px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                            cursor: "pointer", background: "rgba(251,191,36,0.12)",
+                            color: "#fcd34d", border: "1px solid rgba(251,191,36,0.3)",
+                          }}
+                        >
+                          <Download size={13} />
+                          Abrir DANFE (PDF)
+                        </button>
+                        <button
+                          onClick={() => baixarBase64(m.danfe!.filename ?? "danfe.pdf", m.danfe!.pdf_base64!, "application/pdf")}
+                          style={{
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            padding: "6px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                            cursor: "pointer", background: "var(--sgt-bg-section)",
+                            color: "var(--sgt-text-primary)", border: "1px solid var(--sgt-border-subtle)",
+                          }}
+                        >
+                          <Download size={13} />
+                          Baixar
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

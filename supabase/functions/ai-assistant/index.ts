@@ -509,6 +509,21 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "preparar_danfe",
+      description:
+        "Gera e ENVIA ao usuário o DANFE (PDF) de uma nota fiscal a partir da CHAVE de acesso (44 dígitos). Use quando pedirem 'me manda o DANFE da nota X', 'o PDF da nota', 'baixa o DANFE dessa chave', 'quero o documento/DANFE da nota'. Depois de chamar, avise que o DANFE está sendo enviado (anexo no WhatsApp / download no site) e NÃO descreva o conteúdo da nota. ATENÇÃO: cada geração é uma consulta PAGA — só chame quando pedirem explicitamente o PDF/DANFE/documento da nota. Para 'de quem é a nota' ou 'qual o valor' use get_nfe_por_chave (não este).",
+      parameters: {
+        type: "object",
+        properties: {
+          chave: { type: "string", description: "Chave de acesso da NFe (44 dígitos, só números)." },
+        },
+        required: ["chave"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_custo_veiculo",
       description:
         "Custo por veículo (caminhão) no período: MANUTENÇÃO (peças) + COMBUSTÍVEL, somados por placa e ordenados do que mais custa pro que menos. A empresa NÃO atribui receita por veículo, então isto é CUSTO (não rentabilidade/lucro) — deixe isso claro se perguntarem de lucro. Use para 'qual caminhão gasta/custa mais', 'quanto o veículo X custou', 'ranking de custo da frota', 'onde a frota está gastando', 'caminhão buraco negro'. Informe dataInicio e dataFim (se não disserem, usa os últimos 30 dias). Passe 'veiculo' para detalhar um caminhão específico.",
@@ -1089,6 +1104,16 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         ok: true,
         tipo,
         mensagem: `Certo — a planilha Excel (.xlsx) das notas (${tipo.replace("_", " ")}) do período será enviada ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO liste as notas em texto.`,
+      });
+    }
+    if (name === "preparar_danfe") {
+      const chave = String(args.chave ?? "").replace(/\D/g, "");
+      if (chave.length !== 44) {
+        return JSON.stringify({ ok: false, erro: "Chave inválida — preciso da chave de acesso de 44 dígitos." });
+      }
+      return JSON.stringify({
+        ok: true,
+        mensagem: "Certo — o DANFE (PDF) dessa nota será enviado ao usuário (anexo no WhatsApp / download no site). Avise que está enviando e NÃO descreva o conteúdo da nota.",
       });
     }
     if (name === "get_top_clientes") {
@@ -1861,6 +1886,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Manutenção (detalhe) → get_manutencao_analise para: gasto por subgrupo/peça (pneu, óleo, filtro), por fornecedor, por mecânico (funcionário), por setor, por situação da OS (em aberto/concluída) ou filtrando um tipo de item específico. Use o parâmetro filtroSubgrupo para itens como "pneu" ou "oleo", e agruparPor para a dimensão pedida.
 - Ordens de serviço (OS) → get_os_por_veiculo para "últimas N OS da placa X" (lista resumida do histórico do veículo); get_os_detalhe para "o que foi feito na OS X" (itens, peças vs serviços, valores). valor_pecas ≈ NFe, valor_servicos_mao_obra ≈ NFS-e.
 - Nota fiscal (NFe) pela chave → get_nfe_por_chave (consulta a SEFAZ; retorna fornecedor + valor total + data; itens só se a nota estiver manifestada — a maioria vem só o resumo). Use quando derem a chave de 44 dígitos ou pedirem pra conferir uma nota.
+- DANFE / PDF da nota pela chave → preparar_danfe(chave). Use quando pedirem o DOCUMENTO/PDF/DANFE da nota ("me manda o DANFE", "quero o PDF da nota", "baixa o DANFE dessa chave"). Gera o DANFE completo (com itens) e ENVIA sozinho (anexo no WhatsApp / download no site) — apenas avise que está enviando e NÃO descreva o conteúdo. É consulta PAGA: só chame quando pedirem o PDF/DANFE explicitamente; pra "de quem é" ou "qual o valor" use get_nfe_por_chave. Cada pedido (inclusive "manda de novo") exige uma NOVA chamada desta tool nesta resposta.
 - CONFERIR OS × NOTA ("confere a OS X", "a OS X bate com a nota?") → fluxo de 3 passos: (1) get_os_notas(X) pega a(s) chave(s) e o valor_nota lançado; (2) get_nfe_por_chave(chave) pega o valor REAL na SEFAZ; (3) compare o valor real da SEFAZ com o valor lançado e avise se há divergência. Como a maioria das notas vem só o resumo, a conferência é pelo VALOR TOTAL (não item a item). Se get_os_notas não achar nota, diga que a OS não tem nota vinculada no sistema.
 - CONFERÊNCIA FISCAL DO PERÍODO ("quantas notas estão sem lançar", "quanto falta lançar em junho", "tem nota pendente/não lançada", "quais fornecedores têm nota pendente") → get_conferencia_nfe(dataInicio, dataFim). SEMPRE passe o período (ex: mês inteiro: 2026-06-01 a 2026-06-30). Responda por padrão com os números de 'resumo_pra_lancar' (já sem notas de entrada e sem desconsiderados como a Minerva); só use 'resumo_bruto' se pedirem "todas" ou comparar com o portal. Cite a quantidade não lançada, o valor em R$ e, se pedirem detalhe, os top fornecedores. A mesma tool responde ACCOUNTABILITY: notas paradas há muito tempo (aging — destaque as 15/30+ dias), pendências por filial e quem lançou as notas (ranking de usuários). Isso é do MÊS/PERÍODO todo — não confundir com conferir uma OS específica.
 - CUSTO POR VEÍCULO ("qual caminhão gasta/custa mais", "quanto o veículo X custou", "ranking de custo da frota", "onde a frota gasta") → get_custo_veiculo(dataInicio, dataFim, veiculo?). É CUSTO (manutenção + combustível), NÃO lucro/rentabilidade — se perguntarem de lucro/prejuízo, explique que a empresa não atribui receita por placa, então só dá pra ver o custo. Default: últimos 30 dias.
@@ -1926,6 +1952,8 @@ serve(async (req: Request) => {
 
     // Pedido de planilha capturado durante o tool-calling (enviado na resposta final)
     let planilhaReq: { tipo: string; dataInicio: unknown; dataFim: unknown } | null = null;
+    // Pedido de DANFE capturado durante o tool-calling (gerado na resposta final)
+    let danfeReq: { chave: string } | null = null;
 
     // Loop de tool-calling (máx 5 iterações)
     for (let i = 0; i < 5; i++) {
@@ -1966,6 +1994,24 @@ serve(async (req: Request) => {
             return respond({ reply: (msg.content ?? "") + "\n\n(Não consegui gerar a planilha agora, tente de novo.)" });
           }
         }
+        if (danfeReq) {
+          try {
+            const r = await dwCall("/nfe-danfe", { chave: danfeReq.chave });
+            if (r?.ok && r?.pdf_base64) {
+              return respond({
+                reply: msg.content ?? "",
+                danfe: { filename: r.name ?? `DANFE-${danfeReq.chave}.pdf`, pdf_base64: r.pdf_base64 },
+              });
+            }
+            return respond({ reply: (msg.content ?? "") + "\n\n(Não consegui gerar o DANFE dessa nota agora.)" });
+          } catch (e) {
+            const emsg = String((e as Error)?.message ?? "");
+            let motivo = "Não consegui gerar o DANFE dessa nota agora.";
+            if (emsg.includes(" 404")) motivo = "Essa nota não foi encontrada na base do gerador de DANFE.";
+            else if (emsg.includes(" 402")) motivo = "Sem saldo no serviço de DANFE — avise o financeiro pra recarregar.";
+            return respond({ reply: (msg.content ?? "") + `\n\n(${motivo})` });
+          }
+        }
         return respond({ reply: msg.content ?? "" });
       }
 
@@ -1985,6 +2031,10 @@ serve(async (req: Request) => {
             const t = ["nao_lancadas", "divergentes", "todas"].includes(String(args.tipo))
               ? String(args.tipo) : "nao_lancadas";
             planilhaReq = { tipo: t, dataInicio: args.dataInicio ?? null, dataFim: args.dataFim ?? null };
+          }
+          if (tc.function.name === "preparar_danfe") {
+            const ch = String(args.chave ?? "").replace(/\D/g, "");
+            if (ch.length === 44) danfeReq = { chave: ch };
           }
           const out = await execTool(tc.function.name, args);
           return {

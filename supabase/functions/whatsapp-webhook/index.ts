@@ -103,7 +103,9 @@ async function sendWhatsApp(to: string, body: string) {
 // com o MIME oficial do Excel — formato aceito pela Media API do WhatsApp.
 const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-async function sendWhatsAppDocument(to: string, filename: string, base64: string, caption: string) {
+const PDF_MIME = "application/pdf";
+
+async function sendWhatsAppDocument(to: string, filename: string, base64: string, caption: string, mime: string = XLSX_MIME) {
   const token = Deno.env.get("WHATSAPP_TOKEN");
   const phoneId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
   if (!token || !phoneId) {
@@ -115,8 +117,8 @@ async function sendWhatsAppDocument(to: string, filename: string, base64: string
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
   const form = new FormData();
   form.append("messaging_product", "whatsapp");
-  form.append("type", XLSX_MIME);
-  form.append("file", new Blob([bytes], { type: XLSX_MIME }), filename);
+  form.append("type", mime);
+  form.append("file", new Blob([bytes], { type: mime }), filename);
 
   const up = await fetch(
     `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/media`,
@@ -179,6 +181,7 @@ function periodoDoDia(): string {
 interface AiResposta {
   reply: string;
   planilha?: { filename?: string; xlsx_base64?: string };
+  danfe?: { filename?: string; pdf_base64?: string };
 }
 
 async function askAI(historico: Turn[], nome: string | null, periodo: string): Promise<AiResposta> {
@@ -218,7 +221,11 @@ async function askAI(historico: Turn[], nome: string | null, periodo: string): P
     return { reply: "Não consegui processar agora. Tente novamente em instantes." };
   }
   const data = await res.json();
-  return { reply: data?.reply ?? "Não consegui responder agora.", planilha: data?.planilha };
+  return {
+    reply: data?.reply ?? "Não consegui responder agora.",
+    planilha: data?.planilha,
+    danfe: data?.danfe,
+  };
 }
 
 serve(async (req: Request) => {
@@ -411,7 +418,7 @@ async function handleMessage(from: string, text: string, audioId = "") {
     await salvarMensagem(from, "user", mensagem);
 
     const historico = [...historicoAnterior, { role: "user" as const, content: mensagem }];
-    const { reply, planilha } = await askAI(historico, nome, periodoDoDia());
+    const { reply, planilha, danfe } = await askAI(historico, nome, periodoDoDia());
 
     await salvarMensagem(from, "assistant", reply);
     await sendWhatsApp(from, reply);
@@ -423,6 +430,17 @@ async function handleMessage(from: string, text: string, audioId = "") {
         planilha.filename ?? "conferencia_nfe.xlsx",
         planilha.xlsx_base64,
         "📊 Planilha de conferência fiscal",
+      );
+    }
+
+    // Se a Sofia gerou um DANFE (PDF), envia como documento anexo
+    if (danfe?.pdf_base64) {
+      await sendWhatsAppDocument(
+        from,
+        danfe.filename ?? "danfe.pdf",
+        danfe.pdf_base64,
+        "📄 DANFE da nota fiscal",
+        PDF_MIME,
       );
     }
   } catch (err) {
