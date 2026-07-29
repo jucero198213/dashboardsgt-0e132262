@@ -83,6 +83,9 @@ async function processarEmail(email) {
       const tela = err.stderr && err.stderr.includes('(app)') ? 'app' : 'web';
       log.warn(`Rodopar: troca de senha obrigatória detectada (${tela})`);
       await notifier.trocaSenha(tela);
+    } else if (err.exitCode === 3 || (err.stderr && err.stderr.includes('INCONSISTENTE'))) {
+      log.warn('Rodopar: importação resultou em Situação Inconsistente');
+      await notifier.inconsistencia();
     } else {
       log.error(`Rodopar bot falhou: ${err.message}`);
       await notifier.erro('Rodopar Bot', err.stderr || err.message);

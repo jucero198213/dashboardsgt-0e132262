@@ -152,4 +152,18 @@ async function trocaSenha(tela) {
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-module.exports = { sucesso, divergencia, erro, emailInvalido, trocaSenha, enviarEmail, enviarWhatsApp };
+async function inconsistencia() {
+  const assunto = '⚠️ Baixa MB — Situação Inconsistente no Rodopar';
+  const corpo = [
+    'A importação da planilha no Rodopar foi concluída, mas o campo Situação ficou como "Inconsistente".',
+    '',
+    'Isso indica um problema com os dados da planilha (duplicatas, valores inválidos, etc.).',
+    '',
+    '👉 Verifique o Aviso Bancário no Rodopar MANUALMENTE — o aviso NÃO foi fechado.',
+    '',
+    '— Automação MB',
+  ].join('\n');
+  await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
+}
+
+module.exports = { sucesso, divergencia, erro, emailInvalido, trocaSenha, inconsistencia, enviarEmail, enviarWhatsApp };

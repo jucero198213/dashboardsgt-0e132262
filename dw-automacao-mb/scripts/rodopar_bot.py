@@ -48,6 +48,7 @@ IMG_DIR = os.path.join(BASE_DIR, 'img')
 EXIT_OK = 0
 EXIT_ERRO = 1
 EXIT_TROCA_SENHA = 2
+EXIT_INCONSISTENTE = 3
 
 UPLOAD_ESPERA = 120
 IMPORT_ESPERA = 120
@@ -163,6 +164,28 @@ def sair_troca_senha(tela):
     msg = f"TROCA_SENHA: Rodopar exigiu troca de senha ({tela}). Atualize a senha manualmente e altere o .env."
     print(msg, file=sys.stderr)
     sys.exit(EXIT_TROCA_SENHA)
+
+
+def detectar_inconsistente():
+    """Verifica se o campo Situação mostra 'Inconsistente' após importação."""
+    img_path = os.path.join(IMG_DIR, 'inconsistente.png')
+    if not os.path.exists(img_path):
+        log(f"Imagem de referência {img_path} não existe — pulando verificação de inconsistência")
+        return False
+    try:
+        loc = pyautogui.locateOnScreen(img_path, confidence=0.8)
+        if loc:
+            log("⚠ INCONSISTÊNCIA DETECTADA no campo Situação!")
+            return True
+    except Exception as e:
+        log(f"Erro na detecção de inconsistência: {e}")
+    return False
+
+
+def sair_inconsistente():
+    msg = "INCONSISTENTE: Importação resultou em Situação 'Inconsistente'. Verificar manualmente no Rodopar."
+    print(msg, file=sys.stderr)
+    sys.exit(EXIT_INCONSISTENTE)
 
 
 # ── Abrir PWA ────────────────────────────────────────────────
@@ -384,7 +407,13 @@ def main(args):
         webfile_path=webfile_path,
     )
 
-    # ── 13. Fecha Aviso ──────────────────────────────────────
+    # ── 13. Verificar Situação ───────────────────────────────
+    print("\n[VERIFICAÇÃO] Checando campo Situação...")
+    esperar(3, "aguardando tela atualizar")
+    if detectar_inconsistente():
+        sair_inconsistente()
+
+    # ── 14. Fecha Aviso ──────────────────────────────────────
     print("\n[FIM] Fechando aviso...")
     fechar_aviso(coords)
 
