@@ -52,25 +52,32 @@ async function buscarEmailsMB() {
 
     log.info(`IMAP: ${results.length} e-mail(s) BAIXA MB encontrado(s)`);
 
-    const emails = [];
-    for (const item of results) {
-      const rawAll = item.parts.find(p => p.which === '');
-      if (!rawAll) continue;
+    // Pega só o mais recente (maior UID); marca os antigos como lidos pra não reprocessar
+    results.sort((a, b) => b.attributes.uid - a.attributes.uid);
+    const maisRecente = results[0];
 
-      const parsed = await simpleParser(rawAll.body);
-      const anexo = (parsed.attachments || []).find(a =>
-        /\.(xlsx|xls|csv)$/i.test(a.filename)
-      );
-
-      emails.push({
-        uid: item.attributes.uid,
-        assunto: parsed.subject || '',
-        corpo: extrairCorpo(parsed),
-        anexoBuffer: anexo ? anexo.content : null,
-        nomeAnexo: anexo ? anexo.filename : null,
-      });
+    if (results.length > 1) {
+      log.info(`IMAP: descartando ${results.length - 1} e-mail(s) antigo(s), processando apenas uid=${maisRecente.attributes.uid}`);
+      for (const old of results.slice(1)) {
+        await connection.addFlags(old.attributes.uid, ['\\Seen']);
+      }
     }
-    return emails;
+
+    const rawAll = maisRecente.parts.find(p => p.which === '');
+    if (!rawAll) return [];
+
+    const parsed = await simpleParser(rawAll.body);
+    const anexo = (parsed.attachments || []).find(a =>
+      /\.(xlsx|xls|csv)$/i.test(a.filename)
+    );
+
+    return [{
+      uid: maisRecente.attributes.uid,
+      assunto: parsed.subject || '',
+      corpo: extrairCorpo(parsed),
+      anexoBuffer: anexo ? anexo.content : null,
+      nomeAnexo: anexo ? anexo.filename : null,
+    }];
   } catch (err) {
     log.error(`IMAP: erro ao buscar e-mails — ${err.message}`);
     return [];
