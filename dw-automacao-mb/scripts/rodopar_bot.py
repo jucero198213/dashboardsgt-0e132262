@@ -25,6 +25,12 @@ import time
 import subprocess
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env'))
+except ImportError:
+    pass
+
+try:
     import pyautogui
     import pyperclip
 except ImportError:
