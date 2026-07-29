@@ -312,7 +312,7 @@ def main(args):
     digitar(rdp_web_pass)
     tab()
     enter()
-    esperar(6, "aviso legal carregando")
+    esperar(15, "página carregando após login web")
 
     # ── 3. Aviso legal → Enter ───────────────────────────────
     print("\n[3/10] Aviso legal → Enter...")
