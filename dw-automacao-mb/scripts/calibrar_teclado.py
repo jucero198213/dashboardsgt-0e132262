@@ -31,6 +31,7 @@ PONTOS = [
     ('toolbar_toggle',  'Setinha ⌄ da barra TSplus (topo da tela)'),
     ('toolbar_upload',  'Ícone de upload (nuvem) na barra TSplus'),
     ('upload_dropzone', '"Click or drop files to upload" no File Transfer'),
+    ('upload_close',    'Botão X pra fechar o painel File Transfer'),
     ('btn_reticencias', 'Botão "..." no diálogo de importação do Rodopar'),
     ('btn_fecha_aviso', 'Botão "Fecha Aviso" na tela de Aviso Bancário'),
 ]

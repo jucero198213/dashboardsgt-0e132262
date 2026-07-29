@@ -59,6 +59,7 @@ COORDS_KEYS = [
     'toolbar_toggle',
     'toolbar_upload',
     'upload_dropzone',
+    'upload_close',
     'btn_reticencias',
     'btn_fecha_aviso',
 ]
@@ -106,7 +107,7 @@ def clicar(coords, key):
 
 
 def env(var):
-    val = os.environ.get(var, '')
+    val = os.environ.get(var, '').strip()
     if not val:
         print(f"ERRO: variável de ambiente {var} não configurada", file=sys.stderr)
         sys.exit(EXIT_ERRO)
@@ -184,7 +185,7 @@ def upload_webfile(coords, caminho_local):
     enter()
     esperar(UPLOAD_ESPERA, "arquivo sendo enviado pro WebFile (~2 min)")
 
-    hotkey('escape')
+    clicar(coords, 'upload_close')
     esperar(1, "fechando File Transfer")
 
 
