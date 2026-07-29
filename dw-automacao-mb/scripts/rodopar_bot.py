@@ -341,6 +341,7 @@ def main(args):
     digitar(rdp_app_user, colar=False)
     tab()
     digitar(rdp_app_pass, colar=False)
+    tab()
     enter()
     esperar(5, "tela de filial carregando")
 
