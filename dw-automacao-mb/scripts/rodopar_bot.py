@@ -304,9 +304,13 @@ def main(args):
 
     # ── 2. Login Web (teclado) ───────────────────────────────
     print("\n[2/10] Login web...")
+    pyautogui.click(400, 400)
+    esperar(1, "garantindo foco na página")
+    tab()
     digitar(rdp_web_user)
     tab()
     digitar(rdp_web_pass)
+    tab()
     enter()
     esperar(6, "aviso legal carregando")
 
