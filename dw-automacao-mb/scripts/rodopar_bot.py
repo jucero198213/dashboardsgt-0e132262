@@ -77,9 +77,15 @@ def esperar(segundos, motivo=''):
     time.sleep(segundos)
 
 
-def digitar(texto):
-    pyperclip.copy(str(texto))
-    pyautogui.hotkey('ctrl', 'v')
+def digitar(texto, colar=True):
+    """Digita texto. colar=True usa clipboard (Ctrl+V), bom pra browser.
+    colar=False digita tecla por tecla, necessário dentro do TSplus."""
+    texto = str(texto)
+    if colar:
+        pyperclip.copy(texto)
+        pyautogui.hotkey('ctrl', 'v')
+    else:
+        pyautogui.write(texto, interval=0.05)
     time.sleep(0.3)
 
 
@@ -194,26 +200,27 @@ def upload_webfile(coords, caminho_local):
 def preencher_aba1(data_aviso, valor, conta='79235-7', filial='1',
                    tipo_doc='AVI', hist_bancario='1', complemento='Baixa MB'):
     log("Preenchendo Aba 1 — Aviso Bancário")
+    R = False  # dentro do TSplus: digitar tecla por tecla
 
-    digitar(conta)
+    digitar(conta, colar=R)
     tab(2)
 
-    digitar(filial)
+    digitar(filial, colar=R)
     tab()
 
-    digitar(data_aviso)
+    digitar(data_aviso, colar=R)
     tab(2)
 
-    digitar(tipo_doc)
+    digitar(tipo_doc, colar=R)
     tab()
 
-    digitar(hist_bancario)
+    digitar(hist_bancario, colar=R)
     tab()
 
-    digitar(valor)
+    digitar(valor, colar=R)
     tab(2)
 
-    digitar(complemento)
+    digitar(complemento, colar=R)
     log("Aba 1 preenchida")
 
 
@@ -243,14 +250,14 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
 
     caminho_webfile = f"{webfile_path}\\{nome_arquivo}"
     log(f"Digitando caminho: {caminho_webfile}")
-    digitar(caminho_webfile)
+    digitar(caminho_webfile, colar=False)
     esperar(0.5)
     enter()
     esperar(2, "arquivo selecionado")
 
     log("Preenchendo nome da planilha")
     hotkey('shift', 'tab')
-    digitar(nome_planilha)
+    digitar(nome_planilha, colar=False)
     tab(2)
     enter()
     log(f"Processando importação — aguardando {IMPORT_ESPERA}s")
@@ -329,11 +336,11 @@ def main(args):
     if detectar_troca_senha('web'):
         sair_troca_senha('web')
 
-    # ── 6. Login App (teclado) ───────────────────────────────
+    # ── 6. Login App (teclado — dentro do TSplus, digita tecla por tecla) ──
     print("\n[5/10] Login Visual Rodopar...")
-    digitar(rdp_app_user)
+    digitar(rdp_app_user, colar=False)
     tab()
-    digitar(rdp_app_pass)
+    digitar(rdp_app_pass, colar=False)
     enter()
     esperar(5, "tela de filial carregando")
 
