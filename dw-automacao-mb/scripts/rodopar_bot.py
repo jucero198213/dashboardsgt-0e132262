@@ -1,15 +1,20 @@
 """
-rodopar_bot.py — PyAutoGUI para a parte Citrix do Rodopar.
+rodopar_bot.py — Automação Rodopar via TECLADO + 6 cliques fixos (PWA).
 
-Lê as coordenadas de coordenadas.json (gerado por calibrar.py). NÃO tem
-coordenada hardcoded — se precisar recalibrar, rode calibrar.py de novo.
+Fluxo: login web (Tab/Enter) → PROD_SGT (clique) → login app (Tab/Enter) →
+upload planilha pro WebFile (TSplus toolbar, cliques) → Ctrl+A (Aviso Bancário) →
+preencher aba 1 por Tab → aba 2 Itens → importar (Alt+I) → "..." (clique) →
+digitar caminho WebFile → processar → aguardar → cancelar → Fecha Aviso (clique).
+
+Detecção de troca de senha obrigatória: se aparecer após qualquer login,
+notifica e PARA (exit code 2).
+
+Coordenadas dos 6 cliques vêm de coordenadas.json (gerado por calibrar_teclado.py).
 
 Uso:
   python rodopar_bot.py --data-aviso 22/07/2026 --valor 2576896,75 \
                         --planilha "C:\\automacao-mb\\downloads\\mb_baixa_X.xlsx" \
                         --nome-planilha DOCUMENTO
-
-Pré-requisito: rodar antes  python scripts/calibrar.py
 """
 
 import argparse
@@ -23,236 +28,358 @@ try:
     import pyautogui
     import pyperclip
 except ImportError:
-    print("ERRO: execute: pip install pyautogui pyperclip pillow", file=sys.stderr)
+    print("ERRO: pip install pyautogui pyperclip pillow", file=sys.stderr)
     sys.exit(1)
 
-pyautogui.FAILSAFE = True   # mouse no canto superior esquerdo aborta o script
+pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0.3
 
-COORDS_FILE = os.path.join(os.path.dirname(__file__), '..', 'coordenadas.json')
-IMPORTACAO_ESPERA = 70      # segundos após "Processar" (documentos carregam ~1 min)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.join(SCRIPT_DIR, '..')
+COORDS_FILE = os.path.join(BASE_DIR, 'coordenadas.json')
+IMG_DIR = os.path.join(BASE_DIR, 'img')
 
-# Todas as chaves que o robô precisa (devem existir no coordenadas.json)
-CHAVES = [
-    'web_user', 'web_pass', 'web_login',
-    'aviso_ok',
+EXIT_OK = 0
+EXIT_ERRO = 1
+EXIT_TROCA_SENHA = 2
+
+UPLOAD_ESPERA = 120
+IMPORT_ESPERA = 120
+MSG_ENTER_MAX = 10
+MSG_ENTER_INTERVALO = 2
+
+COORDS_KEYS = [
     'prod_sgt',
-    'login_user', 'login_pass', 'login_ok',
-    'filial_continuar',
-    'menu_fluxo', 'menu_moviment', 'menu_avi',
-    'avi_conta', 'avi_data_aviso', 'avi_data_ref', 'avi_valor',
-    'aba_itens', 'citrix_canvas', 'btn_importar',
-    'btn_reticencias', 'campo_nome_plan', 'btn_processar', 'btn_cancelar',
-    'webfile', 'arquivo_item',
+    'toolbar_toggle',
+    'toolbar_upload',
+    'upload_dropzone',
+    'btn_reticencias',
     'btn_fecha_aviso',
-    'explorer_arquivo',
 ]
 
 
-def carregar_coords():
-    if not os.path.exists(COORDS_FILE):
-        print(f"ERRO: {COORDS_FILE} não existe. Rode antes: python scripts/calibrar.py", file=sys.stderr)
-        sys.exit(1)
-    with open(COORDS_FILE, encoding='utf-8') as f:
-        coords = json.load(f)
-    faltando = [k for k in CHAVES if k not in coords]
-    if faltando:
-        print(f"ERRO: faltam coordenadas: {', '.join(faltando)}. Rode: python scripts/calibrar.py", file=sys.stderr)
-        sys.exit(1)
-    return coords
+# ── Helpers ──────────────────────────────────────────────────
+
+def log(msg):
+    print(f"  >> {msg}")
 
 
-def clicar(coords, key, descricao=''):
-    x, y = coords[key]
-    if descricao:
-        print(f"  >> Clicando {descricao} ({x}, {y})")
-    pyautogui.click(x, y)
-    time.sleep(0.5)
+def esperar(segundos, motivo=''):
+    if motivo:
+        log(f"Aguardando {segundos}s — {motivo}")
+    time.sleep(segundos)
 
 
-def duplo_clique(coords, key, descricao=''):
-    x, y = coords[key]
-    if descricao:
-        print(f"  >> Duplo clique {descricao} ({x}, {y})")
-    pyautogui.doubleClick(x, y)
-    time.sleep(0.5)
-
-
-def digitar(texto, descricao=''):
-    if descricao:
-        print(f"  >> Digitando {descricao}: {texto}")
-    pyperclip.copy(texto)
+def digitar(texto):
+    pyperclip.copy(str(texto))
     pyautogui.hotkey('ctrl', 'v')
     time.sleep(0.3)
 
 
-def limpar_campo():
-    pyautogui.hotkey('ctrl', 'a')
-    time.sleep(0.1)
+def tab(n=1):
+    for _ in range(n):
+        pyautogui.press('tab')
+        time.sleep(0.2)
 
 
-def aguardar(segundos, motivo=''):
-    if motivo:
-        print(f"  >> Aguardando {segundos}s — {motivo}")
-    time.sleep(segundos)
+def enter():
+    pyautogui.press('enter')
+    time.sleep(0.3)
 
 
-def abrir_chrome(url):
-    """Abre o Chrome numa janela nova e maximizada na URL do Rodopar."""
-    print(f"  >> Abrindo Chrome em {url}")
-    subprocess.Popen(f'start chrome --new-window --start-maximized "{url}"', shell=True)
+def hotkey(*keys):
+    pyautogui.hotkey(*keys)
+    time.sleep(0.3)
 
 
-def drag_arquivo_para_citrix(coords, caminho_arquivo):
-    """Abre o Explorer com o arquivo e arrasta pro canvas do Citrix."""
-    subprocess.Popen(f'explorer /select,"{caminho_arquivo}"')
-    aguardar(2, 'Explorer abrindo')
+def clicar(coords, key):
+    x, y = coords[key]
+    log(f"Clique: {key} ({x}, {y})")
+    pyautogui.click(x, y)
+    time.sleep(0.5)
 
-    ex, ey = coords['explorer_arquivo']
-    cx, cy = coords['citrix_canvas']
-    print(f"  >> Arrastando arquivo do Explorer ({ex},{ey}) pro Citrix ({cx},{cy})")
-    pyautogui.moveTo(ex, ey)
-    pyautogui.mouseDown()
-    aguardar(0.5)
-    pyautogui.moveTo(cx, cy, duration=1.5)
-    pyautogui.mouseUp()
-    aguardar(2, 'aguardando upload no Citrix')
 
+def env(var):
+    val = os.environ.get(var, '')
+    if not val:
+        print(f"ERRO: variável de ambiente {var} não configurada", file=sys.stderr)
+        sys.exit(EXIT_ERRO)
+    return val
+
+
+# ── Coordenadas ──────────────────────────────────────────────
+
+def carregar_coords():
+    if not os.path.exists(COORDS_FILE):
+        print(f"ERRO: {COORDS_FILE} não existe. Rode: python scripts/calibrar_teclado.py", file=sys.stderr)
+        sys.exit(EXIT_ERRO)
+    with open(COORDS_FILE, encoding='utf-8') as f:
+        coords = json.load(f)
+    faltando = [k for k in COORDS_KEYS if k not in coords]
+    if faltando:
+        print(f"ERRO: coordenadas faltando: {', '.join(faltando)}. Rode: python scripts/calibrar_teclado.py", file=sys.stderr)
+        sys.exit(EXIT_ERRO)
+    return coords
+
+
+# ── Detecção de troca de senha ───────────────────────────────
+
+def detectar_troca_senha(tela):
+    """Procura a imagem de referência da tela de troca de senha.
+    Retorna True se encontrada. Se a imagem de referência não existir, pula."""
+    img_path = os.path.join(IMG_DIR, f'troca_senha_{tela}.png')
+    if not os.path.exists(img_path):
+        log(f"Imagem de referência {img_path} não existe — pulando detecção de troca de senha ({tela})")
+        return False
+    try:
+        loc = pyautogui.locateOnScreen(img_path, confidence=0.8)
+        if loc:
+            log(f"⚠ TROCA DE SENHA DETECTADA ({tela})!")
+            return True
+    except Exception as e:
+        log(f"Erro na detecção de troca de senha ({tela}): {e}")
+    return False
+
+
+def sair_troca_senha(tela):
+    msg = f"TROCA_SENHA: Rodopar exigiu troca de senha ({tela}). Atualize a senha manualmente e altere o .env."
+    print(msg, file=sys.stderr)
+    sys.exit(EXIT_TROCA_SENHA)
+
+
+# ── Abrir PWA ────────────────────────────────────────────────
+
+def abrir_pwa(url):
+    """Abre o Rodopar em modo PWA (Chrome --app) com janela fixa."""
+    log(f"Abrindo PWA: {url}")
+    subprocess.Popen(
+        f'start "" "chrome" --app="{url}" --window-position=0,0 --window-size=1920,1080',
+        shell=True
+    )
+
+
+# ── Upload pro WebFile (TSplus File Transfer) ────────────────
+
+def upload_webfile(coords, caminho_local):
+    """Usa a barra do TSplus pra fazer upload do arquivo pro WebFile."""
+    log(f"Upload pro WebFile: {caminho_local}")
+
+    clicar(coords, 'toolbar_toggle')
+    esperar(1, "toolbar expandindo")
+
+    clicar(coords, 'toolbar_upload')
+    esperar(2, "File Transfer abrindo")
+
+    clicar(coords, 'upload_dropzone')
+    esperar(2, "diálogo de arquivo abrindo")
+
+    digitar(caminho_local)
+    esperar(0.5)
+    enter()
+    esperar(UPLOAD_ESPERA, "arquivo sendo enviado pro WebFile (~2 min)")
+
+    hotkey('escape')
+    esperar(1, "fechando File Transfer")
+
+
+# ── Preenchimento Aba 1 (Aviso Bancário) ─────────────────────
+
+def preencher_aba1(data_aviso, valor, conta='79235-7', filial='1',
+                   tipo_doc='AVI', hist_bancario='1', complemento='Baixa MB'):
+    log("Preenchendo Aba 1 — Aviso Bancário")
+
+    digitar(conta)
+    tab(2)
+
+    digitar(filial)
+    tab()
+
+    digitar(data_aviso)
+    tab(2)
+
+    digitar(tipo_doc)
+    tab()
+
+    digitar(hist_bancario)
+    tab()
+
+    digitar(valor)
+    tab(2)
+
+    digitar(complemento)
+    log("Aba 1 preenchida")
+
+
+# ── Importação da planilha ───────────────────────────────────
+
+def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
+    """Navega pra aba Itens, abre importação, seleciona arquivo e processa."""
+    log("Indo pra Aba 2 — Itens do Aviso")
+    tab()
+    enter()
+    tab(2)
+    esperar(2, "aba Itens carregando")
+
+    log("Abrindo diálogo de importação (Alt+I ×3 → Enter)")
+    hotkey('alt', 'i')
+    esperar(0.5)
+    hotkey('alt', 'i')
+    esperar(0.5)
+    hotkey('alt', 'i')
+    esperar(0.5)
+    enter()
+    esperar(3, "diálogo de importação abrindo")
+
+    log("Selecionando arquivo via '...'")
+    clicar(coords, 'btn_reticencias')
+    esperar(3, "seletor de arquivo abrindo")
+
+    caminho_webfile = f"{webfile_path}\\{nome_arquivo}"
+    log(f"Digitando caminho: {caminho_webfile}")
+    digitar(caminho_webfile)
+    esperar(0.5)
+    enter()
+    esperar(2, "arquivo selecionado")
+
+    log("Preenchendo nome da planilha")
+    hotkey('shift', 'tab')
+    digitar(nome_planilha)
+    tab(2)
+    enter()
+    log(f"Processando importação — aguardando {IMPORT_ESPERA}s")
+    esperar(IMPORT_ESPERA, "documentos importando (~2 min)")
+
+    log("Fechando diálogo (Tab → Enter = Cancelar)")
+    tab()
+    enter()
+    esperar(2, "diálogo fechando")
+
+
+# ── Fecha Aviso + mensagens variáveis ────────────────────────
+
+def fechar_aviso(coords):
+    log("Clicando Fecha Aviso")
+    clicar(coords, 'btn_fecha_aviso')
+    esperar(3, "aviso sendo fechado")
+
+    log(f"Confirmando mensagens (até {MSG_ENTER_MAX} Enters)")
+    for i in range(MSG_ENTER_MAX):
+        enter()
+        time.sleep(MSG_ENTER_INTERVALO)
+
+
+# ── Main ─────────────────────────────────────────────────────
 
 def main(args):
     coords = carregar_coords()
 
+    rdp_url = env('RDP_URL')
+    rdp_web_user = env('RDP_WEB_USER')
+    rdp_web_pass = env('RDP_WEB_PASS')
+    rdp_app_user = env('RDP_APP_USER')
+    rdp_app_pass = env('RDP_APP_PASS')
+    webfile_path = env('WEBFILE_PATH')
+
+    nome_arquivo = os.path.basename(args.planilha)
+
     print("=" * 60)
-    print("  Rodopar Bot — MB")
+    print("  Rodopar Bot — MB (Teclado)")
     print(f"  Data Aviso : {args.data_aviso}")
     print(f"  Valor      : {args.valor}")
     print(f"  Planilha   : {args.planilha}")
     print(f"  Nome aba   : {args.nome_planilha}")
+    print(f"  WebFile    : {webfile_path}")
     print("=" * 60)
 
-    rdp_url = os.environ.get('RDP_URL', 'https://webcloud2.datapardc.com')
+    # ── 1. Abrir PWA ─────────────────────────────────────────
+    print("\n[1/10] Abrindo Rodopar (PWA)...")
+    abrir_pwa(rdp_url)
+    esperar(12, "PWA carregando página de login")
 
-    # ── 0a. Abrir Chrome + Login WEB (tela 1) ────────────────
-    print("\n[0/9] Abrindo Chrome e fazendo login web...")
-    abrir_chrome(rdp_url)
-    aguardar(12, 'Chrome abrindo e carregando a página de login')
-    clicar(coords, 'web_user', 'campo Usuário (web)')
-    limpar_campo()
-    digitar(os.environ.get('RDP_WEB_USER', ''), 'usuário web')
-    clicar(coords, 'web_pass', 'campo Senha (web)')
-    limpar_campo()
-    digitar(os.environ.get('RDP_WEB_PASS', ''), 'senha web')
-    clicar(coords, 'web_login', 'botão Login (web)')
-    aguardar(6, 'aguardando tela de aviso legal')
+    # ── 2. Login Web (teclado) ───────────────────────────────
+    print("\n[2/10] Login web...")
+    digitar(rdp_web_user)
+    tab()
+    digitar(rdp_web_pass)
+    enter()
+    esperar(6, "aviso legal carregando")
 
-    # ── 0b. Aviso legal (tela 2) ─────────────────────────────
-    print("\n[0/9] Aviso legal → OK...")
-    clicar(coords, 'aviso_ok', 'OK aviso legal')
-    aguardar(10, 'aguardando menu de aplicativos carregar')
+    # ── 3. Aviso legal → Enter ───────────────────────────────
+    print("\n[3/10] Aviso legal → Enter...")
+    enter()
+    esperar(10, "menu de aplicativos carregando")
 
-    # ── 0c. PROD_SGT (tela 3) ────────────────────────────────
-    print("\n[0/9] Abrindo PROD_SGT...")
-    clicar(coords, 'prod_sgt', 'PROD_SGT')
-    aguardar(20, 'aguardando Citrix inicializar o Visual Rodopar')
+    # ── 4. PROD_SGT → CLIQUE ────────────────────────────────
+    print("\n[4/10] Abrindo PROD_SGT...")
+    clicar(coords, 'prod_sgt')
+    esperar(20, "Visual Rodopar inicializando")
 
-    # ── 1. Login Visual Rodopar ──────────────────────────────
-    print("\n[1/9] Login Visual Rodopar...")
-    aguardar(5, 'garantindo que a janela de login apareceu')
-    clicar(coords, 'login_user', 'campo Login')
-    limpar_campo()
-    digitar(os.environ.get('RDP_APP_USER', ''), 'usuário app')
-    clicar(coords, 'login_pass', 'campo Senha')
-    limpar_campo()
-    digitar(os.environ.get('RDP_APP_PASS', ''), 'senha app')
-    clicar(coords, 'login_ok', 'OK login')
-    aguardar(5, 'aguardando tela de filial')
+    # ── 5. Verificar troca de senha (web) ────────────────────
+    if detectar_troca_senha('web'):
+        sair_troca_senha('web')
 
-    # ── 2. Selecione a Filial ────────────────────────────────
-    print("\n[2/9] Selecione a Filial → Continuar...")
-    clicar(coords, 'filial_continuar', 'Continuar')
-    aguardar(8, 'aguardando menu principal')
+    # ── 6. Login App (teclado) ───────────────────────────────
+    print("\n[5/10] Login Visual Rodopar...")
+    digitar(rdp_app_user)
+    tab()
+    digitar(rdp_app_pass)
+    enter()
+    esperar(5, "tela de filial carregando")
 
-    # ── 3. Navegar até AVI ───────────────────────────────────
-    print("\n[3/9] Abrindo Baixa por Aviso Bancário...")
-    clicar(coords, 'menu_fluxo', 'menu Fluxo de Caixa')
-    aguardar(1, 'submenu')
-    clicar(coords, 'menu_moviment', 'Movimentação')
-    aguardar(1, 'submenu')
-    clicar(coords, 'menu_avi', 'Baixa por Aviso Bancário')
-    aguardar(4, 'formulário AVI carregando')
+    # ── 7. Verificar troca de senha (app) ────────────────────
+    if detectar_troca_senha('app'):
+        sair_troca_senha('app')
 
-    # ── 4. Aba 1: Aviso Bancário ─────────────────────────────
-    print("\n[4/9] Preenchendo Aviso Bancário...")
-    clicar(coords, 'avi_conta', 'Conta Corrente')
-    limpar_campo()
-    digitar('79235-7', 'conta MB')
-    pyautogui.press('tab')
-    aguardar(1)
+    # ── 8. Filial → Enter (Continuar) ────────────────────────
+    print("\n[6/10] Selecione a Filial → Enter...")
+    enter()
+    esperar(8, "menu principal carregando")
 
-    clicar(coords, 'avi_data_aviso', 'Data do Aviso')
-    limpar_campo()
-    digitar(args.data_aviso, 'data aviso')
-    pyautogui.press('tab')
-    aguardar(0.5)
+    # ── 9. Upload da planilha pro WebFile ────────────────────
+    print("\n[7/10] Upload da planilha pro WebFile...")
+    upload_webfile(coords, args.planilha)
 
-    clicar(coords, 'avi_data_ref', 'Data de Referência')
-    limpar_campo()
-    digitar(args.data_aviso, 'data referência (= data aviso)')
-    pyautogui.press('tab')
-    aguardar(0.5)
+    # ── 10. Ctrl+A → Aviso Bancário ──────────────────────────
+    print("\n[8/10] Abrindo Aviso Bancário (Ctrl+A)...")
+    hotkey('ctrl', 'a')
+    esperar(4, "tela Aviso Bancário carregando")
 
-    clicar(coords, 'avi_valor', 'Valor')
-    limpar_campo()
-    digitar(args.valor, 'valor banco')
+    # ── 11. Preencher Aba 1 ──────────────────────────────────
+    print("\n[9/10] Preenchendo formulário...")
+    preencher_aba1(
+        data_aviso=args.data_aviso,
+        valor=args.valor,
+    )
 
-    # ── 5. Aba 2: Itens do Aviso ─────────────────────────────
-    print("\n[5/9] Abrindo aba Itens do Aviso...")
-    clicar(coords, 'aba_itens', 'aba Itens do Aviso')
-    aguardar(2, 'aba carregando')
+    # ── 12. Importar planilha (Aba 2) ────────────────────────
+    print("\n[10/10] Importando planilha...")
+    importar_planilha(
+        coords=coords,
+        nome_arquivo=nome_arquivo,
+        nome_planilha=args.nome_planilha,
+        webfile_path=webfile_path,
+    )
 
-    # ── 6. Importar planilha ─────────────────────────────────
-    print("\n[6/9] Importando planilha...")
-    drag_arquivo_para_citrix(coords, args.planilha)
-    clicar(coords, 'btn_importar', 'Importar Itens')
-    aguardar(3, 'diálogo de importação abrindo')
-    clicar(coords, 'btn_reticencias', 'botão ...')
-    aguardar(3, 'janela de seleção abrindo')
-    duplo_clique(coords, 'webfile', 'pasta WebFile')
-    aguardar(2, 'pasta abrindo')
-    duplo_clique(coords, 'arquivo_item', 'arquivo da planilha')
-    aguardar(2, 'arquivo selecionado')
-    clicar(coords, 'campo_nome_plan', 'Nome da Planilha')
-    limpar_campo()
-    digitar(args.nome_planilha, 'nome da aba')
-
-    # ── 7. Processar e aguardar ──────────────────────────────
-    print(f"\n[7/9] Processar — aguardando {IMPORTACAO_ESPERA}s os documentos carregarem...")
-    clicar(coords, 'btn_processar', 'Processar importação')
-    aguardar(IMPORTACAO_ESPERA, 'documentos importando (~1 min)')
-
-    # ── 8. Cancelar (fecha o diálogo) ────────────────────────
-    print("\n[8/9] Fechando diálogo de importação (Cancelar)...")
-    clicar(coords, 'btn_cancelar', 'Cancelar')
-    aguardar(2, 'diálogo fechando')
-
-    # ── 9. Fecha Aviso ───────────────────────────────────────
-    print("\n[9/9] Clicando Fecha Aviso...")
-    clicar(coords, 'btn_fecha_aviso', 'Fecha Aviso')
-    aguardar(3, 'aviso sendo fechado')
+    # ── 13. Fecha Aviso ──────────────────────────────────────
+    print("\n[FIM] Fechando aviso...")
+    fechar_aviso(coords)
 
     print("\n✅ Rodopar Bot concluído com sucesso!")
-    sys.exit(0)
+    sys.exit(EXIT_OK)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data-aviso',    required=True)
-    parser.add_argument('--valor',         required=True)
-    parser.add_argument('--planilha',      required=True)
-    parser.add_argument('--nome-planilha', default='DOCUMENTO')
+    parser = argparse.ArgumentParser(description='Rodopar Bot — Baixa MB por teclado')
+    parser.add_argument('--data-aviso', required=True, help='Data do aviso (DD/MM/AAAA)')
+    parser.add_argument('--valor', required=True, help='Valor do banco (ex: 2576896,75)')
+    parser.add_argument('--planilha', required=True, help='Caminho LOCAL da planilha .xlsx')
+    parser.add_argument('--nome-planilha', default='DOCUMENTO', help='Nome da aba na planilha')
     args = parser.parse_args()
     try:
         main(args)
+    except pyautogui.FailSafeException:
+        print("\nABORTADO: mouse movido pro canto (failsafe)", file=sys.stderr)
+        sys.exit(EXIT_ERRO)
     except Exception as e:
         print(f"\nERRO: {e}", file=sys.stderr)
-        sys.exit(1)
+        sys.exit(EXIT_ERRO)

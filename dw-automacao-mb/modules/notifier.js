@@ -136,4 +136,20 @@ async function emailInvalido(motivo) {
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-module.exports = { sucesso, divergencia, erro, emailInvalido, enviarEmail, enviarWhatsApp };
+async function trocaSenha(tela) {
+  const assunto = '🔐 Baixa MB — Troca de senha obrigatória';
+  const corpo = [
+    `O Rodopar exigiu troca de senha na tela de login (${tela}).`,
+    'A automação foi PARADA. A baixa de hoje precisa ser feita MANUALMENTE.',
+    '',
+    'Para restaurar a automação:',
+    `  1. Acesse o Rodopar e troque a senha (tela: ${tela})`,
+    `  2. Atualize o .env na máquina DW (variável: ${tela === 'web' ? 'RDP_WEB_PASS' : 'RDP_APP_PASS'})`,
+    '  3. A automação vai funcionar normalmente no próximo e-mail',
+    '',
+    '— Automação MB',
+  ].join('\n');
+  await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
+}
+
+module.exports = { sucesso, divergencia, erro, emailInvalido, trocaSenha, enviarEmail, enviarWhatsApp };

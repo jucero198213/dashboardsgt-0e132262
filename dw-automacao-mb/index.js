@@ -65,8 +65,13 @@ async function processarEmail(email) {
       const proc = execFile('python', args, { env: process.env, timeout: 8 * 60 * 1000 }, (err, stdout, stderr) => {
         if (stdout) log.info(`Bot stdout: ${stdout.trim()}`);
         if (stderr) log.warn(`Bot stderr: ${stderr.trim()}`);
-        if (err) reject(new Error(stderr || err.message));
-        else resolve();
+        if (err) {
+          err.exitCode = proc.exitCode;
+          err.stderr = stderr;
+          reject(err);
+        } else {
+          resolve();
+        }
       });
     });
 
@@ -74,8 +79,14 @@ async function processarEmail(email) {
     await notifier.sucesso(valorBanco, dataRecebimento, { documentos: rfResult.totalDocumentos });
 
   } catch (err) {
-    log.error(`Rodopar bot falhou: ${err.message}`);
-    await notifier.erro('Rodopar Bot', err.message);
+    if (err.exitCode === 2 || (err.stderr && err.stderr.includes('TROCA_SENHA'))) {
+      const tela = err.stderr && err.stderr.includes('(app)') ? 'app' : 'web';
+      log.warn(`Rodopar: troca de senha obrigatória detectada (${tela})`);
+      await notifier.trocaSenha(tela);
+    } else {
+      log.error(`Rodopar bot falhou: ${err.message}`);
+      await notifier.erro('Rodopar Bot', err.stderr || err.message);
+    }
   }
 }
 
