@@ -85,7 +85,12 @@ def digitar(texto, colar=True):
         pyperclip.copy(texto)
         pyautogui.hotkey('ctrl', 'v')
     else:
-        pyautogui.write(texto, interval=0.05)
+        for c in texto:
+            if c.isupper():
+                pyautogui.hotkey('shift', c.lower())
+            else:
+                pyautogui.write(c, interval=0)
+            time.sleep(0.03)
     time.sleep(0.3)
 
 
