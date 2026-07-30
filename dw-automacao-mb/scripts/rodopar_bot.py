@@ -1,10 +1,10 @@
 """
 rodopar_bot.py — Automação Rodopar via TECLADO + 6 cliques fixos (PWA).
 
-Fluxo: login web (Tab/Enter) → PROD_SGT (clique) → login app (Tab/Enter) →
-upload planilha pro WebFile (TSplus toolbar, cliques) → Ctrl+A (Aviso Bancário) →
-preencher aba 1 por Tab → aba 2 Itens → importar (Alt+I) → "..." (clique) →
-digitar caminho WebFile → processar → aguardar → cancelar → Fecha Aviso (clique).
+Fluxo: login web (Tab/Enter) ->PROD_SGT (clique) ->login app (Tab/Enter) ->
+upload planilha pro WebFile (TSplus toolbar, cliques) ->Ctrl+A (Aviso Bancário) ->
+preencher aba 1 por Tab ->aba 2 Itens ->importar (Alt+I) ->"..." (clique) ->
+digitar caminho WebFile ->processar ->aguardar ->cancelar ->Fecha Aviso (clique).
 
 Detecção de troca de senha obrigatória: se aparecer após qualquer login,
 notifica e PARA (exit code 2).
@@ -153,7 +153,7 @@ def detectar_troca_senha(tela):
     try:
         loc = pyautogui.locateOnScreen(img_path, confidence=0.8)
         if loc:
-            log(f"⚠ TROCA DE SENHA DETECTADA ({tela})!")
+            log(f"ALERTA:TROCA DE SENHA DETECTADA ({tela})!")
             return True
     except Exception as e:
         log(f"Erro na detecção de troca de senha ({tela}): {e}")
@@ -175,7 +175,7 @@ def detectar_inconsistente():
     try:
         loc = pyautogui.locateOnScreen(img_path, confidence=0.8)
         if loc:
-            log("⚠ INCONSISTÊNCIA DETECTADA no campo Situação!")
+            log("ALERTA:INCONSISTÊNCIA DETECTADA no campo Situação!")
             return True
     except Exception as e:
         log(f"Erro na detecção de inconsistência: {e}")
@@ -262,7 +262,7 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
     tab(2)
     esperar(2, "aba Itens carregando")
 
-    log("Abrindo diálogo de importação (Alt+I ×3 → Enter)")
+    log("Abrindo diálogo de importação (Alt+I ×3 ->Enter)")
     hotkey('alt', 'i')
     esperar(0.5)
     hotkey('alt', 'i')
@@ -291,7 +291,7 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
     log(f"Processando importação — aguardando {IMPORT_ESPERA}s")
     esperar(IMPORT_ESPERA, "documentos importando (~2 min)")
 
-    log("Fechando diálogo (Tab → Enter = Cancelar)")
+    log("Fechando diálogo (Tab ->Enter = Cancelar)")
     tab()
     enter()
     esperar(2, "diálogo fechando")
@@ -350,12 +350,12 @@ def main(args):
     enter()
     esperar(15, "página carregando após login web")
 
-    # ── 3. Aviso legal → Enter ───────────────────────────────
-    print("\n[3/10] Aviso legal → Enter...")
+    # ── 3. Aviso legal ->Enter ───────────────────────────────
+    print("\n[3/10] Aviso legal ->Enter...")
     enter()
     esperar(10, "menu de aplicativos carregando")
 
-    # ── 4. PROD_SGT → CLIQUE ────────────────────────────────
+    # ── 4. PROD_SGT ->CLIQUE ────────────────────────────────
     print("\n[4/10] Abrindo PROD_SGT...")
     clicar(coords, 'prod_sgt')
     esperar(20, "Visual Rodopar inicializando")
@@ -377,8 +377,8 @@ def main(args):
     if detectar_troca_senha('app'):
         sair_troca_senha('app')
 
-    # ── 8. Filial → Enter (Continuar) ────────────────────────
-    print("\n[6/10] Selecione a Filial → Enter...")
+    # ── 8. Filial ->Enter (Continuar) ────────────────────────
+    print("\n[6/10] Selecione a Filial ->Enter...")
     enter()
     esperar(8, "menu principal carregando")
 
@@ -386,7 +386,7 @@ def main(args):
     print("\n[7/10] Upload da planilha pro WebFile...")
     upload_webfile(coords, args.planilha)
 
-    # ── 10. Ctrl+A → Aviso Bancário ──────────────────────────
+    # ── 10. Ctrl+A ->Aviso Bancário ──────────────────────────
     print("\n[8/10] Abrindo Aviso Bancário (Ctrl+A)...")
     hotkey('ctrl', 'a')
     esperar(4, "tela Aviso Bancário carregando")
@@ -417,7 +417,7 @@ def main(args):
     print("\n[FIM] Fechando aviso...")
     fechar_aviso(coords)
 
-    print("\n✅ Rodopar Bot concluído com sucesso!")
+    print("\nOK:Rodopar Bot concluído com sucesso!")
     sys.exit(EXIT_OK)
 
 
