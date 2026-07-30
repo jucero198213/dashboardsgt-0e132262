@@ -10,9 +10,12 @@ const DOWNLOADS_DIR = process.env.DOWNLOADS_DIR || path.join(__dirname, '..', 'd
 //   DATA_VENCIMENTO: 22/07/2026
 //   VALOR_BANCO: 125.432,50
 function parseCorpo(corpo) {
+  log.info(`Email-parser corpo (debug):\n---\n${corpo}\n---`);
+
   const campo = (nome) => {
-    const m = corpo.match(new RegExp(`${nome}\\s*:\\s*([^\\r\\n]+)`, 'i'));
-    return m ? m[1].trim() : null;
+    const escaped = nome.replace(/[_\s]/g, '[_\\s]+');
+    const m = corpo.match(new RegExp(`${escaped}\\s*:?\\s*([^\\r\\n]+)`, 'i'));
+    return m ? m[1].replace(/^:\s*/, '').trim() : null;
   };
 
   const dataRecebimento = campo('DATA_RECEBIMENTO') || campo('DATA RECEBIMENTO');
