@@ -285,6 +285,8 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
 
     log("Preenchendo nome da planilha")
     hotkey('shift', 'tab')
+    hotkey('ctrl', 'a')
+    time.sleep(0.2)
     digitar(nome_planilha, colar=False)
     tab(2)
     enter()
