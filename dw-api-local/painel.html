@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painel — SGT Log</title>
+<style>
+  @font-face {
+    font-family: 'SystemMono';
+    src: local('Menlo'), local('Consolas'), local('Monaco'), local('Courier New');
+  }
+
+  :root {
+    --bg: #060B18;
+    --surface: #0C1425;
+    --card: rgba(13,20,37,0.85);
+    --card-border: rgba(255,255,255,0.06);
+    --card-hover: rgba(255,255,255,0.03);
+    --text: #D8E2F0;
+    --text-dim: #6B7A92;
+    --accent: #FE8005;
+    --green: #00E68A;
+    --yellow: #FFB020;
+    --red: #FF4D6A;
+    --blue: #4EA8FF;
+    --terminal-bg: #080E1C;
+    --terminal-line: rgba(255,255,255,0.025);
+    --scrollbar-track: #0C1425;
+    --scrollbar-thumb: #1E2A40;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column;
+    height: 100dvh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2A3A55; }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+  }
+  .topbar-brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .topbar-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .topbar-title {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+    color: var(--text);
+  }
+  .topbar-title span { color: var(--text-dim); font-weight: 400; }
+  .topbar-right {
+    margin-left: auto; display: flex; align-items: center; gap: 14px;
+  }
+  .topbar-clock {
+    font-size: 12px; color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .topbar-link {
+    font-size: 11px; color: var(--accent); text-decoration: none;
+    padding: 4px 10px; border: 1px solid rgba(254,128,5,0.25);
+    border-radius: 6px; transition: all 0.2s;
+  }
+  .topbar-link:hover { background: rgba(254,128,5,0.1); border-color: var(--accent); }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex; flex: 1; overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--card-border);
+    display: flex; flex-direction: column;
+    padding: 16px 12px;
+    gap: 8px;
+    overflow-y: auto;
+  }
+  .sidebar-label {
+    font-size: 10px; color: var(--text-dim); text-transform: uppercase;
+    letter-spacing: 1.5px; padding: 0 8px; margin-bottom: 4px;
+  }
+  .svc-card {
+    padding: 10px 12px; border-radius: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .svc-card:hover { background: var(--card-hover); border-color: var(--card-border); }
+  .svc-card.active {
+    background: var(--card);
+    border-color: rgba(254,128,5,0.3);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .svc-card-header {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .svc-indicator {
+    width: 6px; height: 6px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .svc-indicator.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .svc-indicator.off { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .svc-indicator.unknown { background: var(--text-dim); }
+  .svc-name {
+    font-size: 12px; font-weight: 600; color: var(--text);
+  }
+  .svc-meta {
+    font-size: 10px; color: var(--text-dim); padding-left: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Main area ── */
+  .main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* ── Terminal toolbar ── */
+  .terminal-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+  }
+  .terminal-bar-dots {
+    display: flex; gap: 5px;
+  }
+  .terminal-bar-dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .terminal-bar-dots span:nth-child(1) { background: var(--red); }
+  .terminal-bar-dots span:nth-child(2) { background: var(--yellow); }
+  .terminal-bar-dots span:nth-child(3) { background: var(--green); }
+  .terminal-tab {
+    font-size: 11px; color: var(--text-dim);
+    padding: 3px 10px; border-radius: 4px;
+    background: rgba(255,255,255,0.03);
+    font-family: 'SystemMono', Menlo, Consolas, monospace;
+  }
+  .terminal-tab .svc-label { color: var(--accent); }
+
+  .terminal-controls {
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+  }
+  .search-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 5px; padding: 4px 10px;
+    color: var(--text); font-size: 11px;
+    font-family: 'SystemMono', Menlo, Consolas, monospace;
+    outline: none; width: 180px;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: rgba(254,128,5,0.4); }
+  .search-box::placeholder { color: var(--text-dim); }
+
+  .btn-icon {
+    background: none; border: 1px solid var(--card-border);
+    border-radius: 5px; padding: 4px 8px;
+    color: var(--text-dim); font-size: 11px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { color: var(--text); border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); }
+  .btn-icon.active { color: var(--green); border-color: rgba(0,230,138,0.3); }
+
+  .line-count {
+    font-size: 10px; color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Terminal output ── */
+  .terminal {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    background: var(--terminal-bg);
+    padding: 12px 0;
+    font-family: 'SystemMono', Menlo, Consolas, monospace;
+    font-size: 12px; line-height: 1.65;
+    counter-reset: line;
+  }
+
+  .log-line {
+    display: flex; padding: 0 16px; min-height: 20px;
+    transition: background 0.15s;
+  }
+  .log-line:hover { background: rgba(255,255,255,0.02); }
+  .log-line.highlight { background: rgba(254,128,5,0.08); }
+
+  .log-num {
+    width: 44px; flex-shrink: 0; text-align: right;
+    color: var(--text-dim); opacity: 0.4;
+    padding-right: 12px; user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .log-text {
+    flex: 1; white-space: pre-wrap; word-break: break-all;
+    color: var(--text);
+  }
+
+  .log-line.level-error .log-text { color: var(--red); }
+  .log-line.level-warn .log-text { color: var(--yellow); }
+  .log-line.level-info .log-text { color: var(--green); }
+  .log-line.level-debug .log-text { color: var(--blue); }
+
+  .log-text mark {
+    background: rgba(254,128,5,0.3); color: inherit;
+    border-radius: 2px; padding: 0 1px;
+  }
+
+  .terminal-empty {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; color: var(--text-dim); font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    flex-direction: column; gap: 8px;
+  }
+  .terminal-empty-icon { font-size: 28px; opacity: 0.3; }
+
+  /* ── Bottom bar ── */
+  .bottombar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--card-border);
+    flex-shrink: 0;
+    font-size: 11px; color: var(--text-dim);
+  }
+  .bottombar-item {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .bottombar-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+  }
+  .bottombar-dot.live { background: var(--green); animation: dotPulse 2s ease-in-out infinite; }
+  .bottombar-dot.off { background: var(--red); }
+
+  .poll-indicator {
+    width: 40px; height: 2px; background: rgba(255,255,255,0.06);
+    border-radius: 1px; overflow: hidden;
+  }
+  .poll-fill {
+    height: 100%; background: var(--accent); border-radius: 1px;
+    width: 0%; transition: width 0.3s linear;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .layout { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-dot" id="connDot"></div>
+    <div class="topbar-title">SGT Log <span>/ Painel de Servicos</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-clock" id="clock"></div>
+    <a class="topbar-link" href="/health" target="_blank">Health</a>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-label">Servicos</div>
+    <div id="svcList"></div>
+  </div>
+
+  <div class="main">
+    <div class="terminal-bar">
+      <div class="terminal-bar-dots"><span></span><span></span><span></span></div>
+      <div class="terminal-tab" id="termTab">$ tail -f <span class="svc-label" id="termSvc">—</span></div>
+      <div class="terminal-controls">
+        <input type="text" class="search-box" id="searchBox" placeholder="Filtrar logs..." />
+        <button class="btn-icon active" id="btnAutoScroll" title="Auto-scroll">Auto</button>
+        <button class="btn-icon" id="btnClear" title="Limpar tela">Limpar</button>
+        <span class="line-count" id="lineCount">0 linhas</span>
+      </div>
+    </div>
+
+    <div class="terminal" id="terminal">
+      <div class="terminal-empty">
+        <div class="terminal-empty-icon">_</div>
+        Selecione um servico para ver os logs
+      </div>
+    </div>
+
+    <div class="bottombar">
+      <div class="bottombar-item">
+        <div class="bottombar-dot live" id="pollDot"></div>
+        <span id="pollStatus">Conectado</span>
+      </div>
+      <div class="poll-indicator"><div class="poll-fill" id="pollFill"></div></div>
+      <span id="pollTimer">Atualiza em 5s</span>
+      <span style="margin-left:auto" id="fileInfo">—</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = location.origin;
+const POLL_MS = 5000;
+const MAX_LINES = 200;
+
+const $ = id => document.getElementById(id);
+
+const SERVICES = [
+  { id: 'automacao',     label: 'Automacao MB',        icon: 'stdout' },
+  { id: 'automacao-err', label: 'Automacao MB (erros)', icon: 'stderr' },
+];
+
+let activeService = null;
+let autoScroll = true;
+let searchTerm = '';
+let currentLines = [];
+let pollTimer = null;
+let pollCountdown = POLL_MS;
+let connected = false;
+
+// ── Clock ──
+function tickClock() {
+  const now = new Date();
+  $('clock').textContent = now.toLocaleTimeString('pt-BR') + ' · ' +
+    now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ── Service list ──
+function renderServices(meta) {
+  const container = $('svcList');
+  container.innerHTML = '';
+  SERVICES.forEach(svc => {
+    const info = meta ? meta[svc.id] : null;
+    const card = document.createElement('div');
+    card.className = 'svc-card' + (activeService === svc.id ? ' active' : '');
+    const exists = info ? info.exists : false;
+    card.innerHTML = `
+      <div class="svc-card-header">
+        <div class="svc-indicator ${exists ? 'on' : info === null ? 'unknown' : 'off'}"></div>
+        <div class="svc-name">${svc.label}</div>
+      </div>
+      <div class="svc-meta">${info && info.exists ? formatSize(info.size) + ' · ' + timeAgo(info.modified) : info ? 'Sem log' : '...'}</div>
+    `;
+    card.addEventListener('click', () => selectService(svc.id));
+    container.appendChild(card);
+  });
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'agora';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + ' min atras';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h atras';
+  return Math.floor(h / 24) + 'd atras';
+}
+
+// ── Select service ──
+function selectService(id) {
+  activeService = id;
+  const svc = SERVICES.find(s => s.id === id);
+  $('termSvc').textContent = svc ? svc.label : id;
+  currentLines = [];
+  renderTerminal();
+  renderServices(lastMeta);
+  fetchLogs();
+}
+
+// ── Fetch logs ──
+let lastMeta = null;
+
+async function fetchMeta() {
+  try {
+    const res = await fetch(API_BASE + '/api/logs');
+    const data = await res.json();
+    lastMeta = data.services;
+    connected = true;
+    renderServices(lastMeta);
+    updateConnection(true);
+  } catch {
+    connected = false;
+    updateConnection(false);
+  }
+}
+
+async function fetchLogs() {
+  if (!activeService) return;
+  try {
+    const res = await fetch(API_BASE + '/api/logs?service=' + activeService + '&lines=' + MAX_LINES);
+    const data = await res.json();
+    connected = true;
+    updateConnection(true);
+    if (data.ok) {
+      currentLines = data.lines;
+      $('lineCount').textContent = data.total + ' linhas total';
+      $('fileInfo').textContent = activeService + ' · ' + data.lines.length + '/' + data.total + ' linhas exibidas';
+      renderTerminal();
+    } else {
+      currentLines = [];
+      $('terminal').innerHTML = '<div class="terminal-empty"><div class="terminal-empty-icon">!</div>' + (data.error || 'Erro ao carregar') + '</div>';
+    }
+  } catch {
+    connected = false;
+    updateConnection(false);
+  }
+}
+
+function updateConnection(ok) {
+  $('connDot').style.background = ok ? 'var(--green)' : 'var(--red)';
+  $('connDot').style.boxShadow = ok ? '0 0 8px var(--green)' : '0 0 8px var(--red)';
+  $('pollDot').className = 'bottombar-dot ' + (ok ? 'live' : 'off');
+  $('pollStatus').textContent = ok ? 'Conectado' : 'Desconectado';
+}
+
+// ── Render terminal ──
+function classifyLine(text) {
+  const lower = text.toLowerCase();
+  if (lower.includes('error') || lower.includes('erro') || lower.includes('falh') || lower.includes('fatal') || lower.includes('reject')) return 'error';
+  if (lower.includes('warn') || lower.includes('aviso') || lower.includes('divergen')) return 'warn';
+  if (lower.includes('sucesso') || lower.includes('ok') || lower.includes('conectado') || lower.includes('iniciando')) return 'info';
+  if (lower.includes('debug') || lower.includes('poll')) return 'debug';
+  return '';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function highlightSearch(text, term) {
+  if (!term) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const termEsc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp('(' + termEsc + ')', 'gi'), '<mark>$1</mark>');
+}
+
+function renderTerminal() {
+  const terminal = $('terminal');
+  if (!currentLines.length) {
+    terminal.innerHTML = '<div class="terminal-empty"><div class="terminal-empty-icon">_</div>Nenhum log disponivel</div>';
+    return;
+  }
+
+  let filtered = currentLines;
+  if (searchTerm) {
+    const lower = searchTerm.toLowerCase();
+    filtered = currentLines.filter(l => l.toLowerCase().includes(lower));
+  }
+
+  const fragment = document.createDocumentFragment();
+  filtered.forEach((line, i) => {
+    const div = document.createElement('div');
+    const level = classifyLine(line);
+    div.className = 'log-line' + (level ? ' level-' + level : '') + (searchTerm && line.toLowerCase().includes(searchTerm.toLowerCase()) ? ' highlight' : '');
+    div.innerHTML = '<span class="log-num">' + (i + 1) + '</span><span class="log-text">' + highlightSearch(line, searchTerm) + '</span>';
+    fragment.appendChild(div);
+  });
+
+  terminal.innerHTML = '';
+  terminal.appendChild(fragment);
+
+  if (autoScroll) {
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+}
+
+// ── Controls ──
+$('btnAutoScroll').addEventListener('click', () => {
+  autoScroll = !autoScroll;
+  $('btnAutoScroll').className = 'btn-icon' + (autoScroll ? ' active' : '');
+  if (autoScroll) {
+    $('terminal').scrollTop = $('terminal').scrollHeight;
+  }
+});
+
+$('btnClear').addEventListener('click', () => {
+  currentLines = [];
+  renderTerminal();
+});
+
+$('searchBox').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  renderTerminal();
+});
+
+$('terminal').addEventListener('scroll', () => {
+  const el = $('terminal');
+  const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+  if (!atBottom && autoScroll) {
+    autoScroll = false;
+    $('btnAutoScroll').className = 'btn-icon';
+  }
+});
+
+// ── Polling ──
+async function poll() {
+  await fetchMeta();
+  if (activeService) await fetchLogs();
+  pollCountdown = POLL_MS;
+}
+
+function startPolling() {
+  poll();
+  setInterval(poll, POLL_MS);
+
+  setInterval(() => {
+    pollCountdown = Math.max(0, pollCountdown - 200);
+    const pct = 100 - (pollCountdown / POLL_MS * 100);
+    $('pollFill').style.width = pct + '%';
+    const sec = Math.ceil(pollCountdown / 1000);
+    $('pollTimer').textContent = sec > 0 ? 'Atualiza em ' + sec + 's' : 'Atualizando...';
+  }, 200);
+}
+
+// ── Init ──
+renderServices(null);
+startPolling();
+selectService('automacao');
+</script>
+</body>
+</html>

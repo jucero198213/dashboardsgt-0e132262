@@ -99,7 +99,7 @@ setInterval(() => {
 }, RL_WIN).unref();
 
 app.use((req, res, next) => {
-  if (req.method === "GET" && (req.path === "/" || req.path === "/health")) return next();
+  if (req.method === "GET" && (req.path === "/" || req.path === "/health" || req.path === "/api/logs" || req.path === "/painel")) return next();
   const ip = (req.headers["x-forwarded-for"] ?? "").split(",")[0].trim() || req.socket?.remoteAddress || "?";
   const now = Date.now();
   const floor = now - RL_WIN;
@@ -119,7 +119,7 @@ app.use((req, res, next) => {
 const API_SECRET = process.env.API_SECRET;
 
 app.use((req, res, next) => {
-  if (req.method === "GET" && (req.path === "/" || req.path === "/health")) return next();
+  if (req.method === "GET" && (req.path === "/" || req.path === "/health" || req.path === "/api/logs" || req.path === "/painel")) return next();
 
   if (!API_SECRET) {
     console.warn("⚠️  API_SECRET não definido no .env — autenticação desabilitada");
@@ -2301,6 +2301,63 @@ app.post("/dw-abastecimento-qualidade", async (req, res) => {
     }
     return res.status(500).json({ error: err.message, code: err.code ?? null });
   }
+});
+
+// ── Endpoint de logs dos serviços ─────────────────────────────────────────────
+// Público (sem x-api-key). Lê as últimas N linhas dos arquivos de log.
+// GET /api/logs?service=automacao&lines=100
+const LOG_SOURCES = {
+  automacao: path.join(__dirname, '..', 'dw-automacao-mb', 'logs', 'service-stdout.log'),
+  'automacao-err': path.join(__dirname, '..', 'dw-automacao-mb', 'logs', 'service-stderr.log'),
+};
+
+function tailFile(filePath, n) {
+  try {
+    if (!fs.existsSync(filePath)) return { ok: false, error: 'Arquivo não encontrado' };
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n').filter(Boolean);
+    const tail = lines.slice(-n);
+    return { ok: true, lines: tail, total: lines.length };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+app.get("/api/logs", (_req, res) => {
+  const service = _req.query.service;
+  const lines = Math.min(parseInt(_req.query.lines) || 100, 500);
+
+  if (!service) {
+    const available = Object.keys(LOG_SOURCES);
+    const services = {};
+    for (const svc of available) {
+      const filePath = LOG_SOURCES[svc];
+      const exists = fs.existsSync(filePath);
+      let size = 0;
+      let modified = null;
+      if (exists) {
+        const stat = fs.statSync(filePath);
+        size = stat.size;
+        modified = stat.mtime.toISOString();
+      }
+      services[svc] = { exists, size, modified, path: filePath };
+    }
+    return res.json({ services });
+  }
+
+  if (!LOG_SOURCES[service]) {
+    return res.status(400).json({ error: `Serviço desconhecido: ${service}. Disponíveis: ${Object.keys(LOG_SOURCES).join(', ')}` });
+  }
+
+  const result = tailFile(LOG_SOURCES[service], lines);
+  res.json({ service, ...result });
+});
+
+// ── Painel de logs (serve o HTML) ────────────────────────────────────────────
+const painelPath = path.join(__dirname, "painel.html");
+app.get("/painel", (_req, res) => {
+  if (!fs.existsSync(painelPath)) return res.status(404).send("painel.html não encontrado");
+  res.sendFile(painelPath);
 });
 
 // ── Inicia o servidor ─────────────────────────────────────────────────────────
