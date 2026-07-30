@@ -36,7 +36,8 @@ PONTOS = [
     ('webfile_folder',  'Pasta "WebFile on ..." na arvore de pastas do dialogo de arquivo'),
     ('webfile_file',    'Posicao do PRIMEIRO ARQUIVO na area de conteudo (lado direito do dialogo)'),
     ('btn_fecha_aviso', 'Botao "Fecha Aviso" na tela de Aviso Bancario'),
-    ('btn_logoff',      'Botao de Logoff do Rodopar'),
+    ('btn_sair',        'Botao "Sair" no menu do Rodopar'),
+    ('btn_logoff',      'Opcao "Logoff" no menu que expande ao clicar Sair'),
 ]
 
 captured = {}

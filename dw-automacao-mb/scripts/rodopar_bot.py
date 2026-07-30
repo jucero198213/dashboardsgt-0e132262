@@ -65,6 +65,7 @@ COORDS_KEYS = [
     'webfile_folder',
     'webfile_file',
     'btn_fecha_aviso',
+    'btn_sair',
     'btn_logoff',
 ]
 
@@ -320,8 +321,10 @@ def fechar_aviso(coords):
 # ── Logoff ───────────────────────────────────────────────────
 
 def fazer_logoff(coords):
-    """Clica no botao de logoff do Rodopar e fecha o PWA."""
+    """Clica em Sair -> Logoff e fecha o PWA."""
     log("Fazendo logoff do Rodopar")
+    clicar(coords, 'btn_sair')
+    esperar(1, "menu Sair expandindo")
     clicar(coords, 'btn_logoff')
     esperar(3, "logoff processando")
     enter()
