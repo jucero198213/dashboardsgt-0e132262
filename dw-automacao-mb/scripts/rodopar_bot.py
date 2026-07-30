@@ -62,7 +62,10 @@ COORDS_KEYS = [
     'upload_dropzone',
     'upload_close',
     'btn_reticencias',
+    'webfile_folder',
+    'webfile_file',
     'btn_fecha_aviso',
+    'btn_logoff',
 ]
 
 
@@ -254,15 +257,15 @@ def preencher_aba1(data_aviso, valor, conta='79235-7', filial='1',
 
 # ── Importação da planilha ───────────────────────────────────
 
-def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
-    """Navega pra aba Itens, abre importação, seleciona arquivo e processa."""
-    log("Indo pra Aba 2 — Itens do Aviso")
+def importar_planilha(coords, nome_planilha):
+    """Navega pra aba Itens, abre importação, seleciona arquivo via WebFile e processa."""
+    log("Indo pra Aba 2 -- Itens do Aviso")
     tab()
     enter()
     tab(2)
     esperar(2, "aba Itens carregando")
 
-    log("Abrindo diálogo de importação (Alt+I ×3 ->Enter)")
+    log("Abrindo dialogo de importacao (Alt+I x3 -> Enter)")
     hotkey('alt', 'i')
     esperar(0.5)
     hotkey('alt', 'i')
@@ -270,17 +273,19 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
     hotkey('alt', 'i')
     esperar(0.5)
     enter()
-    esperar(3, "diálogo de importação abrindo")
+    esperar(3, "dialogo de importacao abrindo")
 
-    log("Selecionando arquivo via '...'")
+    log("Selecionando arquivo via '...' -> WebFile")
     clicar(coords, 'btn_reticencias')
     esperar(3, "seletor de arquivo abrindo")
 
-    caminho_webfile = f"{webfile_path}\\{nome_arquivo}"
-    log(f"Digitando caminho: {caminho_webfile}")
-    digitar(caminho_webfile, colar=False)
-    esperar(0.5)
-    enter()
+    log("Clicando na pasta WebFile")
+    clicar(coords, 'webfile_folder')
+    esperar(2, "pasta WebFile abrindo")
+
+    log("Duplo clique no arquivo (unico na pasta)")
+    x, y = coords['webfile_file']
+    pyautogui.doubleClick(x, y)
     esperar(2, "arquivo selecionado")
 
     log("Preenchendo nome da planilha")
@@ -290,13 +295,13 @@ def importar_planilha(coords, nome_arquivo, nome_planilha, webfile_path):
     digitar(nome_planilha, colar=False)
     tab(2)
     enter()
-    log(f"Processando importação — aguardando {IMPORT_ESPERA}s")
+    log(f"Processando importacao -- aguardando {IMPORT_ESPERA}s")
     esperar(IMPORT_ESPERA, "documentos importando (~2 min)")
 
-    log("Fechando diálogo (Tab ->Enter = Cancelar)")
+    log("Fechando dialogo (Tab -> Enter = Cancelar)")
     tab()
     enter()
-    esperar(2, "diálogo fechando")
+    esperar(2, "dialogo fechando")
 
 
 # ── Fecha Aviso + mensagens variáveis ────────────────────────
@@ -312,6 +317,21 @@ def fechar_aviso(coords):
         time.sleep(MSG_ENTER_INTERVALO)
 
 
+# ── Logoff ───────────────────────────────────────────────────
+
+def fazer_logoff(coords):
+    """Clica no botao de logoff do Rodopar e fecha o PWA."""
+    log("Fazendo logoff do Rodopar")
+    clicar(coords, 'btn_logoff')
+    esperar(3, "logoff processando")
+    enter()
+    esperar(2)
+
+    log("Fechando PWA (Alt+F4)")
+    hotkey('alt', 'F4')
+    esperar(2, "PWA fechando")
+
+
 # ── Main ─────────────────────────────────────────────────────
 
 def main(args):
@@ -322,17 +342,13 @@ def main(args):
     rdp_web_pass = env('RDP_WEB_PASS')
     rdp_app_user = env('RDP_APP_USER')
     rdp_app_pass = env('RDP_APP_PASS')
-    webfile_path = env('WEBFILE_PATH')
-
-    nome_arquivo = os.path.basename(args.planilha)
 
     print("=" * 60)
-    print("  Rodopar Bot — MB (Teclado)")
+    print("  Rodopar Bot -- MB (Teclado)")
     print(f"  Data Aviso : {args.data_aviso}")
     print(f"  Valor      : {args.valor}")
     print(f"  Planilha   : {args.planilha}")
     print(f"  Nome aba   : {args.nome_planilha}")
-    print(f"  WebFile    : {webfile_path}")
     print("=" * 60)
 
     # ── 1. Abrir PWA ─────────────────────────────────────────
@@ -404,13 +420,11 @@ def main(args):
     print("\n[10/10] Importando planilha...")
     importar_planilha(
         coords=coords,
-        nome_arquivo=nome_arquivo,
         nome_planilha=args.nome_planilha,
-        webfile_path=webfile_path,
     )
 
-    # ── 13. Verificar Situação ───────────────────────────────
-    print("\n[VERIFICAÇÃO] Checando campo Situação...")
+    # ── 13. Verificar Situacao ───────────────────────────────
+    print("\n[VERIFICACAO] Checando campo Situacao...")
     esperar(3, "aguardando tela atualizar")
     if detectar_inconsistente():
         sair_inconsistente()
@@ -419,7 +433,11 @@ def main(args):
     print("\n[FIM] Fechando aviso...")
     fechar_aviso(coords)
 
-    print("\nOK:Rodopar Bot concluído com sucesso!")
+    # ── 15. Logoff (limpa WebFile pra proxima baixa) ─────────
+    print("\n[LOGOFF] Encerrando sessao...")
+    fazer_logoff(coords)
+
+    print("\nOK: Rodopar Bot concluido com sucesso!")
     sys.exit(EXIT_OK)
 
 

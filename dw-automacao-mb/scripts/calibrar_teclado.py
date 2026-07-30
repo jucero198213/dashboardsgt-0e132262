@@ -31,9 +31,12 @@ PONTOS = [
     ('toolbar_toggle',  'Setinha ⌄ da barra TSplus (topo da tela)'),
     ('toolbar_upload',  'Ícone de upload (nuvem) na barra TSplus'),
     ('upload_dropzone', '"Click or drop files to upload" no File Transfer'),
-    ('upload_close',    'Botão X pra fechar o painel File Transfer'),
-    ('btn_reticencias', 'Botão "..." no diálogo de importação do Rodopar'),
-    ('btn_fecha_aviso', 'Botão "Fecha Aviso" na tela de Aviso Bancário'),
+    ('upload_close',    'Botao X pra fechar o painel File Transfer'),
+    ('btn_reticencias', 'Botao "..." no dialogo de importacao do Rodopar'),
+    ('webfile_folder',  'Pasta "WebFile on ..." na arvore de pastas do dialogo de arquivo'),
+    ('webfile_file',    'Posicao do PRIMEIRO ARQUIVO na area de conteudo (lado direito do dialogo)'),
+    ('btn_fecha_aviso', 'Botao "Fecha Aviso" na tela de Aviso Bancario'),
+    ('btn_logoff',      'Botao de Logoff do Rodopar'),
 ]
 
 captured = {}
