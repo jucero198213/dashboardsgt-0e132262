@@ -190,7 +190,7 @@ function processarPlatlog({ caminhoAnexo, valorBanco, desconto }) {
   if (!fs.existsSync(DOWNLOADS_DIR)) fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
   const ts = Date.now();
   const caminhoSaida = path.join(DOWNLOADS_DIR, `platlog_baixa_${ts}.xlsx`);
-  const outBuffer = gerarPlanilhaFinal(result.documents);
+  const outBuffer = gerarPlanilhaFinal(documents);
   fs.writeFileSync(caminhoSaida, outBuffer);
 
   log.info(`Processador Platlog: planilha de baixa gerada em ${caminhoSaida} (aba "${NOME_ABA_SAIDA}")`);
@@ -198,8 +198,8 @@ function processarPlatlog({ caminhoAnexo, valorBanco, desconto }) {
     ok: true,
     caminhoSaida,
     nomeAba: NOME_ABA_SAIDA,
-    totalDocumentos: result.totalDocumentos,
-    totalValorBruto: result.totalValorBruto,
+    totalDocumentos: documents.length,
+    totalValorBruto,
   };
 }
 
