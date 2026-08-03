@@ -4,37 +4,43 @@ const log = require('./logger');
 
 const DOWNLOADS_DIR = process.env.DOWNLOADS_DIR || path.join(__dirname, '..', 'downloads');
 
-// Extrai DATA_RECEBIMENTO, DATA_VENCIMENTO e VALOR_BANCO do corpo do e-mail
-// Formato esperado:
-//   DATA_RECEBIMENTO: 22/07/2026
-//   DATA_VENCIMENTO: 22/07/2026
-//   VALOR_BANCO: 125.432,50
-function parseCorpo(corpo) {
+// Campos comuns a todos os clientes
+const CAMPOS_BASE = ['DATA_RECEBIMENTO', 'VALOR_BANCO'];
+
+// Campos extras por processador
+const CAMPOS_EXTRAS = {
+  mb: ['DATA_VENCIMENTO'],
+  platlog: ['DESCONTO'],
+};
+
+function extrairCampo(corpo, nome) {
+  const escaped = nome.replace(/[_\s]/g, '[_\\s]+');
+  const m = corpo.match(new RegExp(`${escaped}\\s*:?\\s*([^\\r\\n]+)`, 'i'));
+  return m ? m[1].replace(/^:\s*/, '').trim() : null;
+}
+
+function parseCorpo(corpo, processador) {
   log.info(`Email-parser corpo (debug):\n---\n${corpo}\n---`);
 
-  const campo = (nome) => {
-    const escaped = nome.replace(/[_\s]/g, '[_\\s]+');
-    const m = corpo.match(new RegExp(`${escaped}\\s*:?\\s*([^\\r\\n]+)`, 'i'));
-    return m ? m[1].replace(/^:\s*/, '').trim() : null;
-  };
-
-  const dataRecebimento = campo('DATA_RECEBIMENTO') || campo('DATA RECEBIMENTO');
-  const dataVencimento  = campo('DATA_VENCIMENTO')  || campo('DATA VENCIMENTO');
-  const valorBanco      = campo('VALOR_BANCO')       || campo('VALOR BANCO');
-
+  const campos = [...CAMPOS_BASE, ...(CAMPOS_EXTRAS[processador] || [])];
+  const resultado = {};
   const faltando = [];
-  if (!dataRecebimento) faltando.push('DATA_RECEBIMENTO');
-  if (!dataVencimento)  faltando.push('DATA_VENCIMENTO');
-  if (!valorBanco)      faltando.push('VALOR_BANCO');
+
+  for (const campo of campos) {
+    const alternativa = campo.replace(/_/g, ' ');
+    const valor = extrairCampo(corpo, campo) || extrairCampo(corpo, alternativa);
+    const chave = campo.toLowerCase().replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    resultado[chave] = valor || null;
+    if (!valor) faltando.push(campo);
+  }
 
   if (faltando.length) {
     return { ok: false, erro: `Campo(s) faltando no corpo do e-mail: ${faltando.join(', ')}` };
   }
 
-  return { ok: true, dataRecebimento, dataVencimento, valorBanco };
+  return { ok: true, ...resultado };
 }
 
-// Salva o buffer do anexo em disco e retorna o caminho
 function salvarAnexo(buffer, nomeAnexo) {
   if (!fs.existsSync(DOWNLOADS_DIR)) fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
   const ts = Date.now();
@@ -45,23 +51,21 @@ function salvarAnexo(buffer, nomeAnexo) {
   return destino;
 }
 
-function parse(email) {
+function parse(email, processador) {
   if (!email.anexoBuffer) {
     return { ok: false, erro: 'E-mail sem anexo de planilha (.xlsx/.xls/.csv)' };
   }
 
-  const params = parseCorpo(email.corpo);
+  const params = parseCorpo(email.corpo, processador);
   if (!params.ok) return params;
 
   const caminhoAnexo = salvarAnexo(email.anexoBuffer, email.nomeAnexo || 'planilha.xlsx');
 
-  log.info(`Email-parser: DATA_RECEBIMENTO=${params.dataRecebimento} DATA_VENCIMENTO=${params.dataVencimento} VALOR_BANCO=${params.valorBanco}`);
+  log.info(`Email-parser [${processador}]: ${JSON.stringify(params)}`);
 
   return {
     ok: true,
-    dataRecebimento: params.dataRecebimento,
-    dataVencimento:  params.dataVencimento,
-    valorBanco:      params.valorBanco,
+    ...params,
     caminhoAnexo,
   };
 }

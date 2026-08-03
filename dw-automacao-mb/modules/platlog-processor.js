@@ -93,12 +93,25 @@ function processarPlanilha(fileBuffer) {
     });
   }
 
-  const totalValorBruto = documents.reduce((sum, d) => sum + d.valorPago, 0);
-  return {
-    documents,
-    totalValorBruto: Math.round(totalValorBruto * 100) / 100,
-    totalDocumentos: documents.length,
-  };
+  return documents;
+}
+
+function aplicarDescontos(baseDocuments, descontoTotal) {
+  const documents = baseDocuments.map((d) => ({ ...d, descontoAplicado: 0 }));
+  let restante = Math.round(descontoTotal * 100) / 100;
+
+  while (restante > 0) {
+    const elegiveis = documents.filter((d) => d.valorPago > 0).sort((a, b) => b.valorPago - a.valorPago);
+    if (!elegiveis.length) break;
+
+    const alvo = elegiveis[0];
+    const aplicado = Math.min(restante, alvo.valorPago);
+    alvo.descontoAplicado = Math.round((alvo.descontoAplicado + aplicado) * 100) / 100;
+    alvo.valorPago = Math.round((alvo.valorPago - aplicado) * 100) / 100;
+    restante = Math.round((restante - aplicado) * 100) / 100;
+  }
+
+  return documents.filter((d) => d.valorPago > 0);
 }
 
 function gerarPlanilhaFinal(documents) {
@@ -135,7 +148,7 @@ function parseValor(raw) {
   return Number.isFinite(num) ? num : null;
 }
 
-function processarPlatlog({ caminhoAnexo, valorBanco }) {
+function processarPlatlog({ caminhoAnexo, valorBanco, desconto }) {
   log.info('Processador Platlog: processando planilha...');
 
   const valorBancoNum = parseValor(valorBanco);
@@ -143,26 +156,35 @@ function processarPlatlog({ caminhoAnexo, valorBanco }) {
     return { ok: false, divergencia: false, detalhe: `Valor do banco inválido: "${valorBanco}"` };
   }
 
-  let result;
+  const descontoNum = parseValor(desconto) || 0;
+
+  let baseDocuments;
   try {
     const buffer = fs.readFileSync(caminhoAnexo);
-    result = processarPlanilha(buffer);
+    baseDocuments = processarPlanilha(buffer);
   } catch (err) {
     log.error(`Processador Platlog: erro ao processar — ${err.message}`);
     return { ok: false, divergencia: false, detalhe: err.message };
   }
 
-  log.info(`Processador Platlog: ${result.totalDocumentos} documento(s), total R$ ${result.totalValorBruto.toFixed(2)}`);
+  if (!baseDocuments.length) {
+    return { ok: false, divergencia: true, detalhe: 'Nenhum documento válido encontrado na planilha.' };
+  }
 
-  const diff = Math.abs(result.totalValorBruto - valorBancoNum);
+  const documents = descontoNum > 0 ? aplicarDescontos(baseDocuments, descontoNum) : baseDocuments;
+  const totalValorBruto = Math.round(documents.reduce((sum, d) => sum + d.valorPago, 0) * 100) / 100;
+
+  log.info(`Processador Platlog: ${documents.length} documento(s), total R$ ${totalValorBruto.toFixed(2)}${descontoNum > 0 ? `, desconto R$ ${descontoNum.toFixed(2)}` : ''}`);
+
+  const diff = Math.abs(totalValorBruto - valorBancoNum);
   if (diff >= 0.01) {
-    const detalhe = `Valor da planilha (R$ ${result.totalValorBruto.toFixed(2)}) diverge do valor do banco (R$ ${valorBancoNum.toFixed(2)}) — diferença de R$ ${diff.toFixed(2)}.`;
+    const detalhe = `Valor da planilha (R$ ${totalValorBruto.toFixed(2)}) diverge do valor do banco (R$ ${valorBancoNum.toFixed(2)}) — diferença de R$ ${diff.toFixed(2)}.`;
     log.warn(`Processador Platlog: DIVERGÊNCIA — ${detalhe}`);
     return { ok: false, divergencia: true, detalhe };
   }
 
-  if (result.totalDocumentos === 0) {
-    return { ok: false, divergencia: true, detalhe: 'Nenhum documento válido encontrado na planilha.' };
+  if (!documents.length) {
+    return { ok: false, divergencia: true, detalhe: 'Nenhum documento válido após aplicação dos descontos.' };
   }
 
   if (!fs.existsSync(DOWNLOADS_DIR)) fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });

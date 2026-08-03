@@ -27,10 +27,19 @@ function identificarCliente(assuntoEmail) {
 
 function processarPlanilha(cliente, dados) {
   if (cliente.processador === 'mb') {
-    return rfMB.processarMB(dados);
+    return rfMB.processarMB({
+      caminhoAnexo: dados.caminhoAnexo,
+      dataRecebimento: dados.dataRecebimento,
+      dataVencimento: dados.dataVencimento,
+      valorBanco: dados.valorBanco,
+    });
   }
   if (cliente.processador === 'platlog') {
-    return rfPlatlog.processarPlatlog(dados);
+    return rfPlatlog.processarPlatlog({
+      caminhoAnexo: dados.caminhoAnexo,
+      valorBanco: dados.valorBanco,
+      desconto: dados.desconto,
+    });
   }
   return { ok: false, divergencia: false, detalhe: `Processador desconhecido: ${cliente.processador}` };
 }
@@ -48,7 +57,7 @@ async function processarEmail(email) {
   log.info(`[${cliente.sigla}] Processando e-mail uid=${uid} — "${email.assunto}"`);
 
   // ── 1. Parse do e-mail ────────────────────────────────────
-  const dados = parser.parse(email);
+  const dados = parser.parse(email, cliente.processador);
   if (!dados.ok) {
     log.warn(`[${cliente.sigla}] Parse falhou: ${dados.erro}`);
     await notifier.emailInvalido(dados.erro, notifExtra);
@@ -57,11 +66,10 @@ async function processarEmail(email) {
   }
 
   await imap.marcarLido(uid);
-  const { dataRecebimento, dataVencimento, valorBanco, caminhoAnexo } = dados;
 
   // ── 2. Processamento da planilha ──────────────────────────
   log.info(`[${cliente.sigla}] Etapa: Processamento da planilha`);
-  const rfResult = processarPlanilha(cliente, { caminhoAnexo, dataRecebimento, dataVencimento, valorBanco });
+  const rfResult = processarPlanilha(cliente, dados);
 
   if (!rfResult.ok) {
     if (rfResult.divergencia) {
@@ -84,8 +92,8 @@ async function processarEmail(email) {
     await new Promise((resolve, reject) => {
       const args = [
         BOT_SCRIPT,
-        '--data-aviso',    dataRecebimento,
-        '--valor',         valorBanco,
+        '--data-aviso',    dados.dataRecebimento,
+        '--valor',         dados.valorBanco,
         '--planilha',      caminhoSaida,
         '--nome-planilha', nomeAba,
         '--complemento',   cliente.complemento,
@@ -109,7 +117,7 @@ async function processarEmail(email) {
     });
 
     log.info(`[${cliente.sigla}] Rodopar bot concluído com sucesso`);
-    await notifier.sucesso(valorBanco, dataRecebimento, { documentos: rfResult.totalDocumentos, ...notifExtra });
+    await notifier.sucesso(dados.valorBanco, dados.dataRecebimento, { documentos: rfResult.totalDocumentos, ...notifExtra });
 
   } catch (err) {
     if (err.exitCode === 2 || (err.stderr && err.stderr.includes('TROCA_SENHA'))) {
