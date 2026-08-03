@@ -17,7 +17,6 @@
     --yellow: #FFB020;
     --red: #FF4D6A;
     --blue: #4EA8FF;
-    --purple: #A78BFA;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
@@ -28,62 +27,64 @@
   .shell{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;gap:0}
 
   /* ── Topbar ── */
-  .topbar{display:flex;align-items:center;padding:8px 18px;border-bottom:1px solid var(--border);background:rgba(6,11,24,0.7);backdrop-filter:blur(20px);flex-shrink:0}
-  .topbar-brand{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .topbar{display:flex;align-items:center;padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(6,11,24,0.7);backdrop-filter:blur(20px);flex-shrink:0}
+  .topbar-brand{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
   .topbar-brand span{color:var(--dim);font-weight:400;font-size:12px}
   .topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-  .topbar-clock{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
-  .conn-pill{font-size:10px;padding:2px 8px;border-radius:10px;display:flex;align-items:center;gap:4px}
+  .topbar-clock{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+  .conn-pill{font-size:10px;padding:3px 10px;border-radius:10px;display:flex;align-items:center;gap:5px}
   .conn-pill.ok{background:rgba(0,230,138,0.1);color:var(--green)}
   .conn-pill.off{background:rgba(255,77,106,0.1);color:var(--red)}
   .conn-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  /* ── Hero (server + tunnel) ── */
-  .hero{display:flex;gap:12px;padding:12px 18px;flex-shrink:0}
+  /* ── Status section ── */
+  .status-section{padding:16px 20px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
 
-  .hero-server{flex:3;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:18px;backdrop-filter:blur(16px);position:relative;overflow:hidden;transition:border-color .3s}
-  .hero-server:hover{border-color:var(--border-hi)}
+  /* Server status */
+  .server-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(16px);overflow:hidden;position:relative;transition:border-color .3s}
+  .server-top{display:flex;align-items:center;gap:16px;padding:16px 20px}
 
-  .orb-wrap{position:relative;width:64px;height:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-  .orb{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;z-index:2;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.07),transparent 60%);transition:box-shadow .6s}
+  .orb-wrap{position:relative;width:72px;height:72px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .orb{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;z-index:2;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.07),transparent 60%);transition:box-shadow .6s}
   .orb-ring{position:absolute;inset:-6px;border-radius:50%;border:1px solid var(--green);opacity:0;animation:ringPulse 3s ease-out infinite}
   .orb-ring:nth-child(2){animation-delay:1.5s}
   @keyframes ringPulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.2);opacity:0}}
 
-  .state-on .orb{box-shadow:0 0 30px -4px var(--green),inset 0 0 16px -6px var(--green);animation:breathe 4s ease-in-out infinite}
-  .state-off .orb{box-shadow:0 0 30px -4px var(--red),inset 0 0 16px -6px var(--red);animation:shake 1.5s ease-in-out infinite}
+  .state-on .orb{box-shadow:0 0 35px -4px var(--green),inset 0 0 18px -6px var(--green);animation:breathe 4s ease-in-out infinite}
+  .state-off .orb{box-shadow:0 0 35px -4px var(--red),inset 0 0 18px -6px var(--red);animation:shake 1.5s ease-in-out infinite}
   .state-off .orb-ring{border-color:var(--red)}
-  .state-deg .orb{box-shadow:0 0 30px -4px var(--yellow),inset 0 0 16px -6px var(--yellow)}
+  .state-deg .orb{box-shadow:0 0 35px -4px var(--yellow),inset 0 0 18px -6px var(--yellow)}
   .state-deg .orb-ring{border-color:var(--yellow)}
   @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 
-  .hero-info{flex:1}
-  .hero-label{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:1px;transition:color .4s}
-  .state-on .hero-label{color:var(--green)}
-  .state-off .hero-label{color:var(--red)}
-  .state-deg .hero-label{color:var(--yellow)}
-  .hero-sub{font-size:11px;color:var(--dim);margin-top:2px}
+  .server-info{flex:1}
+  .server-label{font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;transition:color .4s}
+  .state-on .server-label{color:var(--green)}
+  .state-off .server-label{color:var(--red)}
+  .state-deg .server-label{color:var(--yellow)}
+  .server-sub{font-size:12px;color:var(--dim);margin-top:3px}
 
-  .hero-metrics{display:flex;gap:18px;margin-left:auto}
-  .hm{text-align:center}
-  .hm-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;transition:color .3s}
-  .hm-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
-  .hm-val.warn{color:var(--yellow)}.hm-val.bad{color:var(--red)}
+  .server-metrics{display:flex;gap:2px;padding:0 12px 12px}
+  .sm{flex:1;text-align:center;padding:8px 4px;background:rgba(255,255,255,.02);border-radius:8px}
+  .sm-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;transition:color .3s}
+  .sm-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  .sm-val.warn{color:var(--yellow)}.sm-val.bad{color:var(--red)}
 
-  .hero-hb{position:absolute;bottom:0;left:0;right:0;height:24px;opacity:.25}
-  .hero-hb canvas{width:100%;height:100%}
-
-  .hero-history{display:flex;gap:2px;align-items:flex-end;height:18px;margin-left:20px;min-width:120px}
+  .server-bottom{display:flex;align-items:center;gap:12px;padding:0 16px 10px}
+  .server-history{display:flex;gap:2px;align-items:flex-end;height:20px;flex:1}
   .hbar{flex:1;border-radius:1.5px;background:rgba(255,255,255,.04);transition:background .3s}
   .hbar.ok{background:var(--green);box-shadow:0 0 4px var(--green)}
   .hbar.deg{background:var(--yellow)}
   .hbar.down{background:var(--red)}
 
-  /* ── Service cards ── */
-  .hero-services{flex:2;display:flex;gap:12px}
-  .svc-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;backdrop-filter:blur(16px);display:flex;flex-direction:column;gap:8px;transition:border-color .3s}
+  .hb-wrap{height:24px;opacity:.3;flex:1}
+  .hb-wrap canvas{width:100%;height:100%}
+
+  /* ── Service cards row ── */
+  .svc-row{display:flex;gap:10px}
+  .svc-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;backdrop-filter:blur(16px);display:flex;flex-direction:column;gap:6px;transition:border-color .3s}
   .svc-card:hover{border-color:var(--border-hi)}
   .svc-head{display:flex;align-items:center;gap:8px}
   .svc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:all .3s}
@@ -94,15 +95,14 @@
   .svc-badge{margin-left:auto;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
   .svc-badge.ok{background:rgba(0,230,138,.12);color:var(--green)}
   .svc-badge.bad{background:rgba(255,77,106,.12);color:var(--red)}
-  .svc-badge.warn{background:rgba(255,176,32,.12);color:var(--yellow)}
   .svc-detail{font-size:10px;color:var(--dim);line-height:1.5}
   .svc-detail strong{color:var(--text);font-weight:600}
 
   /* ── Logs area ── */
-  .logs-area{flex:1;display:flex;flex-direction:column;overflow:hidden;margin:0 18px 10px;border-radius:14px;background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(16px)}
+  .logs-area{flex:1;display:flex;flex-direction:column;overflow:hidden;margin:0 20px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--border);backdrop-filter:blur(16px)}
 
-  .logs-tabs{display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 4px}
-  .log-tab{padding:8px 14px;font-size:11px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px}
+  .logs-tabs{display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 6px}
+  .log-tab{padding:10px 16px;font-size:11px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px}
   .log-tab:hover{color:var(--text)}
   .log-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
   .log-tab .tab-dot{width:5px;height:5px;border-radius:50%}
@@ -111,7 +111,7 @@
   .log-tab .tab-dot.wait{background:var(--dim)}
   .log-tab .tab-count{font-size:9px;color:var(--dim);font-weight:400;font-variant-numeric:tabular-nums}
 
-  .logs-toolbar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .logs-toolbar{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
   .logs-toolbar-dots{display:flex;gap:4px}
   .logs-toolbar-dots span{width:8px;height:8px;border-radius:50%}
   .logs-toolbar-dots span:nth-child(1){background:var(--red)}
@@ -119,18 +119,18 @@
   .logs-toolbar-dots span:nth-child(3){background:var(--green)}
   .logs-path{font-size:10px;color:var(--dim);font-family:Menlo,Consolas,monospace;margin-left:4px}
   .logs-controls{margin-left:auto;display:flex;align-items:center;gap:6px}
-  .filter-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--text);font-size:10px;font-family:Menlo,Consolas,monospace;outline:none;width:140px;transition:border-color .2s}
+  .filter-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;padding:4px 10px;color:var(--text);font-size:11px;font-family:Menlo,Consolas,monospace;outline:none;width:160px;transition:border-color .2s}
   .filter-box:focus{border-color:rgba(254,128,5,.4)}
   .filter-box::placeholder{color:var(--dim)}
-  .tbtn{background:none;border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--dim);font-size:10px;cursor:pointer;transition:all .2s}
+  .tbtn{background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;color:var(--dim);font-size:10px;cursor:pointer;transition:all .2s}
   .tbtn:hover{color:var(--text);border-color:var(--border-hi);background:rgba(255,255,255,.02)}
   .tbtn.active{color:var(--green);border-color:rgba(0,230,138,.3)}
   .log-count{font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums}
 
-  .logs-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 0;font-family:Menlo,Consolas,Monaco,"Courier New",monospace;font-size:11px;line-height:1.65}
-  .log-line{display:flex;padding:0 12px;transition:background .1s}
+  .logs-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 0;font-family:Menlo,Consolas,Monaco,"Courier New",monospace;font-size:12px;line-height:1.7}
+  .log-line{display:flex;padding:1px 14px;transition:background .1s}
   .log-line:hover{background:rgba(255,255,255,.02)}
-  .log-ts{width:65px;flex-shrink:0;color:var(--dim);opacity:.4;font-variant-numeric:tabular-nums;user-select:none}
+  .log-ts{width:70px;flex-shrink:0;color:var(--dim);opacity:.4;font-variant-numeric:tabular-nums;user-select:none}
   .log-text{flex:1;white-space:pre-wrap;word-break:break-all}
   .log-line.l-error .log-text{color:var(--red)}
   .log-line.l-warn .log-text{color:var(--yellow)}
@@ -139,11 +139,11 @@
   .log-text mark{background:rgba(254,128,5,.25);color:inherit;border-radius:2px;padding:0 1px}
   .log-line.flash{animation:logFlash .8s ease-out}
   @keyframes logFlash{0%{background:rgba(0,230,138,.06)}100%{background:transparent}}
-  .logs-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;flex-direction:column;gap:6px}
-  .logs-empty-icon{font-size:24px;opacity:.2}
+  .logs-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:13px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;flex-direction:column;gap:6px}
+  .logs-empty-icon{font-size:28px;opacity:.2}
 
   /* ── Footer ── */
-  .footer{display:flex;align-items:center;padding:5px 18px;font-size:10px;color:var(--dim);flex-shrink:0;border-top:1px solid var(--border);background:rgba(6,11,24,.5)}
+  .footer{display:flex;align-items:center;padding:6px 20px;font-size:10px;color:var(--dim);flex-shrink:0;border-top:1px solid var(--border);background:rgba(6,11,24,.5)}
   .footer span+span{margin-left:auto}
 </style>
 </head>
@@ -155,57 +155,59 @@
     <div class="topbar-brand">SGT Log <span>Centro de Controle</span></div>
     <div class="topbar-right">
       <div class="topbar-clock" id="clock"></div>
-      <div class="conn-pill ok" id="connPill"><div class="conn-dot"></div> <span id="connTxt">Conectado</span></div>
+      <div class="conn-pill ok" id="connPill"><div class="conn-dot"></div><span id="connTxt">Conectado</span></div>
     </div>
   </div>
 
-  <div class="hero">
-    <div class="hero-server state-on" id="heroServer">
-      <div class="orb-wrap">
-        <div class="orb-ring"></div>
-        <div class="orb-ring"></div>
-        <div class="orb" id="orb">...</div>
+  <div class="status-section">
+    <!-- Server -->
+    <div class="server-card state-on" id="serverCard">
+      <div class="server-top">
+        <div class="orb-wrap">
+          <div class="orb-ring"></div>
+          <div class="orb-ring"></div>
+          <div class="orb" id="orb">...</div>
+        </div>
+        <div class="server-info">
+          <div class="server-label" id="srvLabel">Verificando...</div>
+          <div class="server-sub" id="srvSub">Conectando ao servidor</div>
+        </div>
       </div>
-      <div class="hero-info">
-        <div class="hero-label" id="srvLabel">Verificando...</div>
-        <div class="hero-sub" id="srvSub">Conectando ao servidor</div>
+      <div class="server-metrics">
+        <div class="sm"><div class="sm-val" id="srvPing">--</div><div class="sm-lbl">Resposta</div></div>
+        <div class="sm"><div class="sm-val" id="srvUp">--</div><div class="sm-lbl">Uptime</div></div>
+        <div class="sm"><div class="sm-val" id="srvOut">0</div><div class="sm-lbl">Quedas</div></div>
+        <div class="sm"><div class="sm-val" id="srvSince">--</div><div class="sm-lbl" id="srvSinceLbl">No ar ha</div></div>
+        <div class="sm"><div class="sm-val" id="srvAvg">--</div><div class="sm-lbl">Media</div></div>
       </div>
-      <div class="hero-history" id="srvHistory"></div>
-      <div class="hero-metrics">
-        <div class="hm"><div class="hm-val" id="srvPing">--</div><div class="hm-lbl">Resposta</div></div>
-        <div class="hm"><div class="hm-val" id="srvUp">--</div><div class="hm-lbl">Uptime</div></div>
-        <div class="hm"><div class="hm-val" id="srvOut">0</div><div class="hm-lbl">Quedas</div></div>
-        <div class="hm"><div class="hm-val" id="srvSince">--</div><div class="hm-lbl" id="srvSinceLbl">No ar ha</div></div>
+      <div class="server-bottom">
+        <div class="server-history" id="srvHistory"></div>
+        <div class="hb-wrap"><canvas id="hbCanvas"></canvas></div>
       </div>
-      <div class="hero-hb"><canvas id="hbCanvas"></canvas></div>
     </div>
 
-    <div class="hero-services">
-      <div class="svc-card" id="cardTunnel">
+    <!-- Services -->
+    <div class="svc-row">
+      <div class="svc-card">
         <div class="svc-head">
           <div class="svc-dot wait" id="tunnelDot"></div>
           <div class="svc-name">Tunnel Cloudflare</div>
           <div class="svc-badge" id="tunnelBadge">--</div>
         </div>
-        <div class="svc-detail" id="tunnelDetail">
-          Dominio: <strong>dw.dwsgtlog.com</strong><br/>
-          Destino: localhost:3001
-        </div>
+        <div class="svc-detail" id="tunnelDetail">Dominio: <strong>dw.dwsgtlog.com</strong><br/>Destino: localhost:3001</div>
       </div>
-      <div class="svc-card" id="cardAuto">
+      <div class="svc-card">
         <div class="svc-head">
           <div class="svc-dot wait" id="autoDot"></div>
           <div class="svc-name">Automacao de Baixa</div>
           <div class="svc-badge" id="autoBadge">--</div>
         </div>
-        <div class="svc-detail" id="autoDetail">
-          Servico: <strong>AutomacaoMB</strong><br/>
-          IMAP poll a cada 2min
-        </div>
+        <div class="svc-detail" id="autoDetail">Servico: <strong>AutomacaoMB</strong><br/>IMAP poll a cada 2min</div>
       </div>
     </div>
   </div>
 
+  <!-- Logs -->
   <div class="logs-area">
     <div class="logs-tabs" id="logTabs">
       <div class="log-tab active" data-svc="automacao">
@@ -218,14 +220,11 @@
         Erros
         <span class="tab-count" id="tabCountErr"></span>
       </div>
-      <!-- Futuros clientes -->
-      <div class="log-tab" data-svc="cliente2" style="opacity:.35;cursor:default">
-        <div class="tab-dot wait"></div>
-        Cliente 2
+      <div class="log-tab" data-svc="cliente2" style="opacity:.3;cursor:default">
+        <div class="tab-dot wait"></div>Cliente 2
       </div>
-      <div class="log-tab" data-svc="cliente3" style="opacity:.35;cursor:default">
-        <div class="tab-dot wait"></div>
-        Cliente 3
+      <div class="log-tab" data-svc="cliente3" style="opacity:.3;cursor:default">
+        <div class="tab-dot wait"></div>Cliente 3
       </div>
     </div>
     <div class="logs-toolbar">
@@ -233,7 +232,7 @@
       <div class="logs-path" id="logPath">service-stdout.log</div>
       <div class="logs-controls">
         <input type="text" class="filter-box" id="filterBox" placeholder="Filtrar..." />
-        <button class="tbtn active" id="btnAuto" title="Auto-scroll">Auto</button>
+        <button class="tbtn active" id="btnAuto">Auto</button>
         <span class="log-count" id="logCount">--</span>
       </div>
     </div>
@@ -243,7 +242,7 @@
   </div>
 
   <div class="footer">
-    <span>Health a cada 15s · Logs a cada 5s</span>
+    <span>Health 15s · Logs 5s</span>
     <span id="footerUrl"></span>
   </div>
 
@@ -276,9 +275,9 @@ $('footerUrl').textContent = API;
   draw();
 })();
 
-// ── Heartbeat wave ──
+// ── Heartbeat ──
 (function(){
-  const c=$('hbCanvas'),ctx=c.getContext('2d');c.width=600;c.height=48;let off=0;
+  const c=$('hbCanvas'),ctx=c.getContext('2d');c.width=500;c.height=48;let off=0;
   function draw(){
     ctx.clearRect(0,0,c.width,c.height);
     const gc=serverUp===false?'#FF4D6A':serverUp?'#00E68A':'#5A6B85';
@@ -296,7 +295,7 @@ setInterval(tick,1000);tick();
 
 // ── Health ──
 let hist=[],checks=0,ups=0,sumMs=0,msN=0,outages=0,lastUp=null,stateSince=Date.now();
-const MAX_BARS=20;
+const MAX_BARS=30;
 
 function renderHist(){const el=$('srvHistory');el.innerHTML='';for(let i=0;i<MAX_BARS;i++){const b=document.createElement('div');const idx=hist.length-MAX_BARS+i;b.className='hbar'+(idx>=0?' '+hist[idx]:'');el.appendChild(b)}}
 
@@ -307,17 +306,18 @@ async function checkHealth(){
   try{
     const r=await fetch(API+'/health',{cache:'no-store',signal:ctrl.signal});clearTimeout(t);
     const ms=Math.round(performance.now()-t0);const d=await r.json();checks++;
-    if(r.ok&&d.db){up=true;ups++;sumMs+=ms;msN++;hist.push('ok');$('srvLabel').textContent='Online';$('srvSub').textContent='Servidor e banco respondendo';$('srvPing').textContent=ms+'ms';$('orb').textContent='✓';$('heroServer').className='hero-server state-on'}
-    else{hist.push('deg');$('srvLabel').textContent='Instavel';$('srvSub').textContent='Banco nao respondeu';$('srvPing').textContent=ms+'ms';$('orb').textContent='!';$('heroServer').className='hero-server state-deg'}
-  }catch{clearTimeout(t);checks++;hist.push('down');$('srvLabel').textContent='Offline';$('srvSub').textContent='Servidor nao respondeu';$('srvPing').textContent='--';$('orb').textContent='✕';$('heroServer').className='hero-server state-off'}
+    if(r.ok&&d.db){up=true;ups++;sumMs+=ms;msN++;hist.push('ok');$('srvLabel').textContent='Online';$('srvSub').textContent='Servidor e banco respondendo';$('srvPing').textContent=ms+'ms';$('orb').textContent='✓';$('serverCard').className='server-card state-on'}
+    else{hist.push('deg');$('srvLabel').textContent='Instavel';$('srvSub').textContent='Banco nao respondeu';$('srvPing').textContent=ms+'ms';$('orb').textContent='!';$('serverCard').className='server-card state-deg'}
+  }catch{clearTimeout(t);checks++;hist.push('down');$('srvLabel').textContent='Offline';$('srvSub').textContent='Servidor nao respondeu';$('srvPing').textContent='--';$('orb').textContent='✕';$('serverCard').className='server-card state-off'}
   if(lastUp===null){lastUp=up;stateSince=Date.now()}else if(up!==lastUp){if(lastUp&&!up)outages++;lastUp=up;stateSince=Date.now()}
   serverUp=up;
   if(hist.length>MAX_BARS)hist=hist.slice(-MAX_BARS);
   $('srvUp').textContent=checks?Math.round(ups/checks*100)+'%':'--';
-  $('srvOut').textContent=outages;$('srvOut').className='hm-val'+(outages>0?' bad':'');
+  $('srvAvg').textContent=msN?Math.round(sumMs/msN)+'ms':'--';
+  $('srvOut').textContent=outages;$('srvOut').className='sm-val'+(outages>0?' bad':'');
   $('srvSince').textContent=fmtDur(Date.now()-stateSince);
   $('srvSinceLbl').textContent=lastUp===false?'Fora ha':'No ar ha';
-  $('srvSince').className='hm-val'+(lastUp===false?' bad':'');
+  $('srvSince').className='sm-val'+(lastUp===false?' bad':'');
   setConn(true);renderHist();
   $('tunnelDot').className='svc-dot '+(up?'on':'off');
   $('tunnelBadge').className='svc-badge '+(up?'ok':'bad');
@@ -326,7 +326,6 @@ async function checkHealth(){
 }
 
 function setConn(ok){$('connPill').className='conn-pill '+(ok?'ok':'off');$('connTxt').textContent=ok?'Conectado':'Desconectado'}
-
 setInterval(()=>{if(lastUp!==null)$('srvSince').textContent=fmtDur(Date.now()-stateSince)},1000);
 
 // ── Logs ──
@@ -374,18 +373,15 @@ async function fetchLogs(){
   }catch{setConn(false)}
 }
 
-// ── Tab switching ──
 $('logTabs').addEventListener('click',e=>{
   const tab=e.target.closest('.log-tab');if(!tab)return;
-  const svc=tab.dataset.svc;
-  if(svc==='cliente2'||svc==='cliente3')return;
+  const svc=tab.dataset.svc;if(svc==='cliente2'||svc==='cliente3')return;
   activeSvc=svc;
   document.querySelectorAll('.log-tab').forEach(t=>t.classList.remove('active'));
   tab.classList.add('active');
   $('logPath').textContent=svc==='automacao'?'service-stdout.log':'service-stderr.log';
   renderLogs();
 });
-
 $('filterBox').addEventListener('input',e=>{filter=e.target.value;renderLogs()});
 $('btnAuto').addEventListener('click',()=>{autoScroll=!autoScroll;$('btnAuto').className='tbtn'+(autoScroll?' active':'');if(autoScroll)$('logsBody').scrollTop=$('logsBody').scrollHeight});
 $('logsBody').addEventListener('scroll',()=>{const el=$('logsBody');if(el.scrollTop+el.clientHeight<el.scrollHeight-30&&autoScroll){autoScroll=false;$('btnAuto').className='tbtn'}});
