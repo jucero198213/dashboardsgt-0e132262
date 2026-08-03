@@ -31,7 +31,7 @@ async function enviarEmail(assunto, corpo) {
   }
   try {
     await getTransporter().sendMail({
-      from: `"Automação MB" <${EMAIL_FROM}>`,
+      from: `"Automação de Baixa" <${EMAIL_FROM}>`,
       to: DESTINATARIOS.join(', '),
       subject: assunto,
       text: corpo,
@@ -76,10 +76,10 @@ async function enviarWhatsApp(mensagem) {
 // ── Notificações de alto nível (interface usada pelo index.js) ─────────
 
 async function sucesso(valor, dataRecebimento, extra = {}) {
-  const { documentos } = extra;
-  const assunto = `✅ Baixa MB concluída — R$ ${valor} (${dataRecebimento})`;
+  const { documentos, cliente = 'MB', nomeCliente = 'Martin Brower' } = extra;
+  const assunto = `✅ Baixa ${cliente} concluída — R$ ${valor} (${dataRecebimento})`;
   const corpo = [
-    'A baixa do cliente Martin Brower foi processada e importada no Rodopar com sucesso.',
+    `A baixa do cliente ${nomeCliente} foi processada e importada no Rodopar com sucesso.`,
     '',
     `• Data de recebimento: ${dataRecebimento}`,
     `• Valor: R$ ${valor}`,
@@ -87,28 +87,30 @@ async function sucesso(valor, dataRecebimento, extra = {}) {
     '',
     'Nenhuma ação necessária — processo 100% automático.',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].filter((l) => l !== null).join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-async function divergencia(detalhe) {
-  const assunto = '⚠️ Baixa MB — Divergência (fazer manual)';
+async function divergencia(detalhe, extra = {}) {
+  const { cliente = 'MB', nomeCliente = 'Martin Brower' } = extra;
+  const assunto = `⚠️ Baixa ${cliente} — Divergência (fazer manual)`;
   const corpo = [
-    'A baixa do Martin Brower foi PARADA por divergência. O processo NÃO foi importado no Rodopar.',
+    `A baixa do ${nomeCliente} foi PARADA por divergência. O processo NÃO foi importado no Rodopar.`,
     '',
     'Detalhe da divergência:',
     detalhe,
     '',
     '👉 A baixa precisa ser feita MANUALMENTE pela equipe responsável.',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-async function erro(etapa, detalhe) {
-  const assunto = `❌ Baixa MB — Erro na etapa: ${etapa}`;
+async function erro(etapa, detalhe, extra = {}) {
+  const { cliente = 'MB' } = extra;
+  const assunto = `❌ Baixa ${cliente} — Erro na etapa: ${etapa}`;
   const corpo = [
     `A automação encontrou um erro na etapa "${etapa}" e não concluiu a baixa.`,
     '',
@@ -117,43 +119,46 @@ async function erro(etapa, detalhe) {
     '',
     '👉 Verifique a máquina do DW / os logs, e faça a baixa manualmente se necessário.',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-async function emailInvalido(motivo) {
-  const assunto = '📧 Baixa MB — E-mail inválido';
+async function emailInvalido(motivo, extra = {}) {
+  const { cliente = 'MB' } = extra;
+  const assunto = `📧 Baixa ${cliente} — E-mail inválido`;
   const corpo = [
-    'Chegou um e-mail "BAIXA MB", mas ele está incompleto e não pôde ser processado.',
+    `Chegou um e-mail de baixa ${cliente}, mas ele está incompleto e não pôde ser processado.`,
     '',
     `Motivo: ${motivo}`,
     '',
     'Reenvie o e-mail com o formato correto (anexo + DATA_RECEBIMENTO, DATA_VENCIMENTO e VALOR_BANCO no corpo).',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-async function trocaSenha(tela) {
-  const assunto = '🔐 Baixa MB — Troca de senha obrigatória';
+async function trocaSenha(tela, extra = {}) {
+  const { cliente = 'MB' } = extra;
+  const assunto = `🔐 Baixa ${cliente} — Troca de senha obrigatória`;
   const corpo = [
     `O Rodopar exigiu troca de senha na tela de login (${tela}).`,
-    'A automação foi PARADA. A baixa de hoje precisa ser feita MANUALMENTE.',
+    `A automação ${cliente} foi PARADA. A baixa de hoje precisa ser feita MANUALMENTE.`,
     '',
     'Para restaurar a automação:',
     `  1. Acesse o Rodopar e troque a senha (tela: ${tela})`,
     `  2. Atualize o .env na máquina DW (variável: ${tela === 'web' ? 'RDP_WEB_PASS' : 'RDP_APP_PASS'})`,
     '  3. A automação vai funcionar normalmente no próximo e-mail',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }
 
-async function inconsistencia() {
-  const assunto = '⚠️ Baixa MB — Situação Inconsistente no Rodopar';
+async function inconsistencia(extra = {}) {
+  const { cliente = 'MB' } = extra;
+  const assunto = `⚠️ Baixa ${cliente} — Situação Inconsistente no Rodopar`;
   const corpo = [
     'A importação da planilha no Rodopar foi concluída, mas o campo Situação ficou como "Inconsistente".',
     '',
@@ -161,7 +166,7 @@ async function inconsistencia() {
     '',
     '👉 Verifique o Aviso Bancário no Rodopar MANUALMENTE — o aviso NÃO foi fechado.',
     '',
-    '— Automação MB',
+    `— Automação ${cliente}`,
   ].join('\n');
   await Promise.all([enviarEmail(assunto, corpo), enviarWhatsApp(assunto)]);
 }

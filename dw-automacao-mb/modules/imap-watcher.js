@@ -36,48 +36,52 @@ const IMAP_CONFIG = {
   },
 };
 
-// Retorna array de { uid, assunto, corpo, anexoBuffer, nomeAnexo } para emails BAIXA MB não lidos
-async function buscarEmailsMB() {
+// Busca e-mails não lidos para uma lista de assuntos.
+// Retorna array de { uid, assunto, corpo, anexoBuffer, nomeAnexo } — no máximo 1 por assunto (o mais recente).
+async function buscarEmails(assuntos) {
   let connection;
   try {
     connection = await imapSimple.connect(IMAP_CONFIG);
     await connection.openBox('INBOX');
 
-    const results = await connection.search(
-      ['UNSEEN', ['SUBJECT', 'BAIXA MB']],
-      { bodies: [''], markSeen: false }
-    );
+    const todos = [];
+    for (const assunto of assuntos) {
+      const results = await connection.search(
+        ['UNSEEN', ['SUBJECT', assunto]],
+        { bodies: [''], markSeen: false }
+      );
+      if (!results.length) continue;
 
-    if (!results.length) return [];
+      log.info(`IMAP: ${results.length} e-mail(s) "${assunto}" encontrado(s)`);
 
-    log.info(`IMAP: ${results.length} e-mail(s) BAIXA MB encontrado(s)`);
+      results.sort((a, b) => b.attributes.uid - a.attributes.uid);
+      const maisRecente = results[0];
 
-    // Pega só o mais recente (maior UID); marca os antigos como lidos pra não reprocessar
-    results.sort((a, b) => b.attributes.uid - a.attributes.uid);
-    const maisRecente = results[0];
-
-    if (results.length > 1) {
-      log.info(`IMAP: descartando ${results.length - 1} e-mail(s) antigo(s), processando apenas uid=${maisRecente.attributes.uid}`);
-      for (const old of results.slice(1)) {
-        await connection.addFlags(old.attributes.uid, ['\\Seen']);
+      if (results.length > 1) {
+        log.info(`IMAP: descartando ${results.length - 1} e-mail(s) antigo(s) de "${assunto}", processando apenas uid=${maisRecente.attributes.uid}`);
+        for (const old of results.slice(1)) {
+          await connection.addFlags(old.attributes.uid, ['\\Seen']);
+        }
       }
+
+      const rawAll = maisRecente.parts.find(p => p.which === '');
+      if (!rawAll) continue;
+
+      const parsed = await simpleParser(rawAll.body);
+      const anexo = (parsed.attachments || []).find(a =>
+        /\.(xlsx|xls|csv)$/i.test(a.filename)
+      );
+
+      todos.push({
+        uid: maisRecente.attributes.uid,
+        assunto: parsed.subject || '',
+        corpo: extrairCorpo(parsed),
+        anexoBuffer: anexo ? anexo.content : null,
+        nomeAnexo: anexo ? anexo.filename : null,
+      });
     }
 
-    const rawAll = maisRecente.parts.find(p => p.which === '');
-    if (!rawAll) return [];
-
-    const parsed = await simpleParser(rawAll.body);
-    const anexo = (parsed.attachments || []).find(a =>
-      /\.(xlsx|xls|csv)$/i.test(a.filename)
-    );
-
-    return [{
-      uid: maisRecente.attributes.uid,
-      assunto: parsed.subject || '',
-      corpo: extrairCorpo(parsed),
-      anexoBuffer: anexo ? anexo.content : null,
-      nomeAnexo: anexo ? anexo.filename : null,
-    }];
+    return todos;
   } catch (err) {
     log.error(`IMAP: erro ao buscar e-mails — ${err.message}`);
     return [];
@@ -104,4 +108,4 @@ async function marcarLido(uid) {
   }
 }
 
-module.exports = { buscarEmailsMB, marcarLido };
+module.exports = { buscarEmails, marcarLido };

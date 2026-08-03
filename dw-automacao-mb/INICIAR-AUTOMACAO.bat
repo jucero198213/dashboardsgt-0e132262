@@ -1,9 +1,9 @@
 @echo off
-title Automacao MB - SGT Log
+title Automacao de Baixa - SGT Log
 color 0A
 echo.
 echo  ================================================
-echo   AUTOMACAO DE BAIXA - MARTIN BROWER
+echo   AUTOMACAO DE BAIXA - MB, PLATLOG
 echo  ================================================
 echo.
 

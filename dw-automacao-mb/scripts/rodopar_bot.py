@@ -347,11 +347,16 @@ def main(args):
     rdp_app_pass = env('RDP_APP_PASS')
 
     print("=" * 60)
-    print("  Rodopar Bot -- MB (Teclado)")
-    print(f"  Data Aviso : {args.data_aviso}")
-    print(f"  Valor      : {args.valor}")
-    print(f"  Planilha   : {args.planilha}")
-    print(f"  Nome aba   : {args.nome_planilha}")
+    print(f"  Rodopar Bot -- {args.complemento} (Teclado)")
+    print(f"  Data Aviso  : {args.data_aviso}")
+    print(f"  Valor       : {args.valor}")
+    print(f"  Planilha    : {args.planilha}")
+    print(f"  Nome aba    : {args.nome_planilha}")
+    print(f"  Complemento : {args.complemento}")
+    print(f"  Conta       : {args.conta}")
+    print(f"  Filial      : {args.filial}")
+    print(f"  Tipo Doc    : {args.tipo_doc}")
+    print(f"  Hist Banc   : {args.hist_bancario}")
     print("=" * 60)
 
     # ── 1. Abrir PWA ─────────────────────────────────────────
@@ -417,6 +422,11 @@ def main(args):
     preencher_aba1(
         data_aviso=args.data_aviso,
         valor=args.valor,
+        conta=args.conta,
+        filial=args.filial,
+        tipo_doc=args.tipo_doc,
+        hist_bancario=args.hist_bancario,
+        complemento=args.complemento,
     )
 
     # ── 12. Importar planilha (Aba 2) ────────────────────────
@@ -445,11 +455,16 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Rodopar Bot — Baixa MB por teclado')
+    parser = argparse.ArgumentParser(description='Rodopar Bot — Baixa automática por teclado')
     parser.add_argument('--data-aviso', required=True, help='Data do aviso (DD/MM/AAAA)')
     parser.add_argument('--valor', required=True, help='Valor do banco (ex: 2576896,75)')
     parser.add_argument('--planilha', required=True, help='Caminho LOCAL da planilha .xlsx')
     parser.add_argument('--nome-planilha', default='DOCUMENTO', help='Nome da aba na planilha')
+    parser.add_argument('--complemento', default='Baixa MB', help='Texto do campo Complemento')
+    parser.add_argument('--conta', default='79235-7', help='Conta Corrente')
+    parser.add_argument('--filial', default='1', help='Filial')
+    parser.add_argument('--tipo-doc', default='AVI', help='Tipo de Doc. Bancário')
+    parser.add_argument('--hist-bancario', default='1', help='Histórico Bancário')
     args = parser.parse_args()
     try:
         main(args)

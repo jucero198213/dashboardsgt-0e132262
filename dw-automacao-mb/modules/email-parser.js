@@ -38,7 +38,7 @@ function parseCorpo(corpo) {
 function salvarAnexo(buffer, nomeAnexo) {
   if (!fs.existsSync(DOWNLOADS_DIR)) fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
   const ts = Date.now();
-  const nome = `mb_entrada_${ts}_${nomeAnexo}`;
+  const nome = `entrada_${ts}_${nomeAnexo}`;
   const destino = path.join(DOWNLOADS_DIR, nome);
   fs.writeFileSync(destino, buffer);
   log.info(`Email-parser: anexo salvo em ${destino}`);

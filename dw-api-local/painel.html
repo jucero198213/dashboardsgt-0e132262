@@ -220,8 +220,8 @@
         Erros
         <span class="tab-count" id="tabCountErr"></span>
       </div>
-      <div class="log-tab" data-svc="cliente2" style="opacity:.3;cursor:default">
-        <div class="tab-dot wait"></div>Cliente 2
+      <div class="log-tab" data-svc="platlog">
+        <div class="tab-dot wait"></div>Platlog
       </div>
       <div class="log-tab" data-svc="cliente3" style="opacity:.3;cursor:default">
         <div class="tab-dot wait"></div>Cliente 3
@@ -336,9 +336,12 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 function hi(t,q){if(!q)return esc(t);const e=esc(t),r=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return e.replace(new RegExp('('+r+')','gi'),'<mark>$1</mark>')}
 
 function renderLogs(){
-  const el=$('logsBody');const data=cache[activeSvc];
+  const el=$('logsBody');
+  const src=activeSvc==='platlog'?'automacao':activeSvc;
+  const data=cache[src];
   if(!data||!data.lines||!data.lines.length){el.innerHTML='<div class="logs-empty"><div class="logs-empty-icon">_</div>'+(data&&data.error?data.error:'Sem logs')+'</div>';return}
   let lines=data.lines;
+  if(activeSvc==='platlog'){lines=lines.filter(l=>l.toUpperCase().includes('[PLATLOG]'))}
   if(filter){const fl=filter.toLowerCase();lines=lines.filter(l=>l.toLowerCase().includes(fl))}
   const atBot=el.scrollTop+el.clientHeight>=el.scrollHeight-30;
   const frag=document.createDocumentFragment();
@@ -363,23 +366,26 @@ async function fetchLogs(){
     $('autoDot').className='svc-dot '+(mb&&mb.ok?'on':'off');
     $('autoBadge').className='svc-badge '+(mb&&mb.ok?'ok':'bad');
     $('autoBadge').textContent=mb&&mb.ok?'Rodando':'Sem log';
-    $('autoDetail').innerHTML='Servico: <strong>AutomacaoMB</strong><br/>IMAP poll a cada 2min'+(mb&&mb.ok?' · <strong>'+mb.total+' linhas</strong>':'');
+    $('autoDetail').innerHTML='Servico: <strong>Automação de Baixa</strong><br/>Clientes: MB, Platlog · IMAP poll a cada 2min'+(mb&&mb.ok?' · <strong>'+mb.total+' linhas</strong>':'');
     $('tabDotMB').className='tab-dot '+(mb&&mb.ok?'on':'off');
     $('tabCountMB').textContent=mb&&mb.ok?mb.total:'';
     const err=cache['automacao-err'];
     $('tabDotErr').className='tab-dot '+(err&&err.ok&&err.lines.length?'off':'on');
     $('tabCountErr').textContent=err&&err.ok&&err.lines.length?err.lines.length:'';
+    const platlogLines=mb&&mb.ok&&mb.lines?mb.lines.filter(l=>l.toUpperCase().includes('[PLATLOG]')):[];
+    const platDot=document.querySelector('[data-svc="platlog"] .tab-dot');
+    if(platDot)platDot.className='tab-dot '+(platlogLines.length?'on':'wait');
     renderLogs();
   }catch{setConn(false)}
 }
 
 $('logTabs').addEventListener('click',e=>{
   const tab=e.target.closest('.log-tab');if(!tab)return;
-  const svc=tab.dataset.svc;if(svc==='cliente2'||svc==='cliente3')return;
+  const svc=tab.dataset.svc;if(svc==='cliente3')return;
   activeSvc=svc;
   document.querySelectorAll('.log-tab').forEach(t=>t.classList.remove('active'));
   tab.classList.add('active');
-  $('logPath').textContent=svc==='automacao'?'service-stdout.log':'service-stderr.log';
+  $('logPath').textContent=svc==='automacao-err'?'service-stderr.log':'service-stdout.log';
   renderLogs();
 });
 $('filterBox').addEventListener('input',e=>{filter=e.target.value;renderLogs()});
