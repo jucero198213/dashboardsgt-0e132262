@@ -12,6 +12,7 @@ function normalizeHeader(value) {
     .replace(/[̀-ͯ]/g, '')
     .replace(/\s+/g, '')
     .replace(/\./g, '')
+    .replace(/\(.*?\)/g, '')
     .trim()
     .toLowerCase();
 }
@@ -52,8 +53,8 @@ function findHeaderRow(rows) {
       const normalized = normalizeHeader(cell);
       if (normalized) headerMap[normalized] = colIndex;
     });
-    const hasDoc = headerMap['nfiscal'] !== undefined || headerMap['numero'] !== undefined;
-    const hasValor = headerMap['vltotal'] !== undefined || headerMap['valordopagamento'] !== undefined;
+    const hasDoc = headerMap['nfiscal'] !== undefined || headerMap['numero'] !== undefined || headerMap['nºcte'] !== undefined || headerMap['ncte'] !== undefined;
+    const hasValor = headerMap['vltotal'] !== undefined || headerMap['valordopagamento'] !== undefined || headerMap['valordopagamentor$'] !== undefined;
     if (hasDoc && hasValor) return { headerRowIndex: rowIndex, headerMap };
   }
   throw new Error('Não foi possível localizar as colunas N.Fiscal/Número e Vl.Total/Valor do pagamento na planilha.');
@@ -75,9 +76,10 @@ function processarPlanilha(fileBuffer) {
     const row = rows[i] || [];
     const nfiscal = toDocumentString(row[headerMap['nfiscal']]);
     const numero = toDocumentString(row[headerMap['numero']]);
-    const numeroDocumento = nfiscal || numero;
+    const ncte = toDocumentString(row[headerMap['nºcte']] ?? row[headerMap['ncte']]);
+    const numeroDocumento = nfiscal || numero || ncte;
     const vlTotal = toNumber(row[headerMap['vltotal']]);
-    const valorPagamento = toNumber(row[headerMap['valordopagamento']]);
+    const valorPagamento = toNumber(row[headerMap['valordopagamento']] ?? row[headerMap['valordopagamentor$']]);
     const valor = vlTotal !== null ? vlTotal : valorPagamento;
 
     if (!numeroDocumento || valor === null) continue;
