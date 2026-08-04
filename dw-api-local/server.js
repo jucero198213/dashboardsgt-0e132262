@@ -917,6 +917,7 @@ WHERE H.TRANSF='N' AND B.ORIGEM='LB' AND B.CODFIL=F.CODFIL AND B.SITUAC='O' AND 
       const query = `
         SELECT
           SUM(T.TOTFRE)                                                  AS FRETE_TOTAL,
+          COUNT(*)                                                       AS QTD_CTES,
           ISNULL(CGR.DESCRI, 'Sem grupo')                                AS DESCRI,
           SUM(T.TOTFRE) * 100.0
             / NULLIF(SUM(SUM(T.TOTFRE)) OVER (), 0)                     AS PERCENTUAL

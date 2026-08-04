@@ -1117,7 +1117,7 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
       const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
       const ranked = rows
         .map((r) => ({
-          grupo: r.GRUPO_CLIENTE ?? r.NOME_CLIENTE ?? r.CLIENTE ?? "—",
+          grupo: r.DESCRI ?? "Sem grupo",
           faturamento: Number(r.FRETE_TOTAL ?? 0),
           ctes: Number(r.QTD_CTES ?? r.QTDE ?? 0),
         }))
