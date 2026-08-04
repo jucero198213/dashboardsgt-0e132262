@@ -391,6 +391,22 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "get_abastecimento_desvios",
+      description:
+        "Detecta veículos com consumo de combustível FORA DO NORMAL (km/L muito abaixo da média da frota ou da média do fabricante). Use para 'tem veículo com consumo estranho?', 'algum caminhão gastando demais?', 'quais placas estão fora da média de km/L?', 'eficiência da frota'. Complementa get_abastecimento_consumo.",
+      parameters: {
+        type: "object",
+        properties: {
+          dataInicio: { type: "string", description: "YYYY-MM-DD (opcional, default últimos 30 dias)" },
+          dataFim: { type: "string", description: "YYYY-MM-DD (opcional, default hoje)" },
+          limiar: { type: "number", description: "Percentual mínimo de desvio para considerar anômalo (default 30 = 30% abaixo da média). Quanto maior, menos veículos aparecem." },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_titulos_lista",
       description:
         "LISTA títulos financeiros individuais (contas a pagar/receber), com parceiro, documento, vencimento, valor e situação. Use para 'quais títulos a pagar do fornecedor X', 'lista os títulos vencidos', 'o que tenho a receber do cliente Y'. Complementa get_titulos_financeiros (que só soma).",
@@ -1497,6 +1513,69 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         resultado: lista,
       });
     }
+    if (name === "get_abastecimento_desvios") {
+      const dataFim = (args.dataFim as string) || today();
+      const dataInicio = (args.dataInicio as string) || daysAgo(30);
+      const limiarPct = Number(args.limiar ?? 30) / 100;
+
+      const data = await dwCall("/dw-abastecimento", { dataInicio, dataFim });
+      const rows = ((data as { data?: unknown[] }).data ?? []) as Array<Record<string, unknown>>;
+
+      const porVeic = new Map<string, { veiculo: string; frota: string; medias: number[]; medfab: number; litros: number; gasto: number; abastecimentos: number }>();
+      for (const r of rows) {
+        const v = String(r.veiculo ?? "");
+        if (!v) continue;
+        const media = Number(r.media ?? 0);
+        const cur = porVeic.get(v) ?? { veiculo: v, frota: String(r.frota ?? "—"), medias: [], medfab: Number(r.medfab ?? 0), litros: 0, gasto: 0, abastecimentos: 0 };
+        if (media > 0) cur.medias.push(media);
+        cur.litros += Number(r.quanti ?? 0);
+        cur.gasto += Number(r.vlrtot ?? 0);
+        cur.abastecimentos++;
+        if (Number(r.medfab ?? 0) > 0) cur.medfab = Number(r.medfab);
+        porVeic.set(v, cur);
+      }
+
+      const veiculos = [...porVeic.values()]
+        .filter((v) => v.medias.length >= 3)
+        .map((v) => ({
+          ...v,
+          media_km_l: v.medias.reduce((s, x) => s + x, 0) / v.medias.length,
+        }));
+
+      if (!veiculos.length) {
+        return JSON.stringify({ periodo: { dataInicio, dataFim }, mensagem: "Sem dados suficientes de km/L no período (mínimo 3 abastecimentos por veículo).", anomalos: [] });
+      }
+
+      const todasMedias = veiculos.map((v) => v.media_km_l);
+      const mediaFrota = todasMedias.reduce((s, x) => s + x, 0) / todasMedias.length;
+
+      const anomalos = veiculos
+        .filter((v) => v.media_km_l < mediaFrota * (1 - limiarPct))
+        .sort((a, b) => a.media_km_l - b.media_km_l)
+        .slice(0, 15)
+        .map((v) => ({
+          veiculo: v.veiculo,
+          frota: v.frota,
+          media_km_l: Number(v.media_km_l.toFixed(2)),
+          media_frota: Number(mediaFrota.toFixed(2)),
+          desvio_pct: Number((((v.media_km_l - mediaFrota) / mediaFrota) * 100).toFixed(1)),
+          media_fabricante: v.medfab > 0 ? v.medfab : null,
+          desvio_fabricante_pct: v.medfab > 0 ? Number((((v.media_km_l - v.medfab) / v.medfab) * 100).toFixed(1)) : null,
+          litros_periodo: Number(v.litros.toFixed(0)),
+          gasto_periodo: Number(v.gasto.toFixed(2)),
+          qtd_abastecimentos: v.abastecimentos,
+        }));
+
+      return JSON.stringify({
+        periodo: { dataInicio, dataFim },
+        media_frota_km_l: Number(mediaFrota.toFixed(2)),
+        total_veiculos_analisados: veiculos.length,
+        limiar_desvio: `${(limiarPct * 100).toFixed(0)}% abaixo da média`,
+        qtd_anomalos: anomalos.length,
+        anomalos,
+        _dica: "desvio_pct negativo = abaixo da média (pior). desvio_fabricante_pct compara com a média do fabricante (cadastrada no veículo). Veículos com poucos abastecimentos ou média de fábrica zerada podem não ter dados confiáveis — ressalve. Sugira investigação mecânica nos casos mais graves.",
+      });
+    }
     if (name === "get_titulos_lista") {
       const status = args.status ? String(args.status).toLowerCase() : null;
       const dataFim = (args.dataFim as string) || today();
@@ -1891,7 +1970,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
 - Compras → get_compras_resumo (visão geral). Para detalhe por grupo/subgrupo/fornecedor/centro de custo/produto ou filtrar um item → get_compras_analise.
 - RH/Motoristas → get_rh_motoristas (contagem/headcount, CNH vencendo). Para LISTAR motoristas (nomes, função, CNH, admissão/demissão, filial) ou filtrar ativos/CNH vencendo → get_rh_motoristas_lista.
-- Abastecimento → get_abastecimento_consumo (km/L por veículo). Para gasto por veículo/motorista/posto/combustível/frota → get_abastecimento_analise.
+- Abastecimento → get_abastecimento_consumo (km/L por veículo). Para gasto por veículo/motorista/posto/combustível/frota → get_abastecimento_analise. Para veículos com consumo fora do normal (km/L abaixo da média da frota ou do fabricante) → get_abastecimento_desvios.
 - Bancos → get_bancos_saldos (saldos e movimentação).
 - Financiamentos de veículos → get_financiamento_frota.
 
