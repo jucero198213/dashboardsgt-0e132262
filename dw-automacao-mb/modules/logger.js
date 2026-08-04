@@ -11,7 +11,7 @@ function logFile() {
 }
 
 function fmt(level, msg) {
-  const ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  const ts = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace('T', ' ');
   return `[${ts}] [${level}] ${msg}`;
 }
 
