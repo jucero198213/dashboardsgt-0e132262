@@ -366,7 +366,15 @@ def main(args):
 
     # ── 2. Login Web (teclado) ───────────────────────────────
     print("\n[2/10] Login web...")
-    pyautogui.click(400, 400)
+    try:
+        wins = pyautogui.getWindowsWithTitle('webcloud2.datapardc.com')
+        if wins:
+            wins[0].activate()
+            esperar(1, "ativando janela do PWA")
+    except Exception:
+        pass
+    focus_pos = coords.get('pwa_focus', [400, 400])
+    pyautogui.click(focus_pos[0], focus_pos[1])
     esperar(1, "garantindo foco na página")
     tab()
     digitar(rdp_web_user)

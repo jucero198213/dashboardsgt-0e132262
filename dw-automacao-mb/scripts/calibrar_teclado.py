@@ -27,6 +27,7 @@ except ImportError:
 COORDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'coordenadas.json')
 
 PONTOS = [
+    ('pwa_focus',       'Centro da janela do PWA (qualquer area visivel, para focar a janela)'),
     ('prod_sgt',        'Botão PROD_SGT (tela de seleção de aplicativo)'),
     ('toolbar_toggle',  'Setinha ⌄ da barra TSplus (topo da tela)'),
     ('toolbar_upload',  'Ícone de upload (nuvem) na barra TSplus'),
