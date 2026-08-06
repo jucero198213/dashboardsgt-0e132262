@@ -194,6 +194,14 @@ def sair_inconsistente():
 
 # ── Abrir PWA ────────────────────────────────────────────────
 
+def fechar_chrome():
+    """Fecha qualquer instância de Chrome residual antes de abrir o PWA."""
+    log("Fechando Chrome residual (se houver)...")
+    subprocess.run('taskkill /F /IM chrome.exe', shell=True,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(2)
+
+
 def abrir_pwa(url):
     """Abre o Rodopar em modo PWA (Chrome --app) com janela fixa."""
     log(f"Abrindo PWA: {url}")
@@ -201,6 +209,24 @@ def abrir_pwa(url):
         f'start "" "chrome" --app="{url}" --window-position=0,0 --window-size=1920,1080',
         shell=True
     )
+
+
+def focar_pwa():
+    """Tenta focar a janela do PWA de múltiplas formas."""
+    log("Focando janela do PWA...")
+    tentativas = ['webcloud2.datapardc.com', 'Rodopar', 'chrome']
+    for titulo in tentativas:
+        try:
+            wins = pyautogui.getWindowsWithTitle(titulo)
+            if wins:
+                log(f"  Janela encontrada: '{titulo}' ({len(wins)} match)")
+                wins[0].activate()
+                time.sleep(1)
+                return True
+        except Exception as e:
+            log(f"  getWindowsWithTitle('{titulo}') falhou: {e}")
+    log("  Nenhuma janela encontrada por titulo")
+    return False
 
 
 # ── Upload pro WebFile (TSplus File Transfer) ────────────────
@@ -359,29 +385,32 @@ def main(args):
     print(f"  Hist Banc   : {args.hist_bancario}")
     print("=" * 60)
 
+    # ── 0. Limpar estado ───────────────────────────────────────
+    print("\n[PREP] Limpando estado anterior...")
+    pyautogui.moveTo(960, 540)
+    fechar_chrome()
+
     # ── 1. Abrir PWA ─────────────────────────────────────────
     print("\n[1/10] Abrindo Rodopar (PWA)...")
     abrir_pwa(rdp_url)
-    esperar(12, "PWA carregando página de login")
+    esperar(15, "PWA carregando página de login")
 
     # ── 2. Login Web (teclado) ───────────────────────────────
     print("\n[2/10] Login web...")
-    try:
-        wins = pyautogui.getWindowsWithTitle('webcloud2.datapardc.com')
-        if wins:
-            wins[0].activate()
-            esperar(1, "ativando janela do PWA")
-    except Exception:
-        pass
-    focus_pos = coords.get('pwa_focus', [400, 400])
+    focar_pwa()
+    focus_pos = coords.get('pwa_focus', [960, 400])
+    log(f"Clicando pwa_focus ({focus_pos[0]}, {focus_pos[1]})")
     pyautogui.click(focus_pos[0], focus_pos[1])
-    esperar(1, "garantindo foco na página")
+    esperar(2, "garantindo foco na página")
+
+    log("Digitando credenciais web...")
     tab()
     digitar(rdp_web_user)
     tab()
     digitar(rdp_web_pass)
     tab()
     esperar(1, "foco no botão login")
+    log("Pressionando Enter no login...")
     enter()
     esperar(15, "página carregando após login web")
 
