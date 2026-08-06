@@ -194,14 +194,6 @@ def sair_inconsistente():
 
 # ── Abrir PWA ────────────────────────────────────────────────
 
-def fechar_chrome():
-    """Fecha qualquer instância de Chrome residual antes de abrir o PWA."""
-    log("Fechando Chrome residual (se houver)...")
-    subprocess.run('taskkill /F /IM chrome.exe', shell=True,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(2)
-
-
 def abrir_pwa(url):
     """Abre o Rodopar em modo PWA (Chrome --app) com janela fixa."""
     log(f"Abrindo PWA: {url}")
@@ -384,11 +376,6 @@ def main(args):
     print(f"  Tipo Doc    : {args.tipo_doc}")
     print(f"  Hist Banc   : {args.hist_bancario}")
     print("=" * 60)
-
-    # ── 0. Limpar estado ───────────────────────────────────────
-    print("\n[PREP] Limpando estado anterior...")
-    pyautogui.moveTo(960, 540)
-    fechar_chrome()
 
     # ── 1. Abrir PWA ─────────────────────────────────────────
     print("\n[1/10] Abrindo Rodopar (PWA)...")
