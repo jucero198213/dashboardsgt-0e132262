@@ -381,6 +381,7 @@ def main(args):
     tab()
     digitar(rdp_web_pass)
     tab()
+    esperar(1, "foco no botão login")
     enter()
     esperar(15, "página carregando após login web")
 
