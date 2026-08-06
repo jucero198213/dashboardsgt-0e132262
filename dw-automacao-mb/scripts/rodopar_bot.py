@@ -359,6 +359,9 @@ def main(args):
     print(f"  Hist Banc   : {args.hist_bancario}")
     print("=" * 60)
 
+    # ── 0. Mover mouse pro centro (evita failsafe no canto 0,0) ──
+    pyautogui.moveTo(960, 540)
+
     # ── 1. Abrir PWA ─────────────────────────────────────────
     print("\n[1/10] Abrindo Rodopar (PWA)...")
     abrir_pwa(rdp_url)
@@ -366,6 +369,7 @@ def main(args):
 
     # ── 2. Login Web (teclado) ───────────────────────────────
     print("\n[2/10] Login web...")
+    pyautogui.moveTo(960, 540)
     try:
         wins = pyautogui.getWindowsWithTitle('webcloud2.datapardc.com')
         if wins:
