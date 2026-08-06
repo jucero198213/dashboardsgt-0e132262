@@ -360,7 +360,9 @@ def main(args):
     print("=" * 60)
 
     # ── 0. Mover mouse pro centro (evita failsafe no canto 0,0) ──
+    pyautogui.FAILSAFE = False
     pyautogui.moveTo(960, 540)
+    pyautogui.FAILSAFE = True
 
     # ── 1. Abrir PWA ─────────────────────────────────────────
     print("\n[1/10] Abrindo Rodopar (PWA)...")
