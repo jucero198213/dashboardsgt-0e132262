@@ -48,7 +48,7 @@ function SearchIcon({ layoutId }: { layoutId: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      className="size-4 shrink-0"
+      className="size-3.5 shrink-0"
     >
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
@@ -67,20 +67,9 @@ const iconBubbleVariants = {
   expanded: { scale: 1, opacity: 1 },
 };
 
-export interface GooeyInputClassNames {
-  root?: string;
-  filterWrap?: string;
-  buttonRow?: string;
-  trigger?: string;
-  input?: string;
-  bubble?: string;
-  bubbleSurface?: string;
-}
-
 export interface GooeyInputProps {
   placeholder?: string;
   className?: string;
-  classNames?: GooeyInputClassNames;
   collapsedWidth?: number;
   expandedWidth?: number;
   expandedOffset?: number;
@@ -93,12 +82,11 @@ export interface GooeyInputProps {
 }
 
 export function GooeyInput({
-  placeholder = "Type to search...",
+  placeholder = "Buscar...",
   className,
-  classNames,
-  collapsedWidth = 115,
+  collapsedWidth = 100,
   expandedWidth = 200,
-  expandedOffset = 50,
+  expandedOffset = 36,
   gooeyBlur = 5,
   value: valueProp,
   defaultValue = "",
@@ -170,28 +158,21 @@ export function GooeyInput({
     if (!searchText) setExpanded(false);
   }, [searchText, setExpanded]);
 
-  const surfaceClass =
-    "bg-foreground text-background shadow-sm ring-1 ring-border/60";
-
   return (
     <div
       className={cn(
-        "relative flex items-center justify-center",
+        "relative flex items-center",
         className,
-        classNames?.root,
       )}
     >
       <GooeyFilter filterId={filterId} blur={gooeyBlur} />
 
       <div
-        className={cn(
-          "relative flex h-10 items-center justify-center",
-          classNames?.filterWrap,
-        )}
+        className="relative flex h-8 items-center"
         style={{ filter: `url(#${filterId})` }}
       >
         <motion.div
-          className={cn("flex h-10 items-center justify-center", classNames?.buttonRow)}
+          className="flex h-8 items-center"
           variants={buttonVariants}
           initial="collapsed"
           animate={isExpanded ? "expanded" : "collapsed"}
@@ -201,11 +182,7 @@ export function GooeyInput({
             type="button"
             disabled={disabled}
             onClick={handleExpand}
-            className={cn(
-              "flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-medium outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
-              surfaceClass,
-              classNames?.trigger,
-            )}
+            className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 text-[11px] font-medium outline-none transition-colors hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-input-hover)] focus-visible:border-amber-400/40 disabled:pointer-events-none disabled:opacity-50"
           >
             {!isExpanded ? (
               <SearchIcon layoutId={iconLayoutId} />
@@ -222,33 +199,23 @@ export function GooeyInput({
               disabled={disabled || !isExpanded}
               placeholder={placeholder}
               className={cn(
-                "h-full min-w-0 flex-1 bg-transparent text-sm text-background outline-none",
+                "h-full min-w-0 flex-1 bg-transparent text-[11px] outline-none",
                 isExpanded
-                  ? "placeholder:text-background/50 dark:placeholder:text-background/45"
-                  : "pointer-events-none placeholder:text-background/80 dark:placeholder:text-background/70",
-                classNames?.input,
+                  ? "text-slate-200 placeholder:text-slate-500"
+                  : "pointer-events-none text-slate-300 placeholder:text-slate-500",
               )}
             />
           </button>
         </motion.div>
 
         <motion.div
-          className={cn(
-            "absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center",
-            classNames?.bubble,
-          )}
+          className="absolute top-1/2 left-0 flex size-8 -translate-y-1/2 items-center justify-center"
           variants={iconBubbleVariants}
           initial="collapsed"
           animate={isExpanded ? "expanded" : "collapsed"}
           transition={transition}
         >
-          <div
-            className={cn(
-              "flex size-10 items-center justify-center rounded-full",
-              surfaceClass,
-              classNames?.bubbleSurface,
-            )}
-          >
+          <div className="flex size-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400">
             <SearchIcon layoutId={iconLayoutId} />
           </div>
         </motion.div>
