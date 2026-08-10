@@ -22,6 +22,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -475,16 +476,11 @@ export default function Compras() {
 
           {/* ════════ FILTROS ════════ */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Buscar por produto, fornecedor ou NF..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-9 w-full rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[13px] text-white placeholder-slate-500 transition-all focus:border-[var(--sgt-border-medium)] focus:bg-[var(--sgt-input-hover)] focus:outline-none"
-              />
-            </div>
+            <GooeyInput
+              placeholder="Buscar por produto, fornecedor ou NF..."
+              value={search}
+              onValueChange={(v) => setSearch(v)}
+            />
 
             <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
               <SelectTrigger className="h-9 w-full sm:w-[200px] rounded-lg text-[12px]">

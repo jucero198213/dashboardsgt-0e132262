@@ -20,6 +20,7 @@ import {
   fetchConsultaNfe, fetchConsultaNfeTendencia, fetchDanfe, clearDwCache,
   type ConsultaNfeRow, type TendenciaNfeRow,
 } from "@/lib/dwApi";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Tipos / helpers ──────────────────────────────────────────────────────────
 
@@ -373,11 +374,11 @@ export default function Fiscal() {
             <AnimatedCard delay={240} hover={false}>
               <div className="flex flex-col rounded-[16px] border overflow-hidden" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
                 <div className="flex flex-wrap items-center gap-2 px-3 sm:px-4 py-2.5 border-b shrink-0" style={{ borderColor: "var(--sgt-divider)" }}>
-                  <div className="relative flex items-center">
-                    <Search className="absolute left-2.5 h-3 w-3 text-slate-500 pointer-events-none" />
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar nota, fornecedor, CNPJ..."
-                      className="h-7 rounded-lg pl-7 pr-3 text-[11px] bg-white/5 border border-white/10 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-amber-400/40 w-[190px]" />
-                  </div>
+                  <GooeyInput
+                    placeholder="Buscar nota, fornecedor, CNPJ..."
+                    value={search}
+                    onValueChange={(v) => setSearch(v)}
+                  />
                   <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value as typeof filtroStatus)}
                     className="h-7 rounded-lg px-2 text-[10px] bg-white/5 border border-white/10 text-slate-300 focus:outline-none focus:border-amber-400/40">
                     <option value="todos">Todos status</option>

@@ -30,6 +30,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { GooeyInput } from "@/components/ui/gooey-input";
 import { PartnersAnalytics, type PartnerRow } from "@/components/finance/PartnersAnalytics";
 import { BankLogo } from "@/components/finance/BankLogo";
 
@@ -193,12 +194,10 @@ function ActionBtn({ icon: Icon, title }: { icon: React.ElementType; title: stri
 function FilterBar({ search, onSearch, children }: { search: string; onSearch: (v: string) => void; children?: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] px-3 py-2 mb-3">
-      <Search className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-      <input
-        value={search}
-        onChange={e => onSearch(e.target.value)}
+      <GooeyInput
         placeholder="Buscar..."
-        className="flex-1 min-w-[140px] bg-transparent text-[12px] text-slate-300 placeholder:text-slate-600 outline-none"
+        value={search}
+        onValueChange={onSearch}
       />
       {children}
     </div>
@@ -1253,16 +1252,11 @@ function ScreenConciliacao() {
 
           {/* Busca */}
           <div className="border-b px-4 py-2.5" style={{ borderColor: "var(--sgt-divider)" }}>
-            <div className="relative max-w-sm">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2" style={{ color: "var(--sgt-text-muted)" }} />
-              <input
-                value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
-                placeholder="Buscar por descrição ou documento..."
-                className="h-8 w-full rounded-lg border bg-[var(--sgt-input-bg)] pl-9 pr-3 text-[12px] outline-none transition-colors focus:border-[var(--sgt-border-medium)] placeholder:text-slate-600"
-                style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-secondary)" }}
-              />
-            </div>
+            <GooeyInput
+              placeholder="Buscar por descrição ou documento..."
+              value={search}
+              onValueChange={(v) => { setSearch(v); setPage(1); }}
+            />
           </div>
 
           {/* Tabela */}
