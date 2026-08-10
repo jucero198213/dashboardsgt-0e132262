@@ -182,7 +182,7 @@ export function GooeyInput({
             type="button"
             disabled={disabled}
             onClick={handleExpand}
-            className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.08] px-3 text-[11px] font-medium text-slate-400 outline-none transition-colors hover:border-white/[0.20] hover:bg-white/[0.12] focus-visible:border-amber-400/40 disabled:pointer-events-none disabled:opacity-50"
+            className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-xl border border-[#2a3a52] bg-[#1e283a] px-3 text-[11px] font-medium text-slate-400 outline-none transition-colors hover:border-[#3a4f6a] hover:bg-[#253248] focus-visible:border-amber-400/40 disabled:pointer-events-none disabled:opacity-50"
           >
             {!isExpanded ? (
               <SearchIcon layoutId={iconLayoutId} />
@@ -215,7 +215,7 @@ export function GooeyInput({
           animate={isExpanded ? "expanded" : "collapsed"}
           transition={transition}
         >
-          <div className="flex size-8 items-center justify-center rounded-xl border border-white/[0.12] bg-white/[0.08] text-slate-400">
+          <div className="flex size-8 items-center justify-center rounded-xl border border-[#2a3a52] bg-[#1e283a] text-slate-400">
             <SearchIcon layoutId={iconLayoutId} />
           </div>
         </motion.div>
