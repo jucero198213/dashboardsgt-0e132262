@@ -4,6 +4,7 @@ import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 
 const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
@@ -218,14 +219,11 @@ export default function GestaoUsuarios() {
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--sgt-text-muted)]" />
-          <input
-            value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por email..."
-            className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] py-2 pl-9 pr-4 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
-          />
-        </div>
+        <GooeyInput
+          placeholder="Buscar por email..."
+          value={search}
+          onValueChange={(v) => setSearch(v)}
+        />
         <button onClick={load}
           className="flex items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all hover:border-[var(--sgt-border-medium)]">
           <RefreshCw className="h-3.5 w-3.5" />

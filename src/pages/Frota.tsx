@@ -20,6 +20,7 @@ import {
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { type FrotaRow, type ManutencaoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -969,16 +970,11 @@ export default function Frota() {
 
             {/* ════════ FILTROS DA TABELA ════════ */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar por código, chassi, modelo, município..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[12px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/40"
-                />
-              </div>
+              <GooeyInput
+                placeholder="Buscar por código, chassi, modelo, município..."
+                value={search}
+                onValueChange={(v) => setSearch(v)}
+              />
 
               <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
                 <SelectTrigger className="h-9 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">

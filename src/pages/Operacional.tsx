@@ -25,6 +25,7 @@ import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { VeiculosMap } from "@/components/operacional/VeiculosMap";
 import { ViagensDialog } from "@/components/operacional/ViagensDialog";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -919,16 +920,11 @@ export default function Operacional() {
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
                   <div className="ml-auto flex items-center gap-2">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        placeholder="Buscar veículo, motorista, rota..."
-                        className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[160px] sm:w-[210px]"
-                      />
-                    </div>
+                    <GooeyInput
+                      placeholder="Buscar veículo, motorista, rota..."
+                      value={search}
+                      onValueChange={(v) => { setSearch(v); setPage(1); }}
+                    />
                     {/* Toggle de visualização — padrão tela Bancos */}
                     <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
                       {([
