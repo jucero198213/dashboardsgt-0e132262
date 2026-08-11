@@ -7,7 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { SofiaChatInput } from "@/components/ui/ai-chat-input";
+import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { TextShimmer } from "@/components/ui/shimmer-text";
 
 /* ------------------------------------------------------------------ */
@@ -553,9 +553,9 @@ export default function SofiaChat() {
                 transition={{ duration: 0.6, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
                 className="w-full max-w-[620px] mb-8"
               >
-                <SofiaChatInput
-                  onSubmit={sendText}
-                  disabled={loading}
+                <PromptInputBox
+                  onSend={(message) => sendText(message)}
+                  isLoading={loading}
                   placeholder="Pergunte qualquer coisa..."
                 />
               </motion.div>
@@ -598,9 +598,9 @@ export default function SofiaChat() {
                 className="pb-6 pt-3 px-4"
               >
                 <div className="max-w-2xl mx-auto">
-                  <SofiaChatInput
-                    onSubmit={sendText}
-                    disabled={loading}
+                  <PromptInputBox
+                    onSend={(message) => sendText(message)}
+                    isLoading={loading}
                     placeholder="Pergunte algo..."
                   />
                 </div>
