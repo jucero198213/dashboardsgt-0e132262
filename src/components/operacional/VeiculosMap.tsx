@@ -59,7 +59,7 @@ export function VeiculosMap({ veiculos }: { veiculos: MapVeiculo[] }) {
             pathOptions={{ color: "#ffffff66", weight: 1, fillColor: c, fillOpacity: 0.9 }}
           >
             <Popup>
-              <div style={{ fontFamily: "ui-sans-serif, system-ui", minWidth: 180 }}>
+              <div style={{ fontFamily: "var(--sgt-font-body)", minWidth: 180 }}>
                 <div style={{ fontWeight: 700, color: c, fontSize: 13 }}>{v.veiculo}</div>
                 <div style={{ fontSize: 12, color: "#334155" }}>{v.motorista ?? "—"}</div>
                 <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>

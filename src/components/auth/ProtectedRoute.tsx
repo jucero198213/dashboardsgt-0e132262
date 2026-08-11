@@ -26,7 +26,7 @@ export function ProtectedRoute({
 
   if (isLoading || (moduleToCheck && permsLoading)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#060912]">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--sgt-bg-base)]">
         <div className="flex flex-col items-center gap-4">
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
           <p className="text-[13px] text-slate-600">Carregando...</p>

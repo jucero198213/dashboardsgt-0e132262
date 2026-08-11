@@ -435,7 +435,7 @@ export default function SofiaChat() {
   const clear = () => setMessages([]);
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-[#07090e]">
+    <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-[var(--sgt-bg-base)]">
 
       {/* Animated aurora */}
       <AuroraBackground />
