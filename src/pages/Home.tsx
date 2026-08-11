@@ -67,7 +67,7 @@ function AnimatedTitle({ text, delay = 0 }: { text: string; delay?: number }) {
         opacity: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
         y: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
         backgroundPosition: {
-          duration: 3,
+          duration: 6,
           delay: delay + 0.7,
           repeat: Infinity,
           ease: "linear",
