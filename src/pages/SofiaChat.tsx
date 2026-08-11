@@ -540,7 +540,7 @@ export default function SofiaChat() {
                 transition={{ duration: 0.5, delay: 0.45 }}
                 className="text-[15px] text-white/25 mb-4 text-center"
               >
-                Assistente inteligente da SGT
+                Sistema Operacional de Fluxo de Inteligência Artificial
               </motion.p>
 
               {/* Glowing divider */}
