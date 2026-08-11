@@ -4,9 +4,16 @@
  *                  logo + fallback wordmark vermelho.
  * Lógica: auth, permissões e rotas preservadas da v1.
  */
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, Home, Sun, Moon, Shield, LogOut } from "lucide-react";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { APP_NAV, type AppNavItem } from "./appNav";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +25,65 @@ import sgtLogoMark from "@/assets/sgt-logo-clean.png";
 const STORAGE_KEY       = "sgt-sidebar-collapsed";
 export const SB_W_EXPANDED  = 216;
 export const SB_W_COLLAPSED = 72;
+
+// ── Dock magnification (vertical) ───────────────────────────────────────────
+const MAG_SIZE     = 48;
+const MAG_BASE     = 40;
+const MAG_DISTANCE = 120;
+const MAG_SPRING   = { mass: 0.1, stiffness: 150, damping: 12 };
+
+const MouseYContext = createContext<MotionValue<number> | null>(null);
+
+const fallbackMotionValue = { get: () => Infinity, set: () => {}, on: () => () => {} } as unknown as MotionValue<number>;
+
+function MagItem({
+  children,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  ariaLabel,
+  style,
+  className,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  onMouseEnter?: React.MouseEventHandler;
+  onMouseLeave?: React.MouseEventHandler;
+  ariaLabel?: string;
+  style?: React.CSSProperties;
+  className?: string;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const mouseY = useContext(MouseYContext) ?? fallbackMotionValue;
+
+  const distanceFromMouse = useTransform(mouseY, (val) => {
+    const rect = ref.current?.getBoundingClientRect() ?? { y: 0, height: 0 };
+    return val - rect.y - rect.height / 2;
+  });
+
+  const sizeTransform = useTransform(
+    distanceFromMouse,
+    [-MAG_DISTANCE, 0, MAG_DISTANCE],
+    [MAG_BASE, MAG_SIZE, MAG_BASE],
+  );
+  const size = useSpring(sizeTransform, MAG_SPRING);
+
+  return (
+    <div className="flex items-center justify-center py-[2px]">
+      <motion.button
+        ref={ref}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        aria-label={ariaLabel}
+        className={className}
+        style={{ ...style, width: size, height: size } as React.CSSProperties}
+      >
+        {children}
+      </motion.button>
+    </div>
+  );
+}
 
 // ── Estrutura do menu ────────────────────────────────────────────────────────
 const CORE_GROUPS: { label: string; ids: string[] }[] = [
@@ -72,6 +138,7 @@ export function AppSidebar() {
   } | null>(null);
   const [logoErr, setLogoErr] = useState(false);
   const [markErr, setMarkErr] = useState(false);
+  const mouseY = useMotionValue(Infinity);
 
   // ── helpers ────────────────────────────────────────────────────────────────
   const search       = new URLSearchParams(location.search);
@@ -133,25 +200,23 @@ export function AppSidebar() {
     // ── estado recolhido ──────────────────────────────────────────────────
     if (collapsed) {
       return (
-        <div key={item.id} className="flex items-center justify-center py-[2px]">
-          <button
-            onClick={() => goItem(item)}
-            onMouseEnter={e => {
-              setFlyout({ id: item.id, label: item.label, icon: item.icon, active,
-                rect: (e.currentTarget as HTMLButtonElement).getBoundingClientRect() });
-            }}
-            onMouseLeave={() => setFlyout(null)}
-            aria-label={item.label}
-            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
-            style={active
-              ? { ...CHIP_ACTIVE }
-              : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
-            
-          >
-            <Icon className="w-4 h-4 shrink-0"
-              style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
-          </button>
-        </div>
+        <MagItem
+          key={item.id}
+          onClick={() => goItem(item)}
+          onMouseEnter={e => {
+            setFlyout({ id: item.id, label: item.label, icon: item.icon, active,
+              rect: (e.currentTarget as HTMLButtonElement).getBoundingClientRect() });
+          }}
+          onMouseLeave={() => setFlyout(null)}
+          ariaLabel={item.label}
+          className="flex items-center justify-center rounded-lg border transition-colors duration-150"
+          style={active
+            ? { ...CHIP_ACTIVE }
+            : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
+        >
+          <Icon className="w-4 h-4 shrink-0"
+            style={active ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
+        </MagItem>
       );
     }
 
@@ -205,8 +270,8 @@ export function AppSidebar() {
   function renderHome() {
     if (collapsed) {
       return (
-        <div className="flex items-center justify-center py-[2px] mt-2">
-          <button
+        <div className="mt-2">
+          <MagItem
             onClick={() => navigate("/home")}
             onMouseEnter={e =>
               setFlyout({ id: "__home", label: "Início",
@@ -214,14 +279,14 @@ export function AppSidebar() {
                 rect: (e.currentTarget as HTMLButtonElement).getBoundingClientRect() })
             }
             onMouseLeave={() => setFlyout(null)}
-            aria-label="Início"
-            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-all duration-150"
+            ariaLabel="Início"
+            className="flex items-center justify-center rounded-lg border transition-colors duration-150"
             style={isHomeActive ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
           >
             <Home className="w-4 h-4 shrink-0"
               style={isHomeActive ? { color: "#1B1304", opacity: 1 } : { opacity: 0.6 }} />
-          </button>
+          </MagItem>
         </div>
       );
     }
@@ -357,10 +422,12 @@ export function AppSidebar() {
       </div>
 
       {/* ── NAVEGAÇÃO ────────────────────────────────────────────────────── */}
+      <MouseYContext.Provider value={mouseY}>
       <div
         className="flex-1 min-h-0 overflow-y-auto py-1 flex flex-col"
         style={{ scrollbarWidth: "none", overflowX: "visible" }}
-        onMouseLeave={() => setFlyout(null)}
+        onMouseMove={collapsed ? (e) => mouseY.set(e.clientY) : undefined}
+        onMouseLeave={() => { mouseY.set(Infinity); setFlyout(null); }}
       >
         {/* Início */}
         {renderHome()}
@@ -425,6 +492,7 @@ export function AppSidebar() {
 
         <div className="h-2 shrink-0" />
       </div>
+      </MouseYContext.Provider>
 
       {/* ── RODAPÉ ───────────────────────────────────────────────────────── */}
       <UserFooter
