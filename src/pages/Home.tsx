@@ -58,8 +58,29 @@ function AnimatedTitle({ text, delay = 0 }: { text: string; delay?: number }) {
     <motion.span
       className="inline-block"
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        backgroundPosition: ["0% center", "200% center"],
+      }}
+      transition={{
+        opacity: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
+        y: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
+        backgroundPosition: {
+          duration: 3,
+          delay: delay + 0.7,
+          repeat: Infinity,
+          ease: "linear",
+        },
+      }}
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, #fcd34d 0%, #ffffff 15%, #f59e0b 30%, #fcd34d 45%, #ffffff 60%, #ea580c 75%, #fcd34d 100%)",
+        backgroundSize: "200% auto",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }}
     >
       {text}
     </motion.span>
@@ -611,12 +632,11 @@ export default function Home() {
                 Bem&#8209;vindo ao
               </motion.span>
 
-              {/* "Workspace" — de branco/creme até laranja, máximo contraste */}
+              {/* "Workspace" — shiny gradient animado */}
               <span
-                className="block font-black tracking-[-0.04em] bg-clip-text text-transparent"
+                className="block font-black tracking-[-0.04em]"
                 style={{
                   fontSize: "clamp(2.5rem,15vw,11rem)",
-                  backgroundImage: "linear-gradient(135deg, #fffbeb 0%, #fcd34d 30%, #f59e0b 60%, #ea580c 100%)",
                   filter: "drop-shadow(0 0 32px rgba(245,158,11,0.28)) drop-shadow(0 4px 16px rgba(234,88,12,0.15))",
                   lineHeight: 1,
                 }}
