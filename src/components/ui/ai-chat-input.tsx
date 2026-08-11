@@ -217,16 +217,25 @@ export const SofiaChatInput = React.forwardRef<HTMLDivElement, SofiaChatInputPro
           else if (ref) ref.current = node;
           containerRef.current = node;
         }}
-        className={cn("relative w-full", className)}
+        className={cn("relative w-full group/input", className)}
       >
+        {/* Ambient glow behind input */}
+        <div
+          className="absolute -inset-[1px] rounded-2xl opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-700 pointer-events-none"
+          style={{
+            background: "linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.06), rgba(234,88,12,0.08))",
+            filter: "blur(16px)",
+          }}
+        />
         <div
           onClick={() => textareaRef.current?.focus()}
           className={cn(
             "relative w-full rounded-2xl border cursor-text",
-            "border-white/[0.08] bg-white/[0.04] backdrop-blur-sm",
-            "focus-within:border-amber-400/25 focus-within:bg-white/[0.06]",
-            "hover:border-white/[0.12]",
-            "transition-all duration-300"
+            "border-white/[0.08] bg-white/[0.04] backdrop-blur-md",
+            "focus-within:border-amber-400/20 focus-within:bg-white/[0.06]",
+            "focus-within:shadow-[0_0_30px_rgba(251,191,36,0.06),inset_0_1px_0_rgba(255,255,255,0.04)]",
+            "hover:border-white/[0.12] hover:bg-white/[0.05]",
+            "transition-all duration-500"
           )}
         >
           <style dangerouslySetInnerHTML={{ __html: `
