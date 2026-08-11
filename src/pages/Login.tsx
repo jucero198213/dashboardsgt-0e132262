@@ -5,6 +5,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import sgtLogo from "@/assets/sgt-logo-clean.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
+import { PasswordStrength, type PasswordRule } from "@/components/ui/password-strength";
+
+const sgtPasswordRules: PasswordRule[] = [
+  { id: "length", label: "Exatamente 6 caracteres", test: (v) => v.length === 6 },
+  { id: "letter", label: "Pelo menos uma letra", test: (v) => /[a-zA-Z]/.test(v) },
+  { id: "digit", label: "Pelo menos um número", test: (v) => /\d/.test(v) },
+];
+
+const sgtPasswordLabels = ["", "Fraca", "Regular", "Forte"] as const;
 
 export default function Login() {
   const { session, isLoading, signIn } = useAuth();
@@ -203,6 +212,13 @@ export default function Login() {
                         {faShowPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
+                    <PasswordStrength
+                      value={faPassword}
+                      rules={sgtPasswordRules}
+                      labels={sgtPasswordLabels as unknown as string[]}
+                      showRules={true}
+                      className="mt-2"
+                    />
                   </div>
 
                   <div className="space-y-2">
