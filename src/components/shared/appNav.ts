@@ -4,7 +4,7 @@ import {
   TrendingUp, Activity, Wallet, Banknote, Users,
   Truck, Wrench, MapPin, Briefcase, ShoppingCart, Fuel,
   LineChart as LineChartIcon, Headphones, UserCog, Scale,
-  Sparkles, Globe, Monitor,
+  Sparkles, Globe, Monitor, BotMessageSquare,
 } from "lucide-react";
 import type { AppModule } from "@/hooks/usePagePermissions";
 
@@ -35,6 +35,9 @@ export type AppNavItem = {
  * Itens sem `module` são visíveis para todos os usuários autenticados.
  */
 export const APP_NAV: AppNavItem[] = [
+  // ── Sofia AI ──────────────────────────────────────────────────────────────
+  { id: "sofia-ai",           label: "Sofia AI",       icon: BotMessageSquare, to: "/sofia", portal: true, section: "IA" },
+
   // ── Portais integrados — visíveis para todos ─────────────────────────────
   { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais", module: "portal-receitaflow" },
   { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    externalUrl: "https://webcloud2.datapardc.com/software/html5.html", portal: true, module: "portal-visual" },
