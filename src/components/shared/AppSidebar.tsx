@@ -27,7 +27,7 @@ export const SB_W_EXPANDED  = 216;
 export const SB_W_COLLAPSED = 72;
 
 // ── Dock magnification (vertical) ───────────────────────────────────────────
-const MAG_SCALE_MAX = 1.25;
+const MAG_SCALE_MAX = 1.5;
 const MAG_DISTANCE  = 120;
 const MAG_SPRING    = { mass: 0.1, stiffness: 200, damping: 15 };
 
