@@ -505,13 +505,13 @@ export default function IndicadorDetalhe() {
                         stroke="#c9a227" strokeWidth="2.5" strokeLinecap="round"/>
                       <circle cx={mo.x} cy={mo.y} r="3" fill="#c9a227"/>
                       <text x={ml.x} y={ml.y - 2} textAnchor="middle"
-                        fill="#c9a227" fontSize="7" fontFamily="sans-serif">{pMeta}%</text>
+                        fill="#c9a227" fontSize="7" fontFamily="var(--sgt-font-body)">{pMeta}%</text>
                       <text x={cx} y={cy - 4} textAnchor="middle"
-                        fill="white" fontSize="12" fontWeight="700" fontFamily="sans-serif">{pReal.toFixed(1)}%</text>
+                        fill="white" fontSize="12" fontWeight="700" fontFamily="var(--sgt-font-body)">{pReal.toFixed(1)}%</text>
                       <text x={cx} y={cy + 6} textAnchor="middle"
-                        fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="sans-serif">meta {pMeta}%</text>
-                      <text x={cx-r-3} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">E</text>
-                      <text x={cx+r-4} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">F</text>
+                        fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="var(--sgt-font-body)">meta {pMeta}%</text>
+                      <text x={cx-r-3} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="var(--sgt-font-body)">E</text>
+                      <text x={cx+r-4} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="var(--sgt-font-body)">F</text>
                     </svg>
                   );
                 })()}

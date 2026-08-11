@@ -160,7 +160,7 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
             ))}
             {[0.25,0.5,0.75,1].map(f => (
               <text key={f} x={padL-4} y={toY(maxVal*f)+3} textAnchor="end"
-                fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{fmtY(maxVal*f)}</text>
             ))}
 
             {areaPath && <path d={areaPath} fill="url(#fatGradAcum)" clipPath="url(#yc-clip)"/>}
@@ -176,7 +176,7 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
               <text key={m} x={toX(i)} y={H-4} textAnchor="middle" fontSize={8}
                 fill={i === mesFiltro ? "#fbbf24" : "var(--sgt-text-muted)"}
                 fontWeight={i === mesFiltro ? "700" : "400"}
-                fontFamily="system-ui">{m}</text>
+                fontFamily="var(--sgt-font-body)">{m}</text>
             ))}
 
             {hover && (
@@ -204,24 +204,24 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
                   <rect x={tx} y={ty} width={tw} height={th} rx={6}
                     fill="var(--sgt-bg-section)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.5}/>
                   <text x={tx+10} y={ty+14} fontSize={9} fontWeight="700"
-                    fill="rgba(255,255,255,0.9)" fontFamily="system-ui">{months[hover.idx]}</text>
+                    fill="rgba(255,255,255,0.9)" fontFamily="var(--sgt-font-body)">{months[hover.idx]}</text>
                   {delta !== null && (
                     <text x={tx+tw-8} y={ty+14} textAnchor="end" fontSize={8} fontWeight="700"
-                      fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="system-ui">
+                      fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="var(--sgt-font-body)">
                       {delta >= 0 ? "+" : ""}{delta.toFixed(1)}%
                     </text>
                   )}
                   {vAtual !== null && (
                     <>
                       <circle cx={tx+9} cy={ty+27} r={3} fill="#fbbf24"/>
-                      <text x={tx+17} y={ty+31} fontSize={8.5} fill="#fbbf24" fontFamily="system-ui" fontWeight="600">
+                      <text x={tx+17} y={ty+31} fontSize={8.5} fill="#fbbf24" fontFamily="var(--sgt-font-body)" fontWeight="600">
                         {anoAtual}: {fmtFull(vAtual)}
                       </text>
                     </>
                   )}
                   <circle cx={tx+9} cy={ty+(vAtual !== null ? 45 : 28)} r={2.5} fill="#94a3b8" opacity={0.6}/>
                   <text x={tx+17} y={ty+(vAtual !== null ? 49 : 32)} fontSize={8.5}
-                    fill="rgba(148,163,184,0.6)" fontFamily="system-ui">
+                    fill="rgba(148,163,184,0.6)" fontFamily="var(--sgt-font-body)">
                     {anoAnt}: {fmtFull(vAnt)}
                   </text>
                 </g>

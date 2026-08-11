@@ -72,6 +72,8 @@
     --sgt-danger:  #E94848;
     --sgt-warning: #F0A730;
     --sgt-info:    #4A9EFF;
+    --sgt-tone-steel: #4A6FB8;
+    --sgt-tone-steel-text: #A8C0E8;
 
     /* SGT — RAW temático (inline styles via objeto RAW) */
     --sgt-raw-inset:  #090c14;
@@ -180,6 +182,8 @@
     --sgt-accent-hover:  #e5730a;
     --sgt-accent-soft:   rgba(254,128,5,0.12);
     --sgt-accent-text:   #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
+    --sgt-tone-steel: #3B5998;
+    --sgt-tone-steel-text: #2C4A7C;
     --sgt-sidebar-hover: rgba(20,30,45,0.05);
     --sgt-flyout-bg:     #fafbfc;
     --sgt-flyout-border: rgba(20,30,45,0.12);

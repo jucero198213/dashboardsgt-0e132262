@@ -332,7 +332,7 @@ const MiniLineChart = ({
                 strokeWidth={frac === 0 ? 0.8 : 0.5}/>
               {frac > 0 && (
                 <text x={padL - 6} y={y + 3} textAnchor="end"
-                  fill="var(--sgt-text-muted)" fontSize={9} fontWeight={500} fontFamily="system-ui,sans-serif">
+                  fill="var(--sgt-text-muted)" fontSize={9} fontWeight={500} fontFamily="var(--sgt-font-body)">
                   {formatY(val)}
                 </text>
               )}
@@ -406,20 +406,20 @@ const MiniLineChart = ({
               <rect x={tx} y={ty} width={150} height={64} rx={6}
                 fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
               <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.92)"
-                fontSize={9.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                fontSize={9.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                 {months[hoverIndex]}{ano ? ` ${ano}` : ""}
               </text>
               <rect x={tx+8} y={ty+19} width={2.5} height={9} rx={1} fill={primaryColor}/>
-              <text x={tx+15} y={ty+27} fill={primaryColor} fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+              <text x={tx+15} y={ty+27} fill={primaryColor} fontSize={8.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                 Realizado: {formatFull(r)}
               </text>
               <rect x={tx+8} y={ty+33} width={2.5} height={9} rx={1} fill={secondaryColor}/>
-              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.78)" fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.78)" fontSize={8.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                 Previsto: {formatFull(p)}
               </text>
               {diff !== null && (
                 <text x={tx+8} y={ty+55} fill={diff >= 0 ? "#34d399" : "#f87171"}
-                  fontSize={8.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                  fontSize={8.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                   {diff >= 0 ? "▲" : "▼"} {Math.abs(diff).toFixed(1)}% vs previsto
                 </text>
               )}
@@ -435,7 +435,7 @@ const MiniLineChart = ({
             <text key={`mx-${i}`} x={toX(i)} y={svgH - 6} textAnchor="middle"
               fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.72)"}
               fontSize={9} fontWeight={hoverIndex === i ? 700 : 500}
-              fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+              fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
               {months[i]}
             </text>
           );
@@ -619,7 +619,7 @@ const YearComparisonChart = ({
                     strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
+                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="var(--sgt-font-body)">
                       {formatY(maxVal * frac)}
                     </text>
                   )}
@@ -687,27 +687,27 @@ const YearComparisonChart = ({
                   <rect x={tx} y={ty} width={188} height={104} rx={8}
                     fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
                   <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
-                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                    fontSize={10.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                     {months[hoverIndex]}
                   </text>
                   {/* CR */}
                   <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
-                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     CR {anoAtual}: {formatFull(crA)}
                   </text>
-                  <text x={tx+18} y={ty+45} fill="rgba(148,163,184,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+45} fill="rgba(148,163,184,0.5)" fontSize={9} fontFamily="var(--sgt-font-body)">
                     {anoAnterior}: {formatFull(crB)}{crDiff !== null ? `  (${crDiff >= 0 ? "+" : ""}${crDiff.toFixed(1)}%)` : ""}
                   </text>
                   {/* CP */}
                   <rect x={tx+10} y={ty+56} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.8)"/>
-                  <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     CP {anoAtual}: {formatFull(cpA)}
                   </text>
-                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.45)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.45)" fontSize={9} fontFamily="var(--sgt-font-body)">
                     {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
                   </text>
                   <line x1={tx+10} y1={ty+86} x2={tx+178} y2={ty+86} stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
-                  <text x={tx+10} y={ty+98} fill="var(--sgt-text-muted)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  <text x={tx+10} y={ty+98} fill="var(--sgt-text-muted)" fontSize={8.5} fontFamily="var(--sgt-font-body)">
                     variação vs mesmo mês
                   </text>
                 </g>
@@ -719,7 +719,7 @@ const YearComparisonChart = ({
               <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
                 fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
                 fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
-                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
                 {m}
               </text>
             ))}
@@ -914,7 +914,7 @@ const ComparativeLineChart = ({
                     strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
+                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="var(--sgt-font-body)">
                       {formatY(val)}
                     </text>
                   )}
@@ -938,7 +938,7 @@ const ComparativeLineChart = ({
                     textAnchor="middle"
                     fill="rgba(148,163,184,0.42)"
                     fontSize={8} fontStyle="italic"
-                    fontFamily="system-ui,sans-serif">
+                    fontFamily="var(--sgt-font-body)">
                     sem movimentação relevante
                   </text>
                 )}
@@ -989,24 +989,24 @@ const ComparativeLineChart = ({
                   <rect x={tx} y={ty} width={178} height={82} rx={8}
                     fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
                   <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
-                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                    fontSize={10.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                     {months[hoverIndex]}{ano ? ` ${ano}` : ""}
                   </text>
                   <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
                   <text x={tx+18} y={ty+33} fill="#2dd4bf"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                    fontSize={9.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     Receber: {formatFull(crV)}
                   </text>
                   <rect x={tx+10} y={ty+40} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.7)"/>
                   <text x={tx+18} y={ty+49} fill="rgba(248,113,113,0.85)"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                    fontSize={9.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     Pagar: {formatFull(cpV)}
                   </text>
                   <line x1={tx+10} y1={ty+58} x2={tx+168} y2={ty+58}
                     stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
                   <text x={tx+10} y={ty+72}
                     fill={diff >= 0 ? "rgba(45,212,191,0.85)" : "rgba(248,113,113,0.85)"}
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                    fontSize={9.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     Saldo: {diff >= 0 ? "+" : ""}{formatFull(diff)}
                   </text>
                 </g>
@@ -1021,7 +1021,7 @@ const ComparativeLineChart = ({
                 <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
                   fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
                   fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
-                  fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                  fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
                   {months[i]}
                 </text>
               );

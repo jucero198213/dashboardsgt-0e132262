@@ -568,13 +568,13 @@ export default function Compras() {
                           <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{fmtY(maxVal*f)}</text>
                         ))}
                         <path d={`${buildPath(valoresAtual,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#comprasGrad)"/>
                         <path d={buildPath(valoresAnt,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
                         <path d={buildPath(valoresAtual,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{m}</text>
                         ))}
                       </svg>
                     )}

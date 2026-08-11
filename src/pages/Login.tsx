@@ -427,7 +427,7 @@ export default function Login() {
             <div className="flex flex-col gap-4 pt-2">
               <button
                 type="submit" disabled={submitting}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 font-bold text-[#060912] shadow-[0_0_40px_-10px_rgba(245,158,11,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_-5px_rgba(245,158,11,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 font-bold text-gray-900 shadow-[0_0_40px_-10px_rgba(245,158,11,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_-5px_rgba(245,158,11,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? (
                   <><Loader2 className="h-4 w-4 animate-spin" />Autenticando...</>

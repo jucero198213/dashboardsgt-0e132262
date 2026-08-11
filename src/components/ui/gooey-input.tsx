@@ -147,7 +147,7 @@ export function GooeyInput({
           initial="collapsed"
           animate={isExpanded ? "expanded" : "collapsed"}
           transition={transition}
-          className="flex h-8 cursor-pointer items-center gap-2 rounded-xl border border-[#2a3a52] bg-[#1e283a] px-2.5 text-slate-400 outline-none transition-colors hover:border-[#3a4f6a] hover:bg-[#253248] focus-visible:border-amber-400/40 disabled:pointer-events-none disabled:opacity-50"
+          className="flex h-8 cursor-pointer items-center gap-2 rounded-xl border border-[var(--sgt-border-medium)] bg-[var(--sgt-bg-card)] px-2.5 text-slate-400 outline-none transition-colors hover:border-[var(--sgt-border-medium)] hover:bg-[var(--sgt-bg-surface)] focus-visible:border-amber-400/40 disabled:pointer-events-none disabled:opacity-50"
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
           {isExpanded && (
