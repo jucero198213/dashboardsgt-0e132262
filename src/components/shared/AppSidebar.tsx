@@ -27,10 +27,9 @@ export const SB_W_EXPANDED  = 216;
 export const SB_W_COLLAPSED = 72;
 
 // ── Dock magnification (vertical) ───────────────────────────────────────────
-const MAG_SIZE     = 48;
-const MAG_BASE     = 40;
-const MAG_DISTANCE = 120;
-const MAG_SPRING   = { mass: 0.1, stiffness: 150, damping: 12 };
+const MAG_SCALE_MAX = 1.25;
+const MAG_DISTANCE  = 120;
+const MAG_SPRING    = { mass: 0.1, stiffness: 200, damping: 15 };
 
 const MouseYContext = createContext<MotionValue<number> | null>(null);
 
@@ -61,12 +60,12 @@ function MagItem({
     return val - rect.y - rect.height / 2;
   });
 
-  const sizeTransform = useTransform(
+  const scaleTransform = useTransform(
     distanceFromMouse,
     [-MAG_DISTANCE, 0, MAG_DISTANCE],
-    [MAG_BASE, MAG_SIZE, MAG_BASE],
+    [1, MAG_SCALE_MAX, 1],
   );
-  const size = useSpring(sizeTransform, MAG_SPRING);
+  const scale = useSpring(scaleTransform, MAG_SPRING);
 
   return (
     <div className="flex items-center justify-center py-[2px]">
@@ -77,7 +76,7 @@ function MagItem({
         onMouseLeave={onMouseLeave}
         aria-label={ariaLabel}
         className={className}
-        style={{ ...style, width: size, height: size } as React.CSSProperties}
+        style={{ ...style, scale, willChange: "transform" } as React.CSSProperties}
       >
         {children}
       </motion.button>
