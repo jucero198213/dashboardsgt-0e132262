@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import {
   Trash2, Download, Sparkles, BarChart3, Wallet,
   TrendingUp, Fuel, Landmark, Truck, ArrowLeft,
@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SofiaChatInput } from "@/components/ui/ai-chat-input";
 import { TextShimmer } from "@/components/ui/shimmer-text";
-import { GradientBars } from "@/components/ui/gradient-bars-background";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -47,8 +46,89 @@ const SUGGESTIONS: { icon: React.ElementType; label: string; prompt: string }[] 
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Floating particles                                                  */
+/*  Animated Aurora Background                                          */
 /* ------------------------------------------------------------------ */
+function AuroraBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Primary arc — slow breathing pulse */}
+      <motion.div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{
+          bottom: "-30%",
+          width: "140%",
+          height: "80%",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at 50% 80%, rgba(245,158,11,0.20) 0%, rgba(234,88,12,0.09) 35%, rgba(180,83,9,0.03) 55%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+        animate={{
+          opacity: [0.6, 1, 0.6],
+          scale: [1, 1.05, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      {/* Inner glow — offset breathing */}
+      <motion.div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{
+          bottom: "-25%",
+          width: "100%",
+          height: "60%",
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at 50% 85%, rgba(251,191,36,0.14) 0%, rgba(245,158,11,0.06) 40%, transparent 65%)",
+          filter: "blur(30px)",
+        }}
+        animate={{
+          opacity: [0.5, 0.9, 0.5],
+          scale: [1.02, 0.98, 1.02],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
+      />
+      {/* Edge ring — subtle shimmer */}
+      <motion.div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{
+          bottom: "-28%",
+          width: "120%",
+          height: "70%",
+          borderRadius: "50%",
+          boxShadow: "inset 0 0 80px 2px rgba(251,191,36,0.08), inset 0 0 160px 4px rgba(245,158,11,0.04)",
+        }}
+        animate={{
+          opacity: [0.4, 0.8, 0.4],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2,
+        }}
+      />
+      {/* Top ambient haze */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 50% 30% at 50% 0%, rgba(245,158,11,0.03), transparent 60%)",
+        }}
+      />
+
+      {/* Floating particles */}
+      {Array.from({ length: 20 }).map((_, i) => (
+        <FloatingParticle key={i} index={i} />
+      ))}
+    </div>
+  );
+}
 
 function FloatingParticle({ index }: { index: number }) {
   const size = useMemo(() => 1.5 + Math.random() * 2, []);
@@ -357,27 +437,8 @@ export default function SofiaChat() {
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-[#07090e]">
 
-      {/* Gradient bars background */}
-      <GradientBars
-        numBars={15}
-        gradientFrom="rgba(245, 158, 11, 0.35)"
-        gradientTo="transparent"
-        animationDuration={2.5}
-      />
-
-      {/* Overlay to soften the bars + add depth */}
-      <div className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 100%, transparent 30%, #07090e 75%)",
-        }}
-      />
-
-      {/* Floating particles on top of bars */}
-      <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <FloatingParticle key={i} index={i} />
-        ))}
-      </div>
+      {/* Animated aurora */}
+      <AuroraBackground />
 
       {/* Back button + Beta badge */}
       <motion.div
@@ -424,7 +485,7 @@ export default function SofiaChat() {
       </AnimatePresence>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-0 relative z-[5]">
+      <div className="flex-1 flex flex-col min-h-0 relative z-10">
         <AnimatePresence mode="wait">
           {!hasMessages ? (
             /* ── EMPTY STATE ── */
