@@ -208,7 +208,7 @@ export function AppSidebar() {
           }}
           onMouseLeave={() => setFlyout(null)}
           ariaLabel={item.label}
-          className="flex items-center justify-center rounded-lg border transition-colors duration-150"
+          className="flex items-center justify-center w-11 h-10 rounded-lg border transition-colors duration-150"
           style={active
             ? { ...CHIP_ACTIVE }
             : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
@@ -279,7 +279,7 @@ export function AppSidebar() {
             }
             onMouseLeave={() => setFlyout(null)}
             ariaLabel="Início"
-            className="flex items-center justify-center rounded-lg border transition-colors duration-150"
+            className="flex items-center justify-center w-11 h-10 rounded-lg border transition-colors duration-150"
             style={isHomeActive ? { ...CHIP_ACTIVE }
               : { borderColor: "transparent", color: "var(--sb-text-secondary)", background: "transparent" }}
           >
