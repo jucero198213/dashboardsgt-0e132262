@@ -440,12 +440,12 @@ export default function SofiaChat() {
       {/* Animated aurora */}
       <AuroraBackground />
 
-      {/* Back button + Beta badge */}
+      {/* Back button */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
-        className="absolute top-4 left-4 z-30 flex items-center gap-2"
+        className="absolute top-4 left-4 z-30"
       >
         <motion.button
           whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.06)" }}
@@ -456,9 +456,6 @@ export default function SofiaChat() {
         >
           <ArrowLeft className="w-4 h-4" />
         </motion.button>
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-amber-400/70 border border-amber-400/20 bg-amber-400/[0.06] select-none">
-          Beta
-        </span>
       </motion.div>
 
       {/* Clear button */}
@@ -523,8 +520,18 @@ export default function SofiaChat() {
                 </motion.div>
               </motion.div>
 
-              {/* Title */}
-              <AnimatedTitle />
+              {/* Title + Beta badge */}
+              <div className="flex items-center justify-center gap-3">
+                <AnimatedTitle />
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] text-amber-400/70 border border-amber-400/20 bg-amber-400/[0.06] select-none mb-3"
+                >
+                  Beta
+                </motion.span>
+              </div>
 
               {/* Subtitle */}
               <motion.p
