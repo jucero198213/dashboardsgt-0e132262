@@ -76,7 +76,7 @@ function MagItem({
         onMouseLeave={onMouseLeave}
         aria-label={ariaLabel}
         className={className}
-        style={{ ...style, scale, willChange: "transform" } as React.CSSProperties}
+        style={{ ...style, scale, willChange: "transform" } as unknown as React.CSSProperties}
       >
         {children}
       </motion.button>
