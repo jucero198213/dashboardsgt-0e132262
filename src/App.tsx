@@ -39,6 +39,7 @@ const SgtWorkspace            = lazy(() => import("./pages/SgtWorkspace"));
 const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspace"));
 const PortalWrWorkspace       = lazy(() => import("./pages/PortalWrWorkspace"));
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
+const SofiaChat               = lazy(() => import("./pages/SofiaChat"));
 const Welcome                 = lazy(() => import("./pages/Welcome"));
 
 // ── QueryClient com configurações otimizadas ─────────────────────────────────
@@ -100,6 +101,7 @@ const App = () => (
                 <Route path="/visual-rodopar"  element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/portal-wr"       element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><PortalWrWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/sofia"           element={<ProtectedRoute><SofiaChat /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
