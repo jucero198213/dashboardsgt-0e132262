@@ -475,13 +475,12 @@ export default function Compras() {
           </div>
 
           {/* ════════ FILTROS ════════ */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <GooeyInput
               placeholder="Buscar por produto, fornecedor ou NF..."
               value={search}
               onValueChange={(v) => setSearch(v)}
             />
-
             <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
               <SelectTrigger className="h-9 w-full sm:w-[200px] rounded-lg text-[12px]">
                 <SelectValue placeholder="Grupo" />

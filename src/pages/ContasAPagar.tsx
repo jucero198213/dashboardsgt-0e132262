@@ -606,13 +606,12 @@ export default function ContasAPagar() {
         </div>
 
         {/* ════════ FILTROS ════════ */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <GooeyInput
             placeholder="Buscar por documento ou fornecedor..."
             value={search}
             onValueChange={(v) => setSearch(v)}
           />
-
           <div className="flex gap-2 overflow-x-auto">
             {["todos", "Em Aberto", "Vencido", "Parcial", "Pago"].map((status) => (
               <button
