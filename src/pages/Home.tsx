@@ -254,8 +254,8 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       <motion.button
         type="button"
         onClick={handleClick}
-        whileHover={{ y: -5, transition: { duration: 0.18, ease: "easeOut" } }}
-        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left transition-all duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
+        whileHover={{ y: -6, scale: 1.015, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+        className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border-2 p-8 text-left transition-colors duration-300 cursor-pointer ${f.border} ${f.bgGrad} ${f.hoverBorder} ${f.hoverShadow}`}
       >
         <div className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${f.glow1} via-transparent to-transparent opacity-40`} />
         <div className={`pointer-events-none absolute -top-24 left-1/2 h-48 w-[90%] -translate-x-1/2 rounded-full bg-gradient-to-b ${f.glow2} to-transparent blur-2xl transition-opacity duration-500 opacity-30 group-hover:opacity-80`} />
@@ -293,8 +293,8 @@ function ModuleCard({ data, index }: { data: ModuleCardData; index: number }) {
       type="button"
       onClick={handleClick}
       disabled={data.disabled}
-      whileHover={data.disabled ? undefined : { y: -4, transition: { duration: 0.15, ease: "easeOut" } }}
-      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left transition-all duration-300 ${tone.ring} ${tone.hoverShadow} ${
+      whileHover={data.disabled ? undefined : { y: -5, scale: 1.015, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+      className={`group relative flex h-full w-full flex-col items-start gap-5 overflow-hidden rounded-3xl border p-7 text-left transition-colors duration-300 ${tone.ring} ${tone.hoverShadow} ${
         data.disabled
           ? "cursor-default opacity-80 dark:border-white/8 border-slate-200 dark:bg-white/[0.03] bg-slate-50"
           : `cursor-pointer dark:border-white/10 ${tone.borderLight} dark:bg-white/[0.04] ${tone.bgLight} hover:dark:bg-white/[0.07] dark:hover:border-white/20`
@@ -389,42 +389,20 @@ function Reveal({
   delay?: number;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    // Fallback: garante visibilidade mesmo se o observer não disparar
-    const fallback = setTimeout(() => setVisible(true), 600);
-
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          clearTimeout(fallback);
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { rootMargin: "0px" }
-    );
-    obs.observe(el);
-    return () => { obs.disconnect(); clearTimeout(fallback); };
-  }, []);
-
   return (
-    <div
-      ref={ref}
+    <motion.div
       className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.6s ${delay}s ease-out, transform 0.6s ${delay}s ease-out`,
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{
+        duration: 0.5,
+        delay,
+        ease: [0.25, 0.46, 0.45, 0.94],
       }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -809,7 +787,7 @@ export default function Home() {
                 <Reveal key={item.label} delay={i * 0.1} className="h-full">
                   {item.href ? (
                     <motion.a href={item.href} target="_blank" rel="noopener noreferrer"
-                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+                      whileHover={{ y: -4, scale: 1.01, transition: { type: "spring", stiffness: 300, damping: 20 } }}
                       className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] dark:bg-[var(--sgt-input-bg)]/40 bg-[var(--sgt-bg-card)] p-6 backdrop-blur-sm transition-colors dark:hover:bg-[var(--sgt-input-hover)]/60 hover:bg-[var(--sgt-bg-section)] ${item.hoverCls} h-full`}>
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
                       <div className="flex-1">
@@ -822,7 +800,7 @@ export default function Home() {
                     </motion.a>
                   ) : (
                     <motion.button type="button" onClick={item.onClick}
-                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+                      whileHover={{ y: -4, scale: 1.01, transition: { type: "spring", stiffness: 300, damping: 20 } }}
                       className={`group flex items-start gap-5 rounded-3xl border border-[var(--sgt-border-subtle)] dark:bg-[var(--sgt-input-bg)]/40 bg-[var(--sgt-bg-card)] p-6 backdrop-blur-sm transition-colors dark:hover:bg-[var(--sgt-input-hover)]/60 hover:bg-[var(--sgt-bg-section)] ${item.hoverCls} text-left cursor-pointer w-full h-full`}>
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border ${item.iconCls}`}>{item.iconEl}</div>
                       <div className="flex-1">
