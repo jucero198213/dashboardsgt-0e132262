@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Trash2, Download, ArrowLeft, Sparkles } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  Trash2, Download, Sparkles, BarChart3, Wallet,
+  TrendingUp, Fuel, Landmark, Truck, ArrowLeft,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,33 +33,27 @@ const WELCOME: ChatMessage = {
     "Olá! Sou a Sofia, assistente de IA da SGT. Posso consultar e analisar os dados do seu DW (faturamento, contas, manutenção e mais). Não realizo alterações no sistema. Como posso ajudar?",
 };
 
-const SUGGESTIONS: { label: string; prompt: string }[] = [
-  { label: "Faturamento de ontem", prompt: "Qual foi o faturamento de ontem?" },
-  { label: "Top 5 clientes do mês", prompt: "Quais os 5 clientes que mais faturaram este mês?" },
-  { label: "Mês atual vs mês passado", prompt: "Compare o faturamento deste mês com o mês passado." },
-  { label: "Contas a pagar (7 dias)", prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
-  { label: "Inadimplência atual", prompt: "Qual o total de contas a receber vencidas e quem são os maiores devedores?" },
-  { label: "Caminhão que mais gasta", prompt: "Qual veículo está com maior custo de manutenção nos últimos 90 dias?" },
-  { label: "Consumo da frota", prompt: "Como está o consumo de combustível da frota nos últimos 30 dias?" },
-  { label: "Saldo dos bancos", prompt: "Qual o saldo atual de todas as contas bancárias?" },
-  { label: "Composição da frota", prompt: "Me mostra a composição da frota: total, situação, idade média." },
-  { label: "Compras do mês", prompt: "Resumo das compras do mês: total e principais fornecedores." },
-  { label: "Motoristas + CNHs", prompt: "Quantos motoristas ativos temos e quais CNHs vencem nos próximos 60 dias?" },
-  { label: "Financiamentos", prompt: "Qual o total em aberto de financiamentos de veículos e o que vence nos próximos 30 dias?" },
+const SUGGESTIONS: { icon: React.ElementType; label: string; prompt: string }[] = [
+  { icon: BarChart3, label: "Faturamento",     prompt: "Qual foi o faturamento de ontem?" },
+  { icon: Wallet,    label: "Contas a pagar",   prompt: "Quais contas a pagar vencem nos próximos 7 dias?" },
+  { icon: TrendingUp,label: "Comparar meses",   prompt: "Compare o faturamento deste mês com o mês passado." },
+  { icon: Fuel,      label: "Consumo frota",    prompt: "Como está o consumo de combustível da frota nos últimos 30 dias?" },
+  { icon: Landmark,  label: "Saldo bancos",     prompt: "Qual o saldo atual de todas as contas bancárias?" },
+  { icon: Truck,     label: "Composição frota", prompt: "Me mostra a composição da frota: total, situação, idade média." },
 ];
 
-function MessageBubble({ msg, index }: { msg: ChatMessage; index: number }) {
+function MessageBubble({ msg }: { msg: ChatMessage }) {
   const reduce = useReducedMotion();
 
   if (msg.role === "user") {
     return (
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: 8, scale: 0.96 }}
+        initial={reduce ? false : { opacity: 0, y: 12, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="flex justify-end"
       >
-        <div className="max-w-[75%] rounded-2xl rounded-br-md px-4 py-3 text-[14px] leading-relaxed whitespace-pre-wrap break-words bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/10">
+        <div className="max-w-[70%] rounded-3xl rounded-br-lg px-5 py-3 text-[14px] leading-relaxed whitespace-pre-wrap break-words bg-gradient-to-br from-amber-500 to-amber-600 text-white">
           {msg.content}
         </div>
       </motion.div>
@@ -65,50 +62,41 @@ function MessageBubble({ msg, index }: { msg: ChatMessage; index: number }) {
 
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, y: 8, scale: 0.96 }}
+      initial={reduce ? false : { opacity: 0, y: 12, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="flex gap-3 items-start"
     >
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/15">
-        <Sparkles className="w-4 h-4" />
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white mt-0.5">
+        <Sparkles className="w-3.5 h-3.5" />
       </div>
-      <div className="max-w-[80%] space-y-2">
-        <div className="rounded-2xl rounded-tl-md px-4 py-3 text-[14px] leading-relaxed whitespace-pre-wrap break-words dark:bg-white/[0.06] bg-slate-100 dark:text-[var(--sgt-text-primary)] text-slate-800 border dark:border-white/8 border-slate-200/60">
+      <div className="max-w-[80%] space-y-2 flex-1">
+        <div className="text-[14px] leading-relaxed whitespace-pre-wrap break-words text-slate-200">
           {msg.content}
         </div>
         {msg.planilha?.xlsx_base64 && (
           <button
             onClick={() => baixarBase64(msg.planilha!.filename ?? "conferencia_nfe.xlsx", msg.planilha!.xlsx_base64!, XLSX_MIME)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-semibold cursor-pointer bg-amber-400/10 text-amber-400 border border-amber-400/25 hover:bg-amber-400/20 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium cursor-pointer bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/20 transition-colors"
           >
-            <Download size={13} />
-            Baixar planilha (Excel)
+            <Download size={12} />
+            Baixar planilha
           </button>
         )}
         {msg.danfe?.pdf_base64 && (
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => {
-                const bytes = Uint8Array.from(atob(msg.danfe!.pdf_base64!), (c) => c.charCodeAt(0));
-                const blob = new Blob([bytes], { type: "application/pdf" });
-                const url = URL.createObjectURL(blob);
-                window.open(url, "_blank");
-                setTimeout(() => URL.revokeObjectURL(url), 60000);
-              }}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-semibold cursor-pointer bg-amber-400/10 text-amber-400 border border-amber-400/25 hover:bg-amber-400/20 transition-colors"
-            >
-              <Download size={13} />
-              Abrir DANFE (PDF)
-            </button>
-            <button
-              onClick={() => baixarBase64(msg.danfe!.filename ?? "danfe.pdf", msg.danfe!.pdf_base64!, "application/pdf")}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-semibold cursor-pointer dark:bg-white/5 bg-slate-100 dark:text-[var(--sgt-text-primary)] text-slate-600 border dark:border-white/10 border-slate-200 hover:dark:bg-white/10 hover:bg-slate-200 transition-colors"
-            >
-              <Download size={13} />
-              Baixar
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              const bytes = Uint8Array.from(atob(msg.danfe!.pdf_base64!), (c) => c.charCodeAt(0));
+              const blob = new Blob([bytes], { type: "application/pdf" });
+              const url = URL.createObjectURL(blob);
+              window.open(url, "_blank");
+              setTimeout(() => URL.revokeObjectURL(url), 60000);
+            }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium cursor-pointer bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/20 transition-colors"
+          >
+            <Download size={12} />
+            Abrir DANFE
+          </button>
         )}
       </div>
     </motion.div>
@@ -122,10 +110,10 @@ function TypingIndicator() {
       animate={{ opacity: 1, y: 0 }}
       className="flex gap-3 items-start"
     >
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/15">
-        <Sparkles className="w-4 h-4" />
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white mt-0.5">
+        <Sparkles className="w-3.5 h-3.5" />
       </div>
-      <div className="rounded-2xl rounded-tl-md px-4 py-3 dark:bg-white/[0.06] bg-slate-100 border dark:border-white/8 border-slate-200/60">
+      <div className="pt-1">
         <TextShimmer className="text-[14px] font-medium" duration={1.5}>
           Sofia está pensando...
         </TextShimmer>
@@ -136,12 +124,13 @@ function TypingIndicator() {
 
 export default function SofiaChat() {
   const navigate = useNavigate();
-  const { role } = useAuth();
   const reduce = useReducedMotion();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     if (listRef.current) {
@@ -151,8 +140,9 @@ export default function SofiaChat() {
 
   const sendText = async (text: string) => {
     if (!text || loading) return;
-    const next = [...messages, { role: "user" as const, content: text }];
-    setMessages(next);
+    const userMsg: ChatMessage = { role: "user", content: text };
+    const next = [WELCOME, ...messages, userMsg];
+    setMessages((m) => [...m, userMsg]);
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("ai-assistant", {
@@ -173,133 +163,188 @@ export default function SofiaChat() {
     }
   };
 
-  const clear = () => setMessages([WELCOME]);
-
-  const showChat = messages.length > 1 || loading;
+  const clear = () => setMessages([]);
 
   return (
-    <div
-      className="flex flex-col h-[100dvh] overflow-hidden"
-      style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
-    >
-      {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.10),transparent_58%)]" />
+    <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-[#07090e]">
 
-      {/* Header */}
-      <header className="relative z-20 flex items-center gap-3 px-4 py-3 sm:px-6 border-b dark:border-white/[0.06] border-slate-200/60 dark:bg-[var(--sgt-bg-surface)]/80 bg-white/80 backdrop-blur-xl">
+      {/* ── Ambient aurora arc (amber/gold) ── */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {/* Main arc glow */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            bottom: "-30%",
+            width: "140%",
+            height: "80%",
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse at 50% 80%, rgba(245,158,11,0.18) 0%, rgba(234,88,12,0.08) 35%, rgba(180,83,9,0.03) 55%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+        {/* Secondary inner glow */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            bottom: "-25%",
+            width: "100%",
+            height: "60%",
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse at 50% 85%, rgba(251,191,36,0.12) 0%, rgba(245,158,11,0.05) 40%, transparent 65%)",
+            filter: "blur(30px)",
+          }}
+        />
+        {/* Bright edge ring */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            bottom: "-28%",
+            width: "120%",
+            height: "70%",
+            borderRadius: "50%",
+            background: "transparent",
+            boxShadow: "inset 0 0 80px 2px rgba(251,191,36,0.08), inset 0 0 160px 4px rgba(245,158,11,0.04)",
+          }}
+        />
+        {/* Subtle top ambient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 50% 30% at 50% 0%, rgba(245,158,11,0.03), transparent 60%)",
+          }}
+        />
+      </div>
+
+      {/* ── Back button (always visible, discrete) ── */}
+      <div className="absolute top-4 left-4 z-30">
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center justify-center w-9 h-9 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-400 text-slate-500 hover:dark:bg-white/10 hover:bg-slate-200 transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-white/20 hover:text-white/50 hover:bg-white/5 transition-all"
           aria-label="Voltar"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
+      </div>
 
-        <div className="flex items-center gap-2.5 flex-1">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/15">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <h1 className="text-[15px] font-bold dark:text-white text-slate-800 leading-tight">Sofia AI</h1>
-            <p className="text-[11px] dark:text-slate-500 text-slate-400 leading-tight">Assistente inteligente SGT</p>
-          </div>
-        </div>
-
-        <button
-          onClick={clear}
-          title="Nova conversa"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold dark:bg-white/5 bg-slate-100 dark:text-slate-400 text-slate-500 hover:dark:bg-white/10 hover:bg-slate-200 transition-colors"
-        >
-          <Trash2 size={12} />
-          <span className="hidden sm:inline">Nova conversa</span>
-        </button>
-      </header>
-
-      {/* Chat area */}
-      <div ref={listRef} className="flex-1 overflow-y-auto relative z-10">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-          {/* Welcome screen */}
-          {!showChat && (
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="flex flex-col items-center text-center pt-8 sm:pt-16"
+      {/* ── Clear button (only when chatting) ── */}
+      <AnimatePresence>
+        {hasMessages && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-4 right-4 z-30"
+          >
+            <button
+              onClick={clear}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-white/25 hover:text-white/60 hover:bg-white/5 transition-all"
             >
-              <motion.div
-                initial={reduce ? false : { scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.1, ease: [0.175, 0.885, 0.32, 1.275] }}
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-xl shadow-amber-500/20 mb-6"
-              >
-                <Sparkles className="w-7 h-7" />
-              </motion.div>
+              <Trash2 size={11} />
+              Limpar
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              <motion.h2
-                initial={reduce ? false : { opacity: 0, y: 8 }}
+      {/* ── Main content ── */}
+      <div className="flex-1 flex flex-col min-h-0 relative z-10">
+        <AnimatePresence mode="wait">
+          {!hasMessages ? (
+            /* ── EMPTY STATE — centered ── */
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -30, transition: { duration: 0.25 } }}
+              className="flex-1 flex flex-col items-center justify-center px-4"
+            >
+              {/* Title */}
+              <motion.h1
+                initial={reduce ? false : { opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="text-[clamp(2rem,6vw,3.2rem)] font-black tracking-tight text-white mb-2"
+              >
+                Sofia AI
+              </motion.h1>
+
+              <motion.p
+                initial={reduce ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-2xl sm:text-3xl font-black tracking-tight dark:text-white text-slate-800 mb-2"
+                className="text-[15px] text-white/35 mb-12 text-center"
               >
-                Como posso ajudar?
-              </motion.h2>
-              <motion.p
-                initial={reduce ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-[14px] dark:text-slate-400 text-slate-500 max-w-md mb-10"
-              >
-                Consulte faturamento, contas, frota, manutenção e muito mais. Pergunte em linguagem natural.
+                Assistente inteligente da SGT — pergunte em linguagem natural.
               </motion.p>
 
+              {/* Input */}
               <motion.div
                 initial={reduce ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="w-full max-w-xl"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="w-full max-w-[620px] mb-8"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] dark:text-slate-600 text-slate-400 mb-4">
-                  Sugestões para começar
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {SUGGESTIONS.map((s, i) => (
+                <SofiaChatInput
+                  onSubmit={sendText}
+                  disabled={loading}
+                  placeholder="Pergunte algo para a Sofia..."
+                />
+              </motion.div>
+
+              {/* Suggestion chips */}
+              <motion.div
+                initial={reduce ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                className="flex flex-wrap gap-2.5 justify-center max-w-[640px]"
+              >
+                {SUGGESTIONS.map((s, i) => {
+                  const Icon = s.icon;
+                  return (
                     <motion.button
                       key={s.label}
-                      initial={reduce ? false : { opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.45 + i * 0.03 }}
+                      initial={reduce ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.5 + i * 0.04 }}
                       onClick={() => sendText(s.prompt)}
-                      className="px-3 py-2 rounded-xl text-[12px] font-medium dark:bg-white/[0.04] bg-slate-50 dark:text-slate-300 text-slate-600 border dark:border-white/8 border-slate-200/80 hover:dark:bg-white/[0.08] hover:bg-slate-100 hover:dark:border-white/15 hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5"
+                      className="group flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-medium text-white/30 border border-white/[0.06] bg-white/[0.02] hover:text-white/70 hover:border-white/15 hover:bg-white/[0.05] transition-all duration-300 cursor-default"
                     >
+                      <Icon className="w-3.5 h-3.5 opacity-50 group-hover:opacity-80 transition-opacity" />
                       {s.label}
                     </motion.button>
-                  ))}
-                </div>
+                  );
+                })}
               </motion.div>
             </motion.div>
-          )}
+          ) : (
+            /* ── CHAT STATE ── */
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              <div ref={listRef} className="flex-1 overflow-y-auto pt-14 pb-4">
+                <div className="max-w-2xl mx-auto px-5 space-y-6">
+                  {messages.map((msg, i) => (
+                    <MessageBubble key={i} msg={msg} />
+                  ))}
+                  {loading && <TypingIndicator />}
+                </div>
+              </div>
 
-          {/* Messages */}
-          {showChat && (
-            <>
-              {messages.map((msg, i) => (
-                <MessageBubble key={i} msg={msg} index={i} />
-              ))}
-              {loading && <TypingIndicator />}
-            </>
+              <div className="pb-6 pt-3 px-4">
+                <div className="max-w-2xl mx-auto">
+                  <SofiaChatInput
+                    onSubmit={sendText}
+                    disabled={loading}
+                    placeholder="Pergunte algo..."
+                  />
+                </div>
+              </div>
+            </motion.div>
           )}
-        </div>
-      </div>
-
-      {/* Input area */}
-      <div className="relative z-20 border-t dark:border-white/[0.06] border-slate-200/60 dark:bg-[var(--sgt-bg-surface)]/80 bg-white/80 backdrop-blur-xl">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
-          <SofiaChatInput
-            onSubmit={sendText}
-            disabled={loading}
-            placeholder="Pergunte algo para a Sofia..."
-          />
-        </div>
+        </AnimatePresence>
       </div>
     </div>
   );
