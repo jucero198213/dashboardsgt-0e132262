@@ -608,7 +608,7 @@ export default function Home() {
           <TodayTicketsPopup />
 
           {/* ── HERO ── */}
-          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center overflow-x-hidden px-4 pt-16 pb-6 text-center sm:pt-20 sm:pb-8 lg:px-10 lg:pt-24 lg:pb-10">
+          <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center overflow-x-hidden px-4 pt-12 pb-4 text-center sm:pt-14 sm:pb-6 lg:px-10 lg:pt-16 lg:pb-8">
 
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
@@ -627,7 +627,7 @@ export default function Home() {
               <span
                 className="block font-black tracking-[-0.04em]"
                 style={{
-                  fontSize: "clamp(2.5rem,15vw,11rem)",
+                  fontSize: "clamp(2.5rem,12vw,8rem)",
                   filter: "drop-shadow(0 0 32px rgba(245,158,11,0.28)) drop-shadow(0 4px 16px rgba(234,88,12,0.15))",
                   lineHeight: 1,
                 }}
@@ -654,7 +654,7 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
               className="mt-8 flex w-full justify-center"
             >
-              <SgtLogoSlot className="h-[100px] sm:h-[130px] lg:h-[155px]" />
+              <SgtLogoSlot className="h-[80px] sm:h-[100px] lg:h-[120px]" />
             </motion.div>
 
             <motion.p
