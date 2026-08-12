@@ -153,7 +153,7 @@ const Top10Chart = ({ data }: { data: any[] }) => {
   const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         {data.map((d, i) => (
           <linearGradient key={i} id={`bar-g-${i}`} x1="0" y1="0" x2="1" y2="0">
@@ -253,7 +253,7 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
   
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[240px_1fr] gap-3 h-full items-start sm:items-center">
-      <svg viewBox="0 0 260 260" className="w-full" onMouseLeave={() => setHover(null)}>
+      <svg viewBox="0 0 260 260" className="w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
         {slices.map((s, i) => {
           const isHover = hover === i;
           const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
@@ -356,7 +356,7 @@ const MonthlyMaintenanceChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.18" />
@@ -435,7 +435,7 @@ const AgeCostChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         {data.map((d, i) => (
           <linearGradient key={i} id={`age-g-${i}`} x1="0" y1="0" x2="0" y2="1">
@@ -793,7 +793,7 @@ export default function Frota() {
               style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 sm:gap-3 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
 
             {/* ════════ NAVBAR ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
@@ -850,8 +850,6 @@ export default function Frota() {
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-
-
             {/* ════════ LOADING PHASE ════════ */}
             {isFetchingDw && loadingPhase && (
               <div className="flex items-center gap-2 text-[11px] text-amber-300/80">
@@ -866,6 +864,10 @@ export default function Frota() {
             )}
 
             {/* ════════ KPI ROW (4 cards) ════════ */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Indicadores</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0 sgt-stagger">
               <AnimatedCard delay={0}>
                 <KpiCard label="Frota Ativa" value={isFetchingDw ? "—" : fmtNum(kpis.ativos)} subtitle={`${fmtNum(kpis.total)} no recorte`} icon={Truck} tone="cyan" />
@@ -881,7 +883,11 @@ export default function Frota() {
               </AnimatedCard>
             </div>
 
-            {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
+            {/* ════════ GRÁFICOS ════════ */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Análise Gráfica</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Top 10 custo */}
               <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
@@ -912,10 +918,9 @@ export default function Frota() {
               </div>
             </div>
 
-            {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[220px]">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -929,7 +934,7 @@ export default function Frota() {
               </div>
 
               {/* Custo médio por idade */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -966,7 +971,13 @@ export default function Frota() {
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
-        />
+            />
+
+            {/* ════════ FROTA DETALHADA ════════ */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Frota Detalhada</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
 
             {/* ════════ FILTROS DA TABELA ════════ */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
