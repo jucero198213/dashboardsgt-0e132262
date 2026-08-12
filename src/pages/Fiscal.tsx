@@ -95,6 +95,7 @@ export default function Fiscal() {
   const [pagina, setPagina]         = useState(1);
   const [danfeLoading, setDanfeLoading] = useState<string | null>(null);
   const [danfeErro, setDanfeErro]   = useState<Record<string, string>>({});
+  const [abaClassif, setAbaClassif] = useState<string>("todas");
 
   const gerarDanfe = useCallback(async (chave: string) => {
     setDanfeLoading(chave);
@@ -137,9 +138,23 @@ export default function Fiscal() {
   // ── Toggles + base ──────────────────────────────────────────────────────────
   const qtdEntrada        = notas.filter(isEntrada).length;
   const qtdDesconsiderado = notas.filter(isDesconsiderado).length;
-  const notasBase = useMemo(() => notas.filter(n =>
+  const notasPreClassif = useMemo(() => notas.filter(n =>
     !(ocultarEntrada && isEntrada(n)) && !(ocultarDesconsiderados && isDesconsiderado(n))
   ), [notas, ocultarEntrada, ocultarDesconsiderados]);
+
+  const classificacoes = useMemo(() => {
+    const set = new Set<string>();
+    notasPreClassif.forEach(n => {
+      if (n.CLASSIFICACAO_FORNECEDOR) set.add(n.CLASSIFICACAO_FORNECEDOR);
+    });
+    return Array.from(set).sort();
+  }, [notasPreClassif]);
+
+  const notasBase = useMemo(() => {
+    if (abaClassif === "todas") return notasPreClassif;
+    if (abaClassif === "sem_classificacao") return notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR);
+    return notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === abaClassif);
+  }, [notasPreClassif, abaClassif]);
 
   const total       = notasBase.length;
   const lancadas    = notasBase.filter(n => n.SITUACAO === "OK").length;
@@ -184,7 +199,7 @@ export default function Fiscal() {
   const totalPaginas = Math.max(1, Math.ceil(notasFiltradas.length / POR_PAGINA));
   const paginaAtual  = Math.min(pagina, totalPaginas);
   const notasPagina  = notasFiltradas.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
-  useEffect(() => { setPagina(1); }, [search, filtroStatus, ocultarEntrada, ocultarDesconsiderados, dataInicio, dataFim]);
+  useEffect(() => { setPagina(1); }, [search, filtroStatus, ocultarEntrada, ocultarDesconsiderados, dataInicio, dataFim, abaClassif]);
 
   const exportarCsv = () => {
     const header = "situacao;fornecedor;cnpj;numero_nota;serie;valor_nota;valor_lancado;origem;data_emissao;chave";
@@ -369,6 +384,53 @@ export default function Fiscal() {
                 </div>
               </AnimatedCard>
             </div>
+
+            {/* ABAS POR CLASSIFICAÇÃO DO FORNECEDOR */}
+            {classificacoes.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
+                <button
+                  onClick={() => setAbaClassif("todas")}
+                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                    abaClassif === "todas"
+                      ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
+                      : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                  }`}
+                >
+                  Todas classificações
+                  <span className="text-[9px] font-bold tabular-nums opacity-70">({notasPreClassif.length})</span>
+                </button>
+                {classificacoes.map(c => {
+                  const qtd = notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === c).length;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => setAbaClassif(abaClassif === c ? "todas" : c)}
+                      className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                        abaClassif === c
+                          ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
+                          : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                      }`}
+                    >
+                      {c}
+                      <span className="text-[9px] font-bold tabular-nums opacity-70">({qtd})</span>
+                    </button>
+                  );
+                })}
+                {notasPreClassif.some(n => !n.CLASSIFICACAO_FORNECEDOR) && (
+                  <button
+                    onClick={() => setAbaClassif(abaClassif === "sem_classificacao" ? "todas" : "sem_classificacao")}
+                    className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                      abaClassif === "sem_classificacao"
+                        ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
+                        : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                    }`}
+                  >
+                    Sem classificação
+                    <span className="text-[9px] font-bold tabular-nums opacity-70">({notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length})</span>
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* TABELA */}
             <AnimatedCard delay={240} hover={false}>

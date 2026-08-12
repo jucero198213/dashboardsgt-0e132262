@@ -1961,6 +1961,7 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           -- Marcações pra tela filtrar (Opção C): entrada (TPNF=0) e fornecedor
           -- desconsiderado (Minerva etc.). Nenhuma é escondida aqui no servidor.
           CASE WHEN LEFT(${limpaCnpj("D.CNPJ")}, 8) IN (${descInSql}) THEN 1 ELSE 0 END AS DESCONSIDERADO,
+          CLASSIF.CLASSIFICACAO AS CLASSIFICACAO_FORNECEDOR,
           -- Accountability: quem/quando lançou (USUATU/DATATU registram a última
           -- atualização — pra nota lançada, é o lançamento) e há quantos dias a
           -- nota está no sistema (pra medir quanto tempo as pendentes empacam).
@@ -2011,6 +2012,15 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           GROUP BY ${limpaCnpj("CLI.CODCGC")}, TRY_CONVERT(BIGINT, PI.NUMDOC)
         ) A ON A.CNPJ   = ${limpaCnpj("D.CNPJ")}
            AND A.NUMDOC = TRY_CONVERT(BIGINT, D.NOTA)
+        -- Classificação do fornecedor (RODCLI.CODCMO → RODCMO.DESCRI)
+        LEFT JOIN (
+          SELECT ${limpaCnpj("CLI2.CODCGC")} AS CNPJ_LIMPO,
+                 MAX(CMO.DESCRI)             AS CLASSIFICACAO
+          FROM RODCLI CLI2 WITH (NOLOCK)
+          JOIN RODCMO CMO  WITH (NOLOCK) ON CLI2.CODCMO = CMO.CODCMO
+          WHERE CLI2.CODCMO IS NOT NULL
+          GROUP BY ${limpaCnpj("CLI2.CODCGC")}
+        ) CLASSIF ON CLASSIF.CNPJ_LIMPO = ${limpaCnpj("D.CNPJ")}
         WHERE D.VNF > 0
           AND D.XNOME IS NOT NULL
           -- Entrada (TPNF=0) e desconsiderados NÃO são escondidos aqui: a tela

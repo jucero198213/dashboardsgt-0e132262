@@ -697,6 +697,7 @@ export interface ConsultaNfeRow {
   SERIE_NOTA:       string | null;
   TPNF:             string | number | null;   // 0 = entrada, 1 = saída
   DESCONSIDERADO:   number;                    // 1 = fornecedor desconsiderado (Minerva etc.)
+  CLASSIFICACAO_FORNECEDOR: string | null;     // classificação do fornecedor (RODCMO.DESCRI)
   USUARIO_LANCAMENTO: string | null;           // quem lançou (última atualização no VR)
   DATA_LANCAMENTO:  string | null;             // quando lançou
   DIAS_PARADA:      number | null;             // dias desde o recebimento da nota
