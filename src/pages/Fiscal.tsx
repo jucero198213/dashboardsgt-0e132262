@@ -223,14 +223,14 @@ export default function Fiscal() {
 
   return (
     <div
-      className="flex flex-col transition-all duration-300 min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      className="flex flex-col transition-all duration-300 min-h-[100dvh] overflow-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
       <BackgroundEffects />
 
-      <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden w-full">
+      <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-auto xl:overflow-hidden"
+          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
         >
           <div className="h-[3px] w-full overflow-hidden rounded-t-[24px] shrink-0">
@@ -387,17 +387,17 @@ export default function Fiscal() {
 
             {/* ABAS POR CLASSIFICAÇÃO DO FORNECEDOR */}
             {classificacoes.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-thin">
+              <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-0.5">
                 <button
                   onClick={() => setAbaClassif("todas")}
-                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                  className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
                     abaClassif === "todas"
-                      ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
-                      : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                      ? "bg-amber-400/15 text-amber-300"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                   }`}
                 >
-                  Todas classificações
-                  <span className="text-[9px] font-bold tabular-nums opacity-70">({notasPreClassif.length})</span>
+                  Todas
+                  <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.length}</span>
                 </button>
                 {classificacoes.map(c => {
                   const qtd = notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === c).length;
@@ -405,28 +405,28 @@ export default function Fiscal() {
                     <button
                       key={c}
                       onClick={() => setAbaClassif(abaClassif === c ? "todas" : c)}
-                      className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                      className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
                         abaClassif === c
-                          ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
-                          : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                          ? "bg-amber-400/15 text-amber-300"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                       }`}
                     >
                       {c}
-                      <span className="text-[9px] font-bold tabular-nums opacity-70">({qtd})</span>
+                      <span className="text-[9px] tabular-nums opacity-60">{qtd}</span>
                     </button>
                   );
                 })}
                 {notasPreClassif.some(n => !n.CLASSIFICACAO_FORNECEDOR) && (
                   <button
                     onClick={() => setAbaClassif(abaClassif === "sem_classificacao" ? "todas" : "sem_classificacao")}
-                    className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors border ${
+                    className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
                       abaClassif === "sem_classificacao"
-                        ? "bg-amber-400/15 border-amber-400/30 text-amber-300"
-                        : "border-[var(--sgt-border-subtle)] text-slate-400 hover:text-slate-200 hover:border-slate-500/40"
+                        ? "bg-amber-400/15 text-amber-300"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                     }`}
                   >
-                    Sem classificação
-                    <span className="text-[9px] font-bold tabular-nums opacity-70">({notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length})</span>
+                    Sem classif.
+                    <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length}</span>
                   </button>
                 )}
               </div>
@@ -467,7 +467,7 @@ export default function Fiscal() {
                   )}
                 </div>
 
-                <div className="overflow-y-auto" style={{ maxHeight: 460 }}>
+                <div>
                   {isLoading ? (
                     <div className="flex flex-col gap-1 p-3">
                       {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-10 rounded-lg animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />)}
