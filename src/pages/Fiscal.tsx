@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   CheckCircle2, AlertTriangle, XCircle, Search, FileText,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Download, EyeOff,
@@ -96,6 +96,7 @@ export default function Fiscal() {
   const [danfeLoading, setDanfeLoading] = useState<string | null>(null);
   const [danfeErro, setDanfeErro]   = useState<Record<string, string>>({});
   const [abaClassif, setAbaClassif] = useState<string>("todas");
+  const tabelaRef = useRef<HTMLDivElement>(null);
 
   const gerarDanfe = useCallback(async (chave: string) => {
     setDanfeLoading(chave);
@@ -434,7 +435,7 @@ export default function Fiscal() {
 
             {/* TABELA */}
             <AnimatedCard delay={240} hover={false}>
-              <div className="flex flex-col rounded-[16px] border overflow-hidden" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+              <div ref={tabelaRef} className="flex flex-col rounded-[16px] border overflow-hidden" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
                 <div className="flex flex-wrap items-center gap-2 px-3 sm:px-4 py-2.5 border-b shrink-0" style={{ borderColor: "var(--sgt-divider)" }}>
                   <GooeyInput
                     placeholder="Buscar nota, fornecedor, CNPJ..."
@@ -555,12 +556,12 @@ export default function Fiscal() {
                       {(paginaAtual - 1) * POR_PAGINA + 1}–{Math.min(paginaAtual * POR_PAGINA, notasFiltradas.length)} de {notasFiltradas.length}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={paginaAtual === 1}
+                      <button onClick={() => { setPagina(p => Math.max(1, p - 1)); tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }} disabled={paginaAtual === 1}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed">
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </button>
                       <span className="text-[10px] text-slate-400 tabular-nums px-1">pág. {paginaAtual}/{totalPaginas}</span>
-                      <button onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} disabled={paginaAtual === totalPaginas}
+                      <button onClick={() => { setPagina(p => Math.min(totalPaginas, p + 1)); tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }} disabled={paginaAtual === totalPaginas}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed">
                         <ChevronRight className="h-3.5 w-3.5" />
                       </button>
