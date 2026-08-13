@@ -154,6 +154,7 @@ export default function Fiscal() {
   const notasBase = useMemo(() => {
     if (abaClassif === "todas") return notasPreClassif;
     if (abaClassif === "sem_classificacao") return notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR);
+    if (abaClassif === "devolucao") return notasPreClassif.filter(n => n.IS_DEVOLUCAO === 1);
     return notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === abaClassif);
   }, [notasPreClassif, abaClassif]);
 
@@ -387,51 +388,61 @@ export default function Fiscal() {
             </div>
 
             {/* ABAS POR CLASSIFICAÇÃO DO FORNECEDOR */}
-            {classificacoes.length > 0 && (
-              <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-0.5">
-                <button
-                  onClick={() => setAbaClassif("todas")}
-                  className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
-                    abaClassif === "todas"
-                      ? "bg-amber-400/15 text-amber-300"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                  }`}
-                >
-                  Todas
-                  <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.length}</span>
-                </button>
-                {classificacoes.map(c => {
-                  const qtd = notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === c).length;
-                  return (
-                    <button
-                      key={c}
-                      onClick={() => setAbaClassif(abaClassif === c ? "todas" : c)}
-                      className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
-                        abaClassif === c
-                          ? "bg-amber-400/15 text-amber-300"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                      }`}
-                    >
-                      {c}
-                      <span className="text-[9px] tabular-nums opacity-60">{qtd}</span>
-                    </button>
-                  );
-                })}
-                {notasPreClassif.some(n => !n.CLASSIFICACAO_FORNECEDOR) && (
+            <div className="flex items-center gap-1 overflow-x-auto rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-0.5">
+              <button
+                onClick={() => setAbaClassif("todas")}
+                className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
+                  abaClassif === "todas"
+                    ? "bg-amber-400/15 text-amber-300"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                }`}
+              >
+                Todas
+                <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.length}</span>
+              </button>
+              {classificacoes.map(c => {
+                const qtd = notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === c).length;
+                return (
                   <button
-                    onClick={() => setAbaClassif(abaClassif === "sem_classificacao" ? "todas" : "sem_classificacao")}
+                    key={c}
+                    onClick={() => setAbaClassif(abaClassif === c ? "todas" : c)}
                     className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
-                      abaClassif === "sem_classificacao"
+                      abaClassif === c
                         ? "bg-amber-400/15 text-amber-300"
                         : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                     }`}
                   >
-                    Sem classif.
-                    <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length}</span>
+                    {c}
+                    <span className="text-[9px] tabular-nums opacity-60">{qtd}</span>
                   </button>
-                )}
-              </div>
-            )}
+                );
+              })}
+              {notasPreClassif.some(n => !n.CLASSIFICACAO_FORNECEDOR) && (
+                <button
+                  onClick={() => setAbaClassif(abaClassif === "sem_classificacao" ? "todas" : "sem_classificacao")}
+                  className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
+                    abaClassif === "sem_classificacao"
+                      ? "bg-amber-400/15 text-amber-300"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  }`}
+                >
+                  Sem classif.
+                  <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length}</span>
+                </button>
+              )}
+              <div className="h-4 w-px shrink-0 mx-0.5" style={{ background: "var(--sgt-divider)" }} />
+              <button
+                onClick={() => setAbaClassif(abaClassif === "devolucao" ? "todas" : "devolucao")}
+                className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
+                  abaClassif === "devolucao"
+                    ? "bg-rose-400/15 text-rose-300"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                }`}
+              >
+                Devoluções
+                <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => n.IS_DEVOLUCAO === 1).length}</span>
+              </button>
+            </div>
 
             {/* TABELA */}
             <AnimatedCard delay={240} hover={false}>
