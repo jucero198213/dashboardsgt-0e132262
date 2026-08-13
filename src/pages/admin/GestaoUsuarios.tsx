@@ -3,7 +3,7 @@ import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, 
   Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw, FileBarChart, Activity, TrendingUp,
   Scale, Building2, Users, Tag, MapPin, Wrench, Fuel, Wallet, Banknote,
-  LineChart, ChevronDown, CheckSquare, Square, MinusSquare,
+  LineChart, ChevronDown, CheckSquare, Square, MinusSquare, UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -86,6 +86,7 @@ export default function GestaoUsuarios() {
   const [deleting, setDeleting] = useState(false);
   const [permUserId, setPermUserId] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [replicateFromId, setReplicateFromId] = useState<string | null>(null);
 
   const flash = (msg: string, type: "ok" | "err", ms = 3000) => {
     setFeedback({ msg, type });
@@ -217,10 +218,24 @@ export default function GestaoUsuarios() {
       if (error || data?.error) {
         flash(data?.error || "Erro ao criar usuário.", "err");
       } else {
+        const newUserId = data?.user_id;
+        if (replicateFromId && newUserId) {
+          const sourceUser = users.find(u => u.id === replicateFromId);
+          if (sourceUser && sourceUser.pages.size > 0) {
+            const rows = [...sourceUser.pages].map(page => ({ user_id: newUserId, page }));
+            await supabase.from("page_permissions").insert(rows as never);
+          }
+        }
         setGeneratedCode(data?.access_code || null);
-        flash("Usuário criado com sucesso!", "ok", 5000);
+        flash(
+          replicateFromId
+            ? "Usuário criado com permissões replicadas!"
+            : "Usuário criado com sucesso!",
+          "ok", 5000,
+        );
         setNewEmail("");
         setNewRole("user");
+        setReplicateFromId(null);
         load();
       }
     } catch {
@@ -278,12 +293,12 @@ export default function GestaoUsuarios() {
           <div className="w-full max-w-md rounded-2xl border border-[var(--sgt-border-subtle)] sgt-bg-card shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--sgt-divider)] px-6 py-4">
               <div className="flex items-center gap-2">
-                <Plus className="h-4 w-4 text-emerald-400" />
+                {replicateFromId && !generatedCode ? <UserPlus className="h-4 w-4 text-violet-400" /> : <Plus className="h-4 w-4 text-emerald-400" />}
                 <h3 className="text-sm font-semibold sgt-text">
-                  {generatedCode ? "Código de acesso gerado" : "Cadastrar novo usuário"}
+                  {generatedCode ? "Código de acesso gerado" : replicateFromId ? "Replicar usuário" : "Cadastrar novo usuário"}
                 </h3>
               </div>
-              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setGeneratedCode(null); }}
+              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setReplicateFromId(null); setGeneratedCode(null); setReplicateFromId(null); }}
                 className="rounded-lg p-1.5 transition-colors hover:bg-[var(--sgt-input-hover)]">
                 <X className="h-4 w-4 sgt-text-2" />
               </button>
@@ -316,11 +331,23 @@ export default function GestaoUsuarios() {
                 </>
               ) : (
                 <>
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-                    <p className="text-[12px] text-amber-300 leading-relaxed">
-                      Ao cadastrar, um código de acesso será gerado. Envie esse código ao usuário para que ele defina sua senha no <strong>Primeiro Acesso</strong>.
-                    </p>
-                  </div>
+                  {replicateFromId && (() => {
+                    const src = users.find(u => u.id === replicateFromId);
+                    return src ? (
+                      <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3">
+                        <p className="text-[12px] text-violet-300 leading-relaxed">
+                          Novo usuário receberá as mesmas <strong>{src.pages.size} telas</strong> liberadas de <strong>{src.email}</strong>. Basta preencher o email abaixo.
+                        </p>
+                      </div>
+                    ) : null;
+                  })()}
+                  {!replicateFromId && (
+                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                      <p className="text-[12px] text-amber-300 leading-relaxed">
+                        Ao cadastrar, um código de acesso será gerado. Envie esse código ao usuário para que ele defina sua senha no <strong>Primeiro Acesso</strong>.
+                      </p>
+                    </div>
+                  )}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Email</label>
                     <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
@@ -355,7 +382,7 @@ export default function GestaoUsuarios() {
                 </button>
               ) : (
                 <>
-                  <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
+                  <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setReplicateFromId(null); }}
                     className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
                     Cancelar
                   </button>
@@ -412,15 +439,22 @@ export default function GestaoUsuarios() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {u.role !== "admin" && (
-                      <button onClick={() => setPermUserId(permUserId === u.id ? null : u.id)}
-                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all ${
-                          permUserId === u.id
-                            ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
-                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] hover:border-[var(--sgt-border-medium)]"
-                        }`}>
-                        <Shield className="h-3 w-3" />
-                        Permissões
-                      </button>
+                      <>
+                        <button onClick={() => setPermUserId(permUserId === u.id ? null : u.id)}
+                          className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                            permUserId === u.id
+                              ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
+                              : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] hover:border-[var(--sgt-border-medium)]"
+                          }`}>
+                          <Shield className="h-3 w-3" />
+                          Permissões
+                        </button>
+                        <button onClick={() => { setReplicateFromId(u.id); setNewRole(u.role); setShowModal(true); }}
+                          className="flex items-center gap-1.5 rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-1.5 text-[11px] font-semibold text-violet-300 hover:bg-violet-500/20 transition-all">
+                          <UserPlus className="h-3 w-3" />
+                          Replicar
+                        </button>
+                      </>
                     )}
                     {/* Role actions */}
                     {u.role === "admin" ? (
