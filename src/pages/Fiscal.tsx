@@ -154,6 +154,7 @@ export default function Fiscal() {
   const notasBase = useMemo(() => {
     if (abaClassif === "todas") return notasPreClassif;
     if (abaClassif === "sem_classificacao") return notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR);
+    if (abaClassif === "entrada") return notasPreClassif.filter(n => String(n.TPNF) === "0");
     return notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === abaClassif);
   }, [notasPreClassif, abaClassif]);
 
@@ -428,6 +429,22 @@ export default function Fiscal() {
                   Sem classif.
                   <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length}</span>
                 </button>
+              )}
+              {notasPreClassif.some(n => String(n.TPNF) === "0") && (
+                <>
+                  <div className="h-4 w-px shrink-0 mx-0.5" style={{ background: "var(--sgt-divider)" }} />
+                  <button
+                    onClick={() => setAbaClassif(abaClassif === "entrada" ? "todas" : "entrada")}
+                    className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
+                      abaClassif === "entrada"
+                        ? "bg-cyan-400/15 text-cyan-300"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    }`}
+                  >
+                    Entrada
+                    <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => String(n.TPNF) === "0").length}</span>
+                  </button>
+                </>
               )}
             </div>
 
