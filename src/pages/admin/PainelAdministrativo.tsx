@@ -7,6 +7,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import GestaoUsuarios from "./GestaoUsuarios";
 import Configuracoes from "./Configuracoes";
 import BancoDados from "./BancoDados";
@@ -26,6 +28,7 @@ const NAV_ITEMS = [
     bg: "bg-emerald-500/8",
     icon_color: "text-emerald-400",
     badge_bg: "bg-emerald-500/15",
+    glow: "rgba(16,185,129,0.08)",
   },
   {
     id: "config" as Screen,
@@ -37,6 +40,7 @@ const NAV_ITEMS = [
     bg: "bg-cyan-500/8",
     icon_color: "text-cyan-400",
     badge_bg: "bg-cyan-500/15",
+    glow: "rgba(6,182,212,0.08)",
   },
   {
     id: "banco" as Screen,
@@ -48,6 +52,7 @@ const NAV_ITEMS = [
     bg: "bg-violet-500/8",
     icon_color: "text-violet-400",
     badge_bg: "bg-violet-500/15",
+    glow: "rgba(139,92,246,0.08)",
   },
   {
     id: "monitor" as Screen,
@@ -59,6 +64,7 @@ const NAV_ITEMS = [
     bg: "bg-amber-500/8",
     icon_color: "text-amber-400",
     badge_bg: "bg-amber-500/15",
+    glow: "rgba(245,158,11,0.08)",
   },
   {
     id: "seguranca" as Screen,
@@ -70,6 +76,7 @@ const NAV_ITEMS = [
     bg: "bg-red-500/8",
     icon_color: "text-red-400",
     badge_bg: "bg-red-500/15",
+    glow: "rgba(239,68,68,0.08)",
   },
   {
     id: "chamados" as Screen,
@@ -81,6 +88,7 @@ const NAV_ITEMS = [
     bg: "bg-amber-500/8",
     icon_color: "text-amber-400",
     badge_bg: "bg-amber-500/15",
+    glow: "rgba(245,158,11,0.08)",
     route: "/chamados",
   },
 ];
@@ -108,10 +116,7 @@ export default function PainelAdministrativo() {
       className="flex flex-col min-h-[100dvh] transition-all duration-300 px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
-      {/* Atmosfera */}
-      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(59,130,246,0.18),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 dark:bg-[radial-gradient(ellipse_55%_40%_at_100%_110%,rgba(239,68,68,0.07),transparent_60%)]" />
-      <div className="pointer-events-none fixed inset-0 dark:opacity-100" style={{ background: "radial-gradient(ellipse 115% 115% at 50% 50%, transparent 10%, rgba(2,3,12,0.72) 100%)" }} />
+      <BackgroundEffects />
 
       <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
@@ -202,61 +207,65 @@ export default function PainelAdministrativo() {
         {/* Home — navigation grid */}
         {screen === "home" && (
           <>
-            {/* Stats rápidas */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {/* ── Indicadores ── */}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Indicadores</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4">
               {[
-                { label: "Usuários ativos", value: "7", icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                { label: "Uptime", value: "99.9%", icon: Server, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-                { label: "Integrações", value: "5/5", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10" },
-                { label: "Alertas", value: "1", icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10" },
-              ].map((s) => (
-                <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3 flex items-center gap-3">
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
-                    <s.icon className={`h-4 w-4 ${s.color}`} />
+                { label: "Usuários ativos", value: "7", icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10", glow: "rgba(16,185,129,0.06)" },
+                { label: "Uptime", value: "99.9%", icon: Server, color: "text-cyan-400", bg: "bg-cyan-500/10", glow: "rgba(6,182,212,0.06)" },
+                { label: "Integrações", value: "5/5", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10", glow: "rgba(139,92,246,0.06)" },
+                { label: "Alertas", value: "1", icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10", glow: "rgba(245,158,11,0.06)" },
+              ].map((s, i) => (
+                <AnimatedCard key={s.label} delay={i * 60} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+                  <div
+                    className="px-4 py-3 flex items-center gap-3"
+                    style={{ background: `radial-gradient(ellipse at top left, ${s.glow}, transparent 70%)` }}
+                  >
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
+                      <s.icon className={`h-4 w-4 ${s.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
+                      <p className={`text-[15px] font-bold ${s.color}`}>{s.value}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
-                    <p className={`text-[15px] font-bold ${s.color}`}>{s.value}</p>
-                  </div>
-                </div>
+                </AnimatedCard>
               ))}
             </div>
 
-            {/* Nav grid */}
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {NAV_ITEMS.slice(0, 3).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setScreen(item.id)}
-                  className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--sgt-input-bg)] ${item.icon_color}`}>
-                      <item.icon className="h-5 w-5" />
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
-                  </div>
-                  <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
-                  <p className="text-[11px] sgt-text-2">{item.desc}</p>
-                </button>
-              ))}
+            {/* ── Módulos ── */}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Módulos</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              {NAV_ITEMS.slice(3).map((item) => (
-                <button
+
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {NAV_ITEMS.map((item, i) => (
+                <AnimatedCard
                   key={item.id}
-                  onClick={() => (item as any).route ? navigate((item as any).route) : setScreen(item.id)}
-                  className={`group text-left overflow-hidden rounded-[20px] border ${item.border} ${item.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(0,0,0,0.4)] hover:brightness-110`}
+                  delay={240 + i * 80}
+                  className={`group rounded-[20px] border ${item.border} sgt-bg-card cursor-pointer`}
+                  hover
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--sgt-input-bg)] ${item.icon_color}`}>
-                      <item.icon className="h-5 w-5" />
+                  <button
+                    onClick={() => (item as any).route ? navigate((item as any).route) : setScreen(item.id)}
+                    className="text-left w-full p-5"
+                    style={{ background: `radial-gradient(ellipse at top left, ${item.glow}, transparent 60%)` }}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${item.border} ${item.bg} ${item.icon_color}`}>
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
-                  </div>
-                  <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
-                  <p className="text-[11px] sgt-text-2">{item.desc}</p>
-                </button>
+                    <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
+                    <p className="text-[11px] sgt-text-2">{item.desc}</p>
+                  </button>
+                </AnimatedCard>
               ))}
             </div>
           </>

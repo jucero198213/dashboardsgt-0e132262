@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
 import { GooeyInput } from "@/components/ui/gooey-input";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
 
 
 const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
@@ -217,7 +218,12 @@ export default function GestaoUsuarios() {
         </div>
       )}
 
-      {/* Toolbar */}
+      {/* ── Ferramentas ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Ferramentas</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <GooeyInput
           placeholder="Buscar por email..."
@@ -389,8 +395,13 @@ export default function GestaoUsuarios() {
         </div>
       )}
 
-      {/* Tabela */}
-      <div className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+      {/* ── Usuários Cadastrados ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Usuários Cadastrados</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+      </div>
+
+      <AnimatedCard delay={80} className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
         <div className="px-6 py-4 flex items-center justify-between">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Usuários Cadastrados</p>
           <span className="text-xs text-[var(--sgt-text-muted)]">{filtered.length} usuário(s)</span>
@@ -601,7 +612,7 @@ export default function GestaoUsuarios() {
             </div>
           </>
         )}
-      </div>
+      </AnimatedCard>
 
       {/* Modal Confirmar Exclusão */}
       {deleteConfirm && (
