@@ -1962,12 +1962,7 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           -- desconsiderado (Minerva etc.). Nenhuma é escondida aqui no servidor.
           CASE WHEN LEFT(${limpaCnpj("D.CNPJ")}, 8) IN (${descInSql}) THEN 1 ELSE 0 END AS DESCONSIDERADO,
           CLASSIF.CLASSIFICACAO AS CLASSIFICACAO_FORNECEDOR,
-          CASE
-            WHEN D.FINNFE = 4                    THEN 1
-            WHEN D.NATOP LIKE '%DEVOL%'          THEN 1
-            ELSE 0
-          END AS IS_DEVOLUCAO,
-          D.NATOP AS NATUREZA_OPERACAO,
+          CASE WHEN D.FINNFE = 4 THEN 1 ELSE 0 END AS IS_DEVOLUCAO,
           -- Accountability: quem/quando lançou (USUATU/DATATU registram a última
           -- atualização — pra nota lançada, é o lançamento) e há quantos dias a
           -- nota está no sistema (pra medir quanto tempo as pendentes empacam).

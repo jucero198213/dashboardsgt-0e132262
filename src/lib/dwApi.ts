@@ -698,8 +698,7 @@ export interface ConsultaNfeRow {
   TPNF:             string | number | null;   // 0 = entrada, 1 = saída
   DESCONSIDERADO:   number;                    // 1 = fornecedor desconsiderado (Minerva etc.)
   CLASSIFICACAO_FORNECEDOR: string | null;     // classificação do fornecedor (RODCMO.DESCRI)
-  IS_DEVOLUCAO:            number;             // 1 = nota de devolução (FINNFE=4 ou NATOP com "DEVOL")
-  NATUREZA_OPERACAO:       string | null;      // NATOP — natureza da operação fiscal
+  IS_DEVOLUCAO:            number;             // 1 = nota de devolução (FINNFE=4)
   USUARIO_LANCAMENTO: string | null;           // quem lançou (última atualização no VR)
   DATA_LANCAMENTO:  string | null;             // quando lançou
   DIAS_PARADA:      number | null;             // dias desde o recebimento da nota
