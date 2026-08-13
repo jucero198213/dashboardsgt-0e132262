@@ -1,23 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2,
-  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare } from "lucide-react";
+  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare,
+  LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw, FileBarChart, Activity, TrendingUp,
+  Scale, Building2, Users, Tag, MapPin, Wrench, Fuel, Wallet, Banknote,
+  LineChart, ChevronDown, CheckSquare, Square, MinusSquare,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
+import { type AppPage, ALL_PAGES, PAGE_GROUPS } from "@/hooks/usePagePermissions";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 
+const PAGE_META: Record<AppPage, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
+  "fin-painel":       { label: "Painel Financeiro", icon: LayoutDashboard, color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-pagar":        { label: "Contas a Pagar",    icon: ArrowDownCircle, color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-receber":      { label: "Contas a Receber",  icon: ArrowUpCircle,   color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-conciliacao":  { label: "Conciliação",       icon: RefreshCcw,      color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-realizado":    { label: "Realizado",         icon: Activity,        color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-previsto":     { label: "Previsto",          icon: TrendingUp,      color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-relatorios":   { label: "Relatórios",        icon: FileBarChart,    color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "ext-fiscal":       { label: "Fiscal",            icon: Scale,           color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-fornecedores": { label: "Fornecedores",      icon: Building2,       color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-clientes":     { label: "Clientes",          icon: Users,           color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-categorias":   { label: "Categorias",        icon: Tag,             color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "fin-bancos":       { label: "Bancos",            icon: Landmark,        color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "ext-executivo":    { label: "Painel Executivo",   icon: Briefcase,       color: "text-violet-300",  border: "border-violet-400/30",  bg: "bg-violet-400/10"  },
+  "ext-indicadores":  { label: "Indicadores",       icon: LineChart,       color: "text-violet-300",  border: "border-violet-400/30",  bg: "bg-violet-400/10"  },
+  "ext-faturamento":  { label: "Faturamento",       icon: Banknote,        color: "text-violet-300",  border: "border-violet-400/30",  bg: "bg-violet-400/10"  },
+  "ext-operacional":  { label: "Operacional",       icon: MapPin,          color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-frota":        { label: "Gestão de Frota",   icon: Truck,           color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-fin-frota":    { label: "Financiamentos",    icon: Wallet,          color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-manutencao":   { label: "Manutenção",        icon: Wrench,          color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-abastecimento":{ label: "Abastecimento",     icon: Fuel,            color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-compras":      { label: "Compras",           icon: ShoppingCart,    color: "text-emerald-300", border: "border-emerald-400/30", bg: "bg-emerald-400/10" },
+  "ext-rh":           { label: "RH",                icon: UserCog,         color: "text-pink-300",    border: "border-pink-400/30",    bg: "bg-pink-400/10"    },
+  "ext-chamados":     { label: "Chamados",          icon: Headphones,      color: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/10"    },
+  "portal-receitaflow":{ label: "ReceitaFlow",      icon: Sparkles,        color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
+  "portal-visual":    { label: "Visual Rodopar",    icon: Globe,           color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "sofia-ai":         { label: "Sofia AI",          icon: BotMessageSquare,color: "text-rose-300",    border: "border-rose-400/30",    bg: "bg-rose-400/10"    },
+};
 
-const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
-  financeiro: { label: "Financeiro", icon: Landmark,    color: "text-amber-300",  border: "border-amber-400/30",  bg: "bg-amber-400/10"  },
-  gestao:     { label: "Gestão",     icon: Briefcase,   color: "text-violet-300", border: "border-violet-400/30", bg: "bg-violet-400/10" },
-  operacao:   { label: "Operação",   icon: Truck,       color: "text-cyan-300",   border: "border-cyan-400/30",   bg: "bg-cyan-400/10"   },
-  compras:    { label: "Compras",    icon: ShoppingCart,color: "text-emerald-300",border: "border-emerald-400/30",bg: "bg-emerald-400/10"},
-  rh:         { label: "RH",         icon: UserCog,     color: "text-pink-300",   border: "border-pink-400/30",   bg: "bg-pink-400/10"   },
-  suporte:             { label: "Suporte",         icon: Headphones, color: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/10"    },
-  "portal-receitaflow":{ label: "ReceitaFlow",     icon: Sparkles,   color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
-  "portal-visual":     { label: "Visual Rodopar",  icon: Globe,      color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
-  "sofia-ai":          { label: "Sofia AI",       icon: BotMessageSquare, color: "text-rose-300", border: "border-rose-400/30", bg: "bg-rose-400/10" },
+const GROUP_COLORS: Record<string, { text: string; border: string; bg: string; accent: string }> = {
+  "Financeiro":       { text: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/5",   accent: "bg-amber-400"   },
+  "Outras Análises":  { text: "text-amber-300",   border: "border-amber-400/20",   bg: "bg-amber-400/5",   accent: "bg-amber-400"   },
+  "Gestão":           { text: "text-violet-300",  border: "border-violet-400/30",  bg: "bg-violet-400/5",  accent: "bg-violet-400"  },
+  "Operação":         { text: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/5",    accent: "bg-cyan-400"    },
+  "Compras":          { text: "text-emerald-300", border: "border-emerald-400/30", bg: "bg-emerald-400/5", accent: "bg-emerald-400" },
+  "RH":               { text: "text-pink-300",    border: "border-pink-400/30",    bg: "bg-pink-400/5",    accent: "bg-pink-400"    },
+  "Suporte":          { text: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/5",    accent: "bg-blue-400"    },
+  "Portais":          { text: "text-cyan-300",    border: "border-cyan-400/20",    bg: "bg-cyan-400/5",    accent: "bg-cyan-400"    },
+  "IA":               { text: "text-rose-300",    border: "border-rose-400/30",    bg: "bg-rose-400/5",    accent: "bg-rose-400"    },
 };
 
 interface SupaUser {
@@ -27,7 +59,7 @@ interface SupaUser {
   last_sign_in_at: string | null;
   role: "admin" | "user" | "diretoria";
   confirmed: boolean;
-  modules: Set<AppModule>;
+  pages: Set<AppPage>;
 }
 
 const roleStyle: Record<string, string> = {
@@ -36,8 +68,8 @@ const roleStyle: Record<string, string> = {
   user:      "bg-slate-500/10 sgt-text-2 border border-[var(--sgt-border-subtle)]",
 };
 
-const initials = (email: string) => email.substring(0, 2).toUpperCase();
-const colors   = ["#3b82f6","#10b981","#8b5cf6","#f59e0b","#14b8a6","#ec4899","#06b6d4","#ef4444"];
+const emailInitials = (email: string) => email.substring(0, 2).toUpperCase();
+const colors = ["#3b82f6","#10b981","#8b5cf6","#f59e0b","#14b8a6","#ec4899","#06b6d4","#ef4444"];
 
 export default function GestaoUsuarios() {
   const { user: me } = useAuth();
@@ -52,6 +84,13 @@ export default function GestaoUsuarios() {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [permUserId, setPermUserId] = useState<string | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+
+  const flash = (msg: string, type: "ok" | "err", ms = 3000) => {
+    setFeedback({ msg, type });
+    setTimeout(() => setFeedback(null), ms);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -62,7 +101,6 @@ export default function GestaoUsuarios() {
         supabase.functions.invoke("list-users"),
       ]);
 
-      // Mapa de emails reais vindos da Edge Function
       const emailMap = new Map<string, string>();
       if (!listRes.error && listRes.data?.users) {
         (listRes.data.users as { id: string; email: string }[]).forEach(u => {
@@ -70,12 +108,12 @@ export default function GestaoUsuarios() {
         });
       }
 
-      const modulesByUser = new Map<string, Set<AppModule>>();
+      const pagesByUser = new Map<string, Set<AppPage>>();
       (pagePerms ?? []).forEach((p) => {
-        if (!ALL_MODULES.includes(p.page as AppModule)) return;
-        const set = modulesByUser.get(p.user_id) ?? new Set<AppModule>();
-        set.add(p.page as AppModule);
-        modulesByUser.set(p.user_id, set);
+        if (!ALL_PAGES.includes(p.page as AppPage)) return;
+        const set = pagesByUser.get(p.user_id) ?? new Set<AppPage>();
+        set.add(p.page as AppPage);
+        pagesByUser.set(p.user_id, set);
       });
 
       const mapped: SupaUser[] = (roles ?? []).map((r) => ({
@@ -85,7 +123,7 @@ export default function GestaoUsuarios() {
         last_sign_in_at: null,
         role:            r.role as "admin" | "user" | "diretoria",
         confirmed:       true,
-        modules:         modulesByUser.get(r.user_id) ?? new Set<AppModule>(),
+        pages:           pagesByUser.get(r.user_id) ?? new Set<AppPage>(),
       }));
       if (me && !mapped.find((u) => u.id === me.id)) {
         mapped.unshift({
@@ -93,12 +131,12 @@ export default function GestaoUsuarios() {
           created_at: me.created_at ?? new Date().toISOString(),
           last_sign_in_at: me.last_sign_in_at ?? null,
           role: "admin", confirmed: !!me.email_confirmed_at,
-          modules: new Set<AppModule>(ALL_MODULES),
+          pages: new Set<AppPage>(ALL_PAGES),
         });
       }
       setUsers(mapped);
-    } catch (e) {
-      setFeedback({ msg: "Erro ao carregar usuários.", type: "err" });
+    } catch {
+      flash("Erro ao carregar usuários.", "err");
     } finally {
       setLoading(false);
     }
@@ -106,104 +144,102 @@ export default function GestaoUsuarios() {
 
   useEffect(() => { load(); }, []);
 
-  const changeRole = async (userId: string, newRole: "admin" | "user" | "diretoria") => {
-    // Delete all existing role rows for this user, then insert the new one.
-    // (upsert without an id always INSERTs, creating duplicate rows and
-    //  breaking maybeSingle() in fetchRole)
-    const { error: delErr } = await supabase
-      .from("user_roles")
-      .delete()
-      .eq("user_id", userId);
-    if (delErr) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
-
-    const { error: insErr } = await supabase
-      .from("user_roles")
-      .insert({ user_id: userId, role: newRole } as any);
-    if (insErr) { setFeedback({ msg: "Erro ao alterar role.", type: "err" }); return; }
-
-    setFeedback({ msg: "Role atualizada com sucesso.", type: "ok" });
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
-    setTimeout(() => setFeedback(null), 3000);
+  const changeRole = async (userId: string, role: "admin" | "user" | "diretoria") => {
+    const { error: delErr } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (delErr) { flash("Erro ao alterar role.", "err"); return; }
+    const { error: insErr } = await supabase.from("user_roles").insert({ user_id: userId, role } as any);
+    if (insErr) { flash("Erro ao alterar role.", "err"); return; }
+    flash("Role atualizada com sucesso.", "ok");
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role } : u));
   };
 
-  const toggleModule = async (userId: string, mod: AppModule, currentlyHas: boolean) => {
+  const togglePage = async (userId: string, page: AppPage, currentlyHas: boolean) => {
     if (currentlyHas) {
-      const { error } = await supabase
-        .from("page_permissions")
-        .delete()
-        .eq("user_id", userId)
-        .eq("page", mod as never);
-      if (error) { setFeedback({ msg: "Erro ao revogar permissão.", type: "err" }); return; }
+      const { error } = await supabase.from("page_permissions").delete().eq("user_id", userId).eq("page", page as never);
+      if (error) { flash("Erro ao revogar permissão.", "err"); return; }
     } else {
-      const { error } = await supabase
-        .from("page_permissions")
-        .insert({ user_id: userId, page: mod } as never);
-      if (error) { setFeedback({ msg: "Erro ao conceder permissão.", type: "err" }); return; }
+      const { error } = await supabase.from("page_permissions").insert({ user_id: userId, page } as never);
+      if (error) { flash("Erro ao conceder permissão.", "err"); return; }
     }
     setUsers((prev) => prev.map((u) => {
       if (u.id !== userId) return u;
-      const next = new Set(u.modules);
-      if (currentlyHas) next.delete(mod); else next.add(mod);
-      return { ...u, modules: next };
+      const next = new Set(u.pages);
+      if (currentlyHas) next.delete(page); else next.add(page);
+      return { ...u, pages: next };
     }));
-    setFeedback({ msg: "Permissão atualizada.", type: "ok" });
-    setTimeout(() => setFeedback(null), 2000);
+  };
+
+  const toggleGroup = async (userId: string, groupPages: AppPage[], userPages: Set<AppPage>) => {
+    const allHas = groupPages.every(p => userPages.has(p));
+    const ops = groupPages.map(p => {
+      const has = userPages.has(p);
+      if (allHas && has) return togglePage(userId, p, true);
+      if (!allHas && !has) return togglePage(userId, p, false);
+      return Promise.resolve();
+    });
+    await Promise.all(ops);
+  };
+
+  const toggleAll = async (userId: string, userPages: Set<AppPage>) => {
+    const allHas = ALL_PAGES.every(p => userPages.has(p));
+    const ops = ALL_PAGES.map(p => {
+      const has = userPages.has(p);
+      if (allHas && has) return togglePage(userId, p, true);
+      if (!allHas && !has) return togglePage(userId, p, false);
+      return Promise.resolve();
+    });
+    await Promise.all(ops);
   };
 
   const handleDeleteUser = async (userId: string) => {
     setDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("delete-user", {
-        body: { user_id: userId },
-      });
+      const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
       if (error || data?.error) {
-        setFeedback({ msg: data?.error || "Erro ao excluir usuário.", type: "err" });
+        flash(data?.error || "Erro ao excluir usuário.", "err");
       } else {
-        setFeedback({ msg: "Usuário excluído com sucesso.", type: "ok" });
+        flash("Usuário excluído com sucesso.", "ok");
         setUsers((prev) => prev.filter((u) => u.id !== userId));
       }
     } catch {
-      setFeedback({ msg: "Erro ao excluir usuário.", type: "err" });
+      flash("Erro ao excluir usuário.", "err");
     } finally {
       setDeleting(false);
       setDeleteConfirm(null);
-      setTimeout(() => setFeedback(null), 3000);
     }
   };
 
   const handleCreateUser = async () => {
-    if (!newEmail) {
-      setFeedback({ msg: "Preencha o email.", type: "err" });
-      setTimeout(() => setFeedback(null), 3000);
-      return;
-    }
-
+    if (!newEmail) { flash("Preencha o email.", "err"); return; }
     setCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, role: newRole },
-      });
-
+      const { data, error } = await supabase.functions.invoke("create-user", { body: { email: newEmail, role: newRole } });
       if (error || data?.error) {
-        setFeedback({ msg: data?.error || "Erro ao criar usuário.", type: "err" });
+        flash(data?.error || "Erro ao criar usuário.", "err");
       } else {
         setGeneratedCode(data?.access_code || null);
-        setFeedback({ msg: "Usuário criado com sucesso!", type: "ok" });
+        flash("Usuário criado com sucesso!", "ok", 5000);
         setNewEmail("");
         setNewRole("user");
         load();
       }
-    } catch (e) {
-      setFeedback({ msg: "Erro ao criar usuário.", type: "err" });
+    } catch {
+      flash("Erro ao criar usuário.", "err");
     } finally {
       setCreating(false);
-      setTimeout(() => setFeedback(null), 5000);
     }
   };
 
   const filtered = users.filter((u) =>
     u.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  const permUser = permUserId ? users.find(u => u.id === permUserId) : null;
+
+  const permCount = (u: SupaUser) => {
+    if (u.role === "admin") return ALL_PAGES.length;
+    return u.pages.size;
+  };
 
   return (
     <div className="space-y-4">
@@ -225,21 +261,14 @@ export default function GestaoUsuarios() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <GooeyInput
-          placeholder="Buscar por email..."
-          value={search}
-          onValueChange={(v) => setSearch(v)}
-        />
+        <GooeyInput placeholder="Buscar por email..." value={search} onValueChange={(v) => setSearch(v)} />
         <button onClick={load}
           className="flex items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all hover:border-[var(--sgt-border-medium)]">
-          <RefreshCw className="h-3.5 w-3.5" />
-          Recarregar
+          <RefreshCw className="h-3.5 w-3.5" /> Recarregar
         </button>
-        <button
-          onClick={() => setShowModal(true)}
+        <button onClick={() => setShowModal(true)}
           className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-500/20 transition-all">
-          <Plus className="h-3.5 w-3.5" />
-          Novo usuário
+          <Plus className="h-3.5 w-3.5" /> Novo usuário
         </button>
       </div>
 
@@ -247,7 +276,6 @@ export default function GestaoUsuarios() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-2xl border border-[var(--sgt-border-subtle)] sgt-bg-card shadow-2xl">
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-[var(--sgt-divider)] px-6 py-4">
               <div className="flex items-center gap-2">
                 <Plus className="h-4 w-4 text-emerald-400" />
@@ -260,8 +288,6 @@ export default function GestaoUsuarios() {
                 <X className="h-4 w-4 sgt-text-2" />
               </button>
             </div>
-
-            {/* Body */}
             <div className="space-y-4 px-6 py-5">
               {generatedCode ? (
                 <>
@@ -270,122 +296,72 @@ export default function GestaoUsuarios() {
                       Usuário criado com sucesso! Envie o código abaixo para o usuário. Ele usará esse código junto com seu email na tela de <strong>Primeiro Acesso</strong>.
                     </p>
                   </div>
-
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Código de acesso</label>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 rounded-xl border border-amber-400/30 bg-amber-400/5 px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-amber-300">
                         {generatedCode}
                       </div>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(generatedCode);
-                          setFeedback({ msg: "Código copiado!", type: "ok" });
-                          setTimeout(() => setFeedback(null), 2000);
-                        }}
-                        className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-3 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
-                        title="Copiar código"
-                      >
+                      <button onClick={() => { navigator.clipboard.writeText(generatedCode); flash("Código copiado!", "ok", 2000); }}
+                        className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-3 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all" title="Copiar código">
                         <Copy className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
-
                   <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
                     <p className="text-[12px] text-amber-300 leading-relaxed">
-                      ⚠️ Este código só pode ser usado uma vez. Guarde-o em local seguro até enviar ao usuário.
+                      Este código só pode ser usado uma vez. Guarde-o em local seguro até enviar ao usuário.
                     </p>
                   </div>
                 </>
               ) : (
                 <>
-                  {/* Info */}
                   <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
                     <p className="text-[12px] text-amber-300 leading-relaxed">
                       Ao cadastrar, um código de acesso será gerado. Envie esse código ao usuário para que ele defina sua senha no <strong>Primeiro Acesso</strong>.
                     </p>
                   </div>
-
-                  {/* Email */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Email</label>
-                    <input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
+                    <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
                       placeholder="usuario@empresa.com.br"
-                      className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
-                    />
+                      className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-4 py-2.5 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50" />
                   </div>
-
-                  {/* Role */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Permissão</label>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setNewRole("user")}
-                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
-                          newRole === "user"
-                            ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
-                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
-                        }`}
-                      >
-                        Usuário
-                      </button>
-                      <button
-                        onClick={() => setNewRole("diretoria")}
-                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
-                          newRole === "diretoria"
-                            ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
-                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
-                        }`}
-                      >
-                        Diretoria
-                      </button>
-                      <button
-                        onClick={() => setNewRole("admin")}
-                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
-                          newRole === "admin"
-                            ? "border-red-500/30 bg-red-500/10 text-red-400"
-                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
-                        }`}
-                      >
-                        Admin
-                      </button>
+                      {(["user", "diretoria", "admin"] as const).map(r => (
+                        <button key={r} onClick={() => setNewRole(r)}
+                          className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
+                            newRole === r
+                              ? r === "admin" ? "border-red-500/30 bg-red-500/10 text-red-400"
+                                : r === "diretoria" ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                                : "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+                              : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2"
+                          }`}>
+                          {r === "user" ? "Usuário" : r === "diretoria" ? "Diretoria" : "Admin"}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </>
               )}
             </div>
-
-            {/* Footer */}
             <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
               {generatedCode ? (
-                <button
-                  onClick={() => { setShowModal(false); setGeneratedCode(null); }}
-                  className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all"
-                >
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  Fechar
+                <button onClick={() => { setShowModal(false); setGeneratedCode(null); }}
+                  className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all">
+                  <CheckCircle className="h-3.5 w-3.5" /> Fechar
                 </button>
               ) : (
                 <>
-                  <button
-                    onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
-                    className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
-                  >
+                  <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); }}
+                    className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
                     Cancelar
                   </button>
-                  <button
-                    onClick={handleCreateUser}
-                    disabled={creating || !newEmail}
-                    className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {creating ? (
-                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
-                    ) : (
-                      <Plus className="h-3.5 w-3.5" />
-                    )}
+                  <button onClick={handleCreateUser} disabled={creating || !newEmail}
+                    className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    {creating ? <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" /> : <Plus className="h-3.5 w-3.5" />}
                     {creating ? "Cadastrando..." : "Cadastrar"}
                   </button>
                 </>
@@ -412,205 +388,172 @@ export default function GestaoUsuarios() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-sm sgt-text-2">
-            Nenhum usuário encontrado
-          </div>
+          <div className="flex items-center justify-center py-16 text-sm sgt-text-2">Nenhum usuário encontrado</div>
         ) : (
-          <>
-            {/* ── Cards mobile (< md) ── */}
-            <div className="md:hidden divide-y divide-[var(--sgt-divider)]">
-              {filtered.map((u, idx) => (
-                <div key={u.id} className="p-4 space-y-3">
-                  {/* Cabeçalho do card */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
-                        style={{ background: colors[idx % colors.length] }}>
-                        {initials(u.email)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm sgt-text">{u.email}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
-                          {u.id === me?.id && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>}
-                        </div>
-                      </div>
+          <div className="divide-y divide-[var(--sgt-divider)]">
+            {filtered.map((u, idx) => (
+              <div key={u.id} className="p-4 md:px-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
+                      style={{ background: colors[idx % colors.length] }}>
+                      {emailInitials(u.email)}
                     </div>
-                    {/* Ações */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {u.role === "admin" ? (
-                        <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
-                          className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 transition-all disabled:opacity-30">
-                          <UserX className="h-3 w-3" /> User
-                        </button>
-                      ) : u.role === "diretoria" ? (
-                        <>
-                          <button onClick={() => changeRole(u.id, "user")}
-                            className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
-                            <UserX className="h-3 w-3" /> User
-                          </button>
-                          <button onClick={() => changeRole(u.id, "admin")}
-                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
-                            <Shield className="h-3 w-3" /> Admin
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => changeRole(u.id, "diretoria")}
-                            className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
-                            Dir.
-                          </button>
-                          <button onClick={() => changeRole(u.id, "admin")}
-                            className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
-                            <Shield className="h-3 w-3" /> Admin
-                          </button>
-                        </>
-                      )}
-                      {u.id !== me?.id && (
-                        <button onClick={() => setDeleteConfirm(u.id)}
-                          className="flex items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 hover:bg-red-500/20 transition-all">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm sgt-text font-medium">{u.email}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
+                        {u.id === me?.id && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>}
+                        <span className="text-[10px] text-[var(--sgt-text-muted)]">
+                          {u.role === "admin" ? `${ALL_PAGES.length}/${ALL_PAGES.length} telas` : `${u.pages.size}/${ALL_PAGES.length} telas`}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  {/* Módulos */}
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)] mb-2">Módulos</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {u.role !== "admin" && (
+                      <button onClick={() => setPermUserId(permUserId === u.id ? null : u.id)}
+                        className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                          permUserId === u.id
+                            ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
+                            : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] hover:border-[var(--sgt-border-medium)]"
+                        }`}>
+                        <Shield className="h-3 w-3" />
+                        Permissões
+                      </button>
+                    )}
+                    {/* Role actions */}
                     {u.role === "admin" ? (
-                      <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
+                      <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
+                        className="flex items-center gap-1 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all disabled:opacity-30">
+                        <UserX className="h-3 w-3" /> Rebaixar
+                      </button>
                     ) : u.role === "diretoria" ? (
-                      <span className="inline-flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-violet-400">
-                        <Briefcase className="h-3.5 w-3.5" />
-                        Gestão — automático
-                      </span>
+                      <>
+                        <button onClick={() => changeRole(u.id, "user")}
+                          className="flex items-center gap-1 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1.5 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+                          <UserX className="h-3 w-3" /> User
+                        </button>
+                        <button onClick={() => changeRole(u.id, "admin")}
+                          className="flex items-center gap-1 rounded-xl border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                          <Shield className="h-3 w-3" /> Admin
+                        </button>
+                      </>
                     ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {ALL_MODULES.map((mod) => {
-                          const meta = MODULE_META[mod];
-                          const ModIcon = meta.icon;
-                          const has = u.modules.has(mod);
-                          return (
-                            <button key={mod} onClick={() => toggleModule(u.id, mod, has)}
-                              className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-all active:scale-95 ${
-                                has ? `${meta.border} ${meta.bg} ${meta.color}` : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)]"
-                              }`}>
-                              <ModIcon className="h-3.5 w-3.5" /> {meta.label}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <>
+                        <button onClick={() => changeRole(u.id, "diretoria")}
+                          className="flex items-center gap-1 rounded-xl border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
+                          Dir.
+                        </button>
+                        <button onClick={() => changeRole(u.id, "admin")}
+                          className="flex items-center gap-1 rounded-xl border border-red-500/20 bg-red-500/10 px-2.5 py-1.5 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
+                          <Shield className="h-3 w-3" /> Admin
+                        </button>
+                      </>
+                    )}
+                    {u.id !== me?.id && (
+                      <button onClick={() => setDeleteConfirm(u.id)}
+                        className="flex items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 p-1.5 text-red-400 hover:bg-red-500/20 transition-all">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* ── Tabela desktop (≥ md) ── */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-[var(--sgt-divider)]">
-                    {["Usuário", "ID", "Criado em", "Role", "Módulos", "Ações"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((u, idx) => (
-                    <tr key={u.id} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold [color:var(--sgt-text-primary)]"
-                            style={{ background: colors[idx % colors.length] }}>
-                            {initials(u.email)}
-                          </div>
-                          <span className="text-sm sgt-text">{u.email}</span>
-                          {u.id === me?.id && (
-                            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-[11px] text-[var(--sgt-text-muted)]">{u.id.substring(0, 8)}…</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm sgt-text-2">
-                        {new Date(u.created_at).toLocaleDateString("pt-BR")}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {u.role === "admin" ? (
-                          <span className="text-[11px] italic text-[var(--sgt-text-muted)]">acesso total</span>
-                        ) : u.role === "diretoria" ? (
-                          <span className="inline-flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2 py-1 text-[10px] font-semibold text-violet-400">
-                            <Briefcase className="h-3 w-3" />
-                            Gestão — automático
-                          </span>
-                        ) : (
-                          <div className="flex flex-wrap gap-1.5">
-                            {ALL_MODULES.map((mod) => {
-                              const meta = MODULE_META[mod];
-                              const ModIcon = meta.icon;
-                              const has = u.modules.has(mod);
-                              return (
-                                <button key={mod} onClick={() => toggleModule(u.id, mod, has)}
-                                  title={has ? `Revogar ${meta.label}` : `Liberar ${meta.label}`}
-                                  className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-semibold transition-all ${
-                                    has ? `${meta.border} ${meta.bg} ${meta.color} hover:opacity-80` : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
-                                  }`}>
-                                  <ModIcon className="h-3 w-3" /> {meta.label}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          {u.role === "admin" ? (
-                            <button onClick={() => changeRole(u.id, "user")} disabled={u.id === me?.id}
-                              className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all disabled:opacity-30">
-                              <UserX className="h-3 w-3" /> User
-                            </button>
-                          ) : u.role === "diretoria" ? (
-                            <>
-                              <button onClick={() => changeRole(u.id, "user")}
-                                className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-2.5 py-1 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
-                                <UserX className="h-3 w-3" /> User
-                              </button>
-                              <button onClick={() => changeRole(u.id, "admin")}
-                                className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
-                                <Shield className="h-3 w-3" /> Admin
-                              </button>
-                            </>
+                {/* ── Painel de permissões expandido ── */}
+                {permUserId === u.id && u.role !== "admin" && (
+                  <div className="mt-4 rounded-2xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-section)] overflow-hidden">
+                    {/* Header do painel */}
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--sgt-divider)]">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-cyan-400" />
+                        <span className="text-[12px] font-bold sgt-text">Controle de Acesso por Tela</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-[var(--sgt-text-muted)]">
+                          {u.pages.size}/{ALL_PAGES.length} ativas
+                        </span>
+                        <button onClick={() => toggleAll(u.id, u.pages)}
+                          className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[10px] font-semibold transition-all ${
+                            ALL_PAGES.every(p => u.pages.has(p))
+                              ? "border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20"
+                              : u.pages.size > 0
+                                ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20"
+                                : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)]"
+                          }`}>
+                          {ALL_PAGES.every(p => u.pages.has(p)) ? (
+                            <><CheckSquare className="h-3 w-3" /> Desmarcar tudo</>
                           ) : (
-                            <>
-                              <button onClick={() => changeRole(u.id, "diretoria")}
-                                className="flex items-center gap-1 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-[11px] text-violet-300 hover:bg-violet-500/20 transition-all">
-                                Dir.
-                              </button>
-                              <button onClick={() => changeRole(u.id, "admin")}
-                                className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-300 hover:bg-red-500/20 transition-all">
-                                <Shield className="h-3 w-3" /> Admin
-                              </button>
-                            </>
+                            <><Square className="h-3 w-3" /> Marcar tudo</>
                           )}
-                          {u.id !== me?.id && (
-                            <button onClick={() => setDeleteConfirm(u.id)}
-                              className="flex items-center gap-1 rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-500/20 transition-all">
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Grupos de telas */}
+                    <div className="divide-y divide-[var(--sgt-divider)]">
+                      {PAGE_GROUPS.map(group => {
+                        const gc = GROUP_COLORS[group.label] ?? GROUP_COLORS["Financeiro"];
+                        const groupHasAll = group.pages.every(p => u.pages.has(p));
+                        const groupHasSome = group.pages.some(p => u.pages.has(p));
+                        const groupHasCount = group.pages.filter(p => u.pages.has(p)).length;
+                        const isCollapsed = collapsedGroups[`${u.id}-${group.label}`];
+
+                        return (
+                          <div key={group.label}>
+                            {/* Header do grupo */}
+                            <div className={`flex items-center gap-3 px-5 py-2.5 ${gc.bg} cursor-pointer select-none`}
+                              onClick={() => setCollapsedGroups(prev => ({ ...prev, [`${u.id}-${group.label}`]: !prev[`${u.id}-${group.label}`] }))}>
+                              <div className={`w-1 h-5 rounded-full ${gc.accent} opacity-60`} />
+                              <ChevronDown className={`h-3.5 w-3.5 ${gc.text} opacity-60 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
+                              <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${gc.text}`}>{group.label}</span>
+                              <span className="text-[10px] text-[var(--sgt-text-muted)]">{groupHasCount}/{group.pages.length}</span>
+                              <div className="flex-1" />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleGroup(u.id, group.pages, u.pages); }}
+                                className={`flex items-center gap-1 rounded-md border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider transition-all ${
+                                  groupHasAll
+                                    ? `${gc.border} ${gc.bg} ${gc.text} hover:opacity-80`
+                                    : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                                }`}>
+                                {groupHasAll ? <CheckSquare className="h-2.5 w-2.5" /> : groupHasSome ? <MinusSquare className="h-2.5 w-2.5" /> : <Square className="h-2.5 w-2.5" />}
+                                {groupHasAll ? "Tudo" : "Selecionar"}
+                              </button>
+                            </div>
+
+                            {/* Telas do grupo */}
+                            {!isCollapsed && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 p-3">
+                                {group.pages.map(page => {
+                                  const meta = PAGE_META[page];
+                                  const Icon = meta.icon;
+                                  const has = u.pages.has(page);
+                                  return (
+                                    <button key={page} onClick={() => togglePage(u.id, page, has)}
+                                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all ${
+                                        has
+                                          ? `${meta.border} ${meta.bg} ${meta.color}`
+                                          : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)] hover:border-[var(--sgt-border-medium)]"
+                                      }`}>
+                                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                                      <span className="text-[11px] font-semibold truncate">{meta.label}</span>
+                                      <div className="ml-auto shrink-0">
+                                        {has ? <CheckSquare className="h-3.5 w-3.5 opacity-70" /> : <Square className="h-3.5 w-3.5 opacity-40" />}
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </AnimatedCard>
 
@@ -631,23 +574,13 @@ export default function GestaoUsuarios() {
               </p>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                disabled={deleting}
-                className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all"
-              >
+              <button onClick={() => setDeleteConfirm(null)} disabled={deleting}
+                className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
                 Cancelar
               </button>
-              <button
-                onClick={() => handleDeleteUser(deleteConfirm)}
-                disabled={deleting}
-                className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {deleting ? (
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
-                ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
-                )}
+              <button onClick={() => handleDeleteUser(deleteConfirm)} disabled={deleting}
+                className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                {deleting ? <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-400 border-t-transparent" /> : <Trash2 className="h-3.5 w-3.5" />}
                 {deleting ? "Excluindo..." : "Excluir"}
               </button>
             </div>

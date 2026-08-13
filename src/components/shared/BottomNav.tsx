@@ -8,7 +8,7 @@ import {
   Building2, Users, Tag, Landmark,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { usePagePermissions, type AppModule } from "@/hooks/usePagePermissions";
+import { usePagePermissions, type AppPage } from "@/hooks/usePagePermissions";
 import { MenuDrawerContent } from "./MenuDrawerContent";
 
 // ─── Tipo de item de navegação ────────────────────────────────────────────────
@@ -17,51 +17,51 @@ type NavItem = {
   icon: React.ElementType;
   label: string;
   to: string;
-  module?: AppModule;
+  page?: AppPage;
   badge?: number;
 };
 
 // ─── Mapa de itens por contexto (baseado na rota atual) ──────────────────────
 const CONTEXT_NAV: Record<string, NavItem[]> = {
   default: [
-    { id: "exec", icon: Briefcase,       label: "Executivo",    to: "/executivo",          module: "gestao" },
-    { id: "fat",  icon: Banknote,        label: "Faturamento",  to: "/faturamento",         module: "gestao" },
-    { id: "ind",  icon: LineChart,       label: "Indicadores",  to: "/indicadores",         module: "gestao" },
+    { id: "exec", icon: Briefcase,       label: "Executivo",    to: "/executivo",          page: "ext-executivo" },
+    { id: "fat",  icon: Banknote,        label: "Faturamento",  to: "/faturamento",         page: "ext-faturamento" },
+    { id: "ind",  icon: LineChart,       label: "Indicadores",  to: "/indicadores",         page: "ext-indicadores" },
   ],
   gestao: [
-    { id: "exec", icon: Briefcase,       label: "Executivo",    to: "/executivo",           module: "gestao" },
-    { id: "fat",  icon: Banknote,        label: "Faturamento",  to: "/faturamento",          module: "gestao" },
-    { id: "ind",  icon: LineChart,       label: "Indicadores",  to: "/indicadores",         module: "gestao" },
+    { id: "exec", icon: Briefcase,       label: "Executivo",    to: "/executivo",           page: "ext-executivo" },
+    { id: "fat",  icon: Banknote,        label: "Faturamento",  to: "/faturamento",          page: "ext-faturamento" },
+    { id: "ind",  icon: LineChart,       label: "Indicadores",  to: "/indicadores",         page: "ext-indicadores" },
   ],
   operacao: [
-    { id: "oper",  icon: MapPin,         label: "Operacional",  to: "/operacional",         module: "operacao" },
-    { id: "frota", icon: Truck,          label: "Frota",        to: "/frota",               module: "operacao" },
-    { id: "financ",icon: Car,            label: "Financiamento",to: "/financiamento-frota", module: "operacao" },
-    { id: "manut", icon: Wrench,         label: "Manutenção",   to: "/manutencao",          module: "operacao" },
-    { id: "abast", icon: Fuel,           label: "Abastecimento",to: "/abastecimento",        module: "operacao" },
+    { id: "oper",  icon: MapPin,         label: "Operacional",  to: "/operacional",         page: "ext-operacional" },
+    { id: "frota", icon: Truck,          label: "Frota",        to: "/frota",               page: "ext-frota" },
+    { id: "financ",icon: Car,            label: "Financiamento",to: "/financiamento-frota", page: "ext-fin-frota" },
+    { id: "manut", icon: Wrench,         label: "Manutenção",   to: "/manutencao",          page: "ext-manutencao" },
+    { id: "abast", icon: Fuel,           label: "Abastecimento",to: "/abastecimento",        page: "ext-abastecimento" },
   ],
   financeiro: [
-    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",      to: "/financeiro",                    module: "financeiro" },
-    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",       to: "/financeiro?s=pagar",             module: "financeiro" },
-    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",     to: "/financeiro?s=receber",           module: "financeiro" },
-    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação", to: "/financeiro?s=conciliacao",       module: "financeiro" },
-    { id: "fin-rl",  icon: Activity,        label: "Realizado",   to: "/dashboard",                      module: "financeiro" },
-    { id: "fin-pv",  icon: TrendingUp,      label: "Previsto",    to: "/financeiro?s=previsto",          module: "financeiro" },
+    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",      to: "/financeiro",                    page: "fin-painel" },
+    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",       to: "/financeiro?s=pagar",             page: "fin-pagar" },
+    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",     to: "/financeiro?s=receber",           page: "fin-receber" },
+    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação", to: "/financeiro?s=conciliacao",       page: "fin-conciliacao" },
+    { id: "fin-rl",  icon: Activity,        label: "Realizado",   to: "/dashboard",                      page: "fin-realizado" },
+    { id: "fin-pv",  icon: TrendingUp,      label: "Previsto",    to: "/financeiro?s=previsto",          page: "fin-previsto" },
   ],
   compras: [
-    { id: "compras", icon: ShoppingCart, label: "Compras",      to: "/compras",             module: "compras" },
+    { id: "compras", icon: ShoppingCart, label: "Compras",      to: "/compras",             page: "ext-compras" },
   ],
   rh: [
-    { id: "rh",      icon: UserCog,      label: "RH",           to: "/rh",                  module: "rh" },
+    { id: "rh",      icon: UserCog,      label: "RH",           to: "/rh",                  page: "ext-rh" },
   ],
   receitaflow: [
-    { id: "rf",      icon: Sparkles,     label: "ReceitaFlow",  to: "/receitaflow" },
+    { id: "rf",      icon: Sparkles,     label: "ReceitaFlow",  to: "/receitaflow",         page: "portal-receitaflow" },
   ],
   "outras-analises": [
-    { id: "oa-forn", icon: Building2, label: "Fornecedores", to: "/financeiro?s=fornecedores", module: "financeiro" },
-    { id: "oa-cli",  icon: Users,     label: "Clientes",     to: "/financeiro?s=clientes",     module: "financeiro" },
-    { id: "oa-cat",  icon: Tag,       label: "Categorias",   to: "/financeiro?s=categorias",   module: "financeiro" },
-    { id: "oa-ban",  icon: Landmark,  label: "Bancos",       to: "/financeiro?s=bancos",        module: "financeiro" },
+    { id: "oa-forn", icon: Building2, label: "Fornecedores", to: "/financeiro?s=fornecedores", page: "fin-fornecedores" },
+    { id: "oa-cli",  icon: Users,     label: "Clientes",     to: "/financeiro?s=clientes",     page: "fin-clientes" },
+    { id: "oa-cat",  icon: Tag,       label: "Categorias",   to: "/financeiro?s=categorias",   page: "fin-categorias" },
+    { id: "oa-ban",  icon: Landmark,  label: "Bancos",       to: "/financeiro?s=bancos",        page: "fin-bancos" },
   ],
 };
 
@@ -96,12 +96,10 @@ function NavTab({
       className={`relative flex min-h-[58px] flex-col items-center justify-center gap-[3px] py-2.5 transition-colors active:scale-95 ${fill ? "flex-1" : tabWidth}`}
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      {/* Indicador superior */}
       <span className={`absolute top-0 h-0.5 w-7 rounded-b bg-amber-400 transition-transform duration-200 ${
         active ? "scale-x-100" : "scale-x-0"
       }`} />
 
-      {/* Wrapper do ícone — preenche âmbar-muted quando ativo */}
       <span className={`relative flex h-[30px] ${dense ? "w-[40px]" : "w-[46px]"} items-center justify-center rounded-lg transition-colors ${
         active ? "bg-amber-400/[0.14]" : "bg-transparent"
       }`}>
@@ -132,7 +130,7 @@ export function BottomNav() {
   const allItems = CONTEXT_NAV[ctx] ?? CONTEXT_NAV.default;
 
   const visibleItems = useMemo(
-    () => allItems.filter(item => !item.module || canAccess(item.module)),
+    () => allItems.filter(item => !item.page || canAccess(item.page)),
     [allItems, canAccess],
   );
 
@@ -154,7 +152,6 @@ export function BottomNav() {
 
   return (
     <>
-      {/* ── Bottom bar ── */}
       <nav
         className="sm:hidden fixed bottom-0 left-0 right-0 z-[80] flex items-stretch border-t"
         style={{
@@ -166,10 +163,8 @@ export function BottomNav() {
           boxShadow: "0 -4px 24px rgba(0,0,0,0.35)",
         }}
       >
-        {/* INÍCIO — fixo à esquerda */}
         <NavTab icon={Home} label="Início" active={isHome} onClick={() => navigate("/home")} />
 
-        {/* Itens dinâmicos — scroll horizontal com gradient quando > 3 */}
         <div className="relative flex-1 min-w-0">
           {visibleItems.length > 3 && (
             <div
@@ -196,11 +191,9 @@ export function BottomNav() {
           </div>
         </div>
 
-        {/* MENU — fixo à direita */}
         <NavTab icon={Menu} label="Menu" active={menuOpen} onClick={() => setMenuOpen(true)} isMenu />
       </nav>
 
-      {/* ── Drawer completo (conteúdo compartilhado com a MobileNav) ── */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent
           side="left"

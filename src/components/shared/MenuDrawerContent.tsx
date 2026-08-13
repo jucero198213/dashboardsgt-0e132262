@@ -62,9 +62,7 @@ export function MenuDrawerContent({ onClose }: { onClose: () => void }) {
   // Itens visíveis (permissão + esconde portais externos p/ diretoria), agrupados por seção.
   const sections = useMemo(() => {
     const visible = APP_NAV.filter(
-      (item) =>
-        (!item.module || canAccess(item.module)) &&
-        (role !== "diretoria" || item.id !== "portal-visual"),
+      (item) => !item.page || canAccess(item.page),
     );
     const q = norm(query.trim());
     const grouped: { title: string; items: AppNavItem[] }[] = [];

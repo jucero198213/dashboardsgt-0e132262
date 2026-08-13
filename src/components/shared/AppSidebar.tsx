@@ -165,8 +165,7 @@ export function AppSidebar() {
     return ids
       .map(id => NAV_MAP.get(id))
       .filter(Boolean)
-      .filter(i => !i!.module || canAccess(i!.module))
-      .filter(i => !(role === "diretoria" && i!.id === "portal-visual")) as AppNavItem[];
+      .filter(i => !i!.page || canAccess(i!.page)) as AppNavItem[];
   }
 
   // ── efeitos ────────────────────────────────────────────────────────────────

@@ -434,9 +434,8 @@ function useGreeting(email?: string) {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user, role } = useAuth();
+  const { user } = useAuth();
   const { canAccess } = usePagePermissions();
-  const isDiretoria = role === "diretoria";
   const reduce = useReducedMotion();
   const { greeting, name } = useGreeting(user?.email);
 
@@ -718,14 +717,14 @@ export default function Home() {
 
             {/* Cards fixados — Visual Rodopar, Sofia AI, Chamados */}
             {(() => {
-              const pinnedPermMap: Record<string, "portal-visual" | "sofia-ai" | "suporte"> = {
+              const pinnedPermMap: Record<string, "portal-visual" | "sofia-ai" | "ext-chamados"> = {
                 "visual-rodopar": "portal-visual",
                 "sofia-ai": "sofia-ai",
-                "chamados": "suporte",
+                "chamados": "ext-chamados",
               };
               const visiblePinned = pinnedModules.filter((m) => {
-                const mod = pinnedPermMap[m.key];
-                return !mod || canAccess(mod);
+                const pg = pinnedPermMap[m.key];
+                return !pg || canAccess(pg);
               });
               return visiblePinned.length > 0 && (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
@@ -752,19 +751,18 @@ export default function Home() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {moduleCards
                 .filter((m) => {
-                  const moduleMap: Record<string, "portal-receitaflow" | "financeiro" | "gestao" | "operacao" | "compras" | "rh" | "suporte"> = {
+                  const pageMap: Record<string, import("@/hooks/usePagePermissions").AppPage> = {
                     "receitaflow": "portal-receitaflow",
-                    "financeiro": "financeiro",
-                    "gestao": "gestao",
-                    "operacao": "operacao",
-                    "compras": "compras",
-                    "rh": "rh",
-                    "suporte": "suporte",
-                    "outras-analises": "financeiro",
+                    "financeiro": "fin-painel",
+                    "gestao": "ext-executivo",
+                    "operacao": "ext-operacional",
+                    "compras": "ext-compras",
+                    "rh": "ext-rh",
+                    "outras-analises": "fin-fornecedores",
                   };
-                  const mod = moduleMap[m.key];
-                  if (!mod) return true;
-                  return canAccess(mod);
+                  const pg = pageMap[m.key];
+                  if (!pg) return true;
+                  return canAccess(pg);
                 })
                 .map((m, i) => (
                   <Reveal key={m.key} delay={i * 0.1} className="h-full">
