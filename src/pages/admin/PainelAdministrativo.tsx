@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, Settings, Database, Activity, Shield,
-  ChevronRight, Lock, Server, Zap, ClipboardList,
+  ChevronRight, Lock, Server, Zap, ClipboardList, Terminal,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -17,78 +17,69 @@ import Seguranca from "./Seguranca";
 
 type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca" | "chamados";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: {
+  id: Screen;
+  label: string;
+  desc: string;
+  icon: React.ElementType;
+  gradient: string;
+  borderGlow: string;
+  iconBg: string;
+  route?: string;
+}[] = [
   {
-    id: "usuarios" as Screen,
+    id: "usuarios",
     label: "Gestão de Usuários",
-    desc: "Usuários, permissões e roles via Supabase Auth",
+    desc: "Gerencie usuários, permissões e roles do sistema",
     icon: Users,
-    accent: "emerald",
-    border: "border-emerald-500/20",
-    bg: "bg-emerald-500/8",
-    icon_color: "text-emerald-400",
-    badge_bg: "bg-emerald-500/15",
-    glow: "rgba(16,185,129,0.08)",
+    gradient: "linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.08) 100%)",
+    borderGlow: "rgba(16,185,129,0.3)",
+    iconBg: "bg-emerald-500/20",
   },
   {
-    id: "config" as Screen,
+    id: "config",
     label: "Configurações",
     desc: "Tunnel URL, integrações e parâmetros do sistema",
     icon: Settings,
-    accent: "cyan",
-    border: "border-cyan-500/20",
-    bg: "bg-cyan-500/8",
-    icon_color: "text-cyan-400",
-    badge_bg: "bg-cyan-500/15",
-    glow: "rgba(6,182,212,0.08)",
+    gradient: "linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(59,130,246,0.08) 100%)",
+    borderGlow: "rgba(6,182,212,0.3)",
+    iconBg: "bg-cyan-500/20",
   },
   {
-    id: "banco" as Screen,
+    id: "banco",
     label: "Banco de Dados",
     desc: "Schema, tabelas e console SQL read-only",
     icon: Database,
-    accent: "violet",
-    border: "border-violet-500/20",
-    bg: "bg-violet-500/8",
-    icon_color: "text-violet-400",
-    badge_bg: "bg-violet-500/15",
-    glow: "rgba(139,92,246,0.08)",
+    gradient: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(99,102,241,0.08) 100%)",
+    borderGlow: "rgba(139,92,246,0.3)",
+    iconBg: "bg-violet-500/20",
   },
   {
-    id: "monitor" as Screen,
+    id: "monitor",
     label: "Monitoramento",
-    desc: "Logs de atividade, auditoria e métricas",
+    desc: "Logs de atividade, auditoria e métricas em tempo real",
     icon: Activity,
-    accent: "amber",
-    border: "border-amber-500/20",
-    bg: "bg-amber-500/8",
-    icon_color: "text-amber-400",
-    badge_bg: "bg-amber-500/15",
-    glow: "rgba(245,158,11,0.08)",
+    gradient: "linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(239,68,68,0.06) 100%)",
+    borderGlow: "rgba(245,158,11,0.3)",
+    iconBg: "bg-amber-500/20",
   },
   {
-    id: "seguranca" as Screen,
+    id: "seguranca",
     label: "Segurança",
     desc: "Sessões ativas, 2FA, IPs permitidos e SSO",
     icon: Shield,
-    accent: "red",
-    border: "border-red-500/20",
-    bg: "bg-red-500/8",
-    icon_color: "text-red-400",
-    badge_bg: "bg-red-500/15",
-    glow: "rgba(239,68,68,0.08)",
+    gradient: "linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(244,63,94,0.08) 100%)",
+    borderGlow: "rgba(239,68,68,0.3)",
+    iconBg: "bg-red-500/20",
   },
   {
-    id: "chamados" as Screen,
+    id: "chamados",
     label: "Agenda de Chamados",
-    desc: "Calendário, criação e acompanhamento de chamados",
+    desc: "Calendário, criação e acompanhamento",
     icon: ClipboardList,
-    accent: "amber",
-    border: "border-amber-500/20",
-    bg: "bg-amber-500/8",
-    icon_color: "text-amber-400",
-    badge_bg: "bg-amber-500/15",
-    glow: "rgba(245,158,11,0.08)",
+    gradient: "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(234,88,12,0.08) 100%)",
+    borderGlow: "rgba(245,158,11,0.3)",
+    iconBg: "bg-amber-500/20",
     route: "/chamados",
   },
 ];
@@ -125,7 +116,7 @@ export default function PainelAdministrativo() {
         >
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
 
-            {/* Navbar desktop */}
+            {/* ─── Navbar desktop ─── */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-400/20 bg-red-400/[0.08]">
@@ -165,7 +156,7 @@ export default function PainelAdministrativo() {
               <UserMenu />
             </div>
 
-            {/* Navbar mobile */}
+            {/* ─── Navbar mobile ─── */}
             <div className="flex sm:hidden items-center justify-between gap-2 py-1">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-400/20 bg-red-400/[0.08] shrink-0">
@@ -192,78 +183,114 @@ export default function PainelAdministrativo() {
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-            {/* Page subtitle */}
-            <div>
-              <p className="text-[12px] text-[var(--sgt-text-muted)]">
-                {screen === "home"
-                  ? `Central de controle · ${user?.email ?? "ti@sgtlog.com.br"}`
-                  : currentItem?.desc}
-              </p>
-            </div>
-
-            {/* Content */}
+            {/* ─── Content ─── */}
             <div className="flex flex-col gap-6">
 
-        {/* Home — navigation grid */}
         {screen === "home" && (
           <>
-            {/* ── Indicadores ── */}
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Indicadores</span>
-              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
-            </div>
+            {/* ═══ Hero banner ═══ */}
+            <AnimatedCard delay={0} hover={false} className="rounded-[20px] sm:rounded-[24px] overflow-hidden border border-[var(--sgt-border-subtle)]">
+              <div
+                className="relative px-5 py-6 sm:px-8 sm:py-8"
+                style={{
+                  background: "linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(139,92,246,0.08) 40%, rgba(6,182,212,0.06) 100%)",
+                }}
+              >
+                <div className="absolute inset-0 opacity-[0.03]" style={{
+                  backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+                  backgroundSize: "24px 24px",
+                }} />
+                <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                  <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl border border-red-400/20 bg-red-500/10 backdrop-blur-sm shrink-0">
+                    <Terminal className="h-7 w-7 sm:h-8 sm:w-8 text-red-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl sm:text-2xl font-black tracking-[-0.03em] dark:text-white text-slate-800 mb-1">
+                      Central de Controle
+                    </h1>
+                    <p className="text-sm sm:text-base text-[var(--sgt-text-secondary)] leading-relaxed">
+                      Gerencie usuários, integrações, segurança e infraestrutura do Workspace SGT.
+                    </p>
+                    <p className="text-xs text-[var(--sgt-text-muted)] mt-2 font-mono">
+                      {user?.email ?? "ti@sgtlog.com.br"}
+                    </p>
+                  </div>
+                  <div className="hidden lg:flex gap-3 shrink-0">
+                    {[
+                      { label: "Usuários", value: "7", color: "text-emerald-400", icon: Users, bg: "bg-emerald-500/10 border-emerald-500/20" },
+                      { label: "Uptime", value: "99.9%", color: "text-cyan-400", icon: Server, bg: "bg-cyan-500/10 border-cyan-500/20" },
+                      { label: "Integrações", value: "5/5", color: "text-violet-400", icon: Zap, bg: "bg-violet-500/10 border-violet-500/20" },
+                    ].map((s) => (
+                      <div key={s.label} className={`flex flex-col items-center rounded-xl border px-4 py-3 backdrop-blur-sm ${s.bg}`}>
+                        <s.icon className={`h-4 w-4 ${s.color} mb-1`} />
+                        <span className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</span>
+                        <span className="text-[9px] uppercase tracking-[0.15em] text-[var(--sgt-text-muted)]">{s.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </AnimatedCard>
 
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4">
+            {/* ═══ Stats mobile (visíveis só em < lg) ═══ */}
+            <div className="grid grid-cols-3 gap-2.5 lg:hidden">
               {[
-                { label: "Usuários ativos", value: "7", icon: Users, color: "text-emerald-400", bg: "bg-emerald-500/10", glow: "rgba(16,185,129,0.06)" },
-                { label: "Uptime", value: "99.9%", icon: Server, color: "text-cyan-400", bg: "bg-cyan-500/10", glow: "rgba(6,182,212,0.06)" },
-                { label: "Integrações", value: "5/5", icon: Zap, color: "text-violet-400", bg: "bg-violet-500/10", glow: "rgba(139,92,246,0.06)" },
-                { label: "Alertas", value: "1", icon: Shield, color: "text-amber-400", bg: "bg-amber-500/10", glow: "rgba(245,158,11,0.06)" },
+                { label: "Usuários", value: "7", color: "text-emerald-400", icon: Users, gradient: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.04))" },
+                { label: "Uptime", value: "99.9%", color: "text-cyan-400", icon: Server, gradient: "linear-gradient(135deg, rgba(6,182,212,0.12), rgba(59,130,246,0.04))" },
+                { label: "Integrações", value: "5/5", color: "text-violet-400", icon: Zap, gradient: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.04))" },
               ].map((s, i) => (
-                <AnimatedCard key={s.label} delay={i * 60} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
-                  <div
-                    className="px-4 py-3 flex items-center gap-3"
-                    style={{ background: `radial-gradient(ellipse at top left, ${s.glow}, transparent 70%)` }}
-                  >
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${s.bg} shrink-0`}>
-                      <s.icon className={`h-4 w-4 ${s.color}`} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-[var(--sgt-text-muted)] uppercase tracking-[0.15em]">{s.label}</p>
-                      <p className={`text-[15px] font-bold ${s.color}`}>{s.value}</p>
-                    </div>
+                <AnimatedCard key={s.label} delay={80 + i * 50} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+                  <div className="flex flex-col items-center py-3 px-2" style={{ background: s.gradient }}>
+                    <s.icon className={`h-4 w-4 ${s.color} mb-1.5`} />
+                    <span className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</span>
+                    <span className="text-[9px] uppercase tracking-[0.15em] text-[var(--sgt-text-muted)]">{s.label}</span>
                   </div>
                 </AnimatedCard>
               ))}
             </div>
 
-            {/* ── Módulos ── */}
+            {/* ═══ Módulos ═══ */}
             <div className="flex items-center gap-3">
               <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Módulos</span>
               <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
             </div>
 
-            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {NAV_ITEMS.map((item, i) => (
                 <AnimatedCard
                   key={item.id}
-                  delay={240 + i * 80}
-                  className={`group rounded-[20px] border ${item.border} sgt-bg-card cursor-pointer`}
+                  delay={200 + i * 70}
                   hover
+                  className="group rounded-[20px] overflow-hidden cursor-pointer"
                 >
                   <button
-                    onClick={() => (item as any).route ? navigate((item as any).route) : setScreen(item.id)}
-                    className="text-left w-full p-5"
-                    style={{ background: `radial-gradient(ellipse at top left, ${item.glow}, transparent 60%)` }}
+                    onClick={() => item.route ? navigate(item.route) : setScreen(item.id)}
+                    className="text-left w-full h-full"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${item.border} ${item.bg} ${item.icon_color}`}>
-                        <item.icon className="h-5 w-5" />
+                    <div
+                      className="relative p-5 sm:p-6 h-full border rounded-[20px] transition-all duration-300"
+                      style={{
+                        background: item.gradient,
+                        borderColor: item.borderGlow,
+                      }}
+                    >
+                      {/* Dot pattern overlay */}
+                      <div className="absolute inset-0 opacity-[0.025] rounded-[20px]" style={{
+                        backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 0.5px, transparent 0)",
+                        backgroundSize: "16px 16px",
+                      }} />
+
+                      <div className="relative">
+                        <div className="flex items-start justify-between mb-5">
+                          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} backdrop-blur-sm border border-white/[0.06]`}>
+                            <item.icon className="h-6 w-6" />
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-[var(--sgt-text-muted)] transition-all duration-300 group-hover:translate-x-1 group-hover:text-[var(--sgt-text-secondary)]" />
+                        </div>
+                        <h3 className="text-[15px] sm:text-base font-bold sgt-text mb-1.5 tracking-[-0.01em]">{item.label}</h3>
+                        <p className="text-[12px] sm:text-[13px] text-[var(--sgt-text-secondary)] leading-relaxed">{item.desc}</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-[var(--sgt-text-muted)] transition-all group-hover:translate-x-0.5 group-hover:text-[var(--sgt-text-secondary)]" />
                     </div>
-                    <h3 className="text-[13px] font-semibold sgt-text mb-1">{item.label}</h3>
-                    <p className="text-[11px] sgt-text-2">{item.desc}</p>
                   </button>
                 </AnimatedCard>
               ))}
@@ -278,7 +305,7 @@ export default function PainelAdministrativo() {
           </div>
         )}
 
-            </div> {/* Content */}
+            </div>
           </div>
         </section>
       </div>
