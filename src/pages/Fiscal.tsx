@@ -154,7 +154,6 @@ export default function Fiscal() {
   const notasBase = useMemo(() => {
     if (abaClassif === "todas") return notasPreClassif;
     if (abaClassif === "sem_classificacao") return notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR);
-    if (abaClassif === "devolucao") return notasPreClassif.filter(n => n.IS_DEVOLUCAO === 1);
     return notasPreClassif.filter(n => n.CLASSIFICACAO_FORNECEDOR === abaClassif);
   }, [notasPreClassif, abaClassif]);
 
@@ -430,18 +429,6 @@ export default function Fiscal() {
                   <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => !n.CLASSIFICACAO_FORNECEDOR).length}</span>
                 </button>
               )}
-              <div className="h-4 w-px shrink-0 mx-0.5" style={{ background: "var(--sgt-divider)" }} />
-              <button
-                onClick={() => setAbaClassif(abaClassif === "devolucao" ? "todas" : "devolucao")}
-                className={`shrink-0 inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-colors ${
-                  abaClassif === "devolucao"
-                    ? "bg-rose-400/15 text-rose-300"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                }`}
-              >
-                Devoluções
-                <span className="text-[9px] tabular-nums opacity-60">{notasPreClassif.filter(n => n.IS_DEVOLUCAO === 1).length}</span>
-              </button>
             </div>
 
             {/* TABELA */}
