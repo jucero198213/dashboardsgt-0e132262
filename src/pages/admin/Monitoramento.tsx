@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Activity, Shield, RefreshCw, Download, Circle } from "lucide-react";
+import { Activity, Shield, RefreshCw, Download, Circle, AlertTriangle, Clock, Wifi } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -36,13 +36,14 @@ function ResourceBar({ label, base, color }: { label: string; base: number; colo
     const t = setInterval(() => setVal(Math.max(5, Math.min(95, base + Math.floor((Math.random() - 0.5) * 12)))), 4000);
     return () => clearInterval(t);
   }, [base]);
+  const isHigh = val > 75;
   return (
-    <div>
-      <div className="flex justify-between mb-1.5">
+    <div className="space-y-1.5">
+      <div className="flex justify-between">
         <span className="text-xs text-[var(--sgt-text-muted)]">{label}</span>
-        <span className="text-xs font-semibold sgt-text">{val}%</span>
+        <span className={`text-xs font-bold tabular-nums ${isHigh ? "text-red-400" : "sgt-text"}`}>{val}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-[var(--sgt-progress-track)]">
+      <div className="h-2 overflow-hidden rounded-full bg-[var(--sgt-progress-track)]">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${val}%`, background: color }} />
       </div>
     </div>
@@ -77,6 +78,13 @@ export default function Monitoramento() {
 
   const filtered = filter === "all" ? logs : logs.filter((l) => l.action === filter);
 
+  const stats = [
+    { label: "Eventos hoje", value: String(count), icon: Activity, color: "text-cyan-400", gradient: "linear-gradient(135deg, rgba(6,182,212,0.12), rgba(59,130,246,0.04))", border: "border-cyan-500/20" },
+    { label: "Erros (24h)", value: "1", icon: AlertTriangle, color: "text-red-400", gradient: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(244,63,94,0.04))", border: "border-red-500/20" },
+    { label: "Sessões ativas", value: "3", icon: Wifi, color: "text-emerald-400", gradient: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.04))", border: "border-emerald-500/20" },
+    { label: "Tempo resp.", value: "124ms", icon: Clock, color: "text-violet-400", gradient: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.04))", border: "border-violet-500/20" },
+  ];
+
   return (
     <div className="space-y-4">
       {/* ── Indicadores ── */}
@@ -85,17 +93,17 @@ export default function Monitoramento() {
         <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
       </div>
 
-      <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2 md:grid-cols-4">
-        {[
-          { label: "Eventos hoje",      value: String(count),  color: "text-cyan-400",    glow: "rgba(6,182,212,0.06)" },
-          { label: "Erros (24h)",        value: "1",            color: "text-red-400",     glow: "rgba(239,68,68,0.06)" },
-          { label: "Sessões ativas",     value: "3",            color: "text-emerald-400", glow: "rgba(16,185,129,0.06)" },
-          { label: "Tempo médio resp.", value: "124ms",        color: "text-violet-400",  glow: "rgba(139,92,246,0.06)" },
-        ].map((s, i) => (
-          <AnimatedCard key={s.label} delay={i * 60} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
-            <div className="px-4 py-3" style={{ background: `radial-gradient(ellipse at top left, ${s.glow}, transparent 70%)` }}>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
-              <p className={`mt-1 text-[15px] font-bold ${s.color}`}>{s.value}</p>
+      <div className="grid gap-2.5 sm:gap-3 grid-cols-2 md:grid-cols-4">
+        {stats.map((s, i) => (
+          <AnimatedCard key={s.label} delay={i * 60} className={`rounded-[16px] border ${s.border} overflow-hidden`}>
+            <div className="px-4 py-3.5 flex items-center gap-3" style={{ background: s.gradient }}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] shrink-0">
+                <s.icon className={`h-4 w-4 ${s.color}`} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--sgt-text-muted)]">{s.label}</p>
+                <p className={`text-[16px] font-bold tabular-nums ${s.color}`}>{s.value}</p>
+              </div>
             </div>
           </AnimatedCard>
         ))}
@@ -107,21 +115,27 @@ export default function Monitoramento() {
         <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
+      <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
         {/* Logs */}
-        <AnimatedCard delay={240} className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Logs de Atividade</p>
+        <AnimatedCard delay={240} className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)]">
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+            style={{ background: "linear-gradient(180deg, rgba(6,182,212,0.05) 0%, transparent 100%)" }}
+          >
             <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-cyan-400" />
+              <p className="text-[12px] font-semibold uppercase tracking-[0.2em] sgt-text-2">Logs de Atividade</p>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
               {["all","LOGIN","EXPORT","CRUD","CONFIG"].map((v) => (
                 <button key={v} onClick={() => setFilter(v)}
-                  className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
-                    filter === v ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20" : "text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)]"
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                    filter === v ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/25" : "text-[var(--sgt-text-muted)] hover:text-[var(--sgt-text-secondary)] hover:bg-[var(--sgt-input-bg)]"
                   }`}>
                   {v === "all" ? "Todos" : v}
                 </button>
               ))}
-              <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1 text-xs sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+              <button className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-xs sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
                 <Download className="h-3 w-3" /> Exportar
               </button>
             </div>
@@ -155,7 +169,7 @@ export default function Monitoramento() {
               </thead>
               <tbody>
                 {filtered.map((l, i) => (
-                  <tr key={i} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)]">
+                  <tr key={i} className="border-b border-[var(--sgt-divider)] hover:bg-[var(--sgt-row-hover)] transition-colors">
                     <td className="px-4 py-2.5 font-mono text-[11px] sgt-text-2">{l.time}</td>
                     <td className="px-4 py-2.5 text-sm sgt-text max-w-[180px] truncate">{l.user}</td>
                     <td className="px-4 py-2.5">
@@ -176,10 +190,16 @@ export default function Monitoramento() {
           </div>
         </AnimatedCard>
 
-        {/* Recursos */}
-        <AnimatedCard delay={320} className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
-          <div className="p-5 space-y-4" style={{ background: "radial-gradient(ellipse at top left, rgba(6,182,212,0.04), transparent 60%)" }}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Recursos do Servidor</p>
+        {/* Recursos do Servidor */}
+        <AnimatedCard delay={320} className="rounded-[20px] overflow-hidden border border-[var(--sgt-border-subtle)]">
+          <div
+            className="p-5 space-y-5 h-full"
+            style={{ background: "linear-gradient(180deg, rgba(139,92,246,0.06) 0%, transparent 100%)" }}
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-violet-400" />
+              <p className="text-[12px] font-semibold uppercase tracking-[0.2em] sgt-text-2">Servidor</p>
+            </div>
             <ResourceBar label="CPU"    base={42} color="linear-gradient(90deg,#06b6d4,#3b82f6)" />
             <ResourceBar label="Memória" base={61} color="linear-gradient(90deg,#8b5cf6,#6366f1)" />
             <ResourceBar label="Disco"   base={38} color="linear-gradient(90deg,#10b981,#06b6d4)" />
