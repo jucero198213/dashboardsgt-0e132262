@@ -571,12 +571,12 @@ export default function Fiscal() {
                       {(paginaAtual - 1) * POR_PAGINA + 1}–{Math.min(paginaAtual * POR_PAGINA, notasFiltradas.length)} de {notasFiltradas.length}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => { setPagina(p => Math.max(1, p - 1)); tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }} disabled={paginaAtual === 1}
+                      <button onClick={() => { setPagina(p => Math.max(1, p - 1)); requestAnimationFrame(() => tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }} disabled={paginaAtual === 1}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed">
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </button>
                       <span className="text-[10px] text-slate-400 tabular-nums px-1">pág. {paginaAtual}/{totalPaginas}</span>
-                      <button onClick={() => { setPagina(p => Math.min(totalPaginas, p + 1)); tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }} disabled={paginaAtual === totalPaginas}
+                      <button onClick={() => { setPagina(p => Math.min(totalPaginas, p + 1)); requestAnimationFrame(() => tabelaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }} disabled={paginaAtual === totalPaginas}
                         className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition-colors hover:text-slate-200 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed">
                         <ChevronRight className="h-3.5 w-3.5" />
                       </button>
