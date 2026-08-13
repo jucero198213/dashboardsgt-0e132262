@@ -716,7 +716,7 @@ export default function Home() {
               </h2>
             </Reveal>
 
-            {/* Cards fixados — Visual Rodopar, Portal WR SGT, Chamados (oculto para diretoria) */}
+            {/* Cards fixados — Visual Rodopar, Sofia AI, Chamados (oculto para diretoria) */}
             {!isDiretoria && (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
                 {pinnedModules.map((m, i) => (

@@ -4,7 +4,7 @@ import {
   TrendingUp, Activity, Wallet, Banknote, Users,
   Truck, Wrench, MapPin, Briefcase, ShoppingCart, Fuel,
   LineChart as LineChartIcon, Headphones, UserCog, Scale,
-  Sparkles, Globe, Monitor, BotMessageSquare,
+  Sparkles, Globe, BotMessageSquare,
 } from "lucide-react";
 import type { AppModule } from "@/hooks/usePagePermissions";
 
@@ -41,7 +41,6 @@ export const APP_NAV: AppNavItem[] = [
   // ── Portais integrados — visíveis para todos ─────────────────────────────
   { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais", module: "portal-receitaflow" },
   { id: "portal-visual",      label: "Visual Rodopar", icon: Globe,    externalUrl: "https://webcloud2.datapardc.com/software/html5.html", portal: true, module: "portal-visual" },
-  { id: "portal-wr",          label: "Portal WR SGT",  icon: Monitor,  externalUrl: "http://54.232.121.164:9474/#/login",                  portal: true, module: "portal-wr"     },
 
   // ── Financeiro ────────────────────────────────────────────────────────────
   { id: "fin-painel",       label: "Painel Financeiro",icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", module: "financeiro" },

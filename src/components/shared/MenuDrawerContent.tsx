@@ -64,7 +64,7 @@ export function MenuDrawerContent({ onClose }: { onClose: () => void }) {
     const visible = APP_NAV.filter(
       (item) =>
         (!item.module || canAccess(item.module)) &&
-        (role !== "diretoria" || !["portal-visual", "portal-wr"].includes(item.id)),
+        (role !== "diretoria" || item.id !== "portal-visual"),
     );
     const q = norm(query.trim());
     const grouped: { title: string; items: AppNavItem[] }[] = [];

@@ -87,7 +87,7 @@ function MagItem({
 // ── Estrutura do menu ────────────────────────────────────────────────────────
 const CORE_GROUPS: { label: string; ids: string[] }[] = [
   { label: "Portais",
-    ids: ["portal-receitaflow","portal-visual","portal-wr"] },
+    ids: ["portal-receitaflow","portal-visual"] },
   { label: "Financeiro",
     ids: ["fin-painel","fin-pagar","fin-receber","fin-conciliacao",
           "fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"] },
@@ -166,7 +166,7 @@ export function AppSidebar() {
       .map(id => NAV_MAP.get(id))
       .filter(Boolean)
       .filter(i => !i!.module || canAccess(i!.module))
-      .filter(i => !(role === "diretoria" && ["portal-visual","portal-wr"].includes(i!.id))) as AppNavItem[];
+      .filter(i => !(role === "diretoria" && i!.id === "portal-visual")) as AppNavItem[];
   }
 
   // ── efeitos ────────────────────────────────────────────────────────────────
