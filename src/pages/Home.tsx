@@ -716,16 +716,27 @@ export default function Home() {
               </h2>
             </Reveal>
 
-            {/* Cards fixados — Visual Rodopar, Sofia AI, Chamados (oculto para diretoria) */}
-            {!isDiretoria && (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
-                {pinnedModules.map((m, i) => (
-                  <Reveal key={m.key} delay={i * 0.12} className="h-full">
-                    <ModuleCard data={m} index={0} />
-                  </Reveal>
-                ))}
-              </div>
-            )}
+            {/* Cards fixados — Visual Rodopar, Sofia AI, Chamados */}
+            {(() => {
+              const pinnedPermMap: Record<string, "portal-visual" | "sofia-ai" | "suporte"> = {
+                "visual-rodopar": "portal-visual",
+                "sofia-ai": "sofia-ai",
+                "chamados": "suporte",
+              };
+              const visiblePinned = pinnedModules.filter((m) => {
+                const mod = pinnedPermMap[m.key];
+                return !mod || canAccess(mod);
+              });
+              return visiblePinned.length > 0 && (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
+                  {visiblePinned.map((m, i) => (
+                    <Reveal key={m.key} delay={i * 0.12} className="h-full">
+                      <ModuleCard data={m} index={0} />
+                    </Reveal>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* Separador Módulos do sistema */}
             <Reveal delay={0.05} className="mb-8">

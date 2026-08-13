@@ -36,7 +36,7 @@ export type AppNavItem = {
  */
 export const APP_NAV: AppNavItem[] = [
   // ── Sofia AI ──────────────────────────────────────────────────────────────
-  { id: "sofia-ai",           label: "Sofia AI",       icon: BotMessageSquare, to: "/sofia", portal: true, section: "IA" },
+  { id: "sofia-ai",           label: "Sofia AI",       icon: BotMessageSquare, to: "/sofia", portal: true, section: "IA", module: "sofia-ai" },
 
   // ── Portais integrados — visíveis para todos ─────────────────────────────
   { id: "portal-receitaflow", label: "ReceitaFlow",    icon: Sparkles, to: "/receitaflow",    portal: true, section: "Portais", module: "portal-receitaflow" },
