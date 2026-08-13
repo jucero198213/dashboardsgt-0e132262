@@ -43,6 +43,7 @@ const fmtData = (d: string | null | undefined) => {
 
 const isEntrada        = (n: ConsultaNfeRow) => String(n.TPNF) === "0";
 const isDesconsiderado = (n: ConsultaNfeRow) => n.DESCONSIDERADO === 1;
+const isDesconhecimento = (n: ConsultaNfeRow) => n.DESCONHECIMENTO === 1;
 
 const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const mesLabel = (m: string) => {
@@ -87,6 +88,7 @@ export default function Fiscal() {
   const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusNota>("todos");
   const [ocultarEntrada, setOcultarEntrada] = useState(false);
   const [ocultarDesconsiderados, setOcultarDesconsiderados] = useState(false);
+  const [ocultarDesconhecimento, setOcultarDesconhecimento] = useState(false);
   const [isLoading, setIsLoading]   = useState(false);
   const [erro, setErro]             = useState<string | null>(null);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -137,11 +139,12 @@ export default function Fiscal() {
   }, []);
 
   // ── Toggles + base ──────────────────────────────────────────────────────────
-  const qtdEntrada        = notas.filter(isEntrada).length;
-  const qtdDesconsiderado = notas.filter(isDesconsiderado).length;
+  const qtdEntrada         = notas.filter(isEntrada).length;
+  const qtdDesconsiderado  = notas.filter(isDesconsiderado).length;
+  const qtdDesconhecimento = notas.filter(isDesconhecimento).length;
   const notasPreClassif = useMemo(() => notas.filter(n =>
-    !(ocultarEntrada && isEntrada(n)) && !(ocultarDesconsiderados && isDesconsiderado(n))
-  ), [notas, ocultarEntrada, ocultarDesconsiderados]);
+    !(ocultarEntrada && isEntrada(n)) && !(ocultarDesconsiderados && isDesconsiderado(n)) && !(ocultarDesconhecimento && isDesconhecimento(n))
+  ), [notas, ocultarEntrada, ocultarDesconsiderados, ocultarDesconhecimento]);
 
   const classificacoes = useMemo(() => {
     const set = new Set<string>();
@@ -201,7 +204,7 @@ export default function Fiscal() {
   const totalPaginas = Math.max(1, Math.ceil(notasFiltradas.length / POR_PAGINA));
   const paginaAtual  = Math.min(pagina, totalPaginas);
   const notasPagina  = notasFiltradas.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
-  useEffect(() => { setPagina(1); }, [search, filtroStatus, ocultarEntrada, ocultarDesconsiderados, dataInicio, dataFim, abaClassif]);
+  useEffect(() => { setPagina(1); }, [search, filtroStatus, ocultarEntrada, ocultarDesconsiderados, ocultarDesconhecimento, dataInicio, dataFim, abaClassif]);
 
   const exportarCsv = () => {
     const header = "situacao;fornecedor;cnpj;numero_nota;serie;valor_nota;valor_lancado;origem;data_emissao;chave";
@@ -472,6 +475,11 @@ export default function Fiscal() {
                   {qtdDesconsiderado > 0 && (
                     <button onClick={() => setOcultarDesconsiderados(v => !v)} className={chipCls(ocultarDesconsiderados)}>
                       <EyeOff className="h-3 w-3" />{ocultarDesconsiderados ? "Desconsid. ocultos" : "Ocultar desconsiderados"} ({qtdDesconsiderado})
+                    </button>
+                  )}
+                  {qtdDesconhecimento > 0 && (
+                    <button onClick={() => setOcultarDesconhecimento(v => !v)} className={chipCls(ocultarDesconhecimento)}>
+                      <EyeOff className="h-3 w-3" />{ocultarDesconhecimento ? "Desconhec. ocultas" : "Ocultar desconhecimento"} ({qtdDesconhecimento})
                     </button>
                   )}
                   <div className="flex-1" />
