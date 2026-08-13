@@ -85,7 +85,7 @@ export function useQuickAccess(): QuickAccess {
     () =>
       ids
         .map((id) => APP_NAV.find((i) => i.id === id))
-        .filter((i): i is AppNavItem => !!i && (!i.module || canAccess(i.module))),
+        .filter((i): i is AppNavItem => !!i && (!i.page || canAccess(i.page))),
     [ids, canAccess],
   );
 

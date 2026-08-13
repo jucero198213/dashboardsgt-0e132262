@@ -45,11 +45,11 @@ const Welcome                 = lazy(() => import("./pages/Welcome"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime:            5 * 60 * 1000,  // 5 min — não refetch enquanto dado é fresco
-      gcTime:              10 * 60 * 1000,  // 10 min — mantém cache em memória
-      retry:                1,              // uma retentativa só
-      refetchOnWindowFocus: false,          // não refetch ao alterar aba
-      refetchOnReconnect:   true,           // refetch ao reconectar internet
+      staleTime:            5 * 60 * 1000,
+      gcTime:              10 * 60 * 1000,
+      retry:                1,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect:   true,
     },
   },
 });
@@ -71,35 +71,36 @@ const App = () => (
                 <Route path="/login"    element={<Login />} />
                 <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 {/* ── Financeiro ── */}
-                <Route path="/dashboard"        element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
-                <Route path="/contas-a-receber" element={<ProtectedRoute requiredModule="financeiro"><AppLayout><ContasAReceber /></AppLayout></ProtectedRoute>} />
-                <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredModule="financeiro"><AppLayout><ContasAPagar /></AppLayout></ProtectedRoute>} />
-                <Route path="/financeiro"       element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
-                <Route path="/fiscal"           element={<ProtectedRoute requiredModule="financeiro"><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
+                <Route path="/dashboard"        element={<ProtectedRoute requiredPage="fin-realizado"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
+                <Route path="/contas-a-receber" element={<ProtectedRoute requiredPage="fin-receber"><AppLayout><ContasAReceber /></AppLayout></ProtectedRoute>} />
+                <Route path="/contas-a-pagar"   element={<ProtectedRoute requiredPage="fin-pagar"><AppLayout><ContasAPagar /></AppLayout></ProtectedRoute>} />
+                <Route path="/financeiro"       element={<ProtectedRoute requiredPage="fin-painel"><AppLayout><Finance /></AppLayout></ProtectedRoute>} />
+                <Route path="/fiscal"           element={<ProtectedRoute requiredPage="ext-fiscal"><AppLayout><Fiscal /></AppLayout></ProtectedRoute>} />
                 {/* ── Gestão ── */}
-                <Route path="/indicadores"      element={<ProtectedRoute requiredModule="gestao"><AppLayout><Indicadores /></AppLayout></ProtectedRoute>} />
-                <Route path="/indicadores/:id"  element={<ProtectedRoute requiredModule="gestao"><AppLayout><IndicadorDetalhe /></AppLayout></ProtectedRoute>} />
-                <Route path="/executivo"        element={<ProtectedRoute requiredModule="gestao"><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
-                <Route path="/faturamento"      element={<ProtectedRoute requiredModule="gestao"><AppLayout><Faturamento /></AppLayout></ProtectedRoute>} />
+                <Route path="/indicadores"      element={<ProtectedRoute requiredPage="ext-indicadores"><AppLayout><Indicadores /></AppLayout></ProtectedRoute>} />
+                <Route path="/indicadores/:id"  element={<ProtectedRoute requiredPage="ext-indicadores"><AppLayout><IndicadorDetalhe /></AppLayout></ProtectedRoute>} />
+                <Route path="/executivo"        element={<ProtectedRoute requiredPage="ext-executivo"><AppLayout><Executivo /></AppLayout></ProtectedRoute>} />
+                <Route path="/faturamento"      element={<ProtectedRoute requiredPage="ext-faturamento"><AppLayout><Faturamento /></AppLayout></ProtectedRoute>} />
                 {/* ── Operação ── */}
-                <Route path="/operacional"      element={<ProtectedRoute requiredModule="operacao"><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
-                <Route path="/frota"            element={<ProtectedRoute requiredModule="operacao"><AppLayout><Frota /></AppLayout></ProtectedRoute>} />
-                <Route path="/financiamento-frota" element={<ProtectedRoute requiredModule="operacao"><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
-                <Route path="/manutencao"       element={<ProtectedRoute requiredModule="operacao"><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
-                <Route path="/abastecimento"    element={<ProtectedRoute requiredModule="operacao"><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
+                <Route path="/operacional"      element={<ProtectedRoute requiredPage="ext-operacional"><AppLayout><Operacional /></AppLayout></ProtectedRoute>} />
+                <Route path="/frota"            element={<ProtectedRoute requiredPage="ext-frota"><AppLayout><Frota /></AppLayout></ProtectedRoute>} />
+                <Route path="/financiamento-frota" element={<ProtectedRoute requiredPage="ext-fin-frota"><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
+                <Route path="/manutencao"       element={<ProtectedRoute requiredPage="ext-manutencao"><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
+                <Route path="/abastecimento"    element={<ProtectedRoute requiredPage="ext-abastecimento"><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
                 {/* ── Compras ── */}
-                <Route path="/compras"          element={<ProtectedRoute requiredModule="compras"><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
+                <Route path="/compras"          element={<ProtectedRoute requiredPage="ext-compras"><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
                 {/* ── RH ── */}
-                <Route path="/rh"               element={<ProtectedRoute requiredModule="rh"><AppLayout><Rh /></AppLayout></ProtectedRoute>} />
+                <Route path="/rh"               element={<ProtectedRoute requiredPage="ext-rh"><AppLayout><Rh /></AppLayout></ProtectedRoute>} />
                 {/* ── Suporte ── */}
-                <Route path="/chamados"         element={<ProtectedRoute requiredModule="suporte"><AppLayout><Chamados /></AppLayout></ProtectedRoute>} />
-                {/* ── Admin / misc ── */}
+                <Route path="/chamados"         element={<ProtectedRoute requiredPage="ext-chamados"><AppLayout><Chamados /></AppLayout></ProtectedRoute>} />
+                {/* ── Portais ── */}
+                <Route path="/visual-rodopar"  element={<ProtectedRoute requiredPage="portal-visual"><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/receitaflow"     element={<ProtectedRoute requiredPage="portal-receitaflow"><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/sofia"           element={<ProtectedRoute requiredPage="sofia-ai"><SofiaChat /></ProtectedRoute>} />
+                {/* ── Admin / telas livres ── */}
                 <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
                 <Route path="/admin"            element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
                 <Route path="/sgt"              element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/visual-rodopar"  element={<ProtectedRoute requiredModule="portal-visual"><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/receitaflow"     element={<ProtectedRoute requiredModule="portal-receitaflow"><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/sofia"           element={<ProtectedRoute requiredModule="sofia-ai"><SofiaChat /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
