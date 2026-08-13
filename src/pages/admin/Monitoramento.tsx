@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Activity, Shield, RefreshCw, Download, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
 
 interface LogEntry {
   time: string;
@@ -78,23 +79,37 @@ export default function Monitoramento() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+      {/* ── Indicadores ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Indicadores</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+      </div>
+
+      <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2 md:grid-cols-4">
         {[
-          { label: "Eventos hoje",      value: String(count),  color: "text-cyan-400" },
-          { label: "Erros (24h)",        value: "1",            color: "text-red-400" },
-          { label: "Sessões ativas",     value: "3",            color: "text-emerald-400" },
-          { label: "Tempo médio resp.", value: "124ms",        color: "text-violet-400" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-[16px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
-            <p className={`mt-1 text-[15px] font-bold ${s.color}`}>{s.value}</p>
-          </div>
+          { label: "Eventos hoje",      value: String(count),  color: "text-cyan-400",    glow: "rgba(6,182,212,0.06)" },
+          { label: "Erros (24h)",        value: "1",            color: "text-red-400",     glow: "rgba(239,68,68,0.06)" },
+          { label: "Sessões ativas",     value: "3",            color: "text-emerald-400", glow: "rgba(16,185,129,0.06)" },
+          { label: "Tempo médio resp.", value: "124ms",        color: "text-violet-400",  glow: "rgba(139,92,246,0.06)" },
+        ].map((s, i) => (
+          <AnimatedCard key={s.label} delay={i * 60} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+            <div className="px-4 py-3" style={{ background: `radial-gradient(ellipse at top left, ${s.glow}, transparent 70%)` }}>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{s.label}</p>
+              <p className={`mt-1 text-[15px] font-bold ${s.color}`}>{s.value}</p>
+            </div>
+          </AnimatedCard>
         ))}
+      </div>
+
+      {/* ── Atividade ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Atividade</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
         {/* Logs */}
-        <div className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+        <AnimatedCard delay={240} className="overflow-hidden rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Logs de Atividade</p>
             <div className="flex items-center gap-2">
@@ -159,16 +174,18 @@ export default function Monitoramento() {
               </tbody>
             </table>
           </div>
-        </div>
+        </AnimatedCard>
 
         {/* Recursos */}
-        <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5 space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Recursos do Servidor</p>
-          <ResourceBar label="CPU"    base={42} color="linear-gradient(90deg,#06b6d4,#3b82f6)" />
-          <ResourceBar label="Memória" base={61} color="linear-gradient(90deg,#8b5cf6,#6366f1)" />
-          <ResourceBar label="Disco"   base={38} color="linear-gradient(90deg,#10b981,#06b6d4)" />
-          <ResourceBar label="Rede"    base={22} color="linear-gradient(90deg,#f59e0b,#ef4444)" />
-        </div>
+        <AnimatedCard delay={320} className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+          <div className="p-5 space-y-4" style={{ background: "radial-gradient(ellipse at top left, rgba(6,182,212,0.04), transparent 60%)" }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] sgt-text-2">Recursos do Servidor</p>
+            <ResourceBar label="CPU"    base={42} color="linear-gradient(90deg,#06b6d4,#3b82f6)" />
+            <ResourceBar label="Memória" base={61} color="linear-gradient(90deg,#8b5cf6,#6366f1)" />
+            <ResourceBar label="Disco"   base={38} color="linear-gradient(90deg,#10b981,#06b6d4)" />
+            <ResourceBar label="Rede"    base={22} color="linear-gradient(90deg,#f59e0b,#ef4444)" />
+          </div>
+        </AnimatedCard>
       </div>
     </div>
   );

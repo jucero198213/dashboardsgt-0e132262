@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Settings, CheckCircle, Zap, Link2, RefreshCw } from "lucide-react";
+import { AnimatedCard } from "@/components/shared/AnimatedCard";
 
 const integrations = [
   { name: "Power BI Embedded", desc: "Azure Service Principal ativo", status: "Conectado", color: "emerald" },
@@ -47,80 +48,96 @@ export default function Configuracoes() {
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      {/* ── Configurações Gerais ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Configurações Gerais</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+      </div>
 
+      <div className="grid gap-4 xl:grid-cols-2">
         {/* Tunnel URL */}
-        <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <Link2 className="h-4 w-4 text-cyan-400" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Tunnel URL — DW Local</p>
-          </div>
-          <p className="text-xs text-[var(--sgt-text-muted)]">URL do Cloudflare Tunnel que conecta o portal ao servidor Node.js local. Atualizar quando reiniciar o tunnel.</p>
-          <input
-            value={tunnelUrl}
-            onChange={(e) => setTunnelUrl(e.target.value)}
-            className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-sm sgt-text font-mono placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
-            placeholder="https://xxxx.trycloudflare.com"
-          />
-          <div className="flex gap-2">
-            <button onClick={save}
-              className="flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-all">
-              <CheckCircle className="h-3.5 w-3.5" /> Salvar URL
-            </button>
-            <button onClick={() => window.open(tunnelUrl + "/health", "_blank")}
-              className="flex items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
-              <RefreshCw className="h-3.5 w-3.5" /> Testar
-            </button>
-          </div>
-        </div>
-
-        {/* Feature flags */}
-        <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Settings className="h-4 w-4 text-violet-400" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Feature Flags</p>
-          </div>
-          {featureList.map((f) => (
-            <div key={f.key} className="flex items-center justify-between gap-4 py-2 border-b border-[var(--sgt-divider)] last:border-0">
-              <div>
-                <p className="text-sm font-medium sgt-text">{f.name}</p>
-                <p className="text-xs text-[var(--sgt-text-muted)]">{f.desc}</p>
-              </div>
-              <button
-                onClick={() => toggle(f.key)}
-                className={`relative h-5 w-9 rounded-full transition-colors duration-200 shrink-0 ${
-                  features[f.key] ? "bg-cyan-500" : "bg-[var(--sgt-progress-track)]"
-                }`}
-              >
-                <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200 ${
-                  features[f.key] ? "translate-x-4" : "translate-x-0.5"
-                }`} />
+        <AnimatedCard delay={0} className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+          <div className="p-5 space-y-4" style={{ background: "radial-gradient(ellipse at top left, rgba(6,182,212,0.05), transparent 60%)" }}>
+            <div className="flex items-center gap-2">
+              <Link2 className="h-4 w-4 text-cyan-400" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Tunnel URL — DW Local</p>
+            </div>
+            <p className="text-xs text-[var(--sgt-text-muted)]">URL do Cloudflare Tunnel que conecta o portal ao servidor Node.js local. Atualizar quando reiniciar o tunnel.</p>
+            <input
+              value={tunnelUrl}
+              onChange={(e) => setTunnelUrl(e.target.value)}
+              className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-sm sgt-text font-mono placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
+              placeholder="https://xxxx.trycloudflare.com"
+            />
+            <div className="flex gap-2">
+              <button onClick={save}
+                className="flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-all">
+                <CheckCircle className="h-3.5 w-3.5" /> Salvar URL
+              </button>
+              <button onClick={() => window.open(tunnelUrl + "/health", "_blank")}
+                className="flex items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+                <RefreshCw className="h-3.5 w-3.5" /> Testar
               </button>
             </div>
-          ))}
-        </div>
+          </div>
+        </AnimatedCard>
+
+        {/* Feature flags */}
+        <AnimatedCard delay={80} className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+          <div className="p-5 space-y-3" style={{ background: "radial-gradient(ellipse at top left, rgba(139,92,246,0.05), transparent 60%)" }}>
+            <div className="flex items-center gap-2 mb-1">
+              <Settings className="h-4 w-4 text-violet-400" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Feature Flags</p>
+            </div>
+            {featureList.map((f) => (
+              <div key={f.key} className="flex items-center justify-between gap-4 py-2 border-b border-[var(--sgt-divider)] last:border-0">
+                <div>
+                  <p className="text-sm font-medium sgt-text">{f.name}</p>
+                  <p className="text-xs text-[var(--sgt-text-muted)]">{f.desc}</p>
+                </div>
+                <button
+                  onClick={() => toggle(f.key)}
+                  className={`relative h-5 w-9 rounded-full transition-colors duration-200 shrink-0 ${
+                    features[f.key] ? "bg-cyan-500" : "bg-[var(--sgt-progress-track)]"
+                  }`}
+                >
+                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200 ${
+                    features[f.key] ? "translate-x-4" : "translate-x-0.5"
+                  }`} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </AnimatedCard>
       </div>
 
-      {/* Integrações */}
-      <div className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Zap className="h-4 w-4 text-amber-400" />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Status das Integrações</p>
-        </div>
-        <div className="space-y-3">
-          {integrations.map((int) => (
-            <div key={int.name} className="flex items-center justify-between gap-4 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
-              <div>
-                <p className="text-sm font-medium sgt-text">{int.name}</p>
-                <p className="text-xs text-[var(--sgt-text-muted)]">{int.desc}</p>
-              </div>
-              <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusColors[int.color]}`}>
-                {int.status}
-              </span>
-            </div>
-          ))}
-        </div>
+      {/* ── Integrações ── */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Integrações</span>
+        <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
       </div>
+
+      <AnimatedCard delay={160} className="rounded-[20px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+        <div className="p-5" style={{ background: "radial-gradient(ellipse at top left, rgba(245,158,11,0.04), transparent 60%)" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-4 w-4 text-amber-400" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] sgt-text-2">Status das Integrações</p>
+          </div>
+          <div className="space-y-3">
+            {integrations.map((int) => (
+              <div key={int.name} className="flex items-center justify-between gap-4 rounded-[12px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium sgt-text">{int.name}</p>
+                  <p className="text-xs text-[var(--sgt-text-muted)]">{int.desc}</p>
+                </div>
+                <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusColors[int.color]}`}>
+                  {int.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </AnimatedCard>
     </div>
   );
 }
