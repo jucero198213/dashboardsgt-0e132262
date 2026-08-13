@@ -10,7 +10,8 @@ export type AppModule =
   | "rh"
   | "suporte"
   | "portal-receitaflow"
-  | "portal-visual";
+  | "portal-visual"
+  | "sofia-ai";
 
 export const ALL_MODULES: AppModule[] = [
   "financeiro",
@@ -21,6 +22,7 @@ export const ALL_MODULES: AppModule[] = [
   "suporte",
   "portal-receitaflow",
   "portal-visual",
+  "sofia-ai",
 ];
 
 
@@ -52,12 +54,6 @@ export function usePagePermissions(): UsePagePermissionsResult {
       setIsLoading(false);
       return;
     }
-    // Diretoria: acesso automático somente ao módulo gestão (sem consulta ao DB)
-    if (role === "diretoria") {
-      setPermissions(new Set<AppModule>(["gestao"]));
-      setIsLoading(false);
-      return;
-    }
     setIsLoading(true);
     const { data, error } = await supabase
       .from("page_permissions")
@@ -66,15 +62,17 @@ export function usePagePermissions(): UsePagePermissionsResult {
 
     if (error) {
       console.error("Erro ao buscar permissões:", error);
-      setPermissions(new Set());
+      // Diretoria sempre tem gestao como fallback
+      setPermissions(new Set<AppModule>(role === "diretoria" ? ["gestao"] : []));
     } else {
-      setPermissions(
-        new Set(
-          (data ?? [])
-            .map((r) => r.page as AppModule)
-            .filter((m): m is AppModule => ALL_MODULES.includes(m as AppModule))
-        )
+      const dbPerms = new Set(
+        (data ?? [])
+          .map((r) => r.page as AppModule)
+          .filter((m): m is AppModule => ALL_MODULES.includes(m as AppModule))
       );
+      // Diretoria sempre inclui gestao, mais quaisquer extras do banco
+      if (role === "diretoria") dbPerms.add("gestao");
+      setPermissions(dbPerms);
     }
     setIsLoading(false);
   }, [user, isAdmin, role]);

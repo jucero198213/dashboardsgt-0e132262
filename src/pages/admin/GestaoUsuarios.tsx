@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2,
-  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe } from "lucide-react";
+  Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppModule, ALL_MODULES } from "@/hooks/usePagePermissions";
@@ -17,6 +17,7 @@ const MODULE_META: Record<AppModule, { label: string; icon: React.ElementType; c
   suporte:             { label: "Suporte",         icon: Headphones, color: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/10"    },
   "portal-receitaflow":{ label: "ReceitaFlow",     icon: Sparkles,   color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
   "portal-visual":     { label: "Visual Rodopar",  icon: Globe,      color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "sofia-ai":          { label: "Sofia AI",       icon: BotMessageSquare, color: "text-rose-300", border: "border-rose-400/30", bg: "bg-rose-400/10" },
 };
 
 interface SupaUser {

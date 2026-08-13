@@ -97,9 +97,9 @@ const App = () => (
                 <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
                 <Route path="/admin"            element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />
                 <Route path="/sgt"              element={<ProtectedRoute><AppLayout><SgtWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/visual-rodopar"  element={<ProtectedRoute excludeRoles={["diretoria"]}><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/receitaflow"     element={<ProtectedRoute><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
-                <Route path="/sofia"           element={<ProtectedRoute><SofiaChat /></ProtectedRoute>} />
+                <Route path="/visual-rodopar"  element={<ProtectedRoute requiredModule="portal-visual"><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/receitaflow"     element={<ProtectedRoute requiredModule="portal-receitaflow"><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
+                <Route path="/sofia"           element={<ProtectedRoute requiredModule="sofia-ai"><SofiaChat /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
