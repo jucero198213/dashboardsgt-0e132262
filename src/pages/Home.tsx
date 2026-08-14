@@ -480,6 +480,53 @@ export default function Home() {
     },
   ];
 
+  // ── Mapeamento página → rota (para navegação dinâmica) ──
+  const pageRoute: Record<import("@/hooks/usePagePermissions").AppPage, string> = {
+    "portal-receitaflow": "/receitaflow",
+    "fin-painel": "/financeiro",
+    "fin-pagar": "/contas-a-pagar",
+    "fin-receber": "/contas-a-receber",
+    "fin-conciliacao": "/financeiro",
+    "fin-realizado": "/dashboard",
+    "fin-previsto": "/financeiro",
+    "fin-relatorios": "/financeiro",
+    "ext-fiscal": "/fiscal",
+    "ext-executivo": "/executivo",
+    "ext-indicadores": "/indicadores",
+    "ext-faturamento": "/faturamento",
+    "ext-operacional": "/operacional",
+    "ext-frota": "/frota",
+    "ext-fin-frota": "/financiamento-frota",
+    "ext-manutencao": "/manutencao",
+    "ext-abastecimento": "/abastecimento",
+    "ext-compras": "/compras",
+    "ext-rh": "/rh",
+    "ext-chamados": "/chamados",
+    "portal-visual": "/visual-rodopar",
+    "sofia-ai": "/sofia",
+    "fin-fornecedores": "/financeiro?s=fornecedores",
+    "fin-clientes": "/financeiro?s=clientes",
+    "fin-categorias": "/financeiro?s=categorias",
+    "fin-bancos": "/financeiro?s=bancos",
+  };
+
+  const groupPagesList: Record<string, import("@/hooks/usePagePermissions").AppPage[]> = {
+    "receitaflow": ["portal-receitaflow"],
+    "financeiro": ["fin-painel","fin-pagar","fin-receber","fin-conciliacao","fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"],
+    "gestao": ["ext-executivo","ext-indicadores","ext-faturamento"],
+    "operacao": ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"],
+    "compras": ["ext-compras"],
+    "rh": ["ext-rh"],
+    "outras-analises": ["fin-fornecedores","fin-clientes","fin-categorias","fin-bancos"],
+  };
+
+  const firstAccessibleRoute = (groupKey: string, fallback: string): string => {
+    const pages = groupPagesList[groupKey];
+    if (!pages) return fallback;
+    const found = pages.find(p => canAccess(p));
+    return found ? pageRoute[found] : fallback;
+  };
+
   // ── Cards de módulo agrupado — mesmo padrão visual do ModuleCard ──
   const moduleCards: ModuleCardData[] = [
     {
@@ -488,7 +535,7 @@ export default function Home() {
       title: "ReceitaFlow",
       description: "Ferramenta complementar para apoiar rotinas e processos vinculados ao ecossistema Workspace SGT.",
       cta: "Acessar ReceitaFlow",
-      onClick: () => navigate("/receitaflow"),
+      onClick: () => navigate(firstAccessibleRoute("receitaflow", "/receitaflow")),
       tone: "cyan" as const,
     },
     {
@@ -497,8 +544,8 @@ export default function Home() {
       title: "Financeiro",
       description: "Contas a pagar e receber, conciliação bancária, fluxo de caixa e relatórios financeiros.",
       cta: "Acessar financeiro",
-      onClick: () => navigate("/financeiro"),
-      tone: "emerald" as const,   // verde = dinheiro/finanças
+      onClick: () => navigate(firstAccessibleRoute("financeiro", "/financeiro")),
+      tone: "emerald" as const,
     },
     {
       key: "gestao",
@@ -506,8 +553,8 @@ export default function Home() {
       title: "Diretoria",
       description: "Painel executivo, indicadores estratégicos e faturamento consolidado.",
       cta: "Acessar diretoria",
-      onClick: () => navigate("/executivo"),
-      tone: "violet" as const,    // violeta = inteligência/estratégia
+      onClick: () => navigate(firstAccessibleRoute("gestao", "/executivo")),
+      tone: "violet" as const,
     },
     {
       key: "operacao",
@@ -515,8 +562,8 @@ export default function Home() {
       title: "Operação",
       description: "Operacional, gestão de frota, financiamentos, manutenção e abastecimento.",
       cta: "Acessar operação",
-      onClick: () => navigate("/operacional"),
-      tone: "blue" as const,       // azul = movimento/logística
+      onClick: () => navigate(firstAccessibleRoute("operacao", "/operacional")),
+      tone: "blue" as const,
     },
     {
       key: "compras",
@@ -524,8 +571,8 @@ export default function Home() {
       title: "Compras",
       description: "Notas fiscais de entrada, fornecedores, grupos de produtos e centro de custo.",
       cta: "Acessar compras",
-      onClick: () => navigate("/compras"),
-      tone: "orange" as const,    // laranja = comércio/aquisição
+      onClick: () => navigate(firstAccessibleRoute("compras", "/compras")),
+      tone: "orange" as const,
     },
     {
       key: "rh",
@@ -533,8 +580,8 @@ export default function Home() {
       title: "RH",
       description: "Gestão de colaboradores, folha de pagamento, admissões e desligamentos.",
       cta: "Acessar RH",
-      onClick: () => navigate("/rh"),
-      tone: "rose" as const,      // rosa = pessoas/equipe
+      onClick: () => navigate(firstAccessibleRoute("rh", "/rh")),
+      tone: "rose" as const,
     },
     {
       key: "outras-analises",
@@ -542,8 +589,8 @@ export default function Home() {
       title: "Outras Análises",
       description: "Visões financeiras por fornecedor, cliente, banco e categoria de custo.",
       cta: "Acessar análises",
-      onClick: () => navigate("/financeiro?s=fornecedores"),
-      tone: "amber" as const,     // dourado = análise financeira
+      onClick: () => navigate(firstAccessibleRoute("outras-analises", "/financeiro?s=fornecedores")),
+      tone: "amber" as const,
     },
   ];
 
@@ -751,16 +798,7 @@ export default function Home() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {moduleCards
                 .filter((m) => {
-                  const groupPages: Record<string, import("@/hooks/usePagePermissions").AppPage[]> = {
-                    "receitaflow": ["portal-receitaflow"],
-                    "financeiro": ["fin-painel","fin-pagar","fin-receber","fin-conciliacao","fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"],
-                    "gestao": ["ext-executivo","ext-indicadores","ext-faturamento"],
-                    "operacao": ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"],
-                    "compras": ["ext-compras"],
-                    "rh": ["ext-rh"],
-                    "outras-analises": ["fin-fornecedores","fin-clientes","fin-categorias","fin-bancos"],
-                  };
-                  const pages = groupPages[m.key];
+                  const pages = groupPagesList[m.key];
                   if (!pages) return true;
                   return pages.some(p => canAccess(p));
                 })
