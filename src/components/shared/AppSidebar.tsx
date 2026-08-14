@@ -18,6 +18,7 @@ import { APP_NAV, type AppNavItem } from "./appNav";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { NotificationBell } from "./NotificationBell";
 import sgtLogo     from "@/assets/sgt-logo.png";
 import sgtLogoMark from "@/assets/sgt-logo-clean.png";
 
@@ -491,6 +492,9 @@ export function AppSidebar() {
         <div className="h-2 shrink-0" />
       </div>
       </MouseYContext.Provider>
+
+      {/* ── NOTIFICAÇÕES ─────────────────────────────────────────────────── */}
+      <NotificationBell collapsed={collapsed} />
 
       {/* ── RODAPÉ ───────────────────────────────────────────────────────── */}
       <UserFooter

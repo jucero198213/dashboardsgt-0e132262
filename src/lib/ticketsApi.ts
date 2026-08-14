@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { criarNotificacao } from "./notificacoesApi";
 
 export type TicketPrioridade = "baixa" | "media" | "alta" | "urgente";
 export type TicketStatus = "aberto" | "em_andamento" | "pendente" | "concluido" | "cancelado";
@@ -51,7 +52,52 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
     .select()
     .single();
   if (error) throw error;
-  return data as Ticket;
+  const ticket = data as Ticket;
+
+  notifyAdminsNewTicket(ticket, userData.user?.email ?? "Usuário").catch(() => {});
+
+  return ticket;
+}
+
+async function notifyAdminsNewTicket(ticket: Ticket, remetenteEmail: string) {
+  const { data: admins } = await supabase
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "admin");
+  if (!admins?.length) return;
+
+  const notifs = admins.map((a) =>
+    criarNotificacao(
+      a.user_id,
+      "novo_chamado",
+      `Novo chamado: ${ticket.titulo}`,
+      `Aberto por ${remetenteEmail}`,
+      ticket.id,
+    ),
+  );
+  await Promise.allSettled(notifs);
+
+  const adminEmails = await getAdminEmails(admins.map((a) => a.user_id));
+  if (adminEmails.length > 0) {
+    await supabase.functions.invoke("notify-ticket-email", {
+      body: {
+        type: "novo_chamado",
+        ticket_id: ticket.id,
+        ticket_titulo: ticket.titulo,
+        destinatarios: adminEmails,
+        remetente_nome: remetenteEmail,
+        conteudo: ticket.descricao,
+      },
+    });
+  }
+}
+
+async function getAdminEmails(userIds: string[]): Promise<string[]> {
+  const { data } = await supabase.functions.invoke("list-users");
+  if (!data?.users) return [];
+  return (data.users as { id: string; email: string }[])
+    .filter((u) => userIds.includes(u.id))
+    .map((u) => u.email);
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
@@ -75,7 +121,19 @@ export async function updateTicket(id: string, payload: Partial<TicketInput>): P
     .select()
     .single();
   if (error) throw error;
-  return data as Ticket;
+  const ticket = data as Ticket;
+
+  if (payload.status && ticket.aberto_por) {
+    criarNotificacao(
+      ticket.aberto_por,
+      "status_chamado",
+      `Chamado atualizado: ${ticket.titulo}`,
+      `Status alterado para ${STATUS_LABEL[ticket.status]}`,
+      ticket.id,
+    ).catch(() => {});
+  }
+
+  return ticket;
 }
 
 export async function deleteTicket(id: string): Promise<void> {
