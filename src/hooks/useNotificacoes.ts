@@ -32,9 +32,12 @@ export function useNotificacoes() {
     refresh();
   }, [refresh]);
 
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
+
   useEffect(() => {
     if (!user) return;
-    const channelName = `notifications-${user.id}`;
+    const channelName = `notifications-${user.id}-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
       .channel(channelName)
       .on(
@@ -45,15 +48,15 @@ export function useNotificacoes() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        () => { refresh(); },
+        () => { refreshRef.current(); },
       )
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
 
   const ler = useCallback(
     async (id: string) => {
