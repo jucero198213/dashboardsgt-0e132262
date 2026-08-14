@@ -185,6 +185,32 @@ export type Database = {
         | "compras"
         | "rh"
         | "suporte"
+        | "fin-painel"
+        | "fin-pagar"
+        | "fin-receber"
+        | "fin-conciliacao"
+        | "fin-realizado"
+        | "fin-previsto"
+        | "fin-relatorios"
+        | "ext-fiscal"
+        | "fin-fornecedores"
+        | "fin-clientes"
+        | "fin-categorias"
+        | "fin-bancos"
+        | "ext-executivo"
+        | "ext-indicadores"
+        | "ext-faturamento"
+        | "ext-operacional"
+        | "ext-frota"
+        | "ext-fin-frota"
+        | "ext-manutencao"
+        | "ext-abastecimento"
+        | "ext-compras"
+        | "ext-rh"
+        | "ext-chamados"
+        | "portal-receitaflow"
+        | "portal-visual"
+        | "sofia-ai"
       app_role: "admin" | "user"
     }
     CompositeTypes: {
@@ -322,6 +348,32 @@ export const Constants = {
         "compras",
         "rh",
         "suporte",
+        "fin-painel",
+        "fin-pagar",
+        "fin-receber",
+        "fin-conciliacao",
+        "fin-realizado",
+        "fin-previsto",
+        "fin-relatorios",
+        "ext-fiscal",
+        "fin-fornecedores",
+        "fin-clientes",
+        "fin-categorias",
+        "fin-bancos",
+        "ext-executivo",
+        "ext-indicadores",
+        "ext-faturamento",
+        "ext-operacional",
+        "ext-frota",
+        "ext-fin-frota",
+        "ext-manutencao",
+        "ext-abastecimento",
+        "ext-compras",
+        "ext-rh",
+        "ext-chamados",
+        "portal-receitaflow",
+        "portal-visual",
+        "sofia-ai",
       ],
       app_role: ["admin", "user"],
     },
