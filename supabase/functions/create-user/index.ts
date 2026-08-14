@@ -58,7 +58,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email);
+    const siteUrl = Deno.env.get("SITE_URL") || "https://sgtlog.com";
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${siteUrl}/set-password`,
+    });
 
     if (inviteError) {
       const msg = inviteError.message.includes("already been registered")

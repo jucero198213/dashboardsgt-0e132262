@@ -40,6 +40,7 @@ const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspac
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
 const SofiaChat               = lazy(() => import("./pages/SofiaChat"));
 const Welcome                 = lazy(() => import("./pages/Welcome"));
+const SetPassword             = lazy(() => import("./pages/SetPassword"));
 
 // ── QueryClient com configurações otimizadas ─────────────────────────────────
 const queryClient = new QueryClient({
@@ -69,6 +70,7 @@ const App = () => (
                 <Route path="/"         element={<Welcome />} />
                 <Route path="/welcome"  element={<Welcome />} />
                 <Route path="/login"    element={<Login />} />
+                <Route path="/set-password" element={<SetPassword />} />
                 <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 {/* ── Financeiro ── */}
                 <Route path="/dashboard"        element={<ProtectedRoute requiredPage="fin-realizado"><AppLayout><Index /></AppLayout></ProtectedRoute>} />
