@@ -14,6 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Trash2, CheckCircle2, Save, Loader2, Lock } from "lucide-react";
+import { TicketThread } from "./TicketThread";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { toast } from "sonner";
 import {
@@ -274,6 +275,9 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
               />
             </div>
           </div>
+
+          {/* Thread de mensagens — só aparece em tickets existentes */}
+          {ticket && <TicketThread ticketId={ticket.id} />}
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-between">
             {/* Ações admin — só aparecem para admins */}
