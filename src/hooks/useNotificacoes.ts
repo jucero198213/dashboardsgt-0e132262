@@ -17,10 +17,15 @@ export function useNotificacoes() {
 
   const refresh = useCallback(async () => {
     if (!user) return;
-    const [list, count] = await Promise.all([fetchNotificacoes(), countNaoLidas()]);
-    setNotificacoes(list);
-    setNaoLidas(count);
-    setLoading(false);
+    try {
+      const [list, count] = await Promise.all([fetchNotificacoes(), countNaoLidas()]);
+      setNotificacoes(list);
+      setNaoLidas(count);
+    } catch {
+      // silencia erro se tabela não existe ou RLS bloqueia
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {

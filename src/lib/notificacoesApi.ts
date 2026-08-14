@@ -19,7 +19,7 @@ export async function fetchNotificacoes(): Promise<Notificacao[]> {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error) throw error;
+  if (error) return [];
   return (data ?? []) as Notificacao[];
 }
 
