@@ -8,3 +8,7 @@ verify_jwt = false
 # Chamada máquina-a-máquina pela automação do DW (auth por x-automacao-key).
 [functions.automacao-notificar]
 verify_jwt = false
+
+# Chamada pelo frontend autenticado para enviar e-mails de chamados.
+[functions.notify-ticket-email]
+verify_jwt = true
