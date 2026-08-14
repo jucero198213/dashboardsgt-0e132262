@@ -34,8 +34,9 @@ export function useNotificacoes() {
 
   useEffect(() => {
     if (!user) return;
+    const channelName = `notifications-${user.id}`;
     const channel = supabase
-      .channel("notifications-realtime")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -48,8 +49,11 @@ export function useNotificacoes() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [user, refresh]);
+    return () => {
+      channel.unsubscribe();
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const ler = useCallback(
     async (id: string) => {
