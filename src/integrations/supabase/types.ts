@@ -38,6 +38,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          lida: boolean
+          mensagem: string | null
+          referencia_id: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string | null
+          referencia_id?: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string | null
+          referencia_id?: string | null
+          tipo?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       page_permissions: {
         Row: {
           created_at: string
@@ -56,6 +89,36 @@ export type Database = {
           id?: string
           page?: Database["public"]["Enums"]["app_page"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          departamento: Database["public"]["Enums"]["departamento"] | null
+          display_name: string
+          id: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
+          display_name: string
+          id: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
+          display_name?: string
+          id?: string
+          telefone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -83,6 +146,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_mensagens: {
+        Row: {
+          autor_id: string
+          conteudo: string
+          created_at: string
+          id: string
+          ticket_id: string
+          tipo: string
+        }
+        Insert: {
+          autor_id: string
+          conteudo: string
+          created_at?: string
+          id?: string
+          ticket_id: string
+          tipo?: string
+        }
+        Update: {
+          autor_id?: string
+          conteudo?: string
+          created_at?: string
+          id?: string
+          ticket_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_mensagens_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           aberto_por: string | null
@@ -90,12 +188,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_chamado: string
+          departamento: Database["public"]["Enums"]["departamento"] | null
           descricao: string | null
           horario_chamado: string | null
           id: string
           observacoes: string | null
           prioridade: string
           responsavel: string | null
+          responsavel_id: string | null
           status: string
           titulo: string
           updated_at: string
@@ -106,12 +206,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_chamado: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
           descricao?: string | null
           horario_chamado?: string | null
           id?: string
           observacoes?: string | null
           prioridade?: string
           responsavel?: string | null
+          responsavel_id?: string | null
           status?: string
           titulo: string
           updated_at?: string
@@ -122,12 +224,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_chamado?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
           descricao?: string | null
           horario_chamado?: string | null
           id?: string
           observacoes?: string | null
           prioridade?: string
           responsavel?: string | null
+          responsavel_id?: string | null
           status?: string
           titulo?: string
           updated_at?: string
@@ -212,6 +316,14 @@ export type Database = {
         | "portal-visual"
         | "sofia-ai"
       app_role: "admin" | "user"
+      departamento:
+        | "ti"
+        | "financeiro"
+        | "operacao"
+        | "rh"
+        | "diretoria"
+        | "compras"
+        | "comercial"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -376,6 +488,15 @@ export const Constants = {
         "sofia-ai",
       ],
       app_role: ["admin", "user"],
+      departamento: [
+        "ti",
+        "financeiro",
+        "operacao",
+        "rh",
+        "diretoria",
+        "compras",
+        "comercial",
+      ],
     },
   },
 } as const
