@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Home, Menu,
+  Home, Menu, Bell,
   Briefcase, Banknote, LineChart, MapPin, Truck, Car, Wrench, Fuel,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
   ShoppingCart, UserCog, Sparkles, Activity, TrendingUp,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { usePagePermissions, type AppPage } from "@/hooks/usePagePermissions";
+import { useNotificacoes } from "@/hooks/useNotificacoes";
 import { MenuDrawerContent } from "./MenuDrawerContent";
 
 // ─── Tipo de item de navegação ────────────────────────────────────────────────
@@ -124,6 +125,7 @@ export function BottomNav() {
   const navigate   = useNavigate();
   const location   = useLocation();
   const { canAccess } = usePagePermissions();
+  const { naoLidas } = useNotificacoes();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const ctx = getNavContext(location.pathname, location.search);
@@ -191,6 +193,7 @@ export function BottomNav() {
           </div>
         </div>
 
+        <NavTab icon={Bell} label="Alertas" active={false} onClick={() => navigate("/chamados")} isMenu badge={naoLidas > 0 ? naoLidas : undefined} />
         <NavTab icon={Menu} label="Menu" active={menuOpen} onClick={() => setMenuOpen(true)} isMenu />
       </nav>
 
