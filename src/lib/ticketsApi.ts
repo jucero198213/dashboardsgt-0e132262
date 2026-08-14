@@ -54,21 +54,18 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
   if (error) throw error;
   const ticket = data as Ticket;
 
-  notifyAdminsNewTicket(ticket, userData.user?.email ?? "Usuário").catch(() => {});
+  notifyTITeam(ticket, userData.user?.email ?? "Usuário").catch(() => {});
 
   return ticket;
 }
 
-async function notifyAdminsNewTicket(ticket: Ticket, remetenteEmail: string) {
-  const { data: admins } = await supabase
-    .from("user_roles")
-    .select("user_id")
-    .eq("role", "admin");
-  if (!admins?.length) return;
+async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
+  const tiUsers = await getTIUsers();
+  if (!tiUsers.length) return;
 
-  const notifs = admins.map((a) =>
+  const notifs = tiUsers.map((u) =>
     criarNotificacao(
-      a.user_id,
+      u.id,
       "novo_chamado",
       `Novo chamado: ${ticket.titulo}`,
       `Aberto por ${remetenteEmail}`,
@@ -77,14 +74,14 @@ async function notifyAdminsNewTicket(ticket: Ticket, remetenteEmail: string) {
   );
   await Promise.allSettled(notifs);
 
-  const adminEmails = await getAdminEmails(admins.map((a) => a.user_id));
-  if (adminEmails.length > 0) {
+  const emails = tiUsers.map((u) => u.email).filter(Boolean);
+  if (emails.length > 0) {
     await supabase.functions.invoke("notify-ticket-email", {
       body: {
         type: "novo_chamado",
         ticket_id: ticket.id,
         ticket_titulo: ticket.titulo,
-        destinatarios: adminEmails,
+        destinatarios: emails,
         remetente_nome: remetenteEmail,
         conteudo: ticket.descricao,
       },
@@ -92,12 +89,20 @@ async function notifyAdminsNewTicket(ticket: Ticket, remetenteEmail: string) {
   }
 }
 
-async function getAdminEmails(userIds: string[]): Promise<string[]> {
-  const { data } = await supabase.functions.invoke("list-users");
-  if (!data?.users) return [];
-  return (data.users as { id: string; email: string }[])
-    .filter((u) => userIds.includes(u.id))
-    .map((u) => u.email);
+async function getTIUsers(): Promise<{ id: string; email: string }[]> {
+  const { data: tiProfiles } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("departamento", "ti");
+  if (!tiProfiles?.length) return [];
+
+  const tiIds = tiProfiles.map((p) => p.id);
+
+  const { data: listRes } = await supabase.functions.invoke("list-users");
+  if (!listRes?.users) return [];
+
+  return (listRes.users as { id: string; email: string }[])
+    .filter((u) => tiIds.includes(u.id));
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {

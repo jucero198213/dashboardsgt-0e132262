@@ -53,11 +53,11 @@ async function notifyTicketReply(ticketId: string, autorId: string, conteudo: st
   const { data: autorProfile } = await supabase.from("profiles").select("display_name").eq("id", autorId).maybeSingle();
   const autorNome = (autorProfile as { display_name: string | null } | null)?.display_name ?? "Alguém";
 
-  const { data: adminRoles } = await supabase.from("user_roles").select("user_id").eq("role", "admin");
-  const adminIds = new Set((adminRoles ?? []).map((r) => r.user_id));
-  const isAdmin = adminIds.has(autorId);
+  const { data: tiProfiles } = await supabase.from("profiles").select("id").eq("departamento", "ti");
+  const tiIds = new Set((tiProfiles ?? []).map((p) => p.id));
+  const isTI = tiIds.has(autorId);
 
-  if (isAdmin && ticket.aberto_por) {
+  if (isTI && ticket.aberto_por) {
     await criarNotificacao(
       ticket.aberto_por,
       "resposta_chamado",
@@ -66,7 +66,7 @@ async function notifyTicketReply(ticketId: string, autorId: string, conteudo: st
       ticketId,
     );
   } else {
-    const notifs = [...adminIds]
+    const notifs = [...tiIds]
       .filter((id) => id !== autorId)
       .map((id) =>
         criarNotificacao(id, "resposta_chamado", `Resposta no chamado: ${ticket.titulo}`, `${autorNome} respondeu`, ticketId),
