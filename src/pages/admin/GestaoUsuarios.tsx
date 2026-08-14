@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, Trash2,
+import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Trash2,
   Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw, FileBarChart, Activity, TrendingUp,
   Scale, Building2, Users, Tag, MapPin, Wrench, Fuel, Wallet, Banknote,
@@ -84,7 +84,7 @@ export default function GestaoUsuarios() {
   const [creating, setCreating] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"user" | "admin" | "diretoria">("user");
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [inviteSent, setInviteSent] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [permUserId, setPermUserId] = useState<string | null>(null);
@@ -246,16 +246,13 @@ export default function GestaoUsuarios() {
             await supabase.from("page_permissions").insert(rows as never);
           }
         }
-        setGeneratedCode(data?.access_code || null);
+        setInviteSent(true);
         flash(
           replicateFromId
-            ? "Usuário criado com permissões replicadas!"
-            : "Usuário criado com sucesso!",
+            ? "Convite enviado com permissões replicadas!"
+            : "Convite enviado por email!",
           "ok", 5000,
         );
-        setNewEmail("");
-        setNewRole("user");
-        setReplicateFromId(null);
         load();
       }
     } catch {
@@ -341,42 +338,27 @@ export default function GestaoUsuarios() {
           <div className="w-full max-w-md rounded-2xl border border-[var(--sgt-border-subtle)] sgt-bg-card shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--sgt-divider)] px-6 py-4">
               <div className="flex items-center gap-2">
-                {replicateFromId && !generatedCode ? <UserPlus className="h-4 w-4 text-violet-400" /> : <Plus className="h-4 w-4 text-emerald-400" />}
+                {replicateFromId && !inviteSent ? <UserPlus className="h-4 w-4 text-violet-400" /> : <Plus className="h-4 w-4 text-emerald-400" />}
                 <h3 className="text-sm font-semibold sgt-text">
-                  {generatedCode ? "Código de acesso gerado" : replicateFromId ? "Replicar usuário" : "Cadastrar novo usuário"}
+                  {inviteSent ? "Convite enviado" : replicateFromId ? "Replicar usuário" : "Cadastrar novo usuário"}
                 </h3>
               </div>
-              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setReplicateFromId(null); setGeneratedCode(null); setReplicateFromId(null); }}
+              <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setReplicateFromId(null); setInviteSent(false); }}
                 className="rounded-lg p-1.5 transition-colors hover:bg-[var(--sgt-input-hover)]">
                 <X className="h-4 w-4 sgt-text-2" />
               </button>
             </div>
             <div className="space-y-4 px-6 py-5">
-              {generatedCode ? (
-                <>
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
-                    <p className="text-[12px] text-emerald-300 leading-relaxed">
-                      Usuário criado com sucesso! Envie o código abaixo para o usuário. Ele usará esse código junto com seu email na tela de <strong>Primeiro Acesso</strong>.
-                    </p>
+              {inviteSent ? (
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-emerald-400" />
+                    <p className="text-sm font-semibold text-emerald-300">Convite enviado!</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Código de acesso</label>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 rounded-xl border border-amber-400/30 bg-amber-400/5 px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-amber-300">
-                        {generatedCode}
-                      </div>
-                      <button onClick={() => { navigator.clipboard.writeText(generatedCode); flash("Código copiado!", "ok", 2000); }}
-                        className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-3 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all" title="Copiar código">
-                        <Copy className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-                    <p className="text-[12px] text-amber-300 leading-relaxed">
-                      Este código só pode ser usado uma vez. Guarde-o em local seguro até enviar ao usuário.
-                    </p>
-                  </div>
-                </>
+                  <p className="text-[12px] text-emerald-300/80 leading-relaxed">
+                    Um email foi enviado para <strong>{newEmail}</strong> com um link para criar a conta. O usuário só precisa clicar no link e definir sua senha.
+                  </p>
+                </div>
               ) : (
                 <>
                   {replicateFromId && (() => {
@@ -392,7 +374,7 @@ export default function GestaoUsuarios() {
                   {!replicateFromId && (
                     <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
                       <p className="text-[12px] text-amber-300 leading-relaxed">
-                        Ao cadastrar, um código de acesso será gerado. Envie esse código ao usuário para que ele defina sua senha no <strong>Primeiro Acesso</strong>.
+                        Um email será enviado para o usuário com um link para criar a conta e definir sua senha.
                       </p>
                     </div>
                   )}
@@ -423,8 +405,8 @@ export default function GestaoUsuarios() {
               )}
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-[var(--sgt-divider)] px-6 py-4">
-              {generatedCode ? (
-                <button onClick={() => { setShowModal(false); setGeneratedCode(null); }}
+              {inviteSent ? (
+                <button onClick={() => { setShowModal(false); setNewEmail(""); setNewRole("user"); setReplicateFromId(null); setInviteSent(false); }}
                   className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all">
                   <CheckCircle className="h-3.5 w-3.5" /> Fechar
                 </button>
@@ -437,7 +419,7 @@ export default function GestaoUsuarios() {
                   <button onClick={handleCreateUser} disabled={creating || !newEmail}
                     className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     {creating ? <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" /> : <Plus className="h-3.5 w-3.5" />}
-                    {creating ? "Cadastrando..." : "Cadastrar"}
+                    {creating ? "Enviando convite..." : "Enviar convite"}
                   </button>
                 </>
               )}

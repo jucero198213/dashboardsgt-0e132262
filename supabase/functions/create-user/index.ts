@@ -5,15 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function generateCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -32,7 +23,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify caller is admin
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -68,45 +58,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create user with random password (user will set their own via first access code)
-    const randomPassword = crypto.randomUUID() + "Aa1!";
+    const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email);
 
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
-      email,
-      password: randomPassword,
-      email_confirm: true,
-    });
-
-    if (createError) {
-      const msg = createError.message.includes("already been registered")
+    if (inviteError) {
+      const msg = inviteError.message.includes("already been registered")
         ? "Este email já está cadastrado"
-        : createError.message;
+        : inviteError.message;
       return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Set role if admin
-    if (role === "admin" && newUser.user) {
+    if (role && role !== "user" && inviteData.user) {
       await adminClient
         .from("user_roles")
-        .update({ role: "admin" })
-        .eq("user_id", newUser.user.id);
-    }
-
-    // Generate first access code
-    const accessCode = generateCode();
-    if (newUser.user) {
-      await adminClient.from("first_access_codes").upsert({
-        user_id: newUser.user.id,
-        code: accessCode,
-        used: false,
-      }, { onConflict: "user_id" });
+        .upsert({ user_id: inviteData.user.id, role }, { onConflict: "user_id" });
     }
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUser.user?.id, access_code: accessCode }),
+      JSON.stringify({ success: true, user_id: inviteData.user?.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
