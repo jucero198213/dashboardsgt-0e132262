@@ -751,18 +751,18 @@ export default function Home() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {moduleCards
                 .filter((m) => {
-                  const pageMap: Record<string, import("@/hooks/usePagePermissions").AppPage> = {
-                    "receitaflow": "portal-receitaflow",
-                    "financeiro": "fin-painel",
-                    "gestao": "ext-executivo",
-                    "operacao": "ext-operacional",
-                    "compras": "ext-compras",
-                    "rh": "ext-rh",
-                    "outras-analises": "fin-fornecedores",
+                  const groupPages: Record<string, import("@/hooks/usePagePermissions").AppPage[]> = {
+                    "receitaflow": ["portal-receitaflow"],
+                    "financeiro": ["fin-painel","fin-pagar","fin-receber","fin-conciliacao","fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"],
+                    "gestao": ["ext-executivo","ext-indicadores","ext-faturamento"],
+                    "operacao": ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"],
+                    "compras": ["ext-compras"],
+                    "rh": ["ext-rh"],
+                    "outras-analises": ["fin-fornecedores","fin-clientes","fin-categorias","fin-bancos"],
                   };
-                  const pg = pageMap[m.key];
-                  if (!pg) return true;
-                  return canAccess(pg);
+                  const pages = groupPages[m.key];
+                  if (!pages) return true;
+                  return pages.some(p => canAccess(p));
                 })
                 .map((m, i) => (
                   <Reveal key={m.key} delay={i * 0.1} className="h-full">
