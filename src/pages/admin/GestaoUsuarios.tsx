@@ -134,7 +134,7 @@ export default function GestaoUsuarios() {
         const prof = profileMap.get(r.user_id);
         return {
           id:              r.user_id,
-          email:           emailMap.get(r.user_id) ?? me?.email ?? "—",
+          email:           emailMap.get(r.user_id) ?? "—",
           created_at:      r.created_at,
           last_sign_in_at: null,
           role:            r.role as "admin" | "user" | "diretoria",
