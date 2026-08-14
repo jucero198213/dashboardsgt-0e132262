@@ -3,11 +3,12 @@ import { Search, Plus, RefreshCw, CheckCircle, XCircle, UserX, Shield, X, Copy, 
   Landmark, Briefcase, Truck, ShoppingCart, UserCog, Headphones, Sparkles, Globe, BotMessageSquare,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw, FileBarChart, Activity, TrendingUp,
   Scale, Building2, Users, Tag, MapPin, Wrench, Fuel, Wallet, Banknote,
-  LineChart, ChevronDown, CheckSquare, Square, MinusSquare, UserPlus,
+  LineChart, ChevronDown, CheckSquare, Square, MinusSquare, UserPlus, Pencil, Save,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { type AppPage, ALL_PAGES, PAGE_GROUPS } from "@/hooks/usePagePermissions";
+import { type Departamento, DEPARTAMENTO_LABEL, DEPARTAMENTO_COLOR } from "@/hooks/useProfiles";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 
@@ -60,6 +61,8 @@ interface SupaUser {
   role: "admin" | "user" | "diretoria";
   confirmed: boolean;
   pages: Set<AppPage>;
+  display_name: string | null;
+  departamento: Departamento | null;
 }
 
 const roleStyle: Record<string, string> = {
@@ -87,6 +90,10 @@ export default function GestaoUsuarios() {
   const [permUserId, setPermUserId] = useState<string | null>(null);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [replicateFromId, setReplicateFromId] = useState<string | null>(null);
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+  const [profileName, setProfileName] = useState("");
+  const [profileDepto, setProfileDepto] = useState<Departamento | "">("");
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const flash = (msg: string, type: "ok" | "err", ms = 3000) => {
     setFeedback({ msg, type });
@@ -96,9 +103,10 @@ export default function GestaoUsuarios() {
   const load = async () => {
     setLoading(true);
     try {
-      const [{ data: roles }, { data: pagePerms }, listRes] = await Promise.all([
+      const [{ data: roles }, { data: pagePerms }, { data: profileRows }, listRes] = await Promise.all([
         supabase.from("user_roles").select("user_id, role, created_at"),
         supabase.from("page_permissions").select("user_id, page"),
+        supabase.from("profiles").select("id, display_name, departamento"),
         supabase.functions.invoke("list-users"),
       ]);
 
@@ -109,6 +117,11 @@ export default function GestaoUsuarios() {
         });
       }
 
+      const profileMap = new Map<string, { display_name: string | null; departamento: Departamento | null }>();
+      (profileRows ?? []).forEach((p: { id: string; display_name: string | null; departamento: string | null }) => {
+        profileMap.set(p.id, { display_name: p.display_name, departamento: p.departamento as Departamento | null });
+      });
+
       const pagesByUser = new Map<string, Set<AppPage>>();
       (pagePerms ?? []).forEach((p) => {
         if (!ALL_PAGES.includes(p.page as AppPage)) return;
@@ -117,15 +130,20 @@ export default function GestaoUsuarios() {
         pagesByUser.set(p.user_id, set);
       });
 
-      const mapped: SupaUser[] = (roles ?? []).map((r) => ({
-        id:              r.user_id,
-        email:           emailMap.get(r.user_id) ?? me?.email ?? "—",
-        created_at:      r.created_at,
-        last_sign_in_at: null,
-        role:            r.role as "admin" | "user" | "diretoria",
-        confirmed:       true,
-        pages:           pagesByUser.get(r.user_id) ?? new Set<AppPage>(),
-      }));
+      const mapped: SupaUser[] = (roles ?? []).map((r) => {
+        const prof = profileMap.get(r.user_id);
+        return {
+          id:              r.user_id,
+          email:           emailMap.get(r.user_id) ?? me?.email ?? "—",
+          created_at:      r.created_at,
+          last_sign_in_at: null,
+          role:            r.role as "admin" | "user" | "diretoria",
+          confirmed:       true,
+          pages:           pagesByUser.get(r.user_id) ?? new Set<AppPage>(),
+          display_name:    prof?.display_name ?? null,
+          departamento:    prof?.departamento ?? null,
+        };
+      });
       if (me && !mapped.find((u) => u.id === me.id)) {
         mapped.unshift({
           id: me.id, email: me.email ?? "—",
@@ -133,6 +151,8 @@ export default function GestaoUsuarios() {
           last_sign_in_at: me.last_sign_in_at ?? null,
           role: "admin", confirmed: !!me.email_confirmed_at,
           pages: new Set<AppPage>(ALL_PAGES),
+          display_name: profileMap.get(me.id)?.display_name ?? null,
+          departamento: profileMap.get(me.id)?.departamento ?? null,
         });
       }
       setUsers(mapped);
@@ -248,6 +268,34 @@ export default function GestaoUsuarios() {
   const filtered = users.filter((u) =>
     u.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  const startEditProfile = (u: SupaUser) => {
+    setEditingProfileId(u.id);
+    setProfileName(u.display_name ?? "");
+    setProfileDepto((u.departamento ?? "") as Departamento | "");
+  };
+
+  const saveProfile = async (userId: string) => {
+    setSavingProfile(true);
+    try {
+      const fields: Record<string, unknown> = {
+        id: userId,
+        display_name: profileName || null,
+        departamento: profileDepto || null,
+      };
+      const { error } = await supabase.from("profiles").upsert(fields as never, { onConflict: "id" });
+      if (error) { flash("Erro ao salvar perfil.", "err"); return; }
+      setUsers(prev => prev.map(u =>
+        u.id === userId ? { ...u, display_name: profileName || null, departamento: (profileDepto || null) as Departamento | null } : u
+      ));
+      flash("Perfil atualizado!", "ok");
+      setEditingProfileId(null);
+    } catch {
+      flash("Erro ao salvar perfil.", "err");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const permUser = permUserId ? users.find(u => u.id === permUserId) : null;
 
@@ -427,9 +475,24 @@ export default function GestaoUsuarios() {
                       {emailInitials(u.email)}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm sgt-text font-medium">{u.email}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="truncate text-sm sgt-text font-medium">
+                          {u.display_name || u.email}
+                        </p>
+                        {u.display_name && (
+                          <span className="text-[10px] text-[var(--sgt-text-muted)] truncate max-w-[180px]">{u.email}</span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${roleStyle[u.role]}`}>{u.role}</span>
+                        {u.departamento && (() => {
+                          const dc = DEPARTAMENTO_COLOR[u.departamento];
+                          return (
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${dc.bg} ${dc.text} border ${dc.border}`}>
+                              {DEPARTAMENTO_LABEL[u.departamento]}
+                            </span>
+                          );
+                        })()}
                         {u.id === me?.id && <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[9px] font-semibold text-cyan-400 border border-cyan-500/20">Você</span>}
                         <span className="text-[10px] text-[var(--sgt-text-muted)]">
                           {u.role === "admin" ? `${ALL_PAGES.length}/${ALL_PAGES.length} telas` : `${u.pages.size}/${ALL_PAGES.length} telas`}
@@ -437,7 +500,16 @@ export default function GestaoUsuarios() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    <button onClick={() => editingProfileId === u.id ? setEditingProfileId(null) : startEditProfile(u)}
+                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold transition-all ${
+                        editingProfileId === u.id
+                          ? "border-amber-400/40 bg-amber-400/10 text-amber-300"
+                          : "border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] sgt-text-2 hover:text-[var(--sgt-text-primary)] hover:border-[var(--sgt-border-medium)]"
+                      }`}>
+                      <Pencil className="h-3 w-3" />
+                      Perfil
+                    </button>
                     {u.role !== "admin" && (
                       <>
                         <button onClick={() => setPermUserId(permUserId === u.id ? null : u.id)}
@@ -493,6 +565,52 @@ export default function GestaoUsuarios() {
                     )}
                   </div>
                 </div>
+
+                {/* ── Painel de perfil expandido ── */}
+                {editingProfileId === u.id && (
+                  <div className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/5 overflow-hidden">
+                    <div className="flex items-center gap-2 px-5 py-3 border-b border-amber-400/10">
+                      <Pencil className="h-4 w-4 text-amber-400" />
+                      <span className="text-[12px] font-bold sgt-text">Editar Perfil</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Nome de exibição</label>
+                        <input
+                          type="text"
+                          value={profileName}
+                          onChange={(e) => setProfileName(e.target.value)}
+                          placeholder="Ex: João Silva"
+                          className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-sm sgt-text placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-amber-400/50"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">Departamento</label>
+                        <select
+                          value={profileDepto}
+                          onChange={(e) => setProfileDepto(e.target.value as Departamento | "")}
+                          className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2 text-sm sgt-text focus:outline-none focus:border-amber-400/50"
+                        >
+                          <option value="">Sem departamento</option>
+                          {(Object.keys(DEPARTAMENTO_LABEL) as Departamento[]).map(d => (
+                            <option key={d} value={d}>{DEPARTAMENTO_LABEL[d]}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 px-4 pb-4">
+                      <button onClick={() => setEditingProfileId(null)}
+                        className="rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-3 py-1.5 text-[11px] sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
+                        Cancelar
+                      </button>
+                      <button onClick={() => saveProfile(u.id)} disabled={savingProfile}
+                        className="flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[11px] font-semibold text-amber-300 hover:bg-amber-400/20 transition-all disabled:opacity-40">
+                        {savingProfile ? <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" /> : <Save className="h-3 w-3" />}
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* ── Painel de permissões expandido ── */}
                 {permUserId === u.id && u.role !== "admin" && (
