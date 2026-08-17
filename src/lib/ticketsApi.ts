@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { criarNotificacao } from "./notificacoesApi";
 import { criarMensagemSistema } from "./ticketMensagensApi";
+import { logActivity } from "./activityLogApi";
+
 
 export type TicketPrioridade = "baixa" | "media" | "alta" | "urgente";
 export type TicketStatus = "aberto" | "em_andamento" | "pendente" | "concluido" | "cancelado";
