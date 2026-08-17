@@ -269,6 +269,7 @@ export default function PainelAdministrativo() {
 
   const navItems = useMemo(() => {
     const counters: Record<Screen, string> = {
+      home: "Dashboard executivo",
       usuarios: `${data.totalUsers} usuário${data.totalUsers === 1 ? "" : "s"}`,
       config: `${data.activeModules} módulo${data.activeModules === 1 ? "" : "s"} ativo${data.activeModules === 1 ? "" : "s"}`,
       banco: "Schema • SQL read-only",
