@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/lib/activityLogApi";
+import { registrarEventoLogin } from "@/lib/loginHistoryApi";
+
 
 
 export type AppRole = "admin" | "user" | "diretoria";
@@ -73,8 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchRole]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      registrarEventoLogin("login_failed", email, null).catch(() => {});
       const messages: Record<string, string> = {
         "Invalid login credentials": "Email ou senha incorretos.",
         "Email not confirmed": "Confirme seu email antes de fazer login.",
@@ -82,15 +85,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: messages[error.message] ?? "Erro ao fazer login. Tente novamente." };
     }
     logActivity("login", "Fez login no sistema").catch(() => {});
+    registrarEventoLogin("login_success", email, data.user?.id ?? null).catch(() => {});
     return { error: null };
   }, []);
 
 
   const signOut = useCallback(async () => {
+    const email = session?.user?.email;
+    const uid = session?.user?.id;
+    if (email) await registrarEventoLogin("logout", email, uid ?? null).catch(() => {});
     await supabase.auth.signOut();
     setSession(null);
     setRole(null);
-  }, []);
+  }, [session]);
+
 
 
   const value: AuthContextType = {
