@@ -100,7 +100,6 @@ const ACCORDION_GROUPS: { key: string; label: string; ids: string[] }[] = [
   { key: "gestao",    label: "Gestão",       ids: ["ext-executivo","ext-indicadores","ext-faturamento"] },
   { key: "operacao",  label: "Operação",     ids: ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"] },
   { key: "comprasrh", label: "Compras / RH", ids: ["ext-compras","ext-rh"] },
-  { key: "suporte",   label: "Suporte",      ids: ["ext-chamados"] },
 ];
 
 const NAV_MAP = new Map(APP_NAV.map(n => [n.id, n]));
@@ -430,6 +429,14 @@ export function AppSidebar() {
       >
         {/* Início */}
         {renderHome()}
+
+        {/* Chamados — destaque fixo no topo */}
+        {(() => {
+          const chamadosItem = NAV_MAP.get("ext-chamados");
+          if (chamadosItem && (!chamadosItem.page || canAccess(chamadosItem.page)))
+            return renderItem(chamadosItem);
+          return null;
+        })()}
 
         {/* Grupos core (flat) */}
         {CORE_GROUPS.map(group => {
