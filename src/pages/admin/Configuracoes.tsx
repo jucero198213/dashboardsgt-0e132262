@@ -1,54 +1,161 @@
-import { useState } from "react";
-import { Settings, CheckCircle, Zap, Link2, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Settings, CheckCircle, Zap, Link2, RefreshCw, ToggleLeft, ToggleRight, Loader2, AlertCircle,
+} from "lucide-react";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { getSettingsMeta, setSetting } from "@/lib/settingsApi";
+import { supabase } from "@/integrations/supabase/client";
 
-const integrations = [
-  { name: "Power BI Embedded", desc: "Azure Service Principal ativo", status: "Conectado", color: "emerald" },
-  { name: "SQL Server (DW SGT)", desc: "Cloudflare Tunnel → porta 3001", status: "Online", color: "emerald" },
-  { name: "Supabase", desc: "Banco de dados principal + Auth", status: "Ativo", color: "emerald" },
-  { name: "TOTVS Protheus", desc: "ERP — sincronização diária", status: "Parcial", color: "amber" },
-  { name: "Vercel Deploy", desc: "CI/CD automático via GitHub", status: "Ativo", color: "emerald" },
+type FeatureFlags = Record<string, boolean>;
+
+const FEATURE_LIST: { key: string; name: string; desc: string; locked?: boolean }[] = [
+  { key: "sofia_ai", name: "Sofia AI", desc: "Assistente inteligente integrada ao portal" },
+  { key: "fiscal_nfe", name: "Conferência Fiscal NFe", desc: "Validação e alertas de notas fiscais" },
+  { key: "whatsapp_alerts", name: "Alertas WhatsApp", desc: "Envio automático de alertas via WhatsApp" },
+  { key: "automacao_mb", name: "Automação MB", desc: "Baixa automática de títulos (Martin Brower)" },
+  { key: "chamados", name: "Sistema de Chamados", desc: "Sempre ativo — módulo essencial", locked: true },
 ];
 
-const statusColors: Record<string, { badge: string; dot: string }> = {
-  emerald: { badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", dot: "bg-emerald-400" },
-  amber:   { badge: "bg-amber-500/10 text-amber-400 border-amber-500/20", dot: "bg-amber-400" },
+type Health = "online" | "offline" | "unknown" | "checking";
+
+const HEALTH_UI: Record<Health, { label: string; badge: string; dot: string }> = {
+  online:   { label: "Online",          badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", dot: "bg-emerald-400" },
+  offline:  { label: "Offline",         badge: "bg-rose-500/10 text-rose-400 border-rose-500/20",          dot: "bg-rose-400" },
+  unknown:  { label: "Não configurado", badge: "bg-slate-500/10 text-slate-400 border-slate-500/20",       dot: "bg-slate-400" },
+  checking: { label: "Verificando...",  badge: "bg-amber-500/10 text-amber-400 border-amber-500/20",       dot: "bg-amber-400" },
 };
 
+function formatDate(iso?: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
 export default function Configuracoes() {
-  const [tunnelUrl, setTunnelUrl] = useState("https://firefox-fixed-iii-targets.trycloudflare.com");
-  const [saved, setSaved] = useState(false);
-  const [features, setFeatures] = useState({
-    twofa: true, audit: true, email: true, maintenance: false, api: true, cache: true,
+  const [tunnelUrl, setTunnelUrl] = useState("");
+  const [tunnelUpdatedAt, setTunnelUpdatedAt] = useState<string | null>(null);
+  const [flags, setFlags] = useState<FeatureFlags>({});
+  const [flagsUpdatedAt, setFlagsUpdatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  const [health, setHealth] = useState<Record<string, Health>>({
+    supabase: "checking", resend: "checking", dw: "unknown",
   });
+  const [checking, setChecking] = useState(false);
 
-  const toggle = (k: keyof typeof features) =>
-    setFeatures((p) => ({ ...p, [k]: !p[k] }));
-
-  const save = () => {
-    sessionStorage.setItem("admin_tunnel_url", tunnelUrl);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const notify = (ok: boolean, msg: string) => {
+    setToast({ ok, msg });
+    setTimeout(() => setToast(null), 3500);
   };
 
-  const featureList = [
-    { key: "twofa" as const,        name: "Autenticação 2FA",         desc: "Exigir segundo fator para todos os usuários" },
-    { key: "audit" as const,        name: "Logs de auditoria",         desc: "Registrar todas as ações dos usuários" },
-    { key: "email" as const,        name: "Notificações por e-mail",   desc: "Alertas automáticos do sistema" },
-    { key: "maintenance" as const,  name: "Modo manutenção",           desc: "Bloquear acesso de usuários comuns" },
-    { key: "api" as const,          name: "Acesso via API",            desc: "Habilitar endpoints REST externos" },
-    { key: "cache" as const,        name: "Cache de relatórios",       desc: "Cachear relatórios por 30 min" },
+  const load = useCallback(async () => {
+    setLoading(true);
+    const rows = await getSettingsMeta();
+    const tunnel = rows.find((r) => r.key === "tunnel_url");
+    const ff = rows.find((r) => r.key === "feature_flags");
+    setTunnelUrl(typeof tunnel?.value === "string" ? tunnel.value : "");
+    setTunnelUpdatedAt(tunnel?.updated_at ?? null);
+    setFlags((ff?.value as FeatureFlags) ?? {});
+    setFlagsUpdatedAt(ff?.updated_at ?? null);
+    setLoading(false);
+    return typeof tunnel?.value === "string" ? tunnel.value : "";
+  }, []);
+
+  const checkDw = useCallback(async (url: string): Promise<Health> => {
+    if (!url.trim()) return "unknown";
+    try {
+      const res = await fetch(url.replace(/\/$/, "") + "/health", { method: "GET" });
+      return res.ok ? "online" : "offline";
+    } catch {
+      return "offline";
+    }
+  }, []);
+
+  const runHealthChecks = useCallback(async (url: string) => {
+    setChecking(true);
+    setHealth({ supabase: "checking", resend: "checking", dw: url.trim() ? "checking" : "unknown" });
+
+    const supaP = (async (): Promise<Health> => {
+      const { error } = await supabase.from("app_settings").select("key").limit(1);
+      return error ? "offline" : "online";
+    })();
+
+    const resendP = (async (): Promise<Health> => {
+      try {
+        const base = import.meta.env.VITE_SUPABASE_URL as string;
+        const res = await fetch(`${base}/functions/v1/notify-ticket-email`, { method: "OPTIONS" });
+        return res.ok || res.status === 401 ? "online" : "offline";
+      } catch {
+        return "offline";
+      }
+    })();
+
+    const [supabaseStatus, resendStatus, dwStatus] = await Promise.all([supaP, resendP, checkDw(url)]);
+    setHealth({ supabase: supabaseStatus, resend: resendStatus, dw: dwStatus });
+    setChecking(false);
+  }, [checkDw]);
+
+  useEffect(() => {
+    load().then((url) => runHealthChecks(url));
+  }, [load, runHealthChecks]);
+
+  const saveTunnel = async () => {
+    setSaving(true);
+    try {
+      await setSetting("tunnel_url", tunnelUrl.trim());
+      setTunnelUpdatedAt(new Date().toISOString());
+      notify(true, "URL do túnel salva com sucesso!");
+      setHealth((h) => ({ ...h, dw: "checking" }));
+      const st = await checkDw(tunnelUrl);
+      setHealth((h) => ({ ...h, dw: st }));
+    } catch {
+      notify(false, "Não foi possível salvar a URL.");
+    }
+    setSaving(false);
+  };
+
+  const testTunnel = async () => {
+    if (!tunnelUrl.trim()) return notify(false, "Informe a URL do túnel primeiro.");
+    setHealth((h) => ({ ...h, dw: "checking" }));
+    const st = await checkDw(tunnelUrl);
+    setHealth((h) => ({ ...h, dw: st }));
+    notify(st === "online", st === "online" ? "Conexão OK (HTTP 200)." : "A URL não respondeu.");
+  };
+
+  const toggleFlag = async (key: string) => {
+    const next = { ...flags, [key]: !flags[key] };
+    setFlags(next);
+    try {
+      await setSetting("feature_flags", next);
+      setFlagsUpdatedAt(new Date().toISOString());
+    } catch {
+      setFlags(flags);
+      notify(false, "Não foi possível salvar o módulo.");
+    }
+  };
+
+  const integrations = [
+    { id: "supabase", name: "Banco de dados", desc: "Backend principal + autenticação" },
+    { id: "resend", name: "E-mails (Resend)", desc: "Função de envio de e-mails de chamados" },
+    { id: "dw", name: "DW API (Cloudflare Tunnel)", desc: tunnelUrl || "URL não configurada" },
   ];
+
+  const activeCount = FEATURE_LIST.filter((f) => f.locked || flags[f.key]).length;
+  const onlineCount = integrations.filter((i) => health[i.id] === "online").length;
 
   return (
     <div className="space-y-5">
-      {saved && (
-        <div className="flex items-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
-          <CheckCircle className="h-4 w-4" /> Configurações salvas com sucesso!
+      {toast && (
+        <div className={`flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm ${
+          toast.ok
+            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+            : "border-rose-500/20 bg-rose-500/10 text-rose-400"
+        }`}>
+          {toast.ok ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />} {toast.msg}
         </div>
       )}
 
-      {/* ── Configurações Gerais ── */}
       <div className="flex items-center gap-3">
         <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Configurações Gerais</span>
         <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
@@ -67,24 +174,27 @@ export default function Configuracoes() {
               </div>
               <div>
                 <p className="text-sm font-bold sgt-text">Tunnel URL — DW Local</p>
-                <p className="text-[11px] text-[var(--sgt-text-muted)]">Cloudflare Tunnel → Node.js</p>
+                <p className="text-[11px] text-[var(--sgt-text-muted)]">Última atualização: {formatDate(tunnelUpdatedAt)}</p>
               </div>
             </div>
-            <p className="text-xs text-[var(--sgt-text-secondary)] leading-relaxed">URL do Cloudflare Tunnel que conecta o portal ao servidor Node.js local. Atualizar quando reiniciar o tunnel.</p>
+            <p className="text-xs text-[var(--sgt-text-secondary)] leading-relaxed">
+              URL do Cloudflare Tunnel que conecta o portal ao servidor Node.js local. Atualizar quando reiniciar o tunnel.
+            </p>
             <input
               value={tunnelUrl}
               onChange={(e) => setTunnelUrl(e.target.value)}
-              className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2.5 text-sm sgt-text font-mono placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50"
+              disabled={loading}
+              className="w-full rounded-xl border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] px-3 py-2.5 text-sm sgt-text font-mono placeholder:text-[var(--sgt-text-faint)] focus:outline-none focus:border-cyan-500/50 disabled:opacity-50"
               placeholder="https://xxxx.trycloudflare.com"
             />
             <div className="flex gap-2">
-              <button onClick={save}
-                className="flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/15 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/25 transition-all">
-                <CheckCircle className="h-3.5 w-3.5" /> Salvar URL
+              <button onClick={saveTunnel} disabled={saving || loading}
+                className="flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/15 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/25 transition-all disabled:opacity-50">
+                {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />} Salvar URL
               </button>
-              <button onClick={() => window.open(tunnelUrl + "/health", "_blank")}
+              <button onClick={testTunnel}
                 className="flex items-center gap-2 rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-2 text-sm sgt-text-2 hover:text-[var(--sgt-text-primary)] transition-all">
-                <RefreshCw className="h-3.5 w-3.5" /> Testar
+                <RefreshCw className={`h-3.5 w-3.5 ${health.dw === "checking" ? "animate-spin" : ""}`} /> Testar conexão
               </button>
             </div>
           </div>
@@ -101,27 +211,32 @@ export default function Configuracoes() {
                 <Settings className="h-5 w-5 text-violet-400" />
               </div>
               <div>
-                <p className="text-sm font-bold sgt-text">Feature Flags</p>
-                <p className="text-[11px] text-[var(--sgt-text-muted)]">{Object.values(features).filter(Boolean).length}/{featureList.length} ativas</p>
+                <p className="text-sm font-bold sgt-text">Módulos do Sistema</p>
+                <p className="text-[11px] text-[var(--sgt-text-muted)]">
+                  {activeCount}/{FEATURE_LIST.length} ativos · salvo em {formatDate(flagsUpdatedAt)}
+                </p>
               </div>
             </div>
-            {featureList.map((f) => (
-              <div key={f.key} className="flex items-center justify-between gap-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0">
-                <div>
-                  <p className="text-sm font-medium sgt-text">{f.name}</p>
-                  <p className="text-[11px] text-[var(--sgt-text-muted)]">{f.desc}</p>
+            {FEATURE_LIST.map((f) => {
+              const on = f.locked ? true : !!flags[f.key];
+              return (
+                <div key={f.key} className="flex items-center justify-between gap-4 py-2.5 border-b border-[var(--sgt-divider)] last:border-0">
+                  <div>
+                    <p className="text-sm font-medium sgt-text">{f.name}</p>
+                    <p className="text-[11px] text-[var(--sgt-text-muted)]">{f.desc}</p>
+                  </div>
+                  <button
+                    onClick={() => !f.locked && toggleFlag(f.key)}
+                    disabled={f.locked || loading}
+                    className="shrink-0 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {on
+                      ? <ToggleRight className="h-7 w-7 text-cyan-400" />
+                      : <ToggleLeft className="h-7 w-7 text-[var(--sgt-text-faint)]" />}
+                  </button>
                 </div>
-                <button
-                  onClick={() => toggle(f.key)}
-                  className="shrink-0 transition-colors duration-200"
-                >
-                  {features[f.key]
-                    ? <ToggleRight className="h-7 w-7 text-cyan-400" />
-                    : <ToggleLeft className="h-7 w-7 text-[var(--sgt-text-faint)]" />
-                  }
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </AnimatedCard>
       </div>
@@ -137,30 +252,39 @@ export default function Configuracoes() {
           className="p-5 sm:p-6"
           style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(234,88,12,0.03) 100%)" }}
         >
-          <div className="flex items-center gap-3 mb-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 border border-amber-500/20">
-              <Zap className="h-5 w-5 text-amber-400" />
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 border border-amber-500/20">
+                <Zap className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold sgt-text">Status das Integrações</p>
+                <p className="text-[11px] text-[var(--sgt-text-muted)]">{onlineCount}/{integrations.length} online</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-bold sgt-text">Status das Integrações</p>
-              <p className="text-[11px] text-[var(--sgt-text-muted)]">{integrations.filter(i => i.color === "emerald").length}/{integrations.length} online</p>
-            </div>
+            <button onClick={() => runHealthChecks(tunnelUrl)} disabled={checking}
+              className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/15 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-500/25 transition-all disabled:opacity-50">
+              <RefreshCw className={`h-3.5 w-3.5 ${checking ? "animate-spin" : ""}`} /> Verificar todas
+            </button>
           </div>
           <div className="space-y-2.5">
-            {integrations.map((int) => (
-              <div key={int.name} className="flex items-center justify-between gap-4 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3.5 transition-all hover:bg-[var(--sgt-row-hover)]">
-                <div className="flex items-center gap-3">
-                  <span className={`h-2 w-2 rounded-full shrink-0 ${statusColors[int.color].dot}`} />
-                  <div>
-                    <p className="text-sm font-medium sgt-text">{int.name}</p>
-                    <p className="text-[11px] text-[var(--sgt-text-muted)]">{int.desc}</p>
+            {integrations.map((int) => {
+              const ui = HEALTH_UI[health[int.id] ?? "unknown"];
+              return (
+                <div key={int.id} className="flex items-center justify-between gap-4 rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] px-4 py-3.5 transition-all hover:bg-[var(--sgt-row-hover)]">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`h-2 w-2 rounded-full shrink-0 ${ui.dot}`} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium sgt-text">{int.name}</p>
+                      <p className="text-[11px] text-[var(--sgt-text-muted)] truncate">{int.desc}</p>
+                    </div>
                   </div>
+                  <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${ui.badge}`}>
+                    {ui.label}
+                  </span>
                 </div>
-                <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${statusColors[int.color].badge}`}>
-                  {int.status}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </AnimatedCard>
