@@ -14,6 +14,8 @@ import {
   PRIORIDADE_LABEL, STATUS_LABEL, PRIORIDADE_COLOR, STATUS_COLOR,
 } from "@/lib/ticketsApi";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
+import { SlaBadge } from "@/components/admin/tickets/SlaBadge";
+import { TicketCategoria, fetchCategorias, categoriaBadgeStyle } from "@/lib/ticketCategoriasApi";
 
 const fmtDateBR = (iso: string) => {
   const [y, m, d] = iso.split("-");
@@ -27,6 +29,11 @@ export default function Chamados() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const [categorias, setCategorias] = useState<TicketCategoria[]>([]);
+
+  useEffect(() => {
+    fetchCategorias(false).then(setCategorias).catch(() => setCategorias([]));
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -162,6 +169,7 @@ export default function Chamados() {
                 {tickets.map((t) => {
                   const pc = PRIORIDADE_COLOR[t.prioridade];
                   const sc = STATUS_COLOR[t.status];
+                  const cat = categorias.find((c) => c.id === t.categoria_id) ?? null;
                   return (
                     <button
                       key={t.id}
@@ -178,9 +186,17 @@ export default function Chamados() {
                         <p className="text-[12px] text-[var(--sgt-text-muted)] line-clamp-2">{t.descricao}</p>
                       )}
                       <div className="flex items-center justify-between gap-2 mt-1">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
-                          {PRIORIDADE_LABEL[t.prioridade]}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
+                            {PRIORIDADE_LABEL[t.prioridade]}
+                          </span>
+                          {cat && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-semibold" style={categoriaBadgeStyle(cat.cor)}>
+                              {cat.nome}
+                            </span>
+                          )}
+                          <SlaBadge ticket={t} />
+                        </div>
                         <span className="text-[10px] text-[var(--sgt-text-muted)]">
                           {fmtDateBR(t.data_chamado)}{t.horario_chamado ? ` · ${t.horario_chamado.slice(0,5)}` : ""}
                         </span>
