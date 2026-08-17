@@ -106,7 +106,7 @@ export default function Configuracoes() {
       await setSetting("tunnel_url", tunnelUrl.trim());
       setTunnelUpdatedAt(new Date().toISOString());
       notify(true, "URL do túnel salva com sucesso!");
-      setHealth((h) => ({ ...h, dw: await_placeholder() }));
+      setHealth((h) => ({ ...h, dw: "checking" }));
       const st = await checkDw(tunnelUrl);
       setHealth((h) => ({ ...h, dw: st }));
     } catch {
@@ -114,8 +114,6 @@ export default function Configuracoes() {
     }
     setSaving(false);
   };
-
-  const await_placeholder = (): Health => "checking";
 
   const testTunnel = async () => {
     if (!tunnelUrl.trim()) return notify(false, "Informe a URL do túnel primeiro.");
