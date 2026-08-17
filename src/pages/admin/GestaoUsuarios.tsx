@@ -225,8 +225,11 @@ export default function GestaoUsuarios() {
         flash(data?.error || "Erro ao excluir usuário.", "err");
       } else {
         flash("Usuário excluído com sucesso.", "ok");
+        const alvo = users.find((u) => u.id === userId);
+        logActivity("user_deleted", `Excluiu usuário: ${alvo?.email ?? userId}`, { target_user_id: userId }).catch(() => {});
         setUsers((prev) => prev.filter((u) => u.id !== userId));
       }
+
     } catch {
       flash("Erro ao excluir usuário.", "err");
     } finally {
