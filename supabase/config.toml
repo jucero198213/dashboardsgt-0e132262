@@ -12,3 +12,7 @@ verify_jwt = false
 # Chamada pelo frontend autenticado para enviar e-mails de chamados.
 [functions.notify-ticket-email]
 verify_jwt = true
+
+# Diagnóstico temporário do Resend.
+[functions.resend-debug]
+verify_jwt = false
