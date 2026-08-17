@@ -54,7 +54,7 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
   if (error) throw error;
   const ticket = data as Ticket;
 
-  notifyTITeam(ticket, userData.user?.email ?? "Usuário").catch(() => {});
+  notifyTITeam(ticket, userData.user?.email ?? "Usuário").catch((err) => console.error("notifyTITeam falhou:", err));
 
   return ticket;
 }
@@ -77,9 +77,11 @@ async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
       ticket.id,
     ),
   );
-  await Promise.allSettled(notifs);
+  const results = await Promise.allSettled(notifs);
+  const rejected = results.filter((r) => r.status === "rejected");
+  if (rejected.length) console.error("Falha ao criar notificações:", rejected);
 
-  await supabase.functions.invoke("notify-ticket-email", {
+  const { error } = await supabase.functions.invoke("notify-ticket-email", {
     body: {
       type: "novo_chamado",
       ticket_id: ticket.id,
@@ -89,6 +91,7 @@ async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
       conteudo: ticket.descricao,
     },
   });
+  if (error) console.error("notify-ticket-email falhou:", error);
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
