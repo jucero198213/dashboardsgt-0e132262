@@ -130,7 +130,7 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
       };
       let alvo = ticket;
       if (ticket) {
-        await updateTicket(ticket.id, payload);
+        if (podeEditar) await updateTicket(ticket.id, payload);
       } else {
         alvo = await createTicket(payload);
       }
@@ -141,7 +141,9 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
           toast.error(e?.message ?? "Erro ao enviar anexos");
         }
       }
-      toast.success(ticket ? "Chamado atualizado" : "Chamado criado com sucesso!");
+      toast.success(
+        ticket ? (podeEditar ? "Chamado atualizado" : "Anexos enviados") : "Chamado criado com sucesso!",
+      );
       setPendentes([]);
       onSaved();
       onOpenChange(false);
