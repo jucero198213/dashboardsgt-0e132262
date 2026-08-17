@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Users, Settings, Database, Activity, Shield,
   ChevronRight, Lock, Server, Zap, ClipboardList, Terminal,
-  Inbox, AlertTriangle, Ticket, LogIn, CheckCircle2, RefreshCw,
+  Inbox, AlertTriangle, Ticket as TicketIcon, LogIn, CheckCircle2, RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
