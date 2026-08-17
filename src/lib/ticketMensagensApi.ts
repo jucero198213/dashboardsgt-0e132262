@@ -65,13 +65,36 @@ async function notifyTicketReply(ticketId: string, autorId: string, conteudo: st
       `${autorNome} respondeu ao seu chamado`,
       ticketId,
     );
+    const { error } = await supabase.functions.invoke("notify-ticket-email", {
+      body: {
+        type: "resposta_chamado",
+        ticket_id: ticketId,
+        ticket_titulo: ticket.titulo,
+        destinatarios_ids: [ticket.aberto_por],
+        remetente_nome: autorNome,
+        conteudo,
+      },
+    });
+    if (error) console.error("notify-ticket-email (resposta) falhou:", error);
   } else {
-    const notifs = [...tiIds]
-      .filter((id) => id !== autorId)
-      .map((id) =>
-        criarNotificacao(id, "resposta_chamado", `Resposta no chamado: ${ticket.titulo}`, `${autorNome} respondeu`, ticketId),
-      );
+    const destinatarios = [...tiIds].filter((id) => id !== autorId);
+    const notifs = destinatarios.map((id) =>
+      criarNotificacao(id, "resposta_chamado", `Resposta no chamado: ${ticket.titulo}`, `${autorNome} respondeu`, ticketId),
+    );
     await Promise.allSettled(notifs);
+    if (destinatarios.length) {
+      const { error } = await supabase.functions.invoke("notify-ticket-email", {
+        body: {
+          type: "resposta_chamado",
+          ticket_id: ticketId,
+          ticket_titulo: ticket.titulo,
+          destinatarios_ids: destinatarios,
+          remetente_nome: autorNome,
+          conteudo,
+        },
+      });
+      if (error) console.error("notify-ticket-email (resposta) falhou:", error);
+    }
   }
 }
 
