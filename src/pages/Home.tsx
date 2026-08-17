@@ -28,7 +28,6 @@ import {
   PieChart,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { GlowCard } from "@/components/ui/spotlight-card";
 import { ScrollTextSection } from "@/components/ui/scroll-text-animation";
 import ReactLenis from "lenis/react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -797,9 +796,7 @@ export default function Home() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
                   {visiblePinned.map((m, i) => (
                     <Reveal key={m.key} delay={i * 0.12} className="h-full">
-                      <GlowCard wrapper glowColor={m.tone as any} className="h-full rounded-3xl">
-                        <ModuleCard data={m} index={0} />
-                      </GlowCard>
+                      <ModuleCard data={m} index={0} />
                     </Reveal>
                   ))}
                 </div>
