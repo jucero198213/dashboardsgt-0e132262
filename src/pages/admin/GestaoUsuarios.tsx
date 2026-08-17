@@ -11,6 +11,8 @@ import { type AppPage, ALL_PAGES, PAGE_GROUPS } from "@/hooks/usePagePermissions
 import { type Departamento, DEPARTAMENTO_LABEL, DEPARTAMENTO_COLOR } from "@/hooks/useProfiles";
 import { GooeyInput } from "@/components/ui/gooey-input";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { logActivity } from "@/lib/activityLogApi";
+
 
 const PAGE_META: Record<AppPage, { label: string; icon: React.ElementType; color: string; border: string; bg: string }> = {
   "fin-painel":       { label: "Painel Financeiro", icon: LayoutDashboard, color: "text-amber-300",   border: "border-amber-400/30",   bg: "bg-amber-400/10"   },
@@ -171,8 +173,11 @@ export default function GestaoUsuarios() {
     const { error: insErr } = await supabase.from("user_roles").insert({ user_id: userId, role } as any);
     if (insErr) { flash("Erro ao alterar role.", "err"); return; }
     flash("Role atualizada com sucesso.", "ok");
+    const alvo = users.find((u) => u.id === userId);
+    logActivity("role_changed", `Alterou role de ${alvo?.email ?? userId} para ${role}`, { target_user_id: userId, role }).catch(() => {});
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role } : u));
   };
+
 
   const togglePage = async (userId: string, page: AppPage, currentlyHas: boolean) => {
     if (currentlyHas) {
