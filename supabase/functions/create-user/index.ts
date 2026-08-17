@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const siteUrl = Deno.env.get("SITE_URL") || "https://sgtlog.com";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://dashboardsgt.lovable.app";
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       redirectTo: `${siteUrl}/set-password`,
     });
