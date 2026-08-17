@@ -146,6 +146,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_anexos: {
+        Row: {
+          arquivo_url: string
+          created_at: string
+          id: string
+          mensagem_id: string | null
+          nome_arquivo: string | null
+          tamanho: number | null
+          ticket_id: string
+          tipo: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          arquivo_url: string
+          created_at?: string
+          id?: string
+          mensagem_id?: string | null
+          nome_arquivo?: string | null
+          tamanho?: number | null
+          ticket_id: string
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          arquivo_url?: string
+          created_at?: string
+          id?: string
+          mensagem_id?: string | null
+          nome_arquivo?: string | null
+          tamanho?: number | null
+          ticket_id?: string
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_anexos_mensagem_id_fkey"
+            columns: ["mensagem_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_mensagens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_anexos_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_categorias: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       ticket_mensagens: {
         Row: {
           autor_id: string
@@ -184,6 +259,7 @@ export type Database = {
       tickets: {
         Row: {
           aberto_por: string | null
+          categoria_id: string | null
           cliente_setor: string | null
           created_at: string
           created_by: string | null
@@ -202,6 +278,7 @@ export type Database = {
         }
         Insert: {
           aberto_por?: string | null
+          categoria_id?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
@@ -220,6 +297,7 @@ export type Database = {
         }
         Update: {
           aberto_por?: string | null
+          categoria_id?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
@@ -236,7 +314,15 @@ export type Database = {
           titulo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tickets_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_categorias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

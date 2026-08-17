@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { Send, Loader2, MessageSquare, Shield } from "lucide-react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { Send, Loader2, MessageSquare, Shield, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import {
   fetchMensagens, criarMensagem,
 } from "@/lib/ticketMensagensApi";
 import { supabase } from "@/integrations/supabase/client";
+import { TicketAnexo, fetchAnexos, uploadAnexos, validarArquivo, TIPOS_ACEITOS } from "@/lib/ticketAnexosApi";
+import { AnexosGrid, PendingFilesGrid } from "./TicketAnexos";
 
 interface Props {
   ticketId: string;
@@ -39,12 +41,25 @@ export function TicketThread({ ticketId }: Props) {
   const [texto, setTexto] = useState("");
   const [sending, setSending] = useState(false);
   const [tipo, setTipo] = useState<TipoMensagem>("resposta");
+  const [anexos, setAnexos] = useState<TicketAnexo[]>([]);
+  const [pendentes, setPendentes] = useState<File[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const anexosPorMensagem = useMemo(() => {
+    const map: Record<string, TicketAnexo[]> = {};
+    for (const a of anexos) {
+      if (!a.mensagem_id) continue;
+      (map[a.mensagem_id] ??= []).push(a);
+    }
+    return map;
+  }, [anexos]);
 
   const loadMensagens = useCallback(async () => {
     try {
       const msgs = await fetchMensagens(ticketId);
       setMensagens(msgs);
+      fetchAnexos(ticketId).then(setAnexos).catch(() => {});
 
       const autorIds = [...new Set(msgs.map((m) => m.autor_id))];
       const missing = autorIds.filter((id) => !profiles[id]);
@@ -99,12 +114,32 @@ export function TicketThread({ ticketId }: Props) {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
 
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const validos: File[] = [];
+    for (const f of Array.from(list)) {
+      const erro = validarArquivo(f);
+      if (erro) toast.error(erro);
+      else validos.push(f);
+    }
+    if (validos.length) setPendentes((p) => [...p, ...validos]);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
   const enviar = async () => {
     const txt = texto.trim();
-    if (!txt) return;
+    if (!txt && pendentes.length === 0) return;
     setSending(true);
     try {
-      await criarMensagem(ticketId, txt, tipo);
+      const msg = await criarMensagem(ticketId, txt || "(imagem)", tipo);
+      if (pendentes.length) {
+        try {
+          await uploadAnexos(ticketId, pendentes, msg.id);
+        } catch (e: any) {
+          toast.error(e?.message ?? "Erro ao enviar anexo");
+        }
+        setPendentes([]);
+      }
       setTexto("");
       await loadMensagens();
     } catch (err: any) {
@@ -171,6 +206,7 @@ export function TicketThread({ ticketId }: Props) {
                 >
                   {m.conteudo}
                 </div>
+                <AnexosGrid anexos={anexosPorMensagem[m.id] ?? []} className="mt-1" />
               </div>
             );
           })
@@ -207,6 +243,10 @@ export function TicketThread({ ticketId }: Props) {
               </button>
             </div>
           )}
+          <PendingFilesGrid
+            files={pendentes}
+            onRemove={(i) => setPendentes((p) => p.filter((_, idx) => idx !== i))}
+          />
           <Textarea
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
@@ -216,10 +256,28 @@ export function TicketThread({ ticketId }: Props) {
             className="min-h-[38px] max-h-[100px] resize-none text-[13px]"
           />
         </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept={TIPOS_ACEITOS.join(",")}
+          multiple
+          className="hidden"
+          onChange={(e) => addFiles(e.target.files)}
+        />
+        <Button
+          size="sm"
+          variant="outline"
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          aria-label="Anexar imagem"
+          className="h-[38px] px-3 border-[var(--sgt-border-subtle)]"
+        >
+          <Paperclip className="h-4 w-4" />
+        </Button>
         <Button
           size="sm"
           onClick={enviar}
-          disabled={sending || !texto.trim()}
+          disabled={sending || (!texto.trim() && pendentes.length === 0)}
           className="bg-amber-500 hover:bg-amber-600 text-black h-[38px] px-3"
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
