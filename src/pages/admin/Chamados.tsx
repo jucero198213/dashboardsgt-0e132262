@@ -18,6 +18,9 @@ import {
 } from "@/lib/ticketsApi";
 import { TicketsCalendar } from "@/components/admin/tickets/TicketsCalendar";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
+import { SlaBadge } from "@/components/admin/tickets/SlaBadge";
+import { CategoriasManager } from "@/components/admin/tickets/CategoriasManager";
+import { TicketCategoria, fetchCategorias, categoriaBadgeStyle } from "@/lib/ticketCategoriasApi";
 
 const fmtDateInput = (d: Date) => {
   const y = d.getFullYear();
@@ -266,6 +269,7 @@ export default function Chamados() {
                       {dayTickets.map((t) => {
                         const pc = PRIORIDADE_COLOR[t.prioridade];
                         const sc = STATUS_COLOR[t.status];
+                        const cat = categorias.find((c) => c.id === t.categoria_id) ?? null;
                         return (
                           <button
                             key={t.id}
@@ -292,6 +296,12 @@ export default function Chamados() {
                               <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${sc.border} ${sc.bg} ${sc.text} font-semibold uppercase tracking-wider`}>
                                 {STATUS_LABEL[t.status]}
                               </span>
+                              {cat && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-full border font-semibold" style={categoriaBadgeStyle(cat.cor)}>
+                                  {cat.nome}
+                                </span>
+                              )}
+                              <SlaBadge ticket={t} />
                             </div>
                           </button>
                         );
