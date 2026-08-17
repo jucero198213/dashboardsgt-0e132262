@@ -434,7 +434,7 @@ export default function PainelAdministrativo() {
               <AnimatedCard delay={160} className="rounded-[20px] border border-[var(--sgt-border-subtle)] overflow-hidden flex flex-col">
                 <div className="flex items-center justify-between gap-3 px-5 py-4" style={{ background: "linear-gradient(180deg, rgba(245,158,11,0.05) 0%, transparent 100%)" }}>
                   <div className="flex items-center gap-2">
-                    <Ticket className="h-4 w-4 text-amber-400" />
+                    <TicketIcon className="h-4 w-4 text-amber-400" />
                     <p className="text-[12px] font-semibold uppercase tracking-[0.2em] sgt-text-2">Últimos chamados</p>
                   </div>
                   <button
