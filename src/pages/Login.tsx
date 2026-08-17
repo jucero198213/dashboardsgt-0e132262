@@ -1,43 +1,18 @@
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import sgtLogo from "@/assets/sgt-logo-clean.png";
-import { supabase } from "@/integrations/supabase/client";
-import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, TrendingUp, BarChart3, Shield, Sun, Moon, UserPlus, ArrowLeft, CheckCircle, KeyRound } from "lucide-react";
-import { PasswordStrength, type PasswordRule } from "@/components/ui/password-strength";
-
-const sgtPasswordRules: PasswordRule[] = [
-  { id: "length", label: "Exatamente 6 caracteres", test: (v) => v.length === 6 },
-  { id: "letter", label: "Pelo menos uma letra", test: (v) => /[a-zA-Z]/.test(v) },
-  { id: "digit", label: "Pelo menos um número", test: (v) => /\d/.test(v) },
-];
-
-const sgtPasswordLabels = ["", "Fraca", "Regular", "Forte"] as const;
+import { Lock, Mail, Eye, EyeOff, AlertCircle, Loader2, BarChart3, Sun, Moon } from "lucide-react";
 
 export default function Login() {
   const { session, isLoading, signIn } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email,       setEmail]       = useState("");
   const [password,    setPassword]    = useState("");
   const [showPass,    setShowPass]    = useState(false);
   const [error,       setError]       = useState<string | null>(null);
   const [submitting,  setSubmitting]  = useState(false);
-
-  // Primeiro acesso — inicializa pelo query param ?mode=first-access
-  const [mode, setMode] = useState<"login" | "first-access">(
-    searchParams.get("mode") === "first-access" ? "first-access" : "login"
-  );
-  const [faEmail, setFaEmail] = useState("");
-  const [faCode, setFaCode] = useState("");
-  const [faPassword, setFaPassword] = useState("");
-  const [faConfirm, setFaConfirm] = useState("");
-  const [faShowPass, setFaShowPass] = useState(false);
-  const [faLoading, setFaLoading] = useState(false);
-  const [faError, setFaError] = useState<string | null>(null);
-  const [faSuccess, setFaSuccess] = useState(false);
 
   if (isLoading) return (
     <div className="flex min-h-screen items-center justify-center sgt-bg-base">
@@ -56,227 +31,7 @@ export default function Login() {
     setSubmitting(false);
   };
 
-  const handleFirstAccess = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (faPassword.length !== 6) {
-      setFaError("A senha deve ter exatamente 6 caracteres.");
-      return;
-    }
-    if (faPassword !== faConfirm) {
-      setFaError("As senhas não coincidem.");
-      return;
-    }
-    setFaError(null);
-    setFaLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("first-access", {
-        body: { email: faEmail, code: faCode, password: faPassword },
-      });
-      if (error) {
-        // Tenta extrair a mensagem real do body da resposta
-        let msg = "Erro ao definir senha. Tente novamente.";
-        try {
-          const body = await (error as any).context?.json?.();
-          if (body?.error) msg = body.error;
-        } catch { /* ignora */ }
-        setFaError(msg);
-      } else if (data?.error) {
-        setFaError(data.error);
-      } else {
-        setFaSuccess(true);
-        setTimeout(async () => {
-          await signIn(faEmail, faPassword);
-          navigate("/home");
-        }, 1500);
-      }
-    } catch (e: any) {
-      setFaError(`Erro inesperado: ${e?.message || "Tente novamente."}`);
-    } finally {
-      setFaLoading(false);
-    }
-  };
-
-  // ── Render: First access with code ──
-  if (mode === "first-access") {
-    return (
-      <div className="relative flex min-h-screen overflow-hidden sgt-bg-base">
-        <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_80%_60%_at_30%_-10%,rgba(180,110,4,0.22),transparent_55%)]" />
-        <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_50%_50%_at_100%_110%,rgba(6,182,212,0.07),transparent_60%)]" />
-        <div className="pointer-events-none fixed inset-0 sgt-atmosphere" style={{ background: "radial-gradient(ellipse 120% 120% at 50% 50%, transparent 10%, rgba(2,3,12,0.70) 100%)" }} />
-
-        {/* Left panel - desktop only */}
-        <div className="relative hidden flex-col justify-between overflow-hidden border-r border-[var(--sgt-border-subtle)] sgt-bg-section px-12 py-14 lg:flex lg:w-[52%]">
-          <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_90%_70%_at_0%_10%,rgba(180,110,4,0.18),transparent_60%)]" />
-          <div className="relative space-y-6">
-            <h1 className="text-[clamp(2rem,4vw,3rem)] font-black leading-[1.08] tracking-[-0.04em] sgt-text">
-              Primeiro<br />
-              <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-600 bg-clip-text text-transparent">
-                Acesso
-              </span>
-            </h1>
-            <p className="max-w-[380px] text-[15px] leading-relaxed sgt-text-2">
-              Utilize o código fornecido pelo administrador para definir sua senha e acessar o portal.
-            </p>
-          </div>
-          <div className="relative flex items-center justify-between">
-            <p className="text-[11px] text-[var(--sgt-text-faint)]">© 2026 SGT Log · Todos os direitos reservados</p>
-          </div>
-        </div>
-
-        {/* Right panel */}
-        <div className="relative flex flex-1 items-center justify-center px-6 py-12 lg:px-16">
-          <div className="pointer-events-none absolute inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_70%_60%_at_100%_-10%,rgba(6,182,212,0.06),transparent_55%)]" />
-          <div className="relative w-full max-w-[400px] animate-[fadeSlideIn_0.6s_ease-out]">
-
-            {/* Logo mobile */}
-            <div className="mb-10 flex items-center gap-3 lg:hidden">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10">
-                <BarChart3 className="h-4.5 w-4.5 text-amber-300" />
-              </div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/70">SGT LOG · Gestão Financeira</p>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-[28px] font-extrabold tracking-[-0.03em] sgt-text">
-                {faSuccess ? "Senha definida!" : "Primeiro acesso"}
-              </h2>
-              <p className="mt-1.5 text-[14px] text-[var(--sgt-text-muted)]">
-                {faSuccess
-                  ? "Redirecionando para o portal..."
-                  : "Informe seu email, código de acesso e crie sua senha"}
-              </p>
-            </div>
-
-            {faSuccess ? (
-              <div className="flex items-center gap-2.5 rounded-[14px] border border-emerald-400/20 bg-emerald-400/8 px-4 py-3 text-[13px] text-emerald-300">
-                <CheckCircle className="h-4 w-4 shrink-0" />
-                Senha definida com sucesso! Entrando...
-              </div>
-            ) : (
-              <>
-                {faError && (
-                  <div className="mb-6 flex items-center gap-2.5 rounded-[14px] border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-[13px] text-rose-300">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    {faError}
-                  </div>
-                )}
-
-                <form onSubmit={handleFirstAccess} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
-                      <input
-                        type="email"
-                        value={faEmail}
-                        onChange={(e) => setFaEmail(e.target.value)}
-                        required
-                        autoComplete="email"
-                        placeholder="seu@email.com"
-                        className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Código de acesso</label>
-                    <div className="relative">
-                      <KeyRound className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
-                      <input
-                        type="text"
-                        value={faCode}
-                        onChange={(e) => setFaCode(e.target.value.toUpperCase())}
-                        required
-                        placeholder="EX: ABC123"
-                        maxLength={6}
-                        className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[14px] font-mono tracking-[0.2em] sgt-text placeholder:text-[var(--sgt-text-faint)] placeholder:font-sans placeholder:tracking-normal outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Nova senha</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
-                      <input
-                        type={faShowPass ? "text" : "password"}
-                        value={faPassword}
-                        onChange={(e) => setFaPassword(e.target.value)}
-                        required
-                        maxLength={6}
-                        placeholder="6 caracteres"
-                        className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-12 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
-                      />
-                      <button type="button" onClick={() => setFaShowPass(!faShowPass)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--sgt-text-muted)] transition-colors hover:text-[var(--sgt-text-secondary)]">
-                        {faShowPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <PasswordStrength
-                      value={faPassword}
-                      rules={sgtPasswordRules}
-                      labels={sgtPasswordLabels as unknown as string[]}
-                      showRules={true}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--sgt-text-muted)]">Confirmar senha</label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--sgt-text-muted)]" />
-                      <input
-                        type={faShowPass ? "text" : "password"}
-                        value={faConfirm}
-                        onChange={(e) => setFaConfirm(e.target.value)}
-                        required
-                        maxLength={6}
-                        placeholder="Repita a senha"
-                        className="h-12 w-full rounded-[14px] border border-[var(--sgt-input-border)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[14px] sgt-text placeholder:text-[var(--sgt-text-faint)] outline-none transition-all duration-200 hover:border-[var(--sgt-border-medium)] focus:border-amber-400/35 focus:bg-[var(--sgt-input-hover)] focus:shadow-[0_0_0_3px_rgba(245,158,11,0.07)]"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={faLoading}
-                    className="relative mt-2 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-[14px] bg-amber-500/[0.12] text-[14px] font-bold text-amber-300 transition-all duration-300 border border-amber-400/25 hover:bg-amber-400/[0.18] hover:border-amber-400/40 hover:shadow-[0_8px_32px_rgba(245,158,11,0.18)] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <div className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-amber-400/60 via-amber-300/40 to-transparent" />
-                    {faLoading ? (
-                      <><Loader2 className="h-4 w-4 animate-spin" />Definindo senha...</>
-                    ) : "Definir senha e acessar"}
-                  </button>
-                </form>
-
-                <button
-                  onClick={() => { setMode("login"); setFaError(null); setFaEmail(""); setFaCode(""); setFaPassword(""); setFaConfirm(""); }}
-                  className="mt-6 flex items-center gap-2 text-[13px] text-[var(--sgt-text-muted)] hover:text-amber-300 transition-colors"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Voltar ao login
-                </button>
-              </>
-            )}
-
-            <div className="mt-8 flex items-center justify-end">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="flex items-center gap-1.5 rounded-lg border border-[var(--sgt-border-subtle)] px-2.5 py-1.5 text-[11px] font-medium text-[color:var(--sgt-text-muted)] transition-all hover:border-[var(--sgt-border-medium)] hover:text-[color:var(--sgt-text-secondary)]"
-                style={{ background: "var(--sgt-input-bg)" }}
-              >
-                {theme === "dark" ? <Sun className="h-3 w-3 text-amber-400" /> : <Moon className="h-3 w-3 text-cyan-400" />}
-                {theme === "dark" ? "Tema claro" : "Tema escuro"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Render: Login normal (Cinematic enterprise) ──
+  // ── Render: Login (Cinematic enterprise) ──
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden sgt-bg-base text-slate-200 selection:bg-amber-500/30">
 
@@ -434,13 +189,6 @@ export default function Login() {
                 ) : "Acessar Portal"}
               </button>
 
-              <button
-                type="button" onClick={() => setMode("first-access")}
-                className="flex h-14 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] text-sm font-medium text-slate-300 transition-all hover:border-white/20 hover:bg-white/[0.05]"
-              >
-                <UserPlus className="h-[18px] w-[18px]" />
-                Primeiro acesso? Defina sua senha
-              </button>
             </div>
           </form>
 
