@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Plus, Filter, CalendarDays, Loader2, ClipboardList,
   AlertCircle, Clock, CheckCircle2, XCircle,
+  Tags,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 import { TicketsCalendar } from "@/components/admin/tickets/TicketsCalendar";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
 import { SlaBadge } from "@/components/admin/tickets/SlaBadge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CategoriasManager } from "@/components/admin/tickets/CategoriasManager";
 import { TicketCategoria, fetchCategorias, categoriaBadgeStyle } from "@/lib/ticketCategoriasApi";
 
@@ -51,6 +53,13 @@ export default function Chamados() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [modalDefaultDate, setModalDefaultDate] = useState<string | undefined>(undefined);
+  const [categorias, setCategorias] = useState<TicketCategoria[]>([]);
+  const [catsOpen, setCatsOpen] = useState(false);
+
+  const loadCategorias = () => {
+    fetchCategorias(false).then(setCategorias).catch(() => setCategorias([]));
+  };
+  useEffect(() => { loadCategorias(); }, []);
 
   const load = async () => {
     setLoading(true);
@@ -134,6 +143,14 @@ export default function Chamados() {
                 </span>
               </div>
               <div className="hidden sm:block flex-1" />
+              <button
+                onClick={() => setCatsOpen(true)}
+                aria-label="Gerenciar categorias"
+                title="Gerenciar categorias"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-amber-300"
+              >
+                <Tags className="h-4 w-4" />
+              </button>
               {/* Mobile: ícone-only */}
               <button
                 onClick={() => setShowFilters((v) => !v)}
@@ -314,6 +331,16 @@ export default function Chamados() {
           </div>
         </section>
       </div>
+
+      <Dialog open={catsOpen} onOpenChange={(o) => { setCatsOpen(o); if (!o) loadCategorias(); }}>
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Categorias de chamado</DialogTitle>
+            <DialogDescription>Crie, edite ou desative as categorias disponíveis.</DialogDescription>
+          </DialogHeader>
+          <CategoriasManager />
+        </DialogContent>
+      </Dialog>
 
       <TicketModal
         open={modalOpen}
