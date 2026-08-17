@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { ArrowRight, UserPlus } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import sgtLogo from "@/assets/sgt-logo-clean.png";
 
@@ -441,9 +441,6 @@ export default function Welcome() {
           <div className="wlc-btns">
             <button className="wlc-btn1" onClick={()=>navigate("/login")}>
               Acessar Plataforma <ArrowRight size={17}/>
-            </button>
-            <button className="wlc-btn2" onClick={()=>navigate("/login?mode=first-access")}>
-              <UserPlus size={14}/> Primeiro acesso? Defina sua senha
             </button>
           </div>
           <p className="wlc-footer">Acesso restrito · Uso interno SGT Log</p>
