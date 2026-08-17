@@ -58,10 +58,13 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
   if (error) throw error;
   const ticket = data as Ticket;
 
+  logActivity("ticket_created", `Criou chamado: ${ticket.titulo}`, { ticket_id: ticket.id }).catch(() => {});
+
   notifyTITeam(ticket, userData.user?.email ?? "Usuário").catch((err) => console.error("notifyTITeam falhou:", err));
 
   return ticket;
 }
+
 
 async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
   const { data: tiProfiles } = await supabase
@@ -127,6 +130,10 @@ export async function updateTicket(id: string, payload: Partial<TicketInput>): P
   if (error) throw error;
   const ticket = data as Ticket;
 
+  logActivity("ticket_updated", `Atualizou chamado: ${ticket.titulo}`, { ticket_id: ticket.id }).catch(() => {});
+
+
+
   if (payload.status && statusAnterior && statusAnterior !== ticket.status) {
     criarMensagemSistema(
       ticket.id,
@@ -150,7 +157,9 @@ export async function updateTicket(id: string, payload: Partial<TicketInput>): P
 export async function deleteTicket(id: string): Promise<void> {
   const { error } = await supabase.from("tickets").delete().eq("id", id);
   if (error) throw error;
+  logActivity("ticket_deleted", "Excluiu chamado", { ticket_id: id }).catch(() => {});
 }
+
 
 export const PRIORIDADE_LABEL: Record<TicketPrioridade, string> = {
   baixa: "Baixa",
