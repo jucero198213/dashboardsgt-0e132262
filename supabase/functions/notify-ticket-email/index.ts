@@ -1,15 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
-//  notify-ticket-email — envia email via Resend quando um chamado é criado
-//  ou recebe uma resposta.
-//
-//  Body esperado:
-//    { type: "novo_chamado" | "resposta_chamado" | "status_chamado",
-//      ticket_id, ticket_titulo, destinatarios: string[],
-//      remetente_nome?: string, conteudo?: string }
-//
-//  Secrets necessários: RESEND_API_KEY, RESEND_FROM_EMAIL (ex: chamados@seudominio.com)
-// ─────────────────────────────────────────────────────────────────────────────
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,7 +17,8 @@ interface EmailPayload {
   type: "novo_chamado" | "resposta_chamado" | "status_chamado";
   ticket_id: string;
   ticket_titulo: string;
-  destinatarios: string[];
+  destinatarios?: string[];
+  destinatarios_ids?: string[];
   remetente_nome?: string;
   conteudo?: string;
   novo_status?: string;
@@ -67,6 +58,23 @@ function buildHtml(p: EmailPayload): string {
     </div>`;
 }
 
+async function resolveEmails(ids: string[]): Promise<string[]> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+  const emails: string[] = [];
+  const { data: { users }, error } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+  if (error || !users) return [];
+
+  for (const u of users) {
+    if (ids.includes(u.id) && u.email) {
+      emails.push(u.email);
+    }
+  }
+  return emails;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -77,10 +85,17 @@ serve(async (req) => {
     if (!apiKey) return json({ error: "RESEND_API_KEY não configurada" }, 500);
 
     const payload: EmailPayload = await req.json();
-    if (!payload.destinatarios?.length) return json({ error: "Nenhum destinatário" }, 400);
+
+    let emailList = payload.destinatarios ?? [];
+
+    if (!emailList.length && payload.destinatarios_ids?.length) {
+      emailList = await resolveEmails(payload.destinatarios_ids);
+    }
+
+    if (!emailList.length) return json({ error: "Nenhum destinatário" }, 400);
 
     const results = await Promise.allSettled(
-      payload.destinatarios.map(async (to) => {
+      emailList.map(async (to) => {
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -91,7 +106,11 @@ serve(async (req) => {
             html: buildHtml(payload),
           }),
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error(`Resend falhou pra ${to}:`, errBody);
+          throw new Error(errBody);
+        }
         return { to, ok: true };
       }),
     );
@@ -99,8 +118,11 @@ serve(async (req) => {
     const enviados = results.filter((r) => r.status === "fulfilled").length;
     const falhas = results.filter((r) => r.status === "rejected").length;
 
+    console.log(`notify-ticket-email: ${enviados} enviados, ${falhas} falhas`);
+
     return json({ enviados, falhas });
   } catch (e) {
+    console.error("notify-ticket-email erro:", e);
     return json({ error: (e as Error).message }, 500);
   }
 });

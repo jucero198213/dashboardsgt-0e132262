@@ -60,12 +60,17 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
 }
 
 async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
-  const tiUsers = await getTIUsers();
-  if (!tiUsers.length) return;
+  const { data: tiProfiles } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("departamento", "ti");
+  if (!tiProfiles?.length) return;
 
-  const notifs = tiUsers.map((u) =>
+  const tiIds = tiProfiles.map((p) => p.id);
+
+  const notifs = tiIds.map((id) =>
     criarNotificacao(
-      u.id,
+      id,
       "novo_chamado",
       `Novo chamado: ${ticket.titulo}`,
       `Aberto por ${remetenteEmail}`,
@@ -74,35 +79,16 @@ async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
   );
   await Promise.allSettled(notifs);
 
-  const emails = tiUsers.map((u) => u.email).filter(Boolean);
-  if (emails.length > 0) {
-    await supabase.functions.invoke("notify-ticket-email", {
-      body: {
-        type: "novo_chamado",
-        ticket_id: ticket.id,
-        ticket_titulo: ticket.titulo,
-        destinatarios: emails,
-        remetente_nome: remetenteEmail,
-        conteudo: ticket.descricao,
-      },
-    });
-  }
-}
-
-async function getTIUsers(): Promise<{ id: string; email: string }[]> {
-  const { data: tiProfiles } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("departamento", "ti");
-  if (!tiProfiles?.length) return [];
-
-  const tiIds = tiProfiles.map((p) => p.id);
-
-  const { data: listRes } = await supabase.functions.invoke("list-users");
-  if (!listRes?.users) return [];
-
-  return (listRes.users as { id: string; email: string }[])
-    .filter((u) => tiIds.includes(u.id));
+  await supabase.functions.invoke("notify-ticket-email", {
+    body: {
+      type: "novo_chamado",
+      ticket_id: ticket.id,
+      ticket_titulo: ticket.titulo,
+      destinatarios_ids: tiIds,
+      remetente_nome: remetenteEmail,
+      conteudo: ticket.descricao,
+    },
+  });
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
