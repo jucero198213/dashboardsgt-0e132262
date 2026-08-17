@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/lib/activityLogApi";
+
 
 export type AppRole = "admin" | "user" | "diretoria";
 
@@ -79,8 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       return { error: messages[error.message] ?? "Erro ao fazer login. Tente novamente." };
     }
+    logActivity("login", "Fez login no sistema").catch(() => {});
     return { error: null };
   }, []);
+
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();

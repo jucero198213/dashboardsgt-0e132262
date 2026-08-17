@@ -247,6 +247,8 @@ export default function GestaoUsuarios() {
         flash(data?.error || "Erro ao criar usuário.", "err");
       } else {
         const newUserId = data?.user_id;
+        logActivity("user_created", `Convidou usuário: ${newEmail}`, { target_user_id: newUserId, role: newRole }).catch(() => {});
+
         if (replicateFromId && newUserId) {
           const sourceUser = users.find(u => u.id === replicateFromId);
           if (sourceUser && sourceUser.pages.size > 0) {
