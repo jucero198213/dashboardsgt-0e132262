@@ -21,6 +21,7 @@ import Configuracoes from "./Configuracoes";
 import BancoDados from "./BancoDados";
 import Monitoramento from "./Monitoramento";
 import Seguranca from "./Seguranca";
+import { GlowCard, type GlowCardProps } from "@/components/ui/spotlight-card";
 
 type Screen = "home" | "usuarios" | "config" | "banco" | "monitor" | "seguranca" | "chamados";
 
@@ -412,15 +413,23 @@ export default function PainelAdministrativo() {
 
             {/* ═══ Stats mobile (visíveis só em < lg) ═══ */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 lg:hidden">
-              {heroStats.map((s, i) => (
+              {heroStats.map((s, i) => {
+                const statGlow: Record<string, GlowCardProps["glowColor"]> = {
+                  "text-emerald-400": "emerald", "text-amber-400": "amber",
+                  "text-cyan-400": "cyan", "text-violet-400": "violet",
+                };
+                return (
                 <AnimatedCard key={s.label} delay={80 + i * 50} className="rounded-[16px] border border-[var(--sgt-border-subtle)] sgt-bg-card">
+                  <GlowCard wrapper glowColor={statGlow[s.color] ?? "blue"} className="rounded-[16px]">
                   <div className="flex flex-col items-center py-3 px-2" style={{ background: `linear-gradient(135deg, ${s.color.replace("text-", "rgba(")}0.12), transparent)` }}>
                     <s.icon className={`h-4 w-4 ${s.color} mb-1.5`} />
                     <span className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</span>
                     <span className="text-[9px] uppercase tracking-[0.15em] text-[var(--sgt-text-muted)] text-center">{s.label}</span>
                   </div>
+                  </GlowCard>
                 </AnimatedCard>
-              ))}
+                );
+              })}
             </div>
 
             {/* ═══ Resumo rápido ═══ */}
@@ -598,13 +607,19 @@ export default function PainelAdministrativo() {
             </div>
 
             <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {navItems.map((item, i) => (
+              {navItems.map((item, i) => {
+                const glowMap: Record<Screen, GlowCardProps["glowColor"]> = {
+                  home: "blue", usuarios: "emerald", config: "cyan",
+                  banco: "violet", monitor: "amber", seguranca: "red", chamados: "orange",
+                };
+                return (
                 <AnimatedCard
                   key={item.id}
                   delay={380 + i * 70}
                   hover
                   className="group rounded-[20px] overflow-hidden cursor-pointer"
                 >
+                  <GlowCard wrapper glowColor={glowMap[item.id]} className="rounded-[20px]">
                   <button
                     onClick={() => item.route ? navigate(item.route) : setScreen(item.id)}
                     className="text-left w-full h-full"
@@ -642,8 +657,10 @@ export default function PainelAdministrativo() {
                       </div>
                     </div>
                   </button>
+                  </GlowCard>
                 </AnimatedCard>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

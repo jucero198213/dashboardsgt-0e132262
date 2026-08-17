@@ -28,6 +28,7 @@ import {
   PieChart,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { GlowCard } from "@/components/ui/spotlight-card";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
@@ -777,7 +778,9 @@ export default function Home() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
                   {visiblePinned.map((m, i) => (
                     <Reveal key={m.key} delay={i * 0.12} className="h-full">
-                      <ModuleCard data={m} index={0} />
+                      <GlowCard wrapper glowColor={m.tone as any} className="h-full rounded-3xl">
+                        <ModuleCard data={m} index={0} />
+                      </GlowCard>
                     </Reveal>
                   ))}
                 </div>
