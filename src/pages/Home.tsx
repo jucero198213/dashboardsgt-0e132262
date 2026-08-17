@@ -28,8 +28,6 @@ import {
   PieChart,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
-import { ScrollTextSection } from "@/components/ui/scroll-text-animation";
-import ReactLenis from "lenis/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
@@ -604,7 +602,6 @@ export default function Home() {
   };
 
   return (
-    <ReactLenis root options={{ lerp: 0.08, duration: 1.2 }}>
     <div
       className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
@@ -753,22 +750,6 @@ export default function Home() {
             </motion.button>
           </section>
 
-          {/* ── SCROLL TRANSITION: Hero → Módulos ── */}
-          <ScrollTextSection
-            text="Explore o Workspace"
-            subtitle="Tudo que você precisa para gestão financeira, operacional e logística — em um só lugar."
-            color="text-amber-400"
-            subtitleColor="text-slate-400"
-            height="140vh"
-            icons={[
-              { icon: Globe, color: "text-violet-400/70 bg-violet-400/10 border-violet-400/20" },
-              { icon: Sparkles, color: "text-amber-400/70 bg-amber-400/10 border-amber-400/20" },
-              { icon: ClipboardList, color: "text-rose-400/70 bg-rose-400/10 border-rose-400/20" },
-              { icon: TrendingUp, color: "text-cyan-400/70 bg-cyan-400/10 border-cyan-400/20" },
-              { icon: BarChart3, color: "text-emerald-400/70 bg-emerald-400/10 border-emerald-400/20" },
-            ]}
-          />
-
           {/* ── MÓDULOS PRINCIPAIS ── */}
           <section id="modulos" className="relative mx-auto w-full max-w-[1500px] px-4 py-10 lg:px-10 lg:py-14">
 
@@ -828,15 +809,6 @@ export default function Home() {
                 ))}
             </div>
           </section>
-
-          {/* ── SCROLL TRANSITION: Módulos → Ferramentas ── */}
-          <ScrollTextSection
-            text="Ferramentas & Recursos"
-            subtitle="Recursos complementares para potencializar seu dia a dia no ecossistema SGT."
-            color="text-cyan-400"
-            subtitleColor="text-slate-400"
-            height="130vh"
-          />
 
           {/* ── FERRAMENTAS COMPLEMENTARES ── */}
           <section id="ferramentas" className="relative mx-auto w-full max-w-[1500px] px-4 pb-16 pt-4 lg:px-10">
@@ -913,6 +885,5 @@ export default function Home() {
         </>
       </section>
     </div>
-    </ReactLenis>
   );
 }
