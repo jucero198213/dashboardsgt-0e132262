@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { criarNotificacao } from "./notificacoesApi";
+import { criarMensagemSistema } from "./ticketMensagensApi";
 
 export type TicketPrioridade = "baixa" | "media" | "alta" | "urgente";
 export type TicketStatus = "aberto" | "em_andamento" | "pendente" | "concluido" | "cancelado";
@@ -15,6 +16,7 @@ export interface Ticket {
   prioridade: TicketPrioridade;
   status: TicketStatus;
   observacoes: string | null;
+  categoria_id: string | null;
   created_by: string | null;
   aberto_por: string | null;
   created_at: string;
@@ -108,6 +110,12 @@ export async function fetchMyTickets(): Promise<Ticket[]> {
 }
 
 export async function updateTicket(id: string, payload: Partial<TicketInput>): Promise<Ticket> {
+  let statusAnterior: TicketStatus | null = null;
+  if (payload.status) {
+    const { data: atual } = await supabase.from("tickets").select("status").eq("id", id).maybeSingle();
+    statusAnterior = ((atual as { status: TicketStatus } | null)?.status) ?? null;
+  }
+
   const { data, error } = await supabase
     .from("tickets")
     .update(payload)
@@ -116,6 +124,13 @@ export async function updateTicket(id: string, payload: Partial<TicketInput>): P
     .single();
   if (error) throw error;
   const ticket = data as Ticket;
+
+  if (payload.status && statusAnterior && statusAnterior !== ticket.status) {
+    criarMensagemSistema(
+      ticket.id,
+      `Status alterado de ${STATUS_LABEL[statusAnterior]} para ${STATUS_LABEL[ticket.status]}`,
+    ).catch((err) => console.error("Log de status falhou:", err));
+  }
 
   if (payload.status && ticket.aberto_por) {
     criarNotificacao(
