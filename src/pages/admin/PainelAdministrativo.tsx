@@ -459,7 +459,7 @@ export default function PainelAdministrativo() {
                           className="flex items-start gap-3 px-5 py-3 w-full text-left hover:bg-[var(--sgt-row-hover)] transition-colors"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.04] shrink-0">
-                            <Ticket className="h-3.5 w-3.5 text-amber-400" />
+                            <TicketIcon className="h-3.5 w-3.5 text-amber-400" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[12px] font-semibold sgt-text truncate">{t.titulo}</p>
