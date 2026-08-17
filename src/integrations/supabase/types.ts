@@ -437,6 +437,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_describe_table: {
+        Args: { _caller: string; _table: string }
+        Returns: {
+          column_default: string
+          column_name: string
+          data_type: string
+          is_foreign_key: boolean
+          is_nullable: string
+          is_primary_key: boolean
+          max_length: number
+        }[]
+      }
+      admin_list_tables: {
+        Args: { _caller: string }
+        Returns: {
+          column_count: number
+          row_count: number
+          table_name: string
+        }[]
+      }
+      admin_read_table: {
+        Args: {
+          _caller: string
+          _page?: number
+          _per_page?: number
+          _table: string
+        }
+        Returns: Json
+      }
       has_page_access: {
         Args: {
           _page: Database["public"]["Enums"]["app_page"]
