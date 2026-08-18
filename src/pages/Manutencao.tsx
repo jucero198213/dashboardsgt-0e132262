@@ -5,7 +5,7 @@ import {
   Calendar, ChevronUp, ChevronDown, BarChart3, CheckCircle2, CheckCircle,
   AlertCircle, Activity, DollarSign, Hash, X, ChevronLeft,
   ChevronRight, Package, Users, FileText, Zap, ShieldAlert,
-  Clock, Filter, Layers, LayoutGrid, Table2
+  Clock, Filter, Layers, LayoutGrid, Table2, Sparkles
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -34,6 +34,7 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
 import {
@@ -149,10 +150,11 @@ export default function Manutencao() {
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
   // View do detalhamento de ordens — padrão Bancos (Cards / Tabela / Analytics)
-  const [osView, setOsView] = useState<"cards" | "tabela" | "analytics">("cards");
+  const [osView, setOsView] = useState<"cards" | "tabela" | "analytics">("tabela");
 
   // Modal validação
   const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
+  const [sofiaOpen, setSofiaOpen] = useState(false);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -622,6 +624,19 @@ export default function Manutencao() {
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={manutCooldown} />
               </div>
 
+              <button
+                onClick={() => setSofiaOpen(true)}
+                aria-label="Abrir Sofia IA"
+                className="flex items-center gap-1.5 rounded-lg border px-2.5 h-8 text-[11px] font-semibold transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 shrink-0"
+                style={{ borderColor: "rgba(123,110,245,0.25)", background: "rgba(123,110,245,0.08)", color: "#A99EF8" }}
+              >
+                <span className="relative flex h-1.5 w-1.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-violet-500" />
+                </span>
+                Sofia IA
+              </button>
+
               <HomeButton />
             </div>
 
@@ -770,33 +785,6 @@ export default function Manutencao() {
                 <KpiCard label="Custo Médio / OS" value={loading ? "—" : fmtK(kpis.custoMedioOS)} subtitle={`base: ${fmtNum(kpis.totalOS)} ordens`} icon={BarChart3} tone="rose" loading={loading} />
               </AnimatedCard>
             </div>
-            <InsightsSection
-              setor="manutencao"
-              dados={{
-                totalOrdens: kpis.totalOS,
-                ordensAbertas: kpis.abertas,
-                custoTotal: Math.round(kpis.totalCusto),
-                custoMedioOrdem: Math.round(kpis.custoMedioOS),
-                custoTotalPecas: Math.round(kpis.totalPecas),
-                custoTotalMaoDeObra: Math.round(kpis.totalMO),
-                ordensExternas: kpis.externas,
-                ordensInternas: kpis.internas,
-                rankingVeiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: String(v.veiculo), custo: Math.round(v.custo) })),
-                rankingFornecedores: rankingFornecedor.slice(0, 5).map(f => ({ fornecedor: f.fornecedorFull, custo: Math.round(f.custo) })),
-                distClassificacao: distClassif.map(d => ({ classificacao: d.nome, custo: Math.round(d.custo) })),
-                outliersCusto: validacoes.outliersCusto.length,
-                ordensTravadas30d: validacoes.ordensTravadas.length,
-                semFornecedor: validacoes.semFornecedor.length,
-                concentracaoTopVeiculo: parseFloat((validacoes.concentracaoVeiculo * 100).toFixed(1)),
-                topVeiculoNome: validacoes.topVeiculoNome ?? null,
-                ratioCorretivaPercent: parseFloat((validacoes.ratioCorretiva * 100).toFixed(1)),
-                ordensCorretivasQtd: validacoes.corretivas,
-                semMaoDeObra: validacoes.semMO.length,
-                mediaCustoOrdem: Math.round(validacoes.mediaCusto),
-              }}
-              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-              autoGenerate={true}
-        />
             {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
             <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               
@@ -916,51 +904,72 @@ export default function Manutencao() {
 
             </div>
 
-            {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
-            <AnimatedCard delay={280}>
-              <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">Validações Analíticas</span>
+            {/* ════════ MID GRID: Gráfico + Validações ════════ */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_296px] gap-2">
+
+              {/* Gráfico custo mensal */}
+              <AnimatedCard delay={280}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[280px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div>
+                      <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block">Custo mensal · {custoPorMes.length} meses</span>
+                      <span className="text-[22px] font-black tracking-[-0.04em] leading-none" style={{ color: "var(--sgt-text-primary)" }}>{fmtK(kpis.totalCusto)}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: "#A99EF8" }}>
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#7B6EF5" }} />Peças
+                      </span>
+                      <span className="flex items-center gap-1 text-[9px]" style={{ color: "#9BB0F8" }}>
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#8BA4F5" }} />M.O
+                      </span>
+                    </div>
+                  </div>
+                  {custoPorMes.length === 0 ? (
+                    <div className="flex-1 flex items-center justify-center text-[11px] text-slate-600">
+                      {loading ? "Carregando…" : "Sem dados no período"}
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={custoPorMes} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="gradV2" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%"  stopColor="#7B6EF5" stopOpacity={0.22} />
+                            <stop offset="95%" stopColor="#7B6EF5" stopOpacity={0.01} />
+                          </linearGradient>
+                          <linearGradient id="gradI2" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%"  stopColor="#8BA4F5" stopOpacity={0.18} />
+                            <stop offset="95%" stopColor="#8BA4F5" stopOpacity={0.01} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="2 6" stroke="rgba(108,99,255,0.07)" />
+                        <XAxis dataKey="mes" tick={{ fill: "#3A4168", fontSize: 9 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: "#3A4168", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => fmtK(v)} width={52} />
+                        <ReTooltip content={<DarkTooltip formatter={(v: number, n: string) => `${n === "pecas" ? "Peças" : "MO"}: ${fmtBRL(v)}`} />} />
+                        <Area type="monotone" dataKey="pecas" name="Peças" stroke="#7B6EF5" strokeWidth={2} fill="url(#gradV2)" dot={false} />
+                        <Area type="monotone" dataKey="mo"    name="MO"    stroke="#8BA4F5" strokeWidth={1.5} fill="url(#gradI2)" dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                    {validCards.map(({ key, icon: Icon, label, desc, count, tone, severity }) => {
-                      const t = TONE_COLORS[tone];
+              </AnimatedCard>
+
+              {/* Painel de validações — borda lateral compacto */}
+              <AnimatedCard delay={300}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 flex flex-col h-[280px]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="mb-2.5">
+                    <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-0.5">Validações analíticas</span>
+                    <span className="text-[13px] font-bold tracking-[-0.02em]" style={{ color: "var(--sgt-text-primary)" }}>Alertas do período</span>
+                  </div>
+                  <div className="flex-1 border rounded-[10px] overflow-hidden flex flex-col divide-y" style={{ borderColor: RAW.borderDefault, divideColor: RAW.borderDefault }}>
+                    {validCards.map(({ key, label, desc, count, tone, severity }) => {
+                      const borderAccent = ({ rose: "#C5303C", amber: "#C87C10", violet: "#7B6EF5", cyan: "#7B6EF5", emerald: "#0C9067" } as Record<string, string>)[tone];
+                      const countColor = ({ rose: "text-rose-400", amber: "text-amber-400", violet: "text-violet-400", cyan: "text-violet-400", emerald: "text-emerald-400" } as Record<string, string>)[tone];
+                      const dv = loading ? "—"
+                        : tone === "cyan" ? (validacoes.concentracaoVeiculo > 0.3 ? `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}%` : "✓")
+                        : tone === "emerald" ? (validacoes.ratioCorretiva > 0 ? `${(validacoes.ratioCorretiva * 100).toFixed(0)}%` : "—")
+                        : count === 0 ? "✓"
+                        : fmtNum(count);
                       const hasModal = !!key && count > 0;
-
-                      const cardInner = (
-                        <div
-                          className={`group relative text-left rounded-[14px] border p-2.5 transition-all duration-200 h-full ${
-                            hasModal ? "hover:border-white/[0.14] hover:scale-[1.02]" : ""
-                          } ${severity ? t.border : "border-white/[0.06]"}`}
-                          style={{ background: "var(--sgt-bg-card)" }}
-                        >
-                          <div className="flex items-start justify-between gap-1.5 mb-1.5">
-                            <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
-                              <Icon className={`w-3 h-3 ${t.icon}`} aria-hidden="true" />
-                            </div>
-                            <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
-                              {loading ? "—" : fmtNum(count)}
-                            </span>
-                          </div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 leading-tight mb-0.5">{label}</p>
-                          <p className={`text-[9px] leading-tight ${severity ? t.sub : "text-slate-600"}`}>{desc}</p>
-                          {hasModal && (
-                            <span className={`mt-1.5 inline-flex text-[8px] font-semibold uppercase tracking-[0.2em] ${t.icon} opacity-60 group-hover:opacity-100`}>
-                              Ver detalhes →
-                            </span>
-                          )}
-                          {severity && (
-                            <span className="absolute top-2 right-2 flex h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.glow }}>
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: t.glow }} />
-                            </span>
-                          )}
-                        </div>
-                      );
-
-                      if (!hasModal) {
-                        return <div key={label}>{cardInner}</div>;
-                      }
 
                       const validTitles: Record<string, { title: string; subtitle: string }> = {
                         outliersCusto:      { title: "OS com Custo Elevado (Outliers)", subtitle: `Limite: ${fmtK(validacoes.limiteOutlier)} (média ${fmtK(validacoes.mediaCusto)} + 2σ)` },
@@ -969,13 +978,36 @@ export default function Manutencao() {
                         concentracoesAltas: { title: `Concentração de Custo — Veículo ${validacoes.topVeiculoNome}`, subtitle: `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% do custo total concentrado neste veículo` },
                         semMO:              { title: "OS com Peças mas sem Mão de Obra", subtitle: "Possível sub-lançamento — revisar custo de mão de obra" },
                       };
+
+                      const rowContent = (
+                        <div
+                          className={cn(
+                            "flex items-center gap-2.5 px-2.5 py-2 transition-colors",
+                            hasModal ? "cursor-pointer hover:bg-white/[0.02]" : "cursor-default"
+                          )}
+                          style={{ borderLeft: `2.5px solid ${severity ? borderAccent : "rgba(255,255,255,0.07)"}` }}
+                          onClick={hasModal ? () => setValidacaoAberta(validacaoAberta === key ? null : key) : undefined}
+                        >
+                          <span className={cn("text-[16px] font-black leading-none min-w-[28px] text-right tabular-nums", severity ? countColor : "text-slate-600")}>
+                            {dv}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[10px] font-semibold leading-tight truncate" style={{ color: "var(--sgt-text-primary)" }}>{label}</div>
+                            <div className="text-[8.5px] text-slate-500 mt-0.5 leading-tight truncate">{desc}</div>
+                          </div>
+                          {hasModal && <ChevronRight className="w-3 h-3 text-slate-600 shrink-0" aria-hidden="true" />}
+                        </div>
+                      );
+
+                      if (!hasModal) return <div key={label} className="border-b last:border-b-0" style={{ borderColor: RAW.borderDefault }}>{rowContent}</div>;
+
                       const meta = validTitles[key!] ?? { title: label, subtitle: desc };
                       const lista = validacaoAberta === key ? validacaoLista : [];
 
                       return (
                         <ExpandableCard
                           key={label}
-                          layoutId={`valid-${key}`}
+                          layoutId={`valid-r-${key}`}
                           expanded={validacaoAberta === key}
                           onToggle={() => setValidacaoAberta(validacaoAberta === key ? null : key)}
                           expandedContent={
@@ -998,17 +1030,11 @@ export default function Manutencao() {
                                     {lista.map(o => {
                                       const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
                                       return (
-                                        <div
-                                          key={o.ordem}
-                                          className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]"
-                                          style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
-                                        >
+                                        <div key={o.ordem} className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                                           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
                                               <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
-                                                <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
-                                                {sit.label}
-                                              </Badge>
+                                              <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>{sit.label}</Badge>
                                             </div>
                                             <span className="text-[10px] text-slate-400 truncate">
                                               Veículo: <span className="text-slate-300">{o.veiculo}</span>
@@ -1029,95 +1055,12 @@ export default function Manutencao() {
                             </div>
                           }
                         >
-                          {cardInner}
+                          <div className="border-b last:border-b-0" style={{ borderColor: RAW.borderDefault }}>{rowContent}</div>
                         </ExpandableCard>
                       );
                     })}
                   </div>
-              </div>
-            </AnimatedCard>
-
-            {/* ════════ CUSTO MENSAL ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-
-              {/* Gráfico custo mensal — 2 colunas */}
-              <AnimatedCard delay={340} className="lg:col-span-2">
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo Mensal de Manutenção</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[9px] text-violet-400"><span className="w-2 h-2 rounded-full inline-block" style={{ background: RAW.accent.violet }} />Peças</span>
-                      <span className="flex items-center gap-1 text-[9px] text-cyan-400"><span className="w-2 h-2 rounded-full inline-block" style={{ background: RAW.accent.cyan }} />MO</span>
-                    </div>
-                  </div>
-                  {custoPorMes.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center text-[11px] text-slate-600">
-                      {loading ? "Carregando…" : "Sem dados no período"}
-                    </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={custoPorMes} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="gradViolet" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%"  stopColor={RAW.accent.violet} stopOpacity={0.25} />
-                            <stop offset="95%" stopColor={RAW.accent.violet} stopOpacity={0.02} />
-                          </linearGradient>
-                          <linearGradient id="gradCyan" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%"  stopColor={RAW.accent.cyan} stopOpacity={0.20} />
-                            <stop offset="95%" stopColor={RAW.accent.cyan} stopOpacity={0.02} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" />
-                        <XAxis dataKey="mes" tick={{ fill: "#475569", fontSize: 9 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fill: "#475569", fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => fmtK(v)} width={52} />
-                        <ReTooltip content={<DarkTooltip formatter={(v: number, n: string) => `${n === "pecas" ? "Peças" : "MO"}: ${fmtBRL(v)}`} />} />
-                        <Area type="monotone" dataKey="pecas" name="Peças" stroke={RAW.accent.violet} strokeWidth={2} fill="url(#gradViolet)" dot={false} />
-                        <Area type="monotone" dataKey="mo"    name="MO"    stroke={RAW.accent.cyan}   strokeWidth={2} fill="url(#gradCyan)"   dot={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
-              </AnimatedCard>
-
-              {/* Distribuição por classificação */}
-              <AnimatedCard delay={360}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Layers className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Classificação</span>
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    {distClassif.length === 0 ? (
-                      <div className="flex h-full items-center justify-center text-[11px] text-slate-600">
-                        {loading ? "Carregando…" : "Sem dados"}
-                      </div>
-                    ) : (
-                      <ScrollArea className="h-full">
-                      <div className="space-y-1.5 pr-2">
-                        {distClassif.map((c, i) => {
-                          const pct = kpis.totalCusto > 0 ? (c.custo / kpis.totalCusto) * 100 : 0;
-                          return (
-                            <div key={c.nome}>
-                              <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[10px] text-slate-400 truncate max-w-[130px]">{c.nome}</span>
-                                <span className="text-[10px] font-semibold text-slate-300 shrink-0">{fmtK(c.custo)}</span>
-                              </div>
-                              <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                <div
-                                  className="h-full rounded-full transition-all duration-500"
-                                  style={{ width: `${pct}%`, background: c.fill }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      </ScrollArea>
-                    )}
-                  </div>
+                  <p className="mt-2 text-[8px] text-slate-600">Clique em um alerta para ver as OS relacionadas</p>
                 </div>
               </AnimatedCard>
             </div>
@@ -1125,12 +1068,12 @@ export default function Manutencao() {
             {/* ════════ RANKINGS ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
-              {/* Ranking Peças por Veículo */}
+              {/* Ranking por Veículo */}
               <AnimatedCard delay={400}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Package className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Veículo</span>
+                    <Package className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Veículo</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingVeiculo.length === 0 ? (
@@ -1142,9 +1085,13 @@ export default function Manutencao() {
                       {rankingVeiculo.map((r, i) => {
                         const max = rankingVeiculo[0].custo;
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
+                        const barColor = i === 0
+                          ? "linear-gradient(90deg,#5B50D0,#7B6EF5)"
+                          : `rgba(123,110,245,${Math.max(0.18, 0.78 - i * 0.1)})`;
+                        const textColor = i === 0 ? "#A99EF8" : "#6E78A0";
                         return (
                           <div key={r.veiculo} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right" aria-hidden="true">{i + 1}</span>
+                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <Tooltip>
@@ -1153,10 +1100,10 @@ export default function Manutencao() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="text-[11px]">{r.veiculo}</TooltipContent>
                                 </Tooltip>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
+                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
                               </div>
                             </div>
                           </div>
@@ -1167,12 +1114,12 @@ export default function Manutencao() {
                 </div>
               </AnimatedCard>
 
-              {/* Ranking Peças por Fornecedor */}
+              {/* Ranking por Fornecedor + Classificação */}
               <AnimatedCard delay={440}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Fornecedor</span>
+                    <Users className="w-3.5 h-3.5 text-indigo-400" aria-hidden="true" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Fornecedor</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingFornecedor.length === 0 ? (
@@ -1184,9 +1131,13 @@ export default function Manutencao() {
                       {rankingFornecedor.map((r, i) => {
                         const max = rankingFornecedor[0].custo;
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
+                        const barColor = i === 0
+                          ? "linear-gradient(90deg,#6270C8,#8BA4F5)"
+                          : `rgba(139,164,245,${Math.max(0.18, 0.78 - i * 0.1)})`;
+                        const textColor = i === 0 ? "#9BB0F8" : "#6E78A0";
                         return (
                           <div key={r.fornecedorFull} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right" aria-hidden="true">{i + 1}</span>
+                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <Tooltip>
@@ -1195,15 +1146,36 @@ export default function Manutencao() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="text-[11px]">{r.fornecedorFull}</TooltipContent>
                                 </Tooltip>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
+                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
                               </div>
                             </div>
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* Classificação por custo — integrada */}
+                  {distClassif.length > 0 && (
+                    <div className="mt-3 pt-3 border-t" style={{ borderColor: RAW.borderDefault }}>
+                      <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-2">Por classificação</span>
+                      <div className="space-y-1.5">
+                        {distClassif.map((c) => {
+                          const pct = kpis.totalCusto > 0 ? (c.custo / kpis.totalCusto) * 100 : 0;
+                          return (
+                            <div key={c.nome} className="flex items-center gap-2">
+                              <span className="text-[9px] text-slate-400 w-[88px] shrink-0 truncate">{c.nome}</span>
+                              <div className="flex-1 h-[3.5px] rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: c.fill }} />
+                              </div>
+                              <span className="text-[9px] text-slate-500 w-7 text-right tabular-nums">{pct.toFixed(0)}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1588,7 +1560,53 @@ export default function Manutencao() {
         </section>
       </div>
 
-      {/* ════════ MODAL VALIDAÇÃO ════════ */}
+      {/* ════════ SHEET: SOFIA IA ════════ */}
+      <Sheet open={sofiaOpen} onOpenChange={setSofiaOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-[520px] overflow-auto p-0 border-l"
+          style={{ background: "var(--sgt-bg-section)", borderColor: "rgba(123,110,245,0.2)" }}
+        >
+          <SheetTitle className="sr-only">Sofia IA — Insights de Manutenção</SheetTitle>
+          <div className="flex items-center gap-2.5 px-4 pt-4 pb-3 border-b" style={{ borderColor: "rgba(123,110,245,0.12)" }}>
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
+            </span>
+            <span className="text-[13px] font-bold" style={{ color: "#A99EF8" }}>Sofia IA</span>
+            <span className="text-[10px] text-slate-500">Análise inteligente de manutenção</span>
+          </div>
+          <div className="p-4">
+            <InsightsSection
+              setor="manutencao"
+              dados={{
+                totalOrdens: kpis.totalOS,
+                ordensAbertas: kpis.abertas,
+                custoTotal: Math.round(kpis.totalCusto),
+                custoMedioOrdem: Math.round(kpis.custoMedioOS),
+                custoTotalPecas: Math.round(kpis.totalPecas),
+                custoTotalMaoDeObra: Math.round(kpis.totalMO),
+                ordensExternas: kpis.externas,
+                ordensInternas: kpis.internas,
+                rankingVeiculos: rankingVeiculo.slice(0, 5).map(v => ({ veiculo: String(v.veiculo), custo: Math.round(v.custo) })),
+                rankingFornecedores: rankingFornecedor.slice(0, 5).map(f => ({ fornecedor: f.fornecedorFull, custo: Math.round(f.custo) })),
+                distClassificacao: distClassif.map(d => ({ classificacao: d.nome, custo: Math.round(d.custo) })),
+                outliersCusto: validacoes.outliersCusto.length,
+                ordensTravadas30d: validacoes.ordensTravadas.length,
+                semFornecedor: validacoes.semFornecedor.length,
+                concentracaoTopVeiculo: parseFloat((validacoes.concentracaoVeiculo * 100).toFixed(1)),
+                topVeiculoNome: validacoes.topVeiculoNome ?? null,
+                ratioCorretivaPercent: parseFloat((validacoes.ratioCorretiva * 100).toFixed(1)),
+                ordensCorretivasQtd: validacoes.corretivas,
+                semMaoDeObra: validacoes.semMO.length,
+                mediaCustoOrdem: Math.round(validacoes.mediaCusto),
+              }}
+              periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
+              autoGenerate={true}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
     </TooltipProvider>
   );
