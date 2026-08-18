@@ -1188,8 +1188,8 @@ export default function Manutencao() {
                 {/* Header tabela */}
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <FileText className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                  <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
-                  <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[13px] text-violet-300 rounded-full">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
+                  <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[11px] text-violet-300 rounded-full">
                     {fmtNum(ordensSearchadas.length)} OS
                   </Badge>
                   <div className="ml-auto flex items-center gap-2">
@@ -1211,7 +1211,7 @@ export default function Manutencao() {
                           <button key={t.id} onClick={() => setOsView(t.id)}
                             aria-label={t.label}
                             aria-pressed={active}
-                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-medium transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
                             <Icon className="h-3 w-3" aria-hidden="true" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
@@ -1243,7 +1243,7 @@ export default function Manutencao() {
                             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort(c.key); } }}
                             tabIndex={0}
                             aria-sort={sortCol === c.key ? (sortAsc ? "ascending" : "descending") : undefined}
-                            className={cn("px-3 py-2 cursor-pointer select-none text-[13px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 touch-manipulation", c.resp)}
+                            className={cn("px-3 py-2 cursor-pointer select-none text-[10.5px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 touch-manipulation", c.resp)}
                             style={{ textAlign: c.align as "left" | "right" | "center" }}
                           >
                             <span className="inline-flex items-center gap-0.5">
@@ -1280,39 +1280,39 @@ export default function Manutencao() {
                               className="hover:bg-white/[0.02] touch-manipulation"
                               style={{ borderColor: RAW.borderDefault }}
                             >
-                              <TableCell className="px-3 py-2.5">
-                                <span className="font-mono text-[13px] text-violet-300">{o.ordem}</span>
+                              <TableCell className="px-3 py-2">
+                                <span className="font-mono text-[11px] text-violet-300">{o.ordem}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5">
-                                <span className="text-[13px] font-medium text-slate-300">{o.veiculo}</span>
+                              <TableCell className="px-3 py-2">
+                                <span className="text-[11px] font-medium text-slate-300">{o.veiculo}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden sm:table-cell text-center">
-                                <span className="text-[13px] text-slate-400 tabular-nums">{fmtData(o.dataordem)}</span>
+                              <TableCell className="px-3 py-2 hidden sm:table-cell text-center">
+                                <span className="text-[11px] text-slate-400 tabular-nums">{fmtData(o.dataordem)}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden md:table-cell text-center">
-                                <span className={`text-[13px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
+                              <TableCell className="px-3 py-2 hidden md:table-cell text-center">
+                                <span className={`text-[10.5px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
                                   {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
                                 </span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 text-center">
-                                <Badge className={cn("border-0 ring-1 text-[13.5px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
+                              <TableCell className="px-3 py-2 text-center">
+                                <Badge className={cn("border-0 ring-1 text-[10px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                   {sit.label}
                                 </Badge>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden lg:table-cell">
-                                <span className="text-[13.5px] text-slate-400">{o.classificacao ?? "—"}</span>
+                              <TableCell className="px-3 py-2 hidden lg:table-cell">
+                                <span className="text-[11px] text-slate-400">{o.classificacao ?? "—"}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden xl:table-cell">
-                                <span className="text-[13.5px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
+                              <TableCell className="px-3 py-2 hidden xl:table-cell">
+                                <span className="text-[11px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden sm:table-cell text-right">
-                                <span className="text-[13px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
+                              <TableCell className="px-3 py-2 hidden sm:table-cell text-right">
+                                <span className="text-[11px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 hidden md:table-cell text-right">
-                                <span className="text-[13px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
+                              <TableCell className="px-3 py-2 hidden md:table-cell text-right">
+                                <span className="text-[11px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
                               </TableCell>
-                              <TableCell className="px-3 py-2.5 text-right">
-                                <span className="text-[13.5px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
+                              <TableCell className="px-3 py-2 text-right">
+                                <span className="text-[11.5px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
                               </TableCell>
                             </TableRow>
                           );
@@ -1348,38 +1348,38 @@ export default function Manutencao() {
                                 {/* Header: OS + situação */}
                                 <div className="flex items-start justify-between gap-2 mb-2.5">
                                   <div className="min-w-0">
-                                    <span className="font-mono text-[14px] font-bold text-violet-300">{o.ordem}</span>
-                                    <span className="block text-[13.5px] text-slate-400 truncate">{o.veiculo}</span>
+                                    <span className="font-mono text-[12px] font-bold text-violet-300">{o.ordem}</span>
+                                    <span className="block text-[11px] text-slate-400 truncate">{o.veiculo}</span>
                                   </div>
-                                  <Badge className={cn("shrink-0 border-0 ring-1 text-[13.5px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
+                                  <Badge className={cn("shrink-0 border-0 ring-1 text-[10px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                     {sit.label}
                                   </Badge>
                                 </div>
 
                                 {/* Tipo + data + classificação */}
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className={`text-[13px] font-semibold uppercase tracking-[0.12em] ${externo ? "text-cyan-400" : "text-violet-400"}`}>
+                                  <span className={`text-[10.5px] font-semibold uppercase tracking-[0.12em] ${externo ? "text-cyan-400" : "text-violet-400"}`}>
                                     {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
                                   </span>
-                                  <span className="text-[13.5px] text-slate-600">· {fmtData(o.dataordem)}</span>
+                                  <span className="text-[11px] text-slate-600">· {fmtData(o.dataordem)}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 mb-3">
-                                  <span className="text-[13.5px] text-slate-500 truncate" title={o.fornecedor ?? ""}>{o.fornecedor ?? o.classificacao ?? "—"}</span>
+                                  <span className="text-[11px] text-slate-500 truncate" title={o.fornecedor ?? ""}>{o.fornecedor ?? o.classificacao ?? "—"}</span>
                                 </div>
 
                                 {/* Custos */}
                                 <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
                                   <div>
-                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">Peças</p>
-                                    <p className="text-[13px] font-bold tabular-nums text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">Peças</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</p>
                                   </div>
                                   <div>
-                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">M.O.</p>
-                                    <p className="text-[13px] font-bold tabular-nums text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">M.O.</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
-                                    <p className="text-[13.5px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
+                                    <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
                                   </div>
                                 </div>
                               </div>
@@ -1395,7 +1395,7 @@ export default function Manutencao() {
                 {osView === "analytics" && (
                   <div className="p-3">
                     {osAnalytics.n === 0 ? (
-                      <div className="py-10 text-center text-[13.5px] text-slate-600">Sem dados para análise</div>
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
@@ -1404,7 +1404,7 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
+                              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.porSituacao.map(([sit, qtd], idx) => {
@@ -1413,12 +1413,12 @@ export default function Manutencao() {
                                 const share = osAnalytics.n > 0 ? (qtd / osAnalytics.n) * 100 : 0;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[13px] text-slate-400 w-[130px] truncate shrink-0" title={sit}>{sit}</span>
+                                    <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={sit}>{sit}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qtd / max) * 100}%`, background: cor }} />
                                     </div>
-                                    <span className="text-[13.5px] text-slate-600 w-9 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
-                                    <span className="text-[13px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                    <span className="text-[11px] text-slate-600 w-9 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
                                   </div>
                                 );
                               })}
@@ -1431,18 +1431,18 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Layers className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
-                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
+                              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.porClassificacao.map(([cls, qtd], idx) => {
                                 const max = osAnalytics.porClassificacao[0]?.[1] ?? 1;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[13px] text-slate-400 w-[140px] truncate shrink-0" title={cls}>{cls}</span>
+                                    <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={cls}>{cls}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[13px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
+                                    <span className="text-[11px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
                                   </div>
                                 );
                               })}
@@ -1455,20 +1455,20 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Package className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
+                              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.topFornecedores.length === 0 ? (
-                                <p className="text-[13px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
                               ) : osAnalytics.topFornecedores.map(([forn, val], idx) => {
                                 const max = osAnalytics.topFornecedores[0]?.[1] ?? 1;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[13px] text-slate-400 w-[120px] truncate shrink-0" title={forn}>{forn}</span>
+                                    <span className="text-[11px] text-slate-400 w-[120px] truncate shrink-0" title={forn}>{forn}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[13.5px] font-bold tabular-nums text-amber-200 w-[64px] text-right shrink-0">{fmtK(val)}</span>
+                                    <span className="text-[11.5px] font-bold tabular-nums text-amber-200 w-[64px] text-right shrink-0">{fmtK(val)}</span>
                                   </div>
                                 );
                               })}
@@ -1481,20 +1481,20 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <DollarSign className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
-                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
+                              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.topCusto.length === 0 ? (
-                                <p className="text-[13px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
                               ) : osAnalytics.topCusto.map((o) => {
                                 const max = osAnalytics.topCusto[0]?.totalCusto ?? 1;
                                 return (
                                   <div key={o.ordem} className="flex items-center gap-3">
-                                    <span className="text-[13px] font-mono text-slate-400 w-[90px] truncate shrink-0">{o.ordem}</span>
+                                    <span className="text-[11px] font-mono text-slate-400 w-[90px] truncate shrink-0">{o.ordem}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(o.totalCusto / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[13.5px] font-bold tabular-nums text-rose-200 w-[64px] text-right shrink-0">{fmtK(o.totalCusto)}</span>
+                                    <span className="text-[11.5px] font-bold tabular-nums text-rose-200 w-[64px] text-right shrink-0">{fmtK(o.totalCusto)}</span>
                                   </div>
                                 );
                               })}
@@ -1510,7 +1510,7 @@ export default function Manutencao() {
                 {/* Paginação */}
                 {osView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
-                    <span className="text-[13.5px] text-slate-500">
+                    <span className="text-[11px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
                     </span>
                     <div className="flex items-center gap-1">
@@ -1532,7 +1532,7 @@ export default function Manutencao() {
                           <button
                             key={p}
                             onClick={() => setPage(p)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-lg text-[13px] font-semibold transition-all ${
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${
                               page === p
                                 ? "border border-violet-400/40 bg-violet-500/[0.15] text-violet-300"
                                 : "border border-white/[0.06] text-slate-500 hover:border-violet-400/20 hover:text-violet-300"
