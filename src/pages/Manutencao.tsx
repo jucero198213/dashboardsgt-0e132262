@@ -93,9 +93,9 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-violet-400/30 bg-slate-950/95 px-3 py-2 shadow-xl backdrop-blur">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300 mb-1">{label}</p>
+      <p className="text-[13.5px] font-bold uppercase tracking-[0.2em] text-violet-300 mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
-        <p key={i} style={{ color: p.color ?? "#fff" }} className="text-[12px] font-semibold">
+        <p key={i} style={{ color: p.color ?? "#fff" }} className="text-[13.5px] font-semibold">
           {formatter ? formatter(p.value, p.name) : `${p.name}: ${p.value}`}
         </p>
       ))}
@@ -601,7 +601,7 @@ export default function Manutencao() {
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-violet-400/70">Workspace</span>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.25em] text-violet-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Manutenção de Frota</span>
                 </div>
               </div>
@@ -614,11 +614,11 @@ export default function Manutencao() {
                 <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
                 <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[130px] rounded-lg text-[13.5px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
-                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[140px] rounded-lg text-[13.5px]"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
                 </Select>
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={manutCooldown} />
@@ -627,7 +627,7 @@ export default function Manutencao() {
               <button
                 onClick={() => setSofiaOpen(true)}
                 aria-label="Abrir Sofia IA"
-                className="flex items-center gap-1.5 rounded-lg border px-2.5 h-8 text-[11px] font-semibold transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 shrink-0"
+                className="flex items-center gap-1.5 rounded-lg border px-2.5 h-8 text-[13px] font-semibold transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 shrink-0"
                 style={{ borderColor: "rgba(123,110,245,0.25)", background: "rgba(123,110,245,0.08)", color: "#A99EF8" }}
               >
                 <span className="relative flex h-1.5 w-1.5 shrink-0">
@@ -647,7 +647,7 @@ export default function Manutencao() {
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-violet-400/70">Workspace</span>
+                  <span className="text-[13px] font-semibold uppercase tracking-[0.22em] text-violet-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Manutenção</span>
                 </div>
               </div>
@@ -665,14 +665,14 @@ export default function Manutencao() {
 
             {/* Erro */}
             {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-[12px] text-rose-200">
+              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-[13.5px] text-rose-200">
                 <strong>Erro:</strong> {error}
               </div>
             )}
 
             {/* Loading phase */}
             {loading && loadingPhase && (
-              <div className="flex items-center gap-2 text-[11px] text-violet-300/80">
+              <div className="flex items-center gap-2 text-[13px] text-violet-300/80">
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-violet-400/10">
                   <div className="h-full bg-gradient-to-r from-violet-400 to-violet-200 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
@@ -687,12 +687,12 @@ export default function Manutencao() {
                 style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
               >
                 <Filter className="w-3.5 h-3.5 text-violet-400/60 shrink-0" aria-hidden="true" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
+                <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
                 <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
                 {/* Ano */}
                 <Select value={filtroAno} onValueChange={setFiltroAno}>
-                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30 focus:outline-none">
+                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-violet-500/30 focus:outline-none">
                     <SelectValue placeholder="Ano" />
                   </SelectTrigger>
                   <SelectContent>
@@ -702,7 +702,7 @@ export default function Manutencao() {
 
                 {/* Mês */}
                 <Select value={filtroMes} onValueChange={setFiltroMes}>
-                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-violet-500/30">
                     <SelectValue placeholder="Mês" />
                   </SelectTrigger>
                   <SelectContent>
@@ -715,7 +715,7 @@ export default function Manutencao() {
 
                 {/* Tipo de ordem */}
                 <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-violet-500/30">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -727,7 +727,7 @@ export default function Manutencao() {
 
                 {/* Situação */}
                 <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-violet-500/30">
                     <SelectValue placeholder="Situação" />
                   </SelectTrigger>
                   <SelectContent>
@@ -741,7 +741,7 @@ export default function Manutencao() {
 
                 {/* Classificação */}
                 <Select value={filtroClassif} onValueChange={setFiltroClassif}>
-                  <SelectTrigger className="h-7 min-w-[100px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                  <SelectTrigger className="h-7 min-w-[100px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[13px] text-slate-300 focus:border-violet-500/30">
                     <SelectValue placeholder="Classificação" />
                   </SelectTrigger>
                   <SelectContent>
@@ -755,13 +755,13 @@ export default function Manutencao() {
                 {(filtroAno !== "Todos" || filtroMes !== "Todos" || filtroTipo !== "Todos" || filtroSituacao !== "Todos" || filtroClassif !== "Todos") && (
                   <button
                     onClick={() => { setFiltroAno("Todos"); setFiltroMes("Todos"); setFiltroTipo("Todos"); setFiltroSituacao("Todos"); setFiltroClassif("Todos"); }}
-                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400/50"
+                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[13.5px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400/50"
                   >
                     <X className="w-2.5 h-2.5" aria-hidden="true" /> Limpar
                   </button>
                 )}
 
-                <div className="ml-auto text-[10px] text-slate-500">
+                <div className="ml-auto text-[13.5px] text-slate-500">
                   {fmtNum(ordens.length)} OS • {fmtNum(dadosFiltrados.length)} itens
                 </div>
               </div>
@@ -795,12 +795,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">CPK</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">CPK</p>
                         <p className="text-xl font-black text-white mt-0.5">R$ 2.45/km</p>
                       </div>
                       <DollarSign className="h-4 w-4 text-cyan-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       Custo de manutenção por km rodado. <span className="text-cyan-400 font-semibold">Monitorar por veículo</span> e identificar outliers.
                     </p>
                   </div>
@@ -814,12 +814,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Preventiva</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Preventiva</p>
                         <p className="text-xl font-black text-white mt-0.5">58%</p>
                       </div>
                       <CheckCircle className="h-4 w-4 text-emerald-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       Meta: <span className="text-emerald-400 font-semibold">&gt;70% preventiva</span>. Aumentar manutenções programadas reduz custos e paradas.
                     </p>
                   </div>
@@ -833,12 +833,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">MTBF</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">MTBF</p>
                         <p className="text-xl font-black text-white mt-0.5">45 dias</p>
                       </div>
                       <Clock className="h-4 w-4 text-amber-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       Tempo médio entre falhas <span className="text-amber-400 font-semibold">varia por modelo</span>. Identificar veículos problema.
                     </p>
                   </div>
@@ -852,12 +852,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renovar?</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renovar?</p>
                         <p className="text-lg font-black text-white mt-0.5">8 anos</p>
                       </div>
                       <AlertTriangle className="h-4 w-4 text-rose-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       <span className="text-rose-400 font-semibold">Renovar ou manter</span> veículos com X anos/km? Analisar curva de custo por idade.
                     </p>
                   </div>
@@ -871,12 +871,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
                         <p className="text-lg font-black text-white mt-0.5">Ampliar?</p>
                       </div>
                       <Users className="h-4 w-4 text-blue-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       Vale <span className="text-blue-400 font-semibold">ampliar oficina interna</span> vs continuar terceirizando? Calcular ROI.
                     </p>
                   </div>
@@ -890,12 +890,12 @@ export default function Manutencao() {
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
                         <p className="text-lg font-black text-white mt-0.5">IoT?</p>
                       </div>
                       <TrendingUp className="h-4 w-4 text-violet-400/60" />
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">
                       Investir em <span className="text-violet-400 font-semibold">telemetria preditiva</span> (sensores, IA) traz ROI considerando frota atual?
                     </p>
                   </div>
@@ -912,20 +912,20 @@ export default function Manutencao() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[280px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2.5">
                     <div>
-                      <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block">Custo mensal · {custoPorMes.length} meses</span>
-                      <span className="text-[22px] font-black tracking-[-0.04em] leading-none" style={{ color: "var(--sgt-text-primary)" }}>{fmtK(kpis.totalCusto)}</span>
+                      <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block">Custo mensal · {custoPorMes.length} meses</span>
+                      <span className="text-[26px] font-black tracking-[-0.04em] leading-none" style={{ color: "var(--sgt-text-primary)" }}>{fmtK(kpis.totalCusto)}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[9px]" style={{ color: "#A99EF8" }}>
+                      <span className="flex items-center gap-1 text-[13px]" style={{ color: "#A99EF8" }}>
                         <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#7B6EF5" }} />Peças
                       </span>
-                      <span className="flex items-center gap-1 text-[9px]" style={{ color: "#9BB0F8" }}>
+                      <span className="flex items-center gap-1 text-[13px]" style={{ color: "#9BB0F8" }}>
                         <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#8BA4F5" }} />M.O
                       </span>
                     </div>
                   </div>
                   {custoPorMes.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center text-[11px] text-slate-600">
+                    <div className="flex-1 flex items-center justify-center text-[13px] text-slate-600">
                       {loading ? "Carregando…" : "Sem dados no período"}
                     </div>
                   ) : (
@@ -957,7 +957,7 @@ export default function Manutencao() {
               <AnimatedCard delay={300}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3 flex flex-col h-[280px]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="mb-2.5">
-                    <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-0.5">Validações analíticas</span>
+                    <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-0.5">Validações analíticas</span>
                     <span className="text-[13px] font-bold tracking-[-0.02em]" style={{ color: "var(--sgt-text-primary)" }}>Alertas do período</span>
                   </div>
                   <div className="flex-1 border rounded-[10px] overflow-hidden flex flex-col divide-y" style={{ borderColor: RAW.borderDefault, divideColor: RAW.borderDefault }}>
@@ -988,12 +988,12 @@ export default function Manutencao() {
                           style={{ borderLeft: `2.5px solid ${severity ? borderAccent : "rgba(255,255,255,0.07)"}` }}
                           onClick={hasModal ? () => setValidacaoAberta(validacaoAberta === key ? null : key) : undefined}
                         >
-                          <span className={cn("text-[16px] font-black leading-none min-w-[28px] text-right tabular-nums", severity ? countColor : "text-slate-600")}>
+                          <span className={cn("text-[19px] font-black leading-none min-w-[28px] text-right tabular-nums", severity ? countColor : "text-slate-600")}>
                             {dv}
                           </span>
                           <div className="flex-1 min-w-0">
-                            <div className="text-[10px] font-semibold leading-tight truncate" style={{ color: "var(--sgt-text-primary)" }}>{label}</div>
-                            <div className="text-[8.5px] text-slate-500 mt-0.5 leading-tight truncate">{desc}</div>
+                            <div className="text-[13.5px] font-semibold leading-tight truncate" style={{ color: "var(--sgt-text-primary)" }}>{label}</div>
+                            <div className="text-[10.5px] text-slate-500 mt-0.5 leading-tight truncate">{desc}</div>
                           </div>
                           {hasModal && <ChevronRight className="w-3 h-3 text-slate-600 shrink-0" aria-hidden="true" />}
                         </div>
@@ -1015,15 +1015,15 @@ export default function Manutencao() {
                               <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-white/[0.07] shrink-0">
                                 <div>
                                   <h3 className="text-[13px] font-bold text-slate-100">{meta.title}</h3>
-                                  <p className="text-[10px] text-slate-500 mt-0.5">{meta.subtitle}</p>
+                                  <p className="text-[13.5px] text-slate-500 mt-0.5">{meta.subtitle}</p>
                                 </div>
-                                <span className="text-[11px] text-slate-500 font-medium shrink-0">{lista.length} encontrado(s)</span>
+                                <span className="text-[13px] text-slate-500 font-medium shrink-0">{lista.length} encontrado(s)</span>
                               </div>
                               <div className="flex-1 overflow-auto px-4 pb-4 pt-3">
                                 {lista.length === 0 ? (
                                   <div className="flex flex-col items-center justify-center py-10 gap-2">
                                     <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
-                                    <p className="text-[12px] text-slate-500">Nenhum registro encontrado para esta validação</p>
+                                    <p className="text-[13.5px] text-slate-500">Nenhum registro encontrado para esta validação</p>
                                   </div>
                                 ) : (
                                   <div className="space-y-2">
@@ -1033,10 +1033,10 @@ export default function Manutencao() {
                                         <div key={o.ordem} className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                                           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
-                                              <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
-                                              <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>{sit.label}</Badge>
+                                              <span className="font-mono text-[13px] text-violet-300 font-semibold">{o.ordem}</span>
+                                              <Badge className={cn("border-0 ring-1 text-[13.5px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>{sit.label}</Badge>
                                             </div>
-                                            <span className="text-[10px] text-slate-400 truncate">
+                                            <span className="text-[13.5px] text-slate-400 truncate">
                                               Veículo: <span className="text-slate-300">{o.veiculo}</span>
                                               {o.fornecedor && <> • Forn: <span className="text-slate-300">{o.fornecedor}</span></>}
                                               {o.classificacao && <> • Classif: <span className="text-slate-300">{o.classificacao}</span></>}
@@ -1044,7 +1044,7 @@ export default function Manutencao() {
                                           </div>
                                           <div className="text-right shrink-0">
                                             <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
-                                            <p className="text-[9px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
+                                            <p className="text-[13px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
                                           </div>
                                         </div>
                                       );
@@ -1060,7 +1060,7 @@ export default function Manutencao() {
                       );
                     })}
                   </div>
-                  <p className="mt-2 text-[8px] text-slate-600">Clique em um alerta para ver as OS relacionadas</p>
+                  <p className="mt-2 text-[13.5px] text-slate-600">Clique em um alerta para ver as OS relacionadas</p>
                 </div>
               </AnimatedCard>
             </div>
@@ -1073,11 +1073,11 @@ export default function Manutencao() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Package className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Veículo</span>
-                    <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Veículo</span>
+                    <span className="ml-auto text-[13.5px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingVeiculo.length === 0 ? (
-                    <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">
+                    <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">
                       {loading ? "Carregando…" : "Sem dados"}
                     </div>
                   ) : (
@@ -1091,16 +1091,16 @@ export default function Manutencao() {
                         const textColor = i === 0 ? "#A99EF8" : "#6E78A0";
                         return (
                           <div key={r.veiculo} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
+                            <span className="w-5 text-[13px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-[10px] font-medium text-slate-300 truncate">{r.veiculo}</span>
+                                    <span className="text-[13.5px] font-medium text-slate-300 truncate">{r.veiculo}</span>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="text-[11px]">{r.veiculo}</TooltipContent>
+                                  <TooltipContent side="top" className="text-[13px]">{r.veiculo}</TooltipContent>
                                 </Tooltip>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
+                                <span className="text-[13.5px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
@@ -1119,11 +1119,11 @@ export default function Manutencao() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-indigo-400" aria-hidden="true" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Fornecedor</span>
-                    <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Fornecedor</span>
+                    <span className="ml-auto text-[13.5px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingFornecedor.length === 0 ? (
-                    <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">
+                    <div className="flex h-16 items-center justify-center text-[13px] text-slate-600">
                       {loading ? "Carregando…" : "Sem dados"}
                     </div>
                   ) : (
@@ -1137,16 +1137,16 @@ export default function Manutencao() {
                         const textColor = i === 0 ? "#9BB0F8" : "#6E78A0";
                         return (
                           <div key={r.fornecedorFull} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
+                            <span className="w-5 text-[13px] font-bold text-slate-600 shrink-0 text-right tabular-nums" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-[10px] font-medium text-slate-300 truncate">{r.fornecedor}</span>
+                                    <span className="text-[13.5px] font-medium text-slate-300 truncate">{r.fornecedor}</span>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="text-[11px]">{r.fornecedorFull}</TooltipContent>
+                                  <TooltipContent side="top" className="text-[13px]">{r.fornecedorFull}</TooltipContent>
                                 </Tooltip>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
+                                <span className="text-[13.5px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: textColor }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: barColor }} />
@@ -1161,17 +1161,17 @@ export default function Manutencao() {
                   {/* Classificação por custo — integrada */}
                   {distClassif.length > 0 && (
                     <div className="mt-3 pt-3 border-t" style={{ borderColor: RAW.borderDefault }}>
-                      <span className="text-[8.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-2">Por classificação</span>
+                      <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-2">Por classificação</span>
                       <div className="space-y-1.5">
                         {distClassif.map((c) => {
                           const pct = kpis.totalCusto > 0 ? (c.custo / kpis.totalCusto) * 100 : 0;
                           return (
                             <div key={c.nome} className="flex items-center gap-2">
-                              <span className="text-[9px] text-slate-400 w-[88px] shrink-0 truncate">{c.nome}</span>
+                              <span className="text-[13px] text-slate-400 w-[88px] shrink-0 truncate">{c.nome}</span>
                               <div className="flex-1 h-[3.5px] rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: c.fill }} />
                               </div>
-                              <span className="text-[9px] text-slate-500 w-7 text-right tabular-nums">{pct.toFixed(0)}%</span>
+                              <span className="text-[13px] text-slate-500 w-7 text-right tabular-nums">{pct.toFixed(0)}%</span>
                             </div>
                           );
                         })}
@@ -1188,8 +1188,8 @@ export default function Manutencao() {
                 {/* Header tabela */}
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <FileText className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
-                  <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[9px] text-violet-300 rounded-full">
+                  <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
+                  <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[13px] text-violet-300 rounded-full">
                     {fmtNum(ordensSearchadas.length)} OS
                   </Badge>
                   <div className="ml-auto flex items-center gap-2">
@@ -1211,7 +1211,7 @@ export default function Manutencao() {
                           <button key={t.id} onClick={() => setOsView(t.id)}
                             aria-label={t.label}
                             aria-pressed={active}
-                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] font-medium transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
                             <Icon className="h-3 w-3" aria-hidden="true" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
@@ -1243,7 +1243,7 @@ export default function Manutencao() {
                             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort(c.key); } }}
                             tabIndex={0}
                             aria-sort={sortCol === c.key ? (sortAsc ? "ascending" : "descending") : undefined}
-                            className={cn("px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 touch-manipulation", c.resp)}
+                            className={cn("px-3 py-2 cursor-pointer select-none text-[13px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 touch-manipulation", c.resp)}
                             style={{ textAlign: c.align as "left" | "right" | "center" }}
                           >
                             <span className="inline-flex items-center gap-0.5">
@@ -1267,7 +1267,7 @@ export default function Manutencao() {
                         ))
                       ) : tabelaPagina.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={10} className="py-8 text-center text-[12px] text-slate-600">
+                          <TableCell colSpan={10} className="py-8 text-center text-[13.5px] text-slate-600">
                             Nenhuma ordem encontrada
                           </TableCell>
                         </TableRow>
@@ -1281,38 +1281,38 @@ export default function Manutencao() {
                               style={{ borderColor: RAW.borderDefault }}
                             >
                               <TableCell className="px-3 py-2.5">
-                                <span className="font-mono text-[11px] text-violet-300">{o.ordem}</span>
+                                <span className="font-mono text-[13px] text-violet-300">{o.ordem}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5">
-                                <span className="text-[11px] font-medium text-slate-300">{o.veiculo}</span>
+                                <span className="text-[13px] font-medium text-slate-300">{o.veiculo}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden sm:table-cell text-center">
-                                <span className="text-[11px] text-slate-400 tabular-nums">{fmtData(o.dataordem)}</span>
+                                <span className="text-[13px] text-slate-400 tabular-nums">{fmtData(o.dataordem)}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden md:table-cell text-center">
-                                <span className={`text-[9px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
+                                <span className={`text-[13px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
                                   {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
                                 </span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 text-center">
-                                <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
+                                <Badge className={cn("border-0 ring-1 text-[13.5px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                   {sit.label}
                                 </Badge>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden lg:table-cell">
-                                <span className="text-[10px] text-slate-400">{o.classificacao ?? "—"}</span>
+                                <span className="text-[13.5px] text-slate-400">{o.classificacao ?? "—"}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden xl:table-cell">
-                                <span className="text-[10px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
+                                <span className="text-[13.5px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden sm:table-cell text-right">
-                                <span className="text-[11px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
+                                <span className="text-[13px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 hidden md:table-cell text-right">
-                                <span className="text-[11px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
+                                <span className="text-[13px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
                               </TableCell>
                               <TableCell className="px-3 py-2.5 text-right">
-                                <span className="text-[12px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
+                                <span className="text-[13.5px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
                               </TableCell>
                             </TableRow>
                           );
@@ -1336,7 +1336,7 @@ export default function Manutencao() {
                         ))}
                       </div>
                     ) : tabelaPagina.length === 0 ? (
-                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhuma ordem encontrada</div>
+                      <div className="py-10 text-center text-[13.5px] text-slate-600">Nenhuma ordem encontrada</div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {tabelaPagina.map((o, i) => {
@@ -1349,37 +1349,37 @@ export default function Manutencao() {
                                 <div className="flex items-start justify-between gap-2 mb-2.5">
                                   <div className="min-w-0">
                                     <span className="font-mono text-[14px] font-bold text-violet-300">{o.ordem}</span>
-                                    <span className="block text-[10px] text-slate-400 truncate">{o.veiculo}</span>
+                                    <span className="block text-[13.5px] text-slate-400 truncate">{o.veiculo}</span>
                                   </div>
-                                  <Badge className={cn("shrink-0 border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
+                                  <Badge className={cn("shrink-0 border-0 ring-1 text-[13.5px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                     {sit.label}
                                   </Badge>
                                 </div>
 
                                 {/* Tipo + data + classificação */}
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${externo ? "text-cyan-400" : "text-violet-400"}`}>
+                                  <span className={`text-[13px] font-semibold uppercase tracking-[0.12em] ${externo ? "text-cyan-400" : "text-violet-400"}`}>
                                     {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
                                   </span>
-                                  <span className="text-[10px] text-slate-600">· {fmtData(o.dataordem)}</span>
+                                  <span className="text-[13.5px] text-slate-600">· {fmtData(o.dataordem)}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 mb-3">
-                                  <span className="text-[10px] text-slate-500 truncate" title={o.fornecedor ?? ""}>{o.fornecedor ?? o.classificacao ?? "—"}</span>
+                                  <span className="text-[13.5px] text-slate-500 truncate" title={o.fornecedor ?? ""}>{o.fornecedor ?? o.classificacao ?? "—"}</span>
                                 </div>
 
                                 {/* Custos */}
                                 <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
                                   <div>
-                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Peças</p>
-                                    <p className="text-[11px] font-bold tabular-nums text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</p>
+                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">Peças</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</p>
                                   </div>
                                   <div>
-                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">M.O.</p>
-                                    <p className="text-[11px] font-bold tabular-nums text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</p>
+                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">M.O.</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
-                                    <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
+                                    <p className="text-[13.5px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
+                                    <p className="text-[13.5px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
                                   </div>
                                 </div>
                               </div>
@@ -1395,7 +1395,7 @@ export default function Manutencao() {
                 {osView === "analytics" && (
                   <div className="p-3">
                     {osAnalytics.n === 0 ? (
-                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                      <div className="py-10 text-center text-[13.5px] text-slate-600">Sem dados para análise</div>
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
@@ -1404,7 +1404,7 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
+                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.porSituacao.map(([sit, qtd], idx) => {
@@ -1413,12 +1413,12 @@ export default function Manutencao() {
                                 const share = osAnalytics.n > 0 ? (qtd / osAnalytics.n) * 100 : 0;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={sit}>{sit}</span>
+                                    <span className="text-[13px] text-slate-400 w-[130px] truncate shrink-0" title={sit}>{sit}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qtd / max) * 100}%`, background: cor }} />
                                     </div>
-                                    <span className="text-[10px] text-slate-600 w-9 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
-                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                    <span className="text-[13.5px] text-slate-600 w-9 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
+                                    <span className="text-[13px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
                                   </div>
                                 );
                               })}
@@ -1431,18 +1431,18 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Layers className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
-                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
+                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.porClassificacao.map(([cls, qtd], idx) => {
                                 const max = osAnalytics.porClassificacao[0]?.[1] ?? 1;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={cls}>{cls}</span>
+                                    <span className="text-[13px] text-slate-400 w-[140px] truncate shrink-0" title={cls}>{cls}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[11px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
+                                    <span className="text-[13px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
                                   </div>
                                 );
                               })}
@@ -1455,20 +1455,20 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <Package className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
+                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.topFornecedores.length === 0 ? (
-                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                                <p className="text-[13px] text-slate-600 text-center py-2">Sem custos registrados</p>
                               ) : osAnalytics.topFornecedores.map(([forn, val], idx) => {
                                 const max = osAnalytics.topFornecedores[0]?.[1] ?? 1;
                                 return (
                                   <div key={idx} className="flex items-center gap-3">
-                                    <span className="text-[11px] text-slate-400 w-[120px] truncate shrink-0" title={forn}>{forn}</span>
+                                    <span className="text-[13px] text-slate-400 w-[120px] truncate shrink-0" title={forn}>{forn}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[10px] font-bold tabular-nums text-amber-200 w-[64px] text-right shrink-0">{fmtK(val)}</span>
+                                    <span className="text-[13.5px] font-bold tabular-nums text-amber-200 w-[64px] text-right shrink-0">{fmtK(val)}</span>
                                   </div>
                                 );
                               })}
@@ -1481,20 +1481,20 @@ export default function Manutencao() {
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
                               <DollarSign className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
-                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
+                              <span className="text-[13.5px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
                             </div>
                             <div className="p-4 space-y-2.5">
                               {osAnalytics.topCusto.length === 0 ? (
-                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                                <p className="text-[13px] text-slate-600 text-center py-2">Sem custos registrados</p>
                               ) : osAnalytics.topCusto.map((o) => {
                                 const max = osAnalytics.topCusto[0]?.totalCusto ?? 1;
                                 return (
                                   <div key={o.ordem} className="flex items-center gap-3">
-                                    <span className="text-[11px] font-mono text-slate-400 w-[90px] truncate shrink-0">{o.ordem}</span>
+                                    <span className="text-[13px] font-mono text-slate-400 w-[90px] truncate shrink-0">{o.ordem}</span>
                                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                       <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(o.totalCusto / max) * 100}%` }} />
                                     </div>
-                                    <span className="text-[10px] font-bold tabular-nums text-rose-200 w-[64px] text-right shrink-0">{fmtK(o.totalCusto)}</span>
+                                    <span className="text-[13.5px] font-bold tabular-nums text-rose-200 w-[64px] text-right shrink-0">{fmtK(o.totalCusto)}</span>
                                   </div>
                                 );
                               })}
@@ -1510,7 +1510,7 @@ export default function Manutencao() {
                 {/* Paginação */}
                 {osView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[13.5px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
                     </span>
                     <div className="flex items-center gap-1">
@@ -1532,7 +1532,7 @@ export default function Manutencao() {
                           <button
                             key={p}
                             onClick={() => setPage(p)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg text-[13px] font-semibold transition-all ${
                               page === p
                                 ? "border border-violet-400/40 bg-violet-500/[0.15] text-violet-300"
                                 : "border border-white/[0.06] text-slate-500 hover:border-violet-400/20 hover:text-violet-300"
@@ -1574,7 +1574,7 @@ export default function Manutencao() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500" />
             </span>
             <span className="text-[13px] font-bold" style={{ color: "#A99EF8" }}>Sofia IA</span>
-            <span className="text-[10px] text-slate-500">Análise inteligente de manutenção</span>
+            <span className="text-[13.5px] text-slate-500">Análise inteligente de manutenção</span>
           </div>
           <div className="p-4">
             <InsightsSection
