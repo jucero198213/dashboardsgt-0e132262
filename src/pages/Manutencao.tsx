@@ -15,6 +15,8 @@ import {
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
+import { ExpandableCard } from "@/components/shared/ExpandableCard";
+import { LayoutGroup } from "framer-motion";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -910,44 +912,119 @@ export default function Manutencao() {
                   <Activity className="w-3.5 h-3.5 text-violet-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">Validações Analíticas</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                  {validCards.map(({ key, icon: Icon, label, desc, count, tone, severity }) => {
-                    const t = TONE_COLORS[tone];
-                    const hasModal = !!key && count > 0;
-                    return (
-                      <button
-                        key={label}
-                        disabled={!hasModal}
-                        onClick={() => hasModal && setValidacaoAberta(key)}
-                        className={`group relative text-left rounded-[14px] border p-2.5 transition-all duration-200 ${
-                          hasModal ? "cursor-pointer hover:border-white/[0.14] hover:scale-[1.02]" : "cursor-default"
-                        } ${severity ? t.border : "border-white/[0.06]"}`}
-                        style={{ background: "var(--sgt-bg-card)" }}
-                      >
-                        <div className="flex items-start justify-between gap-1.5 mb-1.5">
-                          <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
-                            <Icon className={`w-3 h-3 ${t.icon}`} />
+                <LayoutGroup>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    {validCards.map(({ key, icon: Icon, label, desc, count, tone, severity }) => {
+                      const t = TONE_COLORS[tone];
+                      const hasModal = !!key && count > 0;
+
+                      const cardInner = (
+                        <div
+                          className={`group relative text-left rounded-[14px] border p-2.5 transition-all duration-200 h-full ${
+                            hasModal ? "hover:border-white/[0.14] hover:scale-[1.02]" : ""
+                          } ${severity ? t.border : "border-white/[0.06]"}`}
+                          style={{ background: "var(--sgt-bg-card)" }}
+                        >
+                          <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                            <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
+                              <Icon className={`w-3 h-3 ${t.icon}`} />
+                            </div>
+                            <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
+                              {loading ? "—" : fmtNum(count)}
+                            </span>
                           </div>
-                          <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
-                            {loading ? "—" : fmtNum(count)}
-                          </span>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 leading-tight mb-0.5">{label}</p>
+                          <p className={`text-[9px] leading-tight ${severity ? t.sub : "text-slate-600"}`}>{desc}</p>
+                          {hasModal && (
+                            <span className={`mt-1.5 inline-flex text-[8px] font-semibold uppercase tracking-[0.2em] ${t.icon} opacity-60 group-hover:opacity-100`}>
+                              Ver detalhes →
+                            </span>
+                          )}
+                          {severity && (
+                            <span className="absolute top-2 right-2 flex h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.glow }}>
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: t.glow }} />
+                            </span>
+                          )}
                         </div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 leading-tight mb-0.5">{label}</p>
-                        <p className={`text-[9px] leading-tight ${severity ? t.sub : "text-slate-600"}`}>{desc}</p>
-                        {hasModal && (
-                          <span className={`mt-1.5 inline-flex text-[8px] font-semibold uppercase tracking-[0.2em] ${t.icon} opacity-60 group-hover:opacity-100`}>
-                            Ver detalhes →
-                          </span>
-                        )}
-                        {severity && (
-                          <span className={`absolute top-2 right-2 flex h-1.5 w-1.5 rounded-full`} style={{ backgroundColor: t.glow }}>
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: t.glow }} />
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                      );
+
+                      if (!hasModal) {
+                        return <div key={label}>{cardInner}</div>;
+                      }
+
+                      const validTitles: Record<string, { title: string; subtitle: string }> = {
+                        outliersCusto:      { title: "OS com Custo Elevado (Outliers)", subtitle: `Limite: ${fmtK(validacoes.limiteOutlier)} (média ${fmtK(validacoes.mediaCusto)} + 2σ)` },
+                        ordensTravadas:     { title: "OS em Andamento há mais de 30 dias", subtitle: "Possível gargalo operacional — verificar encerramento" },
+                        semFornecedor:      { title: "OS Externas sem Fornecedor Cadastrado", subtitle: "Qualidade de dados — vincular fornecedor nos itens externos" },
+                        concentracoesAltas: { title: `Concentração de Custo — Veículo ${validacoes.topVeiculoNome}`, subtitle: `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% do custo total concentrado neste veículo` },
+                        semMO:              { title: "OS com Peças mas sem Mão de Obra", subtitle: "Possível sub-lançamento — revisar custo de mão de obra" },
+                      };
+                      const meta = validTitles[key!] ?? { title: label, subtitle: desc };
+                      const lista = validacaoAberta === key ? validacaoLista : [];
+
+                      return (
+                        <ExpandableCard
+                          key={label}
+                          layoutId={`valid-${key}`}
+                          expanded={validacaoAberta === key}
+                          onToggle={() => setValidacaoAberta(validacaoAberta === key ? null : key)}
+                          expandedContent={
+                            <div className="flex flex-col h-full">
+                              <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-white/[0.07] shrink-0">
+                                <div>
+                                  <h3 className="text-[13px] font-bold text-slate-100">{meta.title}</h3>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">{meta.subtitle}</p>
+                                </div>
+                                <span className="text-[11px] text-slate-500 font-medium shrink-0">{lista.length} encontrado(s)</span>
+                              </div>
+                              <div className="flex-1 overflow-auto px-4 pb-4 pt-3">
+                                {lista.length === 0 ? (
+                                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                                    <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
+                                    <p className="text-[12px] text-slate-500">Nenhum registro encontrado para esta validação</p>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {lista.map(o => {
+                                      const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
+                                      return (
+                                        <div
+                                          key={o.ordem}
+                                          className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]"
+                                          style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
+                                        >
+                                          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
+                                              <span className={`text-[8px] font-bold uppercase tracking-[0.15em] ring-1 rounded-full px-1.5 py-0.5 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                                {sit.label}
+                                              </span>
+                                            </div>
+                                            <span className="text-[10px] text-slate-400 truncate">
+                                              Veículo: <span className="text-slate-300">{o.veiculo}</span>
+                                              {o.fornecedor && <> • Forn: <span className="text-slate-300">{o.fornecedor}</span></>}
+                                              {o.classificacao && <> • Classif: <span className="text-slate-300">{o.classificacao}</span></>}
+                                            </span>
+                                          </div>
+                                          <div className="text-right shrink-0">
+                                            <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
+                                            <p className="text-[9px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          }
+                        >
+                          {cardInner}
+                        </ExpandableCard>
+                      );
+                    })}
+                  </div>
+                </LayoutGroup>
               </div>
             </AnimatedCard>
 
@@ -1486,89 +1563,6 @@ export default function Manutencao() {
       </div>
 
       {/* ════════ MODAL VALIDAÇÃO ════════ */}
-      {validacaoAberta && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(2,3,12,0.80)" }}
-          onClick={() => setValidacaoAberta(null)}
-        >
-          <div
-            className="relative max-w-3xl w-full max-h-[80vh] flex flex-col rounded-2xl border border-violet-400/20 shadow-2xl"
-            style={{ background: "var(--sgt-bg-section)" }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header modal */}
-            <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-white/[0.07]">
-              <div>
-                <h3 className="text-[13px] font-bold text-slate-100">
-                  {validacaoAberta === "outliersCusto"      && "OS com Custo Elevado (Outliers)"}
-                  {validacaoAberta === "ordensTravadas"     && "OS em Andamento há mais de 30 dias"}
-                  {validacaoAberta === "semFornecedor"      && "OS Externas sem Fornecedor Cadastrado"}
-                  {validacaoAberta === "concentracoesAltas" && `Concentração de Custo — Veículo ${validacoes.topVeiculoNome}`}
-                  {validacaoAberta === "semMO"              && "OS com Peças mas sem Mão de Obra"}
-                </h3>
-                <p className="text-[10px] text-slate-500 mt-0.5">
-                  {validacaoAberta === "outliersCusto"      && `Limite: ${fmtK(validacoes.limiteOutlier)} (média ${fmtK(validacoes.mediaCusto)} + 2σ)`}
-                  {validacaoAberta === "ordensTravadas"     && "Possível gargalo operacional — verificar encerramento"}
-                  {validacaoAberta === "semFornecedor"      && "Qualidade de dados — vincular fornecedor nos itens externos"}
-                  {validacaoAberta === "concentracoesAltas" && `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% do custo total concentrado neste veículo`}
-                  {validacaoAberta === "semMO"              && "Possível sub-lançamento — revisar custo de mão de obra"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-500 font-medium">{validacaoLista.length} encontrado(s)</span>
-                <button
-                  onClick={() => setValidacaoAberta(null)}
-                  className="rounded-lg border border-white/[0.08] p-1.5 text-slate-400 hover:border-rose-400/30 hover:text-rose-300 transition-all"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Body modal */}
-            <div className="flex-1 overflow-auto px-4 pb-4 pt-3">
-              {validacaoLista.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
-                  <p className="text-[12px] text-slate-500">Nenhum registro encontrado para esta validação</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {validacaoLista.map(o => {
-                    const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
-                    return (
-                      <div
-                        key={o.ordem}
-                        className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]"
-                        style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
-                      >
-                        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
-                            <span className={`text-[8px] font-bold uppercase tracking-[0.15em] ring-1 rounded-full px-1.5 py-0.5 ${sit.bg} ${sit.text} ${sit.ring}`}>
-                              {sit.label}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 truncate">
-                            Veículo: <span className="text-slate-300">{o.veiculo}</span>
-                            {o.fornecedor && <> • Forn: <span className="text-slate-300">{o.fornecedor}</span></>}
-                            {o.classificacao && <> • Classif: <span className="text-slate-300">{o.classificacao}</span></>}
-                          </span>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
-                          <p className="text-[9px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

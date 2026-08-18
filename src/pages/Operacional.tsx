@@ -24,7 +24,9 @@ import { fetchOperacional, type OperacionalRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { VeiculosMap } from "@/components/operacional/VeiculosMap";
-import { ViagensDialog } from "@/components/operacional/ViagensDialog";
+import { ViagensExpandedContent } from "@/components/operacional/ViagensExpandedContent";
+import { ExpandableCard } from "@/components/shared/ExpandableCard";
+import { LayoutGroup } from "framer-motion";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -306,7 +308,12 @@ export default function Operacional() {
     const comAtraso = filtrados.filter(v => v.temAtraso);
     const avgPerc = filtrados.length > 0
       ? filtrados.reduce((s, v) => s + v.percCompleto, 0) / filtrados.length : 0;
-    return { emAndamento: emAndamento.length, emRota: emRota.length, emManutencao: emManutencao.length, comAtraso: comAtraso.length, avgPerc };
+    return {
+      emAndamento: emAndamento.length, emRota: emRota.length,
+      emManutencao: emManutencao.length, comAtraso: comAtraso.length, avgPerc,
+      rowsAndamento: emAndamento, rowsRota: emRota,
+      rowsManutencao: emManutencao, rowsAtraso: comAtraso,
+    };
   }, [filtrados]);
 
   // ── Alertas ───────────────────────────────────────────────────────────────
@@ -650,23 +657,77 @@ export default function Operacional() {
 
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
-              <AnimatedCard delay={80}>
-                <KpiCard label="Viagens em Andamento" value={loading ? "—" : fmtNum(kpis.emAndamento)} subtitle="0% < PERC < 100% · clique p/ detalhes" icon={Navigation} tone="cyan" loading={loading} onClick={() => setKpiDialog("andamento")} />
-              </AnimatedCard>
-              <AnimatedCard delay={120}>
-                <KpiCard label="Veículos em Rota" value={loading ? "—" : fmtNum(kpis.emRota)} subtitle="Fora de manutenção · clique p/ detalhes" icon={Truck} tone="emerald" loading={loading} onClick={() => setKpiDialog("rota")} />
-              </AnimatedCard>
-              <AnimatedCard delay={160}>
-                <KpiCard label="Em Manutenção" value={loading ? "—" : fmtNum(kpis.emManutencao)} subtitle="EM_MANUTENCAO = S · clique p/ detalhes" icon={Wrench} tone="amber" loading={loading} onClick={() => setKpiDialog("manutencao")} />
-              </AnimatedCard>
-              <AnimatedCard delay={200}>
-                <KpiCard label="Com Atraso na Saída" value={loading ? "—" : fmtNum(kpis.comAtraso)} subtitle="SAIDA_REAL > ORIGINAL · clique p/ detalhes" icon={AlertCircle} tone="rose" loading={loading} onClick={() => setKpiDialog("atraso")} />
-              </AnimatedCard>
-              <AnimatedCard delay={240}>
-                <KpiCard label="Conclusão Média" value={loading ? "—" : fmtPct(kpis.avgPerc)} subtitle="AVG(PERC_COMPLETO)" icon={TrendingUp} tone="violet" loading={loading} />
-              </AnimatedCard>
-            </div>
+            <LayoutGroup>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
+                <AnimatedCard delay={80}>
+                  <ExpandableCard
+                    layoutId="kpi-andamento"
+                    expanded={kpiDialog === "andamento"}
+                    onToggle={() => setKpiDialog(kpiDialog === "andamento" ? null : "andamento")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Viagens em Andamento"
+                        subtitle="0% < % concluído < 100% e fora de manutenção"
+                        rows={kpis.rowsAndamento}
+                      />
+                    }
+                  >
+                    <KpiCard label="Viagens em Andamento" value={loading ? "—" : fmtNum(kpis.emAndamento)} subtitle="0% < PERC < 100% · clique p/ detalhes" icon={Navigation} tone="cyan" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={120}>
+                  <ExpandableCard
+                    layoutId="kpi-rota"
+                    expanded={kpiDialog === "rota"}
+                    onToggle={() => setKpiDialog(kpiDialog === "rota" ? null : "rota")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Veículos em Rota"
+                        subtitle="Fora de manutenção e não finalizadas"
+                        rows={kpis.rowsRota}
+                      />
+                    }
+                  >
+                    <KpiCard label="Veículos em Rota" value={loading ? "—" : fmtNum(kpis.emRota)} subtitle="Fora de manutenção · clique p/ detalhes" icon={Truck} tone="emerald" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={160}>
+                  <ExpandableCard
+                    layoutId="kpi-manutencao"
+                    expanded={kpiDialog === "manutencao"}
+                    onToggle={() => setKpiDialog(kpiDialog === "manutencao" ? null : "manutencao")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Veículos em Manutenção"
+                        subtitle="EM_MANUTENCAO = S"
+                        rows={kpis.rowsManutencao}
+                      />
+                    }
+                  >
+                    <KpiCard label="Em Manutenção" value={loading ? "—" : fmtNum(kpis.emManutencao)} subtitle="EM_MANUTENCAO = S · clique p/ detalhes" icon={Wrench} tone="amber" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={200}>
+                  <ExpandableCard
+                    layoutId="kpi-atraso"
+                    expanded={kpiDialog === "atraso"}
+                    onToggle={() => setKpiDialog(kpiDialog === "atraso" ? null : "atraso")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Saídas com Atraso"
+                        subtitle="SAIDA_REAL > SAIDA_ORIGINAL"
+                        rows={kpis.rowsAtraso}
+                      />
+                    }
+                  >
+                    <KpiCard label="Com Atraso na Saída" value={loading ? "—" : fmtNum(kpis.comAtraso)} subtitle="SAIDA_REAL > ORIGINAL · clique p/ detalhes" icon={AlertCircle} tone="rose" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={240}>
+                  <KpiCard label="Conclusão Média" value={loading ? "—" : fmtPct(kpis.avgPerc)} subtitle="AVG(PERC_COMPLETO)" icon={TrendingUp} tone="violet" loading={loading} />
+                </AnimatedCard>
+              </div>
+            </LayoutGroup>
 
 
 
@@ -1346,29 +1407,6 @@ export default function Operacional() {
         </section>
       </div>
 
-      {/* Dialog de detalhamento dos KPIs */}
-      <ViagensDialog
-        open={kpiDialog !== null}
-        onOpenChange={(o) => !o && setKpiDialog(null)}
-        title={
-          kpiDialog === "andamento" ? "Viagens em Andamento" :
-            kpiDialog === "rota" ? "Veículos em Rota" :
-              kpiDialog === "manutencao" ? "Veículos em Manutenção" :
-                kpiDialog === "atraso" ? "Saídas com Atraso" : ""
-        }
-        subtitle={
-          kpiDialog === "andamento" ? "0% < % concluído < 100% e fora de manutenção" :
-            kpiDialog === "rota" ? "Fora de manutenção e não finalizadas" :
-              kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
-                kpiDialog === "atraso" ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
-        }
-        rows={
-          kpiDialog === "andamento" ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
-            kpiDialog === "rota" ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
-              kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
-                kpiDialog === "atraso" ? filtrados.filter(v => v.temAtraso) : []
-        }
-      />
     </div>
   );
 }
