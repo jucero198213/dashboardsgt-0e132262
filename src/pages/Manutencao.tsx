@@ -16,7 +16,6 @@ import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { ExpandableCard } from "@/components/shared/ExpandableCard";
-import { LayoutGroup } from "framer-motion";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -912,7 +911,6 @@ export default function Manutencao() {
                   <Activity className="w-3.5 h-3.5 text-violet-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">Validações Analíticas</span>
                 </div>
-                <LayoutGroup>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                     {validCards.map(({ key, icon: Icon, label, desc, count, tone, severity }) => {
                       const t = TONE_COLORS[tone];
@@ -1024,7 +1022,6 @@ export default function Manutencao() {
                       );
                     })}
                   </div>
-                </LayoutGroup>
               </div>
             </AnimatedCard>
 

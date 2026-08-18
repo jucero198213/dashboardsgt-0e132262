@@ -26,7 +26,6 @@ import { InsightsSection } from "@/components/shared/InsightsSection";
 import { VeiculosMap } from "@/components/operacional/VeiculosMap";
 import { ViagensExpandedContent } from "@/components/operacional/ViagensExpandedContent";
 import { ExpandableCard } from "@/components/shared/ExpandableCard";
-import { LayoutGroup } from "framer-motion";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -657,7 +656,6 @@ export default function Operacional() {
 
 
 
-            <LayoutGroup>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
                 <AnimatedCard delay={80}>
                   <ExpandableCard
@@ -727,7 +725,6 @@ export default function Operacional() {
                   <KpiCard label="Conclusão Média" value={loading ? "—" : fmtPct(kpis.avgPerc)} subtitle="AVG(PERC_COMPLETO)" icon={TrendingUp} tone="violet" loading={loading} />
                 </AnimatedCard>
               </div>
-            </LayoutGroup>
 
 
 
