@@ -25,6 +25,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
@@ -909,7 +910,7 @@ export default function Manutencao() {
 
               {/* Gráfico custo mensal */}
               <AnimatedCard delay={280}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[280px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <Card className="rounded-xl p-3 h-[280px] flex flex-col">
                   <div className="flex items-center justify-between mb-2.5">
                     <div>
                       <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block">Custo mensal · {custoPorMes.length} meses</span>
@@ -950,12 +951,12 @@ export default function Manutencao() {
                       </AreaChart>
                     </ResponsiveContainer>
                   )}
-                </div>
+                </Card>
               </AnimatedCard>
 
               {/* Painel de validações — borda lateral compacto */}
               <AnimatedCard delay={300}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 flex flex-col h-[280px]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <Card className="rounded-xl p-3 flex flex-col h-[280px]">
                   <div className="mb-2.5">
                     <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-slate-500/80 block mb-0.5">Validações analíticas</span>
                     <span className="text-[13px] font-bold tracking-[-0.02em]" style={{ color: "var(--sgt-text-primary)" }}>Alertas do período</span>
@@ -1030,7 +1031,7 @@ export default function Manutencao() {
                                     {lista.map(o => {
                                       const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
                                       return (
-                                        <div key={o.ordem} className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                                        <Card key={o.ordem} className="rounded-xl flex items-center gap-3 px-3 py-2.5 transition-all hover:border-white/[0.12]">
                                           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
                                               <span className="font-mono text-[13px] text-violet-300 font-semibold">{o.ordem}</span>
@@ -1046,7 +1047,7 @@ export default function Manutencao() {
                                             <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
                                             <p className="text-[13px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
                                           </div>
-                                        </div>
+                                        </Card>
                                       );
                                     })}
                                   </div>
@@ -1061,7 +1062,7 @@ export default function Manutencao() {
                     })}
                   </div>
                   <p className="mt-2 text-[13.5px] text-slate-600">Clique em um alerta para ver as OS relacionadas</p>
-                </div>
+                </Card>
               </AnimatedCard>
             </div>
 
@@ -1070,7 +1071,7 @@ export default function Manutencao() {
 
               {/* Ranking por Veículo */}
               <AnimatedCard delay={400}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <Card className="rounded-xl p-3">
                   <div className="flex items-center gap-2 mb-3">
                     <Package className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                     <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Veículo</span>
@@ -1111,12 +1112,12 @@ export default function Manutencao() {
                       })}
                     </div>
                   )}
-                </div>
+                </Card>
               </AnimatedCard>
 
               {/* Ranking por Fornecedor + Classificação */}
               <AnimatedCard delay={440}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <Card className="rounded-xl p-3">
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-indigo-400" aria-hidden="true" />
                     <span className="text-[13px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Fornecedor</span>
@@ -1178,15 +1179,15 @@ export default function Manutencao() {
                       </div>
                     </div>
                   )}
-                </div>
+                </Card>
               </AnimatedCard>
             </div>
 
             {/* ════════ TABELA DE ORDENS ════════ */}
             <AnimatedCard delay={500}>
-              <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              <Card className="rounded-xl">
                 {/* Header tabela */}
-                <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
+                <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b border-border">
                   <FileText className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                   <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
                   <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[11px] text-violet-300 rounded-full">
@@ -1328,11 +1329,11 @@ export default function Manutencao() {
                     {loading ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {Array.from({ length: 8 }).map((_, i) => (
-                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                          <Card key={i} className="rounded-xl p-3.5 h-[150px]">
                             <Skeleton className="h-3 w-1/2 rounded-full mb-3" />
                             <Skeleton className="h-2 w-3/4 rounded-full mb-2" />
                             <Skeleton className="h-2 w-2/3 rounded-full" />
-                          </div>
+                          </Card>
                         ))}
                       </div>
                     ) : tabelaPagina.length === 0 ? (
@@ -1344,7 +1345,7 @@ export default function Manutencao() {
                           const externo = o.tiposervico === "SERVICOEXTERNO";
                           return (
                             <AnimatedCard key={o.ordem} delay={Math.min(i, 12) * 30}>
-                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-violet-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                              <Card className="group flex h-full flex-col rounded-xl p-3.5 transition-all duration-200 hover:border-violet-400/25">
                                 {/* Header: OS + situação */}
                                 <div className="flex items-start justify-between gap-2 mb-2.5">
                                   <div className="min-w-0">
@@ -1382,7 +1383,7 @@ export default function Manutencao() {
                                     <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
                                   </div>
                                 </div>
-                              </div>
+                              </Card>
                             </AnimatedCard>
                           );
                         })}
@@ -1401,8 +1402,8 @@ export default function Manutencao() {
 
                         {/* Distribuição por situação */}
                         <AnimatedCard>
-                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                          <Card className="rounded-xl h-full">
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b border-border">
                               <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
                             </div>
@@ -1423,13 +1424,13 @@ export default function Manutencao() {
                                 );
                               })}
                             </div>
-                          </div>
+                          </Card>
                         </AnimatedCard>
 
                         {/* Por classificação */}
                         <AnimatedCard delay={60}>
-                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                          <Card className="rounded-xl h-full">
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b border-border">
                               <Layers className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
                               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
                             </div>
@@ -1447,13 +1448,13 @@ export default function Manutencao() {
                                 );
                               })}
                             </div>
-                          </div>
+                          </Card>
                         </AnimatedCard>
 
                         {/* Top fornecedores por custo */}
                         <AnimatedCard delay={120}>
-                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                          <Card className="rounded-xl h-full">
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b border-border">
                               <Package className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
                             </div>
@@ -1473,13 +1474,13 @@ export default function Manutencao() {
                                 );
                               })}
                             </div>
-                          </div>
+                          </Card>
                         </AnimatedCard>
 
                         {/* Ordens de maior custo */}
                         <AnimatedCard delay={180}>
-                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                          <Card className="rounded-xl h-full">
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b border-border">
                               <DollarSign className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
                               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
                             </div>
@@ -1499,7 +1500,7 @@ export default function Manutencao() {
                                 );
                               })}
                             </div>
-                          </div>
+                          </Card>
                         </AnimatedCard>
 
                       </div>
@@ -1509,7 +1510,7 @@ export default function Manutencao() {
 
                 {/* Paginação */}
                 {osView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
-                  <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center justify-between px-3 py-2 border-t border-border">
                     <span className="text-[11px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
                     </span>
@@ -1553,7 +1554,7 @@ export default function Manutencao() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             </AnimatedCard>
 
           </div>{/* fim gap-3 */}
