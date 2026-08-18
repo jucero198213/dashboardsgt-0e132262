@@ -24,6 +24,16 @@ import { UpdateButton } from "@/components/shared/UpdateButton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
+} from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
 import {
@@ -31,6 +41,7 @@ import {
   type ManutencaoRow
 } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -149,13 +160,13 @@ export default function Manutencao() {
     setLoading(true);
     setError(null);
     setProgress(0);
-    setLoadingPhase("Conectando ao DW...");
+    setLoadingPhase("Conectando ao DW…");
 
     let cur = 0;
     const phases = [
-      { at: 30, label: "Buscando ordens de manutenção..." },
-      { at: 70, label: "Processando custos e indicadores..." },
-      { at: 88, label: "Gerando análises e validações..." },
+      { at: 30, label: "Buscando ordens de manutenção…" },
+      { at: 70, label: "Processando custos e indicadores…" },
+      { at: 88, label: "Gerando análises e validações…" },
     ];
     const iv = window.setInterval(() => {
       const spd = cur < 35 ? 4 + Math.random() * 3 : cur < 75 ? 2 + Math.random() * 2 : 0.5 + Math.random();
@@ -480,8 +491,8 @@ export default function Manutencao() {
 
   const SortIcon = ({ col }: { col: keyof OrdemAgregada }) =>
     sortCol === col
-      ? (sortAsc ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />)
-      : <ChevronDown className="w-3 h-3 ml-0.5 opacity-20" />;
+      ? (sortAsc ? <ChevronUp className="w-3 h-3 ml-0.5" aria-hidden="true" /> : <ChevronDown className="w-3 h-3 ml-0.5" aria-hidden="true" />)
+      : <ChevronDown className="w-3 h-3 ml-0.5 opacity-20" aria-hidden="true" />;
 
   // ─── Cards de validação config ─────────────────────────────────────────────
   const validCards = [
@@ -559,6 +570,7 @@ export default function Manutencao() {
   //  RENDER
   // ═════════════════════════════════════════════════════════════════════════════
   return (
+    <TooltipProvider>
     <div
       className="flex flex-col transition-all duration-300 min-h-[100dvh] overflow-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
@@ -634,7 +646,7 @@ export default function Manutencao() {
               <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={manutCooldown} />
             </div>
 
-            <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+            <Separator style={{ background: "var(--sgt-divider)" }} />
 
             {/* Erro */}
             {error && (
@@ -659,7 +671,7 @@ export default function Manutencao() {
                 className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
                 style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
               >
-                <Filter className="w-3.5 h-3.5 text-violet-400/60 shrink-0" />
+                <Filter className="w-3.5 h-3.5 text-violet-400/60 shrink-0" aria-hidden="true" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
                 <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
@@ -728,9 +740,9 @@ export default function Manutencao() {
                 {(filtroAno !== "Todos" || filtroMes !== "Todos" || filtroTipo !== "Todos" || filtroSituacao !== "Todos" || filtroClassif !== "Todos") && (
                   <button
                     onClick={() => { setFiltroAno("Todos"); setFiltroMes("Todos"); setFiltroTipo("Todos"); setFiltroSituacao("Todos"); setFiltroClassif("Todos"); }}
-                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
+                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400/50"
                   >
-                    <X className="w-2.5 h-2.5" /> Limpar
+                    <X className="w-2.5 h-2.5" aria-hidden="true" /> Limpar
                   </button>
                 )}
 
@@ -908,7 +920,7 @@ export default function Manutencao() {
             <AnimatedCard delay={280}>
               <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <Activity className="w-3.5 h-3.5 text-violet-400" />
+                  <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">Validações Analíticas</span>
                 </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -925,7 +937,7 @@ export default function Manutencao() {
                         >
                           <div className="flex items-start justify-between gap-1.5 mb-1.5">
                             <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
-                              <Icon className={`w-3 h-3 ${t.icon}`} />
+                              <Icon className={`w-3 h-3 ${t.icon}`} aria-hidden="true" />
                             </div>
                             <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
                               {loading ? "—" : fmtNum(count)}
@@ -994,9 +1006,9 @@ export default function Manutencao() {
                                           <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
                                               <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
-                                              <span className={`text-[8px] font-bold uppercase tracking-[0.15em] ring-1 rounded-full px-1.5 py-0.5 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                                <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                                 {sit.label}
-                                              </span>
+                                              </Badge>
                                             </div>
                                             <span className="text-[10px] text-slate-400 truncate">
                                               Veículo: <span className="text-slate-300">{o.veiculo}</span>
@@ -1033,7 +1045,7 @@ export default function Manutencao() {
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <TrendingUp className="w-3.5 h-3.5 text-violet-400" />
+                      <TrendingUp className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                       <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo Mensal de Manutenção</span>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1043,7 +1055,7 @@ export default function Manutencao() {
                   </div>
                   {custoPorMes.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center text-[11px] text-slate-600">
-                      {loading ? "Carregando..." : "Sem dados no período"}
+                      {loading ? "Carregando…" : "Sem dados no período"}
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -1074,16 +1086,17 @@ export default function Manutencao() {
               <AnimatedCard delay={360}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    <Layers className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Classificação</span>
                   </div>
                   <div className="flex-1 overflow-hidden">
                     {distClassif.length === 0 ? (
                       <div className="flex h-full items-center justify-center text-[11px] text-slate-600">
-                        {loading ? "Carregando..." : "Sem dados"}
+                        {loading ? "Carregando…" : "Sem dados"}
                       </div>
                     ) : (
-                      <div className="space-y-1.5 h-full overflow-auto pr-1">
+                      <ScrollArea className="h-full">
+                      <div className="space-y-1.5 pr-2">
                         {distClassif.map((c, i) => {
                           const pct = kpis.totalCusto > 0 ? (c.custo / kpis.totalCusto) * 100 : 0;
                           return (
@@ -1102,6 +1115,7 @@ export default function Manutencao() {
                           );
                         })}
                       </div>
+                      </ScrollArea>
                     )}
                   </div>
                 </div>
@@ -1115,13 +1129,13 @@ export default function Manutencao() {
               <AnimatedCard delay={400}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Package className="w-3.5 h-3.5 text-cyan-400" />
+                    <Package className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Veículo</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingVeiculo.length === 0 ? (
                     <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">
-                      {loading ? "Carregando..." : "Sem dados"}
+                      {loading ? "Carregando…" : "Sem dados"}
                     </div>
                   ) : (
                     <div className="space-y-1.5">
@@ -1130,11 +1144,16 @@ export default function Manutencao() {
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
                         return (
                           <div key={r.veiculo} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[10px] font-medium text-slate-300 truncate">{r.veiculo}</span>
-                                <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[10px] font-medium text-slate-300 truncate">{r.veiculo}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="text-[11px]">{r.veiculo}</TooltipContent>
+                                </Tooltip>
+                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
@@ -1152,13 +1171,13 @@ export default function Manutencao() {
               <AnimatedCard delay={440}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-3.5 h-3.5 text-violet-400" />
+                    <Users className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Fornecedor</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingFornecedor.length === 0 ? (
                     <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">
-                      {loading ? "Carregando..." : "Sem dados"}
+                      {loading ? "Carregando…" : "Sem dados"}
                     </div>
                   ) : (
                     <div className="space-y-1.5">
@@ -1167,11 +1186,16 @@ export default function Manutencao() {
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
                         return (
                           <div key={r.fornecedorFull} className="flex items-center gap-2">
-                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                            <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right" aria-hidden="true">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[10px] font-medium text-slate-300 truncate">{r.fornecedor}</span>
-                                <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[10px] font-medium text-slate-300 truncate">{r.fornecedor}</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="text-[11px]">{r.fornecedorFull}</TooltipContent>
+                                </Tooltip>
+                                <span className="text-[10px] font-bold shrink-0 ml-2 tabular-nums" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
                               </div>
                               <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
                                 <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
@@ -1191,11 +1215,11 @@ export default function Manutencao() {
               <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                 {/* Header tabela */}
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
-                  <FileText className="w-3.5 h-3.5 text-violet-400" />
+                  <FileText className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
-                  <span className="rounded-full border border-violet-400/20 bg-violet-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-violet-300">
+                  <Badge variant="outline" className="border-violet-400/20 bg-violet-500/[0.07] text-[9px] text-violet-300 rounded-full">
                     {fmtNum(ordensSearchadas.length)} OS
-                  </span>
+                  </Badge>
                   <div className="ml-auto flex items-center gap-2">
                     <GooeyInput
                       placeholder="Buscar OS, veículo, fornecedor..."
@@ -1213,8 +1237,10 @@ export default function Manutencao() {
                         const active = osView === t.id;
                         return (
                           <button key={t.id} onClick={() => setOsView(t.id)}
-                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
-                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                            aria-label={t.label}
+                            aria-pressed={active}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" aria-hidden="true" /><span className="hidden sm:inline"> {t.label}</span>
                           </button>
                         );
                       })}
@@ -1224,103 +1250,104 @@ export default function Manutencao() {
 
                 {/* Tabela */}
                 {osView === "tabela" && (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr style={{ borderBottom: `1px solid ${RAW.borderDefault}`, background: RAW.surfaceInset }}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent" style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
                         {([
-                          { key: "ordem",        label: "OS",             align: "left",   resp: ""                  },
-                          { key: "veiculo",      label: "Veículo",        align: "left",   resp: ""                  },
-                          { key: "dataordem",    label: "Data",           align: "center", resp: "hidden sm:table-cell" },
-                          { key: "tiposervico",  label: "Tipo",           align: "center", resp: "hidden md:table-cell" },
-                          { key: "situacao",     label: "Situação",       align: "center", resp: ""                  },
-                          { key: "classificacao",label: "Classificação",  align: "left",   resp: "hidden lg:table-cell" },
-                          { key: "fornecedor",   label: "Fornecedor",     align: "left",   resp: "hidden xl:table-cell" },
-                          { key: "totalPecas",   label: "Peças",          align: "right",  resp: "hidden sm:table-cell" },
-                          { key: "totalMO",      label: "MO",             align: "right",  resp: "hidden md:table-cell" },
-                          { key: "totalCusto",   label: "Total",          align: "right",  resp: ""                  },
+                          { key: "ordem",         label: "OS",            align: "left",   resp: ""                     },
+                          { key: "veiculo",       label: "Veículo",       align: "left",   resp: ""                     },
+                          { key: "dataordem",     label: "Data",          align: "center", resp: "hidden sm:table-cell"  },
+                          { key: "tiposervico",   label: "Tipo",          align: "center", resp: "hidden md:table-cell"  },
+                          { key: "situacao",      label: "Situação",      align: "center", resp: ""                     },
+                          { key: "classificacao", label: "Classificação", align: "left",   resp: "hidden lg:table-cell"  },
+                          { key: "fornecedor",    label: "Fornecedor",    align: "left",   resp: "hidden xl:table-cell"  },
+                          { key: "totalPecas",    label: "Peças",         align: "right",  resp: "hidden sm:table-cell"  },
+                          { key: "totalMO",       label: "MO",            align: "right",  resp: "hidden md:table-cell"  },
+                          { key: "totalCusto",    label: "Total",         align: "right",  resp: ""                     },
                         ] as { key: keyof OrdemAgregada; label: string; align: string; resp: string }[]).map(c => (
-                          <th
+                          <TableHead
                             key={c.key}
                             onClick={() => handleSort(c.key)}
-                            className={`px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors ${c.resp}`}
-                            style={{ textAlign: c.align as any }}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort(c.key); } }}
+                            tabIndex={0}
+                            aria-sort={sortCol === c.key ? (sortAsc ? "ascending" : "descending") : undefined}
+                            className={cn("px-3 py-2 cursor-pointer select-none text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 touch-manipulation", c.resp)}
+                            style={{ textAlign: c.align as "left" | "right" | "center" }}
                           >
                             <span className="inline-flex items-center gap-0.5">
                               {c.label}
                               <SortIcon col={c.key} />
                             </span>
-                          </th>
+                          </TableHead>
                         ))}
-                      </tr>
-                    </thead>
-                    <tbody>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {loading ? (
                         Array.from({ length: 6 }).map((_, i) => (
-                          <tr key={i} style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                            {Array.from({ length: 10 }).map((_, j) => (
-                              <td key={j} className="px-3 py-2.5">
-                                <div className="h-2 rounded-full bg-white/[0.04] animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
-                              </td>
+                          <TableRow key={i} style={{ borderColor: RAW.borderDefault }}>
+                            {[60, 45, 30, 25, 20, 35, 50, 22, 22, 18].map((w, j) => (
+                              <TableCell key={j} className="px-3 py-2.5">
+                                <Skeleton className="h-2 rounded-full" style={{ width: `${w}%` }} />
+                              </TableCell>
                             ))}
-                          </tr>
+                          </TableRow>
                         ))
                       ) : tabelaPagina.length === 0 ? (
-                        <tr>
-                          <td colSpan={10} className="py-8 text-center text-[12px] text-slate-600">
+                        <TableRow>
+                          <TableCell colSpan={10} className="py-8 text-center text-[12px] text-slate-600">
                             Nenhuma ordem encontrada
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ) : (
-                        tabelaPagina.map((o, i) => {
+                        tabelaPagina.map((o) => {
                           const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
                           return (
-                            <tr
+                            <TableRow
                               key={o.ordem}
-                              className="transition-colors hover:bg-white/[0.02]"
-                              style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}
+                              className="hover:bg-white/[0.02] touch-manipulation"
+                              style={{ borderColor: RAW.borderDefault }}
                             >
-                              <td className="px-3 py-2.5">
+                              <TableCell className="px-3 py-2.5">
                                 <span className="font-mono text-[11px] text-violet-300">{o.ordem}</span>
-                              </td>
-                              <td className="px-3 py-2.5">
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5">
                                 <span className="text-[11px] font-medium text-slate-300">{o.veiculo}</span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden sm:table-cell text-center">
-                                <span className="text-[11px] text-slate-400">{fmtData(o.dataordem)}</span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden md:table-cell text-center">
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden sm:table-cell text-center">
+                                <span className="text-[11px] text-slate-400 tabular-nums">{fmtData(o.dataordem)}</span>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden md:table-cell text-center">
                                 <span className={`text-[9px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
                                   {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
                                 </span>
-                              </td>
-                              <td className="px-3 py-2.5 text-center">
-                                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 text-center">
+                                <Badge className={cn("border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.15em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                   {sit.label}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden lg:table-cell">
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden lg:table-cell">
                                 <span className="text-[10px] text-slate-400">{o.classificacao ?? "—"}</span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden xl:table-cell">
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden xl:table-cell">
                                 <span className="text-[10px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden sm:table-cell text-right">
-                                <span className="text-[11px] font-medium text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
-                              </td>
-                              <td className="px-3 py-2.5 hidden md:table-cell text-right">
-                                <span className="text-[11px] font-medium text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
-                              </td>
-                              <td className="px-3 py-2.5 text-right">
-                                <span className="text-[12px] font-bold text-slate-200">{fmtK(o.totalCusto)}</span>
-                              </td>
-                            </tr>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden sm:table-cell text-right">
+                                <span className="text-[11px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 hidden md:table-cell text-right">
+                                <span className="text-[11px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
+                              </TableCell>
+                              <TableCell className="px-3 py-2.5 text-right">
+                                <span className="text-[12px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
+                              </TableCell>
+                            </TableRow>
                           );
                         })
                       )}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
                 )}
 
                 {/* ════════ VIEW: CARDS ════════ */}
@@ -1330,9 +1357,9 @@ export default function Manutencao() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                         {Array.from({ length: 8 }).map((_, i) => (
                           <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
-                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
-                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
-                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                            <Skeleton className="h-3 w-1/2 rounded-full mb-3" />
+                            <Skeleton className="h-2 w-3/4 rounded-full mb-2" />
+                            <Skeleton className="h-2 w-2/3 rounded-full" />
                           </div>
                         ))}
                       </div>
@@ -1352,9 +1379,9 @@ export default function Manutencao() {
                                     <span className="font-mono text-[14px] font-bold text-violet-300">{o.ordem}</span>
                                     <span className="block text-[10px] text-slate-400 truncate">{o.veiculo}</span>
                                   </div>
-                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                  <Badge className={cn("shrink-0 border-0 ring-1 text-[8px] font-semibold uppercase tracking-[0.1em] px-1.5 py-0.5 h-auto", sit.bg, sit.text, sit.ring)}>
                                     {sit.label}
-                                  </span>
+                                  </Badge>
                                 </div>
 
                                 {/* Tipo + data + classificação */}
@@ -1404,7 +1431,7 @@ export default function Manutencao() {
                         <AnimatedCard>
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
-                              <Activity className="w-3.5 h-3.5 text-violet-400" />
+                              <Activity className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
                               <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
@@ -1431,7 +1458,7 @@ export default function Manutencao() {
                         <AnimatedCard delay={60}>
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
-                              <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                              <Layers className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
                               <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
                             </div>
                             <div className="p-4 space-y-2.5">
@@ -1455,7 +1482,7 @@ export default function Manutencao() {
                         <AnimatedCard delay={120}>
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
-                              <Package className="w-3.5 h-3.5 text-amber-400" />
+                              <Package className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                               <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
                             </div>
                             <div className="p-4 space-y-2.5">
@@ -1481,7 +1508,7 @@ export default function Manutencao() {
                         <AnimatedCard delay={180}>
                           <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                             <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
-                              <DollarSign className="w-3.5 h-3.5 text-rose-400" />
+                              <DollarSign className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
                               <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
                             </div>
                             <div className="p-4 space-y-2.5">
@@ -1518,9 +1545,10 @@ export default function Manutencao() {
                       <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-violet-400/30 hover:text-violet-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Página anterior"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-violet-400/30 hover:text-violet-300 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50"
                       >
-                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         let p: number;
@@ -1545,9 +1573,10 @@ export default function Manutencao() {
                       <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-violet-400/30 hover:text-violet-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        aria-label="Próxima página"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-violet-400/30 hover:text-violet-300 disabled:opacity-30 disabled:cursor-not-allowed touch-manipulation focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50"
                       >
-                        <ChevronRight className="w-3.5 h-3.5" />
+                        <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -1561,5 +1590,6 @@ export default function Manutencao() {
 
       {/* ════════ MODAL VALIDAÇÃO ════════ */}
     </div>
+    </TooltipProvider>
   );
 }
