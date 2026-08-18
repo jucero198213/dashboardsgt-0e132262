@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Wrench, Search, AlertTriangle, TrendingUp,
-  ChevronUp, ChevronDown, BarChart3,
-  CheckCircle2, AlertCircle, DollarSign, Hash, X, ChevronLeft,
-  ChevronRight, Package, Users, FileText, ShieldAlert,
-  Clock, Layers, Truck
+  Wrench, RefreshCw, Search, AlertTriangle, TrendingUp, TrendingDown,
+  Calendar, ChevronUp, ChevronDown, BarChart3, CheckCircle2, CheckCircle,
+  AlertCircle, Activity, DollarSign, Hash, X, ChevronLeft,
+  ChevronRight, Package, Users, FileText, Zap, ShieldAlert,
+  Clock, Filter, Layers, LayoutGrid, Table2
 } from "lucide-react";
 import {
-  ResponsiveContainer,
-  Tooltip as ReTooltip, CartesianGrid,
-  AreaChart, Area, XAxis, YAxis
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
+  Tooltip as ReTooltip, CartesianGrid, LineChart, Line,
+  AreaChart, Area, Cell
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
@@ -50,6 +50,20 @@ const fmtData = (s: string | null) => {
   return isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
 };
 
+// ─── Paleta de cores alinhada ao theme.ts ─────────────────────────────────────
+const PALETTE = [
+  "#fbbf24",
+  "#f59e0b",
+  "#fcd34d",
+  "#d97706",
+  "#fde68a",
+  "#b45309",
+  "#f59e0b",
+  "#94a3b8",
+];
+const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
+
+// Mapa de situação → estilo visual
 const SITUACAO_STYLE: Record<string, { bg: string; text: string; ring: string; label: string }> = {
   CONCLUIDO:     { bg: "bg-emerald-500/10", text: "text-emerald-300", ring: "ring-emerald-500/30", label: "Concluído" },
   ANDAMENTO:     { bg: "bg-amber-500/10",   text: "text-amber-300",   ring: "ring-amber-500/30",   label: "Andamento" },
@@ -62,6 +76,7 @@ const TIPO_LABEL: Record<string, string> = {
   SERVICOINTERNO: "Interno",
 };
 
+// ─── Tooltip dark customizado ─────────────────────────────────────────────────
 const DarkTooltip = ({ active, payload, label, formatter }: any) => {
   if (!active || !payload?.length) return null;
   return (
@@ -109,7 +124,9 @@ export default function Manutencao() {
   const [loadingPhase, setLoadingPhase] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros inline da tabela
+  // Filtros locais
+  const [filtroAno, setFiltroAno] = useState<string>("Todos");
+  const [filtroMes, setFiltroMes] = useState<string>("Todos");
   const [filtroTipo, setFiltroTipo] = useState<string>("Todos");
   const [filtroSituacao, setFiltroSituacao] = useState<string>("Todos");
   const [filtroClassif, setFiltroClassif] = useState<string>("Todos");
@@ -120,9 +137,11 @@ export default function Manutencao() {
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+  // View do detalhamento de ordens — padrão Bancos (Cards / Tabela / Analytics)
+  const [osView, setOsView] = useState<"cards" | "tabela" | "analytics">("cards");
 
-  // Alertas expandíveis
-  const [alertaAberto, setAlertaAberto] = useState<string | null>(null);
+  // Modal validação
+  const [validacaoAberta, setValidacaoAberta] = useState<string | null>(null);
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -167,6 +186,28 @@ export default function Manutencao() {
   useEffect(() => { carregarDados(); }, []);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
+  const anos = useMemo(() => {
+    const s = new Set<string>();
+    dados.forEach(d => {
+      if (!d.dataordem) return;
+      const y = new Date(d.dataordem).getFullYear();
+      if (!isNaN(y)) s.add(String(y));
+    });
+    return ["Todos", ...Array.from(s).sort().reverse()];
+  }, [dados]);
+
+  const meses = useMemo(() => {
+    const NOMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    const s = new Set<string>();
+    dados.forEach(d => {
+      if (!d.dataordem) return;
+      const dt = new Date(d.dataordem);
+      if (!isNaN(dt.getTime())) s.add(String(dt.getMonth() + 1).padStart(2, "0"));
+    });
+    const sorted = Array.from(s).sort();
+    return ["Todos", ...sorted.map(m => ({ value: m, label: NOMES[parseInt(m) - 1] }))];
+  }, [dados]);
+
   const classificacoes = useMemo(() => {
     const s = new Set<string>();
     dados.forEach(d => { if (d.classificacao) s.add(d.classificacao); });
@@ -176,13 +217,16 @@ export default function Manutencao() {
   // ── Filtragem dos dados brutos ───────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
     return dados.filter(d => {
-      if (d.situacao === "CANCELADO") return false;
+      if (d.situacao === "CANCELADO") return false; // excluir cancelados do agregado padrão
+      const dt = d.dataordem ? new Date(d.dataordem) : null;
+      if (filtroAno !== "Todos" && (!dt || String(dt.getFullYear()) !== filtroAno)) return false;
+      if (filtroMes !== "Todos" && (!dt || String(dt.getMonth() + 1).padStart(2, "0") !== filtroMes)) return false;
       if (filtroTipo !== "Todos" && d.tiposervico !== filtroTipo) return false;
       if (filtroSituacao !== "Todos" && d.situacao !== filtroSituacao) return false;
       if (filtroClassif !== "Todos" && d.classificacao !== filtroClassif) return false;
       return true;
     });
-  }, [dados, filtroTipo, filtroSituacao, filtroClassif]);
+  }, [dados, filtroAno, filtroMes, filtroTipo, filtroSituacao, filtroClassif]);
 
   // ── Agrupamento por ordem ────────────────────────────────────────────────────
   const ordens = useMemo(() => {
@@ -217,6 +261,7 @@ export default function Manutencao() {
       o.totalPecas += pecas;
       o.totalMO    += mo;
       o.qtdItens   += 1;
+      // Usa fornecedor mais recente / prioritário
       if (!o.fornecedor && d.fornecedor) o.fornecedor = d.fornecedor;
     }
     return Array.from(map.values());
@@ -232,14 +277,7 @@ export default function Manutencao() {
     const externas = ordens.filter(o => o.tiposervico === "SERVICOEXTERNO").length;
     const internas = ordens.filter(o => o.tiposervico === "SERVICOINTERNO").length;
     const abertas  = ordens.filter(o => o.situacao === "ANDAMENTO").length;
-
-    const comClassif = ordens.filter(o => o.classificacao);
-    const corretivas = comClassif.filter(o => o.classificacao?.toUpperCase().includes("CORRET"));
-    const ratioPreventiva = comClassif.length > 0
-      ? ((comClassif.length - corretivas.length) / comClassif.length) * 100
-      : 0;
-
-    return { totalOS, totalPecas, totalMO, totalCusto, custoMedioOS, externas, internas, abertas, ratioPreventiva };
+    return { totalOS, totalPecas, totalMO, totalCusto, custoMedioOS, externas, internas, abertas };
   }, [ordens]);
 
   // ── Custo Mensal (área) ───────────────────────────────────────────────────────
@@ -265,35 +303,38 @@ export default function Manutencao() {
       });
   }, [dadosFiltrados]);
 
-  // ── Rankings ─────────────────────────────────────────────────────────────────
+  // ── Ranking de peças por veículo (top 10) ────────────────────────────────────
   const rankingVeiculo = useMemo(() => {
     const map = new Map<string, number>();
-    for (const o of ordens) {
-      map.set(o.veiculo, (map.get(o.veiculo) ?? 0) + o.totalCusto);
+    for (const d of dadosFiltrados) {
+      const k = String(d.veiculo ?? "Indefinido");
+      map.set(k, (map.get(k) ?? 0) + (d.valorpc ?? 0) + (d.valorpc2 ?? 0));
     }
     return Array.from(map.entries())
-      .map(([veiculo, custo]) => ({ veiculo, custo }))
+      .map(([veiculo, custo], i) => ({ veiculo, custo, fill: colorFor(veiculo, i) }))
       .sort((a, b) => b.custo - a.custo)
       .slice(0, 10);
-  }, [ordens]);
+  }, [dadosFiltrados]);
 
+  // ── Ranking de peças por fornecedor (top 10) ─────────────────────────────────
   const rankingFornecedor = useMemo(() => {
     const map = new Map<string, number>();
-    for (const o of ordens) {
-      const k = o.fornecedor?.trim() || "Sem fornecedor";
-      map.set(k, (map.get(k) ?? 0) + o.totalCusto);
+    for (const d of dadosFiltrados) {
+      const k = d.fornecedor?.trim() || "Sem fornecedor";
+      map.set(k, (map.get(k) ?? 0) + (d.valorpc ?? 0) + (d.valorpc2 ?? 0));
     }
     return Array.from(map.entries())
-      .map(([fornecedor, custo]) => ({
+      .map(([fornecedor, custo], i) => ({
         fornecedor: fornecedor.length > 22 ? fornecedor.slice(0, 22) + "…" : fornecedor,
         fornecedorFull: fornecedor,
         custo,
+        fill: colorFor(fornecedor, i),
       }))
       .sort((a, b) => b.custo - a.custo)
       .slice(0, 10);
-  }, [ordens]);
+  }, [dadosFiltrados]);
 
-  // ── Distribuição por classificação (para gráfico lateral) ───────────────────
+  // ── Distribuição por classificação ───────────────────────────────────────────
   const distClassif = useMemo(() => {
     const map = new Map<string, number>();
     ordens.forEach(o => {
@@ -301,29 +342,34 @@ export default function Manutencao() {
       map.set(k, (map.get(k) ?? 0) + o.totalCusto);
     });
     return Array.from(map.entries())
-      .map(([nome, custo]) => ({ nome, custo }))
+      .map(([nome, custo], i) => ({ nome, custo, fill: colorFor(nome, i) }))
       .sort((a, b) => b.custo - a.custo)
       .slice(0, 6);
   }, [ordens]);
 
-  // ── Validações / Alertas ────────────────────────────────────────────────────
+  // ── Validações Analíticas ────────────────────────────────────────────────────
   const validacoes = useMemo(() => {
+    // ① Custos elevados: OS com custo > média + 2σ
     const custos = ordens.filter(o => o.totalCusto > 0).map(o => o.totalCusto);
     const media = custos.length > 0 ? custos.reduce((s, x) => s + x, 0) / custos.length : 0;
     const desvio = custos.length > 0
       ? Math.sqrt(custos.reduce((s, x) => s + (x - media) ** 2, 0) / custos.length)
       : 0;
     const limiteOutlier = media + 2 * desvio;
+
     const outliersCusto = ordens.filter(o => o.totalCusto > limiteOutlier && limiteOutlier > 0);
 
+    // ② OS em aberto há mais de 30 dias
     const ordensTravadas = ordens.filter(o =>
       o.situacao === "ANDAMENTO" && o.diasAberto !== null && o.diasAberto > 30
     );
 
+    // ③ OS externas sem fornecedor cadastrado
     const semFornecedor = ordens.filter(o =>
       o.tiposervico === "SERVICOEXTERNO" && (!o.fornecedor || o.fornecedor.trim() === "")
     );
 
+    // ④ Concentração excessiva de custo num único veículo (> 30% do total)
     const totalGeral = ordens.reduce((s, o) => s + o.totalCusto, 0);
     const custoVeiculo = new Map<string, number>();
     ordens.forEach(o => {
@@ -337,10 +383,14 @@ export default function Manutencao() {
       ? ordens.filter(o => o.veiculo === topVeiculoEntry[0])
       : [];
 
+    // ⑤ Corretiva dominante (> 70% das ordens classificadas são corretivas)
     const comClassif = ordens.filter(o => o.classificacao);
-    const corretivas = comClassif.filter(o => o.classificacao?.toUpperCase().includes("CORRET"));
+    const corretivas = comClassif.filter(o =>
+      o.classificacao?.toUpperCase().includes("CORRET")
+    );
     const ratioCorretiva = comClassif.length > 0 ? corretivas.length / comClassif.length : 0;
 
+    // ⑥ Ordens com MO zero mas com peças > 0 (possível sub-lançamento)
     const semMO = ordens.filter(o => o.totalPecas > 0 && o.totalMO === 0);
 
     return {
@@ -358,8 +408,9 @@ export default function Manutencao() {
     };
   }, [ordens]);
 
-  const alertaLista = useMemo(() => {
-    if (!alertaAberto) return [];
+  // ── Modal de validação ────────────────────────────────────────────────────────
+  const validacaoLista = useMemo(() => {
+    if (!validacaoAberta) return [];
     const map: Record<string, OrdemAgregada[]> = {
       outliersCusto:       validacoes.outliersCusto,
       ordensTravadas:      validacoes.ordensTravadas,
@@ -367,10 +418,10 @@ export default function Manutencao() {
       concentracoesAltas:  validacoes.concentracoesAltas,
       semMO:               validacoes.semMO,
     };
-    return map[alertaAberto] ?? [];
-  }, [alertaAberto, validacoes]);
+    return map[validacaoAberta] ?? [];
+  }, [validacaoAberta, validacoes]);
 
-  // ── Tabela com search + sort + paginação ────────────────────────────────────
+  // ── Tabela de ordens com search + sort + paginação ───────────────────────────
   const ordensSearchadas = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return ordens;
@@ -400,56 +451,109 @@ export default function Manutencao() {
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  useEffect(() => { setPage(1); }, [filtroTipo, filtroSituacao, filtroClassif, search]);
+  // ── Analytics do detalhamento (deriva de tabelaOrdenada → respeita filtros + busca) ──
+  const osAnalytics = useMemo(() => {
+    const base = tabelaOrdenada;
+    const n = base.length;
+
+    const sitMap = new Map<string, number>();
+    base.forEach(o => { const k = (SITUACAO_STYLE[o.situacao ?? ""]?.label) ?? (o.situacao ?? "Inconsistente"); sitMap.set(k, (sitMap.get(k) ?? 0) + 1); });
+    const porSituacao = [...sitMap.entries()].sort((a, b) => b[1] - a[1]);
+
+    const classMap = new Map<string, number>();
+    base.forEach(o => { const k = o.classificacao ?? "Não classificada"; classMap.set(k, (classMap.get(k) ?? 0) + 1); });
+    const porClassificacao = [...classMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const fornMap = new Map<string, number>();
+    base.forEach(o => { const k = o.fornecedor ?? "—"; fornMap.set(k, (fornMap.get(k) ?? 0) + (o.totalCusto || 0)); });
+    const topFornecedores = [...fornMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const topCusto = [...base].filter(o => o.totalCusto > 0).sort((a, b) => b.totalCusto - a.totalCusto).slice(0, 8);
+    const custoTotal = base.reduce((s, o) => s + (o.totalCusto || 0), 0);
+    const totalPecas = base.reduce((s, o) => s + (o.totalPecas || 0), 0);
+    const totalMO = base.reduce((s, o) => s + (o.totalMO || 0), 0);
+
+    return { n, porSituacao, porClassificacao, topFornecedores, topCusto, custoTotal, totalPecas, totalMO };
+  }, [tabelaOrdenada]);
+
+  useEffect(() => { setPage(1); }, [filtroAno, filtroMes, filtroTipo, filtroSituacao, filtroClassif, search]);
 
   const SortIcon = ({ col }: { col: keyof OrdemAgregada }) =>
     sortCol === col
       ? (sortAsc ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />)
       : <ChevronDown className="w-3 h-3 ml-0.5 opacity-20" />;
 
-  // ── Alertas config ──────────────────────────────────────────────────────────
-  const alertCards = [
+  // ─── Cards de validação config ─────────────────────────────────────────────
+  const validCards = [
     {
-      key:   "outliersCusto",
-      icon:  AlertTriangle,
-      label: "OS custo elevado",
-      count: validacoes.outliersCusto.length,
-      color: RAW.accent.rose,
-      title: "OS com Custo Elevado (Outliers)",
-      subtitle: `Limite: ${fmtK(validacoes.limiteOutlier)} (média ${fmtK(validacoes.mediaCusto)} + 2σ)`,
+      key:      "outliersCusto",
+      icon:     AlertTriangle,
+      label:    "OS com Custo Elevado",
+      desc:     `Acima de ${fmtK(validacoes.limiteOutlier)} (média + 2σ)`,
+      count:    validacoes.outliersCusto.length,
+      tone:     "rose" as const,
+      severity: validacoes.outliersCusto.length > 0,
     },
     {
-      key:   "ordensTravadas",
-      icon:  Clock,
-      label: "Travadas > 30 dias",
-      count: validacoes.ordensTravadas.length,
-      color: RAW.accent.amber,
-      title: "OS em Andamento há mais de 30 dias",
-      subtitle: "Possível gargalo operacional — verificar encerramento",
+      key:      "ordensTravadas",
+      icon:     Clock,
+      label:    "OS Travadas (> 30 dias)",
+      desc:     "Em andamento sem encerramento",
+      count:    validacoes.ordensTravadas.length,
+      tone:     "amber" as const,
+      severity: validacoes.ordensTravadas.length > 0,
     },
     {
-      key:   "semFornecedor",
-      icon:  ShieldAlert,
-      label: "Sem fornecedor",
-      count: validacoes.semFornecedor.length,
-      color: RAW.accent.violet,
-      title: "OS Externas sem Fornecedor Cadastrado",
-      subtitle: "Qualidade de dados — vincular fornecedor nos itens externos",
+      key:      "semFornecedor",
+      icon:     ShieldAlert,
+      label:    "Externas sem Fornecedor",
+      desc:     "Serviço externo sem vínculo",
+      count:    validacoes.semFornecedor.length,
+      tone:     "violet" as const,
+      severity: validacoes.semFornecedor.length > 0,
     },
     {
-      key:   "concentracoesAltas",
-      icon:  TrendingUp,
-      label: "Concentração veículo",
-      count: validacoes.concentracoesAltas.length > 0
-        ? `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}%`
-        : "OK",
-      color: RAW.accent.cyan,
-      title: `Concentração de Custo — Veículo ${validacoes.topVeiculoNome ?? "—"}`,
-      subtitle: `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% do custo total concentrado neste veículo`,
+      key:      "concentracoesAltas",
+      icon:     TrendingUp,
+      label:    "Concentração por Veículo",
+      desc:     validacoes.concentracaoVeiculo > 0.3
+        ? `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% em ${validacoes.topVeiculoNome}`
+        : "Distribuição equilibrada",
+      count:    validacoes.concentracoesAltas.length,
+      tone:     "cyan" as const,
+      severity: validacoes.concentracaoVeiculo > 0.3,
+    },
+    {
+      key:      null,
+      icon:     Layers,
+      label:    "Índice Corretiva",
+      desc:     validacoes.ratioCorretiva > 0.7
+        ? `Alta: ${(validacoes.ratioCorretiva * 100).toFixed(0)}% das OS classificadas`
+        : validacoes.ratioCorretiva > 0
+        ? `${(validacoes.ratioCorretiva * 100).toFixed(0)}% das OS classificadas`
+        : "Sem dados de classificação",
+      count:    validacoes.corretivas,
+      tone:     "emerald" as const,
+      severity: validacoes.ratioCorretiva > 0.7,
+    },
+    {
+      key:      "semMO",
+      icon:     Zap,
+      label:    "Peças sem Mão de Obra",
+      desc:     "OS com peças lançadas mas MO = 0",
+      count:    validacoes.semMO.length,
+      tone:     "amber" as const,
+      severity: validacoes.semMO.length > 3,
     },
   ];
 
-  const hasActiveFilters = filtroTipo !== "Todos" || filtroSituacao !== "Todos" || filtroClassif !== "Todos";
+  const TONE_COLORS = {
+    rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
+    amber:   { border: "border-amber-400/20",   icon: "text-amber-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
+    violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
+    cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
+    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
+  };
 
   // ═════════════════════════════════════════════════════════════════════════════
   //  RENDER
@@ -479,7 +583,7 @@ export default function Manutencao() {
 
           <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
 
-            {/* ════════ NAVBAR DESKTOP ════════ */}
+            {/* ════════ NAVBAR ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
                 <div className="flex flex-col leading-none">
@@ -487,6 +591,7 @@ export default function Manutencao() {
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Manutenção de Frota</span>
                 </div>
               </div>
+
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
@@ -548,55 +653,111 @@ export default function Manutencao() {
               </div>
             )}
 
-            {/* ════════ 4 KPIs ════════ */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            {/* ════════ FILTROS LOCAIS ════════ */}
+            <div className="hidden sm:block"><AnimatedCard delay={60}>
+              <div
+                className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
+                style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
+              >
+                <Filter className="w-3.5 h-3.5 text-violet-400/60 shrink-0" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
+                <div className="h-4 w-px bg-white/[0.07] shrink-0" />
+
+                {/* Ano */}
+                <Select value={filtroAno} onValueChange={setFiltroAno}>
+                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30 focus:outline-none">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {anos.map(a => <SelectItem key={a} value={a}>{a === "Todos" ? "Ano" : a}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+
+                {/* Mês */}
+                <Select value={filtroMes} onValueChange={setFiltroMes}>
+                  <SelectTrigger className="h-7 min-w-[72px] max-w-[90px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                    <SelectValue placeholder="Mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todos">Mês</SelectItem>
+                    {(meses.slice(1) as { value: string; label: string }[]).map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Tipo de ordem */}
+                <Select value={filtroTipo} onValueChange={setFiltroTipo}>
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todos">Tipo</SelectItem>
+                    <SelectItem value="SERVICOEXTERNO">Externo</SelectItem>
+                    <SelectItem value="SERVICOINTERNO">Interno</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Situação */}
+                <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
+                  <SelectTrigger className="h-7 min-w-[90px] max-w-[120px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                    <SelectValue placeholder="Situação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todos">Situação</SelectItem>
+                    <SelectItem value="CONCLUIDO">Concluído</SelectItem>
+                    <SelectItem value="ANDAMENTO">Andamento</SelectItem>
+                    <SelectItem value="INCONSISTENTE">Inconsistente</SelectItem>
+                    <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Classificação */}
+                <Select value={filtroClassif} onValueChange={setFiltroClassif}>
+                  <SelectTrigger className="h-7 min-w-[100px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
+                    <SelectValue placeholder="Classificação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classificacoes.map(c => (
+                      <SelectItem key={c} value={c}>{c === "Todos" ? "Classificação" : c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Badges dos filtros ativos */}
+                {(filtroAno !== "Todos" || filtroMes !== "Todos" || filtroTipo !== "Todos" || filtroSituacao !== "Todos" || filtroClassif !== "Todos") && (
+                  <button
+                    onClick={() => { setFiltroAno("Todos"); setFiltroMes("Todos"); setFiltroTipo("Todos"); setFiltroSituacao("Todos"); setFiltroClassif("Todos"); }}
+                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
+                  >
+                    <X className="w-2.5 h-2.5" /> Limpar
+                  </button>
+                )}
+
+                <div className="ml-auto text-[10px] text-slate-500">
+                  {fmtNum(ordens.length)} OS • {fmtNum(dadosFiltrados.length)} itens
+                </div>
+              </div>
+            </AnimatedCard></div>
+
+            {/* ════════ KPI ROW (5 cards) ════════ */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
               <AnimatedCard delay={80}>
-                <KpiCard
-                  label="Custo Total"
-                  value={loading ? "—" : fmtK(kpis.totalCusto)}
-                  rawValue={kpis.totalCusto}
-                  subtitle={`${fmtNum(kpis.externas)} ext · ${fmtNum(kpis.internas)} int`}
-                  icon={DollarSign}
-                  tone="violet"
-                  loading={loading}
-                />
+                <KpiCard label="Ordens de Serviço" value={loading ? "—" : fmtNum(kpis.totalOS)} subtitle={`${fmtNum(kpis.abertas)} em andamento`} icon={Hash} tone="violet" loading={loading} />
               </AnimatedCard>
               <AnimatedCard delay={120}>
-                <KpiCard
-                  label="OS em Aberto"
-                  value={loading ? "—" : fmtNum(kpis.abertas)}
-                  rawValue={kpis.abertas}
-                  subtitle={`${validacoes.ordensTravadas.length} há mais de 30 dias`}
-                  icon={AlertCircle}
-                  tone="amber"
-                  loading={loading}
-                />
+                <KpiCard label="Custo de Peças" value={loading ? "—" : fmtK(kpis.totalPecas)} subtitle={kpis.totalCusto > 0 ? `${((kpis.totalPecas / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—"} icon={Package} tone="cyan" loading={loading} />
               </AnimatedCard>
               <AnimatedCard delay={160}>
-                <KpiCard
-                  label="Custo Médio / OS"
-                  value={loading ? "—" : fmtK(kpis.custoMedioOS)}
-                  rawValue={kpis.custoMedioOS}
-                  subtitle={`base: ${fmtNum(kpis.totalOS)} ordens`}
-                  icon={BarChart3}
-                  tone="rose"
-                  loading={loading}
-                />
+                <KpiCard label="Mão de Obra" value={loading ? "—" : fmtK(kpis.totalMO)} subtitle={kpis.totalCusto > 0 ? `${((kpis.totalMO / kpis.totalCusto) * 100).toFixed(0)}% do total` : "—"} icon={Users} tone="emerald" loading={loading} />
               </AnimatedCard>
               <AnimatedCard delay={200}>
-                <KpiCard
-                  label="Preventiva"
-                  value={loading ? "—" : `${kpis.ratioPreventiva.toFixed(0)}%`}
-                  rawValue={kpis.ratioPreventiva}
-                  subtitle="meta: >70%"
-                  icon={Wrench}
-                  tone="emerald"
-                  loading={loading}
-                />
+                <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={`${fmtNum(kpis.externas)} ext • ${fmtNum(kpis.internas)} int`} icon={DollarSign} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="Custo Médio / OS" value={loading ? "—" : fmtK(kpis.custoMedioOS)} subtitle={`base: ${fmtNum(kpis.totalOS)} ordens`} icon={BarChart3} tone="rose" loading={loading} />
               </AnimatedCard>
             </div>
-
-            {/* ════════ INSIGHTS IA ════════ */}
             <InsightsSection
               setor="manutencao"
               dados={{
@@ -623,18 +784,257 @@ export default function Manutencao() {
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
-            />
+        />
+            {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
+            <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              
+              {/* Insight 1: CPK - Custo por KM */}
+              <AnimatedCard delay={300}>
+                <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-cyan-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">CPK</p>
+                        <p className="text-xl font-black text-white mt-0.5">R$ 2.45/km</p>
+                      </div>
+                      <DollarSign className="h-4 w-4 text-cyan-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Custo de manutenção por km rodado. <span className="text-cyan-400 font-semibold">Monitorar por veículo</span> e identificar outliers.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
 
-            {/* ════════ GRÁFICO + ALERTAS (2col) ════════ */}
+              {/* Insight 2: Preventiva vs Corretiva */}
+              <AnimatedCard delay={340}>
+                <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-emerald-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Preventiva</p>
+                        <p className="text-xl font-black text-white mt-0.5">58%</p>
+                      </div>
+                      <CheckCircle className="h-4 w-4 text-emerald-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Meta: <span className="text-emerald-400 font-semibold">&gt;70% preventiva</span>. Aumentar manutenções programadas reduz custos e paradas.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 3: MTBF - Tempo Médio Entre Falhas */}
+              <AnimatedCard delay={380}>
+                <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-amber-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">MTBF</p>
+                        <p className="text-xl font-black text-white mt-0.5">45 dias</p>
+                      </div>
+                      <Clock className="h-4 w-4 text-amber-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Tempo médio entre falhas <span className="text-amber-400 font-semibold">varia por modelo</span>. Identificar veículos problema.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 4: Renovação de Frota */}
+              <AnimatedCard delay={420}>
+                <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-rose-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Renovar?</p>
+                        <p className="text-lg font-black text-white mt-0.5">8 anos</p>
+                      </div>
+                      <AlertTriangle className="h-4 w-4 text-rose-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      <span className="text-rose-400 font-semibold">Renovar ou manter</span> veículos com X anos/km? Analisar curva de custo por idade.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 5: Oficina Interna */}
+              <AnimatedCard delay={460}>
+                <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-blue-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Estratégia</p>
+                        <p className="text-lg font-black text-white mt-0.5">Ampliar?</p>
+                      </div>
+                      <Users className="h-4 w-4 text-blue-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Vale <span className="text-blue-400 font-semibold">ampliar oficina interna</span> vs continuar terceirizando? Calcular ROI.
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+              {/* Insight 6: Telemetria Preditiva */}
+              <AnimatedCard delay={500}>
+                <div className="relative overflow-hidden rounded-[14px] border border-violet-500/20 bg-[var(--sgt-bg-card)] p-3.5 hover:border-violet-400/30 transition-all">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl"></div>
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-violet-400/70">Inovação</p>
+                        <p className="text-lg font-black text-white mt-0.5">IoT?</p>
+                      </div>
+                      <TrendingUp className="h-4 w-4 text-violet-400/60" />
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Investir em <span className="text-violet-400 font-semibold">telemetria preditiva</span> (sensores, IA) traz ROI considerando frota atual?
+                    </p>
+                  </div>
+                </div>
+              </AnimatedCard>
+
+            </div>
+
+            {/* ════════ VALIDAÇÕES ANALÍTICAS ════════ */}
+            <AnimatedCard delay={280}>
+              <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Activity className="w-3.5 h-3.5 text-violet-400" />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500">Validações Analíticas</span>
+                </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    {validCards.map(({ key, icon: Icon, label, desc, count, tone, severity }) => {
+                      const t = TONE_COLORS[tone];
+                      const hasModal = !!key && count > 0;
+
+                      const cardInner = (
+                        <div
+                          className={`group relative text-left rounded-[14px] border p-2.5 transition-all duration-200 h-full ${
+                            hasModal ? "hover:border-white/[0.14] hover:scale-[1.02]" : ""
+                          } ${severity ? t.border : "border-white/[0.06]"}`}
+                          style={{ background: "var(--sgt-bg-card)" }}
+                        >
+                          <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                            <div className={`rounded-lg p-1.5 ${t.bg} ${t.border} border`}>
+                              <Icon className={`w-3 h-3 ${t.icon}`} />
+                            </div>
+                            <span className={`text-[17px] font-black leading-none ${severity ? t.icon : "text-slate-500"} sgt-count-up`}>
+                              {loading ? "—" : fmtNum(count)}
+                            </span>
+                          </div>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 leading-tight mb-0.5">{label}</p>
+                          <p className={`text-[9px] leading-tight ${severity ? t.sub : "text-slate-600"}`}>{desc}</p>
+                          {hasModal && (
+                            <span className={`mt-1.5 inline-flex text-[8px] font-semibold uppercase tracking-[0.2em] ${t.icon} opacity-60 group-hover:opacity-100`}>
+                              Ver detalhes →
+                            </span>
+                          )}
+                          {severity && (
+                            <span className="absolute top-2 right-2 flex h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.glow }}>
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: t.glow }} />
+                            </span>
+                          )}
+                        </div>
+                      );
+
+                      if (!hasModal) {
+                        return <div key={label}>{cardInner}</div>;
+                      }
+
+                      const validTitles: Record<string, { title: string; subtitle: string }> = {
+                        outliersCusto:      { title: "OS com Custo Elevado (Outliers)", subtitle: `Limite: ${fmtK(validacoes.limiteOutlier)} (média ${fmtK(validacoes.mediaCusto)} + 2σ)` },
+                        ordensTravadas:     { title: "OS em Andamento há mais de 30 dias", subtitle: "Possível gargalo operacional — verificar encerramento" },
+                        semFornecedor:      { title: "OS Externas sem Fornecedor Cadastrado", subtitle: "Qualidade de dados — vincular fornecedor nos itens externos" },
+                        concentracoesAltas: { title: `Concentração de Custo — Veículo ${validacoes.topVeiculoNome}`, subtitle: `${(validacoes.concentracaoVeiculo * 100).toFixed(0)}% do custo total concentrado neste veículo` },
+                        semMO:              { title: "OS com Peças mas sem Mão de Obra", subtitle: "Possível sub-lançamento — revisar custo de mão de obra" },
+                      };
+                      const meta = validTitles[key!] ?? { title: label, subtitle: desc };
+                      const lista = validacaoAberta === key ? validacaoLista : [];
+
+                      return (
+                        <ExpandableCard
+                          key={label}
+                          layoutId={`valid-${key}`}
+                          expanded={validacaoAberta === key}
+                          onToggle={() => setValidacaoAberta(validacaoAberta === key ? null : key)}
+                          expandedContent={
+                            <div className="flex flex-col h-full">
+                              <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-white/[0.07] shrink-0">
+                                <div>
+                                  <h3 className="text-[13px] font-bold text-slate-100">{meta.title}</h3>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">{meta.subtitle}</p>
+                                </div>
+                                <span className="text-[11px] text-slate-500 font-medium shrink-0">{lista.length} encontrado(s)</span>
+                              </div>
+                              <div className="flex-1 overflow-auto px-4 pb-4 pt-3">
+                                {lista.length === 0 ? (
+                                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                                    <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
+                                    <p className="text-[12px] text-slate-500">Nenhum registro encontrado para esta validação</p>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {lista.map(o => {
+                                      const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
+                                      return (
+                                        <div
+                                          key={o.ordem}
+                                          className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]"
+                                          style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
+                                        >
+                                          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
+                                              <span className={`text-[8px] font-bold uppercase tracking-[0.15em] ring-1 rounded-full px-1.5 py-0.5 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                                {sit.label}
+                                              </span>
+                                            </div>
+                                            <span className="text-[10px] text-slate-400 truncate">
+                                              Veículo: <span className="text-slate-300">{o.veiculo}</span>
+                                              {o.fornecedor && <> • Forn: <span className="text-slate-300">{o.fornecedor}</span></>}
+                                              {o.classificacao && <> • Classif: <span className="text-slate-300">{o.classificacao}</span></>}
+                                            </span>
+                                          </div>
+                                          <div className="text-right shrink-0">
+                                            <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
+                                            <p className="text-[9px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` • ${o.diasAberto}d`}</p>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          }
+                        >
+                          {cardInner}
+                        </ExpandableCard>
+                      );
+                    })}
+                  </div>
+              </div>
+            </AnimatedCard>
+
+            {/* ════════ CUSTO MENSAL ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
 
-              {/* Custo mensal — 2 colunas */}
-              <AnimatedCard delay={280} className="lg:col-span-2">
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[240px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+              {/* Gráfico custo mensal — 2 colunas */}
+              <AnimatedCard delay={340} className="lg:col-span-2">
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-3.5 h-3.5 text-violet-400" />
-                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo Mensal</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo Mensal de Manutenção</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1 text-[9px] text-violet-400"><span className="w-2 h-2 rounded-full inline-block" style={{ background: RAW.accent.violet }} />Peças</span>
@@ -670,117 +1070,53 @@ export default function Manutencao() {
                 </div>
               </AnimatedCard>
 
-              {/* Alertas condensados — 1 coluna */}
-              <AnimatedCard delay={300}>
-                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[240px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas</span>
+              {/* Distribuição por classificação */}
+              <AnimatedCard delay={360}>
+                <div className="rounded-[14px] sm:rounded-[16px] border p-3 h-[220px] flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Custo por Classificação</span>
                   </div>
-                  <div className="flex flex-col gap-2 flex-1 overflow-auto">
-                    {alertCards.map(a => {
-                      const hasData = typeof a.count === "number" ? a.count > 0 : a.count !== "OK";
-                      const cardBody = (
-                        <div
-                          className={`flex items-center gap-2.5 rounded-[10px] border px-3 py-2.5 transition-all ${
-                            hasData ? "hover:border-white/[0.12] cursor-pointer" : ""
-                          }`}
-                          style={{ borderColor: RAW.borderDefault, background: "var(--sgt-bg-surface)" }}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{
-                              backgroundColor: hasData ? a.color : "rgba(100,116,139,0.4)",
-                              boxShadow: hasData ? `0 0 6px ${a.color}60` : "none",
-                            }}
-                          />
-                          <span className="text-[11px] text-slate-300 flex-1">{a.label}</span>
-                          <span className={`text-[13px] font-black ${hasData ? "text-slate-100" : "text-slate-600"}`}>
-                            {loading ? "—" : a.count}
-                          </span>
-                          {hasData && (
-                            <span className="text-[8px] font-semibold uppercase tracking-[0.15em] text-slate-600">ver →</span>
-                          )}
-                        </div>
-                      );
-
-                      if (!hasData) return <div key={a.key}>{cardBody}</div>;
-
-                      return (
-                        <ExpandableCard
-                          key={a.key}
-                          layoutId={`alerta-${a.key}`}
-                          expanded={alertaAberto === a.key}
-                          onToggle={() => setAlertaAberto(alertaAberto === a.key ? null : a.key)}
-                          expandedContent={
-                            <div className="flex flex-col h-full">
-                              <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-white/[0.07] shrink-0">
-                                <div>
-                                  <h3 className="text-[13px] font-bold text-slate-100">{a.title}</h3>
-                                  <p className="text-[10px] text-slate-500 mt-0.5">{a.subtitle}</p>
-                                </div>
-                                <span className="text-[11px] text-slate-500 font-medium shrink-0">{alertaLista.length} encontrado(s)</span>
+                  <div className="flex-1 overflow-hidden">
+                    {distClassif.length === 0 ? (
+                      <div className="flex h-full items-center justify-center text-[11px] text-slate-600">
+                        {loading ? "Carregando..." : "Sem dados"}
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 h-full overflow-auto pr-1">
+                        {distClassif.map((c, i) => {
+                          const pct = kpis.totalCusto > 0 ? (c.custo / kpis.totalCusto) * 100 : 0;
+                          return (
+                            <div key={c.nome}>
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[10px] text-slate-400 truncate max-w-[130px]">{c.nome}</span>
+                                <span className="text-[10px] font-semibold text-slate-300 shrink-0">{fmtK(c.custo)}</span>
                               </div>
-                              <div className="flex-1 overflow-auto px-4 pb-4 pt-3">
-                                {alertaLista.length === 0 ? (
-                                  <div className="flex flex-col items-center justify-center py-10 gap-2">
-                                    <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
-                                    <p className="text-[12px] text-slate-500">Nenhum registro encontrado</p>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    {alertaLista.map(o => {
-                                      const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
-                                      return (
-                                        <div
-                                          key={o.ordem}
-                                          className="flex items-center gap-3 rounded-[12px] border px-3 py-2.5 transition-all hover:border-white/[0.11]"
-                                          style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}
-                                        >
-                                          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                                            <div className="flex items-center gap-2">
-                                              <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
-                                              <span className={`text-[8px] font-bold uppercase tracking-[0.15em] ring-1 rounded-full px-1.5 py-0.5 ${sit.bg} ${sit.text} ${sit.ring}`}>
-                                                {sit.label}
-                                              </span>
-                                            </div>
-                                            <span className="text-[10px] text-slate-400 truncate">
-                                              Veículo: <span className="text-slate-300">{o.veiculo}</span>
-                                              {o.fornecedor && <> · Forn: <span className="text-slate-300">{o.fornecedor}</span></>}
-                                              {o.classificacao && <> · Classif: <span className="text-slate-300">{o.classificacao}</span></>}
-                                            </span>
-                                          </div>
-                                          <div className="text-right shrink-0">
-                                            <p className="text-[13px] font-black text-slate-100">{fmtBRL(o.totalCusto)}</p>
-                                            <p className="text-[9px] text-slate-500">{fmtData(o.dataordem)}{o.diasAberto !== null && ` · ${o.diasAberto}d`}</p>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
+                              <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${pct}%`, background: c.fill }}
+                                />
                               </div>
                             </div>
-                          }
-                        >
-                          {cardBody}
-                        </ExpandableCard>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               </AnimatedCard>
             </div>
 
-            {/* ════════ RANKINGS (lado a lado) ════════ */}
+            {/* ════════ RANKINGS ════════ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
-              {/* Top veículos */}
-              <AnimatedCard delay={340}>
+              {/* Ranking Peças por Veículo */}
+              <AnimatedCard delay={400}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
-                    <Truck className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Top Veículos (custo)</span>
+                    <Package className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Veículo</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingVeiculo.length === 0 ? (
@@ -792,17 +1128,16 @@ export default function Manutencao() {
                       {rankingVeiculo.map((r, i) => {
                         const max = rankingVeiculo[0].custo;
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
-                        const opacity = 0.7 - (i * 0.04);
                         return (
                           <div key={r.veiculo} className="flex items-center gap-2">
                             <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <span className="text-[10px] font-medium text-slate-300 truncate">{r.veiculo}</span>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 text-cyan-300">{fmtK(r.custo)}</span>
+                                <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
                               </div>
-                              <div className="h-[3px] rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: RAW.accent.cyan, opacity }} />
+                              <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
                               </div>
                             </div>
                           </div>
@@ -813,12 +1148,12 @@ export default function Manutencao() {
                 </div>
               </AnimatedCard>
 
-              {/* Top fornecedores */}
-              <AnimatedCard delay={380}>
+              {/* Ranking Peças por Fornecedor */}
+              <AnimatedCard delay={440}>
                 <div className="rounded-[14px] sm:rounded-[16px] border p-3" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Top Fornecedores (custo)</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ranking de Peças por Fornecedor</span>
                     <span className="ml-auto text-[8px] text-slate-600 uppercase tracking-[0.2em]">Top 10</span>
                   </div>
                   {rankingFornecedor.length === 0 ? (
@@ -830,17 +1165,16 @@ export default function Manutencao() {
                       {rankingFornecedor.map((r, i) => {
                         const max = rankingFornecedor[0].custo;
                         const pct = max > 0 ? (r.custo / max) * 100 : 0;
-                        const opacity = 0.6 - (i * 0.04);
                         return (
                           <div key={r.fornecedorFull} className="flex items-center gap-2">
                             <span className="w-5 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-0.5">
                                 <span className="text-[10px] font-medium text-slate-300 truncate">{r.fornecedor}</span>
-                                <span className="text-[10px] font-bold shrink-0 ml-2 text-violet-300">{fmtK(r.custo)}</span>
+                                <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{fmtK(r.custo)}</span>
                               </div>
-                              <div className="h-[3px] rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: RAW.accent.violet, opacity }} />
+                              <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: r.fill, opacity: 0.85 }} />
                               </div>
                             </div>
                           </div>
@@ -852,71 +1186,44 @@ export default function Manutencao() {
               </AnimatedCard>
             </div>
 
-            {/* ════════ TABELA DE ORDENS (view única) ════════ */}
-            <AnimatedCard delay={420}>
+            {/* ════════ TABELA DE ORDENS ════════ */}
+            <AnimatedCard delay={500}>
               <div className="rounded-[14px] sm:rounded-[16px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                {/* Header com filtros inline */}
+                {/* Header tabela */}
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <FileText className="w-3.5 h-3.5 text-violet-400" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Ordens de Serviço</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Detalhamento de Ordens</span>
                   <span className="rounded-full border border-violet-400/20 bg-violet-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-violet-300">
                     {fmtNum(ordensSearchadas.length)} OS
                   </span>
-
                   <div className="ml-auto flex items-center gap-2">
-                    {/* Filtros inline */}
-                    <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                      <SelectTrigger className="h-7 min-w-[72px] max-w-[100px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
-                        <SelectValue placeholder="Tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Todos">Tipo</SelectItem>
-                        <SelectItem value="SERVICOEXTERNO">Externo</SelectItem>
-                        <SelectItem value="SERVICOINTERNO">Interno</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
-                      <SelectTrigger className="h-7 min-w-[80px] max-w-[110px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
-                        <SelectValue placeholder="Situação" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Todos">Situação</SelectItem>
-                        <SelectItem value="CONCLUIDO">Concluído</SelectItem>
-                        <SelectItem value="ANDAMENTO">Andamento</SelectItem>
-                        <SelectItem value="INCONSISTENTE">Inconsistente</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={filtroClassif} onValueChange={setFiltroClassif}>
-                      <SelectTrigger className="h-7 min-w-[90px] max-w-[130px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-violet-500/30">
-                        <SelectValue placeholder="Classificação" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classificacoes.map(c => (
-                          <SelectItem key={c} value={c}>{c === "Todos" ? "Classificação" : c}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {hasActiveFilters && (
-                      <button
-                        onClick={() => { setFiltroTipo("Todos"); setFiltroSituacao("Todos"); setFiltroClassif("Todos"); }}
-                        className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
-                      >
-                        <X className="w-2.5 h-2.5" /> Limpar
-                      </button>
-                    )}
-
                     <GooeyInput
                       placeholder="Buscar OS, veículo, fornecedor..."
                       value={search}
                       onValueChange={(v) => setSearch(v)}
                     />
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = osView === t.id;
+                        return (
+                          <button key={t.id} onClick={() => setOsView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-violet-400/15 text-violet-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 {/* Tabela */}
+                {osView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -925,7 +1232,10 @@ export default function Manutencao() {
                           { key: "ordem",        label: "OS",             align: "left",   resp: ""                  },
                           { key: "veiculo",      label: "Veículo",        align: "left",   resp: ""                  },
                           { key: "dataordem",    label: "Data",           align: "center", resp: "hidden sm:table-cell" },
+                          { key: "tiposervico",  label: "Tipo",           align: "center", resp: "hidden md:table-cell" },
                           { key: "situacao",     label: "Situação",       align: "center", resp: ""                  },
+                          { key: "classificacao",label: "Classificação",  align: "left",   resp: "hidden lg:table-cell" },
+                          { key: "fornecedor",   label: "Fornecedor",     align: "left",   resp: "hidden xl:table-cell" },
                           { key: "totalPecas",   label: "Peças",          align: "right",  resp: "hidden sm:table-cell" },
                           { key: "totalMO",      label: "MO",             align: "right",  resp: "hidden md:table-cell" },
                           { key: "totalCusto",   label: "Total",          align: "right",  resp: ""                  },
@@ -948,7 +1258,7 @@ export default function Manutencao() {
                       {loading ? (
                         Array.from({ length: 6 }).map((_, i) => (
                           <tr key={i} style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}>
-                            {Array.from({ length: 7 }).map((_, j) => (
+                            {Array.from({ length: 10 }).map((_, j) => (
                               <td key={j} className="px-3 py-2.5">
                                 <div className="h-2 rounded-full bg-white/[0.04] animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
                               </td>
@@ -957,12 +1267,12 @@ export default function Manutencao() {
                         ))
                       ) : tabelaPagina.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="py-8 text-center text-[12px] text-slate-600">
+                          <td colSpan={10} className="py-8 text-center text-[12px] text-slate-600">
                             Nenhuma ordem encontrada
                           </td>
                         </tr>
                       ) : (
-                        tabelaPagina.map((o) => {
+                        tabelaPagina.map((o, i) => {
                           const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
                           return (
                             <tr
@@ -971,7 +1281,7 @@ export default function Manutencao() {
                               style={{ borderBottom: `1px solid ${RAW.borderDefault}` }}
                             >
                               <td className="px-3 py-2.5">
-                                <span className="font-mono text-[11px] text-violet-300 font-semibold">{o.ordem}</span>
+                                <span className="font-mono text-[11px] text-violet-300">{o.ordem}</span>
                               </td>
                               <td className="px-3 py-2.5">
                                 <span className="text-[11px] font-medium text-slate-300">{o.veiculo}</span>
@@ -979,19 +1289,30 @@ export default function Manutencao() {
                               <td className="px-3 py-2.5 hidden sm:table-cell text-center">
                                 <span className="text-[11px] text-slate-400">{fmtData(o.dataordem)}</span>
                               </td>
+                              <td className="px-3 py-2.5 hidden md:table-cell text-center">
+                                <span className={`text-[9px] font-semibold uppercase tracking-[0.15em] ${o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400"}`}>
+                                  {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
+                                </span>
+                              </td>
                               <td className="px-3 py-2.5 text-center">
                                 <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
                                   {sit.label}
                                 </span>
                               </td>
+                              <td className="px-3 py-2.5 hidden lg:table-cell">
+                                <span className="text-[10px] text-slate-400">{o.classificacao ?? "—"}</span>
+                              </td>
+                              <td className="px-3 py-2.5 hidden xl:table-cell">
+                                <span className="text-[10px] text-slate-400 max-w-[140px] block truncate">{o.fornecedor ?? "—"}</span>
+                              </td>
                               <td className="px-3 py-2.5 hidden sm:table-cell text-right">
-                                <span className="text-[11px] font-medium text-cyan-300 tabular-nums">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
+                                <span className="text-[11px] font-medium text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</span>
                               </td>
                               <td className="px-3 py-2.5 hidden md:table-cell text-right">
-                                <span className="text-[11px] font-medium text-emerald-300 tabular-nums">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
+                                <span className="text-[11px] font-medium text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</span>
                               </td>
                               <td className="px-3 py-2.5 text-right">
-                                <span className="text-[12px] font-bold text-slate-200 tabular-nums">{fmtK(o.totalCusto)}</span>
+                                <span className="text-[12px] font-bold text-slate-200">{fmtK(o.totalCusto)}</span>
                               </td>
                             </tr>
                           );
@@ -1000,9 +1321,195 @@ export default function Manutencao() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ════════ VIEW: CARDS ════════ */}
+                {osView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhuma ordem encontrada</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((o, i) => {
+                          const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
+                          const externo = o.tiposervico === "SERVICOEXTERNO";
+                          return (
+                            <AnimatedCard key={o.ordem} delay={Math.min(i, 12) * 30}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-violet-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: OS + situação */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="font-mono text-[14px] font-bold text-violet-300">{o.ordem}</span>
+                                    <span className="block text-[10px] text-slate-400 truncate">{o.veiculo}</span>
+                                  </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                    {sit.label}
+                                  </span>
+                                </div>
+
+                                {/* Tipo + data + classificação */}
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${externo ? "text-cyan-400" : "text-violet-400"}`}>
+                                    {TIPO_LABEL[o.tiposervico ?? ""] ?? "—"}
+                                  </span>
+                                  <span className="text-[10px] text-slate-600">· {fmtData(o.dataordem)}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mb-3">
+                                  <span className="text-[10px] text-slate-500 truncate" title={o.fornecedor ?? ""}>{o.fornecedor ?? o.classificacao ?? "—"}</span>
+                                </div>
+
+                                {/* Custos */}
+                                <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Peças</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-cyan-300">{o.totalPecas > 0 ? fmtK(o.totalPecas) : "—"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">M.O.</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-emerald-300">{o.totalMO > 0 ? fmtK(o.totalMO) : "—"}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
+                                    <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtK(o.totalCusto)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ════════ VIEW: ANALYTICS ════════ */}
+                {osView === "analytics" && (
+                  <div className="p-3">
+                    {osAnalytics.n === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Distribuição por situação */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Activity className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens por Situação</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {osAnalytics.porSituacao.map(([sit, qtd], idx) => {
+                                const max = osAnalytics.porSituacao[0]?.[1] ?? 1;
+                                const cor = [RAW.accent.violet, RAW.accent.cyan, RAW.accent.emerald, RAW.accent.amber, RAW.accent.rose][idx % 5];
+                                const share = osAnalytics.n > 0 ? (qtd / osAnalytics.n) * 100 : 0;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={sit}>{sit}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qtd / max) * 100}%`, background: cor }} />
+                                    </div>
+                                    <span className="text-[10px] text-slate-600 w-9 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Por classificação */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Classificação</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {osAnalytics.porClassificacao.map(([cls, qtd], idx) => {
+                                const max = osAnalytics.porClassificacao[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={cls}>{cls}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top fornecedores por custo */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Package className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Fornecedor</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {osAnalytics.topFornecedores.length === 0 ? (
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                              ) : osAnalytics.topFornecedores.map(([forn, val], idx) => {
+                                const max = osAnalytics.topFornecedores[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[120px] truncate shrink-0" title={forn}>{forn}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-amber-200 w-[64px] text-right shrink-0">{fmtK(val)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Ordens de maior custo */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <DollarSign className="w-3.5 h-3.5 text-rose-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Ordens de Maior Custo</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {osAnalytics.topCusto.length === 0 ? (
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                              ) : osAnalytics.topCusto.map((o) => {
+                                const max = osAnalytics.topCusto[0]?.totalCusto ?? 1;
+                                return (
+                                  <div key={o.ordem} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-mono text-slate-400 w-[90px] truncate shrink-0">{o.ordem}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(o.totalCusto / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-rose-200 w-[64px] text-right shrink-0">{fmtK(o.totalCusto)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {osView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
@@ -1048,9 +1555,11 @@ export default function Manutencao() {
               </div>
             </AnimatedCard>
 
-          </div>
+          </div>{/* fim gap-3 */}
         </section>
       </div>
+
+      {/* ════════ MODAL VALIDAÇÃO ════════ */}
     </div>
   );
 }
