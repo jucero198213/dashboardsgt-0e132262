@@ -66,37 +66,29 @@ Uses the existing `KpiCard` component from `src/components/indicators/KpiCard.ts
 
 ## 5. Vehicle Attention Panel
 
-### 5a. Score computation (per vehicle, from filtered `ManutencaoRow[]`)
+### 5a. Signal detection (per vehicle, from filtered `ManutencaoRow[]`)
 
-Group all non-cancelled rows by `veiculo`. For each vehicle compute:
+Group all non-cancelled rows by `veiculo`. For each vehicle evaluate these signals:
 
-| Signal | Condition | Score points |
-|--------|-----------|-------------|
-| `cost` | vehicle cost is in top 30% across all vehicles | +3 |
-| `stuck` | has any OS with `situacao === "ANDAMENTO"` and `diasAberto > 15` | +2 per qualifying OS (capped at +4) |
-| `repeat` | count of OS where `classificacao?.toUpperCase().includes("CORRET")` ≥ 2 | +2 |
+| Signal key | Label | Color | Condition |
+|------------|-------|-------|-----------|
+| `stuck` | `⏱ OS parada Xd` | rose | any OS with `situacao === "ANDAMENTO"` and `diasAberto > 15`; X = max diasAberto of qualifying OS |
+| `cost` | `💰 Custo alto` | amber | vehicle total cost > 2× the mean cost across all vehicles in period |
+| `repeat` | `🔄 N reincidências` | indigo | 2+ OS where `classificacao?.toUpperCase().includes("CORRET")`; N = count |
+| `frequency` | `📋 Alta frequência` | violet | 3+ OS in the period |
+| `revisional` | `🔧 Revisional em aberto` | orange | any OS with `classificacao?.toUpperCase().includes("REVIS")` and `situacao === "ANDAMENTO"` |
 
-**diasAberto** = `Math.floor((today - new Date(dataordem)) / 86_400_000)`.
+**diasAberto** = `Math.floor((Date.now() - new Date(dataordem).getTime()) / 86_400_000)`.
 
-A vehicle is included in the attention list only if its total score > 0. Sort descending by score, then by total cost as tiebreaker. Show top 10 vehicles.
+A vehicle is included only if it has **at least 1 active signal**. Sort descending by number of active signals, then by total cost as tiebreaker. Show top 10 vehicles.
 
-### 5b. Signal chips (per vehicle row)
+No score number, no score bar — signals are the only ranking mechanism.
 
-- `💰 Custo alto` (amber) — shown when `cost` signal triggered
-- `⏱ OS travada Xd` (rose) — shown when `stuck` signal triggered; X = max `diasAberto` of stuck OS for that vehicle
-- `🔄 N corretivas` (indigo) — shown when `repeat` signal triggered; N = count of corrective OS
-
-### 5c. Score bar
-
-Mini 3px horizontal bar, width proportional to score / maxScore across visible vehicles.
-Colors: score ≥ 7 → `from-rose-500 to-amber-500`; score 4–6 → `from-amber-500 to-indigo-400`; score < 4 → `text-indigo-400` solid.
-
-### 5d. Row content
+### 5b. Row content
 
 ```
 [rank]  [vehicle name]                         [total cost]
         [signal chips]                         [N OS]
-                                               [score bar]
 ```
 
 Clicking a row opens the OS Sheet pre-filtered to that vehicle.
