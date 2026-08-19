@@ -6,7 +6,7 @@
  */
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, Home, Sun, Moon, Shield, LogOut } from "lucide-react";
+import { ChevronDown, ChevronRight, Home, Sun, Moon, Shield, LogOut, Camera } from "lucide-react";
 import {
   motion,
   useMotionValue,
@@ -600,6 +600,11 @@ function UserFooter({
 
   const menuActions = [
     {
+      label: "Alterar foto de perfil",
+      icon:  <Camera className="h-3.5 w-3.5 text-blue-400" />,
+      fn:    () => { setOpen(false); setModalOpen(true); },
+    },
+    {
       label: theme === "dark" ? "Tema claro" : "Tema escuro",
       icon:  theme === "dark" ? <Sun className="h-3.5 w-3.5 text-amber-400" /> : <Moon className="h-3.5 w-3.5 text-cyan-400" />,
       fn:    () => { setOpen(false); onToggleTheme(); },
@@ -623,11 +628,9 @@ function UserFooter({
         onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sb-row-hover)"}
         onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
       >
-        <button
-          onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
-          className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none"
+        <div
+          className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl overflow-hidden"
           style={{ border: "1px solid color-mix(in srgb, var(--sb-accent) 25%, transparent)" }}
-          title="Alterar foto de perfil"
         >
           {avatarUrl ? (
             <img src={avatarUrl} alt="avatar" className="h-full w-full object-cover" />
@@ -636,7 +639,7 @@ function UserFooter({
               {initial}
             </span>
           )}
-        </button>
+        </div>
         {!collapsed && (
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[12px] font-medium truncate" style={{ color: "var(--sb-text-secondary)" }}>{shortEmail}</p>
