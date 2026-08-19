@@ -74,7 +74,7 @@ export function OsAndamentoCard({ ordens, loading, onExpandChange }: Props) {
      * O card fica em position:absolute, anchored no TOP → cresce para BAIXO
      * com z-index:50, sobrepondo a seção ANÁLISE sem empurrar nada.
      */
-    <div style={{ position: "relative", height: COLLAPSED_H }}>
+    <div style={{ position: "relative", height: "100%", minHeight: COLLAPSED_H }}>
 
       <motion.div
         ref={cardRef}
@@ -102,7 +102,7 @@ export function OsAndamentoCard({ ordens, loading, onExpandChange }: Props) {
             ? "0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(245,166,35,0.15)"
             : "none",
         }}
-        animate={{ height: isExpanded ? EXPANDED_H : COLLAPSED_H }}
+        animate={{ height: isExpanded ? EXPANDED_H : "100%" }}
         transition={{ type: "spring", stiffness: 380, damping: 36 }}
       >
 
