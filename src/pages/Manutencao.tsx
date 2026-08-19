@@ -220,9 +220,9 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              {/* Main grid — 50/50 */}
-              <div className="grid grid-cols-2 gap-3">
-                <AnimatedCard delay={240}>
+              {/* Main grid — 50/50, ambas colunas mesma altura */}
+              <div className="grid grid-cols-2 gap-3 items-stretch">
+                <AnimatedCard delay={240} className="h-full">
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
                     onSelectVeiculo={handleSelectVeiculo}
@@ -230,7 +230,7 @@ export default function Manutencao() {
                   />
                 </AnimatedCard>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 h-full">
                   <AnimatedCard delay={300}>
                     <CustoMiniChart
                       data={dailyCosts}
@@ -238,7 +238,7 @@ export default function Manutencao() {
                       loading={loading}
                     />
                   </AnimatedCard>
-                  <AnimatedCard delay={360}>
+                  <AnimatedCard delay={360} className="flex-1 flex flex-col min-h-0">
                     <FornecedorRanking
                       items={fornecedorRanking}
                       loading={loading}

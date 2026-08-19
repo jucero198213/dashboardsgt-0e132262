@@ -14,7 +14,7 @@ const fmtK = (v: number) =>
 
 export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Props) {
   return (
-    <div className="rounded-[14px] border overflow-hidden flex flex-col"
+    <div className="rounded-[14px] border overflow-hidden flex flex-col h-full"
       style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
 
       {/* Header */}
