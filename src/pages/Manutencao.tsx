@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { DollarSign, AlertTriangle, Activity, TrendingUp, ChevronRight } from "lucide-react";
+import { DollarSign, AlertTriangle, TrendingUp, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -11,6 +11,7 @@ import { VehicleAttentionPanel } from "@/components/manutencao/VehicleAttentionP
 import { FornecedorRanking } from "@/components/manutencao/FornecedorRanking";
 import { CustoMiniChart } from "@/components/manutencao/CustoMiniChart";
 import { OsSheet } from "@/components/manutencao/OsSheet";
+import { OsAndamentoCard } from "@/components/manutencao/OsAndamentoCard";
 import {
   aggregateOrdens,
   computeVehicleSignals,
@@ -183,15 +184,7 @@ export default function Manutencao() {
                 />
               </AnimatedCard>
               <AnimatedCard delay={120}>
-                <KpiCard
-                  label="OS em Andamento"
-                  value={String(kpis.osEmAndamento)}
-                  rawValue={kpis.osEmAndamento}
-                  subtitle="ordens abertas"
-                  icon={Activity}
-                  tone="amber"
-                  loading={loading}
-                />
+                <OsAndamentoCard ordens={ordens} loading={loading} />
               </AnimatedCard>
               <AnimatedCard delay={180}>
                 <KpiCard
