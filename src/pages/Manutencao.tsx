@@ -126,7 +126,7 @@ export default function Manutencao() {
               {/* Navbar desktop */}
               <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em]" style={{ color: "rgba(123,110,245,0.8)" }}>Workspace</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Manutenção</span>
                 </div>
 
