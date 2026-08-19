@@ -191,7 +191,7 @@ export function AppSidebar() {
   }
 
   // ── render helper: item de nav ────────────────────────────────────────────
-  function renderItem(item: AppNavItem) {
+  function renderItem(item: AppNavItem, itemIndex = 0) {
     const Icon   = item.icon;
     const active = isActive(item);
 
@@ -225,10 +225,20 @@ export function AppSidebar() {
           onClick={() => goItem(item)}
           className={`w-full flex items-center gap-3 text-[14px] font-medium transition-all duration-100 ${active ? "sgt-nav-active" : ""}`}
           style={active
-            ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px" }
+            ? { ...PILL_ACTIVE, padding: "8px 12px 8px 16px",
+                animationName: "sidebarItemIn",
+                animationDuration: "0.35s",
+                animationTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+                animationFillMode: "both",
+                animationDelay: `${itemIndex * 55}ms` }
             : { color: "var(--sb-text-secondary)", borderRadius: "9999px",
                 border: "1px solid transparent", background: "transparent",
-                padding: "8px 16px" }}
+                padding: "8px 16px",
+                animationName: "sidebarItemIn",
+                animationDuration: "0.35s",
+                animationTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+                animationFillMode: "both",
+                animationDelay: `${itemIndex * 55}ms` }}
           onMouseEnter={e => {
             if (!active) {
               const b = e.currentTarget as HTMLButtonElement;
@@ -358,6 +368,13 @@ export function AppSidebar() {
       }}
     >
 
+      <style>{`
+        @keyframes sidebarItemIn {
+          from { opacity: 0; transform: translateX(-10px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
+
       {/* ── LOGO + TOGGLE ─────────────────────────────────────────────────── */}
       <div
         className={`flex shrink-0 items-center border-b ${
@@ -445,7 +462,7 @@ export function AppSidebar() {
           return (
             <div key={group.label}>
               {renderSectionLabel(group.label)}
-              {items.map(item => renderItem(item))}
+              {items.map((item, i) => renderItem(item, i))}
             </div>
           );
         })}
@@ -488,7 +505,7 @@ export function AppSidebar() {
               >
                 <div className="overflow-hidden">
                   <div className="py-6 -my-6">
-                    {items.map(item => renderItem(item))}
+                    {items.map((item, i) => renderItem(item, i))}
                   </div>
                 </div>
               </div>

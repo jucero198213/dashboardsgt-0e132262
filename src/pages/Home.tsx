@@ -656,6 +656,13 @@ export default function Home() {
           {/* ── HERO ── */}
           <section className="relative mx-auto flex w-full max-w-[1500px] flex-col items-center justify-center overflow-x-hidden px-4 pt-12 pb-4 text-center sm:pt-14 sm:pb-6 lg:px-10 lg:pt-16 lg:pb-8">
 
+            {/* Floating ambient orbs */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden sgt-atmosphere" aria-hidden="true">
+              <div style={{ position: "absolute", width: 110, height: 110, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.18), transparent 70%)", filter: "blur(26px)", top: "15%", left: "8%", animation: "floatOrb1 6.5s ease-in-out infinite" }} />
+              <div style={{ position: "absolute", width: 80, height: 80, borderRadius: "50%", background: "radial-gradient(circle, rgba(74,158,255,0.11), transparent 70%)", filter: "blur(20px)", top: "50%", right: "10%", animation: "floatOrb2 8.5s ease-in-out infinite 0.6s" }} />
+              <div style={{ position: "absolute", width: 65, height: 65, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,166,35,0.09), transparent 70%)", filter: "blur(16px)", bottom: "18%", left: "40%", animation: "floatOrb3 7.2s ease-in-out infinite 1.3s" }} />
+            </div>
+
             {/* Título hero */}
             <h1 className="w-full leading-none tracking-tight">
 
