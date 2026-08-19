@@ -40,7 +40,7 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
       ref={containerRef}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={handleContainerLeave}
-      className="group relative rounded-[14px] border p-4 flex flex-col gap-3 transition-all duration-500"
+      className="group relative rounded-[14px] border p-4 flex flex-col gap-3 transition-all duration-500 h-full"
       style={{
         background: "var(--sgt-bg-card)",
         borderColor: "var(--sgt-border-subtle)",
@@ -79,7 +79,7 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
 
       {/* Bars */}
       {loading ? (
-        <div className="flex items-end gap-1.5 h-[72px]">
+        <div className="flex items-end gap-1.5 flex-1 min-h-0">
           {Array.from({ length: 7 }).map((_, i) => (
             <div
               key={i}
@@ -92,13 +92,13 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
           ))}
         </div>
       ) : data.length === 0 ? (
-        <div className="h-[72px] flex items-center justify-center">
+        <div className="flex-1 min-h-0 flex items-center justify-center">
           <span className="text-[11px] text-slate-500">Sem dados no período</span>
         </div>
       ) : (
-        <div className="flex items-end gap-1.5 h-[72px]">
+        <div className="flex items-end gap-1.5 flex-1 min-h-0">
           {data.map((item, index) => {
-            const heightPx = Math.max((item.custo / maxValue) * 72, 4);
+            const heightPct = Math.max((item.custo / maxValue) * 100, 2);
             const isHovered = hoveredIndex === index;
             const isAnyHovered = hoveredIndex !== null;
             const isNeighbor = hoveredIndex !== null &&
@@ -114,7 +114,7 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
                 <div
                   className="w-full rounded-full cursor-pointer transition-all duration-300 ease-out origin-bottom"
                   style={{
-                    height: `${heightPx}px`,
+                    height: `${heightPct}%`,
                     background: isHovered
                       ? "rgba(123,110,245,1)"
                       : isNeighbor

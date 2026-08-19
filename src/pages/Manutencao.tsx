@@ -231,7 +231,7 @@ export default function Manutencao() {
                 </AnimatedCard>
 
                 <div className="flex flex-col gap-3 h-full">
-                  <AnimatedCard delay={300}>
+                  <AnimatedCard delay={300} className="flex-1 flex flex-col min-h-0">
                     <CustoMiniChart
                       data={dailyCosts}
                       totalCusto={kpis.totalCusto}
