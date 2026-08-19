@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
@@ -67,12 +67,19 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
   }, [ordens, search, filtroSituacao, filtroTipo, filtroVeiculo]);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-[860px] p-0 flex flex-col"
-        style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)" }}>
-        <SheetTitle className="sr-only">Detalhamento de Ordens de Serviço</SheetTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-5xl w-full p-0 flex flex-col overflow-hidden"
+        style={{
+          height: "85vh",
+          background: "var(--sgt-bg-section)",
+          borderColor: "var(--sgt-border-subtle)",
+          borderRadius: "1rem",
+        }}
+      >
+        <DialogTitle className="sr-only">Detalhamento de Ordens de Serviço</DialogTitle>
 
-        {/* Sheet header */}
+        {/* Dialog header */}
         <div className="flex items-center gap-3 px-5 py-4 shrink-0"
           style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
           <div>
@@ -203,7 +210,7 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
             </tbody>
           </table>
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
