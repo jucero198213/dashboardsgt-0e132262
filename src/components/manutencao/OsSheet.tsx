@@ -4,15 +4,19 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, X } from "lucide-react";
+import { Search, X, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { OrdemAgregada } from "@/lib/manutencaoUtils";
+import type { OrdemAgregada, ManutencaoKpis, VehicleSignal } from "@/lib/manutencaoUtils";
+import { exportManutencaoXlsx } from "@/lib/manutencaoExport";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   ordens: OrdemAgregada[];
   initialVeiculo?: string | null;
+  kpis: ManutencaoKpis;
+  vehicleSignals: VehicleSignal[];
+  filterInfo: { dataInicio: string | null; dataFim: string | null; filial: string | null };
 }
 
 const SITUACAO_STYLE: Record<string, { bg: string; text: string; label: string }> = {
@@ -31,7 +35,7 @@ const fmtData = (s: string | null) => {
   return isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
 };
 
-export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
+export function OsSheet({ open, onOpenChange, ordens, initialVeiculo, kpis, vehicleSignals, filterInfo }: Props) {
   const [search, setSearch] = useState("");
   const [filtroSituacao, setFiltroSituacao] = useState("Todos");
   const [filtroTipo, setFiltroTipo] = useState("Todos");
@@ -66,6 +70,10 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
     });
   }, [ordens, search, filtroSituacao, filtroTipo, filtroVeiculo]);
 
+  const handleExport = () => {
+    exportManutencaoXlsx(ordens, kpis, vehicleSignals, filterInfo);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -79,7 +87,7 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
       >
         <DialogTitle className="sr-only">Detalhamento de Ordens de Serviço</DialogTitle>
 
-        {/* Dialog header */}
+        {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 shrink-0"
           style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
           <div>
@@ -94,6 +102,29 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
             style={{ background: "var(--sgt-skeleton-bg)", color: "var(--sgt-text-secondary)" }}>
             {filtered.length} / {ordens.length} OS
           </span>
+
+          {/* Export button */}
+          <button
+            type="button"
+            onClick={handleExport}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[11px] font-semibold transition-colors"
+            style={{
+              background: "rgba(52,211,153,0.08)",
+              border: "1px solid rgba(52,211,153,0.2)",
+              color: "#34d399",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(52,211,153,0.15)";
+              e.currentTarget.style.borderColor = "rgba(52,211,153,0.4)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "rgba(52,211,153,0.08)";
+              e.currentTarget.style.borderColor = "rgba(52,211,153,0.2)";
+            }}
+          >
+            <FileDown className="h-3.5 w-3.5" />
+            Exportar Excel
+          </button>
         </div>
 
         {/* Filters */}

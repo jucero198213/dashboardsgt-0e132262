@@ -220,8 +220,8 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              {/* Main grid */}
-              <div className="grid grid-cols-[1fr_300px] gap-3">
+              {/* Main grid — 50/50 */}
+              <div className="grid grid-cols-2 gap-3">
                 <AnimatedCard delay={240}>
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
@@ -273,12 +273,15 @@ export default function Manutencao() {
         </section>
       </div>
 
-      {/* Sheet */}
+      {/* Dialog OS */}
       <OsSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         ordens={ordens}
         initialVeiculo={sheetVeiculo}
+        kpis={kpis}
+        vehicleSignals={vehicleSignals}
+        filterInfo={{ dataInicio: dwFilter.dataInicio, dataFim: dwFilter.dataFim, filial: dwFilter.filial ?? null }}
       />
     </div>
   );
