@@ -20,7 +20,7 @@ export function FornecedorRanking({ items, loading }: Props) {
           Por fornecedor
         </span>
         <Badge variant="secondary" className="ml-auto text-[9px] font-bold tracking-wider">
-          TOP {items.length}
+          TOP {loading ? "…" : items.length}
         </Badge>
       </div>
       <div className="flex flex-col divide-y divide-border/40">
