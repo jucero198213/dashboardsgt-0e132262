@@ -221,8 +221,8 @@ export default function Manutencao() {
               </div>
 
               {/* Main grid */}
-              <div className="grid grid-cols-[1fr_300px] gap-3 flex-1 min-h-0">
-                <AnimatedCard delay={240} className="flex flex-col min-h-0">
+              <div className="grid grid-cols-[1fr_300px] gap-3">
+                <AnimatedCard delay={240}>
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
                     onSelectVeiculo={handleSelectVeiculo}
@@ -238,7 +238,7 @@ export default function Manutencao() {
                       loading={loading}
                     />
                   </AnimatedCard>
-                  <AnimatedCard delay={360} className="flex flex-col flex-1 min-h-0">
+                  <AnimatedCard delay={360}>
                     <FornecedorRanking
                       items={fornecedorRanking}
                       loading={loading}

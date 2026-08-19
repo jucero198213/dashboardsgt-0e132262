@@ -12,7 +12,7 @@ const fmtK = (v: number) =>
 
 export function FornecedorRanking({ items, loading }: Props) {
   return (
-    <div className="rounded-[14px] border overflow-hidden flex flex-col flex-1"
+    <div className="rounded-[14px] border overflow-hidden flex flex-col"
       style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
       <div className="flex items-center gap-2 px-3 py-2.5 shrink-0"
         style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>

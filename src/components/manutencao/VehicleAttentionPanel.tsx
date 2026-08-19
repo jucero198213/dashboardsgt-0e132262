@@ -14,7 +14,7 @@ const fmtK = (v: number) =>
 
 export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Props) {
   return (
-    <div className="rounded-[14px] border overflow-hidden flex flex-col h-full"
+    <div className="rounded-[14px] border overflow-hidden flex flex-col"
       style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
 
       {/* Header */}
@@ -42,7 +42,7 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
       </div>
 
       {/* List */}
-      <div className="flex flex-col overflow-y-auto flex-1">
+      <div className="flex flex-col">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-center"
