@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import type { FornecedorItem } from "@/lib/manutencaoUtils";
 
 interface Props {
@@ -14,34 +12,39 @@ const fmtK = (v: number) =>
 
 export function FornecedorRanking({ items, loading }: Props) {
   return (
-    <Card className="rounded-xl overflow-hidden flex flex-col flex-1">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+    <div className="rounded-[14px] border overflow-hidden flex flex-col flex-1"
+      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+      <div className="flex items-center gap-2 px-3 py-2.5 shrink-0"
+        style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+        <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
           Por fornecedor
         </span>
-        <Badge variant="secondary" className="ml-auto text-[9px] font-bold tracking-wider">
+        <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full"
+          style={{ background: "rgba(74,110,184,0.15)", color: "#A8C0E8" }}>
           TOP {loading ? "…" : items.length}
-        </Badge>
+        </span>
       </div>
-      <div className="flex flex-col divide-y divide-border/40">
+      <div className="flex flex-col">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                <div className="h-2.5 w-4 rounded bg-muted animate-pulse" />
-                <div className="h-2.5 flex-1 rounded bg-muted animate-pulse" />
-                <div className="h-2.5 w-12 rounded bg-muted animate-pulse" />
+              <div key={i} className="flex items-center gap-3 px-3 py-2.5"
+                style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+                <div className="h-2.5 w-4 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                <div className="h-2.5 flex-1 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                <div className="h-2.5 w-12 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
               </div>
             ))
           : items.map((item, i) => (
-              <div key={item.fornecedor} className="flex items-center gap-3 px-4 py-2.5">
-                <span className="text-[10px] font-bold text-muted-foreground/40 w-4 text-right shrink-0">
+              <div key={item.fornecedor} className="flex items-center gap-3 px-3 py-2.5"
+                style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+                <span className="text-[10px] font-bold text-slate-500 w-4 text-right shrink-0">
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0 flex flex-col gap-1">
-                  <span className="text-[11px] text-foreground/80 truncate" title={item.fornecedor}>
+                  <span className="text-[11px] dark:text-white/80 text-slate-700 truncate" title={item.fornecedor}>
                     {item.fornecedor}
                   </span>
-                  <div className="h-[3px] rounded-full bg-muted overflow-hidden">
+                  <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "var(--sgt-border-medium)" }}>
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-indigo-400 transition-all duration-500"
                       style={{ width: `${Math.round(item.share * 100)}%` }}
@@ -54,6 +57,6 @@ export function FornecedorRanking({ items, loading }: Props) {
               </div>
             ))}
       </div>
-    </Card>
+    </div>
   );
 }

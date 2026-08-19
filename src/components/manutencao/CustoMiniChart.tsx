@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts";
 import type { DailyCost } from "@/lib/manutencaoUtils";
 
@@ -16,8 +15,9 @@ const fmtK = (v: number) =>
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-violet-400/30 bg-background/95 px-2.5 py-1.5 shadow-xl text-[11px]">
-      <p className="font-bold text-muted-foreground mb-0.5">{label}</p>
+    <div className="rounded-lg border px-2.5 py-1.5 shadow-xl text-[11px]"
+      style={{ background: "var(--sgt-bg-overlay)", borderColor: "rgba(123,110,245,0.3)" }}>
+      <p className="font-bold text-slate-400 mb-0.5">{label}</p>
       <p className="font-black text-violet-400">{fmtK(payload[0].value)}</p>
     </div>
   );
@@ -25,19 +25,20 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function CustoMiniChart({ data, totalCusto, loading }: Props) {
   return (
-    <Card className="rounded-xl p-4 flex flex-col gap-3">
+    <div className="rounded-[14px] border p-3 flex flex-col gap-3"
+      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
             Custo no período
           </p>
-          <p className={`text-xl font-black tracking-tight text-foreground mt-0.5${loading ? " animate-pulse" : ""}`}>
+          <p className={`text-xl font-black tracking-tight dark:text-white text-slate-800 mt-0.5${loading ? " animate-pulse" : ""}`}>
             {loading ? "—" : fmtK(totalCusto)}
           </p>
         </div>
       </div>
       {loading ? (
-        <div className="h-[72px] rounded-lg bg-muted animate-pulse" />
+        <div className="h-[72px] rounded-lg animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
       ) : (
         <div className="h-[72px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -48,6 +49,6 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
           </ResponsiveContainer>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

@@ -1,14 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OrdemAgregada } from "@/lib/manutencaoUtils";
@@ -42,7 +37,6 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
   const [filtroTipo, setFiltroTipo] = useState("Todos");
   const [filtroVeiculo, setFiltroVeiculo] = useState("Todos");
 
-  // Pre-filter by vehicle when opened from vehicle row
   useEffect(() => {
     if (open && initialVeiculo) {
       setFiltroVeiculo(initialVeiculo);
@@ -74,46 +68,56 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-[860px] p-0 flex flex-col">
+      <SheetContent side="right" className="w-full max-w-[860px] p-0 flex flex-col"
+        style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)" }}>
         <SheetTitle className="sr-only">Detalhamento de Ordens de Serviço</SheetTitle>
 
         {/* Sheet header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <div className="flex items-center gap-3 px-5 py-4 shrink-0"
+          style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+            <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
               Detalhamento
             </p>
-            <p className="text-base font-black tracking-tight text-foreground">
+            <p className="text-base font-black tracking-tight dark:text-white text-slate-800">
               Ordens de Serviço
             </p>
           </div>
-          <Badge variant="secondary" className="ml-auto text-[9px] font-bold">
+          <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full"
+            style={{ background: "var(--sgt-skeleton-bg)", color: "var(--sgt-text-secondary)" }}>
             {filtered.length} / {ordens.length} OS
-          </Badge>
+          </span>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-border">
+        <div className="flex items-center gap-2 px-5 py-3 shrink-0"
+          style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+            <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar por ordem, veículo, fornecedor…"
-              className="pl-8 h-8 text-xs"
+              className="w-full h-8 pl-8 pr-8 text-xs rounded-lg outline-none transition-colors"
+              style={{
+                background: "var(--sgt-input-bg)",
+                border: "1px solid var(--sgt-input-border)",
+                color: "var(--sgt-text-primary)",
+              }}
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
               >
                 <X className="h-3 w-3" />
               </button>
             )}
           </div>
           <Select value={filtroVeiculo} onValueChange={setFiltroVeiculo}>
-            <SelectTrigger className="h-8 text-xs w-[140px]">
+            <SelectTrigger className="h-8 text-xs w-[140px]"
+              style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
               <SelectValue placeholder="Veículo" />
             </SelectTrigger>
             <SelectContent>
@@ -122,7 +126,8 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
             </SelectContent>
           </Select>
           <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
-            <SelectTrigger className="h-8 text-xs w-[120px]">
+            <SelectTrigger className="h-8 text-xs w-[120px]"
+              style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
               <SelectValue placeholder="Situação" />
             </SelectTrigger>
             <SelectContent>
@@ -132,7 +137,8 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
             </SelectContent>
           </Select>
           <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-            <SelectTrigger className="h-8 text-xs w-[110px]">
+            <SelectTrigger className="h-8 text-xs w-[110px]"
+              style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>
@@ -145,52 +151,57 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo }: Props) {
 
         {/* Table */}
         <ScrollArea className="flex-1">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-[10px] tracking-wider w-[90px]">Ordem</TableHead>
-                <TableHead className="text-[10px] tracking-wider">Veículo</TableHead>
-                <TableHead className="text-[10px] tracking-wider w-[90px]">Data</TableHead>
-                <TableHead className="text-[10px] tracking-wider w-[80px]">Tipo</TableHead>
-                <TableHead className="text-[10px] tracking-wider w-[100px]">Situação</TableHead>
-                <TableHead className="text-[10px] tracking-wider">Classificação</TableHead>
-                <TableHead className="text-[10px] tracking-wider">Fornecedor</TableHead>
-                <TableHead className="text-[10px] tracking-wider text-right w-[100px]">Custo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
+              <tr>
+                {["Ordem", "Veículo", "Data", "Tipo", "Situação", "Classificação", "Fornecedor", "Custo"].map(h => (
+                  <th key={h} className={cn(
+                    "px-3 py-2 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500",
+                    h === "Custo" && "text-right"
+                  )}
+                    style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
               {filtered.map(o => {
                 const sit = SITUACAO_STYLE[o.situacao ?? ""] ?? SITUACAO_STYLE.INCONSISTENTE;
                 return (
-                  <TableRow key={o.ordem}>
-                    <TableCell className="text-[11px] font-mono text-muted-foreground">{o.ordem}</TableCell>
-                    <TableCell className="text-[11px] font-semibold">{o.veiculo || "—"}</TableCell>
-                    <TableCell className="text-[11px] text-muted-foreground">{fmtData(o.dataordem)}</TableCell>
-                    <TableCell>
-                      <span className={cn("text-[9px] font-bold uppercase tracking-wider", o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400")}>
+                  <tr key={o.ordem} className="transition-colors"
+                    style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                    <td className="px-3 py-2.5 text-[11px] font-mono text-slate-500">{o.ordem}</td>
+                    <td className="px-3 py-2.5 text-[11px] font-semibold dark:text-white text-slate-800">{o.veiculo || "—"}</td>
+                    <td className="px-3 py-2.5 text-[11px] text-slate-500">{fmtData(o.dataordem)}</td>
+                    <td className="px-3 py-2.5">
+                      <span className={cn("text-[9px] font-bold uppercase tracking-wider",
+                        o.tiposervico === "SERVICOEXTERNO" ? "text-cyan-400" : "text-violet-400")}>
                         {o.tiposervico === "SERVICOEXTERNO" ? "Ext" : o.tiposervico === "SERVICOINTERNO" ? "Int" : "—"}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="px-3 py-2.5">
                       <span className={cn("text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded", sit.bg, sit.text)}>
                         {sit.label}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-[11px] text-muted-foreground max-w-[140px] truncate" title={o.classificacao ?? ""}>{o.classificacao || "—"}</TableCell>
-                    <TableCell className="text-[11px] text-muted-foreground max-w-[160px] truncate" title={o.fornecedor ?? ""}>{o.fornecedor || "—"}</TableCell>
-                    <TableCell className="text-[11px] font-black text-right text-foreground">{fmtBRL(o.totalCusto)}</TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="px-3 py-2.5 text-[11px] text-slate-500 max-w-[140px] truncate" title={o.classificacao ?? ""}>{o.classificacao || "—"}</td>
+                    <td className="px-3 py-2.5 text-[11px] text-slate-500 max-w-[160px] truncate" title={o.fornecedor ?? ""}>{o.fornecedor || "—"}</td>
+                    <td className="px-3 py-2.5 text-[11px] font-black text-right dark:text-white text-slate-800">{fmtBRL(o.totalCusto)}</td>
+                  </tr>
                 );
               })}
               {filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground text-sm py-10">
+                <tr>
+                  <td colSpan={8} className="px-3 py-10 text-center text-sm text-slate-500">
                     Nenhuma OS encontrada
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               )}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </ScrollArea>
       </SheetContent>
     </Sheet>

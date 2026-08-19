@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { VehicleSignal } from "@/lib/manutencaoUtils";
 
@@ -16,39 +14,45 @@ const fmtK = (v: number) =>
 
 export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Props) {
   return (
-    <Card className="rounded-xl overflow-hidden flex flex-col h-full">
+    <div className="rounded-[14px] border overflow-hidden flex flex-col h-full"
+      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+      <div className="flex items-center gap-2 px-3 py-2.5 shrink-0"
+        style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+        <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
           Veículos que precisam de atenção
         </span>
-        <Badge variant="secondary" className="ml-auto text-[9px] font-bold tracking-wider">
-          {vehicles.length} veículos
-        </Badge>
+        <span className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full"
+          style={{ background: "var(--sgt-accent-soft)", color: "var(--sgt-accent-text)" }}>
+          {loading ? "…" : vehicles.length} veículos
+        </span>
       </div>
 
       {/* Column labels */}
-      <div className="grid grid-cols-[24px_1fr_auto] gap-3 px-4 py-1.5 border-b border-border/50">
+      <div className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-1.5 shrink-0"
+        style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
         <span />
-        <span className="text-[9px] font-semibold uppercase tracking-[0.28em] text-muted-foreground/60">
+        <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
           Veículo · sinais
         </span>
-        <span className="text-[9px] font-semibold uppercase tracking-[0.28em] text-muted-foreground/60 text-right">
+        <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 text-right">
           Custo · OS
         </span>
       </div>
 
       {/* List */}
-      <div className="flex flex-col divide-y divide-border/40 overflow-y-auto">
+      <div className="flex flex-col overflow-y-auto flex-1">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-4 py-3 items-center">
-                <div className="h-3 w-4 rounded bg-muted animate-pulse" />
+              <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-center"
+                style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
+                <div className="h-3 w-4 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                 <div className="space-y-1.5">
-                  <div className="h-3 w-32 rounded bg-muted animate-pulse" />
-                  <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+                  <div className="h-3 w-32 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+                  <div className="h-3 w-24 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                 </div>
-                <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-16 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
               </div>
             ))
           : vehicles.map((v, i) => (
@@ -57,19 +61,21 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
                 type="button"
                 onClick={() => onSelectVeiculo(v.veiculo)}
                 className={cn(
-                  "grid grid-cols-[24px_1fr_auto] gap-3 px-4 py-3 items-start text-left",
-                  "transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:bg-muted/40",
+                  "grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-start text-left transition-colors",
                   i >= 5 && "opacity-60"
                 )}
+                style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "")}
               >
                 {/* Rank */}
-                <span className="text-[11px] font-bold text-muted-foreground/40 text-right pt-0.5">
+                <span className="text-[11px] font-bold text-slate-500 text-right pt-0.5">
                   {i + 1}
                 </span>
 
                 {/* Vehicle + signals */}
                 <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground/90 mb-1.5 truncate">
+                  <p className="text-[12px] font-semibold mb-1.5 truncate dark:text-white text-slate-800">
                     {v.veiculo}
                   </p>
                   <div className="flex flex-wrap gap-1">
@@ -103,10 +109,10 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
 
                 {/* Cost + OS count */}
                 <div className="text-right shrink-0">
-                  <p className="text-[12px] font-black text-foreground tracking-tight">
+                  <p className="text-[12px] font-black tracking-tight dark:text-white text-slate-800">
                     {fmtK(v.totalCusto)}
                   </p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                  <p className="text-[9px] text-slate-500 mt-0.5">
                     {v.totalOrdens} OS
                   </p>
                 </div>
@@ -114,12 +120,12 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
             ))}
 
         {!loading && vehicles.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
+          <div className="flex flex-col items-center justify-center py-12 text-slate-500">
             <span className="text-2xl mb-2">✅</span>
             <p className="text-xs font-medium">Nenhum veículo com sinal ativo</p>
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 }
