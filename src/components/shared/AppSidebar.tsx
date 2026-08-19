@@ -19,6 +19,8 @@ import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { NotificationBell } from "./NotificationBell";
+import { AvatarUploadModal } from "@/components/profile/AvatarUploadModal";
+import { fetchProfileById } from "@/hooks/useProfiles";
 import sgtLogo     from "@/assets/sgt-logo.png";
 import sgtLogoMark from "@/assets/sgt-logo-clean.png";
 
@@ -524,6 +526,7 @@ export function AppSidebar() {
       <UserFooter
         collapsed={collapsed}
         email={user?.email ?? ""}
+        userId={user?.id ?? ""}
         isAdmin={isAdmin}
         role={role}
         theme={theme}
@@ -566,14 +569,22 @@ export function AppSidebar() {
 
 // ── UserFooter ────────────────────────────────────────────────────────────────
 function UserFooter({
-  collapsed, email, isAdmin, role, theme, onToggleTheme, onGoAdmin, onSignOut,
+  collapsed, email, userId, isAdmin, role, theme, onToggleTheme, onGoAdmin, onSignOut,
 }: {
-  collapsed: boolean; email: string; isAdmin: boolean; role: string | null;
+  collapsed: boolean; email: string; userId: string; isAdmin: boolean; role: string | null;
   theme: "dark" | "light"; onToggleTheme: () => void;
   onGoAdmin: () => void; onSignOut: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (userId) {
+      fetchProfileById(userId).then(p => { if (p?.avatar_url) setAvatarUrl(p.avatar_url); });
+    }
+  }, [userId]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -612,10 +623,20 @@ function UserFooter({
         onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--sb-row-hover)"}
         onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
       >
-        <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl text-[12px] font-bold"
-              style={{ border: "1px solid color-mix(in srgb, var(--sb-accent) 25%, transparent)", background: "var(--sb-accent-soft)", color: "var(--sb-accent-text)" }}>
-          {initial}
-        </span>
+        <button
+          onClick={e => { e.stopPropagation(); setOpen(false); setModalOpen(true); }}
+          className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-xl overflow-hidden transition-opacity hover:opacity-80 focus:outline-none"
+          style={{ border: "1px solid color-mix(in srgb, var(--sb-accent) 25%, transparent)" }}
+          title="Alterar foto de perfil"
+        >
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+          ) : (
+            <span style={{ background: "var(--sb-accent-soft)", color: "var(--sb-accent-text)", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold" }}>
+              {initial}
+            </span>
+          )}
+        </button>
         {!collapsed && (
           <div className="flex-1 min-w-0 text-left">
             <p className="text-[12px] font-medium truncate" style={{ color: "var(--sb-text-secondary)" }}>{shortEmail}</p>
@@ -656,6 +677,14 @@ function UserFooter({
           </button>
         </div>
       )}
+
+      <AvatarUploadModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        userId={userId}
+        currentAvatarUrl={avatarUrl}
+        onUpdated={(url) => setAvatarUrl(url)}
+      />
     </div>
   );
 }
