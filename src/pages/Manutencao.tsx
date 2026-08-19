@@ -183,7 +183,7 @@ export default function Manutencao() {
                   loading={loading}
                 />
               </AnimatedCard>
-              <AnimatedCard delay={120}>
+              <AnimatedCard delay={120} bare>
                 <OsAndamentoCard ordens={ordens} loading={loading} />
               </AnimatedCard>
               <AnimatedCard delay={180}>
