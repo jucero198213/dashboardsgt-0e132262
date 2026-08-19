@@ -34,11 +34,13 @@ export function AvatarUploadModal({ open, onClose, userId, currentAvatarUrl, onU
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { upsertProfile } = useProfiles();
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setError(null);
     const reader = new FileReader();
     reader.onload = () => setImageSrc(reader.result as string);
     reader.readAsDataURL(file);
@@ -51,7 +53,15 @@ export function AvatarUploadModal({ open, onClose, userId, currentAvatarUrl, onU
   const handleUpload = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
     setUploading(true);
+    setError(null);
     try {
+      // Ensure bucket exists (idempotent — ignores "already exists" error)
+      await supabase.storage.createBucket("avatars", {
+        public: true,
+        fileSizeLimit: 5242880,
+        allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+      }).catch(() => {});
+
       const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
       const path = `${userId}/avatar.jpg`;
       const { error: uploadError } = await supabase.storage
@@ -64,7 +74,8 @@ export function AvatarUploadModal({ open, onClose, userId, currentAvatarUrl, onU
       onUpdated(url);
       onClose();
     } catch (err) {
-      console.error("Avatar upload error:", err);
+      const msg = err instanceof Error ? err.message : "Erro ao salvar foto";
+      setError(msg);
     } finally {
       setUploading(false);
     }
@@ -113,6 +124,9 @@ export function AvatarUploadModal({ open, onClose, userId, currentAvatarUrl, onU
               onChange={e => setZoom(Number(e.target.value))}
               className="w-full accent-amber-400"
             />
+            {error && (
+              <p className="text-[11px] text-rose-400 text-center">{error}</p>
+            )}
             <div className="flex gap-2">
               <button
                 onClick={() => setImageSrc(null)}
