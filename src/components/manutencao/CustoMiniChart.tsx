@@ -1,4 +1,7 @@
-import { BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts";
+"use client"
+
+import { useState, useRef, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import type { DailyCost } from "@/lib/manutencaoUtils";
 
 interface Props {
@@ -12,43 +15,157 @@ const fmtK = (v: number) =>
   : v >= 1e3 ? `R$ ${(v / 1e3).toFixed(1).replace(".", ",")}k`
   : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-lg border px-2.5 py-1.5 shadow-xl text-[11px]"
-      style={{ background: "var(--sgt-bg-overlay)", borderColor: "rgba(123,110,245,0.3)" }}>
-      <p className="font-bold text-slate-400 mb-0.5">{label}</p>
-      <p className="font-black text-violet-400">{fmtK(payload[0].value)}</p>
-    </div>
-  );
-};
-
 export function CustoMiniChart({ data, totalCusto, loading }: Props) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [displayValue, setDisplayValue] = useState<number | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.custo)) : 1;
+
+  useEffect(() => {
+    if (hoveredIndex !== null && data[hoveredIndex]) {
+      setDisplayValue(data[hoveredIndex].custo);
+    }
+  }, [hoveredIndex, data]);
+
+  const handleContainerLeave = () => {
+    setIsHovering(false);
+    setHoveredIndex(null);
+    setTimeout(() => setDisplayValue(null), 150);
+  };
+
   return (
-    <div className="rounded-[14px] border p-3 flex flex-col gap-3"
-      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
+    <div
+      ref={containerRef}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={handleContainerLeave}
+      className="group relative rounded-[14px] border p-4 flex flex-col gap-3 transition-all duration-500"
+      style={{
+        background: "var(--sgt-bg-card)",
+        borderColor: "var(--sgt-border-subtle)",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "rgba(123,110,245,0.9)" }} />
+          <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
             Custo no período
-          </p>
-          <p className={`text-xl font-black tracking-tight dark:text-white text-slate-800 mt-0.5${loading ? " animate-pulse" : ""}`}>
-            {loading ? "—" : fmtK(totalCusto)}
-          </p>
+          </span>
+        </div>
+
+        {/* Valor: totalCusto por default, custo do dia ao hover */}
+        <div className="relative h-6 flex items-center">
+          <span
+            className={cn(
+              "text-[15px] font-black tracking-tight tabular-nums transition-all duration-300 ease-out",
+              loading ? "animate-pulse" : "",
+              isHovering && displayValue !== null
+                ? "dark:text-white text-slate-800 opacity-100"
+                : "dark:text-white text-slate-800",
+            )}
+            style={{ color: isHovering && displayValue !== null ? undefined : undefined }}
+          >
+            {loading
+              ? "—"
+              : isHovering && displayValue !== null
+                ? fmtK(displayValue)
+                : fmtK(totalCusto)
+            }
+          </span>
         </div>
       </div>
+
+      {/* Bars */}
       {loading ? (
-        <div className="h-[72px] rounded-lg animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
+        <div className="flex items-end gap-1.5 h-[72px]">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-full animate-pulse"
+              style={{
+                height: `${40 + Math.random() * 32}px`,
+                background: "var(--sgt-skeleton-bg)",
+              }}
+            />
+          ))}
+        </div>
+      ) : data.length === 0 ? (
+        <div className="h-[72px] flex items-center justify-center">
+          <span className="text-[11px] text-slate-500">Sem dados no período</span>
+        </div>
       ) : (
-        <div className="h-[72px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} barCategoryGap="20%">
-              <Bar dataKey="custo" fill="rgba(123,110,245,0.6)" radius={[2, 2, 0, 0]} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(123,110,245,0.08)" }} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="flex items-end gap-1.5 h-[72px]">
+          {data.map((item, index) => {
+            const heightPx = Math.max((item.custo / maxValue) * 72, 4);
+            const isHovered = hoveredIndex === index;
+            const isAnyHovered = hoveredIndex !== null;
+            const isNeighbor = hoveredIndex !== null &&
+              (index === hoveredIndex - 1 || index === hoveredIndex + 1);
+
+            return (
+              <div
+                key={item.date}
+                className="relative flex-1 flex flex-col items-center justify-end h-full"
+                onMouseEnter={() => setHoveredIndex(index)}
+              >
+                {/* Bar */}
+                <div
+                  className="w-full rounded-full cursor-pointer transition-all duration-300 ease-out origin-bottom"
+                  style={{
+                    height: `${heightPx}px`,
+                    background: isHovered
+                      ? "rgba(123,110,245,1)"
+                      : isNeighbor
+                        ? "rgba(123,110,245,0.35)"
+                        : isAnyHovered
+                          ? "rgba(123,110,245,0.1)"
+                          : "rgba(123,110,245,0.3)",
+                    transform: isHovered
+                      ? "scaleX(1.15) scaleY(1.02)"
+                      : isNeighbor
+                        ? "scaleX(1.05)"
+                        : "scaleX(1)",
+                    boxShadow: isHovered ? "0 0 10px rgba(123,110,245,0.5)" : "none",
+                  }}
+                />
+
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-[9px] font-medium mt-1.5 transition-all duration-300 truncate max-w-full text-center",
+                    isHovered ? "dark:text-white text-slate-700" : "text-slate-600",
+                  )}
+                >
+                  {item.date}
+                </span>
+
+                {/* Tooltip */}
+                <div
+                  className={cn(
+                    "absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap transition-all duration-200 pointer-events-none",
+                    isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1",
+                  )}
+                  style={{
+                    background: "rgba(123,110,245,0.95)",
+                    color: "#fff",
+                    boxShadow: "0 2px 8px rgba(123,110,245,0.4)",
+                  }}
+                >
+                  {fmtK(item.custo)}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Glow on hover */}
+      <div
+        className="absolute inset-0 rounded-[14px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at top, rgba(123,110,245,0.04), transparent 60%)" }}
+      />
     </div>
   );
 }
