@@ -42,7 +42,7 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
       </div>
 
       {/* List */}
-      <div className="flex flex-col">
+      <div className="flex flex-col overflow-y-auto max-h-[480px]">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-center"

@@ -222,8 +222,8 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              {/* Main grid — 50/50, ambas colunas mesma altura */}
-              <div className="grid grid-cols-2 gap-3 items-stretch">
+              {/* Main grid — 50/50, colunas alinham ao topo */}
+              <div className="grid grid-cols-2 gap-3 items-start">
                 <AnimatedCard delay={240} className="h-full">
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
