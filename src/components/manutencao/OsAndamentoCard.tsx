@@ -12,6 +12,7 @@ import type { OrdemAgregada } from "@/lib/manutencaoUtils";
 interface Props {
   ordens: OrdemAgregada[];
   loading?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 const COLLAPSED_H = 112;
@@ -31,7 +32,7 @@ function diasColor(dias: number | null) {
   return "text-emerald-400";
 }
 
-export function OsAndamentoCard({ ordens, loading }: Props) {
+export function OsAndamentoCard({ ordens, loading, onExpandChange }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered]   = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -68,7 +69,12 @@ export function OsAndamentoCard({ ordens, loading }: Props) {
       {/* Card animado — ancorado no BOTTOM: cresce para CIMA */}
       <motion.div
         ref={cardRef}
-        onClick={() => !loading && setIsExpanded(v => !v)}
+        onClick={() => {
+          if (loading) return;
+          const next = !isExpanded;
+          setIsExpanded(next);
+          onExpandChange?.(next);
+        }}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
@@ -139,9 +145,9 @@ export function OsAndamentoCard({ ordens, loading }: Props) {
                 height: LIST_H,
                 overflow: "hidden",
               }}
-              initial={{ clipPath: "inset(100% 0 0 0)" }}
-              animate={{ clipPath: "inset(0% 0 0 0)" }}
-              exit={{ clipPath: "inset(100% 0 0 0)" }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 16 }}
               transition={{ type: "spring", stiffness: 380, damping: 38 }}
             >
               {/* Fundo sutil da lista */}

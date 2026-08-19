@@ -6,10 +6,11 @@ interface AnimatedCardProps {
   className?: string;
   hover?: boolean; // habilita hover lift + shimmer sweep
   bare?: boolean;  // sem moldura de card: remove overflow-hidden e efeitos (ex.: modo TV)
+  zIndex?: number; // eleva o grid item quando necessário (ex.: card expandido)
 }
 
 export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(function AnimatedCard(
-  { children, delay = 0, className = "", hover = true, bare = false },
+  { children, delay = 0, className = "", hover = true, bare = false, zIndex },
   ref,
 ) {
   const [visible, setVisible] = useState(false);
@@ -22,6 +23,7 @@ export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(functi
   return (
     <div
       ref={ref}
+      style={zIndex !== undefined ? { zIndex } : undefined}
       className={`relative transition-all duration-500 ease-out ${bare ? "" : "overflow-hidden"} ${
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       } ${hover && !bare ? "sgt-hover-lift sgt-shimmer-sweep" : ""} ${className}`}

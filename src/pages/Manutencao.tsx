@@ -40,6 +40,7 @@ export default function Manutencao() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetVeiculo, setSheetVeiculo] = useState<string | null>(null);
+  const [osExpanded, setOsExpanded] = useState(false);
 
   // ── Data fetch ──────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -183,8 +184,8 @@ export default function Manutencao() {
                   loading={loading}
                 />
               </AnimatedCard>
-              <AnimatedCard delay={120} bare>
-                <OsAndamentoCard ordens={ordens} loading={loading} />
+              <AnimatedCard delay={120} bare zIndex={osExpanded ? 50 : undefined}>
+                <OsAndamentoCard ordens={ordens} loading={loading} onExpandChange={setOsExpanded} />
               </AnimatedCard>
               <AnimatedCard delay={180}>
                 <KpiCard
