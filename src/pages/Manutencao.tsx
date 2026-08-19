@@ -96,18 +96,16 @@ export default function Manutencao() {
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <DatePickerInput
-            label="Início"
             value={dwFilter.dataInicio}
-            onChange={v => setDwFilter(prev => ({ ...prev, dataInicio: v }))}
+            onChange={v => setDwFilter("dataInicio", v)}
           />
           <DatePickerInput
-            label="Fim"
             value={dwFilter.dataFim}
-            onChange={v => setDwFilter(prev => ({ ...prev, dataFim: v }))}
+            onChange={v => setDwFilter("dataFim", v)}
           />
           <Select
             value={dwFilter.filial ?? "Todas"}
-            onValueChange={v => setDwFilter(prev => ({ ...prev, filial: v === "Todas" ? null : v }))}
+            onValueChange={v => setDwFilter("filial", v === "Todas" ? null : v)}
           >
             <SelectTrigger className="h-8 text-xs w-[130px]">
               <SelectValue placeholder="Filial" />
@@ -121,8 +119,7 @@ export default function Manutencao() {
           </Select>
           <UpdateButton
             onClick={() => carregarDados(true)}
-            loading={loading}
-            cooldown={!manutCooldown.canFetch}
+            isFetching={loading}
           />
         </div>
       </header>

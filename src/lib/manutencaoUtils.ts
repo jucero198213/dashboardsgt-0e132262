@@ -180,7 +180,7 @@ export function computeFornecedorRanking(ordens: OrdemAgregada[]): FornecedorIte
   const sorted = Array.from(map.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 7);
-  const maxCost = sorted[0]?.[1] ?? 1;
+  const maxCost = sorted[0]?.[1] || 1;
   return sorted.map(([fornecedor, totalCusto]) => ({
     fornecedor,
     totalCusto,
@@ -189,19 +189,20 @@ export function computeFornecedorRanking(ordens: OrdemAgregada[]): FornecedorIte
 }
 
 export function computeDailyCosts(ordens: OrdemAgregada[]): DailyCost[] {
-  const map = new Map<string, number>();
+  const map = new Map<string, { custo: number; dateObj: Date }>();
   for (const o of ordens) {
     if (!o.dataordem) continue;
     const d = new Date(o.dataordem);
     if (isNaN(d.getTime())) continue;
     const key = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-    map.set(key, (map.get(key) ?? 0) + o.totalCusto);
+    const existing = map.get(key);
+    if (existing) {
+      existing.custo += o.totalCusto;
+    } else {
+      map.set(key, { custo: o.totalCusto, dateObj: d });
+    }
   }
   return Array.from(map.entries())
-    .sort((a, b) => {
-      const [da, ma] = a[0].split("/").map(Number);
-      const [db, mb] = b[0].split("/").map(Number);
-      return ma !== mb ? ma - mb : da - db;
-    })
-    .map(([date, custo]) => ({ date, custo }));
+    .sort((a, b) => a[1].dateObj.getTime() - b[1].dateObj.getTime())
+    .map(([date, { custo }]) => ({ date, custo }));
 }
