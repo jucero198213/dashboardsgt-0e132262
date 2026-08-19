@@ -95,7 +95,7 @@ export default function Manutencao() {
 
       <div className="relative flex flex-col flex-1 min-h-0 w-full">
         <section
-          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] overflow-hidden"
+          className="relative flex-1 min-h-0 flex flex-col border transition-all duration-300 rounded-[16px] sm:rounded-[20px] md:rounded-[24px]"
           style={{ background: "var(--sgt-bg-section)", borderColor: "var(--sgt-border-subtle)", boxShadow: "var(--sgt-section-shadow)" }}
         >
           {/* Barra de progresso */}
@@ -106,154 +106,169 @@ export default function Manutencao() {
             />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 sm:gap-3 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
+          {/*
+           * Layout em duas faixas:
+           * 1. Header (shrink-0, SEM overflow) — os KPI cards ficam aqui.
+           *    O card OS em Andamento expande para BAIXO sem ser clipado.
+           * 2. Body (flex-1, overflow-y-auto) — seção de Análise rola aqui.
+           *    Por ser um sibling (não ancestor) do card expandido, não o clipa.
+           */}
+          <div className="relative flex flex-col flex-1 min-h-0 p-2 sm:p-3 lg:p-4">
 
-            {/* Mobile nav */}
-            <MobileNav title="Manutenção" />
+            {/* ── Faixa 1: header fixo (navbar + KPI grid) ── */}
+            <div className="flex flex-col gap-2.5 sm:gap-3 shrink-0">
 
-            {/* Navbar desktop */}
-            <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em]" style={{ color: "rgba(123,110,245,0.8)" }}>Workspace</span>
-                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Manutenção</span>
+              {/* Mobile nav */}
+              <MobileNav title="Manutenção" />
+
+              {/* Navbar desktop */}
+              <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
+                <div className="flex flex-col leading-none">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em]" style={{ color: "rgba(123,110,245,0.8)" }}>Workspace</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Manutenção</span>
+                </div>
+
+                <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+
+                <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
+                  <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                  <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                  <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+                  <Select
+                    value={dwFilter.filial ?? "Todas"}
+                    onValueChange={v => setDwFilter("filial", v === "Todas" ? null : v)}
+                  >
+                    <SelectTrigger className="h-8 text-xs w-[130px]"
+                      style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
+                      <SelectValue placeholder="Filial" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Todas">Todas as filiais</SelectItem>
+                      {filiaisFiltradas.map(f => (
+                        <SelectItem key={f.codfilial} value={String(f.codfilial)}>{f.filial}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} />
+                </div>
+
+                <HomeButton />
               </div>
 
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+              <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
-              <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
-                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
-                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
-                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-                <Select
-                  value={dwFilter.filial ?? "Todas"}
-                  onValueChange={v => setDwFilter("filial", v === "Todas" ? null : v)}
+              {/* Error */}
+              {error && (
+                <div className="rounded-xl px-4 py-3 text-sm text-rose-400 border"
+                  style={{ background: "rgba(232,72,72,0.05)", borderColor: "rgba(232,72,72,0.2)" }}>
+                  {error}
+                </div>
+              )}
+
+              {/* ════ Indicadores ════ */}
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Indicadores</span>
+                <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+              </div>
+
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sgt-stagger">
+                <AnimatedCard delay={0}>
+                  <KpiCard
+                    label="Custo Total"
+                    value={fmtK(kpis.totalCusto)}
+                    rawValue={kpis.totalCusto}
+                    subtitle="período atual"
+                    icon={DollarSign}
+                    tone="violet"
+                    loading={loading}
+                  />
+                </AnimatedCard>
+                <AnimatedCard delay={60}>
+                  <KpiCard
+                    label="Veículos em Atenção"
+                    value={String(kpis.veiculosEmAtencao)}
+                    rawValue={kpis.veiculosEmAtencao}
+                    subtitle="com sinal ativo"
+                    icon={AlertTriangle}
+                    tone="rose"
+                    loading={loading}
+                  />
+                </AnimatedCard>
+                <AnimatedCard delay={120} bare zIndex={osExpanded ? 50 : undefined}>
+                  <OsAndamentoCard ordens={ordens} loading={loading} onExpandChange={setOsExpanded} />
+                </AnimatedCard>
+                <AnimatedCard delay={180}>
+                  <KpiCard
+                    label="Custo Médio / OS"
+                    value={fmtK(kpis.custoMedioOS)}
+                    rawValue={kpis.custoMedioOS}
+                    subtitle={`base: ${kpis.totalOrdens} ordens`}
+                    icon={TrendingUp}
+                    tone="emerald"
+                    loading={loading}
+                  />
+                </AnimatedCard>
+              </div>
+            </div>
+
+            {/* ── Faixa 2: corpo scrollável (Análise) ── */}
+            <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0 overflow-y-auto mt-2.5 sm:mt-3">
+
+              {/* ════ Análise ════ */}
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Análise</span>
+                <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+              </div>
+
+              {/* Main grid */}
+              <div className="grid grid-cols-[1fr_300px] gap-3 flex-1 min-h-0">
+                <AnimatedCard delay={240} className="flex flex-col min-h-0">
+                  <VehicleAttentionPanel
+                    vehicles={vehicleSignals}
+                    onSelectVeiculo={handleSelectVeiculo}
+                    loading={loading}
+                  />
+                </AnimatedCard>
+
+                <div className="flex flex-col gap-3">
+                  <AnimatedCard delay={300}>
+                    <CustoMiniChart
+                      data={dailyCosts}
+                      totalCusto={kpis.totalCusto}
+                      loading={loading}
+                    />
+                  </AnimatedCard>
+                  <AnimatedCard delay={360} className="flex flex-col flex-1 min-h-0">
+                    <FornecedorRanking
+                      items={fornecedorRanking}
+                      loading={loading}
+                    />
+                  </AnimatedCard>
+                </div>
+              </div>
+
+              {/* OS Sheet trigger */}
+              <AnimatedCard delay={420} hover={false}>
+                <button
+                  type="button"
+                  onClick={handleOpenSheet}
+                  className="w-full rounded-[14px] border px-4 py-3 flex items-center gap-3 text-left transition-colors"
+                  style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(123,110,245,0.3)")}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--sgt-border-subtle)")}
                 >
-                  <SelectTrigger className="h-8 text-xs w-[130px]"
-                    style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
-                    <SelectValue placeholder="Filial" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Todas">Todas as filiais</SelectItem>
-                    {filiaisFiltradas.map(f => (
-                      <SelectItem key={f.codfilial} value={String(f.codfilial)}>{f.filial}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} />
-              </div>
-
-              <HomeButton />
-            </div>
-
-            <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
-            {/* Error */}
-            {error && (
-              <div className="rounded-xl px-4 py-3 text-sm text-rose-400 border"
-                style={{ background: "rgba(232,72,72,0.05)", borderColor: "rgba(232,72,72,0.2)" }}>
-                {error}
-              </div>
-            )}
-
-            {/* ════ Indicadores ════ */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Indicadores</span>
-              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
-            </div>
-
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0 sgt-stagger">
-              <AnimatedCard delay={0}>
-                <KpiCard
-                  label="Custo Total"
-                  value={fmtK(kpis.totalCusto)}
-                  rawValue={kpis.totalCusto}
-                  subtitle="período atual"
-                  icon={DollarSign}
-                  tone="violet"
-                  loading={loading}
-                />
-              </AnimatedCard>
-              <AnimatedCard delay={60}>
-                <KpiCard
-                  label="Veículos em Atenção"
-                  value={String(kpis.veiculosEmAtencao)}
-                  rawValue={kpis.veiculosEmAtencao}
-                  subtitle="com sinal ativo"
-                  icon={AlertTriangle}
-                  tone="rose"
-                  loading={loading}
-                />
-              </AnimatedCard>
-              <AnimatedCard delay={120} bare zIndex={osExpanded ? 50 : undefined}>
-                <OsAndamentoCard ordens={ordens} loading={loading} onExpandChange={setOsExpanded} />
-              </AnimatedCard>
-              <AnimatedCard delay={180}>
-                <KpiCard
-                  label="Custo Médio / OS"
-                  value={fmtK(kpis.custoMedioOS)}
-                  rawValue={kpis.custoMedioOS}
-                  subtitle={`base: ${kpis.totalOrdens} ordens`}
-                  icon={TrendingUp}
-                  tone="emerald"
-                  loading={loading}
-                />
+                  <span className="text-base">📋</span>
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Detalhamento de Ordens de Serviço
+                  </span>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: "var(--sgt-skeleton-bg)", color: "var(--sgt-text-secondary)" }}>
+                    {kpis.totalOrdens} OS
+                  </span>
+                  <ChevronRight className="ml-auto h-4 w-4 text-slate-500" />
+                </button>
               </AnimatedCard>
             </div>
-
-            {/* ════ Análise ════ */}
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Análise</span>
-              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
-            </div>
-
-            {/* Main grid */}
-            <div className="grid grid-cols-[1fr_300px] gap-3 flex-1 min-h-0">
-              <AnimatedCard delay={240} className="flex flex-col min-h-0">
-                <VehicleAttentionPanel
-                  vehicles={vehicleSignals}
-                  onSelectVeiculo={handleSelectVeiculo}
-                  loading={loading}
-                />
-              </AnimatedCard>
-
-              <div className="flex flex-col gap-3">
-                <AnimatedCard delay={300}>
-                  <CustoMiniChart
-                    data={dailyCosts}
-                    totalCusto={kpis.totalCusto}
-                    loading={loading}
-                  />
-                </AnimatedCard>
-                <AnimatedCard delay={360} className="flex flex-col flex-1 min-h-0">
-                  <FornecedorRanking
-                    items={fornecedorRanking}
-                    loading={loading}
-                  />
-                </AnimatedCard>
-              </div>
-            </div>
-
-            {/* OS Sheet trigger */}
-            <AnimatedCard delay={420} hover={false}>
-              <button
-                type="button"
-                onClick={handleOpenSheet}
-                className="w-full rounded-[14px] border px-4 py-3 flex items-center gap-3 text-left transition-colors"
-                style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(123,110,245,0.3)")}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--sgt-border-subtle)")}
-              >
-                <span className="text-base">📋</span>
-                <span className="text-[11px] font-semibold text-slate-500">
-                  Detalhamento de Ordens de Serviço
-                </span>
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: "var(--sgt-skeleton-bg)", color: "var(--sgt-text-secondary)" }}>
-                  {kpis.totalOrdens} OS
-                </span>
-                <ChevronRight className="ml-auto h-4 w-4 text-slate-500" />
-              </button>
-            </AnimatedCard>
           </div>
         </section>
       </div>
