@@ -132,14 +132,24 @@ export function CustoMiniChart({ data, totalCusto, loading }: Props) {
                 />
 
                 {/* Label */}
-                <span
-                  className={cn(
-                    "text-[9px] font-medium mt-1.5 transition-all duration-300 truncate max-w-full text-center",
-                    isHovered ? "dark:text-white text-slate-700" : "text-slate-600",
-                  )}
-                >
-                  {item.date}
-                </span>
+                {(() => {
+                  const skip = data.length > 15 ? Math.ceil(data.length / 14) : 1;
+                  const showLabel = isHovered || index % skip === 0;
+                  const label = data.length > 15
+                    ? String(parseInt(item.date.split("/")[0], 10))
+                    : item.date;
+                  return (
+                    <span
+                      className={cn(
+                        "text-[9px] font-medium mt-1.5 transition-all duration-300 text-center block",
+                        isHovered ? "dark:text-white text-slate-700" : "text-slate-600",
+                      )}
+                      style={{ opacity: showLabel ? 1 : 0 }}
+                    >
+                      {label}
+                    </span>
+                  );
+                })()}
 
                 {/* Tooltip */}
                 <div

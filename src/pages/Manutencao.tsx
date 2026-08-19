@@ -14,11 +14,13 @@ import { OsSheet } from "@/components/manutencao/OsSheet";
 import { OsAndamentoCard } from "@/components/manutencao/OsAndamentoCard";
 import {
   aggregateOrdens,
-  computeVehicleSignals,
   computeKpis,
   computeFornecedorRanking,
-  computeDailyCosts,
 } from "@/lib/manutencaoUtils";
+import {
+  computeVehicleSignals,
+  computeDailyCosts,
+} from "@/lib/manutencaoUtils_fix";
 import { fetchManutencao, type ManutencaoRow } from "@/lib/dwApi";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
