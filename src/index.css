@@ -247,6 +247,29 @@ button:focus-visible, a:focus-visible {
 /* CountUp — sem flash de conteúdo */
 .count-up-value { font-variant-numeric: tabular-nums; }
 
+/* Sidebar — item slide-in lateral */
+@keyframes sidebarItemIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Home hero — floating orbs */
+@keyframes floatOrb1 {
+  0%,100% { transform: translate(0, 0);        }
+  38%     { transform: translate(16px, -18px); }
+  72%     { transform: translate(-12px, 10px); }
+}
+@keyframes floatOrb2 {
+  0%,100% { transform: translate(0, 0);         }
+  42%     { transform: translate(-18px, -10px); }
+  78%     { transform: translate(14px, 16px);   }
+}
+@keyframes floatOrb3 {
+  0%,100% { transform: translate(0, 0);        }
+  50%     { transform: translate(12px, -16px); }
+  82%     { transform: translate(-14px, 12px); }
+}
+
 /* Pulse sutil para badges "Tempo real" */
 @keyframes softPing {
   0%, 100% { transform: scale(1); opacity: 0.6; }
