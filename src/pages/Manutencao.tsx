@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { DollarSign, AlertTriangle, Activity, TrendingUp, ChevronRight, RefreshCw } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { DollarSign, AlertTriangle, Activity, TrendingUp, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -31,7 +29,7 @@ const fmtK = (v: number) =>
   : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export default function Manutencao() {
-  const { dwFilter, setDwFilter, filiais, empresas } = useFinancialData();
+  const { dwFilter, setDwFilter, filiais } = useFinancialData();
   const manutCooldown = useCooldown("dw_manutencao_fetch_ts");
   const filiaisFiltradas = filiais.filter(f => !dwFilter.empresa || f.empresa === dwFilter.empresa);
 
