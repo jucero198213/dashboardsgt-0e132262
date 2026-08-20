@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+  Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, X, FileDown } from "lucide-react";
@@ -159,8 +159,14 @@ export function OsSheet({ open, onOpenChange, ordens, initialVeiculo, kpis, vehi
               <SelectValue placeholder="Veículo" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Todos">Todos veículos</SelectItem>
-              {veiculos.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+              {/* Sticky "Todos" — sempre visível no topo, independente do scroll */}
+              <div className="sticky top-0 z-10 bg-popover border-b border-border pb-1">
+                <SelectItem value="Todos">Todos veículos</SelectItem>
+              </div>
+              {/* Lista de veículos rolável */}
+              <SelectGroup>
+                {veiculos.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+              </SelectGroup>
             </SelectContent>
           </Select>
           <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
