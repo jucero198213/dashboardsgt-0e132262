@@ -634,13 +634,13 @@ export default function ContasAReceber() {
                       {sortCol === "documento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th className="px-3 py-2 text-left hidden sm:table-cell">
                     <button onClick={() => toggleSort("cliente")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Cliente
                       {sortCol === "cliente" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th className="px-3 py-2 text-left hidden sm:table-cell">
                     <button onClick={() => toggleSort("vencimento")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Vencimento
                       {sortCol === "vencimento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
@@ -661,8 +661,8 @@ export default function ContasAReceber() {
                 {paginados.map((conta, i) => (
                   <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
                     <td className="px-3 py-2.5 text-[13px] font-medium text-white">{conta.documento}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-slate-300">{conta.cliente}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-slate-400">{fmtData(conta.vencimento)}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-300 hidden sm:table-cell">{conta.cliente}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-400 hidden sm:table-cell">{fmtData(conta.vencimento)}</td>
                     <td className="px-3 py-2.5 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
                     <td className="px-3 py-2 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${

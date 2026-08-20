@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -82,6 +83,7 @@ export default function Chamados() {
 
             {/* Header — compacto no mobile */}
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 py-1 flex-wrap">
+              <MobileNav />
               <button
                 onClick={() => navigate("/home")}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"

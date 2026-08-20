@@ -9,7 +9,7 @@ export default function SgtWorkspace() {
 
   return (
     <div
-      className="flex h-[100dvh] w-full flex-col"
+      className="flex h-[calc(100dvh-4rem)] sm:h-[100dvh] w-full flex-col"
       style={{ backgroundColor: "var(--sgt-bg-base)" }}
     >
       {/* Topbar integrada — sem URL exposta */}
