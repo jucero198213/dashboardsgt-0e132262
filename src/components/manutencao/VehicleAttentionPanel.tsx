@@ -45,7 +45,7 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
       <div className="flex flex-col overflow-y-auto max-h-[480px]">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-center"
+              <div key={i} className="grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-2 items-center"
                 style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}>
                 <div className="h-3 w-4 rounded animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                 <div className="space-y-1.5">
@@ -61,7 +61,7 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
                 type="button"
                 onClick={() => onSelectVeiculo(v.veiculo)}
                 className={cn(
-                  "grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-3 items-start text-left transition-colors",
+                  "grid grid-cols-[24px_1fr_auto] gap-3 px-3 py-2 items-start text-left transition-colors",
                   i >= 5 && "opacity-60"
                 )}
                 style={{ borderBottom: "1px solid var(--sgt-border-subtle)" }}
@@ -75,7 +75,7 @@ export function VehicleAttentionPanel({ vehicles, onSelectVeiculo, loading }: Pr
 
                 {/* Vehicle + signals */}
                 <div className="min-w-0">
-                  <p className="text-[12px] font-semibold mb-1.5 truncate dark:text-white text-slate-800">
+                  <p className="text-[12px] font-semibold mb-1 truncate dark:text-white text-slate-800">
                     {v.veiculo}
                   </p>
                   <div className="flex flex-wrap gap-1">

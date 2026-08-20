@@ -18,6 +18,7 @@ interface KpiCardProps {
   tone: KpiTone;
   loading?: boolean;
   onClick?: () => void;
+  compact?: boolean;
 }
 
 const toneColors: Record<KpiTone, { icon: string; sub: string; rgb: string }> = {
@@ -31,7 +32,7 @@ const toneColors: Record<KpiTone, { icon: string; sub: string; rgb: string }> = 
 };
 
 export function KpiCard({
-  label, value, rawValue, subtitle, icon: Icon, tone, loading, onClick,
+  label, value, rawValue, subtitle, icon: Icon, tone, loading, onClick, compact,
 }: KpiCardProps) {
   const t = toneColors[tone];
   const cardRef = useRef<HTMLDivElement>(null);
@@ -70,7 +71,7 @@ export function KpiCard({
       onMouseLeave={handleMouseLeave}
       style={{
         position: "relative",
-        minHeight: 112,
+        minHeight: compact ? 92 : 112,
         cursor: onClick ? "pointer" : "default",
         userSelect: "none",
         background: "var(--sgt-bg-card)",
@@ -124,7 +125,7 @@ export function KpiCard({
       {/* Conteúdo */}
       <div style={{
         position: "relative", zIndex: 1,
-        display: "flex", flexDirection: "column", height: "100%", padding: 16,
+        display: "flex", flexDirection: "column", height: "100%", padding: compact ? 12 : 16,
       }}>
         {/* Label + ícone */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
@@ -151,7 +152,7 @@ export function KpiCard({
           className={`dark:text-white text-slate-800${loading ? " animate-pulse" : ""}`}
           style={{
             marginTop: "auto",
-            paddingTop: 12,
+            paddingTop: compact ? 8 : 12,
             fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
             fontWeight: 900,
             lineHeight: 1.15,

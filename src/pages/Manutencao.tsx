@@ -118,7 +118,7 @@ export default function Manutencao() {
           <div className="relative flex flex-col flex-1 min-h-0 p-2 sm:p-3 lg:p-4">
 
             {/* ── Faixa 1: header fixo (navbar + KPI grid) ── */}
-            <div className="flex flex-col gap-2.5 sm:gap-3 shrink-0">
+            <div className="flex flex-col gap-2 sm:gap-3 shrink-0">
 
               {/* ── Mobile header ── */}
               <div className="flex sm:hidden items-center gap-2 py-1">
@@ -131,14 +131,17 @@ export default function Manutencao() {
               </div>
 
               {/* ── Mobile: datas + filial + atualizar ── */}
-              <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
-                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
-                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+              <div className="flex sm:hidden flex-col gap-1.5">
+                <div className="flex items-center gap-1.5">
+                  <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                  <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                  <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} compact />
+                </div>
                 <Select
                   value={dwFilter.filial ?? "Todas"}
                   onValueChange={v => setDwFilter("filial", v === "Todas" ? null : v)}
                 >
-                  <SelectTrigger className="h-8 text-xs flex-1 min-w-[100px]"
+                  <SelectTrigger className="h-7 text-xs w-full"
                     style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
                     <SelectValue placeholder="Filial" />
                   </SelectTrigger>
@@ -149,7 +152,6 @@ export default function Manutencao() {
                     ))}
                   </SelectContent>
                 </Select>
-                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} compact />
               </div>
 
               {/* Navbar desktop */}
@@ -202,7 +204,7 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sgt-stagger">
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5 sgt-stagger">
                 <AnimatedCard delay={0}>
                   <KpiCard
                     label="Custo Total"
@@ -212,6 +214,7 @@ export default function Manutencao() {
                     icon={DollarSign}
                     tone="violet"
                     loading={loading}
+                    compact
                   />
                 </AnimatedCard>
                 <AnimatedCard delay={60}>
@@ -223,6 +226,7 @@ export default function Manutencao() {
                     icon={AlertTriangle}
                     tone="rose"
                     loading={loading}
+                    compact
                   />
                 </AnimatedCard>
                 <AnimatedCard delay={120} bare zIndex={osExpanded ? 50 : undefined}>
@@ -237,6 +241,7 @@ export default function Manutencao() {
                     icon={TrendingUp}
                     tone="emerald"
                     loading={loading}
+                    compact
                   />
                 </AnimatedCard>
               </div>
