@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PromptInputBox } from "@/components/ui/ai-prompt-box";
 import { TextShimmer } from "@/components/ui/shimmer-text";
+import { BottomNav } from "@/components/shared/BottomNav";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -436,6 +437,7 @@ export default function SofiaChat() {
 
   return (
     <div className="flex flex-col h-[100dvh] overflow-hidden relative bg-[var(--sgt-bg-base)]">
+      <BottomNav />
 
       {/* Animated aurora */}
       <AuroraBackground />
@@ -497,7 +499,7 @@ export default function SofiaChat() {
                 filter: "blur(10px)",
                 transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
               }}
-              className="flex-1 flex flex-col items-center justify-center px-4"
+              className="flex-1 flex flex-col items-center justify-center px-4 pb-16 sm:pb-0"
             >
               {/* Sparkles icon */}
               <motion.div
@@ -595,7 +597,7 @@ export default function SofiaChat() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="pb-6 pt-3 px-4"
+                className="pb-16 sm:pb-6 pt-3 px-4"
               >
                 <div className="max-w-2xl mx-auto">
                   <PromptInputBox

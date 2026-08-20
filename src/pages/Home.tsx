@@ -31,6 +31,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePagePermissions } from "@/hooks/usePagePermissions";
 import { TodayTicketsPopup } from "@/components/admin/tickets/TodayTicketsPopup";
+import { BottomNav } from "@/components/shared/BottomNav";
 import sgtLogo from "@/assets/sgt-logo.png";
 
 
@@ -603,9 +604,10 @@ export default function Home() {
 
   return (
     <div
-      className="flex flex-col min-h-[100dvh] px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      className="flex flex-col min-h-[100dvh] px-1 py-1 pb-20 sm:pb-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
+      <BottomNav />
       {/* Atmosfera dark */}
       <div className="pointer-events-none fixed inset-0 sgt-atmosphere bg-[radial-gradient(ellipse_75%_50%_at_50%_-8%,rgba(180,110,4,0.14),transparent_58%)]" />
 
