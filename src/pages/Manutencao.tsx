@@ -120,8 +120,37 @@ export default function Manutencao() {
             {/* ── Faixa 1: header fixo (navbar + KPI grid) ── */}
             <div className="flex flex-col gap-2.5 sm:gap-3 shrink-0">
 
-              {/* Mobile nav */}
-              <MobileNav title="Manutenção" />
+              {/* ── Mobile header ── */}
+              <div className="flex sm:hidden items-center gap-2 py-1">
+                <MobileNav />
+                <div className="flex flex-col leading-none flex-1 min-w-0">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Manutenção</span>
+                </div>
+                <HomeButton />
+              </div>
+
+              {/* ── Mobile: datas + filial + atualizar ── */}
+              <div className="flex sm:hidden items-center gap-1.5 flex-wrap">
+                <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <Select
+                  value={dwFilter.filial ?? "Todas"}
+                  onValueChange={v => setDwFilter("filial", v === "Todas" ? null : v)}
+                >
+                  <SelectTrigger className="h-8 text-xs flex-1 min-w-[100px]"
+                    style={{ background: "var(--sgt-input-bg)", borderColor: "var(--sgt-input-border)" }}>
+                    <SelectValue placeholder="Filial" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todas">Todas as filiais</SelectItem>
+                    {filiaisFiltradas.map(f => (
+                      <SelectItem key={f.codfilial} value={String(f.codfilial)}>{f.filial}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} compact />
+              </div>
 
               {/* Navbar desktop */}
               <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
@@ -222,8 +251,8 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              {/* Main grid — 50/50, colunas alinham ao topo */}
-              <div className="grid grid-cols-2 gap-3 items-start">
+              {/* Main grid — empilha no mobile, 50/50 a partir de md */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
                 <AnimatedCard delay={240} className="h-full">
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
