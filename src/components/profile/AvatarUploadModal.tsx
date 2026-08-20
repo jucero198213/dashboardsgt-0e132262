@@ -55,12 +55,9 @@ export function AvatarUploadModal({ open, onClose, userId, currentAvatarUrl, onU
     setUploading(true);
     setError(null);
     try {
-      // Ensure bucket exists (idempotent — ignores "already exists" error)
-      await supabase.storage.createBucket("avatars", {
-        public: true,
-        fileSizeLimit: 5242880,
-        allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
-      }).catch(() => {});
+      // Ensure bucket exists via edge function (requires service role)
+      const { error: fnError } = await supabase.functions.invoke("ensure-avatars-bucket");
+      if (fnError) throw new Error("Erro ao inicializar storage: " + fnError.message);
 
       const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
       const path = `${userId}/avatar.jpg`;
