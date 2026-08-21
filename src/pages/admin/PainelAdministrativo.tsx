@@ -259,6 +259,21 @@ export default function PainelAdministrativo() {
     }
   };
 
+  async function handleReenviarBrief() {
+    setBriefLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("brief-executivo");
+      if (error) throw error;
+      toast.success("Brief matinal reenviado com sucesso.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Erro ao reenviar brief matinal.";
+      toast.error(message);
+      console.error("Erro ao reenviar brief matinal:", err);
+    } finally {
+      setBriefLoading(false);
+    }
+  }
+
   const currentItem = NAV_BASE.find((n) => n.id === screen);
 
   const heroStats = useMemo(
