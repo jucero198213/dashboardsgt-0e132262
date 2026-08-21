@@ -61,6 +61,7 @@ export function computeVehicleSignals(ordens: OrdemAgregada[]): VehicleSignal[] 
       veiculo,
       totalCusto,
       totalOrdens: vOrdens.length,
+      signalCount: [cost, stuck, repeat, frequency, revisional].filter(Boolean).length,
       signals: { cost, stuck, stuckDias, repeat, repeatCount, frequency, revisional },
     });
   }
