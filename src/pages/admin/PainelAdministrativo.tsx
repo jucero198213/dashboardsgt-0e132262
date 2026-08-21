@@ -665,6 +665,38 @@ export default function PainelAdministrativo() {
                 </AnimatedCard>
               ))}
             </div>
+
+            {/* ═══ Administração ═══ */}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--sgt-text-muted)]">Administração</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
+
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <AnimatedCard delay={760} className="rounded-[20px] border border-[var(--sgt-border-subtle)] overflow-hidden flex flex-col">
+                <div className="flex items-center gap-2 px-5 py-4" style={{ background: "linear-gradient(180deg, rgba(245,158,11,0.05) 0%, transparent 100%)" }}>
+                  <Sunrise className="h-4 w-4 text-amber-400" />
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.2em] sgt-text-2">Brief Matinal</p>
+                </div>
+                <div className="flex-1 p-5">
+                  <p className="text-[12px] text-[var(--sgt-text-secondary)] leading-relaxed mb-4">
+                    Reenvia o resumo executivo matinal para os destinatários configurados.
+                  </p>
+                  <button
+                    onClick={handleReenviarBrief}
+                    disabled={briefLoading}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-2.5 text-[12px] font-semibold text-amber-300 hover:text-amber-200 hover:bg-amber-500/15 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {briefLoading ? (
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sunrise className="h-3.5 w-3.5" />
+                    )}
+                    {briefLoading ? "Enviando..." : "Reenviar Brief Matinal"}
+                  </button>
+                </div>
+              </AnimatedCard>
+            </div>
           </>
         )}
 
