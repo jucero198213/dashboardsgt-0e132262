@@ -243,6 +243,7 @@ function useAdminDashboard(): DashboardData & { refresh: () => Promise<void>; pr
 
 export default function PainelAdministrativo() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [briefLoading, setBriefLoading] = useState(false);
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { refresh, loading, profiles, ...data } = useAdminDashboard();
