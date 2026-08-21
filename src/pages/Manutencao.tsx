@@ -148,7 +148,7 @@ export default function Manutencao() {
                   <SelectContent>
                     <SelectItem value="Todas">Todas as filiais</SelectItem>
                     {filiaisFiltradas.map(f => (
-                      <SelectItem key={f.codfilial} value={String(f.codfilial)}>{f.filial}</SelectItem>
+                      <SelectItem key={f.id} value={String(f.id)}>{f.nome}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -178,7 +178,7 @@ export default function Manutencao() {
                     <SelectContent>
                       <SelectItem value="Todas">Todas as filiais</SelectItem>
                       {filiaisFiltradas.map(f => (
-                        <SelectItem key={f.codfilial} value={String(f.codfilial)}>{f.filial}</SelectItem>
+                        <SelectItem key={f.id} value={String(f.id)}>{f.nome}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
