@@ -4,7 +4,9 @@ import {
   ArrowLeft, Users, Settings, Database, Activity, Shield,
   ChevronRight, Lock, Server, Zap, ClipboardList, Terminal,
   Inbox, AlertTriangle, Ticket as TicketIcon, LogIn, CheckCircle2, RefreshCw,
+  Sunrise,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
