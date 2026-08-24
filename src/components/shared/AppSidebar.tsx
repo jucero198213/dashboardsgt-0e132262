@@ -191,7 +191,7 @@ export function AppSidebar() {
   }, [location.pathname, location.search, collapsed]);
 
   function toggleAcc(key: string) {
-    if (!collapsed) setOpenAcc(p => ({ ...p, [key]: !p[key] }));
+    if (showExpanded) setOpenAcc(p => ({ ...p, [key]: !p[key] }));
   }
 
   // ── render helper: item de nav ────────────────────────────────────────────
