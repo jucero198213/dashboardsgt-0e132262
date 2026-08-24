@@ -6,6 +6,7 @@ import {
   ArrowRight,
   RefreshCw,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FluxoBreakdown } from "@/components/fluxo/FluxoBreakdown";
 
 /* ------------------------------------------------------------------ */
 /*  CountUp — animação de número subindo                               */
@@ -1082,6 +1084,7 @@ const Index = () => {
     chartReceberFiltro,
     chartPagarFiltro,
     kpiExtra,
+    dwRawData,
   } = useFinancialData();
 
   const navigate = useNavigate();
@@ -1089,6 +1092,7 @@ const Index = () => {
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState<string>("");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -1603,6 +1607,19 @@ const Index = () => {
                 </Select>
                 <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
               </div>
+              <button
+                type="button"
+                title="Composição por classificação"
+                onClick={() => setShowBreakdown(true)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5"
+                style={{
+                  background: "rgba(45,212,191,0.08)",
+                  borderColor: "rgba(45,212,191,0.25)",
+                  color: "#2dd4bf",
+                }}
+              >
+                <Layers className="h-3.5 w-3.5" />
+              </button>
               <HomeButton />
             </div>
 
@@ -2003,6 +2020,15 @@ const Index = () => {
           </div>
         </section>
       </div>
+
+      {/* Breakdown por classificação */}
+      {showBreakdown && (
+        <FluxoBreakdown
+          rows={dwRawData}
+          onClose={() => setShowBreakdown(false)}
+          periodo={`${dwFilter.dataInicio} → ${dwFilter.dataFim}`}
+        />
+      )}
     </div>
   );
 };
