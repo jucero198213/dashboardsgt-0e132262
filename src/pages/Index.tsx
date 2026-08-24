@@ -1670,7 +1670,7 @@ const Index = () => {
             {/* Grid principal */}
             <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_minmax(200px,260px)_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
+              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_minmax(200px,1fr)_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
                 {/* Top: 2 colunas — RECEBIDO | PAGO com insights integrados */}
                 {isFetchingDw && !isProcessed ? (
@@ -1891,12 +1891,12 @@ const Index = () => {
                   const inadimplenciaValor = kpiExtra.inadimplencia.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
                   return (
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch h-full">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch">
 
                     {/* SALDO LÍQUIDO — destaque cyan */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
                       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 to-cyan-300/40" />
-                      <div className="relative flex h-full flex-col gap-2">
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-300">Saldo Líquido</span>
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/20 border border-cyan-400/30 transition-transform duration-300 group-hover:scale-110">
@@ -1910,7 +1910,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Recebido − Pago no período
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className="h-full rounded-full bg-cyan-400 transition-all duration-1000 ease-out" style={{ width: saldoPositivo ? "100%" : "20%" }} />
                           </div>
@@ -1923,9 +1923,9 @@ const Index = () => {
                     </div>
 
                     {/* INADIMPLÊNCIA — % em destaque, valor absoluto e docs como subtítulo */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
                       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-red-400/60 to-red-700/20" />
-                      <div className="relative flex h-full flex-col gap-2">
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-red-300/85">Inadimplência</span>
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/15 border border-red-500/20 transition-transform duration-300 group-hover:scale-110">
@@ -1939,7 +1939,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           {inadimplenciaValor}
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className="h-full rounded-full bg-red-400 transition-all duration-1000 ease-out" style={{ width: `${Math.min(kpiExtra.inadimplenciaPerc, 100)}%` }} />
                           </div>
@@ -1951,9 +1951,9 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
                       <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${cpTone.text} opacity-50`} />
-                      <div className="relative flex h-full flex-col gap-2">
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${cpTone.text} opacity-90`}>% Realização CP</span>
                           <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${cpTone.chipBg} border ${cpTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
@@ -1967,7 +1967,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Pago ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className={`h-full rounded-full ${cpTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
                           </div>
@@ -1979,9 +1979,9 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
                       <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${crTone.text} opacity-50`} />
-                      <div className="relative flex h-full flex-col gap-2">
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${crTone.text} opacity-90`}>% Realização CR</span>
                           <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${crTone.chipBg} border ${crTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
@@ -1995,7 +1995,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Recebido ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className={`h-full rounded-full ${crTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
                           </div>
