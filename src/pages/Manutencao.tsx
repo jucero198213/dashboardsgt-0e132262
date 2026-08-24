@@ -247,18 +247,18 @@ export default function Manutencao() {
               </div>
             </div>
 
-            {/* ── Faixa 2: corpo scrollável (Análise) ── */}
-            <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0 overflow-y-auto mt-2.5 sm:mt-3">
+            {/* ── Faixa 2: corpo (Análise) — cresce pra preencher o espaço ── */}
+            <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0 mt-2.5 sm:mt-3">
 
               {/* ════ Análise ════ */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Análise</span>
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              {/* Main grid — empilha no mobile, 50/50 a partir de md */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
-                <AnimatedCard delay={240} className="h-full">
+              {/* Main grid — preenche o espaço restante */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-1 min-h-0">
+                <AnimatedCard delay={240} className="min-h-0 flex flex-col">
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
                     onSelectVeiculo={handleSelectVeiculo}
@@ -266,7 +266,7 @@ export default function Manutencao() {
                   />
                 </AnimatedCard>
 
-                <div className="flex flex-col gap-3 h-full">
+                <div className="flex flex-col gap-3 min-h-0">
                   <AnimatedCard delay={300} className="flex-1 flex flex-col min-h-0">
                     <CustoMiniChart
                       data={dailyCosts}
@@ -284,7 +284,7 @@ export default function Manutencao() {
               </div>
 
               {/* OS Sheet trigger */}
-              <AnimatedCard delay={420} hover={false}>
+              <AnimatedCard delay={420} hover={false} className="shrink-0">
                 <button
                   type="button"
                   onClick={handleOpenSheet}
