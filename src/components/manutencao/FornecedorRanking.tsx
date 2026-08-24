@@ -44,14 +44,14 @@ export function FornecedorRanking({ items, loading }: Props) {
                   <span className="text-[11px] dark:text-white/80 text-slate-700 truncate" title={item.fornecedor}>
                     {item.fornecedor}
                   </span>
-                  <div className="h-[3px] rounded-full overflow-hidden" style={{ background: "var(--sgt-border-medium)" }}>
+                  <div className="h-[6px] rounded-full overflow-hidden" style={{ background: "var(--sgt-border-medium)" }}>
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-indigo-400 transition-all duration-500"
                       style={{ width: `${Math.round(item.share * 100)}%` }}
                     />
                   </div>
                 </div>
-                <span className="text-[10px] font-bold text-indigo-400 shrink-0 min-w-[52px] text-right">
+                <span className="text-[13px] font-bold text-indigo-400 shrink-0 min-w-[60px] text-right">
                   {fmtK(item.totalCusto)}
                 </span>
               </div>
