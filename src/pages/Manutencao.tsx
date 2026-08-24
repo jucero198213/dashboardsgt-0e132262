@@ -87,7 +87,7 @@ export default function Manutencao() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
-      className="flex flex-col transition-all duration-300 min-h-[100dvh] overflow-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      className="flex flex-col transition-all duration-300 h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
       {/* Gradientes de fundo SGT — tom violet/rose para Manutenção */}
@@ -204,7 +204,7 @@ export default function Manutencao() {
                 <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
               </div>
 
-              <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5 sgt-stagger">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 sgt-stagger">
                 <AnimatedCard delay={0}>
                   <KpiCard
                     label="Custo Total"
@@ -257,7 +257,7 @@ export default function Manutencao() {
               </div>
 
               {/* Main grid — empilha no mobile, 50/50 a partir de md */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
                 <AnimatedCard delay={240} className="h-full">
                   <VehicleAttentionPanel
                     vehicles={vehicleSignals}
