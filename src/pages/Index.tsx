@@ -1653,7 +1653,7 @@ const Index = () => {
             {/* Grid principal */}
             <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
+              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_minmax(200px,260px)_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
                 {/* Top: 2 colunas — RECEBIDO | PAGO com insights integrados */}
                 {isFetchingDw && !isProcessed ? (
