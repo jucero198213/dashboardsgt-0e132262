@@ -134,12 +134,14 @@ export function AppSidebar() {
     return localStorage.getItem(STORAGE_KEY) === "1";
   });
   const [openAcc, setOpenAcc] = useState<Record<string, boolean>>({});
+  const [hovered, setHovered] = useState(false);
   const [flyout, setFlyout]   = useState<{
     id: string; label: string; icon: AppNavItem["icon"]; active: boolean; rect: DOMRect;
   } | null>(null);
   const [logoErr, setLogoErr] = useState(false);
   const [markErr, setMarkErr] = useState(false);
   const mouseY = useMotionValue(Infinity);
+  const showExpanded = !collapsed || hovered;
 
   // ── helpers ────────────────────────────────────────────────────────────────
   const search       = new URLSearchParams(location.search);
@@ -198,7 +200,7 @@ export function AppSidebar() {
     const active = isActive(item);
 
     // ── estado recolhido ──────────────────────────────────────────────────
-    if (collapsed) {
+    if (!showExpanded) {
       return (
         <MagItem
           key={item.id}
@@ -278,7 +280,7 @@ export function AppSidebar() {
 
   // ── render helper: item Início ────────────────────────────────────────────
   function renderHome() {
-    if (collapsed) {
+    if (!showExpanded) {
       return (
         <div className="mt-2">
           <MagItem
@@ -341,7 +343,7 @@ export function AppSidebar() {
 
   // ── render helper: label de seção ────────────────────────────────────────
   function renderSectionLabel(label: string) {
-    if (collapsed) {
+    if (!showExpanded) {
       return (
         <div key={`sec-${label}`} className="flex justify-center my-1">
           <div className="w-6 h-px" style={{ background: "var(--sb-border-subtle)" }} />
@@ -359,10 +361,13 @@ export function AppSidebar() {
 
   // ── JSX ───────────────────────────────────────────────────────────────────
   return (
-    <aside
-      className="hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col transition-all duration-300"
+    <motion.aside
+      className="hidden sm:flex fixed left-0 top-0 z-40 h-[100dvh] flex-col"
+      animate={{ width: showExpanded ? SB_W_EXPANDED : SB_W_COLLAPSED }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      onMouseEnter={() => collapsed && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        width:        collapsed ? SB_W_COLLAPSED : SB_W_EXPANDED,
         background:   "var(--sb-bg-surface)",
         borderRight:  "1px solid var(--sb-border-subtle)",
         borderRadius: "0 16px 16px 0",
@@ -380,11 +385,11 @@ export function AppSidebar() {
       {/* ── LOGO + TOGGLE ─────────────────────────────────────────────────── */}
       <div
         className={`flex shrink-0 items-center border-b ${
-          collapsed ? "flex-col justify-center gap-3 py-4 px-0" : "justify-between gap-2 px-5 py-5"
+          showExpanded ? "justify-between gap-2 px-5 py-5" : "flex-col justify-center gap-3 py-4 px-0"
         }`}
         style={{ borderColor: "var(--sb-border-subtle)" }}
       >
-        {!collapsed && (
+        {showExpanded && (
           logoErr
             ? <div style={{
                 fontFamily: "var(--sgt-font-display)", fontSize: 22, fontWeight: 700,
@@ -399,7 +404,7 @@ export function AppSidebar() {
                 onError={() => setLogoErr(true)} />
         )}
 
-        {collapsed && (
+        {!showExpanded && (
           markErr || logoErr
             ? <div style={{
                 width: 32, height: 32, borderRadius: 6, background: "#E8202A", flexShrink: 0,
@@ -443,7 +448,7 @@ export function AppSidebar() {
       <div
         className="flex-1 min-h-0 overflow-y-auto py-1 flex flex-col"
         style={{ scrollbarWidth: "none", overflowX: "visible" }}
-        onMouseMove={collapsed ? (e) => mouseY.set(e.clientY) : undefined}
+        onMouseMove={!showExpanded ? (e) => mouseY.set(e.clientY) : undefined}
         onMouseLeave={() => { mouseY.set(Infinity); setFlyout(null); }}
       >
         {/* Início */}
@@ -479,7 +484,7 @@ export function AppSidebar() {
 
           return (
             <div key={group.key}>
-              {collapsed
+              {!showExpanded
                 ? <div className="flex justify-center my-1">
                     <div className="w-6 h-px" style={{ background: "var(--sb-border-subtle)" }} />
                   </div>
@@ -503,7 +508,7 @@ export function AppSidebar() {
               {/* Corpo: grid-template-rows para animação sem overflow-hidden no pai */}
               <div
                 className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-                style={{ gridTemplateRows: collapsed ? "1fr" : (isOpen ? "1fr" : "0fr") }}
+                style={{ gridTemplateRows: !showExpanded ? "1fr" : (isOpen ? "1fr" : "0fr") }}
               >
                 <div className="overflow-hidden">
                   <div className="py-6 -my-6">
@@ -524,7 +529,7 @@ export function AppSidebar() {
 
       {/* ── RODAPÉ ───────────────────────────────────────────────────────── */}
       <UserFooter
-        collapsed={collapsed}
+        collapsed={!showExpanded}
         email={user?.email ?? ""}
         userId={user?.id ?? ""}
         isAdmin={isAdmin}
@@ -536,7 +541,7 @@ export function AppSidebar() {
       />
 
       {/* ── FLYOUT (estado recolhido) ─────────────────────────────────────── */}
-      {collapsed && flyout && (
+      {!showExpanded && flyout && (
         <div
           className="pointer-events-none fixed z-[200] flex items-center gap-2 whitespace-nowrap px-3 py-1.5 text-[14px] font-semibold"
           style={{
@@ -563,7 +568,7 @@ export function AppSidebar() {
           {flyout.active && <ChevronRight className="w-3 h-3 shrink-0" style={{ color: "#1B1304" }} />}
         </div>
       )}
-    </aside>
+    </motion.aside>
   );
 }
 
