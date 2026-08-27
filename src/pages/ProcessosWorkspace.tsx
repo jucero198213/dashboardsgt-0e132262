@@ -142,7 +142,8 @@ export default function ProcessosWorkspace() {
   const { data: processos = [], isLoading, isError } = useQuery<Processo[]>({
     queryKey: ["processos"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from("processos")
         .select("id, titulo, categoria, descricao, passos, tags")
         .eq("ativo", true)
