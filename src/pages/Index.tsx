@@ -1894,6 +1894,14 @@ const Index = () => {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch">
 
                     {/* SALDO LÍQUIDO — destaque cyan */}
+                    {(() => {
+                      const absS = Math.abs(kpiExtra.saldoLiquido);
+                      const saldoCompacto = absS >= 1e6
+                        ? `${saldoPositivo ? "" : "-"}R$ ${(absS/1e6).toFixed(1).replace(".",",")}M`
+                        : absS >= 1e3
+                        ? `${saldoPositivo ? "" : "-"}R$ ${(absS/1e3).toFixed(0)}k`
+                        : kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+                      return (
                     <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
                       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 to-cyan-300/40" />
                       <div className="relative flex flex-col gap-1.5">
@@ -1903,12 +1911,12 @@ const Index = () => {
                             {saldoPositivo ? <TrendingUp className="h-3 w-3 text-cyan-300" /> : <TrendingDown className="h-3 w-3 text-red-300" />}
                           </div>
                         </div>
-                        <div className="font-black tracking-[-0.04em] text-white leading-none whitespace-nowrap overflow-hidden text-ellipsis"
-                          style={{ fontSize: kpiFontSize(kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })) }}>
-                          {kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        <div className={`font-black tracking-[-0.04em] leading-none ${saldoPositivo ? "text-cyan-300" : "text-red-300"}`}
+                          style={{ fontSize: kpiFontSize(saldoCompacto) }}>
+                          {saldoCompacto}
                         </div>
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
-                          Recebido − Pago no período
+                          {kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                         </p>
                         <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
@@ -1921,6 +1929,8 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
+                      );
+                    })()}
 
                     {/* INADIMPLÊNCIA — % em destaque, valor absoluto e docs como subtítulo */}
                     <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
