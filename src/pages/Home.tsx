@@ -27,6 +27,7 @@ import {
   MapPin,
   UserCog,
   PieChart,
+  CircleDot,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -512,6 +513,7 @@ export default function Home() {
     "ext-fin-frota": "/financiamento-frota",
     "ext-manutencao": "/manutencao",
     "ext-abastecimento": "/abastecimento",
+    "ext-pneus": "/pneus",
     "ext-compras": "/compras",
     "ext-rh": "/rh",
     "ext-chamados": "/chamados",
@@ -525,9 +527,10 @@ export default function Home() {
 
   const groupPagesList: Record<string, import("@/hooks/usePagePermissions").AppPage[]> = {
     "receitaflow": ["portal-receitaflow"],
-    "financeiro": ["fin-painel","fin-pagar","fin-receber","fin-conciliacao","fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"],
+    "financeiro": ["fin-painel","fin-pagar","fin-receber","fin-conciliacao","fin-realizado","fin-previsto","fin-relatorios","ext-fiscal","ext-fin-frota"],
     "gestao": ["ext-executivo","ext-indicadores","ext-faturamento"],
-    "operacao": ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"],
+    "operacao": ["ext-operacional"],
+    "frota": ["ext-frota","ext-manutencao","ext-abastecimento","ext-pneus"],
     "compras": ["ext-compras"],
     "rh": ["ext-rh"],
     "outras-analises": ["fin-fornecedores","fin-clientes","fin-categorias","fin-bancos"],
@@ -573,10 +576,19 @@ export default function Home() {
       key: "operacao",
       icon: MapPin,
       title: "Operação",
-      description: "Operacional, gestão de frota, financiamentos, manutenção e abastecimento.",
+      description: "Painel operacional da empresa.",
       cta: "Acessar operação",
       onClick: () => navigate(firstAccessibleRoute("operacao", "/operacional")),
       tone: "blue" as const,
+    },
+    {
+      key: "frota",
+      icon: Truck,
+      title: "Frota",
+      description: "Gestão de frota, manutenção, abastecimento e controle de pneus.",
+      cta: "Acessar frota",
+      onClick: () => navigate(firstAccessibleRoute("frota", "/frota")),
+      tone: "amber" as const,
     },
     {
       key: "compras",
