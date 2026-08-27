@@ -2027,6 +2027,7 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           -- Entrada (TPNF=0) e desconsiderados NÃO são escondidos aqui: a tela
           -- devolve TODAS as notas (marcadas em TPNF/DESCONSIDERADO) e o usuário
           -- liga/desliga os filtros na interface (Opção C).
+          AND D.TIPRET = 'resNFe'
           AND (@dataInicio IS NULL OR D.DEMI >= @dataInicio)
           AND (@dataFim    IS NULL OR D.DEMI <  DATEADD(day, 1, @dataFim))
           AND (@filial     IS NULL OR D.CODFIL = @filial)
@@ -2099,6 +2100,7 @@ app.post("/dw-consulta-nfe-tendencia", async (req, res) => {
         AND (D.TPNF IS NULL OR D.TPNF <> '0')
         AND LEFT(${limpaCnpj("D.CNPJ")}, 8) NOT IN (${descInSql})
         AND D.DEMI >= @desde
+        AND D.TIPRET = 'resNFe'
       GROUP BY CONVERT(char(7), D.DEMI, 126)
       ORDER BY mes
       OPTION (RECOMPILE)
