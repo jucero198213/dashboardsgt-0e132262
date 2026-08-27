@@ -2028,6 +2028,10 @@ app.post("/dw-consulta-nfe", async (req, res) => {
           -- devolve TODAS as notas (marcadas em TPNF/DESCONSIDERADO) e o usuário
           -- liga/desliga os filtros na interface (Opção C).
           AND D.TIPRET = 'resNFe'
+          AND NOT EXISTS (
+            SELECT 1 FROM NFEIDIST CANC WITH (NOLOCK)
+            WHERE CANC.CHNFE = D.CHNFE AND CANC.TIPRET = 'resCanc'
+          )
           AND (@dataInicio IS NULL OR D.DEMI >= @dataInicio)
           AND (@dataFim    IS NULL OR D.DEMI <  DATEADD(day, 1, @dataFim))
           AND (@filial     IS NULL OR D.CODFIL = @filial)
@@ -2101,6 +2105,10 @@ app.post("/dw-consulta-nfe-tendencia", async (req, res) => {
         AND LEFT(${limpaCnpj("D.CNPJ")}, 8) NOT IN (${descInSql})
         AND D.DEMI >= @desde
         AND D.TIPRET = 'resNFe'
+        AND NOT EXISTS (
+          SELECT 1 FROM NFEIDIST CANC WITH (NOLOCK)
+          WHERE CANC.CHNFE = D.CHNFE AND CANC.TIPRET = 'resCanc'
+        )
       GROUP BY CONVERT(char(7), D.DEMI, 126)
       ORDER BY mes
       OPTION (RECOMPILE)
