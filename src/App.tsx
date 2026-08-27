@@ -40,6 +40,7 @@ const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspac
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
 const SofiaChat               = lazy(() => import("./pages/SofiaChat"));
 const ProcessosWorkspace      = lazy(() => import("./pages/ProcessosWorkspace"));
+const Pneus                   = lazy(() => import("./pages/Pneus"));
 const Welcome                 = lazy(() => import("./pages/Welcome"));
 const SetPassword             = lazy(() => import("./pages/SetPassword"));
 
@@ -90,6 +91,7 @@ const App = () => (
                 <Route path="/financiamento-frota" element={<ProtectedRoute requiredPage="ext-fin-frota"><AppLayout><FinanciamentoFrota /></AppLayout></ProtectedRoute>} />
                 <Route path="/manutencao"       element={<ProtectedRoute requiredPage="ext-manutencao"><AppLayout><Manutencao /></AppLayout></ProtectedRoute>} />
                 <Route path="/abastecimento"    element={<ProtectedRoute requiredPage="ext-abastecimento"><AppLayout><Abastecimento /></AppLayout></ProtectedRoute>} />
+                <Route path="/pneus"           element={<ProtectedRoute requiredPage="ext-pneus"><AppLayout><Pneus /></AppLayout></ProtectedRoute>} />
                 {/* ── Compras ── */}
                 <Route path="/compras"          element={<ProtectedRoute requiredPage="ext-compras"><AppLayout><Compras /></AppLayout></ProtectedRoute>} />
                 {/* ── RH ── */}

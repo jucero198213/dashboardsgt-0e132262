@@ -93,14 +93,15 @@ const CORE_GROUPS: { label: string; ids: string[] }[] = [
     ids: ["portal-receitaflow","portal-visual"] },
   { label: "Financeiro",
     ids: ["fin-painel","fin-pagar","fin-receber","fin-conciliacao",
-          "fin-realizado","fin-previsto","fin-relatorios","ext-fiscal"] },
+          "fin-realizado","fin-previsto","fin-relatorios","ext-fiscal","ext-fin-frota"] },
   { label: "Outras Análises",
     ids: ["fin-fornecedores","fin-clientes","fin-categorias","fin-bancos"] },
 ];
 
 const ACCORDION_GROUPS: { key: string; label: string; ids: string[] }[] = [
   { key: "gestao",    label: "Gestão",       ids: ["ext-executivo","ext-indicadores","ext-faturamento"] },
-  { key: "operacao",  label: "Operação",     ids: ["ext-operacional","ext-frota","ext-fin-frota","ext-manutencao","ext-abastecimento"] },
+  { key: "operacao",  label: "Operação",     ids: ["ext-operacional"] },
+  { key: "frota",     label: "Frota",        ids: ["ext-frota","ext-manutencao","ext-abastecimento","ext-pneus"] },
   { key: "comprasrh", label: "Compras / RH", ids: ["ext-compras","ext-rh"] },
 ];
 

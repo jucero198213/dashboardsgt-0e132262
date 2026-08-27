@@ -23,6 +23,7 @@ export type AppPage =
   | "ext-fin-frota"
   | "ext-manutencao"
   | "ext-abastecimento"
+  | "ext-pneus"
   | "ext-compras"
   | "ext-rh"
   | "ext-chamados"
@@ -51,6 +52,7 @@ export const ALL_PAGES: AppPage[] = [
   "ext-fin-frota",
   "ext-manutencao",
   "ext-abastecimento",
+  "ext-pneus",
   "ext-compras",
   "ext-rh",
   "ext-chamados",
@@ -62,7 +64,7 @@ export const ALL_PAGES: AppPage[] = [
 export const PAGE_GROUPS: { label: string; pages: AppPage[] }[] = [
   {
     label: "Financeiro",
-    pages: ["fin-painel", "fin-pagar", "fin-receber", "fin-conciliacao", "fin-realizado", "fin-previsto", "fin-relatorios", "ext-fiscal"],
+    pages: ["fin-painel", "fin-pagar", "fin-receber", "fin-conciliacao", "fin-realizado", "fin-previsto", "fin-relatorios", "ext-fiscal", "ext-fin-frota"],
   },
   {
     label: "Outras Análises",
@@ -74,7 +76,11 @@ export const PAGE_GROUPS: { label: string; pages: AppPage[] }[] = [
   },
   {
     label: "Operação",
-    pages: ["ext-operacional", "ext-frota", "ext-fin-frota", "ext-manutencao", "ext-abastecimento"],
+    pages: ["ext-operacional"],
+  },
+  {
+    label: "Frota",
+    pages: ["ext-frota", "ext-manutencao", "ext-abastecimento", "ext-pneus"],
   },
   {
     label: "Compras",

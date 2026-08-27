@@ -4,7 +4,7 @@ import {
   TrendingUp, Activity, Wallet, Banknote, Users,
   Truck, Wrench, MapPin, Briefcase, ShoppingCart, Fuel,
   LineChart as LineChartIcon, Headphones, UserCog, Scale,
-  Sparkles, Globe, BotMessageSquare,
+  Sparkles, Globe, BotMessageSquare, CircleDot,
 } from "lucide-react";
 import type { AppPage } from "@/hooks/usePagePermissions";
 
@@ -51,6 +51,7 @@ export const APP_NAV: AppNavItem[] = [
   { id: "fin-previsto",     label: "Previsto",         icon: TrendingUp,      financeScreen: "previsto",     page: "fin-previsto" },
   { id: "fin-relatorios",   label: "Relatórios",       icon: FileBarChart,    financeScreen: "relatorios",   page: "fin-relatorios" },
   { id: "ext-fiscal",       label: "Fiscal",           icon: Scale,           to: "/fiscal",                 page: "ext-fiscal" },
+  { id: "ext-fin-frota",    label: "Financiamentos",   icon: Wallet,          to: "/financiamento-frota",    page: "ext-fin-frota" },
 
   // ── Outras Análises (visões financeiras por dimensão) ─────────────────────
   { id: "fin-fornecedores", label: "Fornecedores",     icon: Building2,       financeScreen: "fornecedores", section: "Outras Análises", page: "fin-fornecedores" },
@@ -65,10 +66,12 @@ export const APP_NAV: AppNavItem[] = [
 
   // ── Operação ──────────────────────────────────────────────────────────────
   { id: "ext-operacional",  label: "Operacional",      icon: MapPin,          to: "/operacional",            section: "Operação",  page: "ext-operacional" },
-  { id: "ext-frota",        label: "Gestão de Frota",  icon: Truck,           to: "/frota",                                         page: "ext-frota" },
-  { id: "ext-fin-frota",    label: "Financiamentos",   icon: Wallet,          to: "/financiamento-frota",                           page: "ext-fin-frota" },
-  { id: "ext-manutencao",   label: "Manutenção",       icon: Wrench,          to: "/manutencao",                                    page: "ext-manutencao" },
-  { id: "ext-abastecimento",label: "Abastecimento",    icon: Fuel,            to: "/abastecimento",                                 page: "ext-abastecimento" },
+
+  // ── Frota ─────────────────────────────────────────────────────────────────
+  { id: "ext-frota",        label: "Gestão de Frota",  icon: Truck,           to: "/frota",                  section: "Frota",     page: "ext-frota" },
+  { id: "ext-manutencao",   label: "Manutenção",       icon: Wrench,          to: "/manutencao",                                   page: "ext-manutencao" },
+  { id: "ext-abastecimento",label: "Abastecimento",    icon: Fuel,            to: "/abastecimento",                                page: "ext-abastecimento" },
+  { id: "ext-pneus",        label: "Pneus",            icon: CircleDot,       to: "/pneus",                                        page: "ext-pneus" },
 
   // ── Compras ───────────────────────────────────────────────────────────────
   { id: "ext-compras",      label: "Compras",          icon: ShoppingCart,    to: "/compras",                section: "Compras",   page: "ext-compras" },

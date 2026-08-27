@@ -5,7 +5,7 @@ import {
   Briefcase, Banknote, LineChart, MapPin, Truck, Car, Wrench, Fuel,
   LayoutDashboard, ArrowDownCircle, ArrowUpCircle, RefreshCcw,
   ShoppingCart, UserCog, Sparkles, Activity, TrendingUp,
-  Building2, Users, Tag, Landmark,
+  Building2, Users, Tag, Landmark, CircleDot,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { usePagePermissions, type AppPage } from "@/hooks/usePagePermissions";
@@ -36,18 +36,21 @@ const CONTEXT_NAV: Record<string, NavItem[]> = {
   ],
   operacao: [
     { id: "oper",  icon: MapPin,         label: "Operacional",  to: "/operacional",         page: "ext-operacional" },
+  ],
+  frota: [
     { id: "frota", icon: Truck,          label: "Frota",        to: "/frota",               page: "ext-frota" },
-    { id: "financ",icon: Car,            label: "Financiamento",to: "/financiamento-frota", page: "ext-fin-frota" },
     { id: "manut", icon: Wrench,         label: "Manutenção",   to: "/manutencao",          page: "ext-manutencao" },
     { id: "abast", icon: Fuel,           label: "Abastecimento",to: "/abastecimento",        page: "ext-abastecimento" },
+    { id: "pneus", icon: CircleDot,      label: "Pneus",        to: "/pneus",               page: "ext-pneus" },
   ],
   financeiro: [
-    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",      to: "/financeiro",                    page: "fin-painel" },
-    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",       to: "/financeiro?s=pagar",             page: "fin-pagar" },
-    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",     to: "/financeiro?s=receber",           page: "fin-receber" },
-    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação", to: "/financeiro?s=conciliacao",       page: "fin-conciliacao" },
-    { id: "fin-rl",  icon: Activity,        label: "Realizado",   to: "/dashboard",                      page: "fin-realizado" },
-    { id: "fin-pv",  icon: TrendingUp,      label: "Previsto",    to: "/financeiro?s=previsto",          page: "fin-previsto" },
+    { id: "fin-p",   icon: LayoutDashboard, label: "Painel",        to: "/financeiro",                    page: "fin-painel" },
+    { id: "fin-pg",  icon: ArrowDownCircle, label: "Pagar",         to: "/financeiro?s=pagar",             page: "fin-pagar" },
+    { id: "fin-rc",  icon: ArrowUpCircle,   label: "Receber",       to: "/financeiro?s=receber",           page: "fin-receber" },
+    { id: "fin-cn",  icon: RefreshCcw,      label: "Conciliação",   to: "/financeiro?s=conciliacao",       page: "fin-conciliacao" },
+    { id: "fin-rl",  icon: Activity,        label: "Realizado",     to: "/dashboard",                      page: "fin-realizado" },
+    { id: "fin-pv",  icon: TrendingUp,      label: "Previsto",      to: "/financeiro?s=previsto",          page: "fin-previsto" },
+    { id: "financ",  icon: Car,             label: "Financiamento", to: "/financiamento-frota",            page: "ext-fin-frota" },
   ],
   compras: [
     { id: "compras", icon: ShoppingCart, label: "Compras",      to: "/compras",             page: "ext-compras" },
@@ -69,12 +72,14 @@ const CONTEXT_NAV: Record<string, NavItem[]> = {
 // ─── Detecta contexto pela rota ──────────────────────────────────────────────
 function getNavContext(pathname: string, search: string): string {
   if (["/executivo", "/faturamento", "/indicadores"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "gestao";
-  if (["/operacional", "/frota", "/financiamento-frota", "/manutencao", "/abastecimento"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "operacao";
+  if (["/operacional"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "operacao";
+  if (["/frota", "/manutencao", "/abastecimento", "/pneus"].some(p => pathname === p || pathname.startsWith(p + "/"))) return "frota";
   if (pathname.startsWith("/financeiro")) {
     const s = new URLSearchParams(search).get("s");
     if (s === "fornecedores" || s === "clientes" || s === "categorias" || s === "bancos") return "outras-analises";
     return "financeiro";
   }
+  if (pathname.startsWith("/financiamento-frota")) return "financeiro";
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/contas-a")) return "financeiro";
   if (pathname.startsWith("/compras")) return "compras";
   if (pathname.startsWith("/rh")) return "rh";
