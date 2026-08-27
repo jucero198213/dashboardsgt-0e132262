@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   BarChart3,
+  BookOpen,
   TrendingUp,
   Sparkles,
   ArrowRight,
@@ -466,6 +467,17 @@ export default function Home() {
       onClick: () => navigate("/sofia"),
       tone: "amber" as const,
       pinned: true,
+      featured: true,
+    },
+    {
+      key: "processos",
+      icon: BookOpen,
+      title: "Processos",
+      description: "Base de conhecimento com passo a passo dos processos operacionais do Visual Rodopar.",
+      cta: "Ver processos",
+      onClick: () => navigate("/processos"),
+      tone: "violet" as const,
+      pinned: false,
       featured: true,
     },
     {

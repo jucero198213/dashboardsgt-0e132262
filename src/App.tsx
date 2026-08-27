@@ -39,6 +39,7 @@ const SgtWorkspace            = lazy(() => import("./pages/SgtWorkspace"));
 const VisualRodoparWorkspace  = lazy(() => import("./pages/VisualRodoparWorkspace"));
 const ReceitaFlowWorkspace    = lazy(() => import("./pages/ReceitaFlowWorkspace"));
 const SofiaChat               = lazy(() => import("./pages/SofiaChat"));
+const ProcessosWorkspace      = lazy(() => import("./pages/ProcessosWorkspace"));
 const Welcome                 = lazy(() => import("./pages/Welcome"));
 const SetPassword             = lazy(() => import("./pages/SetPassword"));
 
@@ -99,6 +100,7 @@ const App = () => (
                 <Route path="/visual-rodopar"  element={<ProtectedRoute requiredPage="portal-visual"><AppLayout><VisualRodoparWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/receitaflow"     element={<ProtectedRoute requiredPage="portal-receitaflow"><AppLayout><ReceitaFlowWorkspace /></AppLayout></ProtectedRoute>} />
                 <Route path="/sofia"           element={<ProtectedRoute requiredPage="sofia-ai"><SofiaChat /></ProtectedRoute>} />
+                <Route path="/processos"      element={<ProtectedRoute><AppLayout><ProcessosWorkspace /></AppLayout></ProtectedRoute>} />
                 {/* ── Admin / telas livres ── */}
                 <Route path="/em-desenvolvimento/:modulo" element={<ProtectedRoute><AppLayout><EmDesenvolvimento /></AppLayout></ProtectedRoute>} />
                 <Route path="/admin"            element={<ProtectedRoute requiredRole="admin"><AppLayout><PainelAdministrativo /></AppLayout></ProtectedRoute>} />

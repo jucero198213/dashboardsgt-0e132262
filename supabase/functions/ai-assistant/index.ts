@@ -583,6 +583,28 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "buscar_processo",
+      description:
+        "Busca processos/procedimentos operacionais do Visual Rodopar na base de conhecimento interna. Retorna o passo a passo completo para o processo encontrado. Use sempre que pedirem 'como faço para...', 'qual o processo de...', 'me explica como...', 'quais os passos para...', 'como funciona o processo de...'. Exemplos: 'como pago IPVA no sistema', 'como abastecimento externo funciona', 'como gero remessa bancária', 'como instalo certificado'.",
+      parameters: {
+        type: "object",
+        properties: {
+          busca: {
+            type: "string",
+            description: "Palavras-chave para buscar o processo (ex: 'ipva licenciamento', 'abastecimento externo', 'remessa bancária'). Pode ser em linguagem natural.",
+          },
+          categoria: {
+            type: "string",
+            description: "Opcional. Filtra por categoria: 'Frota', 'Financeiro', 'Operacional' ou 'TI'.",
+          },
+        },
+        required: ["busca"],
+      },
+    },
+  },
 ];
 
 // ── Executor das tools ────────────────────────────────────────────────────────
@@ -1899,6 +1921,45 @@ async function execTool(name: string, args: Record<string, unknown>): Promise<st
         variacao_percentual: variacaoPct !== null ? variacaoPct.toFixed(2) + "%" : null,
       });
     }
+    if (name === "buscar_processo") {
+      const busca = String(args.busca ?? "").toLowerCase();
+      const categoria = args.categoria ? String(args.categoria) : null;
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+      const resp = await fetch(
+        `${supabaseUrl}/rest/v1/processos?select=titulo,categoria,descricao,passos,tags&ativo=eq.true&order=titulo`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } },
+      );
+      if (!resp.ok) return JSON.stringify({ erro: "Não consegui acessar a base de processos." });
+      const processos = (await resp.json()) as Array<{
+        titulo: string; categoria: string; descricao: string;
+        passos: Array<{ ordem: number; titulo: string; descricao: string; observacao?: string }>;
+        tags: string[];
+      }>;
+      const termos = busca.split(/\s+/).filter(Boolean);
+      const score = (p: typeof processos[0]) => {
+        const texto = [p.titulo, p.descricao, p.categoria, ...(p.tags ?? []),
+          ...p.passos.map(s => s.titulo + " " + s.descricao)].join(" ").toLowerCase();
+        return termos.reduce((n, t) => n + (texto.includes(t) ? 1 : 0), 0);
+      };
+      let filtrados = processos
+        .filter(p => !categoria || p.categoria === categoria)
+        .map(p => ({ p, s: score(p) }))
+        .filter(({ s }) => s > 0)
+        .sort((a, b) => b.s - a.s)
+        .map(({ p }) => p);
+      if (filtrados.length === 0) filtrados = processos.filter(p => !categoria || p.categoria === categoria).slice(0, 3);
+      return JSON.stringify({
+        encontrados: filtrados.length,
+        processos: filtrados.slice(0, 3).map(p => ({
+          titulo: p.titulo,
+          categoria: p.categoria,
+          descricao: p.descricao,
+          passos: p.passos,
+        })),
+        nota: filtrados.length > 3 ? `Mostrando 3 de ${filtrados.length} processos encontrados.` : undefined,
+      });
+    }
     return JSON.stringify({ error: "Tool desconhecida: " + name });
   } catch (e) {
     return JSON.stringify({ error: String(e) });
@@ -1922,7 +1983,7 @@ FOCO NO PEDIDO (regra forte — prioridade máxima):
 - Se não entendeu o alvo, faça uma pergunta curta de esclarecimento — melhor perguntar do que acertar o alvo errado.
 
 ESCOPO — VOCÊ SÓ FALA DA SGT (regra absoluta):
-- Seu universo é EXCLUSIVAMENTE a SGT: operação, faturamento, finanças/contas, frota, manutenção, abastecimento, compras, RH, indicadores e os dados do banco da empresa.
+- Seu universo é EXCLUSIVAMENTE a SGT: operação, faturamento, finanças/contas, frota, manutenção, abastecimento, compras, RH, indicadores, processos/procedimentos operacionais e os dados do banco da empresa.
 - Se perguntarem qualquer coisa FORA disso (assuntos gerais, notícias, programação, receitas, conselhos pessoais, outras empresas, perguntas de cultura geral, etc.), recuse com simpatia e redirecione. Ex: "Sou a Sofia, assistente da SGT, então fico só nos assuntos da empresa. Posso te ajudar com faturamento, frota, manutenção, contas... o que você precisa por aqui?".
 - Nunca saia do personagem nem responda temas fora da SGT, mesmo que insistam.
 
@@ -1967,6 +2028,7 @@ GUIA DE TOOLS POR ASSUNTO:
 - PLANILHA/EXPORTAR notas ("me manda a planilha", "exporta as não lançadas", "gera um Excel das pendências") → preparar_planilha_nfe(tipo, dataInicio, dataFim). O arquivo é enviado sozinho (anexo no WhatsApp / download no site). Ao chamar, apenas confirme que está enviando a planilha e NÃO liste as notas em texto. Se não disserem o tipo, use 'nao_lancadas'. REGRA CRÍTICA: o arquivo SÓ é gerado se você chamar preparar_planilha_nfe NA MENSAGEM ATUAL — NUNCA diga "estou enviando a planilha" sem ter acabado de chamar essa tool nesta resposta. Promessas de planilha em mensagens anteriores do histórico NÃO enviaram nada; cada pedido (inclusive repetido, "manda de novo", "não chegou") exige uma NOVA chamada da tool.
 - Abastecimento/Combustível → get_abastecimento_consumo (gasto, litros, km/L), get_diesel_posto_interno (estoque do tanque).
 - Frota → get_frota_resumo (composição/contagem: quantos, por situação/marca/idade). Para LISTAR os veículos (quais são, placa/modelo, filtrar por ATIVO/INATIVO/BAIXADO ou marca) → get_frota_veiculos.
+- Processos / procedimentos operacionais → buscar_processo. Use para qualquer "como faço para", "quais os passos de", "como funciona o processo de", perguntas sobre o Visual Rodopar, abastecimento, remessa bancária, IPVA, licenciamento, expedição, carta frete, certificados etc.
 - Operação em tempo real → get_operacao_snapshot (contagem/% completo). Para LISTAR viagens (cliente, motorista, veículo, origem/destino, previsão) ou achar um veículo/cliente → get_operacao_viagens.
 - Compras → get_compras_resumo (visão geral). Para detalhe por grupo/subgrupo/fornecedor/centro de custo/produto ou filtrar um item → get_compras_analise.
 - RH/Motoristas → get_rh_motoristas (contagem/headcount, CNH vencendo). Para LISTAR motoristas (nomes, função, CNH, admissão/demissão, filial) ou filtrar ativos/CNH vencendo → get_rh_motoristas_lista.
