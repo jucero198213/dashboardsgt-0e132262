@@ -13,6 +13,9 @@ import {
   Settings,
   Monitor,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Images,
 } from "lucide-react";
 
 interface Passo {
@@ -29,6 +32,7 @@ interface Processo {
   descricao: string;
   passos: Passo[];
   tags: string[];
+  galeria: string[];
 }
 
 const CATEGORIAS = ["Todas", "Frota", "Financeiro", "Operacional", "TI"];
@@ -49,6 +53,79 @@ function CategoriaIcon({ cat, className }: { cat: string; className?: string }) 
   if (cat === "Operacional") return <Settings className={cls} />;
   if (cat === "TI") return <Monitor className={cls} />;
   return <BookOpen className={cls} />;
+}
+
+function Galeria({ imgs }: { imgs: string[] }) {
+  const [idx, setIdx] = useState(0);
+  if (!imgs || imgs.length === 0) return null;
+  const prev = () => setIdx(i => (i - 1 + imgs.length) % imgs.length);
+  const next = () => setIdx(i => (i + 1) % imgs.length);
+  return (
+    <div className="mt-5">
+      <div className="flex items-center gap-2 mb-3">
+        <Images className="h-3.5 w-3.5 text-indigo-400" />
+        <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--sgt-text-muted)" }}>
+          Capturas do manual ({imgs.length})
+        </p>
+      </div>
+      <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: "var(--sgt-border-subtle)", backgroundColor: "var(--sgt-bg-elevated)" }}>
+        <img
+          src={imgs[idx]}
+          alt={`Captura ${idx + 1}`}
+          className="w-full object-contain max-h-80"
+          style={{ backgroundColor: "var(--sgt-bg-elevated)" }}
+        />
+        {imgs.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={prev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center bg-black/50 hover:bg-black/70 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center bg-black/50 hover:bg-black/70 transition-colors"
+            >
+              <ChevronRight className="h-4 w-4 text-white" />
+            </button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {imgs.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIdx(i)}
+                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-4 bg-white" : "w-1.5 bg-white/40"}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-medium bg-black/50 text-white/80 tabular-nums">
+          {idx + 1}/{imgs.length}
+        </div>
+      </div>
+      {/* Miniaturas */}
+      {imgs.length > 1 && (
+        <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+          {imgs.map((src, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`shrink-0 h-12 w-20 rounded border overflow-hidden transition-all ${
+                i === idx ? "border-indigo-500/70 ring-1 ring-indigo-500/50" : "border-white/10 opacity-50 hover:opacity-80"
+              }`}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ProcessoDetalhe({ processo, onVoltar }: { processo: Processo; onVoltar?: () => void }) {
@@ -138,6 +215,8 @@ function ProcessoDetalhe({ processo, onVoltar }: { processo: Processo; onVoltar?
           </div>
         )}
 
+        <Galeria imgs={processo.galeria} />
+
         <p className="mt-5 text-[10px]" style={{ color: "var(--sgt-text-muted)" }}>
           <CheckCircle2 className="inline h-3 w-3 mr-1 text-emerald-400" />
           Extraído dos manuais oficiais Visual Rodopar (Datapar)
@@ -194,7 +273,7 @@ export default function ProcessosWorkspace() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("processos")
-        .select("id, titulo, categoria, descricao, passos, tags")
+        .select("id, titulo, categoria, descricao, passos, tags, galeria")
         .eq("ativo", true)
         .order("categoria")
         .order("titulo");
