@@ -179,6 +179,42 @@ export type Database = {
         }
         Relationships: []
       }
+      processos: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          descricao: string
+          id: string
+          passos: Json
+          tags: string[] | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria: string
+          created_at?: string
+          descricao: string
+          id?: string
+          passos?: Json
+          tags?: string[] | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao?: string
+          id?: string
+          passos?: Json
+          tags?: string[] | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
