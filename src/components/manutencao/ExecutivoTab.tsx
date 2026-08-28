@@ -1,10 +1,9 @@
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-  Tooltip as ReTooltip, CartesianGrid, Cell,
-  PieChart, Pie, Label as RLabel, LabelList,
-  ReferenceLine,
+  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, Tooltip as ReTooltip, CartesianGrid,
+  Cell, ReferenceLine,
 } from "recharts";
-import { DollarSign, Wrench, Package, ClipboardList } from "lucide-react";
+import { DollarSign, Wrench, Package, ClipboardList, TrendingUp } from "lucide-react";
 import type { ManutencaoRow } from "@/lib/dwApi";
 import {
   computeKpisExecutivo,
@@ -13,142 +12,138 @@ import {
   computeTopClassificacao,
   computeTopVeiculos,
   computeTopFornecedores,
+  type TipoOsItem,
+  type TopCatItem,
 } from "@/lib/manutencaoUtils_executivo";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useMemo } from "react";
 
-// ── Paleta SGT ────────────────────────────────────────────────────────────────
-const C_AMBER  = "#F5A623";  // --sgt-accent
-const C_BLUE   = "#4A9EFF";  // --sgt-info
+// ── Paleta ────────────────────────────────────────────────────────────────────
+const C_AMBER  = "#F5A623";
+const C_BLUE   = "#4A9EFF";
+const C_GREEN  = "#22C97A";
 const C_GRID   = "rgba(143,163,187,0.07)";
-const C_CURSOR = "rgba(143,163,187,0.05)";
+const C_CURSOR = "rgba(245,166,35,0.06)";
+const OS_COLORS = [C_AMBER, C_BLUE];
 
-const DONUT_PALETTE = ["#F5A623", "#4A9EFF", "#22C97A", "#A78BFA", "#F472B6"];
-
-// ── Formatters ─────────────────────────────────────────────────────────────────
-function fmtK(v: number) {
-  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`;
-  if (v >= 1_000)     return `R$ ${(v / 1_000).toFixed(0).replace(".", ",")}k`;
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 });
-}
+// ── Formatters ────────────────────────────────────────────────────────────────
 function fmtBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
+function fmtK(v: number) {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1).replace(".", ",")}M`;
+  if (v >= 1_000)     return `R$ ${(v / 1_000).toFixed(0)}k`;
+  return fmtBRL(v);
+}
 function tickK(v: number) {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000)     return `${(v / 1_000).toFixed(0)}k`;
+  if (v >= 1_000)     return `${Math.round(v / 1_000)}k`;
   return String(v);
 }
 
-// Aliases de cor (confiáveis em qualquer SVG — sem url(#id) cross-SVG)
-const C_AMBER_SOLID = C_AMBER;  // #F5A623
-const C_BLUE_SOLID  = C_BLUE;   // #4A9EFF
+// ── Estilos de eixo compartilhados ────────────────────────────────────────────
+const TICK = { fill: "var(--sgt-text-muted)", fontSize: 9, fontFamily: "inherit" } as const;
+const AX   = { axisLine: false as const, tickLine: false as const };
 
 // ── Gauge ─────────────────────────────────────────────────────────────────────
-function IndicadorCard({ percentualReal, percentualEsperado }: {
-  percentualReal: number;
-  percentualEsperado: number;
-}) {
-  const color = percentualReal <= percentualEsperado
-    ? "#22C97A"
-    : percentualReal <= percentualEsperado * 1.1
-    ? C_AMBER
-    : "#E94848";
-  const pctNorm = Math.min(100, (percentualReal / Math.max(percentualEsperado * 1.5, 0.01)) * 100);
-  const angle   = -135 + (pctNorm / 100) * 270;
-  const arcLen  = (pctNorm / 100) * 119.4;
+function Gauge({ real, meta }: { real: number; meta: number }) {
+  const color =
+    real <= meta              ? C_GREEN
+    : real <= meta * 1.1      ? C_AMBER
+    :                           "#E94848";
+  const pctN  = Math.min(100, (real / Math.max(meta * 1.5, 0.01)) * 100);
+  const angle = -135 + (pctN / 100) * 270;
+  const arc   = (pctN / 100) * 119.4;
 
   return (
     <div
-      className="flex flex-col items-center justify-center gap-1 rounded-xl border"
-      style={{
-        background: "var(--sgt-bg-card)",
-        borderColor: "var(--sgt-border-subtle)",
-        padding: "12px 8px",
-        height: "100%",
-      }}
+      className="flex flex-col items-center justify-center gap-1 rounded-xl border h-full"
+      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)", padding: "10px 8px" }}
     >
-      <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-center leading-tight"
+      <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-center leading-tight"
         style={{ color: "var(--sgt-text-muted)" }}>
-        Indicador Manutenção
+        Indicador<br />Manutenção
       </span>
 
-      <div className="relative flex items-center justify-center" style={{ width: 92, height: 54 }}>
-        <svg viewBox="0 0 100 58" width="92" height="54">
+      <div style={{ position: "relative", width: 88, height: 50 }}>
+        <svg viewBox="0 0 100 56" width="88" height="50">
           <defs>
-            <filter id="gauge-glow">
-              <feGaussianBlur stdDeviation="1.5" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            <filter id="g-glow">
+              <feGaussianBlur stdDeviation="1.2" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          {/* Trilha */}
-          <path d="M12,52 A38,38 0 0,1 88,52" fill="none"
-            stroke="var(--sgt-border-subtle)" strokeWidth="8" strokeLinecap="round" />
-          {/* Faixas de cor: verde / amarela / vermelha */}
-          <path d="M12,52 A38,38 0 0,1 88,52" fill="none"
-            stroke="rgba(34,201,122,0.15)" strokeWidth="8" strokeLinecap="round" />
-          {/* Fill */}
-          <path d="M12,52 A38,38 0 0,1 88,52" fill="none"
+          <path d="M12,50 A38,38 0 0,1 88,50" fill="none"
+            stroke="var(--sgt-border-subtle)" strokeWidth="8" strokeLinecap="round"/>
+          <path d="M12,50 A38,38 0 0,1 88,50" fill="none"
             stroke={color} strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={`${arcLen} 119.4`}
-            filter="url(#gauge-glow)"
-          />
-          {/* Agulha */}
-          <g transform={`rotate(${angle}, 50, 52)`}>
-            <line x1="50" y1="52" x2="50" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" opacity={0.8} />
-            <circle cx="50" cy="52" r="4.5" fill={color} />
-            <circle cx="50" cy="52" r="2.5" fill="var(--sgt-bg-card)" />
+            strokeDasharray={`${arc} 119.4`} filter="url(#g-glow)"/>
+          <g transform={`rotate(${angle},50,50)`}>
+            <line x1="50" y1="50" x2="50" y2="19"
+              stroke={color} strokeWidth="2" strokeLinecap="round" opacity={0.85}/>
+            <circle cx="50" cy="50" r="4.5" fill={color}/>
+            <circle cx="50" cy="50" r="2.2" fill="var(--sgt-bg-card)"/>
           </g>
         </svg>
-        <span className="absolute font-black text-sm tabular-nums leading-none"
-          style={{ color, bottom: -4, position: "absolute" }}>
-          {percentualReal.toFixed(1)}%
+        <span style={{
+          position: "absolute", bottom: -4, left: "50%", transform: "translateX(-50%)",
+          fontSize: 13, fontWeight: 900, color, fontVariantNumeric: "tabular-nums", lineHeight: 1,
+        }}>
+          {real.toFixed(1)}%
         </span>
       </div>
 
-      <span className="text-[9px] text-center leading-tight" style={{ color: "var(--sgt-text-muted)" }}>
-        meta {percentualEsperado}% • custo/faturamento
+      <span className="text-[9px] text-center" style={{ color: "var(--sgt-text-muted)" }}>
+        meta {meta}%
       </span>
     </div>
   );
 }
 
-// ── Tooltip ───────────────────────────────────────────────────────────────────
-function Tip({ active, payload, label }: {
-  active?: boolean;
-  payload?: { name: string; value: number; color: string }[];
-  label?: string;
+// ── Tooltip área/linha ────────────────────────────────────────────────────────
+function AreaTip({ active, payload, label }: {
+  active?: boolean; payload?: { value: number }[]; label?: string;
 }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: "var(--sgt-menu-bg)",
-      border: "1px solid var(--sgt-border-medium)",
-      borderRadius: 10,
-      padding: "8px 12px",
-      fontSize: 11,
-      color: "var(--sgt-text-primary)",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-      minWidth: 140,
+      background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
+      borderRadius: 10, padding: "8px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
     }}>
-      {label && (
-        <p style={{ color: "var(--sgt-text-muted)", fontWeight: 600, fontSize: 10, marginBottom: 6, letterSpacing: "0.05em" }}>
-          {label}
-        </p>
-      )}
+      <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+        {label}
+      </p>
+      <p style={{ fontSize: 16, fontWeight: 900, color: C_AMBER,
+        letterSpacing: "-0.04em", fontVariantNumeric: "tabular-nums" }}>
+        {fmtBRL(payload[0].value)}
+      </p>
+    </div>
+  );
+}
+
+// ── Tooltip genérico ──────────────────────────────────────────────────────────
+function Tip({ active, payload, label }: {
+  active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
+      borderRadius: 10, padding: "8px 12px", boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+      minWidth: 150,
+    }}>
+      {label && <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>{label}</p>}
       {payload.map(p => (
-        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-          <span style={{
-            width: 7, height: 7, borderRadius: "50%",
-            background: p.color, flexShrink: 0,
-            boxShadow: `0 0 6px ${p.color}60`,
-          }} />
-          <span style={{ color: "var(--sgt-text-secondary)", flex: 1 }}>{p.name}</span>
-          <span style={{ color: "var(--sgt-text-primary)", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-            {fmtBRL(p.value)}
-          </span>
+        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 3 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: p.color, flexShrink: 0,
+            boxShadow: `0 0 5px ${p.color}80` }} />
+          <span style={{ flex: 1, fontSize: 10, color: "var(--sgt-text-secondary)" }}>{p.name}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--sgt-text-primary)",
+            fontVariantNumeric: "tabular-nums" }}>{fmtBRL(p.value)}</span>
         </div>
       ))}
     </div>
@@ -156,28 +151,20 @@ function Tip({ active, payload, label }: {
 }
 
 // ── Card de seção ─────────────────────────────────────────────────────────────
-function SectionCard({ title, badge, children, className = "" }: {
-  title: string;
-  badge?: string;
-  children: React.ReactNode;
-  className?: string;
+function Panel({ title, aside, children, className = "" }: {
+  title: string; aside?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
   return (
     <div
-      className={`flex flex-col gap-2 p-3 sm:p-4 rounded-xl border ${className}`}
-      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+      className={`flex flex-col rounded-xl border ${className}`}
+      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)", padding: "12px 14px 10px" }}
     >
-      <div className="flex items-center justify-between shrink-0">
-        <h3 className="text-[9px] font-bold uppercase tracking-[0.28em]"
-          style={{ color: "var(--sgt-text-muted)" }}>
+      <div className="flex items-center justify-between shrink-0 mb-2">
+        <h3 style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.28em", color: "var(--sgt-text-muted)", margin: 0 }}>
           {title}
         </h3>
-        {badge && (
-          <span className="text-[9px] font-bold tabular-nums px-1.5 py-0.5 rounded-md"
-            style={{ background: "var(--sgt-accent-soft)", color: "var(--sgt-accent-text)" }}>
-            {badge}
-          </span>
-        )}
+        {aside}
       </div>
       {children}
     </div>
@@ -185,72 +172,128 @@ function SectionCard({ title, badge, children, className = "" }: {
 }
 
 // ── Tick truncado para eixo Y ─────────────────────────────────────────────────
-function TruncTick({ x, y, payload, width = 90 }: {
-  x?: number; y?: number; payload?: { value: string }; width?: number;
+function TruncTick({ x, y, payload, maxChars = 10 }: {
+  x?: number; y?: number; payload?: { value: string }; maxChars?: number;
 }) {
-  const raw   = payload?.value ?? "";
-  const max   = Math.floor(width / 6.5);
-  const label = raw.length > max ? raw.slice(0, max - 1) + "…" : raw;
+  const v = payload?.value ?? "";
+  const s = v.length > maxChars ? v.slice(0, maxChars - 1) + "…" : v;
   return (
     <text x={x} y={y} dy={4} textAnchor="end" fontSize={9}
       fill="var(--sgt-text-muted)" style={{ fontFamily: "inherit" }}>
-      {label}
+      {s}
     </text>
   );
 }
 
-// ── Tick de eixo X ────────────────────────────────────────────────────────────
-const TICK_STYLE = { fill: "var(--sgt-text-muted)", fontSize: 9, fontFamily: "inherit" };
-const AXIS_PROPS = { axisLine: false as const, tickLine: false as const };
-
-// ── Legenda customizada (donut) ───────────────────────────────────────────────
-function DonutLegend({ data }: { data: { tipo: string; custo: number; pct: number }[] }) {
+// ── Painel de split Tipo OS ───────────────────────────────────────────────────
+function TipoOSSplit({ data }: { data: TipoOsItem[] }) {
+  if (!data.length) {
+    return <div className="flex-1 flex items-center justify-center"
+      style={{ color: "var(--sgt-text-muted)", fontSize: 11 }}>Sem dados</div>;
+  }
   return (
-    <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-1">
-      {data.map((item, i) => (
-        <div key={item.tipo} className="flex items-center gap-1.5">
+    <div className="flex flex-col gap-2 flex-1 min-h-0">
+      {data.map((item, i) => {
+        const accent = OS_COLORS[i % OS_COLORS.length];
+        return (
+          <div key={item.tipo} className="flex-1 flex flex-col justify-between rounded-lg"
+            style={{
+              background: "var(--sgt-bg-surface)",
+              border: `1px solid ${accent}22`,
+              padding: "10px 12px",
+              minHeight: 0,
+            }}>
+            {/* Tipo */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%",
+                background: accent, display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: 9, color: "var(--sgt-text-muted)",
+                textTransform: "uppercase", letterSpacing: "0.18em", fontWeight: 700 }}>
+                {item.tipo}
+              </span>
+            </div>
+            {/* Valor e % */}
+            <div style={{ marginTop: 6 }}>
+              <p style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)", fontWeight: 900,
+                color: accent, letterSpacing: "-0.04em", lineHeight: 1, margin: 0,
+                fontVariantNumeric: "tabular-nums" }}>
+                {item.pct.toFixed(0)}<span style={{ fontSize: "0.55em", fontWeight: 600, marginLeft: 2 }}>%</span>
+              </p>
+              <p style={{ fontSize: 10, color: "var(--sgt-text-secondary)",
+                fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
+                {fmtBRL(item.custo)}
+              </p>
+            </div>
+            {/* Fill bar */}
+            <div style={{ marginTop: 8, height: 3,
+              background: "var(--sgt-progress-track)", borderRadius: 99 }}>
+              <div style={{
+                height: "100%", width: `${item.pct}%`,
+                background: accent, borderRadius: 99,
+              }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Lista editorial Top 10 ────────────────────────────────────────────────────
+function RankedList({ items }: { items: TopCatItem[] }) {
+  const max = items[0]?.custo ?? 1;
+  return (
+    <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto pr-0.5">
+      {items.map((item, i) => (
+        <div key={item.cat} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {/* Rank */}
           <span style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: DONUT_PALETTE[i % DONUT_PALETTE.length],
-            display: "inline-block", flexShrink: 0,
-          }} />
-          <span style={{ color: "var(--sgt-text-muted)", fontSize: 9 }}>{item.tipo}</span>
-          <span style={{ color: "var(--sgt-text-secondary)", fontSize: 9, fontWeight: 600 }}>
-            {item.pct.toFixed(0)}%
+            width: 18, flexShrink: 0, fontSize: 9, fontWeight: 800,
+            letterSpacing: "0.04em", textAlign: "right", fontVariantNumeric: "tabular-nums",
+            color: i < 3 ? C_AMBER : "var(--sgt-text-faint)",
+          }}>
+            {String(i + 1).padStart(2, "0")}
           </span>
+          {/* Bar + texto */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between",
+              alignItems: "baseline", gap: 6, marginBottom: 3 }}>
+              <span style={{ fontSize: 10, color: "var(--sgt-text-secondary)",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                flex: 1, minWidth: 0 }}>
+                {item.cat}
+              </span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--sgt-text-primary)",
+                fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>
+                {fmtK(item.custo)}
+              </span>
+            </div>
+            {/* CSS fill bar — sem SVG, sem url() */}
+            <div style={{ height: 2.5, background: "var(--sgt-progress-track)", borderRadius: 99 }}>
+              <div style={{
+                height: "100%",
+                width: `${(item.custo / max) * 100}%`,
+                background: `linear-gradient(to right, ${C_AMBER}, ${C_AMBER}70)`,
+                borderRadius: 99,
+                opacity: Math.max(0.4, 1 - i * 0.06),
+              }} />
+            </div>
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-// ── Label central do donut ────────────────────────────────────────────────────
-function DonutCenter({ viewBox, total }: { viewBox?: { cx: number; cy: number }; total: number }) {
-  if (!viewBox) return null;
-  const { cx, cy } = viewBox;
+// ── Legenda pill ──────────────────────────────────────────────────────────────
+function PillLegend({ items }: { items: { label: string; color: string }[] }) {
   return (
-    <>
-      <text x={cx} y={cy - 7} textAnchor="middle" dominantBaseline="middle"
-        fill="var(--sgt-text-muted)" fontSize={8} fontFamily="inherit"
-        fontWeight={600} letterSpacing="0.12em">
-        TOTAL
-      </text>
-      <text x={cx} y={cy + 9} textAnchor="middle" dominantBaseline="middle"
-        fill="var(--sgt-text-primary)" fontSize={11} fontFamily="inherit" fontWeight={700}>
-        {fmtK(total)}
-      </text>
-    </>
-  );
-}
-
-// ── Legenda inline compartilhada (Peça + M.O.) ───────────────────────────────
-function ChartLegend() {
-  return (
-    <div className="flex justify-center gap-4 shrink-0 mt-0.5">
-      {([["Peça", C_AMBER_SOLID], ["Mão de Obra", C_BLUE_SOLID]] as [string, string][]).map(([label, color]) => (
-        <div key={label} className="flex items-center gap-1.5">
-          <span style={{ width: 10, height: 4, borderRadius: 2, background: color, display: "inline-block" }} />
-          <span style={{ color: "var(--sgt-text-muted)", fontSize: 9 }}>{label}</span>
+    <div className="flex justify-center gap-3 shrink-0 pt-1">
+      {items.map(({ label, color }) => (
+        <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 10, height: 3, borderRadius: 99,
+            background: color, display: "inline-block" }} />
+          <span style={{ fontSize: 9, color: "var(--sgt-text-muted)" }}>{label}</span>
         </div>
       ))}
     </div>
@@ -275,227 +318,162 @@ export function ExecutivoTab({ rows }: Props) {
   const top5Vei  = useMemo(() => computeTopVeiculos(rows, 5),       [rows]);
   const top5Forn = useMemo(() => computeTopFornecedores(rows, 5),   [rows]);
 
-  const pctPeca = kpis.custoTotal > 0 ? kpis.custoPeca / kpis.custoTotal * 100 : 0;
-  const pctMO   = kpis.custoTotal > 0 ? kpis.custoMO   / kpis.custoTotal * 100 : 0;
-
-  // Média mensal para ReferenceLine
   const avgMonthly = useMemo(() => {
     if (!monthly.length) return 0;
     return monthly.reduce((s, m) => s + m.custo, 0) / monthly.length;
   }, [monthly]);
 
-  // Top 10 invertido (Recharts layout=vertical vai de baixo pra cima)
-  const top10Chart = useMemo(() => [...top10Cat].reverse(), [top10Cat]);
+  const maxMonthly = useMemo(() => Math.max(...monthly.map(m => m.custo), 0), [monthly]);
 
-  const tipoOSTotal = useMemo(() => tipoOS.reduce((s, t) => s + t.custo, 0), [tipoOS]);
+  const pctPeca = kpis.custoTotal > 0 ? (kpis.custoPeca / kpis.custoTotal) * 100 : 0;
+  const pctMO   = kpis.custoTotal > 0 ? (kpis.custoMO   / kpis.custoTotal) * 100 : 0;
 
   return (
-    <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0">
+    <div className="flex flex-col gap-2 flex-1 min-h-0">
 
-      {/* ── Row 1: KPI cards ── */}
-      <div
-        className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 shrink-0 sgt-stagger"
-        style={{ gridAutoRows: "1fr" }}
-      >
+      {/* ── Row 1: KPI cards ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 shrink-0 sgt-stagger"
+        style={{ gridAutoRows: "1fr" }}>
         {([
-          <KpiCard key="total"  label="Custo Total"       value={fmtK(kpis.custoTotal)} rawValue={kpis.custoTotal} subtitle="período selecionado"                icon={DollarSign}   tone="amber"  compact />,
-          <KpiCard key="peca"   label="Custo Peça"        value={fmtK(kpis.custoPeca)}  rawValue={kpis.custoPeca}  subtitle={`${pctPeca.toFixed(1)}% do total`}  icon={Package}      tone="emerald" compact />,
-          <KpiCard key="mo"     label="Custo Mão de Obra" value={fmtK(kpis.custoMO)}    rawValue={kpis.custoMO}    subtitle={`${pctMO.toFixed(1)}% do total`}    icon={Wrench}       tone="blue"   compact />,
-          <KpiCard key="plano"  label="Custo Plano Manut." value={fmtK(kpis.custoPlano)} rawValue={kpis.custoPlano} subtitle="tipo PLANOMANUTENCAO"               icon={ClipboardList} tone="violet" compact />,
-        ] as React.ReactNode[]).map((card, i) => (
-          <AnimatedCard key={i} delay={i * 40} className="flex flex-col">
-            <div className="flex-1">{card}</div>
+          <KpiCard key="tot"   label="Custo Total"        value={fmtK(kpis.custoTotal)}  rawValue={kpis.custoTotal}  subtitle="período selecionado"               icon={DollarSign}    tone="amber"   compact />,
+          <KpiCard key="peca"  label="Custo Peça"         value={fmtK(kpis.custoPeca)}   rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
+          <KpiCard key="mo"    label="Mão de Obra"        value={fmtK(kpis.custoMO)}     rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
+          <KpiCard key="plan"  label="Custo Plano Manut." value={fmtK(kpis.custoPlano)}  rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
+        ] as React.ReactNode[]).map((c, i) => (
+          <AnimatedCard key={i} delay={i * 45} className="flex flex-col">
+            <div className="flex-1">{c}</div>
           </AnimatedCard>
         ))}
-        <AnimatedCard delay={160} className="flex flex-col">
-          <IndicadorCard
-            percentualReal={indManut?.percentualReal ?? 0}
-            percentualEsperado={indManut?.percentualEsperado ?? 15}
+        <AnimatedCard delay={180} className="flex flex-col">
+          <Gauge
+            real={indManut?.percentualReal   ?? 0}
+            meta={indManut?.percentualEsperado ?? 15}
           />
         </AnimatedCard>
       </div>
 
-      {/* ── Rows 2+3 ── */}
-      <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0">
+      {/* ── Rows 2+3: crescem para preencher o restante ─────────────────── */}
+      <div className="flex flex-col gap-2 flex-1 min-h-0">
 
-        {/* Row 2: Mensal (2/3) + Tipo OS (1/3) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 sm:gap-3 flex-1 min-h-0">
+        {/* ── Row 2: Trend (2/3) + Tipo OS (1/3) ─────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 flex-1 min-h-0">
 
-          {/* ── Mensal ─────────────────────────────────────────────────── */}
-          <AnimatedCard delay={200} className="lg:col-span-2 min-h-0 flex flex-col">
-            <SectionCard
-              title="Total Mês a Mês"
-              badge={avgMonthly > 0 ? `média ${fmtK(avgMonthly)}` : undefined}
+          {/* ── Evolução Mensal — AreaChart ───────────────────────────────── */}
+          <AnimatedCard delay={220} className="lg:col-span-2 min-h-0 flex flex-col">
+            <Panel
+              title="Evolução Mensal"
               className="flex-1 min-h-0"
+              aside={avgMonthly > 0 ? (
+                <span style={{
+                  fontSize: 9, fontWeight: 700, color: C_AMBER,
+                  background: `${C_AMBER}18`, borderRadius: 6,
+                  padding: "2px 7px", letterSpacing: "0.04em",
+                  display: "flex", alignItems: "center", gap: 4,
+                }}>
+                  <TrendingUp size={9} />
+                  média {fmtK(avgMonthly)}
+                </span>
+              ) : undefined}
             >
-              <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
+              <div className="flex-1 min-h-0" style={{ minHeight: 130 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthly} margin={{ top: 16, right: 4, left: 0, bottom: 0 }} barCategoryGap="32%">
+                  <AreaChart data={monthly} margin={{ top: 10, right: 4, left: 0, bottom: 0 }}>
+                    {/* gradient definido dentro do mesmo SVG — seguro */}
+                    <defs>
+                      <linearGradient id="area-amber" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.32} />
+                        <stop offset="100%" stopColor={C_AMBER} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid vertical={false} stroke={C_GRID} />
-                    <XAxis dataKey="mes" tick={TICK_STYLE} {...AXIS_PROPS} />
-                    <YAxis tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} width={36} />
-                    <ReTooltip content={<Tip />} cursor={{ fill: C_CURSOR, rx: 4 }} />
+                    <XAxis dataKey="mes" tick={TICK} {...AX} />
+                    <YAxis tickFormatter={tickK} tick={TICK} {...AX} width={38} />
+                    <ReTooltip
+                      content={<AreaTip />}
+                      cursor={{ stroke: C_AMBER, strokeWidth: 1, strokeDasharray: "3 3", strokeOpacity: 0.5 }}
+                    />
                     {avgMonthly > 0 && (
                       <ReferenceLine
                         y={avgMonthly}
-                        stroke={C_AMBER}
-                        strokeDasharray="4 3"
-                        strokeOpacity={0.45}
-                        strokeWidth={1}
-                        label={{
-                          value: `↔ média`,
-                          position: "insideTopRight",
-                          fill: C_AMBER,
-                          fontSize: 8,
-                          opacity: 0.7,
-                          fontFamily: "inherit",
-                        }}
+                        stroke={C_AMBER} strokeDasharray="5 3"
+                        strokeOpacity={0.35} strokeWidth={1}
                       />
                     )}
-                    <Bar dataKey="custo" name="Custo" fill={C_AMBER_SOLID} radius={[4, 4, 0, 0]} maxBarSize={56}>
-                      <LabelList
-                        dataKey="custo"
-                        position="top"
-                        formatter={(v: number) => v === Math.max(...monthly.map(m => m.custo)) ? fmtK(v) : ""}
-                        style={{ fill: C_AMBER, fontSize: 9, fontFamily: "inherit", fontWeight: 700 }}
-                      />
-                    </Bar>
-                  </BarChart>
+                    <Area
+                      type="monotone"
+                      dataKey="custo"
+                      name="Custo"
+                      stroke={C_AMBER}
+                      strokeWidth={2}
+                      fill="url(#area-amber)"
+                      dot={false}
+                      activeDot={{ r: 5, fill: C_AMBER,
+                        stroke: "var(--sgt-bg-card)", strokeWidth: 2 }}
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </SectionCard>
+            </Panel>
           </AnimatedCard>
 
-          {/* ── Tipo OS (donut) ─────────────────────────────────────────── */}
-          <AnimatedCard delay={240} className="min-h-0 flex flex-col">
-            <SectionCard title="Tipo Ordem de Serviço" className="flex-1 min-h-0">
-              <div className="flex flex-col flex-1 min-h-0" style={{ minHeight: 140 }}>
-                <div className="flex-1 min-h-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={tipoOS}
-                        dataKey="custo"
-                        nameKey="tipo"
-                        cx="50%" cy="50%"
-                        innerRadius="52%"
-                        outerRadius="76%"
-                        paddingAngle={3}
-                        strokeWidth={0}
-                      >
-                        {tipoOS.map((_, i) => (
-                          <Cell key={i}
-                            fill={DONUT_PALETTE[i % DONUT_PALETTE.length]}
-                            opacity={0.92}
-                          />
-                        ))}
-                        <RLabel content={(props) => <DonutCenter viewBox={props.viewBox as { cx: number; cy: number }} total={tipoOSTotal} />} position="center" />
-                      </Pie>
-                      <ReTooltip
-                        formatter={(v: number) => fmtBRL(v)}
-                        contentStyle={{
-                          background: "var(--sgt-menu-bg)",
-                          border: "1px solid var(--sgt-border-medium)",
-                          borderRadius: 10, fontSize: 11,
-                          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                        }}
-                        itemStyle={{ color: "var(--sgt-text-primary)" }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <DonutLegend data={tipoOS} />
-              </div>
-            </SectionCard>
+          {/* ── Tipo OS — split stat ──────────────────────────────────────── */}
+          <AnimatedCard delay={260} className="min-h-0 flex flex-col">
+            <Panel title="Tipo de Ordem de Serviço" className="flex-1 min-h-0">
+              <TipoOSSplit data={tipoOS} />
+            </Panel>
           </AnimatedCard>
         </div>
 
-        {/* Row 3: Top 10 + Top 5 veículos + Top 5 fornecedores */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 sm:gap-3 flex-1 min-h-0">
+        {/* ── Row 3: Top 10 + Top 5 veículos + Top 5 fornecedores ─────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 flex-1 min-h-0">
 
-          {/* ── Top 10 ─────────────────────────────────────────────────── */}
-          <AnimatedCard delay={280} className="min-h-0 flex flex-col">
-            <SectionCard title="Custo Total — Top 10" className="flex-1 min-h-0">
-              <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={top10Chart}
-                    layout="vertical"
-                    margin={{ top: 0, right: 52, left: 0, bottom: 0 }}
-                    barCategoryGap="16%"
-                  >
-                    <CartesianGrid horizontal={false} stroke={C_GRID} />
-                    <XAxis type="number" tickFormatter={tickK}
-                      tick={TICK_STYLE} {...AXIS_PROPS} />
-                    <YAxis type="category" dataKey="cat" width={92}
-                      tick={<TruncTick width={92} />} {...AXIS_PROPS} />
-                    <ReTooltip
-                      formatter={(v: number) => fmtBRL(v)}
-                      contentStyle={{
-                        background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
-                        borderRadius: 10, fontSize: 11, boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                      }}
-                      itemStyle={{ color: "var(--sgt-text-primary)" }}
-                      labelStyle={{ color: "var(--sgt-text-muted)", fontWeight: 600, marginBottom: 4, fontSize: 10 }}
-                      cursor={{ fill: C_CURSOR, rx: 3 }}
-                    />
-                    <Bar dataKey="custo" name="Custo" radius={[0, 4, 4, 0]} maxBarSize={18}>
-                      {top10Chart.map((_, i) => (
-                        <Cell key={i} fill={C_AMBER_SOLID} opacity={1 - i * 0.06} />
-                      ))}
-                      <LabelList
-                        dataKey="custo"
-                        position="right"
-                        formatter={(v: number) => fmtK(v)}
-                        style={{ fill: "var(--sgt-text-secondary)", fontSize: 8, fontFamily: "inherit" }}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </SectionCard>
+          {/* ── Top 10 — lista editorial ──────────────────────────────────── */}
+          <AnimatedCard delay={300} className="min-h-0 flex flex-col">
+            <Panel title="Custo por Classificação — Top 10" className="flex-1 min-h-0">
+              <RankedList items={top10Cat} />
+            </Panel>
           </AnimatedCard>
 
-          {/* ── Top 5 Veículos ──────────────────────────────────────────── */}
-          <AnimatedCard delay={320} className="min-h-0 flex flex-col">
-            <SectionCard title="Top 5 Veículos — Peça e M.O." className="flex-1 min-h-0">
-              <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
+          {/* ── Top 5 Veículos ────────────────────────────────────────────── */}
+          <AnimatedCard delay={340} className="min-h-0 flex flex-col">
+            <Panel title="Top 5 Veículos" className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0" style={{ minHeight: 120 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top5Vei} layout="vertical"
-                    margin={{ top: 0, right: 4, left: 0, bottom: 20 }} barCategoryGap="22%">
+                    margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="28%">
                     <CartesianGrid horizontal={false} stroke={C_GRID} />
-                    <XAxis type="number" tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} />
-                    <YAxis type="category" dataKey="veiculo" width={62}
-                      tick={<TruncTick width={62} />} {...AXIS_PROPS} />
+                    <XAxis type="number" tickFormatter={tickK} tick={TICK} {...AX} />
+                    <YAxis type="category" dataKey="veiculo" width={60}
+                      tick={<TruncTick maxChars={9} />} {...AX} />
                     <ReTooltip content={<Tip />} cursor={{ fill: C_CURSOR, rx: 3 }} />
-                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER_SOLID} radius={[0, 3, 3, 0]} maxBarSize={12} />
-                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE_SOLID}  radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER} radius={[0, 3, 3, 0]} maxBarSize={11} />
+                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE}  radius={[0, 3, 3, 0]} maxBarSize={11} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <ChartLegend />
-            </SectionCard>
+              <PillLegend items={[{ label: "Peça", color: C_AMBER }, { label: "M.O.", color: C_BLUE }]} />
+            </Panel>
           </AnimatedCard>
 
-          {/* ── Top 5 Fornecedores ──────────────────────────────────────── */}
-          <AnimatedCard delay={360} className="min-h-0 flex flex-col">
-            <SectionCard title="Top 5 Fornecedores — Peça e M.O." className="flex-1 min-h-0">
-              <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
+          {/* ── Top 5 Fornecedores ────────────────────────────────────────── */}
+          <AnimatedCard delay={380} className="min-h-0 flex flex-col">
+            <Panel title="Top 5 Fornecedores" className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0" style={{ minHeight: 120 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top5Forn} layout="vertical"
-                    margin={{ top: 0, right: 4, left: 0, bottom: 20 }} barCategoryGap="22%">
+                    margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="28%">
                     <CartesianGrid horizontal={false} stroke={C_GRID} />
-                    <XAxis type="number" tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} />
-                    <YAxis type="category" dataKey="fornecedor" width={74}
-                      tick={<TruncTick width={74} />} {...AXIS_PROPS} />
+                    <XAxis type="number" tickFormatter={tickK} tick={TICK} {...AX} />
+                    <YAxis type="category" dataKey="fornecedor" width={72}
+                      tick={<TruncTick maxChars={11} />} {...AX} />
                     <ReTooltip content={<Tip />} cursor={{ fill: C_CURSOR, rx: 3 }} />
-                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER_SOLID} radius={[0, 3, 3, 0]} maxBarSize={12} />
-                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE_SOLID}  radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER} radius={[0, 3, 3, 0]} maxBarSize={11} />
+                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE}  radius={[0, 3, 3, 0]} maxBarSize={11} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <ChartLegend />
-            </SectionCard>
+              <PillLegend items={[{ label: "Peça", color: C_AMBER }, { label: "M.O.", color: C_BLUE }]} />
+            </Panel>
           </AnimatedCard>
         </div>
       </div>
