@@ -334,7 +334,8 @@ export default function Manutencao() {
                 </button>
               </AnimatedCard>
             </div>
-            </>)}
+            )}
+
 
             {/* ── Aba Executivo ── */}
             {tab === "executivo" && (
