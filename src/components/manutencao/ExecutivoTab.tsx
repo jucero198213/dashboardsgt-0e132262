@@ -3,7 +3,7 @@ import {
   XAxis, YAxis, Tooltip as ReTooltip, CartesianGrid,
   Cell, ReferenceLine,
 } from "recharts";
-import { DollarSign, Wrench, Package, ClipboardList, TrendingUp } from "lucide-react";
+import { DollarSign, Wrench, Package, ClipboardList, TrendingUp, Target } from "lucide-react";
 import type { ManutencaoRow } from "@/lib/dwApi";
 import {
   computeKpisExecutivo,
@@ -328,6 +328,12 @@ export function ExecutivoTab({ rows }: Props) {
   const pctPeca = kpis.custoTotal > 0 ? (kpis.custoPeca / kpis.custoTotal) * 100 : 0;
   const pctMO   = kpis.custoTotal > 0 ? (kpis.custoMO   / kpis.custoTotal) * 100 : 0;
 
+  const indReal = indManut?.percentualReal    ?? 0;
+  const indMeta = indManut?.percentualEsperado ?? 15;
+  const indTone = indReal <= indMeta         ? "emerald" as const
+    : indReal <= indMeta * 1.1               ? "amber"   as const
+    :                                          "rose"    as const;
+
   return (
     <div className="flex flex-col gap-2 flex-1 min-h-0">
 
@@ -335,21 +341,16 @@ export function ExecutivoTab({ rows }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 shrink-0 sgt-stagger"
         style={{ gridAutoRows: "1fr" }}>
         {([
-          <KpiCard key="tot"   label="Custo Total"        value={fmtK(kpis.custoTotal)}  rawValue={kpis.custoTotal}  subtitle="período selecionado"               icon={DollarSign}    tone="amber"   compact />,
-          <KpiCard key="peca"  label="Custo Peça"         value={fmtK(kpis.custoPeca)}   rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
-          <KpiCard key="mo"    label="Mão de Obra"        value={fmtK(kpis.custoMO)}     rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
-          <KpiCard key="plan"  label="Custo Plano Manut." value={fmtK(kpis.custoPlano)}  rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
+          <KpiCard key="tot"   label="Custo Total"          value={fmtK(kpis.custoTotal)} rawValue={kpis.custoTotal}  subtitle="período selecionado"               icon={DollarSign}    tone="amber"   compact />,
+          <KpiCard key="peca"  label="Custo Peça"           value={fmtK(kpis.custoPeca)}  rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
+          <KpiCard key="mo"    label="Mão de Obra"          value={fmtK(kpis.custoMO)}    rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
+          <KpiCard key="plan"  label="Custo Plano Manut."   value={fmtK(kpis.custoPlano)} rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
+          <KpiCard key="ind"   label="Indicador Manutenção" value={`${indReal.toFixed(1)}%`} rawValue={indReal}       subtitle={`meta ${indMeta}%`}                icon={Target}        tone={indTone} compact />,
         ] as React.ReactNode[]).map((c, i) => (
           <AnimatedCard key={i} delay={i * 45} className="flex flex-col">
             <div className="flex-1">{c}</div>
           </AnimatedCard>
         ))}
-        <AnimatedCard delay={180} className="flex flex-col">
-          <Gauge
-            real={indManut?.percentualReal   ?? 0}
-            meta={indManut?.percentualEsperado ?? 15}
-          />
-        </AnimatedCard>
       </div>
 
       {/* ── Rows 2+3: crescem para preencher o restante ─────────────────── */}
