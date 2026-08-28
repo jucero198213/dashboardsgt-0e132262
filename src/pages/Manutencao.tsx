@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { DollarSign, AlertTriangle, TrendingUp, ChevronRight } from "lucide-react";
+import { DollarSign, AlertTriangle, TrendingUp, ChevronRight, LayoutGrid, BarChart2 } from "lucide-react";
+import { ExecutivoTab } from "@/components/manutencao/ExecutivoTab";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -39,6 +40,8 @@ export default function Manutencao() {
   const [dados, setDados] = useState<ManutencaoRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [tab, setTab] = useState<"operacional" | "executivo">("operacional");
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetVeiculo, setSheetVeiculo] = useState<string | null>(null);
@@ -190,6 +193,28 @@ export default function Manutencao() {
 
               <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
+              {/* ── Tab switcher ── */}
+              <div className="flex items-center gap-1 self-start rounded-xl p-0.5 shrink-0"
+                style={{ background: "var(--sgt-skeleton-bg)", border: "1px solid var(--sgt-border-subtle)" }}>
+                {(["operacional", "executivo"] as const).map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTab(t)}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200"
+                    style={
+                      tab === t
+                        ? { background: "#F59E0B", color: "#000", boxShadow: "0 1px 6px rgba(245,158,11,0.35)" }
+                        : { color: "var(--sgt-text-muted)" }
+                    }
+                  >
+                    {t === "operacional"
+                      ? <><LayoutGrid className="h-3 w-3" /> Operacional</>
+                      : <><BarChart2 className="h-3 w-3" /> Executivo</>}
+                  </button>
+                ))}
+              </div>
+
               {/* Error */}
               {error && (
                 <div className="rounded-xl px-4 py-3 text-sm text-rose-400 border"
@@ -198,6 +223,7 @@ export default function Manutencao() {
                 </div>
               )}
 
+              {tab === "operacional" && (<>
               {/* ════ Indicadores ════ */}
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Indicadores</span>
@@ -305,6 +331,14 @@ export default function Manutencao() {
                 </button>
               </AnimatedCard>
             </div>
+            </>)}
+
+            {/* ── Aba Executivo ── */}
+            {tab === "executivo" && (
+              <div className="flex flex-col flex-1 min-h-0 mt-2.5 sm:mt-3">
+                <ExecutivoTab rows={dados} />
+              </div>
+            )}
           </div>
         </section>
       </div>
