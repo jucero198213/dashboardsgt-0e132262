@@ -263,9 +263,8 @@ function PieTip({ active, payload }: { active?: boolean; payload?: { name: strin
   );
 }
 
-// ── Classificação: barras horizontais ranked ───────────────────────────────────
+// ── Classificação: BarChart horizontal — label dentro da barra (Prompt 2) ──────
 function ClassifBarChart({ items }: { items: TopCatItem[] }) {
-  const max = items[0]?.custo ?? 1;
   if (!items.length) {
     return (
       <div className="flex-1 flex items-center justify-center"
@@ -275,42 +274,56 @@ function ClassifBarChart({ items }: { items: TopCatItem[] }) {
     );
   }
   return (
-    <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto pr-0.5">
-      {items.map((item, i) => {
-        const pct = (item.custo / max) * 100;
-        const fillOpacity = Math.max(0.45, 1 - i * 0.08);
-        return (
-          <div key={item.cat}>
-            <div style={{ display: "flex", justifyContent: "space-between",
-              alignItems: "baseline", gap: 6, marginBottom: 4 }}>
-              <span style={{
-                fontSize: 10, color: "var(--sgt-text-secondary)",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                flex: 1, minWidth: 0,
-              }}>
-                {item.cat}
-              </span>
-              <span style={{
-                fontSize: 10, fontWeight: 700, color: "var(--sgt-text-primary)",
-                fontVariantNumeric: "tabular-nums", flexShrink: 0,
-              }}>
-                {fmtK(item.custo)}
-              </span>
-            </div>
-            {/* Track + fill */}
-            <div style={{ height: 6, background: `${C_AMBER}14`,
-              borderRadius: 99, overflow: "hidden" }}>
-              <div style={{
-                height: "100%",
-                width: `${pct}%`,
-                borderRadius: 99,
-                background: `linear-gradient(to right, ${C_AMBER}, ${C_AMBER}80)`,
-                opacity: fillOpacity,
-              }} />
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={items}
+          layout="vertical"
+          barSize={26}
+          margin={{ left: 0, right: 0, top: 2, bottom: 2 }}
+          barCategoryGap="22%"
+        >
+          <YAxis dataKey="cat" type="category" hide />
+          <XAxis dataKey="custo" type="number" hide />
+          <Bar
+            dataKey="custo"
+            layout="vertical"
+            fill={C_AMBER}
+            background={{ radius: 5, fill: C_AMBER, opacity: 0.13 }}
+            radius={5}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            shape={(props: any) => {
+              const { x, y, width, height, cat, custo, background } = props;
+              const label = typeof cat === "string" && cat.length > 22
+                ? cat.slice(0, 21) + "…"
+                : (cat as string);
+              const trackEnd = (background?.width ?? 0) + x;
+              return (
+                <g>
+                  <rect x={x} y={y} width={Math.max(width, 0)} height={height}
+                    fill={C_AMBER} rx={5} />
+                  {/* Categoria dentro da barra */}
+                  <text
+                    x={x + 10} y={y + height / 2 + 4}
+                    fill="white" fontSize={9} fontWeight={700}
+                  >
+                    {label}
+                  </text>
+                  {/* Valor no fim do track */}
+                  <text
+                    x={trackEnd - 8} y={y + height / 2 + 4}
+                    textAnchor="end"
+                    fill="var(--sgt-text-muted)"
+                    fontSize={9} fontWeight={600}
+                  >
+                    {fmtK(custo as number)}
+                  </text>
+                </g>
+              );
+            }}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -463,28 +476,38 @@ export function ExecutivoTab({ rows }: Props) {
             >
               <div className="flex-1 min-h-0" style={{ minHeight: 130 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={monthly} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
+                  <ComposedChart data={monthly} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>
                     <defs>
                       <linearGradient id="comp-amber" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.28} />
-                        <stop offset="100%" stopColor={C_AMBER} stopOpacity={0} />
+                        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.30} />
+                        <stop offset="100%" stopColor={C_AMBER} stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} stroke={C_GRID} />
-                    <XAxis dataKey="mes" tick={TICK} {...AX} />
-                    <YAxis tickFormatter={tickK} tick={TICK} {...AX} width={38} />
+                    {/* Grid pontilhado igual à referência */}
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="var(--sgt-border-subtle)"
+                      strokeOpacity={1}
+                      horizontal vertical={false}
+                    />
+                    <XAxis dataKey="mes" tick={TICK} {...AX} dy={5} tickMargin={12} />
+                    <YAxis tickFormatter={tickK} tick={TICK} {...AX} width={38} tickMargin={12} />
                     <ReTooltip
                       content={<AreaTip />}
-                      cursor={{ stroke: C_AMBER, strokeWidth: 1, strokeDasharray: "3 3", strokeOpacity: 0.5 }}
+                      cursor={{
+                        stroke: "var(--sgt-border-subtle)",
+                        strokeWidth: 1,
+                        strokeDasharray: "none",
+                      }}
                     />
                     {avgMonthly > 0 && (
                       <ReferenceLine
                         y={avgMonthly}
-                        stroke={C_AMBER} strokeDasharray="5 3"
-                        strokeOpacity={0.35} strokeWidth={1}
+                        stroke={C_AMBER} strokeDasharray="4 4"
+                        strokeOpacity={0.5} strokeWidth={1}
                       />
                     )}
-                    {/* Área de gradiente preenchida sob a linha */}
+                    {/* Área de gradiente sob a linha */}
                     <Area
                       type="linear"
                       dataKey="custo"
@@ -493,7 +516,7 @@ export function ExecutivoTab({ rows }: Props) {
                       strokeWidth={0}
                       dot={false}
                     />
-                    {/* Linha principal com pontos */}
+                    {/* Linha principal — dots ocos grandes (r=6) como na referência */}
                     <Line
                       type="linear"
                       dataKey="custo"
@@ -503,10 +526,10 @@ export function ExecutivoTab({ rows }: Props) {
                       dot={{
                         fill: "var(--sgt-bg-card)",
                         strokeWidth: 2,
-                        r: 4,
+                        r: 6,
                         stroke: C_AMBER,
                       }}
-                      activeDot={{ r: 6, fill: C_AMBER,
+                      activeDot={{ r: 7, fill: C_AMBER,
                         stroke: "var(--sgt-bg-card)", strokeWidth: 2 }}
                     />
                   </ComposedChart>
@@ -532,18 +555,17 @@ export function ExecutivoTab({ rows }: Props) {
                 </div>
               ) : (
                 <div className="flex flex-col flex-1 min-h-0">
-                  <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
+                  {/* PieChart simples (sem donut), aspecto quadrado — referência Prompt 3 */}
+                  <div className="flex-1 min-h-0 mx-auto w-full" style={{ minHeight: 90, maxHeight: 160 }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <ReTooltip content={<PieTip />} />
+                        <ReTooltip content={<PieTip />} cursor={false} />
                         <Pie
                           data={tipoOS}
                           dataKey="custo"
                           nameKey="tipo"
-                          innerRadius="44%"
-                          outerRadius="70%"
-                          paddingAngle={3}
-                          strokeWidth={0}
+                          strokeWidth={2}
+                          stroke="var(--sgt-bg-card)"
                         >
                           {tipoOS.map((_, i) => (
                             <Cell key={i} fill={OS_COLORS[i % OS_COLORS.length]} />
@@ -553,7 +575,7 @@ export function ExecutivoTab({ rows }: Props) {
                     </ResponsiveContainer>
                   </div>
                   {/* Legenda */}
-                  <div className="shrink-0 flex flex-col gap-1.5 pt-1">
+                  <div className="shrink-0 flex flex-col gap-1.5 pt-2">
                     {tipoOS.map((item, i) => (
                       <div key={item.tipo} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{
