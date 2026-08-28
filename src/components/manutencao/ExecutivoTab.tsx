@@ -42,32 +42,9 @@ function tickK(v: number) {
   return String(v);
 }
 
-// ── SVG Defs: gradientes reutilizáveis ────────────────────────────────────────
-function ChartDefs() {
-  return (
-    <defs>
-      {/* barra vertical: de cima (cheio) para baixo (transparente) */}
-      <linearGradient id="grad-amber-v" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.92} />
-        <stop offset="100%" stopColor={C_AMBER} stopOpacity={0.38} />
-      </linearGradient>
-      {/* barra horizontal: da esquerda (cheio) para direita (transparente) */}
-      <linearGradient id="grad-amber-h" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.9} />
-        <stop offset="100%" stopColor={C_AMBER} stopOpacity={0.25} />
-      </linearGradient>
-      <linearGradient id="grad-blue-h" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"   stopColor={C_BLUE} stopOpacity={0.9} />
-        <stop offset="100%" stopColor={C_BLUE} stopOpacity={0.25} />
-      </linearGradient>
-      {/* glow suave nos tops */}
-      <filter id="bar-glow" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="2" result="blur" />
-        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-      </filter>
-    </defs>
-  );
-}
+// Aliases de cor (confiáveis em qualquer SVG — sem url(#id) cross-SVG)
+const C_AMBER_SOLID = C_AMBER;  // #F5A623
+const C_BLUE_SOLID  = C_BLUE;   // #4A9EFF
 
 // ── Gauge ─────────────────────────────────────────────────────────────────────
 function IndicadorCard({ percentualReal, percentualEsperado }: {
@@ -266,6 +243,20 @@ function DonutCenter({ viewBox, total }: { viewBox?: { cx: number; cy: number };
   );
 }
 
+// ── Legenda inline compartilhada (Peça + M.O.) ───────────────────────────────
+function ChartLegend() {
+  return (
+    <div className="flex justify-center gap-4 shrink-0 mt-0.5">
+      {([["Peça", C_AMBER_SOLID], ["Mão de Obra", C_BLUE_SOLID]] as [string, string][]).map(([label, color]) => (
+        <div key={label} className="flex items-center gap-1.5">
+          <span style={{ width: 10, height: 4, borderRadius: 2, background: color, display: "inline-block" }} />
+          <span style={{ color: "var(--sgt-text-muted)", fontSize: 9 }}>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Componente principal ──────────────────────────────────────────────────────
 interface Props { rows: ManutencaoRow[]; }
 
@@ -340,7 +331,6 @@ export function ExecutivoTab({ rows }: Props) {
               <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthly} margin={{ top: 16, right: 4, left: 0, bottom: 0 }} barCategoryGap="32%">
-                    <ChartDefs />
                     <CartesianGrid vertical={false} stroke={C_GRID} />
                     <XAxis dataKey="mes" tick={TICK_STYLE} {...AXIS_PROPS} />
                     <YAxis tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} width={36} />
@@ -362,7 +352,7 @@ export function ExecutivoTab({ rows }: Props) {
                         }}
                       />
                     )}
-                    <Bar dataKey="custo" name="Custo" fill="url(#grad-amber-v)" radius={[4, 4, 0, 0]} maxBarSize={56}>
+                    <Bar dataKey="custo" name="Custo" fill={C_AMBER_SOLID} radius={[4, 4, 0, 0]} maxBarSize={56}>
                       <LabelList
                         dataKey="custo"
                         position="top"
@@ -434,7 +424,6 @@ export function ExecutivoTab({ rows }: Props) {
                     margin={{ top: 0, right: 52, left: 0, bottom: 0 }}
                     barCategoryGap="16%"
                   >
-                    <ChartDefs />
                     <CartesianGrid horizontal={false} stroke={C_GRID} />
                     <XAxis type="number" tickFormatter={tickK}
                       tick={TICK_STYLE} {...AXIS_PROPS} />
@@ -450,7 +439,10 @@ export function ExecutivoTab({ rows }: Props) {
                       labelStyle={{ color: "var(--sgt-text-muted)", fontWeight: 600, marginBottom: 4, fontSize: 10 }}
                       cursor={{ fill: C_CURSOR, rx: 3 }}
                     />
-                    <Bar dataKey="custo" name="Custo" fill="url(#grad-amber-h)" radius={[0, 4, 4, 0]} maxBarSize={18}>
+                    <Bar dataKey="custo" name="Custo" radius={[0, 4, 4, 0]} maxBarSize={18}>
+                      {top10Chart.map((_, i) => (
+                        <Cell key={i} fill={C_AMBER_SOLID} opacity={1 - i * 0.06} />
+                      ))}
                       <LabelList
                         dataKey="custo"
                         position="right"
@@ -471,26 +463,17 @@ export function ExecutivoTab({ rows }: Props) {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top5Vei} layout="vertical"
                     margin={{ top: 0, right: 4, left: 0, bottom: 20 }} barCategoryGap="22%">
-                    <ChartDefs />
                     <CartesianGrid horizontal={false} stroke={C_GRID} />
                     <XAxis type="number" tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} />
                     <YAxis type="category" dataKey="veiculo" width={62}
                       tick={<TruncTick width={62} />} {...AXIS_PROPS} />
                     <ReTooltip content={<Tip />} cursor={{ fill: C_CURSOR, rx: 3 }} />
-                    <Bar dataKey="peca" name="Peça"        fill="url(#grad-amber-h)" radius={[0, 3, 3, 0]} maxBarSize={12} />
-                    <Bar dataKey="mo"   name="Mão de Obra" fill="url(#grad-blue-h)"  radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER_SOLID} radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE_SOLID}  radius={[0, 3, 3, 0]} maxBarSize={12} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              {/* legenda manual inline */}
-              <div className="flex justify-center gap-4 shrink-0 mt-0.5">
-                {[["url(#grad-amber-h)", C_AMBER, "Peça"], ["url(#grad-blue-h)", C_BLUE, "Mão de Obra"]].map(([, dot, label]) => (
-                  <div key={label as string} className="flex items-center gap-1.5">
-                    <span style={{ width: 10, height: 4, borderRadius: 2, background: dot as string, display: "inline-block" }} />
-                    <span style={{ color: "var(--sgt-text-muted)", fontSize: 9 }}>{label as string}</span>
-                  </div>
-                ))}
-              </div>
+              <ChartLegend />
             </SectionCard>
           </AnimatedCard>
 
@@ -501,25 +484,17 @@ export function ExecutivoTab({ rows }: Props) {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top5Forn} layout="vertical"
                     margin={{ top: 0, right: 4, left: 0, bottom: 20 }} barCategoryGap="22%">
-                    <ChartDefs />
                     <CartesianGrid horizontal={false} stroke={C_GRID} />
                     <XAxis type="number" tickFormatter={tickK} tick={TICK_STYLE} {...AXIS_PROPS} />
                     <YAxis type="category" dataKey="fornecedor" width={74}
                       tick={<TruncTick width={74} />} {...AXIS_PROPS} />
                     <ReTooltip content={<Tip />} cursor={{ fill: C_CURSOR, rx: 3 }} />
-                    <Bar dataKey="peca" name="Peça"        fill="url(#grad-amber-h)" radius={[0, 3, 3, 0]} maxBarSize={12} />
-                    <Bar dataKey="mo"   name="Mão de Obra" fill="url(#grad-blue-h)"  radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="peca" name="Peça"        fill={C_AMBER_SOLID} radius={[0, 3, 3, 0]} maxBarSize={12} />
+                    <Bar dataKey="mo"   name="Mão de Obra" fill={C_BLUE_SOLID}  radius={[0, 3, 3, 0]} maxBarSize={12} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex justify-center gap-4 shrink-0 mt-0.5">
-                {[["url(#grad-amber-h)", C_AMBER, "Peça"], ["url(#grad-blue-h)", C_BLUE, "Mão de Obra"]].map(([, dot, label]) => (
-                  <div key={label as string} className="flex items-center gap-1.5">
-                    <span style={{ width: 10, height: 4, borderRadius: 2, background: dot as string, display: "inline-block" }} />
-                    <span style={{ color: "var(--sgt-text-muted)", fontSize: 9 }}>{label as string}</span>
-                  </div>
-                ))}
-              </div>
+              <ChartLegend />
             </SectionCard>
           </AnimatedCard>
         </div>
