@@ -35,6 +35,8 @@ const PAGE_META: Record<AppPage, { label: string; icon: React.ElementType; color
   "ext-fin-frota":    { label: "Financiamentos",    icon: Wallet,          color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
   "ext-manutencao":   { label: "Manutenção",        icon: Wrench,          color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
   "ext-abastecimento":{ label: "Abastecimento",     icon: Fuel,            color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+  "ext-pneus":        { label: "Pneus",             icon: Truck,           color: "text-cyan-300",    border: "border-cyan-400/30",    bg: "bg-cyan-400/10"    },
+
   "ext-compras":      { label: "Compras",           icon: ShoppingCart,    color: "text-emerald-300", border: "border-emerald-400/30", bg: "bg-emerald-400/10" },
   "ext-rh":           { label: "RH",                icon: UserCog,         color: "text-pink-300",    border: "border-pink-400/30",    bg: "bg-pink-400/10"    },
   "ext-chamados":     { label: "Chamados",          icon: Headphones,      color: "text-blue-300",    border: "border-blue-400/30",    bg: "bg-blue-400/10"    },
