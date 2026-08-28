@@ -1,7 +1,7 @@
 import {
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar,
+  ResponsiveContainer, ComposedChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip as ReTooltip, CartesianGrid,
-  Cell, ReferenceLine,
+  Cell, ReferenceLine, Line, PieChart, Pie,
 } from "recharts";
 import { DollarSign, Wrench, Package, ClipboardList, TrendingUp, Target } from "lucide-react";
 import type { ManutencaoRow } from "@/lib/dwApi";
@@ -239,6 +239,82 @@ function TipoOSSplit({ data }: { data: TipoOsItem[] }) {
   );
 }
 
+// ── Tooltip do PieChart Tipo OS ────────────────────────────────────────────────
+function PieTip({ active, payload }: { active?: boolean; payload?: { name: string; value: number; payload: { pct: number } }[] }) {
+  if (!active || !payload?.length) return null;
+  const p = payload[0];
+  return (
+    <div style={{
+      background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
+      borderRadius: 10, padding: "8px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+    }}>
+      <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+        {p.name}
+      </p>
+      <p style={{ fontSize: 15, fontWeight: 900, color: C_AMBER,
+        letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", margin: 0 }}>
+        {p.payload.pct.toFixed(1)}%
+      </p>
+      <p style={{ fontSize: 10, color: "var(--sgt-text-secondary)", marginTop: 2 }}>
+        {fmtBRL(p.value)}
+      </p>
+    </div>
+  );
+}
+
+// ── Classificação: barras horizontais ranked ───────────────────────────────────
+function ClassifBarChart({ items }: { items: TopCatItem[] }) {
+  const max = items[0]?.custo ?? 1;
+  if (!items.length) {
+    return (
+      <div className="flex-1 flex items-center justify-center"
+        style={{ color: "var(--sgt-text-muted)", fontSize: 11 }}>
+        Sem dados
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto pr-0.5">
+      {items.map((item, i) => {
+        const pct = (item.custo / max) * 100;
+        const fillOpacity = Math.max(0.45, 1 - i * 0.08);
+        return (
+          <div key={item.cat}>
+            <div style={{ display: "flex", justifyContent: "space-between",
+              alignItems: "baseline", gap: 6, marginBottom: 4 }}>
+              <span style={{
+                fontSize: 10, color: "var(--sgt-text-secondary)",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                flex: 1, minWidth: 0,
+              }}>
+                {item.cat}
+              </span>
+              <span style={{
+                fontSize: 10, fontWeight: 700, color: "var(--sgt-text-primary)",
+                fontVariantNumeric: "tabular-nums", flexShrink: 0,
+              }}>
+                {fmtK(item.custo)}
+              </span>
+            </div>
+            {/* Track + fill */}
+            <div style={{ height: 6, background: `${C_AMBER}14`,
+              borderRadius: 99, overflow: "hidden" }}>
+              <div style={{
+                height: "100%",
+                width: `${pct}%`,
+                borderRadius: 99,
+                background: `linear-gradient(to right, ${C_AMBER}, ${C_AMBER}80)`,
+                opacity: fillOpacity,
+              }} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Lista editorial Top 10 ────────────────────────────────────────────────────
 function RankedList({ items }: { items: TopCatItem[] }) {
   const max = items[0]?.custo ?? 1;
@@ -365,13 +441,13 @@ export function ExecutivoTab({ rows }: Props) {
       {/* ── Rows 2+3: crescem para preencher o restante ─────────────────── */}
       <div className="flex flex-col gap-2 flex-1 min-h-0">
 
-        {/* ── Row 2: Trend (2/3) + Tipo OS (1/3) ─────────────────────────── */}
+        {/* ── Row 2: Comparativo Mensal + Custo por Classificação + Tipo OS ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 flex-1 min-h-0">
 
-          {/* ── Evolução Mensal — AreaChart ───────────────────────────────── */}
-          <AnimatedCard delay={220} className="lg:col-span-2 min-h-0 flex flex-col">
+          {/* ── 1. Comparativo Mensal — ComposedChart Line + Area ─────────── */}
+          <AnimatedCard delay={220} className="min-h-0 flex flex-col">
             <Panel
-              title="Evolução Mensal"
+              title="Comparativo Mensal"
               className="flex-1 min-h-0"
               aside={avgMonthly > 0 ? (
                 <span style={{
@@ -387,11 +463,10 @@ export function ExecutivoTab({ rows }: Props) {
             >
               <div className="flex-1 min-h-0" style={{ minHeight: 130 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthly} margin={{ top: 10, right: 4, left: 0, bottom: 0 }}>
-                    {/* gradient definido dentro do mesmo SVG — seguro */}
+                  <ComposedChart data={monthly} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="area-amber" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.32} />
+                      <linearGradient id="comp-amber" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%"   stopColor={C_AMBER} stopOpacity={0.28} />
                         <stop offset="100%" stopColor={C_AMBER} stopOpacity={0} />
                       </linearGradient>
                     </defs>
@@ -409,27 +484,98 @@ export function ExecutivoTab({ rows }: Props) {
                         strokeOpacity={0.35} strokeWidth={1}
                       />
                     )}
+                    {/* Área de gradiente preenchida sob a linha */}
                     <Area
-                      type="monotone"
+                      type="linear"
+                      dataKey="custo"
+                      stroke="transparent"
+                      fill="url(#comp-amber)"
+                      strokeWidth={0}
+                      dot={false}
+                    />
+                    {/* Linha principal com pontos */}
+                    <Line
+                      type="linear"
                       dataKey="custo"
                       name="Custo"
                       stroke={C_AMBER}
                       strokeWidth={2}
-                      fill="url(#area-amber)"
-                      dot={false}
-                      activeDot={{ r: 5, fill: C_AMBER,
+                      dot={{
+                        fill: "var(--sgt-bg-card)",
+                        strokeWidth: 2,
+                        r: 4,
+                        stroke: C_AMBER,
+                      }}
+                      activeDot={{ r: 6, fill: C_AMBER,
                         stroke: "var(--sgt-bg-card)", strokeWidth: 2 }}
                     />
-                  </AreaChart>
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </Panel>
           </AnimatedCard>
 
-          {/* ── Tipo OS — split stat ──────────────────────────────────────── */}
-          <AnimatedCard delay={260} className="min-h-0 flex flex-col">
+          {/* ── 2. Custo por Classificação — ranked horizontal bars ───────── */}
+          <AnimatedCard delay={250} className="min-h-0 flex flex-col">
+            <Panel title="Custo por Classificação" className="flex-1 min-h-0">
+              <ClassifBarChart items={top10Cat.slice(0, 7)} />
+            </Panel>
+          </AnimatedCard>
+
+          {/* ── 3. Tipo de Ordem de Serviço — PieChart donut ─────────────── */}
+          <AnimatedCard delay={280} className="min-h-0 flex flex-col">
             <Panel title="Tipo de Ordem de Serviço" className="flex-1 min-h-0">
-              <TipoOSSplit data={tipoOS} />
+              {tipoOS.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center"
+                  style={{ color: "var(--sgt-text-muted)", fontSize: 11 }}>
+                  Sem dados
+                </div>
+              ) : (
+                <div className="flex flex-col flex-1 min-h-0">
+                  <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <ReTooltip content={<PieTip />} />
+                        <Pie
+                          data={tipoOS}
+                          dataKey="custo"
+                          nameKey="tipo"
+                          innerRadius="44%"
+                          outerRadius="70%"
+                          paddingAngle={3}
+                          strokeWidth={0}
+                        >
+                          {tipoOS.map((_, i) => (
+                            <Cell key={i} fill={OS_COLORS[i % OS_COLORS.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* Legenda */}
+                  <div className="shrink-0 flex flex-col gap-1.5 pt-1">
+                    {tipoOS.map((item, i) => (
+                      <div key={item.tipo} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{
+                          width: 8, height: 8, borderRadius: "50%",
+                          background: OS_COLORS[i % OS_COLORS.length],
+                          flexShrink: 0,
+                        }} />
+                        <span style={{ flex: 1, fontSize: 10,
+                          color: "var(--sgt-text-secondary)",
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {item.tipo}
+                        </span>
+                        <span style={{ fontSize: 10, fontWeight: 700,
+                          fontVariantNumeric: "tabular-nums",
+                          color: "var(--sgt-text-primary)", flexShrink: 0 }}>
+                          {item.pct.toFixed(1)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </Panel>
           </AnimatedCard>
         </div>
