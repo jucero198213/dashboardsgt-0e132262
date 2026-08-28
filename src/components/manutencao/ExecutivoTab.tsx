@@ -304,7 +304,7 @@ function PillLegend({ items }: { items: { label: string; color: string }[] }) {
 interface Props { rows: ManutencaoRow[]; }
 
 export function ExecutivoTab({ rows }: Props) {
-  const { indicadores } = useFinancialData();
+  const { indicadores, faturamento } = useFinancialData();
 
   const indManut = useMemo(
     () => indicadores.find(i => i.nome === "Manutenção"),
@@ -328,7 +328,16 @@ export function ExecutivoTab({ rows }: Props) {
   const pctPeca = kpis.custoTotal > 0 ? (kpis.custoPeca / kpis.custoTotal) * 100 : 0;
   const pctMO   = kpis.custoTotal > 0 ? (kpis.custoMO   / kpis.custoTotal) * 100 : 0;
 
-  const indReal = indManut?.percentualReal    ?? 0;
+  const totalFatInd = useMemo(
+    () => faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0),
+    [faturamento]
+  );
+  const indReal = useMemo(() => {
+    if (!indManut) return 0;
+    if (totalFatInd > 0)
+      return Math.round((indManut.valorAbsoluto / totalFatInd) * 1000) / 10;
+    return indManut.percentualReal;
+  }, [indManut, totalFatInd]);
   const indMeta = indManut?.percentualEsperado ?? 15;
   const indTone = indReal <= indMeta         ? "emerald" as const
     : indReal <= indMeta * 1.1               ? "amber"   as const
