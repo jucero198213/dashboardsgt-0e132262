@@ -278,7 +278,7 @@ export default function ProcessosWorkspace() {
         .order("categoria")
         .order("titulo");
       if (error) throw error;
-      return data as Processo[];
+      return data as unknown as Processo[];
     },
   });
 
