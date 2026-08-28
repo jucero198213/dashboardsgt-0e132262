@@ -185,6 +185,7 @@ export type Database = {
           categoria: string
           created_at: string
           descricao: string
+          galeria: string[]
           id: string
           passos: Json
           tags: string[] | null
@@ -196,6 +197,7 @@ export type Database = {
           categoria: string
           created_at?: string
           descricao: string
+          galeria?: string[]
           id?: string
           passos?: Json
           tags?: string[] | null
@@ -207,6 +209,7 @@ export type Database = {
           categoria?: string
           created_at?: string
           descricao?: string
+          galeria?: string[]
           id?: string
           passos?: Json
           tags?: string[] | null
@@ -553,6 +556,7 @@ export type Database = {
         | "portal-receitaflow"
         | "portal-visual"
         | "sofia-ai"
+        | "ext-pneus"
       app_role: "admin" | "user"
       departamento:
         | "ti"
@@ -724,6 +728,7 @@ export const Constants = {
         "portal-receitaflow",
         "portal-visual",
         "sofia-ai",
+        "ext-pneus",
       ],
       app_role: ["admin", "user"],
       departamento: [
