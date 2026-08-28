@@ -15,6 +15,7 @@ import {
 } from "@/lib/manutencaoUtils_executivo";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useMemo } from "react";
 
 const C_AMBER  = "#F59E0B";
@@ -29,49 +30,73 @@ function fmtK(v: number) {
 function fmtBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
-function pct(v: number) { return `${v.toFixed(1)}%`; }
 
-// ── Gauge SVG do indicador ─────────────────────────────────────────────────────
-function IndicadorCard({ value }: { value: number }) {
-  const clamped = Math.min(100, Math.max(0, value));
-  const angle   = -135 + (clamped / 100) * 270;
-  const color   = clamped < 20 ? "#22c55e" : clamped < 50 ? C_AMBER : "#ef4444";
+// ── Gauge SVG — mesma lógica da tela de Indicadores ──────────────────────────
+function IndicadorCard({ percentualReal, percentualEsperado }: {
+  percentualReal: number;
+  percentualEsperado: number;
+}) {
+  const clamped = Math.min(150, Math.max(0, percentualReal));
+  // verde < meta, amarelo até 110% da meta, vermelho acima
+  const color = percentualReal <= percentualEsperado
+    ? "#22c55e"
+    : percentualReal <= percentualEsperado * 1.1
+    ? C_AMBER
+    : "#ef4444";
+
+  // Agulha gira de -135° (0%) a +135° (100% da escala normalizada)
+  const pctNorm = Math.min(100, (percentualReal / Math.max(percentualEsperado * 1.5, 0.01)) * 100);
+  const angle   = -135 + (pctNorm / 100) * 270;
+
   return (
     <div
-      className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl border h-full"
+      className="flex flex-col items-center justify-center gap-1 rounded-xl border"
       style={{
         background: "var(--sgt-bg-card)",
         borderColor: "var(--sgt-border-subtle)",
-        minHeight: 92,
+        padding: "12px 8px",
+        height: "100%",
       }}
     >
-      <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-center"
+      <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-center leading-tight"
         style={{ color: "var(--sgt-text-muted)" }}>
         Indicador Manutenção
       </span>
-      <div className="relative flex items-center justify-center" style={{ width: 88, height: 50 }}>
-        <svg viewBox="0 0 100 58" width="88" height="50">
-          <path d="M12,52 A38,38 0 0,1 88,52" fill="none" stroke="var(--sgt-border-subtle)" strokeWidth="9" strokeLinecap="round" />
-          <path d="M12,52 A38,38 0 0,1 88,52" fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
-            strokeDasharray={`${(clamped / 100) * 119.4} 119.4`} />
+
+      <div className="relative flex items-center justify-center" style={{ width: 88, height: 52 }}>
+        <svg viewBox="0 0 100 58" width="88" height="52">
+          {/* Track */}
+          <path d="M12,52 A38,38 0 0,1 88,52" fill="none"
+            stroke="var(--sgt-border-subtle)" strokeWidth="9" strokeLinecap="round" />
+          {/* Fill proporcional */}
+          <path d="M12,52 A38,38 0 0,1 88,52" fill="none"
+            stroke={color} strokeWidth="9" strokeLinecap="round"
+            strokeDasharray={`${(pctNorm / 100) * 119.4} 119.4`} />
+          {/* Agulha */}
           <g transform={`rotate(${angle}, 50, 52)`}>
             <line x1="50" y1="52" x2="50" y2="20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
             <circle cx="50" cy="52" r="4" fill={color} />
           </g>
         </svg>
-        <span className="absolute font-black text-base tabular-nums" style={{ color, bottom: -2, position: "absolute" }}>
-          {pct(clamped)}
+        <span className="absolute font-black text-sm tabular-nums"
+          style={{ color, bottom: -2, position: "absolute" }}>
+          {percentualReal.toFixed(1)}%
         </span>
       </div>
+
       <span className="text-[9px] text-center" style={{ color: "var(--sgt-text-muted)" }}>
-        % custo plano / total
+        meta {percentualEsperado}% • real/faturamento
       </span>
     </div>
   );
 }
 
 // ── Tooltip customizado ───────────────────────────────────────────────────────
-function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) {
+function CustomTooltip({ active, payload, label }: {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border px-3 py-2 text-xs shadow-xl"
@@ -85,13 +110,16 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 }
 
 // ── Card de seção ─────────────────────────────────────────────────────────────
-function SectionCard({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+function SectionCard({ title, children, className = "" }: {
+  title: string; children: React.ReactNode; className?: string;
+}) {
   return (
     <div
       className={`flex flex-col gap-2 p-3 sm:p-4 rounded-xl border ${className}`}
       style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
     >
-      <h3 className="text-[9px] font-bold uppercase tracking-[0.28em] shrink-0" style={{ color: "var(--sgt-text-muted)" }}>
+      <h3 className="text-[9px] font-bold uppercase tracking-[0.28em] shrink-0"
+        style={{ color: "var(--sgt-text-muted)" }}>
         {title}
       </h3>
       {children}
@@ -99,10 +127,30 @@ function SectionCard({ title, children, className = "" }: { title: string; child
   );
 }
 
+// ── Tick truncado para eixo Y horizontal ──────────────────────────────────────
+function TruncTick({ x, y, payload }: { x?: number; y?: number; payload?: { value: string } }) {
+  const raw   = payload?.value ?? "";
+  const label = raw.length > 16 ? raw.slice(0, 14) + "…" : raw;
+  return (
+    <text x={x} y={y} dy={4} textAnchor="end" fontSize={9}
+      fill="var(--sgt-text-muted)" style={{ fontFamily: "inherit" }}>
+      {label}
+    </text>
+  );
+}
+
 // ── Componente principal ──────────────────────────────────────────────────────
 interface Props { rows: ManutencaoRow[]; }
 
 export function ExecutivoTab({ rows }: Props) {
+  const { indicadores } = useFinancialData();
+
+  // Indicador de Manutenção vem da tela de Indicadores (mesma fonte)
+  const indManut = useMemo(
+    () => indicadores.find(i => i.nome === "Manutenção"),
+    [indicadores]
+  );
+
   const kpis     = useMemo(() => computeKpisExecutivo(rows),        [rows]);
   const monthly  = useMemo(() => computeMonthlyCosts(rows),         [rows]);
   const tipoOS   = useMemo(() => computeTipoOS(rows),               [rows]);
@@ -115,13 +163,22 @@ export function ExecutivoTab({ rows }: Props) {
   const pctPeca = kpis.custoTotal > 0 ? kpis.custoPeca / kpis.custoTotal * 100 : 0;
   const pctMO   = kpis.custoTotal > 0 ? kpis.custoMO   / kpis.custoTotal * 100 : 0;
 
+  // Top 10 em formato compatível com Recharts (barras horizontais)
+  const top10Chart = useMemo(
+    () => [...top10Cat].reverse(), // Recharts layout=vertical renderiza de baixo pra cima
+    [top10Cat]
+  );
+
   return (
     <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0">
 
-      {/* ── Row 1: KPI cards (altura fixa) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 shrink-0 sgt-stagger">
-        <AnimatedCard delay={0}>
-          <KpiCard
+      {/* ── Row 1: KPI cards — altura uniforme via row com h fixo ── */}
+      <div
+        className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-2.5 shrink-0 sgt-stagger"
+        style={{ gridAutoRows: "1fr" }}  /* força células de mesma altura */
+      >
+        {[
+          <KpiCard key="total"
             label="Custo Total"
             value={fmtK(kpis.custoTotal)}
             rawValue={kpis.custoTotal}
@@ -129,32 +186,26 @@ export function ExecutivoTab({ rows }: Props) {
             icon={DollarSign}
             tone="amber"
             compact
-          />
-        </AnimatedCard>
-        <AnimatedCard delay={40}>
-          <KpiCard
+          />,
+          <KpiCard key="peca"
             label="Custo Peça"
             value={fmtK(kpis.custoPeca)}
             rawValue={kpis.custoPeca}
-            subtitle={`${pct(pctPeca)} do total`}
+            subtitle={`${pctPeca.toFixed(1)}% do total`}
             icon={Package}
             tone="emerald"
             compact
-          />
-        </AnimatedCard>
-        <AnimatedCard delay={80}>
-          <KpiCard
+          />,
+          <KpiCard key="mo"
             label="Custo Mão de Obra"
             value={fmtK(kpis.custoMO)}
             rawValue={kpis.custoMO}
-            subtitle={`${pct(pctMO)} do total`}
+            subtitle={`${pctMO.toFixed(1)}% do total`}
             icon={Wrench}
             tone="blue"
             compact
-          />
-        </AnimatedCard>
-        <AnimatedCard delay={120}>
-          <KpiCard
+          />,
+          <KpiCard key="plano"
             label="Custo Plano Manut."
             value={fmtK(kpis.custoPlano)}
             rawValue={kpis.custoPlano}
@@ -162,17 +213,26 @@ export function ExecutivoTab({ rows }: Props) {
             icon={ClipboardList}
             tone="violet"
             compact
+          />,
+        ].map((card, i) => (
+          <AnimatedCard key={i} delay={i * 40} className="flex flex-col">
+            <div className="flex-1">{card}</div>
+          </AnimatedCard>
+        ))}
+
+        {/* Gauge — mesma célula do grid, altura controlada pelo gridAutoRows */}
+        <AnimatedCard delay={160} className="flex flex-col">
+          <IndicadorCard
+            percentualReal={indManut?.percentualReal ?? 0}
+            percentualEsperado={indManut?.percentualEsperado ?? 15}
           />
-        </AnimatedCard>
-        <AnimatedCard delay={160}>
-          <IndicadorCard value={kpis.indicador} />
         </AnimatedCard>
       </div>
 
-      {/* ── Rows 2+3 preenchem o espaço restante ── */}
+      {/* ── Rows 2+3 crescem para preencher o espaço restante ── */}
       <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0">
 
-        {/* Row 2: Mês a mês + Tipo OS — cresce para preencher metade */}
+        {/* Row 2: Mês a mês (2/3) + Tipo OS (1/3) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 sm:gap-3 flex-1 min-h-0">
 
           <AnimatedCard delay={200} className="lg:col-span-2 min-h-0 flex flex-col">
@@ -182,7 +242,8 @@ export function ExecutivoTab({ rows }: Props) {
                   <BarChart data={monthly} margin={{ top: 8, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
                     <CartesianGrid vertical={false} stroke={C_MUTED} />
                     <XAxis dataKey="mes" tick={{ fill: "var(--sgt-text-muted)", fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`} tick={{ fill: "var(--sgt-text-muted)", fontSize: 9 }} axisLine={false} tickLine={false} width={36} />
+                    <YAxis tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
+                      tick={{ fill: "var(--sgt-text-muted)", fontSize: 9 }} axisLine={false} tickLine={false} width={36} />
                     <ReTooltip content={<CustomTooltip />} cursor={{ fill: C_MUTED }} />
                     <Bar dataKey="custo" name="Custo" fill={C_AMBER} radius={[4, 4, 0, 0]} maxBarSize={52} />
                   </BarChart>
@@ -196,10 +257,8 @@ export function ExecutivoTab({ rows }: Props) {
               <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={tipoOS} dataKey="custo" nameKey="tipo"
-                      cx="50%" cy="50%" innerRadius="42%" outerRadius="68%" paddingAngle={2}
-                    >
+                    <Pie data={tipoOS} dataKey="custo" nameKey="tipo"
+                      cx="50%" cy="50%" innerRadius="42%" outerRadius="68%" paddingAngle={2}>
                       {tipoOS.map((_, i) => (
                         <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} stroke="transparent" />
                       ))}
@@ -220,29 +279,51 @@ export function ExecutivoTab({ rows }: Props) {
           </AnimatedCard>
         </div>
 
-        {/* Row 3: Top 10 + Top 5 veículos + Top 5 fornecedores — cresce para preencher o resto */}
+        {/* Row 3: Top 10 (chart) + Top 5 veículos + Top 5 fornecedores */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 sm:gap-3 flex-1 min-h-0">
 
-          {/* Top 10 classificação — barras tipo progress */}
+          {/* Top 10 — gráfico de barras horizontais (usa todo o espaço disponível) */}
           <AnimatedCard delay={280} className="min-h-0 flex flex-col">
-            <SectionCard title="Custo Total — Top 10" className="flex-1 min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-1.5">
-                {top10Cat.map((item) => (
-                  <div key={item.cat} className="flex flex-col gap-0.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] truncate" style={{ color: "var(--sgt-text-secondary)", maxWidth: "60%" }}>
-                        {item.cat}
-                        <span className="ml-1" style={{ color: "var(--sgt-text-muted)" }}>({pct(item.pct)})</span>
-                      </span>
-                      <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: C_AMBER }}>
-                        {fmtK(item.custo)}
-                      </span>
-                    </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sgt-border-subtle)" }}>
-                      <div className="h-full rounded-full" style={{ width: `${item.pct}%`, background: C_AMBER }} />
-                    </div>
-                  </div>
-                ))}
+            <SectionCard title="Custo Total — Top 10" className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={top10Chart}
+                    layout="vertical"
+                    margin={{ top: 0, right: 48, left: 0, bottom: 0 }}
+                    barCategoryGap="18%"
+                  >
+                    <CartesianGrid horizontal={false} stroke={C_MUTED} />
+                    <XAxis
+                      type="number"
+                      tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
+                      tick={{ fill: "var(--sgt-text-muted)", fontSize: 8 }}
+                      axisLine={false} tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="cat"
+                      width={90}
+                      tick={<TruncTick />}
+                      axisLine={false} tickLine={false}
+                    />
+                    <ReTooltip
+                      formatter={(v: number) => fmtBRL(v)}
+                      contentStyle={{ background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)", borderRadius: 12, fontSize: 11 }}
+                      itemStyle={{ color: "var(--sgt-text-primary)" }}
+                      labelStyle={{ color: "var(--sgt-text-muted)", fontWeight: 600, marginBottom: 4 }}
+                    />
+                    <Bar dataKey="custo" name="Custo" radius={[0, 4, 4, 0]} maxBarSize={18}>
+                      {top10Chart.map((entry, i) => (
+                        <Cell
+                          key={i}
+                          fill={C_AMBER}
+                          opacity={1 - i * 0.065}  /* gradiente visual de cima pra baixo */
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </SectionCard>
           </AnimatedCard>
@@ -252,7 +333,8 @@ export function ExecutivoTab({ rows }: Props) {
             <SectionCard title="Top 5 Veículos — Peça e Mão de Obra" className="flex-1 min-h-0">
               <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={top5Vei} layout="vertical" margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="25%">
+                  <BarChart data={top5Vei} layout="vertical"
+                    margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="25%">
                     <CartesianGrid horizontal={false} stroke={C_MUTED} />
                     <XAxis type="number" tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
                       tick={{ fill: "var(--sgt-text-muted)", fontSize: 9 }} axisLine={false} tickLine={false} />
@@ -273,7 +355,8 @@ export function ExecutivoTab({ rows }: Props) {
             <SectionCard title="Top 5 Fornecedores — Peça e Mão de Obra" className="flex-1 min-h-0">
               <div className="flex-1 min-h-0" style={{ minHeight: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={top5Forn} layout="vertical" margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="25%">
+                  <BarChart data={top5Forn} layout="vertical"
+                    margin={{ top: 0, right: 4, left: 0, bottom: 0 }} barCategoryGap="25%">
                     <CartesianGrid horizontal={false} stroke={C_MUTED} />
                     <XAxis type="number" tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
                       tick={{ fill: "var(--sgt-text-muted)", fontSize: 9 }} axisLine={false} tickLine={false} />
