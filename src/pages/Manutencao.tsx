@@ -271,10 +271,13 @@ export default function Manutencao() {
                   />
                 </AnimatedCard>
               </div>
+              </>)}
             </div>
 
             {/* ── Faixa 2: corpo (Análise) — cresce pra preencher o espaço ── */}
+            {tab === "operacional" && (
             <div className="flex flex-col gap-2.5 sm:gap-3 flex-1 min-h-0 mt-2.5 sm:mt-3">
+
 
               {/* ════ Análise ════ */}
               <div className="flex items-center gap-2 shrink-0">
