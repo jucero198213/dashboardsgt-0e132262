@@ -630,6 +630,14 @@ export function ExecutivoTab({ rows }: Props) {
   const pctPeca = kpis.custoTotal > 0 ? (kpis.custoPeca / kpis.custoTotal) * 100 : 0;
   const pctMO   = kpis.custoTotal > 0 ? (kpis.custoMO   / kpis.custoTotal) * 100 : 0;
 
+  const periodoLabel = useMemo(() => {
+    const fmt = (s: string) => {
+      const d = new Date(s + "T00:00:00");
+      return isNaN(d.getTime()) ? s : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    };
+    return `${fmt(dwFilter.dataInicio)} – ${fmt(dwFilter.dataFim)}`;
+  }, [dwFilter.dataInicio, dwFilter.dataFim]);
+
   const totalFatInd = useMemo(
     () => faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0),
     [faturamento]
@@ -656,10 +664,10 @@ export function ExecutivoTab({ rows }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 shrink-0 sgt-stagger"
         style={{ gridAutoRows: "1fr" }}>
         {([
-          <KpiCard key="tot"  label="Custo Total"          value={kpis.custoTotal > 0 ? `R$ ${(kpis.custoTotal/1000).toFixed(0)}k` : "—"} rawValue={kpis.custoTotal}  subtitle="período selecionado"               icon={DollarSign}    tone="amber"   compact />,
-          <KpiCard key="peca" label="Custo Peça"           value={kpis.custoPeca > 0  ? `R$ ${(kpis.custoPeca/1000).toFixed(0)}k`  : "—"} rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
-          <KpiCard key="mo"   label="Mão de Obra"          value={kpis.custoMO > 0    ? `R$ ${(kpis.custoMO/1000).toFixed(0)}k`    : "—"} rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
-          <KpiCard key="plan" label="Custo Plano Manut."   value={kpis.custoPlano > 0 ? `R$ ${(kpis.custoPlano/1000).toFixed(0)}k` : "—"} rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
+          <KpiCard key="tot"  label="Custo Total"          value={kpis.custoTotal > 0 ? fmtK(kpis.custoTotal) : "—"} rawValue={kpis.custoTotal}  subtitle={periodoLabel}                      icon={DollarSign}    tone="amber"   compact />,
+          <KpiCard key="peca" label="Custo Peça"           value={kpis.custoPeca > 0  ? fmtK(kpis.custoPeca)  : "—"} rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
+          <KpiCard key="mo"   label="Mão de Obra"          value={kpis.custoMO > 0    ? fmtK(kpis.custoMO)    : "—"} rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
+          <KpiCard key="plan" label="Custo Plano Manut."   value={kpis.custoPlano > 0 ? fmtK(kpis.custoPlano) : "—"} rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
           <KpiCard key="ind"  label="Indicador Manutenção" value={`${indReal.toFixed(1)}%`}                                               rawValue={indReal}           subtitle={`meta ${indMeta}%`}                icon={Target}        tone={indTone} compact />,
         ] as React.ReactNode[]).map((c, i) => (
           <AnimatedCard key={i} delay={i * 45} className="flex flex-col">
