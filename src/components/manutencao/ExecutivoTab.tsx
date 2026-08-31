@@ -264,10 +264,35 @@ function PieTip({ active, payload }: { active?: boolean; payload?: { name: strin
   );
 }
 
-// ── Tooltip do Glow Bar ───────────────────────────────────────────────────────
+// ── Breakdown de classificação (peça + MO) ────────────────────────────────────
+interface CatBreakdown {
+  cat: string; fullName: string; peca: number; mo: number; total: number;
+}
+function computeClassifBreakdown(rows: ManutencaoRow[], n = 7): CatBreakdown[] {
+  const map = new Map<string, { peca: number; mo: number }>();
+  for (const r of rows) {
+    const key = r.classificacao?.trim() || "Não classificado";
+    if (!map.has(key)) map.set(key, { peca: 0, mo: 0 });
+    const e = map.get(key)!;
+    e.peca += (r.valorpc ?? 0) + (r.valorpc2 ?? 0);
+    e.mo   += (r.valormo ?? 0) + (r.valormo2 ?? 0);
+  }
+  return Array.from(map.entries())
+    .map(([fullName, v]) => ({
+      cat: fullName.length > 11 ? fullName.slice(0, 10) + "…" : fullName,
+      fullName,
+      peca: v.peca,
+      mo: v.mo,
+      total: v.peca + v.mo,
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, n);
+}
+
+// ── Tooltip do Glow Bar (peça + MO) ──────────────────────────────────────────
 function GlowBarTip({ active, payload }: {
   active?: boolean;
-  payload?: { payload: { fullName: string; custo: number; pct: number } }[];
+  payload?: { payload: CatBreakdown }[];
 }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
@@ -275,54 +300,70 @@ function GlowBarTip({ active, payload }: {
     <div style={{
       background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
       borderRadius: 10, padding: "8px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
-      maxWidth: 220,
+      minWidth: 160,
     }}>
       <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
-        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6,
         wordBreak: "break-word" }}>
         {d.fullName}
       </p>
-      <p style={{ fontSize: 15, fontWeight: 900, color: C_AMBER,
-        letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", margin: 0 }}>
-        {fmtK(d.custo)}
+      <p style={{ fontSize: 14, fontWeight: 900, color: C_AMBER,
+        letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", margin: "0 0 6px" }}>
+        {fmtK(d.total)}
       </p>
-      <p style={{ fontSize: 10, color: "var(--sgt-text-secondary)", marginTop: 2 }}>
-        {d.pct.toFixed(1)}% do total
-      </p>
+      {d.peca > 0 && (
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 3 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 2, background: C_AMBER, flexShrink: 0 }} />
+          <span style={{ fontSize: 9, color: "var(--sgt-text-muted)", flex: 1 }}>Peça</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "var(--sgt-text-primary)",
+            fontVariantNumeric: "tabular-nums" }}>{fmtK(d.peca)}</span>
+        </div>
+      )}
+      {d.mo > 0 && (
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 3 }}>
+          <span style={{ width: 6, height: 6, borderRadius: 2, background: C_BLUE, flexShrink: 0 }} />
+          <span style={{ fontSize: 9, color: "var(--sgt-text-muted)", flex: 1 }}>M.O.</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "var(--sgt-text-primary)",
+            fontVariantNumeric: "tabular-nums" }}>{fmtK(d.mo)}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-// ── Barra com glow SVG ────────────────────────────────────────────────────────
-function GlowBar(props: React.SVGProps<SVGRectElement> & {
-  activeIdx?: number | null; index?: number;
-}) {
-  const { fill, x, y, width, height, activeIdx, index } = props;
-  const isHot = activeIdx === null || activeIdx === undefined || activeIdx === index;
-  return (
-    <>
-      <defs>
-        <filter id={`glow-classif-${index}`} x="-150%" y="-150%" width="400%" height="400%">
-          <feGaussianBlur stdDeviation="7" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-      <rect
-        x={x} y={y} rx={4}
-        width={width} height={height}
-        fill={fill ?? C_AMBER}
-        opacity={isHot ? 1 : 0.11}
-        filter={activeIdx === index ? `url(#glow-classif-${index})` : undefined}
-      />
-    </>
-  );
+// ── Shape de barra com glow SVG ───────────────────────────────────────────────
+function makeGlowShape(serie: string, activeIdx: number | null) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function GlowShape(props: any) {
+    const { fill, x, y, width, height, index } = props;
+    const isHot = activeIdx === null || activeIdx === index;
+    const isGlow = activeIdx === index;
+    const filterId = `glow-s-${serie}-${index}`;
+    return (
+      <g>
+        {isGlow && (
+          <defs>
+            <filter id={filterId} x="-200%" y="-200%" width="600%" height="600%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+        )}
+        <rect x={x} y={y} rx={2} width={width} height={Math.max(height, 0)}
+          fill={fill} opacity={isHot ? 1 : 0.08}
+          filter={isGlow ? `url(#${filterId})` : undefined}
+        />
+      </g>
+    );
+  };
 }
 
-// ── Classificação: Glowing Bar Chart — top categorias com glow no hover ───────
-function ClassifBarGlowChart({ items }: { items: TopCatItem[] }) {
+// ── Classificação: Stacked Thin Bar com Glow — peça + MO empilhados ───────────
+function ClassifBarGlowChart({ rows }: { rows: ManutencaoRow[] }) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const data = useMemo(() => computeClassifBreakdown(rows), [rows]);
 
-  if (!items.length) {
+  if (!data.length) {
     return (
       <div className="flex-1 flex items-center justify-center"
         style={{ color: "var(--sgt-text-muted)", fontSize: 11 }}>
@@ -331,49 +372,47 @@ function ClassifBarGlowChart({ items }: { items: TopCatItem[] }) {
     );
   }
 
-  const top = items.slice(0, 8);
-  const data = top.map((item, i) => ({
-    cat: item.cat.length > 10 ? item.cat.slice(0, 9) + "…" : item.cat,
-    custo: item.custo,
-    fullName: item.cat,
-    pct: item.pct,
-    idx: i,
-  }));
+  const onEnter = (_: unknown, index: number) => setActiveIdx(index);
+  const shapeAmber = makeGlowShape("peca", activeIdx);
+  const shapeBlue  = makeGlowShape("mo",   activeIdx);
 
   return (
     <div className="flex-1 min-h-0" style={{ minHeight: 100 }}
       onMouseLeave={() => setActiveIdx(null)}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 8, right: 4, left: 4, bottom: 36 }}
-          barCategoryGap="30%"
-        >
-          <XAxis
-            dataKey="cat"
-            {...AX}
+        <BarChart data={data}
+          margin={{ top: 10, right: 8, left: 8, bottom: 42 }}
+          barCategoryGap="38%" barSize={8}>
+          <XAxis dataKey="cat" {...AX}
             tick={{ fill: "var(--sgt-text-muted)", fontSize: 8, fontFamily: "inherit" }}
-            angle={-35}
-            textAnchor="end"
-            interval={0}
-            dy={4}
+            angle={-40} textAnchor="end" interval={0} dy={4}
           />
           <YAxis hide />
           <ReTooltip content={<GlowBarTip />} cursor={false} />
-          <Bar
-            dataKey="custo"
-            fill={C_AMBER}
-            radius={4}
-            maxBarSize={22}
-            background={{ fill: `${C_AMBER}12`, radius: 4 }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            shape={(props: any) => (
-              <GlowBar {...props} activeIdx={activeIdx} />
-            )}
-            onMouseEnter={(_: unknown, index: number) => setActiveIdx(index)}
+          {/* MO — segmento inferior (azul) */}
+          <Bar stackId="s" dataKey="mo" fill={C_BLUE}
+            radius={[0, 0, 2, 2]}
+            background={{ fill: `${C_AMBER}0D`, radius: 3 }}
+            shape={shapeBlue}
+            onMouseEnter={onEnter}
+          />
+          {/* Peça — segmento superior (amber) */}
+          <Bar stackId="s" dataKey="peca" fill={C_AMBER}
+            radius={[3, 3, 0, 0]}
+            shape={shapeAmber}
+            onMouseEnter={onEnter}
           />
         </BarChart>
       </ResponsiveContainer>
+      {/* Mini legenda */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 14, paddingTop: 2 }}>
+        {([["peca", C_AMBER, "Peça"], ["mo", C_BLUE, "M.O."]] as const).map(([k, c, l]) => (
+          <div key={k} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 3, borderRadius: 99, background: c }} />
+            <span style={{ fontSize: 8, color: "var(--sgt-text-muted)" }}>{l}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -627,7 +666,7 @@ export function ExecutivoTab({ rows }: Props) {
           {/* ── 2. Custo por Classificação — ranked horizontal bars ───────── */}
           <AnimatedCard delay={250} className="min-h-0 flex flex-col">
             <Panel title="Custo por Classificação" className="flex-1 min-h-0">
-              <ClassifBarGlowChart items={top10Cat} />
+              <ClassifBarGlowChart rows={rows} />
             </Panel>
           </AnimatedCard>
 
