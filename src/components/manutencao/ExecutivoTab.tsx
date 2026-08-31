@@ -200,7 +200,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-2">
-      {/* Header com valor highlight ao hover */}
+      {/* Header — linha 1: label + total */}
       <div className="flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 min-w-0 mr-2">
           <div className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ background: C_AMBER }} />
@@ -219,6 +219,26 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
         }}>
           {hov ? fmtK(hov.total) : "—"}
         </span>
+      </div>
+      {/* Breakdown inline — aparece no header ao hover, sem tooltip flutuante */}
+      <div style={{
+        display: "flex", gap: 12, height: hov ? 18 : 0,
+        overflow: "hidden", transition: "height 0.2s ease", shrink: 0,
+      }}>
+        {hov && hov.peca > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 2, background: C_AMBER, flexShrink: 0 }} />
+            <span style={{ fontSize: 9, color: "var(--sgt-text-muted)" }}>Peça</span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: C_AMBER, fontVariantNumeric: "tabular-nums" }}>{fmtK(hov.peca)}</span>
+          </div>
+        )}
+        {hov && hov.mo > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 2, background: C_BLUE, flexShrink: 0 }} />
+            <span style={{ fontSize: 9, color: "var(--sgt-text-muted)" }}>M.O.</span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: C_BLUE, fontVariantNumeric: "tabular-nums" }}>{fmtK(hov.mo)}</span>
+          </div>
+        )}
       </div>
 
       {/* Barras */}
@@ -240,34 +260,6 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
               className="relative flex-1 flex flex-col items-center justify-end h-full"
               onMouseEnter={() => setHovIdx(i)}
             >
-              {/* Tooltip de breakdown */}
-              {isHov && (
-                <div style={{
-                  position: "absolute", top: -60, left: "50%",
-                  transform: "translateX(-50%)",
-                  background: "var(--sgt-menu-bg)",
-                  border: "1px solid var(--sgt-border-medium)",
-                  borderRadius: 8, padding: "6px 10px",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
-                  zIndex: 20, pointerEvents: "none", minWidth: 110,
-                }}>
-                  {item.peca > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: 2, background: C_AMBER, flexShrink: 0 }} />
-                      <span style={{ fontSize: 9, color: "var(--sgt-text-muted)", flex: 1 }}>Peça</span>
-                      <span style={{ fontSize: 9, fontWeight: 700, color: "var(--sgt-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmtK(item.peca)}</span>
-                    </div>
-                  )}
-                  {item.mo > 0 && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: 2, background: C_BLUE, flexShrink: 0 }} />
-                      <span style={{ fontSize: 9, color: "var(--sgt-text-muted)", flex: 1 }}>M.O.</span>
-                      <span style={{ fontSize: 9, fontWeight: 700, color: "var(--sgt-text-primary)", fontVariantNumeric: "tabular-nums" }}>{fmtK(item.mo)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Barra empilhada */}
               <div style={{
                 width: "100%",
