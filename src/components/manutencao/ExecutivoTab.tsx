@@ -43,7 +43,7 @@ function computeClassifBreakdown(rows: ManutencaoRow[], n = 7): CatBreakdown[] {
   }
   return Array.from(map.entries())
     .map(([fullName, v]) => ({
-      cat: fullName.length > 9 ? fullName.slice(0, 8) + "…" : fullName,
+      cat: fullName,
       fullName, peca: v.peca, mo: v.mo, total: v.peca + v.mo,
     }))
     .sort((a, b) => b.total - a.total)
@@ -503,14 +503,14 @@ function HorizontalBars({ items, title }: { items: HBarItem[]; title: string }) 
             >
               {/* Label */}
               <span style={{
-                width: 62, flexShrink: 0,
-                fontSize: 9.5, textAlign: "right",
-                color: isHov ? "var(--sgt-text-primary)" : "var(--sgt-text-muted)",
-                fontWeight: isHov ? 700 : 400,
+                width: 96, flexShrink: 0,
+                fontSize: 9, textAlign: "right",
+                color: isHov ? "var(--sgt-text-primary)" : "var(--sgt-text-secondary)",
+                fontWeight: isHov ? 700 : 500,
                 transition: "color 0.2s",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                lineHeight: 1.25,
               }}>
-                {item.label.length > 9 ? item.label.slice(0, 8) + "…" : item.label}
+                {item.label}
               </span>
 
               {/* Track + barra */}
