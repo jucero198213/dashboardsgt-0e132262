@@ -2,6 +2,7 @@ import {
   ResponsiveContainer, ComposedChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip as ReTooltip, CartesianGrid,
   Cell, ReferenceLine, Line, PieChart, Pie,
+  RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from "recharts";
 import { DollarSign, Wrench, Package, ClipboardList, TrendingUp, Target } from "lucide-react";
 import { fetchManutencao, type ManutencaoRow } from "@/lib/dwApi";
@@ -264,8 +265,37 @@ function PieTip({ active, payload }: { active?: boolean; payload?: { name: strin
   );
 }
 
-// ── Classificação: BarChart horizontal — label dentro da barra (Prompt 2) ──────
-function ClassifBarChart({ items }: { items: TopCatItem[] }) {
+// ── Tooltip do RadarChart ─────────────────────────────────────────────────────
+function RadarTip({ active, payload }: {
+  active?: boolean;
+  payload?: { payload: { fullName: string; custo: number; pct: number } }[];
+}) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div style={{
+      background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
+      borderRadius: 10, padding: "8px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+      maxWidth: 200,
+    }}>
+      <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4,
+        wordBreak: "break-word" }}>
+        {d.fullName}
+      </p>
+      <p style={{ fontSize: 15, fontWeight: 900, color: C_AMBER,
+        letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", margin: 0 }}>
+        {fmtK(d.custo)}
+      </p>
+      <p style={{ fontSize: 10, color: "var(--sgt-text-secondary)", marginTop: 2 }}>
+        {d.pct.toFixed(1)}% do total
+      </p>
+    </div>
+  );
+}
+
+// ── Classificação: RadarChart — visão web dos custos por categoria ─────────────
+function ClassifRadarChart({ items }: { items: TopCatItem[] }) {
   if (!items.length) {
     return (
       <div className="flex-1 flex items-center justify-center"
@@ -274,56 +304,34 @@ function ClassifBarChart({ items }: { items: TopCatItem[] }) {
       </div>
     );
   }
+  const data = items.slice(0, 8).map(item => ({
+    subject: item.cat.length > 13 ? item.cat.slice(0, 12) + "…" : item.cat,
+    custo: item.custo,
+    fullName: item.cat,
+    pct: item.pct,
+  }));
   return (
     <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={items}
-          layout="vertical"
-          barSize={26}
-          margin={{ left: 0, right: 0, top: 2, bottom: 2 }}
-          barCategoryGap="22%"
-        >
-          <YAxis dataKey="cat" type="category" hide />
-          <XAxis dataKey="custo" type="number" hide />
-          <Bar
-            dataKey="custo"
-            layout="vertical"
-            fill={C_AMBER}
-            background={{ radius: 5, fill: C_AMBER, opacity: 0.13 }}
-            radius={5}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            shape={(props: any) => {
-              const { x, y, width, height, cat, custo, background } = props;
-              const label = typeof cat === "string" && cat.length > 22
-                ? cat.slice(0, 21) + "…"
-                : (cat as string);
-              const trackEnd = (background?.width ?? 0) + x;
-              return (
-                <g>
-                  <rect x={x} y={y} width={Math.max(width, 0)} height={height}
-                    fill={C_AMBER} rx={5} />
-                  {/* Categoria dentro da barra */}
-                  <text
-                    x={x + 10} y={y + height / 2 + 4}
-                    fill="white" fontSize={9} fontWeight={700}
-                  >
-                    {label}
-                  </text>
-                  {/* Valor no fim do track */}
-                  <text
-                    x={trackEnd - 8} y={y + height / 2 + 4}
-                    textAnchor="end"
-                    fill="var(--sgt-text-muted)"
-                    fontSize={9} fontWeight={600}
-                  >
-                    {fmtK(custo as number)}
-                  </text>
-                </g>
-              );
-            }}
+        <RadarChart data={data} margin={{ top: 8, right: 24, left: 24, bottom: 8 }}>
+          <PolarGrid
+            stroke="var(--sgt-border-subtle)"
+            strokeDasharray="3 3"
           />
-        </BarChart>
+          <PolarAngleAxis
+            dataKey="subject"
+            tick={{ fill: "var(--sgt-text-muted)", fontSize: 8, fontFamily: "inherit" }}
+          />
+          <ReTooltip content={<RadarTip />} cursor={false} />
+          <Radar
+            dataKey="custo"
+            stroke={C_AMBER}
+            fill={C_AMBER}
+            fillOpacity={0.18}
+            strokeWidth={2}
+            dot={{ fill: C_AMBER, r: 3, strokeWidth: 0 }}
+          />
+        </RadarChart>
       </ResponsiveContainer>
     </div>
   );
@@ -578,7 +586,7 @@ export function ExecutivoTab({ rows }: Props) {
           {/* ── 2. Custo por Classificação — ranked horizontal bars ───────── */}
           <AnimatedCard delay={250} className="min-h-0 flex flex-col">
             <Panel title="Custo por Classificação" className="flex-1 min-h-0">
-              <ClassifBarChart items={top10Cat.slice(0, 7)} />
+              <ClassifRadarChart items={top10Cat} />
             </Panel>
           </AnimatedCard>
 
