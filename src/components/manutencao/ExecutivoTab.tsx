@@ -634,16 +634,10 @@ export function ExecutivoTab({ rows }: Props) {
     () => faturamento.reduce((s, r) => s + (r.FRETE_TOTAL ?? 0), 0),
     [faturamento]
   );
-  const indReal = useMemo(() => {
-    if (!indManut) return 0;
-    if (totalFatInd > 0)
-      return Math.round((indManut.valorAbsoluto / totalFatInd) * 1000) / 10;
-    return indManut.percentualReal;
-  }, [indManut, totalFatInd]);
   const indMeta = indManut?.percentualEsperado ?? 15;
-  const indTone = indReal <= indMeta         ? "emerald" as const
-    : indReal <= indMeta * 1.1               ? "amber"   as const
-    :                                          "rose"    as const;
+  const indTone = kpis.indicador <= indMeta         ? "emerald" as const
+    : kpis.indicador <= indMeta * 1.1               ? "amber"   as const
+    :                                                  "rose"    as const;
 
   // Mapeia top5 para HBarItem
   const veiItems: HBarItem[]  = top5Vei.map(v => ({ label: v.veiculo,    peca: v.peca, mo: v.mo }));
@@ -660,7 +654,7 @@ export function ExecutivoTab({ rows }: Props) {
           <KpiCard key="peca" label="Custo Peça"           value={kpis.custoPeca > 0  ? fmtK(kpis.custoPeca)  : "—"} rawValue={kpis.custoPeca}   subtitle={`${pctPeca.toFixed(1)}% do total`} icon={Package}       tone="emerald" compact />,
           <KpiCard key="mo"   label="Mão de Obra"          value={kpis.custoMO > 0    ? fmtK(kpis.custoMO)    : "—"} rawValue={kpis.custoMO}     subtitle={`${pctMO.toFixed(1)}% do total`}   icon={Wrench}        tone="blue"    compact />,
           <KpiCard key="plan" label="Custo Plano Manut."   value={kpis.custoPlano > 0 ? fmtK(kpis.custoPlano) : "—"} rawValue={kpis.custoPlano}  subtitle="PLANOMANUTENCAO"                   icon={ClipboardList} tone="violet"  compact />,
-          <KpiCard key="ind"  label="Indicador Manutenção" value={`${indReal.toFixed(1)}%`}                                               rawValue={indReal}           subtitle={`meta ${indMeta}%`}                icon={Target}        tone={indTone} compact />,
+          <KpiCard key="ind"  label="Indicador Manutenção" value={`${kpis.indicador.toFixed(1)}%`}                                         rawValue={kpis.indicador}    subtitle={`meta ${indMeta}%`}                icon={Target}        tone={indTone} compact />,
         ] as React.ReactNode[]).map((c, i) => (
           <AnimatedCard key={i} delay={i * 45} className="flex flex-col">
             <div className="flex-1">{c}</div>
