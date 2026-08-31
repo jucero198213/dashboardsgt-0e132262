@@ -2,7 +2,6 @@ import {
   ResponsiveContainer, ComposedChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip as ReTooltip, CartesianGrid,
   Cell, ReferenceLine, Line, PieChart, Pie,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from "recharts";
 import { DollarSign, Wrench, Package, ClipboardList, TrendingUp, Target } from "lucide-react";
 import { fetchManutencao, type ManutencaoRow } from "@/lib/dwApi";
@@ -265,8 +264,8 @@ function PieTip({ active, payload }: { active?: boolean; payload?: { name: strin
   );
 }
 
-// ── Tooltip do RadarChart ─────────────────────────────────────────────────────
-function RadarTip({ active, payload }: {
+// ── Tooltip do Glow Bar ───────────────────────────────────────────────────────
+function GlowBarTip({ active, payload }: {
   active?: boolean;
   payload?: { payload: { fullName: string; custo: number; pct: number } }[];
 }) {
@@ -276,7 +275,7 @@ function RadarTip({ active, payload }: {
     <div style={{
       background: "var(--sgt-menu-bg)", border: "1px solid var(--sgt-border-medium)",
       borderRadius: 10, padding: "8px 14px", boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
-      maxWidth: 200,
+      maxWidth: 220,
     }}>
       <p style={{ fontSize: 9, color: "var(--sgt-text-muted)", fontWeight: 700,
         letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4,
@@ -294,30 +293,35 @@ function RadarTip({ active, payload }: {
   );
 }
 
-// ── Tick customizado para o RadarChart (nome + valor abaixo) ─────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function RadarAxisTick({ x, y, payload, anchor, radarData }: any) {
-  const item = radarData?.find((d: { subject: string; custo: number }) => d.subject === payload?.value);
-  const label = payload?.value ?? "";
+// ── Barra com glow SVG ────────────────────────────────────────────────────────
+function GlowBar(props: React.SVGProps<SVGRectElement> & {
+  activeIdx?: number | null; index?: number;
+}) {
+  const { fill, x, y, width, height, activeIdx, index } = props;
+  const isHot = activeIdx === null || activeIdx === undefined || activeIdx === index;
   return (
-    <g>
-      <text x={x} y={y} textAnchor={anchor ?? "middle"}
-        fill="var(--sgt-text-muted)" fontSize={8} fontFamily="inherit" dominantBaseline="central">
-        {label}
-      </text>
-      {item && (
-        <text x={x} y={y + 11} textAnchor={anchor ?? "middle"}
-          fill={C_AMBER} fontSize={8} fontWeight={700} fontFamily="inherit"
-          fontVariantNumeric="tabular-nums">
-          {fmtK(item.custo)}
-        </text>
-      )}
-    </g>
+    <>
+      <defs>
+        <filter id={`glow-classif-${index}`} x="-150%" y="-150%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="7" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+      <rect
+        x={x} y={y} rx={4}
+        width={width} height={height}
+        fill={fill ?? C_AMBER}
+        opacity={isHot ? 1 : 0.11}
+        filter={activeIdx === index ? `url(#glow-classif-${index})` : undefined}
+      />
+    </>
   );
 }
 
-// ── Classificação: RadarChart — valores normalizados para forma legível ────────
-function ClassifRadarChart({ items }: { items: TopCatItem[] }) {
+// ── Classificação: Glowing Bar Chart — top categorias com glow no hover ───────
+function ClassifBarGlowChart({ items }: { items: TopCatItem[] }) {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
   if (!items.length) {
     return (
       <div className="flex-1 flex items-center justify-center"
@@ -327,62 +331,48 @@ function ClassifRadarChart({ items }: { items: TopCatItem[] }) {
     );
   }
 
-  const top = items.slice(0, 7);
-  const maxCusto = top[0]?.custo ?? 1;
-
-  const data = top.map(item => ({
-    subject: item.cat.length > 12 ? item.cat.slice(0, 11) + "…" : item.cat,
-    // Valor normalizado: top categoria = 100, demais proporcionais
-    valor: Math.round((item.custo / maxCusto) * 100),
-    ref: 45, // linha de referência visível na metade do gráfico
+  const top = items.slice(0, 8);
+  const data = top.map((item, i) => ({
+    cat: item.cat.length > 10 ? item.cat.slice(0, 9) + "…" : item.cat,
     custo: item.custo,
     fullName: item.cat,
     pct: item.pct,
+    idx: i,
   }));
 
   return (
-    <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
+    <div className="flex-1 min-h-0" style={{ minHeight: 100 }}
+      onMouseLeave={() => setActiveIdx(null)}>
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={data} margin={{ top: 18, right: 30, left: 30, bottom: 18 }}>
-          <defs>
-            <radialGradient id="radar-fill" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"  stopColor={C_AMBER} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={C_AMBER} stopOpacity={0.05} />
-            </radialGradient>
-          </defs>
-          <PolarGrid
-            stroke="var(--sgt-border-subtle)"
-            strokeDasharray="3 3"
-            strokeOpacity={0.7}
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 4, left: 4, bottom: 36 }}
+          barCategoryGap="30%"
+        >
+          <XAxis
+            dataKey="cat"
+            {...AX}
+            tick={{ fill: "var(--sgt-text-muted)", fontSize: 8, fontFamily: "inherit" }}
+            angle={-35}
+            textAnchor="end"
+            interval={0}
+            dy={4}
           />
-          <PolarAngleAxis
-            dataKey="subject"
-            tick={(props) => <RadarAxisTick {...props} radarData={data} />}
-            tickLine={false}
+          <YAxis hide />
+          <ReTooltip content={<GlowBarTip />} cursor={false} />
+          <Bar
+            dataKey="custo"
+            fill={C_AMBER}
+            radius={4}
+            maxBarSize={22}
+            background={{ fill: `${C_AMBER}12`, radius: 4 }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            shape={(props: any) => (
+              <GlowBar {...props} activeIdx={activeIdx} />
+            )}
+            onMouseEnter={(_: unknown, index: number) => setActiveIdx(index)}
           />
-          <ReTooltip content={<RadarTip />} cursor={false} />
-          {/* Octógono de referência a 45% */}
-          <Radar
-            dataKey="ref"
-            stroke={`${C_AMBER}28`}
-            fill="transparent"
-            strokeWidth={1}
-            strokeDasharray="4 3"
-            dot={false}
-          />
-          {/* Área principal normalizada */}
-          <Radar
-            dataKey="valor"
-            stroke={C_AMBER}
-            fill="url(#radar-fill)"
-            fillOpacity={1}
-            strokeWidth={2}
-            dot={{ fill: C_AMBER, r: 4, strokeWidth: 2,
-              stroke: "var(--sgt-bg-card)" }}
-            activeDot={{ r: 6, fill: C_AMBER,
-              stroke: "var(--sgt-bg-card)", strokeWidth: 2 }}
-          />
-        </RadarChart>
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
@@ -637,7 +627,7 @@ export function ExecutivoTab({ rows }: Props) {
           {/* ── 2. Custo por Classificação — ranked horizontal bars ───────── */}
           <AnimatedCard delay={250} className="min-h-0 flex flex-col">
             <Panel title="Custo por Classificação" className="flex-1 min-h-0">
-              <ClassifRadarChart items={top10Cat} />
+              <ClassifBarGlowChart items={top10Cat} />
             </Panel>
           </AnimatedCard>
 
