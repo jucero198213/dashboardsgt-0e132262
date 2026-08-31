@@ -162,10 +162,10 @@ function MonthlyBarChart({ data }: { data: { mes: string; custo: number }[] }) {
                 transformOrigin: "bottom",
               }} />
               <span style={{
-                fontSize: 8.5,
+                fontSize: 10,
                 marginTop: 5,
-                color: isHov ? "var(--sgt-text-primary)" : "var(--sgt-text-muted)",
-                fontWeight: isHov ? 700 : 400,
+                color: isHov ? "var(--sgt-text-primary)" : "var(--sgt-text-secondary)",
+                fontWeight: isHov ? 700 : 500,
                 transition: "color 0.2s",
               }}>
                 {item.mes}
@@ -291,9 +291,9 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
               </div>
 
               <span style={{
-                fontSize: 8, marginTop: 5,
-                color: isHov ? "var(--sgt-text-secondary)" : "var(--sgt-text-muted)",
-                fontWeight: isHov ? 600 : 400,
+                fontSize: 9.5, marginTop: 5,
+                color: isHov ? "var(--sgt-text-primary)" : "var(--sgt-text-secondary)",
+                fontWeight: isHov ? 700 : 500,
                 transition: "color 0.2s",
                 textAlign: "center",
               }}>
@@ -309,7 +309,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
         {([{ c: C_AMBER, l: "Peça" }, { c: C_BLUE, l: "M.O." }]).map(({ c, l }) => (
           <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 8, height: 3, borderRadius: 99, background: c, display: "inline-block" }} />
-            <span style={{ fontSize: 8, color: "var(--sgt-text-muted)" }}>{l}</span>
+            <span style={{ fontSize: 10, fontWeight: 500, color: "var(--sgt-text-secondary)" }}>{l}</span>
           </div>
         ))}
       </div>
@@ -557,7 +557,7 @@ function HorizontalBars({ items, title }: { items: HBarItem[]; title: string }) 
         {([{ c: C_AMBER, l: "Peça" }, { c: C_BLUE, l: "M.O." }]).map(({ c, l }) => (
           <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <span style={{ width: 8, height: 3, borderRadius: 99, background: c, display: "inline-block" }} />
-            <span style={{ fontSize: 8, color: "var(--sgt-text-muted)" }}>{l}</span>
+            <span style={{ fontSize: 10, fontWeight: 500, color: "var(--sgt-text-secondary)" }}>{l}</span>
           </div>
         ))}
       </div>
