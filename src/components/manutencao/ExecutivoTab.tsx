@@ -207,7 +207,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
           <span style={{
             fontSize: 9, fontWeight: 700, letterSpacing: "0.28em",
             textTransform: "uppercase", color: "var(--sgt-text-muted)",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            lineHeight: 1.3,
           }}>
             {label}
           </span>
