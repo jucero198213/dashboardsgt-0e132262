@@ -194,9 +194,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
     );
   }
 
-  const label = hov
-    ? (hov.fullName.length > 16 ? hov.fullName.slice(0, 15) + "…" : hov.fullName)
-    : "top categorias";
+  const label = hov ? hov.fullName : "top categorias";
 
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-2">
