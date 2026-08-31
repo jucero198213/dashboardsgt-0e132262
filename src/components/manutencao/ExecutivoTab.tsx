@@ -124,7 +124,7 @@ function MonthlyBarChart({ data }: { data: { mes: string; custo: number }[] }) {
     <div className="flex flex-col flex-1 min-h-0 gap-2">
       <ChartHeader label={displayLabel} value={fmtK(displayVal)} />
       <div
-        className="flex items-end gap-1.5 flex-1 min-h-0"
+        className="flex items-end gap-1 flex-1 min-h-0"
         onMouseLeave={() => setHovIdx(null)}
       >
         {data.map((item, i) => {
@@ -223,7 +223,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
 
       {/* Barras */}
       <div
-        className="flex items-end gap-1.5 flex-1 min-h-0"
+        className="flex items-end gap-1 flex-1 min-h-0"
         onMouseLeave={() => setHovIdx(null)}
       >
         {data.map((item, i) => {
