@@ -141,6 +141,7 @@ function MonthlyBarChart({ data }: { data: { mes: string; custo: number }[] }) {
               {isHov && <FloatTip>{fmtK(item.custo)}</FloatTip>}
               <div style={{
                 width: "100%",
+                maxWidth: 38,
                 borderRadius: 99,
                 cursor: "pointer",
                 height: `${h}%`,
@@ -270,6 +271,7 @@ function ClassifStackedBars({ rows }: { rows: ManutencaoRow[] }) {
               {/* Barra empilhada */}
               <div style={{
                 width: "100%",
+                maxWidth: 46,
                 height: `${totalH}%`,
                 borderRadius: "99px 99px 8px 8px",
                 overflow: "hidden",
