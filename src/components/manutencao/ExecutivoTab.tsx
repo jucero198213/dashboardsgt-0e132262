@@ -482,7 +482,7 @@ function HorizontalBars({ items, title }: { items: HBarItem[]; title: string }) 
       </div>
 
       <div
-        className="flex flex-col flex-1 min-h-0 gap-1.5"
+        className="flex flex-col flex-1 justify-center gap-3"
         onMouseLeave={() => setHovIdx(null)}
       >
         {items.map((item, i) => {
@@ -497,7 +497,7 @@ function HorizontalBars({ items, title }: { items: HBarItem[]; title: string }) 
           return (
             <div
               key={item.label}
-              className="flex items-center gap-2 flex-1 min-h-0"
+              className="flex items-center gap-2"
               onMouseEnter={() => setHovIdx(i)}
               style={{ cursor: "pointer" }}
             >
