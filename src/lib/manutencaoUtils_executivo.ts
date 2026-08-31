@@ -41,14 +41,28 @@ export interface TopFornItem {
 
 // ── KPIs executivo ────────────────────────────────────────────────────────────
 export function computeKpisExecutivo(rows: ManutencaoRow[]): KpisExecutivo {
-  let custoPeca = 0, custoMO = 0, custoPlano = 0;
+  let custoTotal = 0, custoPeca = 0, custoMO = 0, custoPlano = 0;
   for (const r of rows) {
-    if (r.tipoprod === "PLANOMANUTENCAO") custoPlano += r.custo ?? 0;
-    custoPeca += (r.valorpc ?? 0) + (r.valorpc2 ?? 0);
-    custoMO   += (r.valormo ?? 0) + (r.valormo2 ?? 0);
+    const custo = r.custo ?? 0;
+    custoTotal += custo;
+    if (r.tipoprod === "PLANOMANUTENCAO") {
+      custoPlano += custo;
+    } else {
+      // Usa a proporção valorpc/valormo para repartir r.custo entre peça e MO,
+      // evitando somar preços unitários de itens diretamente.
+      const peca      = (r.valorpc ?? 0) + (r.valorpc2 ?? 0);
+      const mo        = (r.valormo ?? 0) + (r.valormo2 ?? 0);
+      const breakdown = peca + mo;
+      if (breakdown > 0) {
+        custoPeca += custo * (peca / breakdown);
+        custoMO   += custo * (mo  / breakdown);
+      } else {
+        custoPeca += custo * 0.5;
+        custoMO   += custo * 0.5;
+      }
+    }
   }
-  const custoTotal = custoPeca + custoMO + custoPlano;
-  const indicador  = custoTotal > 0 ? (custoPlano / custoTotal) * 100 : 0;
+  const indicador = custoTotal > 0 ? (custoPlano / custoTotal) * 100 : 0;
   return { custoTotal, custoPeca, custoMO, custoPlano, indicador };
 }
 
