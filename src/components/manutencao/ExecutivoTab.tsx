@@ -294,7 +294,29 @@ function RadarTip({ active, payload }: {
   );
 }
 
-// ── Classificação: RadarChart — visão web dos custos por categoria ─────────────
+// ── Tick customizado para o RadarChart (nome + valor abaixo) ─────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function RadarAxisTick({ x, y, payload, anchor, radarData }: any) {
+  const item = radarData?.find((d: { subject: string; custo: number }) => d.subject === payload?.value);
+  const label = payload?.value ?? "";
+  return (
+    <g>
+      <text x={x} y={y} textAnchor={anchor ?? "middle"}
+        fill="var(--sgt-text-muted)" fontSize={8} fontFamily="inherit" dominantBaseline="central">
+        {label}
+      </text>
+      {item && (
+        <text x={x} y={y + 11} textAnchor={anchor ?? "middle"}
+          fill={C_AMBER} fontSize={8} fontWeight={700} fontFamily="inherit"
+          fontVariantNumeric="tabular-nums">
+          {fmtK(item.custo)}
+        </text>
+      )}
+    </g>
+  );
+}
+
+// ── Classificação: RadarChart — valores normalizados para forma legível ────────
 function ClassifRadarChart({ items }: { items: TopCatItem[] }) {
   if (!items.length) {
     return (
@@ -304,32 +326,61 @@ function ClassifRadarChart({ items }: { items: TopCatItem[] }) {
       </div>
     );
   }
-  const data = items.slice(0, 8).map(item => ({
-    subject: item.cat.length > 13 ? item.cat.slice(0, 12) + "…" : item.cat,
+
+  const top = items.slice(0, 7);
+  const maxCusto = top[0]?.custo ?? 1;
+
+  const data = top.map(item => ({
+    subject: item.cat.length > 12 ? item.cat.slice(0, 11) + "…" : item.cat,
+    // Valor normalizado: top categoria = 100, demais proporcionais
+    valor: Math.round((item.custo / maxCusto) * 100),
+    ref: 45, // linha de referência visível na metade do gráfico
     custo: item.custo,
     fullName: item.cat,
     pct: item.pct,
   }));
+
   return (
     <div className="flex-1 min-h-0" style={{ minHeight: 100 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart data={data} margin={{ top: 8, right: 24, left: 24, bottom: 8 }}>
+        <RadarChart data={data} margin={{ top: 18, right: 30, left: 30, bottom: 18 }}>
+          <defs>
+            <radialGradient id="radar-fill" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stopColor={C_AMBER} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={C_AMBER} stopOpacity={0.05} />
+            </radialGradient>
+          </defs>
           <PolarGrid
             stroke="var(--sgt-border-subtle)"
             strokeDasharray="3 3"
+            strokeOpacity={0.7}
           />
           <PolarAngleAxis
             dataKey="subject"
-            tick={{ fill: "var(--sgt-text-muted)", fontSize: 8, fontFamily: "inherit" }}
+            tick={(props) => <RadarAxisTick {...props} radarData={data} />}
+            tickLine={false}
           />
           <ReTooltip content={<RadarTip />} cursor={false} />
+          {/* Octógono de referência a 45% */}
           <Radar
-            dataKey="custo"
+            dataKey="ref"
+            stroke={`${C_AMBER}28`}
+            fill="transparent"
+            strokeWidth={1}
+            strokeDasharray="4 3"
+            dot={false}
+          />
+          {/* Área principal normalizada */}
+          <Radar
+            dataKey="valor"
             stroke={C_AMBER}
-            fill={C_AMBER}
-            fillOpacity={0.18}
+            fill="url(#radar-fill)"
+            fillOpacity={1}
             strokeWidth={2}
-            dot={{ fill: C_AMBER, r: 3, strokeWidth: 0 }}
+            dot={{ fill: C_AMBER, r: 4, strokeWidth: 2,
+              stroke: "var(--sgt-bg-card)" }}
+            activeDot={{ r: 6, fill: C_AMBER,
+              stroke: "var(--sgt-bg-card)", strokeWidth: 2 }}
           />
         </RadarChart>
       </ResponsiveContainer>
