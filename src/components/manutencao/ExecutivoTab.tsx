@@ -4,10 +4,9 @@ import {
   Cell, ReferenceLine, Line, PieChart, Pie,
 } from "recharts";
 import { DollarSign, Wrench, Package, ClipboardList, TrendingUp, Target } from "lucide-react";
-import type { ManutencaoRow } from "@/lib/dwApi";
+import { fetchManutencao, type ManutencaoRow } from "@/lib/dwApi";
 import {
   computeKpisExecutivo,
-  computeMonthlyCosts,
   computeTipoOS,
   computeTopClassificacao,
   computeTopVeiculos,
@@ -18,7 +17,9 @@ import {
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+
+const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
 // ── Paleta ────────────────────────────────────────────────────────────────────
 const C_AMBER  = "#F5A623";
@@ -393,15 +394,51 @@ function PillLegend({ items }: { items: { label: string; color: string }[] }) {
 interface Props { rows: ManutencaoRow[]; }
 
 export function ExecutivoTab({ rows }: Props) {
-  const { indicadores, faturamento } = useFinancialData();
+  const { indicadores, faturamento, dwFilter } = useFinancialData();
 
   const indManut = useMemo(
     () => indicadores.find(i => i.nome === "Manutenção"),
     [indicadores]
   );
 
+  // ── Ano selecionado ─────────────────────────────────────────────────────────
+  const selectedYear = useMemo(() => {
+    const d = new Date(dwFilter.dataInicio + "T00:00:00");
+    return isNaN(d.getTime()) ? new Date().getFullYear() : d.getFullYear();
+  }, [dwFilter.dataInicio]);
+
+  // ── Dados do ano inteiro para o gráfico comparativo ──────────────────────────
+  const [yearRows, setYearRows] = useState<ManutencaoRow[]>([]);
+  useEffect(() => {
+    const jan1 = `${selectedYear}-01-01`;
+    const now = new Date();
+    const end = selectedYear < now.getFullYear()
+      ? `${selectedYear}-12-31`
+      : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    fetchManutencao({ dataInicio: jan1, dataFim: end, filial: dwFilter.filial ?? null })
+      .then(res => setYearRows(res.data ?? []))
+      .catch(() => setYearRows([]));
+  }, [selectedYear, dwFilter.filial]);
+
+  // ── Série mensal completa: Jan até mês atual do ano selecionado ───────────────
+  const monthly = useMemo(() => {
+    const now = new Date();
+    const lastMonthIdx = selectedYear < now.getFullYear() ? 11 : now.getMonth();
+    const map = new Map<number, number>();
+    for (const r of yearRows) {
+      if (!r.dataordem || !r.custo) continue;
+      const d = new Date(r.dataordem);
+      if (isNaN(d.getTime()) || d.getFullYear() !== selectedYear) continue;
+      const m = d.getMonth();
+      map.set(m, (map.get(m) ?? 0) + r.custo);
+    }
+    return Array.from({ length: lastMonthIdx + 1 }, (_, m) => ({
+      mes: MESES[m],
+      custo: map.get(m) ?? 0,
+    }));
+  }, [yearRows, selectedYear]);
+
   const kpis     = useMemo(() => computeKpisExecutivo(rows),        [rows]);
-  const monthly  = useMemo(() => computeMonthlyCosts(rows),         [rows]);
   const tipoOS   = useMemo(() => computeTipoOS(rows),               [rows]);
   const top10Cat = useMemo(() => computeTopClassificacao(rows, 10), [rows]);
   const top5Vei  = useMemo(() => computeTopVeiculos(rows, 5),       [rows]);
