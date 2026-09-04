@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
@@ -13,13 +13,19 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Trash2, CheckCircle2, Save, Loader2, Lock } from "lucide-react";
+import { Trash2, CheckCircle2, Save, Loader2, Lock, Paperclip } from "lucide-react";
+import { TicketThread } from "./TicketThread";
+import { AnexosGrid, PendingFilesGrid } from "./TicketAnexos";
+import { SlaBadge } from "./SlaBadge";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import { toast } from "sonner";
 import {
   Ticket, TicketInput, TicketPrioridade, TicketStatus,
   createTicket, updateTicket, deleteTicket,
   PRIORIDADE_LABEL, STATUS_LABEL,
 } from "@/lib/ticketsApi";
+import { TicketCategoria, fetchCategorias } from "@/lib/ticketCategoriasApi";
+import { TicketAnexo, fetchAnexos, uploadAnexos, validarArquivo, TIPOS_ACEITOS } from "@/lib/ticketAnexosApi";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
@@ -29,6 +35,8 @@ interface Props {
   defaultDate?: string;
   onSaved: () => void;
 }
+
+const NENHUMA = "__nenhuma__";
 
 const empty = (date?: string): TicketInput => ({
   titulo: "",
@@ -40,6 +48,7 @@ const empty = (date?: string): TicketInput => ({
   prioridade: "media",
   status: "aberto",
   observacoes: "",
+  categoria_id: null,
 });
 
 export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }: Props) {
@@ -47,6 +56,10 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
   const [form, setForm] = useState<TicketInput>(empty(defaultDate));
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [categorias, setCategorias] = useState<TicketCategoria[]>([]);
+  const [anexos, setAnexos] = useState<TicketAnexo[]>([]);
+  const [pendentes, setPendentes] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // Usuário pode editar apenas se: novo chamado OU é admin
   const podeEditar = !ticket || isAdmin;
@@ -54,6 +67,14 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
   const somenteAdmin = !isAdmin;
 
   useEffect(() => {
+    if (!open) return;
+    fetchCategorias(true)
+      .then(setCategorias)
+      .catch(() => setCategorias([]));
+  }, [open]);
+
+  useEffect(() => {
+    setPendentes([]);
     if (ticket) {
       setForm({
         titulo: ticket.titulo,
@@ -65,14 +86,32 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
         prioridade: ticket.prioridade,
         status: ticket.status,
         observacoes: ticket.observacoes ?? "",
+        categoria_id: ticket.categoria_id ?? null,
       });
+      fetchAnexos(ticket.id).then(setAnexos).catch(() => setAnexos([]));
     } else {
       setForm(empty(defaultDate));
+      setAnexos([]);
     }
   }, [ticket, defaultDate, open]);
 
   const set = <K extends keyof TicketInput>(k: K, v: TicketInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const validos: File[] = [];
+    for (const f of Array.from(list)) {
+      const erro = validarArquivo(f);
+      if (erro) toast.error(erro);
+      else validos.push(f);
+    }
+    if (validos.length) setPendentes((p) => [...p, ...validos]);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  // Anexos da thread (mensagem_id preenchido) não aparecem no formulário
+  const anexosDoChamado = anexos.filter((a) => !a.mensagem_id);
 
   const save = async () => {
     if (!form.titulo.trim()) { toast.error("Título é obrigatório"); return; }
@@ -87,14 +126,25 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
         responsavel: form.responsavel || null,
         observacoes: form.observacoes || null,
         horario_chamado: form.horario_chamado || null,
+        categoria_id: form.categoria_id || null,
       };
+      let alvo = ticket;
       if (ticket) {
-        await updateTicket(ticket.id, payload);
-        toast.success("Chamado atualizado");
+        if (podeEditar) await updateTicket(ticket.id, payload);
       } else {
-        await createTicket(payload);
-        toast.success("Chamado criado com sucesso!");
+        alvo = await createTicket(payload);
       }
+      if (pendentes.length && alvo) {
+        try {
+          await uploadAnexos(alvo.id, pendentes);
+        } catch (e: any) {
+          toast.error(e?.message ?? "Erro ao enviar anexos");
+        }
+      }
+      toast.success(
+        ticket ? (podeEditar ? "Chamado atualizado" : "Anexos enviados") : "Chamado criado com sucesso!",
+      );
+      setPendentes([]);
       onSaved();
       onOpenChange(false);
     } catch (err: any) {
@@ -140,10 +190,11 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               {ticket
                 ? isAdmin ? "Editar chamado" : "Visualizar chamado"
                 : "Abrir novo chamado"}
+              {ticket && <SlaBadge ticket={ticket} />}
             </DialogTitle>
             <DialogDescription>
               {ticket
@@ -163,6 +214,32 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
                 onChange={(e) => set("titulo", e.target.value)}
                 maxLength={200} disabled={!podeEditar}
               />
+            </div>
+
+            {/* Categoria */}
+            <div className="grid gap-2">
+              <Label>Categoria</Label>
+              <Select
+                value={form.categoria_id ?? NENHUMA}
+                onValueChange={(v) => set("categoria_id", v === NENHUMA ? null : v)}
+                disabled={!podeEditar}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar categoria" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NENHUMA}>Sem categoria</SelectItem>
+                  {categorias.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: c.cor ?? "#94a3b8" }}
+                        />
+                        {c.nome}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Descrição */}
@@ -204,10 +281,10 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
                 <Label htmlFor="data">Data *</Label>
-                <Input
-                  id="data" type="date" value={form.data_chamado}
-                  onChange={(e) => set("data_chamado", e.target.value)}
-                  disabled={!podeEditar}
+                <DatePickerInput
+                  value={form.data_chamado}
+                  onChange={(v) => set("data_chamado", v)}
+                  placeholder="Selecionar"
                 />
               </div>
               <div className="grid gap-2">
@@ -272,7 +349,42 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
                 placeholder={!isAdmin && ticket ? "Notas internas do admin" : ""}
               />
             </div>
+
+            {/* Anexos */}
+            <div className="grid gap-2">
+              <Label className="flex items-center gap-1.5">
+                <Paperclip className="h-3.5 w-3.5" /> Imagens anexadas
+              </Label>
+              <AnexosGrid anexos={anexosDoChamado} />
+              <PendingFilesGrid
+                files={pendentes}
+                onRemove={(i) => setPendentes((p) => p.filter((_, idx) => idx !== i))}
+              />
+              <input
+                ref={fileRef}
+                type="file"
+                accept={TIPOS_ACEITOS.join(",")}
+                multiple
+                className="hidden"
+                onChange={(e) => addFiles(e.target.files)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                className="w-fit border-[var(--sgt-border-subtle)]"
+              >
+                <Paperclip className="h-3.5 w-3.5 mr-1" /> Adicionar imagem
+              </Button>
+              <p className="text-[10px] text-[var(--sgt-text-muted)]">
+                JPG, PNG, GIF ou WEBP — até 5MB por arquivo.
+              </p>
+            </div>
           </div>
+
+          {/* Thread de mensagens — só aparece em tickets existentes */}
+          {ticket && <TicketThread ticketId={ticket.id} />}
 
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-between">
             {/* Ações admin — só aparecem para admins */}
@@ -294,7 +406,7 @@ export function TicketModal({ open, onOpenChange, ticket, defaultDate, onSaved }
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
                 {podeEditar ? "Cancelar" : "Fechar"}
               </Button>
-              {podeEditar && (
+              {(podeEditar || pendentes.length > 0) && (
                 <Button type="button" onClick={save} disabled={saving}>
                   {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
                   {ticket ? "Salvar" : "Abrir chamado"}

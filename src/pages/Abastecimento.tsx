@@ -1,11 +1,12 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Fuel, RefreshCw, Search, TrendingUp, TrendingDown,
   Calendar, ChevronUp, ChevronDown, BarChart3,
   DollarSign, Hash, X, ChevronLeft, ChevronRight,
-  Filter, Layers, Droplets, Gauge, MapPin, FileText,
-  Activity, Car, Users, Zap,
+  Layers, Droplets, Gauge, MapPin, FileText,
+  Activity, Car, Users, Zap, LayoutGrid, Table2,
+  Monitor, Minimize2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -14,6 +15,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -23,9 +25,11 @@ import {
 } from "@/components/ui/select";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { useCooldown } from "@/hooks/useCooldown";
-import { fetchAbastecimento, type AbastecimentoRow } from "@/lib/dwApi";
+import { fetchAbastecimento, fetchPostoInterno, clearDwCache, type AbastecimentoRow, type PostoInternoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
+import { PostoInterno } from "@/components/abastecimento/PostoInterno";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -52,13 +56,13 @@ const fmtMedia = (v: number | null) =>
 
 // ─── Paleta de cores alinhada ao theme.ts ────────────────────────────────────
 const PALETTE = [
-  RAW.accent.amber,
-  RAW.accent.cyan,
-  RAW.accent.emerald,
-  RAW.accent.violet,
-  RAW.accent.rose,
-  RAW.accent.red,
-  "#fb923c",
+  "#fbbf24",
+  "#f59e0b",
+  "#fcd34d",
+  "#d97706",
+  "#fde68a",
+  "#b45309",
+  "#f59e0b",
   "#94a3b8",
 ];
 const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
@@ -68,7 +72,7 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-amber-400/30 bg-slate-950/95 px-3 py-2 shadow-xl backdrop-blur">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300 mb-1">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300 mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color ?? "#fff" }} className="text-[12px] font-semibold">
           {formatter ? formatter(p.value, p.name) : `${p.name}: ${p.value}`}
@@ -77,6 +81,22 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
     </div>
   );
 };
+
+// ─── Abas da tela ─────────────────────────────────────────────────────────────
+type AbaAbastecimento = "geral" | "interno" | "externo";
+
+const ABAS: { id: AbaAbastecimento; label: string }[] = [
+  { id: "geral",   label: "Geral" },
+  { id: "interno", label: "Abastecimento Interno" },
+  { id: "externo", label: "Abastecimento Externo" },
+];
+
+// ─── Identificação do posto interno ──────────────────────────────────────────
+// Bombas próprias da SGT no Rodopar: "SGT LOGISTICA LTDA (POSTO MATRIZ)" e
+// "SGT". Tudo que começa com SGT é considerado abastecimento interno; o
+// restante é externo (postos de rua).
+const isAbastecimentoInterno = (d: AbastecimentoRow) =>
+  String(d.posto ?? "").trim().toUpperCase().startsWith("SGT");
 
 // ─── Tipo para registros agregados ───────────────────────────────────────────
 interface AbastecimentoAgregado {
@@ -103,6 +123,146 @@ interface AbastecimentoAgregado {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  INDICADORES DE MERCADO (modo apresentação)
+//  ─────────────────────────────────────────────────────────────────────────────
+//  TODO(integração): conectar aos endpoints reais quando disponíveis:
+//   - ANP    → preço médio Diesel S10 por UF (semanal). Ex.: /dw-mercado/anp
+//   - ABICOM → defasagem PPI do diesel.            Ex.: /dw-mercado/abicom
+//   - ANTT   → status da tabela de piso de frete.  Ex.: /dw-mercado/antt
+//  Enquanto não houver integração, este objeto fornece dados mockados
+//  preservando o contrato (value/formatted/status/updatedAt). O cálculo de
+//  "Diferença vs ANP" é derivado em tempo real abaixo, não hard-coded.
+type IndicatorStatus = "positive" | "neutral" | "warning" | "danger";
+type IndicatorSource = "ANP" | "ABICOM" | "ANTT" | "INTERNO";
+
+const ANP_DIESEL_S10  = 6.12;   // R$/L — TODO: substituir por ANP real
+const PRECO_INTERNO   = 4.89;   // R$/L — TODO: derivar do DW (média da janela)
+const ABICOM_DEFASAGEM = -4.0;  // %    — TODO: substituir por ABICOM real
+
+const diffVsAnpPct = ((PRECO_INTERNO - ANP_DIESEL_S10) / ANP_DIESEL_S10) * 100;
+const diffFormatted = `${diffVsAnpPct >= 0 ? "+" : ""}${diffVsAnpPct.toFixed(1).replace(".", ",")}%`;
+const diffStatus: IndicatorStatus =
+  diffVsAnpPct <= -5 ? "positive" : diffVsAnpPct >= 5 ? "danger" : "neutral";
+const diffLabel =
+  diffVsAnpPct < -1 ? "economia estimada vs ANP"
+  : diffVsAnpPct > 1 ? "acima do mercado"
+  : "alinhado ao mercado";
+
+const abicomStatus: IndicatorStatus =
+  ABICOM_DEFASAGEM <= -5 ? "warning"
+  : ABICOM_DEFASAGEM >= 5 ? "danger"
+  : "neutral";
+const abicomLabel =
+  ABICOM_DEFASAGEM <= -5 ? "pressão de alta"
+  : ABICOM_DEFASAGEM >= 5 ? "pressão de baixa"
+  : "pressão moderada";
+
+interface MarketIndicator {
+  title:       string;
+  value:       string;
+  bottomLeft:  string;
+  bottomRight: string;
+  source:      IndicatorSource;
+  status?:     IndicatorStatus;
+}
+
+const diffAbsRs = Math.abs(PRECO_INTERNO - ANP_DIESEL_S10);
+const diffAbsRsFmt = `${diffVsAnpPct < 0 ? "−" : "+"}R$ ${diffAbsRs.toFixed(2).replace(".", ",")}/L`;
+
+const marketIndicators: MarketIndicator[] = [
+  {
+    title: "Diesel S10 ANP",
+    value: `R$ ${ANP_DIESEL_S10.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "SP · última semana",
+    bottomRight: "Atualizado em 16/06/2026",
+    source: "ANP",
+    status: "neutral",
+  },
+  {
+    title: "Preço Interno",
+    value: `R$ ${PRECO_INTERNO.toFixed(2).replace(".", ",")}/L`,
+    bottomLeft:  "frota própria · posto interno",
+    bottomRight: "média do período",
+    source: "INTERNO",
+    status: "neutral",
+  },
+  {
+    title: "Diferença vs ANP",
+    value: diffFormatted,
+    bottomLeft:  diffVsAnpPct < 0 ? "economia estimada" : "acima do mercado",
+    bottomRight: diffAbsRsFmt,
+    source: "INTERNO",
+    status: diffStatus,
+  },
+  {
+    title: "ABICOM / PPI",
+    value: abicomLabel.charAt(0).toUpperCase() + abicomLabel.slice(1),
+    bottomLeft:  `Diesel: ${ABICOM_DEFASAGEM >= 0 ? "+" : ""}${ABICOM_DEFASAGEM.toFixed(1).replace(".", ",")}%`,
+    bottomRight: "paridade importação",
+    source: "ABICOM",
+    status: abicomStatus,
+  },
+  {
+    title: "ANTT / Frete",
+    value: "Vigente",
+    bottomLeft:  "piso mínimo de frete",
+    bottomRight: "última atualização 16/06",
+    source: "ANTT",
+    status: "positive",
+  },
+];
+
+const STATUS_COLOR: Record<IndicatorStatus, { text: string; ring: string; dot: string }> = {
+  positive: { text: "#34d399", ring: "rgba(52,211,153,0.35)",  dot: "#34d399" },
+  neutral:  { text: "#e2e8f0", ring: "rgba(148,163,184,0.30)", dot: "#94a3b8" },
+  warning:  { text: "#fbbf24", ring: "rgba(251,191,36,0.40)",  dot: "#fbbf24" },
+  danger:   { text: "#f87171", ring: "rgba(248,113,113,0.40)", dot: "#f87171" },
+};
+
+function MarketIndicatorCard({ title, value, bottomLeft, bottomRight, source, status = "neutral" }: MarketIndicator) {
+  const colors = STATUS_COLOR[status];
+  const fallback = value === "--" || value === "—";
+  // Valores textuais longos (ex.: "Pressão moderada") usam fonte menor
+  // para evitar truncamento com reticências.
+  const isLongText = value.length > 10 && !/^[R$\-+−]?\s?\d/.test(value);
+  const valueClass = isLongText
+    ? "text-[clamp(1.05rem,1.9vh,1.55rem)]"
+    : "text-[clamp(1.2rem,2.2vh,1.8rem)]";
+  return (
+    <div
+      className="relative flex h-full min-w-0 flex-col justify-between rounded-[14px] border bg-white/[0.025] px-[clamp(14px,1.3vw,24px)] py-[clamp(8px,1vh,14px)] backdrop-blur-sm"
+      style={{ borderColor: colors.ring }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">{title}</span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.18em]"
+          style={{ color: colors.text, borderColor: colors.ring, background: "rgba(255,255,255,0.025)" }}
+        >
+          <span className="h-1 w-1 rounded-full" style={{ background: colors.dot }} />
+          {source}
+        </span>
+      </div>
+      <p
+        className={`mt-1.5 ${valueClass} font-black leading-tight tabular-nums tracking-[-0.02em] whitespace-nowrap`}
+        style={{ color: fallback ? "#64748b" : colors.text }}
+      >
+        {fallback ? "--" : value}
+      </p>
+      <div className="mt-1 flex items-end justify-between gap-3">
+        <span className="min-w-0 truncate text-[11px] font-semibold text-slate-400">
+          {fallback ? "aguardando atualização" : bottomLeft}
+        </span>
+        {!fallback && bottomRight && (
+          <span className="shrink-0 text-[10px] font-semibold text-slate-500 text-right">{bottomRight}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Abastecimento() {
@@ -112,6 +272,8 @@ export default function Abastecimento() {
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   const [dados, setDados]             = useState<AbastecimentoRow[]>([]);
+  const [postoRows, setPostoRows]     = useState<PostoInternoRow[]>([]);
+  const [postoSaldo, setPostoSaldo]   = useState<number | null>(null);
   const [loading, setLoading]         = useState(false);
   const [progress, setProgress]       = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
@@ -129,10 +291,24 @@ export default function Abastecimento() {
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+  // View dos registros — padrão Bancos (Cards / Tabela / Analytics)
+  const [abastView, setAbastView] = useState<"cards" | "tabela" | "analytics">("cards");
+
+  // Aba ativa — Geral / Abastecimento Interno / Abastecimento Externo
+  const [abaAtiva, setAbaAtiva] = useState<AbaAbastecimento>("geral");
+
+  // Modo Apresentação / TV (tela cheia imersiva)
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [tvClock, setTvClock] = useState("");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
     if (!force && !cooldown.canFetch) return;
+    // Botão "Atualizar" limpa o cache para garantir dados frescos do servidor
+    if (force) {
+      clearDwCache("abastecimento:");
+      clearDwCache("posto-interno:");
+    }
     setLoading(true);
     setError(null);
     setProgress(0);
@@ -153,11 +329,19 @@ export default function Abastecimento() {
     }, 120);
 
     try {
-      const res = await fetchAbastecimento({
-        dataInicio: dwFilter.dataInicio,
-        dataFim:    dwFilter.dataFim,
-      });
+      // 2 chamadas em paralelo:
+      //   1. abastecimento do período (geral/externo — cards e gráficos)
+      //   2. posto interno: ESTRAZ CODPROD=881 — ENTRADA/SAIDA + saldo real
+      let postoErr: string | null = null;
+      const [res, postoRes] = await Promise.all([
+        fetchAbastecimento({ dataInicio: dwFilter.dataInicio, dataFim: dwFilter.dataFim }),
+        fetchPostoInterno({ dataInicio: dwFilter.dataInicio, dataFim: dwFilter.dataFim })
+          .catch((e: Error) => { postoErr = e?.message ?? "Erro ao carregar posto interno"; return null; }),
+      ]);
       setDados(res.data ?? []);
+      setPostoRows(postoRes?.data ?? []);
+      setPostoSaldo(postoRes?.saldo_atual_litros ?? null);
+      if (postoErr) setError(postoErr);
       cooldown.start();
     } catch (err) {
       setError((err as Error).message ?? "Erro ao carregar dados");
@@ -170,6 +354,62 @@ export default function Abastecimento() {
   }, [dwFilter.dataInicio, dwFilter.dataFim]);
 
   useEffect(() => { if (cooldown.canFetch) carregarDados(); }, [cooldown.canFetch]);
+
+  // Recarrega quando o período muda (força bypass de cooldown + limpeza de cache)
+  const isInitialLoad = useRef(true);
+  useEffect(() => {
+    if (isInitialLoad.current) { isInitialLoad.current = false; return; }
+    carregarDados(true);
+  }, [carregarDados]);
+
+  // ── Modo Apresentação / TV — alterna estado + Fullscreen API ─────────────────
+  const togglePresentation = useCallback(async () => {
+    if (!isPresentationMode) {
+      setAbaAtiva("interno");                 // KPIs e posto refletem o interno
+      try { await document.documentElement.requestFullscreen?.(); } catch { /* ignora */ }
+      setIsPresentationMode(true);
+    } else {
+      try { if (document.fullscreenElement) await document.exitFullscreen(); } catch { /* ignora */ }
+      setIsPresentationMode(false);
+    }
+  }, [isPresentationMode]);
+
+  // Sai do modo se o usuário pressionar ESC (sai do fullscreen nativo)
+  useEffect(() => {
+    const onFsChange = () => { if (!document.fullscreenElement) setIsPresentationMode(false); };
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  // Trava scroll global (html/body) enquanto modo apresentação estiver ativo,
+  // evitando qualquer overflow vertical herdado do layout normal.
+  useEffect(() => {
+    if (!isPresentationMode) return;
+    const htmlPrev = document.documentElement.style.overflow;
+    const bodyPrev = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = htmlPrev;
+      document.body.style.overflow = bodyPrev;
+    };
+  }, [isPresentationMode]);
+
+  // Relógio em tempo real — atualiza a cada segundo apenas em presentation mode
+  useEffect(() => {
+    if (!isPresentationMode) { setTvClock(""); return; }
+    const tick = () => setTvClock(new Date().toLocaleTimeString("pt-BR"));
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, [isPresentationMode]);
+
+  // Auto-refresh silencioso a cada 5 minutos em presentation mode
+  useEffect(() => {
+    if (!isPresentationMode) return;
+    const iv = setInterval(() => carregarDados(true), 5 * 60 * 1000);
+    return () => clearInterval(iv);
+  }, [isPresentationMode, carregarDados]);
 
   // ── Listas únicas para filtros ───────────────────────────────────────────────
   const frotas = useMemo(() => {
@@ -196,16 +436,182 @@ export default function Abastecimento() {
     return ["Todos", ...Array.from(s).sort()];
   }, [dados]);
 
+  // ── Fonte de dados por aba ───────────────────────────────────────────────────
+  // Geral: tudo · Interno: só bombas SGT · Externo: só postos de rua
+  const dadosAba = useMemo(() => {
+    if (abaAtiva === "interno") return dados.filter(isAbastecimentoInterno);
+    if (abaAtiva === "externo") return dados.filter(d => !isAbastecimentoInterno(d));
+    return dados;
+  }, [dados, abaAtiva]);
+
+  // ── Dados do posto interno: ESTRAZ quando disponível, RODABA como fallback ────
+  const postoInternoDados = useMemo(() => {
+    // As datas chegam como string ISO ("2026-06-13T00:00:00.000Z") após o JSON
+    // do Express. Normaliza para "YYYY-MM-DD" sem conversão de fuso horário.
+    const toISODate = (d: unknown): string => {
+      if (!d) return "";
+      if (typeof d === "string") {
+        const m = d.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (m) return m[1];
+      }
+      const dt = d instanceof Date ? d : new Date(String(d));
+      return isNaN(dt.getTime()) ? "" : dt.toISOString().slice(0, 10);
+    };
+    // Exibe "DD/MM/AAAA" a partir do dia-calendário, sem deslocar por fuso.
+    const fmtBR = (d: unknown): string => {
+      const iso = toISODate(d);
+      if (!iso) return "—";
+      const [y, m, dd] = iso.split("-");
+      return `${dd}/${m}/${y}`;
+    };
+
+    // ESTRAZ (período selecionado) — pode estar vazio se não houver lançamentos.
+    // Ordena por data desc (string ISO já ordena corretamente); empates do mesmo
+    // dia preservam a ordem do servidor (ID_RAZ desc) por sort estável.
+    const byDataDesc = (a: PostoInternoRow, b: PostoInternoRow) =>
+      toISODate(b.data).localeCompare(toISODate(a.data));
+    const saidas   = postoRows.filter(r => r.tipo === "SAIDA" ).sort(byDataDesc);
+    const entradas = postoRows.filter(r => r.tipo === "ENTRADA").sort(byDataDesc);
+    const useEstraz = postoRows.length > 0;
+
+    // Fallback: abastecimentos internos do RODABA (posto SGT) quando ESTRAZ está vazio no período
+    const rodabaInternos = useEstraz
+      ? []
+      : dados.filter(isAbastecimentoInterno).sort((a, b) => String(b.datref).localeCompare(String(a.datref)));
+
+    // Total abastecido no período
+    const totalPeriodo = useEstraz
+      ? saidas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
+      : rodabaInternos.reduce((s, d) => s + (d.quanti ?? 0), 0);
+
+    // Último dia com abastecimento
+    const ultimoDia = useEstraz
+      ? (saidas[0]?.data ? toISODate(saidas[0].data) : null)
+      : (rodabaInternos[0]?.datref ? toISODate(rodabaInternos[0].datref) : null);
+
+    const litrosUltimoDia = ultimoDia ? (useEstraz
+      ? saidas.filter(r => toISODate(r.data) === ultimoDia).reduce((s, r) => s + (r.qtdade ?? 0), 0)
+      : rodabaInternos.filter(d => toISODate(d.datref) === ultimoDia).reduce((s, d) => s + (d.quanti ?? 0), 0)
+    ) : 0;
+
+    // Última placa abastecida
+    const ultimaSaida   = saidas[0];
+    const ultimoRodaba  = rodabaInternos[0];
+    const ultimaEntrada = entradas[0];
+
+    // Recargas vêm apenas do ESTRAZ (ENTRADA = NFI de diesel) — RODABA não tem essa info
+    const recebidoPeriodoLitros = entradas.length > 0
+      ? entradas.reduce((s, r) => s + (r.qtdade ?? 0), 0)
+      : null;
+    const ultimaRecarga = ultimaEntrada ? {
+      data:       fmtBR(ultimaEntrada.data),
+      litros:     ultimaEntrada.qtdade ?? 0,
+      fornecedor: ultimaEntrada.fornecedor,
+    } : null;
+
+    // Preço médio R$/L da última recarga (vl_unit do servidor; fallback valor/qtd)
+    const precoUltimaRecarga = ultimaEntrada
+      ? (ultimaEntrada.vl_unit && ultimaEntrada.vl_unit > 0
+          ? ultimaEntrada.vl_unit
+          : (ultimaEntrada.qtdade && ultimaEntrada.qtdade > 0
+              ? (ultimaEntrada.valor ?? 0) / ultimaEntrada.qtdade
+              : null))
+      : null;
+
+    // Nº de abastecimentos (saídas): no último dia e no período
+    const qtdAbastecimentosDia = ultimoDia
+      ? (useEstraz
+          ? saidas.filter(r => toISODate(r.data) === ultimoDia).length
+          : rodabaInternos.filter(d => toISODate(d.datref) === ultimoDia).length)
+      : 0;
+    const qtdAbastecimentosPeriodo = useEstraz ? saidas.length : rodabaInternos.length;
+
+    // ── VISOR DA BOMBA (somente) — desconsidera movimentações de inventário ──────
+    //   tipo_nf === "INV" são ajustes de inventário, não abastecimentos reais.
+    //   Escopo restrito ao visor: KPIs, tanque, cards laterais e ticker continuam
+    //   contando todos os tipos. O fallback RODABA não tem tipo_nf → usa os totais.
+    const isInv = (r: PostoInternoRow) => String(r.tipo_nf ?? "").trim().toUpperCase() === "INV";
+    const saidasBomba    = saidas.filter(r => !isInv(r));
+    const ultimoDiaBomba = useEstraz
+      ? (saidasBomba[0]?.data ? toISODate(saidasBomba[0].data) : null)
+      : ultimoDia;
+    const bombaLitrosDia = useEstraz
+      ? (ultimoDiaBomba
+          ? saidasBomba.filter(r => toISODate(r.data) === ultimoDiaBomba).reduce((s, r) => s + (r.qtdade ?? 0), 0)
+          : 0)
+      : litrosUltimoDia;
+    const bombaQtdDia = useEstraz
+      ? (ultimoDiaBomba ? saidasBomba.filter(r => toISODate(r.data) === ultimoDiaBomba).length : 0)
+      : qtdAbastecimentosDia;
+    const bombaQtdPeriodo = useEstraz ? saidasBomba.length : qtdAbastecimentosPeriodo;
+
+    // Saldo: servidor calcula ytd_entrada (ESTRAZ) - ytd_saida (RODABA interno)
+    // Null se ESTRAZ não tem lançamentos de entrada em 2026 → exibido como "—"
+    const saldoAtualLitros = postoSaldo;
+
+    // Movimentações para a tabela (ESTRAZ preferido; fallback RODABA).
+    // Entrega até 60 registros — o componente exibe 6 e expande sob demanda.
+    const movsBrutos = useEstraz
+      ? [
+          ...saidas.slice(0, 50).map(r => ({
+            raw: toISODate(r.data), data: fmtBR(r.data),
+            tipo: "Abastecimento Frota" as const,
+            volumeLitros: r.qtdade ?? 0,
+            responsavel:  String(r.veiculo ?? "—"),
+          })),
+          ...entradas.slice(0, 20).map(r => ({
+            raw: toISODate(r.data), data: fmtBR(r.data),
+            tipo: "Recarga" as const,
+            volumeLitros: r.qtdade ?? 0,
+            responsavel:  r.fornecedor ?? "Distribuidora",
+          })),
+        ]
+      : rodabaInternos.slice(0, 60).map(d => ({
+          raw: toISODate(d.datref), data: fmtBR(d.datref),
+          tipo: "Abastecimento Frota" as const,
+          volumeLitros: d.quanti ?? 0,
+          responsavel:  `${String(d.veiculo ?? "—")}${d.motorista ? ` · ${d.motorista}` : ""}`,
+        }));
+
+    const movimentacoes = movsBrutos
+      .sort((a, b) => b.raw.localeCompare(a.raw))
+      .slice(0, 60)
+      .map(({ raw: _raw, ...m }) => m);
+
+    return {
+      abastecidoPeriodoLitros: totalPeriodo,
+      abastecidoDiaLitros:     litrosUltimoDia,
+      diaReferencia:           ultimoDia ? fmtBR(ultimoDia) : null,
+      ultimaPlaca: ultimaSaida
+        ? { placa: String(ultimaSaida.veiculo ?? "—"), litros: ultimaSaida.qtdade ?? 0, data: fmtBR(ultimaSaida.data) }
+        : ultimoRodaba
+        ? { placa: String(ultimoRodaba.veiculo ?? "—"), litros: ultimoRodaba.quanti ?? 0, data: fmtBR(ultimoRodaba.datref) }
+        : null,
+      recebidoPeriodoLitros,
+      ultimaRecarga,
+      saldoAtualLitros,
+      precoUltimaRecarga,
+      qtdAbastecimentosDia,
+      qtdAbastecimentosPeriodo,
+      // Visor da bomba (exclui INV) — não afeta os campos acima
+      bombaLitrosDia,
+      bombaQtdDia,
+      bombaQtdPeriodo,
+      bombaDiaReferencia: ultimoDiaBomba ? fmtBR(ultimoDiaBomba) : null,
+      movimentacoes,
+    };
+  }, [postoRows, postoSaldo, dados]);
+
   // ── Filtragem ────────────────────────────────────────────────────────────────
   const dadosFiltrados = useMemo(() => {
-    return dados.filter(d => {
+    return dadosAba.filter(d => {
       if (filtroFrota       !== "Todos" && d.frota           !== filtroFrota)       return false;
       if (filtroCombustivel !== "Todos" && d.tipo_combustivel !== filtroCombustivel) return false;
       if (filtroMotorista   !== "Todos" && d.motorista        !== filtroMotorista)   return false;
       if (filtroEstado      !== "Todos" && d.estado           !== filtroEstado)      return false;
       return true;
     });
-  }, [dados, filtroFrota, filtroCombustivel, filtroMotorista, filtroEstado]);
+  }, [dadosAba, filtroFrota, filtroCombustivel, filtroMotorista, filtroEstado]);
 
   // ── Normalização para tabela ─────────────────────────────────────────────────
   const registros = useMemo<AbastecimentoAgregado[]>(() => {
@@ -387,14 +793,37 @@ export default function Abastecimento() {
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TONE_COLORS = {
-    rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
-    amber:   { border: "border-amber-400/20",   icon: "text-amber-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
-    violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
-    cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-  };
+  // ── Analytics dos registros (deriva de tabelaOrdenada → respeita filtros + busca) ──
+  const abastAnalytics = useMemo(() => {
+    const base = tabelaOrdenada;
+    const n = base.length;
+
+    const combMap = new Map<string, { valor: number; litros: number }>();
+    base.forEach(r => {
+      const k = r.tipoCombustivel ?? "Não informado";
+      const cur = combMap.get(k) ?? { valor: 0, litros: 0 };
+      cur.valor += r.vlrtot || 0; cur.litros += r.quanti || 0;
+      combMap.set(k, cur);
+    });
+    const porCombustivel = [...combMap.entries()].sort((a, b) => b[1].valor - a[1].valor);
+
+    const veiMap = new Map<string, number>();
+    base.forEach(r => { veiMap.set(r.veiculo, (veiMap.get(r.veiculo) ?? 0) + (r.vlrtot || 0)); });
+    const topVeiculos = [...veiMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const postoMap = new Map<string, number>();
+    base.forEach(r => { const k = r.posto ?? "—"; postoMap.set(k, (postoMap.get(k) ?? 0) + (r.vlrtot || 0)); });
+    const topPostos = [...postoMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const estMap = new Map<string, number>();
+    base.forEach(r => { const k = r.estado ?? "—"; estMap.set(k, (estMap.get(k) ?? 0) + 1); });
+    const porEstado = [...estMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const custoTotal = base.reduce((s, r) => s + (r.vlrtot || 0), 0);
+    const litrosTotal = base.reduce((s, r) => s + (r.quanti || 0), 0);
+
+    return { n, porCombustivel, topVeiculos, topPostos, porEstado, custoTotal, litrosTotal };
+  }, [tabelaOrdenada]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  RENDER
@@ -427,48 +856,99 @@ export default function Abastecimento() {
             {/* ════════ NAVBAR DESKTOP ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-orange-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Abastecimento</span>
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
-              </div>
 
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
+
+                {/* Filtros locais — mesmo padrão das demais telas */}
+                <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[80px] max-w-[120px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Frota" /></SelectTrigger>
+                  <SelectContent>{frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[90px] max-w-[130px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Combustível" /></SelectTrigger>
+                  <SelectContent>{combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[95px] max-w-[150px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Motorista" /></SelectTrigger>
+                  <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
+                  <SelectTrigger className="h-8 w-full min-w-[70px] max-w-[100px] rounded-lg text-[12px] transition-all"><SelectValue placeholder="Estado" /></SelectTrigger>
+                  <SelectContent>{estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}</SelectContent>
+                </Select>
+
+                {(filtroFrota !== "Todos" || filtroCombustivel !== "Todos" || filtroMotorista !== "Todos" || filtroEstado !== "Todos") && (
+                  <button
+                    onClick={() => { setFiltroFrota("Todos"); setFiltroCombustivel("Todos"); setFiltroMotorista("Todos"); setFiltroEstado("Todos"); setPage(1); }}
+                    className="flex h-8 items-center gap-1 rounded-lg border border-rose-400/20 bg-rose-500/[0.08] px-2.5 text-[11px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all shrink-0"
+                  >
+                    <X className="w-3 h-3" /> Limpar
+                  </button>
+                )}
+
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               </div>
 
+              <button
+                onClick={togglePresentation}
+                title="Modo apresentação (TV)"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300"
+              >
+                <Monitor className="h-4 w-4" />
+              </button>
               <HomeButton />
             </div>
 
             {/* Mobile nav */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-orange-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Abastecimento</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <HomeButton />
+            </div>
+
+            {/* Mobile: datas + atualizar */}
+            <div className="flex sm:hidden items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
+            </div>
+
+            {/* Mobile: filtros locais */}
+            <div className="grid sm:hidden grid-cols-2 gap-2">
+              <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Frota" /></SelectTrigger>
+                <SelectContent>{frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Combustível" /></SelectTrigger>
+                <SelectContent>{combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Motorista" /></SelectTrigger>
+                <SelectContent>{motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
+                <SelectTrigger className="h-8 rounded-lg text-[12px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+                <SelectContent>{estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -482,7 +962,7 @@ export default function Abastecimento() {
 
             {/* Loading phase */}
             {loading && loadingPhase && (
-              <div className="flex items-center gap-2 text-[11px] text-amber-300/80">
+              <div className="flex items-center gap-2 text-[11px] text-orange-300/80">
                 <div className="h-1 w-32 overflow-hidden rounded-full bg-amber-400/10">
                   <div className="h-full bg-gradient-to-r from-amber-400 to-amber-200 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
@@ -490,69 +970,30 @@ export default function Abastecimento() {
               </div>
             )}
 
-            {/* ════════ FILTROS LOCAIS ════════ */}
-            <AnimatedCard delay={60}>
-              <div
-                className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2"
-                style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}
-              >
-                <Filter className="w-3.5 h-3.5 text-amber-400/60 shrink-0" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
-                <div className="h-4 w-px bg-white/[0.07] shrink-0" />
-
-                {/* Frota */}
-                <Select value={filtroFrota} onValueChange={v => { setFiltroFrota(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[80px] max-w-[130px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Frota" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {frotas.map(f => <SelectItem key={f} value={f}>{f === "Todos" ? "Frota" : f}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Combustível */}
-                <Select value={filtroCombustivel} onValueChange={v => { setFiltroCombustivel(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[90px] max-w-[140px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Combustível" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {combustiveis.map(c => <SelectItem key={c} value={c}>{c === "Todos" ? "Combustível" : c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Motorista */}
-                <Select value={filtroMotorista} onValueChange={v => { setFiltroMotorista(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[100px] max-w-[160px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Motorista" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {motoristas.map(m => <SelectItem key={m} value={m}>{m === "Todos" ? "Motorista" : m}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Estado */}
-                <Select value={filtroEstado} onValueChange={v => { setFiltroEstado(v); setPage(1); }}>
-                  <SelectTrigger className="h-7 min-w-[70px] max-w-[100px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-amber-500/30 focus:outline-none">
-                    <SelectValue placeholder="Estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {estados.map(e => <SelectItem key={e} value={e}>{e === "Todos" ? "Estado" : e}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-
-                {/* Limpar filtros */}
-                {(filtroFrota !== "Todos" || filtroCombustivel !== "Todos" || filtroMotorista !== "Todos" || filtroEstado !== "Todos") && (
-                  <button
-                    onClick={() => { setFiltroFrota("Todos"); setFiltroCombustivel("Todos"); setFiltroMotorista("Todos"); setFiltroEstado("Todos"); setPage(1); }}
-                    className="flex items-center gap-1 rounded-full border border-rose-400/20 bg-rose-500/[0.08] px-2.5 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-400/12 transition-all"
-                  >
-                    <X className="w-2.5 h-2.5" /> Limpar
-                  </button>
-                )}
-
-                <div className="ml-auto text-[10px] text-slate-500">
-                  {fmtNum(registros.length)} registros
-                </div>
+            {/* ════════ ABAS — Geral / Interno / Externo ════════ */}
+            <AnimatedCard delay={40}>
+              <div className="flex items-center gap-1 overflow-x-auto rounded-xl border p-1 w-full sm:w-fit"
+                style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}>
+                {ABAS.map(t => {
+                  const active = abaAtiva === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => { setAbaAtiva(t.id); setPage(1); }}
+                      className={`whitespace-nowrap rounded-lg border px-3.5 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
+                        active ? "" : "border-transparent text-slate-500 hover:text-slate-300"
+                      }`}
+                      style={active ? {
+                        borderColor: "color-mix(in srgb, var(--sgt-accent) 35%, transparent)",
+                        background:  "var(--sgt-accent-soft)",
+                        color:       "var(--sgt-accent-text)",
+                        boxShadow:   "0 0 16px color-mix(in srgb, var(--sgt-accent) 18%, transparent)",
+                      } : undefined}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
               </div>
             </AnimatedCard>
 
@@ -567,78 +1008,30 @@ export default function Abastecimento() {
 
             {/* ── KPI Cards (5) ── */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-              {[
-                {
-                  label: "Custo Total",
-                  value: loading ? "—" : fmtK(kpis.totalCusto),
-                  sub: loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`,
-                  Icon: DollarSign,
-                  tone: "amber" as const,
-                  delay: 80,
-                },
-                {
-                  label: "Volume Total",
-                  value: loading ? "—" : fmtLitros(kpis.totalLitros),
-                  sub: loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`,
-                  Icon: Droplets,
-                  tone: "cyan" as const,
-                  delay: 120,
-                },
-                {
-                  label: "Abastecimentos",
-                  value: loading ? "—" : fmtNum(kpis.qtdAbast),
-                  sub: loading ? "" : `${distCombustivel.length} tipo(s) de combustível`,
-                  Icon: Hash,
-                  tone: "rose" as const,
-                  delay: 160,
-                },
-                {
-                  label: "Média Consumo",
-                  value: loading ? "—" : fmtMedia(kpis.mediaConsumo),
-                  sub: loading ? "" : kpis.deltaMedia !== null
-                    ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)`
-                    : "Fábrica: —",
-                  Icon: Gauge,
-                  tone: "violet" as const,
-                  delay: 200,
-                },
-                {
-                  label: "KM Rodados",
-                  value: loading ? "—" : fmtNum(kpis.totalKm) + " km",
-                  sub: loading ? "" : kpis.totalLitros > 0
-                    ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—",
-                  Icon: TrendingUp,
-                  tone: "emerald" as const,
-                  delay: 240,
-                },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TONE_COLORS[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div
-                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`}
-                      style={{ background: "var(--sgt-bg-card)" }}
-                    >
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 mb-1">{label}</p>
-                          <p className={`text-[22px] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>
-                            {value}
-                          </p>
-                          <p className="text-[10px] font-medium mt-1.5 text-slate-500">{sub}</p>
-                        </div>
-                        <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-4 h-4 ${t.icon}`} />
-                        </div>
-                      </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]"
-                        style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+              <AnimatedCard delay={80}>
+                <KpiCard label="Custo Total" value={loading ? "—" : fmtK(kpis.totalCusto)} subtitle={loading ? "" : `Média/abast.: ${fmtK(kpis.qtdAbast > 0 ? kpis.totalCusto / kpis.qtdAbast : 0)}`} icon={DollarSign} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Volume Total" value={loading ? "—" : fmtLitros(kpis.totalLitros)} subtitle={loading ? "" : `Preço médio: R$ ${kpis.precoMedio.toFixed(2).replace(".", ",")}/L`} icon={Droplets} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Abastecimentos" value={loading ? "—" : fmtNum(kpis.qtdAbast)} subtitle={loading ? "" : `${distCombustivel.length} tipo(s) de combustível`} icon={Hash} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="Média Consumo" value={loading ? "—" : fmtMedia(kpis.mediaConsumo)} subtitle={loading ? "" : kpis.deltaMedia !== null ? `Fábrica: ${fmtMedia(kpis.mediaFabrica)} (${kpis.deltaMedia >= 0 ? "+" : ""}${kpis.deltaMedia.toFixed(1)}%)` : "Fábrica: —"} icon={Gauge} tone="violet" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="KM Rodados" value={loading ? "—" : fmtNum(kpis.totalKm) + " km"} subtitle={loading ? "" : kpis.totalLitros > 0 ? `Custo/km: R$ ${(kpis.totalCusto / kpis.totalKm || 0).toFixed(2).replace(".", ",")}` : "—"} icon={TrendingUp} tone="emerald" loading={loading} />
+              </AnimatedCard>
             </div>
+
+            {/* ════════════════════════════════════════════════════════════════
+                ABA INTERNO — Posto próprio (substitui gráficos e tabela)
+            ════════════════════════════════════════════════════════════════ */}
+            {abaAtiva === "interno" && <PostoInterno dados={postoInternoDados} />}
+
+            {/* ════════ ABAS GERAL / EXTERNO — visão completa ════════ */}
+            {abaAtiva !== "interno" && (<>
 
             {/* ── Gráficos Linha 1: Evolução de Custo + Distribuição Combustível ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
@@ -892,22 +1285,37 @@ export default function Abastecimento() {
                 <div className="flex flex-wrap items-center gap-2 px-3 pt-3 pb-2 border-b" style={{ borderColor: RAW.borderDefault }}>
                   <Fuel className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Registros de Abastecimento</span>
-                  <span className="rounded-full border border-amber-400/20 bg-amber-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-amber-300">
+                  <span className="rounded-full border border-orange-400/20 bg-amber-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-orange-300">
                     {fmtNum(tabelaFiltrada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
+                  <div className="ml-auto flex items-center gap-2">
+                    <GooeyInput
                       placeholder="Buscar veículo, motorista, posto..."
-                      className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-amber-500/30 focus:outline-none transition-all w-[210px]"
+                      value={search}
+                      onValueChange={(v) => { setSearch(v); setPage(1); }}
                     />
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = abastView === t.id;
+                        return (
+                          <button key={t.id} onClick={() => setAbastView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 {/* Tabela */}
+                {abastView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -971,7 +1379,7 @@ export default function Abastecimento() {
                               {/* Veículo */}
                               <td className="px-3 py-2.5">
                                 <div>
-                                  <span className="font-mono text-[11px] font-semibold text-amber-300">{r.veiculo}</span>
+                                  <span className="font-mono text-[11px] font-semibold text-orange-300">{r.veiculo}</span>
                                   {(r.marca || r.modelo) && (
                                     <p className="text-[9px] text-slate-600 truncate max-w-[120px]">
                                       {[r.marca, r.modelo].filter(Boolean).join(" · ")}
@@ -985,7 +1393,7 @@ export default function Abastecimento() {
                               </td>
                               {/* Combustível */}
                               <td className="px-3 py-2.5 hidden sm:table-cell text-center">
-                                <span className="rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-amber-300 uppercase tracking-[0.1em]">
+                                <span className="rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-2 py-0.5 text-[9px] font-semibold text-orange-300 uppercase tracking-[0.1em]">
                                   {r.tipoCombustivel ?? "—"}
                                 </span>
                               </td>
@@ -1032,9 +1440,192 @@ export default function Abastecimento() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ════════ VIEW: CARDS ════════ */}
+                {abastView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhum registro encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((r, i) => {
+                          const deltaKmL = r.media && r.medfab && r.medfab > 0 ? ((r.media - r.medfab) / r.medfab) * 100 : null;
+                          return (
+                            <AnimatedCard key={`${r.codaba}-${i}`} delay={Math.min(i, 12) * 30}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[color:var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-[color:var(--sgt-accent-soft)] shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: veículo + combustível */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="font-mono text-[14px] font-bold text-orange-300">{r.veiculo}</span>
+                                    {(r.marca || r.modelo) && <span className="block text-[9px] text-slate-600 truncate">{[r.marca, r.modelo].filter(Boolean).join(" · ")}</span>}
+                                  </div>
+                                  {r.tipoCombustivel && (
+                                    <span className="shrink-0 rounded-full border border-orange-400/20 bg-orange-500/[0.08] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-orange-300">
+                                      {r.tipoCombustivel}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Motorista + data */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Users className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[11px] text-slate-300 truncate">{r.motorista ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mb-3">
+                                  <Calendar className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[10px] text-slate-500">{fmtData(r.datref)}</span>
+                                  {r.posto && <span className="text-[10px] text-slate-600 truncate">· {r.posto}</span>}
+                                </div>
+
+                                {/* Métricas */}
+                                <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Litros</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-cyan-300">{r.quanti > 0 ? `${r.quanti.toFixed(0)}L` : "—"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">km/L</p>
+                                    <p className={`text-[11px] font-bold tabular-nums ${deltaKmL !== null && deltaKmL < -5 ? "text-rose-300" : deltaKmL !== null && deltaKmL > 5 ? "text-emerald-300" : "text-slate-300"}`}>
+                                      {r.media && r.media > 0 ? r.media.toFixed(1) : "—"}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Valor</p>
+                                    <p className="text-[12px] font-black tabular-nums text-[color:var(--sgt-text-primary)]">{fmtBRL(r.vlrtot)}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ════════ VIEW: ANALYTICS ════════ */}
+                {abastView === "analytics" && (
+                  <div className="p-3">
+                    {abastAnalytics.n === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Custo por combustível */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Droplets className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Custo por Combustível</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.porCombustivel.map(([comb, d], idx) => {
+                                const max = abastAnalytics.porCombustivel[0]?.[1].valor ?? 1;
+                                const cor = [RAW.accent.amber, RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet, RAW.accent.rose][idx % 5];
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[110px] truncate shrink-0" title={comb}>{comb}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(d.valor / max) * 100}%`, background: cor }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums w-[64px] text-right shrink-0" style={{ color: cor }}>{fmtBRL(d.valor)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Maiores consumidores (veículos) */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Car className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Maiores Consumidores</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.topVeiculos.map(([vei, val], idx) => {
+                                const max = abastAnalytics.topVeiculos[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-mono text-slate-400 w-[100px] truncate shrink-0">{vei}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-cyan-200 w-[64px] text-right shrink-0">{fmtBRL(val)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top postos */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Postos</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.topPostos.map(([posto, val], idx) => {
+                                const max = abastAnalytics.topPostos[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={posto}>{posto}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold tabular-nums text-emerald-200 w-[64px] text-right shrink-0">{fmtBRL(val)}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Por estado */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Gauge className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Abastecimentos por Estado</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {abastAnalytics.porEstado.map(([est, qtd], idx) => {
+                                const max = abastAnalytics.porEstado[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[80px] truncate shrink-0">{est}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-violet-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-violet-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {abastView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
@@ -1043,7 +1634,7 @@ export default function Abastecimento() {
                       <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-orange-300 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
@@ -1059,8 +1650,8 @@ export default function Abastecimento() {
                             onClick={() => setPage(p)}
                             className={`flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-semibold transition-all ${
                               page === p
-                                ? "border border-amber-400/40 bg-amber-500/[0.15] text-amber-300"
-                                : "border border-white/[0.06] text-slate-500 hover:border-amber-400/20 hover:text-amber-300"
+                                ? "border border-amber-400/40 bg-amber-500/[0.15] text-orange-300"
+                                : "border border-white/[0.06] text-slate-500 hover:border-orange-400/20 hover:text-orange-300"
                             }`}
                           >
                             {p}
@@ -1070,7 +1661,7 @@ export default function Abastecimento() {
                       <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.07] text-slate-400 transition-all hover:border-amber-400/30 hover:text-orange-300 disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
@@ -1080,9 +1671,153 @@ export default function Abastecimento() {
               </div>
             </AnimatedCard>
 
+            </>)}{/* fim abas geral/externo */}
+
           </div>{/* fim gap-3 */}
         </section>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODO APRESENTAÇÃO / TV — overlay imersivo em tela cheia
+          Layout: 100vh, sem scroll. Grid 3 linhas: header · indicadores de
+          mercado · área central (tanque · bomba · resumo). A área central usa
+          um wrapper de fit-to-viewport (transform scale) garantindo que
+          tanque e bomba nunca sejam cortados, independente do tamanho da TV.
+      ═══════════════════════════════════════════════════════════════════════ */}
+      {isPresentationMode && (
+        <div
+          className="sgt-tv fixed inset-0 z-[9999] grid h-[100dvh] grid-rows-[auto_auto_minmax(0,1fr)_auto_auto]"
+          style={{ background: "radial-gradient(ellipse 58% 54% at 50% 56%, rgba(180,120,24,0.10), transparent 68%), linear-gradient(180deg,#090d18 0%,#05070f 55%,#03050b 100%)" }}
+        >
+          {/* Keyframe do ticker */}
+          <style>{`@keyframes sgt-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+
+          {/* Botão sair — propositalmente discreto para TV */}
+          <button
+            onClick={togglePresentation}
+            aria-label="Sair do modo apresentação"
+            className="absolute right-4 top-3 z-30 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-transparent px-2.5 py-1 text-[10px] font-medium text-slate-400/70 opacity-25 transition-all duration-200 hover:opacity-100 hover:border-white/30 hover:text-slate-100 focus:opacity-100 focus:outline-none"
+          >
+            <Minimize2 className="h-3 w-3" /> Sair <span className="opacity-60">· ESC</span>
+          </button>
+
+          {/* ── Linha 1: Header compacto — TV-first, sem ruído ── */}
+          <div
+            className="relative z-10 flex items-center gap-3 px-[clamp(28px,3vw,48px)]"
+            style={{ paddingTop: "clamp(6px,0.8vh,10px)", paddingBottom: "clamp(4px,0.6vh,8px)" }}
+          >
+            <img src={sgtLogo} alt="SGT" className="h-[clamp(20px,2.6vh,28px)] w-auto" />
+            <div className="flex flex-col leading-none">
+              <span className="text-[9px] font-semibold uppercase tracking-[0.32em] text-amber-400/70">Posto Interno</span>
+              <span className="text-[clamp(0.8rem,1.15vw,1.1rem)] font-black tracking-[-0.03em] text-white">Estação Corporativa — Abastecimento</span>
+            </div>
+            <div className="ml-auto flex flex-col items-end leading-none">
+              <span className="font-mono text-[clamp(1.0rem,1.6vw,1.45rem)] font-black tabular-nums text-white">{tvClock}</span>
+              <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "short" })}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Linha 2: Indicadores externos de mercado ── */}
+          <div
+            className="relative z-10 grid grid-cols-2 gap-[clamp(10px,1vw,16px)] px-[clamp(28px,3vw,48px)] pt-[clamp(2px,0.4vh,6px)] pb-[clamp(4px,0.6vh,8px)] sm:grid-cols-3 lg:grid-cols-5"
+            style={{ height: "clamp(110px,13vh,140px)" }}
+          >
+            {marketIndicators.map(m => (
+              <MarketIndicatorCard key={m.title} {...m} />
+            ))}
+          </div>
+
+          {/* ── Linha 3: Conjunto do posto — fit-to-viewport (TV-friendly) ── */}
+          <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center px-[clamp(28px,3vw,48px)]">
+            <div
+              className="origin-center"
+              style={{
+                width: 1060,
+                height: 540,
+                transform:
+                  "scale(calc(min(calc((100vw - 80px) / 1060), calc((100dvh - 370px) / 540)) * 1.0))",
+              }}
+            >
+              <PostoInterno dados={postoInternoDados} presentation />
+            </div>
+          </div>
+
+          {/* ── Linha 4: KPI strip em tempo real ── */}
+          <div className="relative z-10 grid grid-cols-4 gap-[clamp(8px,0.8vw,12px)] px-[clamp(28px,3vw,48px)] pb-[clamp(6px,0.7vh,10px)] pt-[clamp(2px,0.3vh,4px)]">
+            {[
+              {
+                label: "Saldo Atual no Tanque",
+                value: postoInternoDados.saldoAtualLitros != null ? fmtLitros(postoInternoDados.saldoAtualLitros) : "—",
+                sub: "diesel S10 · tanque industrial",
+                color: "#fbbf24",
+              },
+              {
+                label: "Abastecido Hoje",
+                value: postoInternoDados.abastecidoDiaLitros > 0 ? fmtLitros(postoInternoDados.abastecidoDiaLitros) : "—",
+                sub: postoInternoDados.diaReferencia ?? "sem registros",
+                color: "#22d3ee",
+              },
+              {
+                label: "Abastecimentos no Período",
+                value: String(postoInternoDados.qtdAbastecimentosPeriodo),
+                sub: postoInternoDados.qtdAbastecimentosDia > 0 ? `${postoInternoDados.qtdAbastecimentosDia} no último dia` : "nenhum hoje",
+                color: "#a78bfa",
+              },
+              {
+                label: "Última Placa Abastecida",
+                value: postoInternoDados.ultimaPlaca?.placa ?? "—",
+                sub: postoInternoDados.ultimaPlaca
+                  ? `${fmtLitros(postoInternoDados.ultimaPlaca.litros)} · ${postoInternoDados.ultimaPlaca.data}`
+                  : "sem registros",
+                color: "#34d399",
+              },
+            ].map(k => (
+              <div key={k.label} className="flex flex-col rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-[clamp(14px,1.3vw,24px)] py-[clamp(8px,1vh,14px)]">
+                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">{k.label}</span>
+                <span className="mt-1.5 font-black tabular-nums leading-tight text-[clamp(1.2rem,2vw,1.8rem)]" style={{ color: k.color }}>{k.value}</span>
+                <span className="mt-1 truncate text-[11px] font-semibold text-slate-500">{k.sub}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Linha 5: Ticker de movimentações recentes ── */}
+          <div
+            className="relative z-10 flex items-center overflow-hidden border-t border-white/[0.06]"
+            style={{ height: "clamp(28px,3vh,34px)", background: "rgba(255,255,255,0.012)" }}
+          >
+            <div className="flex h-full shrink-0 items-center border-r border-white/[0.08] px-4">
+              <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-amber-400/90">Ao Vivo</span>
+            </div>
+            {postoInternoDados.movimentacoes.length > 0 ? (
+              <div className="relative flex-1 overflow-hidden">
+                <div
+                  className="flex whitespace-nowrap"
+                  style={{ animation: "sgt-ticker 40s linear infinite" }}
+                >
+                  {[...postoInternoDados.movimentacoes, ...postoInternoDados.movimentacoes].map((m, i) => (
+                    <span key={i} className="inline-flex items-center gap-2 px-5 text-[11px]">
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${m.tipo === "Recarga" ? "bg-emerald-400" : "bg-amber-400"}`} />
+                      <span className="font-semibold" style={{ color: m.tipo === "Recarga" ? "#34d399" : "#fbbf24" }}>
+                        {m.tipo === "Recarga" ? "+" : "−"}{Math.round(m.volumeLitros).toLocaleString("pt-BR")} L
+                      </span>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-slate-400">{m.responsavel}</span>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-slate-500">{m.data}</span>
+                      <span className="mx-3 text-slate-700">│</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <span className="px-4 text-[11px] text-slate-600">Nenhuma movimentação no período</span>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

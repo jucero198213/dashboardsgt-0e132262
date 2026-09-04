@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Link } from "react-router-dom";
-import { LogOut, Shield, User, ChevronDown, Sun, Moon } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { LogOut, Shield, User, Sun, Moon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface UserMenuProps {
@@ -14,16 +14,25 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Em todas as telas internas o acesso ao usuário/admin/logout vive na AppSidebar.
+  // O UserMenu só aparece no Portal /home.
+  const showOnRoute = location.pathname === "/home";
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const handler = (e: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
   }, []);
 
-  if (!user) return null;
+  if (!user || !showOnRoute) return null;
 
   const initials = (user.email ?? "U")[0].toUpperCase();
 
@@ -44,23 +53,16 @@ export function UserMenu({ showAdmin = false }: UserMenuProps = {}) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-xl border px-3 py-2 text-[12px] transition-all"
-        style={{
-          background: "var(--sgt-input-bg)",
-          borderColor: "var(--sgt-input-border)",
-          color: "var(--sgt-text-secondary)",
-        }}
+        aria-label="Menu do usuário"
+        className="group relative flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/[0.08] text-amber-300 backdrop-blur-sm transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-400/[0.12] hover:shadow-[0_8px_24px_-8px_rgba(245,158,11,0.5)]"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-500/10 text-[11px] font-bold text-cyan-300">
-          {initials}
-        </div>
-        <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+        <User className="h-[18px] w-[18px]" strokeWidth={2} />
+        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-[var(--sgt-bg,#0b1220)]" />
       </button>
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 z-50 min-w-[200px] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
+          className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-50 min-w-[220px] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border shadow-[0_20px_40px_rgba(0,0,0,0.25)]"
           style={menuStyle}
         >
           {/* User info */}

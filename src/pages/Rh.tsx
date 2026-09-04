@@ -4,14 +4,15 @@ import {
   ChevronUp, ChevronDown, X, ChevronLeft, ChevronRight,
   Filter, AlertTriangle, FileText, Activity,
   UserCheck, UserMinus, UserPlus, Clock, ShieldAlert,
-  BarChart3, Hash, Calendar,
+  BarChart3, Hash, Calendar, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
   Tooltip as ReTooltip, CartesianGrid, Cell,
 } from "recharts";
-import sgtLogo from "@/assets/sgt-logo.png";
+
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -24,10 +25,11 @@ import { useCooldown } from "@/hooks/useCooldown";
 import { fetchRh, type RhRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
-const fmtNum  = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-const fmtPct  = (v: number) => `${v.toFixed(1)}%`;
+const fmtNum = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+const fmtPct = (v: number) => `${v.toFixed(1)}%`;
 
 const fmtData = (s: string | null) => {
   if (!s) return "—";
@@ -59,13 +61,13 @@ const diasAteCnhVencer = (vencha: string | null): number | null => {
   return Math.floor((d.getTime() - Date.now()) / 86_400_000);
 };
 
-const NOMES_MES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const NOMES_MES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const PALETTE = [
-  RAW.accent.emerald, RAW.accent.cyan, RAW.accent.violet,
-  RAW.accent.amber, RAW.accent.rose, RAW.accent.red,
-  "#fb923c", "#94a3b8",
+  "#fbbf24", "#f59e0b", "#fcd34d",
+  "#d97706", "#fde68a", "#b45309",
+  "#f59e0b", "#94a3b8",
 ];
 const colorFor = (_: string, i: number) => PALETTE[i % PALETTE.length];
 
@@ -86,25 +88,25 @@ const DarkTooltip = ({ active, payload, label, formatter }: any) => {
 
 // ─── Tipo local enriquecido ────────────────────────────────────────────────────
 interface Colaborador {
-  codmot:           string;
-  nome:             string;
-  funcao:           string | null;
-  tipoFunc:         string | null;
-  situacao:         string | null;
-  sexo:             string | null;
-  codFilial:        string | null;
-  datAdm:           string | null;
-  datDem:           string | null;
-  motivoDem:        string | null;
-  catCnh:           string | null;
-  validadeCnh:      string | null;
-  ufCnh:            string | null;
-  numeroCpf:        string | null;
-  temCpf:           boolean;
-  temCnh:           boolean;
-  anosEmpresa:      number | null;
-  diasCnhVencer:    number | null;
-  ativo:            boolean;
+  codmot: string;
+  nome: string;
+  funcao: string | null;
+  tipoFunc: string | null;
+  situacao: string | null;
+  sexo: string | null;
+  codFilial: string | null;
+  datAdm: string | null;
+  datDem: string | null;
+  motivoDem: string | null;
+  catCnh: string | null;
+  validadeCnh: string | null;
+  ufCnh: string | null;
+  numeroCpf: string | null;
+  temCpf: boolean;
+  temCnh: boolean;
+  anosEmpresa: number | null;
+  diasCnhVencer: number | null;
+  ativo: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -115,25 +117,27 @@ export default function Rh() {
   const cooldown = useCooldown("dw_rh_fetch_ts");
 
   // ── Estado ──────────────────────────────────────────────────────────────────
-  const [dados,        setDados]        = useState<RhRow[]>([]);
-  const [loading,      setLoading]      = useState(false);
-  const [progress,     setProgress]     = useState(0);
+  const [dados, setDados] = useState<RhRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState("");
-  const [error,        setError]        = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Filtros locais
-  const [filtroSituacao,  setFiltroSituacao]  = useState("Todos");
-  const [filtroFilial,    setFiltroFilial]    = useState("Todos");
-  const [filtroFuncao,    setFiltroFuncao]    = useState("Todos");
-  const [filtroCatCnh,    setFiltroCatCnh]    = useState("Todos");
-  const [filtroTipo,      setFiltroTipo]      = useState("Todos");
-  const [search,          setSearch]          = useState("");
+  const [filtroSituacao, setFiltroSituacao] = useState("Todos");
+  const [filtroFilial, setFiltroFilial] = useState("Todos");
+  const [filtroFuncao, setFiltroFuncao] = useState("Todos");
+  const [filtroCatCnh, setFiltroCatCnh] = useState("Todos");
+  const [filtroTipo, setFiltroTipo] = useState("Todos");
+  const [search, setSearch] = useState("");
 
   // Tabela
   const [sortCol, setSortCol] = useState<keyof Colaborador>("datAdm");
   const [sortAsc, setSortAsc] = useState(false);
   const PAGE_SIZE = 15;
   const [page, setPage] = useState(1);
+  // View de colaboradores — padrão Bancos (Cards / Tabela / Analytics)
+  const [colabView, setColabView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -181,25 +185,25 @@ export default function Rh() {
       const sit = ns(d.situacao).toUpperCase();
       const isAtivo = sit === "A";
       return {
-        codmot:        String(d.codmot ?? "").trim(),
-        nome:          ns(d.motorista) || "—",
-        funcao:        n(d.funcao),
-        tipoFunc:      n(d.tipo_funcionario),
-        situacao:      sit || null,
-        sexo:          n(d.sexo),
-        codFilial:     d.codigo_filial ? String(d.codigo_filial).trim() : null,
-        datAdm:        d.data_admissao,
-        datDem:        d.data_demissao,
-        motivoDem:     n(d.motivo_demissao),
-        catCnh:        n(d.categoria_habilitacao),
-        validadeCnh:   d.validade_habilitacao,
-        ufCnh:         n(d.uf_habilitacao),
-        numeroCpf:     d.numero_cpf ? String(d.numero_cpf).trim() : null,
-        temCpf:        !!(d.numero_cpf && String(d.numero_cpf).trim()),
-        temCnh:        !!(d.habilitacao && String(d.habilitacao).trim()),
-        anosEmpresa:   isAtivo ? calcAnos(d.data_admissao) : null,
+        codmot: String(d.codmot ?? "").trim(),
+        nome: ns(d.motorista) || "—",
+        funcao: n(d.funcao),
+        tipoFunc: n(d.tipo_funcionario),
+        situacao: sit || null,
+        sexo: n(d.sexo),
+        codFilial: d.codigo_filial ? String(d.codigo_filial).trim() : null,
+        datAdm: d.data_admissao,
+        datDem: d.data_demissao,
+        motivoDem: n(d.motivo_demissao),
+        catCnh: n(d.categoria_habilitacao),
+        validadeCnh: d.validade_habilitacao,
+        ufCnh: n(d.uf_habilitacao),
+        numeroCpf: d.numero_cpf ? String(d.numero_cpf).trim() : null,
+        temCpf: !!(d.numero_cpf && String(d.numero_cpf).trim()),
+        temCnh: !!(d.habilitacao && String(d.habilitacao).trim()),
+        anosEmpresa: isAtivo ? calcAnos(d.data_admissao) : null,
         diasCnhVencer: diasAteCnhVencer(d.validade_habilitacao),
-        ativo:         isAtivo,
+        ativo: isAtivo,
       };
     });
   }, [dados]);
@@ -233,10 +237,10 @@ export default function Rh() {
   const filtrados = useMemo(() => {
     return colaboradores.filter(c => {
       if (filtroSituacao !== "Todos" && c.situacao !== filtroSituacao) return false;
-      if (filtroFilial   !== "Todos" && c.codFilial !== filtroFilial)   return false;
-      if (filtroFuncao   !== "Todos" && c.funcao    !== filtroFuncao)   return false;
-      if (filtroCatCnh   !== "Todos" && c.catCnh    !== filtroCatCnh)   return false;
-      if (filtroTipo     !== "Todos" && c.tipoFunc  !== filtroTipo)     return false;
+      if (filtroFilial !== "Todos" && c.codFilial !== filtroFilial) return false;
+      if (filtroFuncao !== "Todos" && c.funcao !== filtroFuncao) return false;
+      if (filtroCatCnh !== "Todos" && c.catCnh !== filtroCatCnh) return false;
+      if (filtroTipo !== "Todos" && c.tipoFunc !== filtroTipo) return false;
       return true;
     });
   }, [colaboradores, filtroSituacao, filtroFilial, filtroFuncao, filtroCatCnh, filtroTipo]);
@@ -247,7 +251,7 @@ export default function Rh() {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return false;
     const ini = dwFilter.dataInicio ? new Date(dwFilter.dataInicio) : null;
-    const fim = dwFilter.dataFim    ? new Date(dwFilter.dataFim)    : null;
+    const fim = dwFilter.dataFim ? new Date(dwFilter.dataFim) : null;
     if (ini && d < ini) return false;
     if (fim && d > fim) return false;
     return true;
@@ -255,14 +259,14 @@ export default function Rh() {
 
   // ── KPIs de quadro ────────────────────────────────────────────────────────────
   const kpis = useMemo(() => {
-    const ativos     = filtrados.filter(c => c.ativo);
-    const admissoes  = filtrados.filter(c => noPeríodo(c.datAdm));
-    const demissoes  = filtrados.filter(c => noPeríodo(c.datDem));
-    const cnh30      = filtrados.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer >= 0 && c.diasCnhVencer <= 30 && c.ativo);
-    const comAnos    = ativos.filter(c => c.anosEmpresa !== null);
-    const mediaAnos  = comAnos.length > 0
+    const ativos = filtrados.filter(c => c.ativo);
+    const admissoes = filtrados.filter(c => noPeríodo(c.datAdm));
+    const demissoes = filtrados.filter(c => noPeríodo(c.datDem));
+    const cnh30 = filtrados.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer >= 0 && c.diasCnhVencer <= 30 && c.ativo);
+    const comAnos = ativos.filter(c => c.anosEmpresa !== null);
+    const mediaAnos = comAnos.length > 0
       ? comAnos.reduce((s, c) => s + c.anosEmpresa!, 0) / comAnos.length : 0;
-    const turnover   = ativos.length > 0 ? (demissoes.length / ativos.length) * 100 : 0;
+    const turnover = ativos.length > 0 ? (demissoes.length / ativos.length) * 100 : 0;
     return { ativos: ativos.length, admissoes: admissoes.length, demissoes: demissoes.length, cnh30: cnh30.length, mediaAnos, turnover, totalDemissoes: demissoes };
   }, [filtrados, noPeríodo]);
 
@@ -316,11 +320,11 @@ export default function Rh() {
     const faixas: Record<string, number> = { "< 1 ano": 0, "1 – 3 anos": 0, "3 – 5 anos": 0, "5 – 10 anos": 0, "> 10 anos": 0 };
     filtrados.filter(c => c.ativo && c.anosEmpresa !== null).forEach(c => {
       const a = c.anosEmpresa!;
-      if      (a < 1)  faixas["< 1 ano"]++;
-      else if (a < 3)  faixas["1 – 3 anos"]++;
-      else if (a < 5)  faixas["3 – 5 anos"]++;
+      if (a < 1) faixas["< 1 ano"]++;
+      else if (a < 3) faixas["1 – 3 anos"]++;
+      else if (a < 5) faixas["3 – 5 anos"]++;
       else if (a < 10) faixas["5 – 10 anos"]++;
-      else             faixas["> 10 anos"]++;
+      else faixas["> 10 anos"]++;
     });
     const cores = [RAW.accent.cyan, RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet, RAW.accent.amber];
     return Object.entries(faixas).map(([faixa, qtd], i) => ({ faixa, qtd, fill: cores[i] }));
@@ -330,11 +334,11 @@ export default function Rh() {
   const alertas = useMemo(() => {
     const ativos = filtrados.filter(c => c.ativo);
     return {
-      cnhVencida:  ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer < 0 && c.temCnh).length,
-      cnh30:       ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer >= 0 && c.diasCnhVencer <= 30).length,
-      cnh60:       ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer > 30 && c.diasCnhVencer <= 60).length,
-      semCnh:      ativos.filter(c => !c.temCnh).length,
-      semCpf:      ativos.filter(c => !c.temCpf).length,
+      cnhVencida: ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer < 0 && c.temCnh).length,
+      cnh30: ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer >= 0 && c.diasCnhVencer <= 30).length,
+      cnh60: ativos.filter(c => c.diasCnhVencer !== null && c.diasCnhVencer > 30 && c.diasCnhVencer <= 60).length,
+      semCnh: ativos.filter(c => !c.temCnh).length,
+      semCpf: ativos.filter(c => !c.temCpf).length,
     };
   }, [filtrados]);
 
@@ -380,8 +384,8 @@ export default function Rh() {
   // ── Turnover por Filial ────────────────────────────────────────────────────
   const turnoverFilial = useMemo(() => {
     const mapAtivos = new Map<string, number>();
-    const mapDem    = new Map<string, number>();
-    const mapAdm    = new Map<string, number>();
+    const mapDem = new Map<string, number>();
+    const mapAdm = new Map<string, number>();
     colaboradores.forEach(c => {
       const f = c.codFilial ?? "S/F";
       if (c.ativo) mapAtivos.set(f, (mapAtivos.get(f) ?? 0) + 1);
@@ -400,16 +404,16 @@ export default function Rh() {
 
   // ── KPIs Turnover ─────────────────────────────────────────────────────────
   const kpisTurnover = useMemo(() => {
-    const saldo    = kpis.admissoes - kpis.demissoes;
+    const saldo = kpis.admissoes - kpis.demissoes;
     const topMotivo = distMotivoDem[0]?.nome ?? "—";
-    const comDem   = kpis.totalDemissoes.filter(c => c.anosEmpresa !== null || calcAnos(c.datAdm) !== null);
+    const comDem = kpis.totalDemissoes.filter(c => c.anosEmpresa !== null || calcAnos(c.datAdm) !== null);
     const mediaAnos = comDem.length > 0
       ? comDem.reduce((s, c) => {
-          const a = c.datDem && c.datAdm
-            ? (new Date(c.datDem).getTime() - new Date(c.datAdm).getTime()) / (365.25 * 86_400_000)
-            : 0;
-          return s + a;
-        }, 0) / comDem.length
+        const a = c.datDem && c.datAdm
+          ? (new Date(c.datDem).getTime() - new Date(c.datAdm).getTime()) / (365.25 * 86_400_000)
+          : 0;
+        return s + a;
+      }, 0) / comDem.length
       : 0;
     return { saldo, topMotivo, mediaAnos };
   }, [kpis, distMotivoDem]);
@@ -446,23 +450,45 @@ export default function Rh() {
     });
   }, [tabelaBuscada, sortCol, sortAsc]);
 
-  const totalPages   = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TC = {
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-    cyan:    { border: "border-cyan-400/20",    icon: "text-cyan-300",    bg: "bg-cyan-400/[0.08]",    glow: RAW.accent.cyan,    sub: "text-cyan-400"    },
-    rose:    { border: "border-rose-400/20",    icon: "text-rose-300",    bg: "bg-rose-400/[0.08]",    glow: RAW.accent.rose,    sub: "text-rose-400"    },
-    amber:   { border: "border-amber-400/20",   icon: "text-amber-300",   bg: "bg-amber-400/[0.08]",   glow: RAW.accent.amber,   sub: "text-amber-400"   },
-    violet:  { border: "border-violet-400/20",  icon: "text-violet-300",  bg: "bg-violet-400/[0.08]",  glow: RAW.accent.violet,  sub: "text-violet-400"  },
-  };
+  // ── Analytics de colaboradores (deriva de tabelaBuscada → respeita filtros + busca) ──
+  const colabAnalytics = useMemo(() => {
+    const base = tabelaBuscada;
+    const n = base.length;
+
+    const funcMap = new Map<string, number>();
+    base.forEach(c => { const k = c.funcao ?? "Não informada"; funcMap.set(k, (funcMap.get(k) ?? 0) + 1); });
+    const porFuncao = [...funcMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const filMap = new Map<string, number>();
+    base.forEach(c => { const k = c.codFilial ?? "—"; filMap.set(k, (filMap.get(k) ?? 0) + 1); });
+    const porFilial = [...filMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const cnhMap = new Map<string, number>();
+    base.forEach(c => { if (c.catCnh) cnhMap.set(c.catCnh, (cnhMap.get(c.catCnh) ?? 0) + 1); });
+    const porCnh = [...cnhMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "< 1 ano", min: 0, max: 0.999, cor: RAW.accent.cyan },
+      { label: "1–3 anos", min: 1, max: 3, cor: RAW.accent.emerald },
+      { label: "3–5 anos", min: 3.001, max: 5, cor: RAW.accent.amber },
+      { label: "5–10 anos", min: 5.001, max: 10, cor: RAW.accent.violet },
+      { label: "10+ anos", min: 10.001, max: 999, cor: RAW.accent.rose },
+    ];
+    const tempoCasa = faixasDef.map(f => ({ ...f, qtd: base.filter(c => c.ativo && c.anosEmpresa !== null && c.anosEmpresa >= f.min && c.anosEmpresa <= f.max).length }));
+
+    const cnhVencer = base.filter(c => c.ativo && c.temCnh && c.diasCnhVencer !== null && c.diasCnhVencer <= 60).length;
+
+    return { n, porFuncao, porFilial, porCnh, tempoCasa, cnhVencer };
+  }, [tabelaBuscada]);
 
   // ── Helper: badge CNH ────────────────────────────────────────────────────────
   const cnhBadge = (dias: number | null, temCnh: boolean) => {
     if (!temCnh) return <span className="text-[10px] text-slate-500">—</span>;
     if (dias === null) return <span className="text-[10px] text-slate-500">—</span>;
-    if (dias < 0)   return <span className="rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[8px] font-bold text-rose-300 ring-1 ring-rose-500/30">VENCIDA</span>;
+    if (dias < 0) return <span className="rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[8px] font-bold text-rose-300 ring-1 ring-rose-500/30">VENCIDA</span>;
     if (dias <= 30) return <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-bold text-amber-300 ring-1 ring-amber-500/30">{dias}d ⚠</span>;
     if (dias <= 60) return <span className="rounded-full bg-yellow-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-yellow-300 ring-1 ring-yellow-500/20">{dias}d</span>;
     return <span className="text-[10px] text-emerald-400">{fmtData(null)}</span>;
@@ -499,44 +525,37 @@ export default function Rh() {
             {/* ════ NAVBAR DESKTOP ════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-emerald-400/70">Workspace</span>
-                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">RH — Gestão de Colaboradores</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Recursos Humanos</span>
                 </div>
-              </div>
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">Tempo real</span>
               </div>
               <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
-                <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
+                <DatePickerInput value={dwFilter.dataFim} onChange={v => setDwFilter("dataFim", v)} placeholder="Data fim" />
                 <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} cooldownOverride={cooldown} />
               </div>
               <HomeButton />
             </div>
 
             {/* Mobile nav */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div className="flex flex-col leading-none min-w-0">
                   <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-400/70">Workspace</span>
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">RH</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <HomeButton />
+            </div>
+
+            {/* Mobile: datas + atualizar */}
+            <div className="flex sm:hidden items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim} onChange={v => setDwFilter("dataFim", v)} placeholder="Data fim" />
+              <UpdateButton onClick={carregarDados} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -557,14 +576,14 @@ export default function Rh() {
             )}
 
             {/* ════ FILTROS ════ */}
-            <AnimatedCard delay={60}>
+            <div className="hidden sm:block"><AnimatedCard delay={60}>
               <div className="flex flex-wrap items-center gap-2 rounded-[14px] border px-3 py-2" style={{ background: RAW.surfaceInset, borderColor: RAW.borderDefault }}>
                 <Filter className="w-3.5 h-3.5 text-emerald-400/60 shrink-0" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500 shrink-0">Filtros</span>
                 <div className="h-4 w-px bg-white/[0.07] shrink-0" />
 
                 {[
-                  { label: "Situação",  value: filtroSituacao,  set: setFiltroSituacao,  items: ["Todos","A","I"] },
+                  { label: "Situação", value: filtroSituacao, set: setFiltroSituacao, items: ["Todos", "A", "I"] },
                 ].map(({ label, value, set, items }) => (
                   <Select key={label} value={value} onValueChange={v => { set(v); setPage(1); }}>
                     <SelectTrigger className="h-7 min-w-[80px] max-w-[110px] rounded-lg border border-white/[0.08] bg-white/[0.04] text-[11px] text-slate-300 focus:border-emerald-500/30 focus:outline-none">
@@ -614,7 +633,7 @@ export default function Rh() {
                 )}
                 <div className="ml-auto text-[10px] text-slate-500">{fmtNum(filtrados.length)} colaboradores</div>
               </div>
-            </AnimatedCard>
+            </AnimatedCard></div>
 
             {/* ════════════════════════════════════════════════════════
                 SEÇÃO 1 — INDICADORES DE QUADRO
@@ -626,34 +645,22 @@ export default function Rh() {
             </div>
 
             {/* KPI Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-              {[
-                { label: "Colaboradores Ativos", value: loading ? "—" : fmtNum(kpis.ativos),    sub: "SITUAC = \"A\"",                Icon: UserCheck, tone: "emerald" as const, delay: 80  },
-                { label: "Admissões no Período", value: loading ? "—" : fmtNum(kpis.admissoes), sub: "DATADM no intervalo",            Icon: UserPlus,  tone: "cyan"    as const, delay: 120 },
-                { label: "Demissões no Período", value: loading ? "—" : fmtNum(kpis.demissoes), sub: `Turnover: ${fmtPct(kpis.turnover)}`, Icon: UserMinus, tone: "rose" as const, delay: 160 },
-                { label: "CNH a Vencer (30d)",   value: loading ? "—" : fmtNum(kpis.cnh30),    sub: "VENCHA ≤ hoje + 30 dias",        Icon: ShieldAlert, tone: "amber" as const, delay: 200 },
-                { label: "Tempo Médio de Casa",  value: loading ? "—" : fmtAnos(kpis.mediaAnos), sub: "AVG(hoje − DATADM) ativos",    Icon: Clock,     tone: "violet"  as const, delay: 240 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TC[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
-                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
-                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
-                          </div>
-                        </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1.1rem,2vw,1.5rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
+              <AnimatedCard delay={80}>
+                <KpiCard label="Colaboradores Ativos" value={loading ? "—" : fmtNum(kpis.ativos)} subtitle='SITUAC = "A"' icon={UserCheck} tone="emerald" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Admissões no Período" value={loading ? "—" : fmtNum(kpis.admissoes)} subtitle="DATADM no intervalo" icon={UserPlus} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={160}>
+                <KpiCard label="Demissões no Período" value={loading ? "—" : fmtNum(kpis.demissoes)} subtitle={`Turnover: ${fmtPct(kpis.turnover)}`} icon={UserMinus} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={200}>
+                <KpiCard label="CNH a Vencer (30d)" value={loading ? "—" : fmtNum(kpis.cnh30)} subtitle="VENCHA ≤ hoje + 30 dias" icon={ShieldAlert} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={240}>
+                <KpiCard label="Tempo Médio de Casa" value={loading ? "—" : fmtAnos(kpis.mediaAnos)} subtitle="AVG(hoje − DATADM) ativos" icon={Clock} tone="violet" loading={loading} />
+              </AnimatedCard>
             </div>
 
             {/* ════════════════════════════════════════════════════════
@@ -679,24 +686,24 @@ export default function Rh() {
                   {distFuncao.length === 0
                     ? <div className="flex h-16 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                     : <div className="space-y-1.5">
-                        {distFuncao.map((r, i) => {
-                          const max = distFuncao[0].qtd;
-                          return (
-                            <div key={r.nome} className="flex items-center gap-2">
-                              <span className="w-4 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[10px] font-medium text-slate-300 truncate">{r.nome}</span>
-                                  <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
-                                </div>
-                                <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
-                                  <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
-                                </div>
+                      {distFuncao.map((r, i) => {
+                        const max = distFuncao[0].qtd;
+                        return (
+                          <div key={r.nome} className="flex items-center gap-2">
+                            <span className="w-4 text-[9px] font-bold text-slate-600 shrink-0 text-right">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[10px] font-medium text-slate-300 truncate">{r.nome}</span>
+                                <span className="text-[10px] font-bold shrink-0 ml-2" style={{ color: r.fill }}>{r.qtd}</span>
+                              </div>
+                              <div className="h-1 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full" style={{ width: `${(r.qtd / max) * 100}%`, background: r.fill, opacity: 0.85 }} />
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   }
                 </div>
               </AnimatedCard>
@@ -714,18 +721,18 @@ export default function Rh() {
                     {distCatCnh.length === 0
                       ? <div className="flex h-10 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                       : <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                          {distCatCnh.map(r => {
-                            const total = distCatCnh.reduce((s, x) => s + x.qtd, 0);
-                            return (
-                              <div key={r.cat} className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.fill }} />
-                                <span className="text-[10px] text-slate-300 flex-1">{r.cat}</span>
-                                <span className="text-[9px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : "—"}</span>
-                                <span className="text-[10px] font-bold w-6 text-right" style={{ color: r.fill }}>{r.qtd}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        {distCatCnh.map(r => {
+                          const total = distCatCnh.reduce((s, x) => s + x.qtd, 0);
+                          return (
+                            <div key={r.cat} className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.fill }} />
+                              <span className="text-[10px] text-slate-300 flex-1">{r.cat}</span>
+                              <span className="text-[9px] text-slate-500">{total > 0 ? `${((r.qtd / total) * 100).toFixed(0)}%` : "—"}</span>
+                              <span className="text-[10px] font-bold w-6 text-right" style={{ color: r.fill }}>{r.qtd}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     }
                   </div>
                 </AnimatedCard>
@@ -810,13 +817,13 @@ export default function Rh() {
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Alertas Operacionais</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
                   {[
-                    { label: "CNH vencida",          count: alertas.cnhVencida, cls: "bg-rose-500/10 border-rose-500/20",   dotCls: "bg-rose-400",   txtCls: "text-rose-300",   valCls: "text-rose-300",   severity: true  },
-                    { label: "CNH vence em 30 dias", count: alertas.cnh30,      cls: "bg-amber-500/10 border-amber-500/20", dotCls: "bg-amber-400",  txtCls: "text-amber-300",  valCls: "text-amber-300",  severity: alertas.cnh30 > 0 },
-                    { label: "CNH vence em 60 dias", count: alertas.cnh60,      cls: "bg-yellow-500/10 border-yellow-500/20", dotCls: "bg-yellow-400", txtCls: "text-yellow-300", valCls: "text-yellow-300", severity: false },
-                    { label: "Sem CNH cadastrada",   count: alertas.semCnh,     cls: "bg-cyan-500/10 border-cyan-500/20",   dotCls: "bg-cyan-400",   txtCls: "text-cyan-300",   valCls: "text-cyan-300",   severity: false },
-                    { label: "Sem CPF cadastrado",   count: alertas.semCpf,     cls: "bg-slate-500/10 border-slate-500/20", dotCls: "bg-slate-400",  txtCls: "text-slate-300",  valCls: "text-slate-300",  severity: false },
+                    { label: "CNH vencida", count: alertas.cnhVencida, cls: "bg-rose-500/10 border-rose-500/20", dotCls: "bg-rose-400", txtCls: "text-rose-300", valCls: "text-rose-300", severity: true },
+                    { label: "CNH vence em 30 dias", count: alertas.cnh30, cls: "bg-amber-500/10 border-amber-500/20", dotCls: "bg-amber-400", txtCls: "text-amber-300", valCls: "text-amber-300", severity: alertas.cnh30 > 0 },
+                    { label: "CNH vence em 60 dias", count: alertas.cnh60, cls: "bg-yellow-500/10 border-yellow-500/20", dotCls: "bg-yellow-400", txtCls: "text-yellow-300", valCls: "text-yellow-300", severity: false },
+                    { label: "Sem CNH cadastrada", count: alertas.semCnh, cls: "bg-cyan-500/10 border-cyan-500/20", dotCls: "bg-cyan-400", txtCls: "text-cyan-300", valCls: "text-cyan-300", severity: false },
+                    { label: "Sem CPF cadastrado", count: alertas.semCpf, cls: "bg-slate-500/10 border-slate-500/20", dotCls: "bg-slate-400", txtCls: "text-slate-300", valCls: "text-slate-300", severity: false },
                   ].map(({ label, count, cls, dotCls, txtCls, valCls, severity }) => (
                     <div key={label} className={`flex flex-col gap-1 rounded-[12px] border px-3 py-2.5 ${cls}`}>
                       <div className="flex items-center gap-1.5">
@@ -841,32 +848,18 @@ export default function Rh() {
 
             {/* KPIs Turnover */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { label: "Turnover no Período", value: loading ? "—" : fmtPct(kpis.turnover), sub: "Dem ÷ Ativos × 100",       Icon: TrendingDown, tone: "rose"   as const, delay: 460 },
-                { label: "Saldo Líquido",        value: loading ? "—" : (kpisTurnover.saldo >= 0 ? `+${kpisTurnover.saldo}` : `${kpisTurnover.saldo}`), sub: "Admissões − Demissões", Icon: TrendingUp, tone: "cyan" as const, delay: 480 },
-                { label: "Motivo + Frequente",   value: loading ? "—" : kpisTurnover.topMotivo.slice(0, 16), sub: "MOTBAI top 1",          Icon: FileText,  tone: "amber"  as const, delay: 500 },
-                { label: "Perm. Média Demitidos",value: loading ? "—" : fmtAnos(kpisTurnover.mediaAnos), sub: "AVG(DATBAI − DATADM)",   Icon: Clock,     tone: "violet" as const, delay: 520 },
-              ].map(({ label, value, sub, Icon, tone, delay }) => {
-                const t = TC[tone];
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div className={`group relative flex min-h-[90px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border}`} style={{ background: "var(--sgt-bg-card)" }}>
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
-                      <div className="relative flex h-full flex-col">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-slate-500 leading-tight">{label}</p>
-                          <div className={`shrink-0 rounded-xl p-2 ${t.bg} border ${t.border} transition-transform duration-300 group-hover:scale-110`}>
-                            <Icon className={`w-3.5 h-3.5 ${t.icon}`} />
-                          </div>
-                        </div>
-                        <p className={`mt-auto pt-2 text-[clamp(1rem,2vw,1.4rem)] font-black leading-none tracking-tight dark:text-white text-slate-800 truncate ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                        <p className="mt-1.5 text-[10px] font-medium text-slate-500">{sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
+              <AnimatedCard delay={460}>
+                <KpiCard label="Turnover no Período" value={loading ? "—" : fmtPct(kpis.turnover)} subtitle="Dem ÷ Ativos × 100" icon={TrendingDown} tone="rose" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={480}>
+                <KpiCard label="Saldo Líquido" value={loading ? "—" : (kpisTurnover.saldo >= 0 ? `+${kpisTurnover.saldo}` : `${kpisTurnover.saldo}`)} subtitle="Admissões − Demissões" icon={TrendingUp} tone="cyan" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={500}>
+                <KpiCard label="Motivo + Frequente" value={loading ? "—" : kpisTurnover.topMotivo.slice(0, 16)} subtitle="MOTBAI top 1" icon={FileText} tone="amber" loading={loading} />
+              </AnimatedCard>
+              <AnimatedCard delay={520}>
+                <KpiCard label="Perm. Média Demitidos" value={loading ? "—" : fmtAnos(kpisTurnover.mediaAnos)} subtitle="AVG(DATBAI − DATADM)" icon={Clock} tone="violet" loading={loading} />
+              </AnimatedCard>
             </div>
 
             {/* Evolução Mensal + Motivo Demissão */}
@@ -895,7 +888,7 @@ export default function Rh() {
                         <YAxis tick={{ fill: "#475569", fontSize: 9 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
                         <ReTooltip content={<DarkTooltip formatter={(v: number, n: string) => `${n}: ${v}`} />} />
                         <Bar dataKey="adm" name="Admissões" fill={RAW.accent.emerald} opacity={0.85} radius={[3, 3, 0, 0]} />
-                        <Bar dataKey="dem" name="Demissões" fill={RAW.accent.rose}    opacity={0.85} radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="dem" name="Demissões" fill={RAW.accent.rose} opacity={0.85} radius={[3, 3, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
@@ -915,7 +908,7 @@ export default function Rh() {
                     <div className="flex-1 space-y-2 overflow-auto pr-1">
                       {distMotivoDem.map((r, i) => {
                         const max = distMotivoDem[0].qtd;
-                        const fill = [RAW.accent.rose, RAW.accent.amber, "#fb923c", RAW.accent.violet, RAW.accent.cyan, "#94a3b8"][i] ?? "#94a3b8";
+                        const fill = ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706", "#fde68a", "#94a3b8"][i] ?? "#94a3b8";
                         return (
                           <div key={r.nome}>
                             <div className="flex items-center justify-between mb-0.5">
@@ -945,7 +938,7 @@ export default function Rh() {
                 {turnoverFilial.length === 0 ? (
                   <div className="flex h-10 items-center justify-center text-[11px] text-slate-600">{loading ? "Carregando..." : "Sem dados"}</div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
                     {turnoverFilial.map(r => {
                       const max = Math.max(...turnoverFilial.map(x => x.pct), 0.1);
                       const cor = r.pct > 6 ? RAW.accent.rose : r.pct > 3 ? RAW.accent.amber : RAW.accent.emerald;
@@ -1017,33 +1010,48 @@ export default function Rh() {
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
+                  <div className="ml-auto flex items-center gap-2">
+                    <GooeyInput
                       placeholder="Buscar nome, matrícula, função..."
-                      className="h-7 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-6 pr-3 text-[11px] text-slate-300 placeholder-slate-600 focus:border-emerald-500/30 focus:outline-none transition-all w-[210px]"
+                      value={search}
+                      onValueChange={(v) => { setSearch(v); setPage(1); }}
                     />
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = colabView === t.id;
+                        return (
+                          <button key={t.id} onClick={() => setColabView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${active ? "bg-emerald-400/15 text-emerald-200" : "text-slate-500 hover:text-slate-300"}`}>
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
+                {colabView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr style={{ borderBottom: "1px solid var(--sgt-border-subtle)", background: "var(--sgt-table-head)" }}>
                         {([
-                          { key: "codmot",     label: "Matríc.",     align: "left",   resp: "" },
-                          { key: "nome",       label: "Nome",        align: "left",   resp: "" },
-                          { key: "funcao",     label: "Função",      align: "left",   resp: "hidden md:table-cell" },
-                          { key: "codFilial",  label: "Filial",      align: "center", resp: "hidden sm:table-cell" },
-                          { key: "tipoFunc",   label: "Tipo",        align: "center", resp: "hidden lg:table-cell" },
-                          { key: "datAdm",     label: "Admissão",    align: "center", resp: "hidden sm:table-cell" },
-                          { key: "anosEmpresa",label: "Tempo Casa",  align: "center", resp: "hidden md:table-cell" },
-                          { key: "catCnh",     label: "CNH",         align: "center", resp: "hidden lg:table-cell" },
-                          { key: "validadeCnh",label: "Val. CNH",    align: "center", resp: "hidden xl:table-cell" },
-                          { key: "situacao",   label: "Situação",    align: "center", resp: "" },
+                          { key: "codmot", label: "Matríc.", align: "left", resp: "" },
+                          { key: "nome", label: "Nome", align: "left", resp: "" },
+                          { key: "funcao", label: "Função", align: "left", resp: "hidden md:table-cell" },
+                          { key: "codFilial", label: "Filial", align: "center", resp: "hidden sm:table-cell" },
+                          { key: "tipoFunc", label: "Tipo", align: "center", resp: "hidden lg:table-cell" },
+                          { key: "datAdm", label: "Admissão", align: "center", resp: "hidden sm:table-cell" },
+                          { key: "anosEmpresa", label: "Tempo Casa", align: "center", resp: "hidden md:table-cell" },
+                          { key: "catCnh", label: "CNH", align: "center", resp: "hidden lg:table-cell" },
+                          { key: "validadeCnh", label: "Val. CNH", align: "center", resp: "hidden xl:table-cell" },
+                          { key: "situacao", label: "Situação", align: "center", resp: "" },
                         ] as { key: keyof Colaborador; label: string; align: string; resp: string }[]).map(c => (
                           <th
                             key={c.key}
@@ -1092,11 +1100,10 @@ export default function Rh() {
                               {cnhBadge(c.diasCnhVencer, c.temCnh)}
                             </td>
                             <td className="px-3 py-2.5 text-center">
-                              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] ring-1 ${
-                                c.situacao === "A"
+                              <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] ring-1 ${c.situacao === "A"
                                   ? "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30"
                                   : "bg-rose-500/10 text-rose-300 ring-rose-500/30"
-                              }`}>
+                                }`}>
                                 {c.situacao === "A" ? "Ativo" : c.situacao === "I" ? "Inativo" : c.situacao ?? "—"}
                               </span>
                             </td>
@@ -1106,9 +1113,191 @@ export default function Rh() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ════════ VIEW: CARDS ════════ */}
+                {colabView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Nenhum colaborador encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((c, i) => {
+                          const ativo = c.situacao === "A";
+                          return (
+                            <AnimatedCard key={`${c.codmot}-${i}`} delay={Math.min(i, 12) * 30}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-emerald-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: nome + situação */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="text-[13px] font-bold text-slate-100 truncate block" title={c.nome}>{c.nome}</span>
+                                    <span className="font-mono text-[10px] text-emerald-300">{c.codmot}</span>
+                                  </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${ativo ? "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30" : "bg-rose-500/10 text-rose-300 ring-rose-500/30"}`}>
+                                    {ativo ? "Ativo" : c.situacao === "I" ? "Inativo" : c.situacao ?? "—"}
+                                  </span>
+                                </div>
+
+                                {/* Função + filial */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <UserCheck className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[11px] text-slate-300 truncate" title={c.funcao ?? ""}>{c.funcao ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-3 text-[10px] text-slate-500">
+                                  <span>Filial {c.codFilial ?? "—"}</span>
+                                  {c.tipoFunc && <span className="text-cyan-400/80 uppercase tracking-[0.1em]">· {c.tipoFunc}</span>}
+                                </div>
+
+                                {/* Métricas */}
+                                <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Admissão</p>
+                                    <p className="text-[10px] font-medium text-slate-300">{fmtData(c.datAdm)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Tempo casa</p>
+                                    <p className="text-[11px] font-bold tabular-nums text-slate-200">{ativo && c.anosEmpresa !== null ? fmtAnos(c.anosEmpresa) : "—"}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">CNH</p>
+                                    <p className="text-[11px] font-bold text-emerald-300">{c.catCnh ?? "—"}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ════════ VIEW: ANALYTICS ════════ */}
+                {colabView === "analytics" && (
+                  <div className="p-3">
+                    {colabAnalytics.n === 0 ? (
+                      <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Por função */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Users className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Função</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porFuncao.map(([func, qtd], idx) => {
+                                const max = colabAnalytics.porFuncao[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={func}>{func}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-emerald-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Por filial */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Por Filial</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porFilial.map(([fil, qtd], idx) => {
+                                const max = colabAnalytics.porFilial[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-mono text-slate-400 w-[80px] truncate shrink-0">Filial {fil}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-cyan-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Tempo de casa */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Clock className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Tempo de Casa (ativos)</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.tempoCasa.map(f => {
+                                const max = Math.max(...colabAnalytics.tempoCasa.map(x => x.qtd), 1);
+                                return (
+                                  <div key={f.label} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[90px] shrink-0">{f.label}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(f.qtd / max) * 100}%`, background: f.cor }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* CNH por categoria */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">CNH por Categoria</span>
+                              {colabAnalytics.cnhVencer > 0 && (
+                                <span className="ml-auto rounded-full bg-rose-500/10 px-2 py-0.5 text-[9px] font-bold text-rose-300 ring-1 ring-rose-500/30">{colabAnalytics.cnhVencer} a vencer (60d)</span>
+                              )}
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {colabAnalytics.porCnh.length === 0 ? (
+                                <p className="text-[11px] text-slate-600 text-center py-2">Sem CNH registrada</p>
+                              ) : colabAnalytics.porCnh.map(([cat, qtd], idx) => {
+                                const max = colabAnalytics.porCnh[0]?.[1] ?? 1;
+                                return (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <span className="text-[11px] font-bold text-slate-300 w-[60px] shrink-0">Cat. {cat}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-amber-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {colabView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}

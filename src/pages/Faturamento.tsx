@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+﻿import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Package, DollarSign, AlertTriangle, Zap, Clock } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -160,7 +160,7 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
             ))}
             {[0.25,0.5,0.75,1].map(f => (
               <text key={f} x={padL-4} y={toY(maxVal*f)+3} textAnchor="end"
-                fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                fontSize={7.5} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{fmtY(maxVal*f)}</text>
             ))}
 
             {areaPath && <path d={areaPath} fill="url(#fatGradAcum)" clipPath="url(#yc-clip)"/>}
@@ -176,7 +176,7 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
               <text key={m} x={toX(i)} y={H-4} textAnchor="middle" fontSize={8}
                 fill={i === mesFiltro ? "#fbbf24" : "var(--sgt-text-muted)"}
                 fontWeight={i === mesFiltro ? "700" : "400"}
-                fontFamily="system-ui">{m}</text>
+                fontFamily="var(--sgt-font-body)">{m}</text>
             ))}
 
             {hover && (
@@ -204,24 +204,24 @@ function GraficoAcumulado({ faturamentoMensal, faturamentoMensalAnterior, isFetc
                   <rect x={tx} y={ty} width={tw} height={th} rx={6}
                     fill="var(--sgt-bg-section)" stroke="rgba(255,255,255,0.1)" strokeWidth={0.5}/>
                   <text x={tx+10} y={ty+14} fontSize={9} fontWeight="700"
-                    fill="rgba(255,255,255,0.9)" fontFamily="system-ui">{months[hover.idx]}</text>
+                    fill="rgba(255,255,255,0.9)" fontFamily="var(--sgt-font-body)">{months[hover.idx]}</text>
                   {delta !== null && (
                     <text x={tx+tw-8} y={ty+14} textAnchor="end" fontSize={8} fontWeight="700"
-                      fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="system-ui">
+                      fill={delta >= 0 ? "#4ade80" : "#f87171"} fontFamily="var(--sgt-font-body)">
                       {delta >= 0 ? "+" : ""}{delta.toFixed(1)}%
                     </text>
                   )}
                   {vAtual !== null && (
                     <>
                       <circle cx={tx+9} cy={ty+27} r={3} fill="#fbbf24"/>
-                      <text x={tx+17} y={ty+31} fontSize={8.5} fill="#fbbf24" fontFamily="system-ui" fontWeight="600">
+                      <text x={tx+17} y={ty+31} fontSize={8.5} fill="#fbbf24" fontFamily="var(--sgt-font-body)" fontWeight="600">
                         {anoAtual}: {fmtFull(vAtual)}
                       </text>
                     </>
                   )}
                   <circle cx={tx+9} cy={ty+(vAtual !== null ? 45 : 28)} r={2.5} fill="#94a3b8" opacity={0.6}/>
                   <text x={tx+17} y={ty+(vAtual !== null ? 49 : 32)} fontSize={8.5}
-                    fill="rgba(148,163,184,0.6)" fontFamily="system-ui">
+                    fill="rgba(148,163,184,0.6)" fontFamily="var(--sgt-font-body)">
                     {anoAnt}: {fmtFull(vAnt)}
                   </text>
                 </g>
@@ -447,7 +447,6 @@ export default function Faturamento() {
     };
   }, [manutencao]);
   const maxTotal = top5[0]?.total ?? 1;
-  const COLORS = ["#2dd4bf","#f87171","#a78bfa","#fbbf24","#34d399","#94a3b8"];
 
   return (
     <div className="flex flex-col transition-all duration-300 min-h-[100dvh] xl:h-[100dvh] overflow-auto xl:overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
@@ -472,8 +471,6 @@ export default function Faturamento() {
           {/* ── NAVBAR DESKTOP ── */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
             <div className="flex shrink-0 items-center gap-3">
-              <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-              <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
               <div className="flex flex-col leading-none">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                 <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Faturamento</span>
@@ -511,8 +508,10 @@ export default function Faturamento() {
 
           {/* ── NAVBAR MOBILE ── */}
           <div className="flex sm:hidden flex-col gap-2 py-1">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
+            {/* Linha 1: menu + logo + título + home */}
+            <div className="flex items-center gap-2">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
@@ -520,15 +519,24 @@ export default function Faturamento() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Faturamento</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <HomeButton />
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Início" />
-              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Fim" />
+            {/* Linha 2: datas + atualizar */}
+            <div className="flex items-center gap-2">
+              <DatePickerInput value={dwFilter.dataInicio} onChange={v => setDwFilter("dataInicio", v)} placeholder="Data início" />
+              <DatePickerInput value={dwFilter.dataFim}    onChange={v => setDwFilter("dataFim", v)}    placeholder="Data fim" />
               <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
+            </div>
+            {/* Linha 3: empresa + filial */}
+            <div className="flex items-center gap-2">
+              <Select value={dwFilter.empresa ?? "__all__"} onValueChange={v => setDwFilter("empresa", v === "__all__" ? null : v)}>
+                <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
+                <SelectContent><SelectItem value="__all__">Todas</SelectItem>{empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select value={dwFilter.filial ?? "__all__"} onValueChange={v => setDwFilter("filial", v === "__all__" ? null : v)}>
+                <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
+                <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -545,13 +553,13 @@ export default function Faturamento() {
           <div className="flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 w-full">
 
             {/* KPIs linha 1 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr items-stretch sgt-stagger">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 auto-rows-fr items-stretch sgt-stagger">
 
               {/* KPI Total */}
               <AnimatedCard delay={0}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-amber-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.10),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400/70 to-amber-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber-400/70 to-amber-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(245,158,11,0.10), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -577,9 +585,9 @@ export default function Faturamento() {
 
               {/* Média por dia útil */}
               <AnimatedCard delay={60}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-cyan-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-cyan-400/70 to-cyan-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400/70 to-cyan-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(6,182,212,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -606,9 +614,9 @@ export default function Faturamento() {
 
               {/* Provisão */}
               <AnimatedCard delay={120}>
-                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-emerald-500/[0.18] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
+                <div className="sgt-kpi-card relative overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-4 xl:p-5 flex flex-col gap-3 h-full">
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.08),transparent_55%)]" />
-                  <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/70 to-emerald-700/20" />
                   <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
                     style={{ background: "radial-gradient(circle at 100% 100%, rgba(16,185,129,0.08), transparent 65%)" }} />
                   <div className="relative flex items-center justify-between">
@@ -658,7 +666,7 @@ export default function Faturamento() {
 
                 {/* Column headers */}
                 {isProcessed && rows.length > 0 && (
-                  <div className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)]">
+                  <div className="grid grid-cols-[minmax(0,1fr)_8rem_3.5rem] sm:grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)]">
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600">Grupo</span>
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Faturamento</span>
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-600 text-right">Part. %</span>
@@ -680,12 +688,13 @@ export default function Faturamento() {
                   ) : (
                     rows.map((r, i) => {
                       const barW = totalFaturado > 0 ? Math.min((r.total / totalFaturado) * 100, 100) : 0;
-                      const STRIPE_COLORS = ["#f59e0b","#22d3ee","#a78bfa","#34d399","#f87171","#fb923c","#60a5fa","#e879f9"];
-                      const color = STRIPE_COLORS[i % STRIPE_COLORS.length];
+                      // Opacidade decrescente: 1º lugar pleno, últimos mais suaves
+                      const opacity = Math.max(0.35, 1 - (i / rows.length) * 0.65);
+                      const barColor = `rgba(245,158,11,${opacity})`;
                       return (
                         <div
                           key={`${r.descri}-${i}`}
-                          className="grid grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2.5 items-center transition-colors border-b border-[var(--sgt-divider)] last:border-0"
+                          className="grid grid-cols-[minmax(0,1fr)_8rem_3.5rem] sm:grid-cols-[minmax(0,1fr)_11rem_4.5rem] gap-3 px-4 py-2.5 items-center transition-colors border-b border-[var(--sgt-divider)] last:border-0"
                           style={{ background: i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent" }}
                           onMouseEnter={e => (e.currentTarget.style.background = "var(--sgt-row-hover)")}
                           onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 1 ? "var(--sgt-row-alt)" : "transparent")}
@@ -702,14 +711,14 @@ export default function Faturamento() {
                               <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                 <div
                                   className="h-full rounded-full transition-all duration-700"
-                                  style={{ width: `${barW}%`, background: color }}
+                                  style={{ width: `${barW}%`, background: barColor }}
                                 />
                               </div>
                             </div>
                           </div>
 
                           {/* Valor */}
-                          <span className="text-[12px] font-bold tabular-nums text-right flex items-center justify-end gap-1" style={{ color }}>
+                          <span className="text-[12px] font-bold tabular-nums text-right flex items-center justify-end gap-1" style={{ color: "var(--sgt-text-primary)" }}>
                             {fmtBRL(r.total)}
                             <MiniDelta valorAtual={r.total} valorAnterior={mapaAnterior.get(r.descri) ?? null} />
                           </span>

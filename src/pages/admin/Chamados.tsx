@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Plus, Filter, CalendarDays, Loader2, ClipboardList,
   AlertCircle, Clock, CheckCircle2, XCircle,
+  Tags,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -17,6 +19,10 @@ import {
 } from "@/lib/ticketsApi";
 import { TicketsCalendar } from "@/components/admin/tickets/TicketsCalendar";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
+import { SlaBadge } from "@/components/admin/tickets/SlaBadge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CategoriasManager } from "@/components/admin/tickets/CategoriasManager";
+import { TicketCategoria, fetchCategorias, categoriaBadgeStyle } from "@/lib/ticketCategoriasApi";
 
 const fmtDateInput = (d: Date) => {
   const y = d.getFullYear();
@@ -47,6 +53,13 @@ export default function Chamados() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [modalDefaultDate, setModalDefaultDate] = useState<string | undefined>(undefined);
+  const [categorias, setCategorias] = useState<TicketCategoria[]>([]);
+  const [catsOpen, setCatsOpen] = useState(false);
+
+  const loadCategorias = () => {
+    fetchCategorias(false).then(setCategorias).catch(() => setCategorias([]));
+  };
+  useEffect(() => { loadCategorias(); }, []);
 
   const load = async () => {
     setLoading(true);
@@ -111,33 +124,56 @@ export default function Chamados() {
         >
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
 
-            {/* Header */}
-            <div className="flex items-center gap-2 md:gap-3 py-1 flex-wrap">
+            {/* Header — compacto no mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 py-1 flex-wrap">
               <button
                 onClick={() => navigate("/admin")}
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
                 aria-label="Voltar"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
                 <ClipboardList className="h-4 w-4 text-amber-400" />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">
+              <div className="flex flex-col leading-none min-w-0 flex-1 sm:flex-initial">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                <span className="text-[14px] sm:text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">
                   Agenda de Chamados
                 </span>
               </div>
-              <div className="flex-1" />
+              <div className="hidden sm:block flex-1" />
+              <button
+                onClick={() => setCatsOpen(true)}
+                aria-label="Gerenciar categorias"
+                title="Gerenciar categorias"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-amber-300"
+              >
+                <Tags className="h-4 w-4" />
+              </button>
+              {/* Mobile: ícone-only */}
+              <button
+                onClick={() => setShowFilters((v) => !v)}
+                aria-label="Filtros"
+                className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-300"
+              >
+                <Filter className="h-4 w-4" />
+              </button>
               <Button
                 size="sm" variant="outline"
                 onClick={() => setShowFilters((v) => !v)}
-                className="border-[var(--sgt-border-subtle)]"
+                className="hidden sm:inline-flex border-[var(--sgt-border-subtle)]"
               >
                 <Filter className="h-4 w-4 mr-1" /> Filtros
               </Button>
-              <Button size="sm" onClick={() => openNew()} className="bg-amber-500 hover:bg-amber-600 text-black">
+              <button
+                onClick={() => openNew()}
+                aria-label="Novo chamado"
+                className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-black hover:bg-amber-600"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+              <Button size="sm" onClick={() => openNew()} className="hidden sm:inline-flex bg-amber-500 hover:bg-amber-600 text-black">
                 <Plus className="h-4 w-4 mr-1" /> Novo chamado
               </Button>
               <UserMenu />
@@ -194,13 +230,13 @@ export default function Chamados() {
                   <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Responsável</label>
                   <Input className="h-9 mt-1" placeholder="Buscar" value={filterResp} onChange={(e) => setFilterResp(e.target.value)} />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">De</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataIni} onChange={(e) => setFilterDataIni(e.target.value)} />
+                <div className="flex flex-col">
+                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)] mb-1">De</label>
+                  <DatePickerInput value={filterDataIni} onChange={setFilterDataIni} placeholder="Data início" />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)]">Até</label>
-                  <Input type="date" className="h-9 mt-1" value={filterDataFim} onChange={(e) => setFilterDataFim(e.target.value)} />
+                <div className="flex flex-col">
+                  <label className="text-[10px] uppercase tracking-wider text-[var(--sgt-text-muted)] mb-1">Até</label>
+                  <DatePickerInput value={filterDataFim} onChange={setFilterDataFim} placeholder="Data fim" />
                 </div>
               </div>
             )}
@@ -250,6 +286,7 @@ export default function Chamados() {
                       {dayTickets.map((t) => {
                         const pc = PRIORIDADE_COLOR[t.prioridade];
                         const sc = STATUS_COLOR[t.status];
+                        const cat = categorias.find((c) => c.id === t.categoria_id) ?? null;
                         return (
                           <button
                             key={t.id}
@@ -276,6 +313,12 @@ export default function Chamados() {
                               <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${sc.border} ${sc.bg} ${sc.text} font-semibold uppercase tracking-wider`}>
                                 {STATUS_LABEL[t.status]}
                               </span>
+                              {cat && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-full border font-semibold" style={categoriaBadgeStyle(cat.cor)}>
+                                  {cat.nome}
+                                </span>
+                              )}
+                              <SlaBadge ticket={t} />
                             </div>
                           </button>
                         );
@@ -288,6 +331,16 @@ export default function Chamados() {
           </div>
         </section>
       </div>
+
+      <Dialog open={catsOpen} onOpenChange={(o) => { setCatsOpen(o); if (!o) loadCategorias(); }}>
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Categorias de chamado</DialogTitle>
+            <DialogDescription>Crie, edite ou desative as categorias disponíveis.</DialogDescription>
+          </DialogHeader>
+          <CategoriasManager />
+        </DialogContent>
+      </Dialog>
 
       <TicketModal
         open={modalOpen}

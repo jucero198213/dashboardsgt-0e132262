@@ -6,14 +6,11 @@
 //   2. Supabase Edge Function (fallback)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SUPABASE_URL = "https://wtjaajhrjsakmmzvbdim.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-  "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0amFhamhyanNha21tenZiZGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTA4NzQsImV4cCI6MjA5MTA2Njg3NH0." +
-  "el-d0njKvDfoJHM6c6fFcs9TqcNtIpD5BY4-rtTAvnQ";
+const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 // ─── URL da API ───────────────────────────────────────────────────────────────
-const TUNNEL_URL = "https://aruba-revised-later-teddy.trycloudflare.com";
+const TUNNEL_URL = "https://dw.dwsgtlog.com";
 
 const LOCAL_API_URL =
   ((
@@ -46,6 +43,10 @@ const ENDPOINT_ABASTECIMENTO = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-abastecimento`
   : `${SUPABASE_URL}/functions/v1/dw-abastecimento`;
 
+const ENDPOINT_POSTO_INTERNO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-posto-interno`
+  : `${SUPABASE_URL}/functions/v1/dw-posto-interno`;
+
 const ENDPOINT_RH = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-rh`
   : `${SUPABASE_URL}/functions/v1/dw-rh`;
@@ -61,6 +62,11 @@ const ENDPOINT_FATURAMENTO_RESUMO = LOCAL_API_URL
 const ENDPOINT_FINANCIAMENTO_FROTA = LOCAL_API_URL
   ? `${LOCAL_API_URL}/dw-financiamento-frota`
   : `${SUPABASE_URL}/functions/v1/dw-financiamento-frota`;
+
+const ENDPOINT_BANCOS = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-bancos`
+  : `${SUPABASE_URL}/functions/v1/dw-bancos`;
+
 const IS_LOCAL = !!LOCAL_API_URL;
 
 // ─── Tipos: Financeiro (mantido) ──────────────────────────────────────────────
@@ -73,7 +79,29 @@ export interface FilterOption {
 
 export interface DwFiltersResponse {
   empresas: FilterOption[];
-  filiais: FilterOption[];
+  filiais:  FilterOption[];
+}
+
+// ── Conta bancária (/dw-bancos) ─────────────────────────────────────────────
+export interface BankAccount {
+  cod_conta:      string;
+  nome_conta:     string;
+  agencia:        string;
+  num_conta:      string;
+  cod_banco:      string;
+  nome_banco:     string;
+  tipo_conta:     string;
+  filial:         string;
+  empresa:        string;
+  nome_filial:    string;
+  saldo_anterior: number;   // acumulado antes do período
+  saldo_atual:    number;   // saldo_anterior + créditos − débitos do período
+  entradas_mes:   number;
+  saidas_mes:     number;
+}
+
+export interface BankAccountsResponse {
+  data: BankAccount[];
 }
 
 export interface DwRow {
@@ -105,6 +133,16 @@ export interface DwRow {
   CENTRO_CUSTO: string | null;
   SINTETICA: string | null;
   ANALITICA: string | null;
+  // ── Campos bancários (LB_D / LB_C) ──────────────────────────
+  DATA_LANCAMENTO:   string | null;
+  COD_BANCO:         string | null;
+  NOME_BANCO:        string | null;
+  NUM_CHEQUE:        string | null;
+  NUM_AVISO:         string | null;
+  DATA_COMPENSACAO:  string | null;
+  HISTORICO:         string | null;
+  NOME_CONTA:        string | null;
+  COD_CONTA:         string | null;
 }
 
 export interface DwFetchResponse {
@@ -277,6 +315,7 @@ export interface AbastecimentoRow {
   codaba:            string | number | null;
   motorista:         string | null;
   posto:             string | null;
+  codpon:            string | number | null;
   estado:            string | null;
   vlrtot:            number | null;
   quanti:            number | null;
@@ -318,6 +357,30 @@ export interface FaturamentoResumoResponse {
   };
 }
 
+// ─── Tipos: POSTO INTERNO ────────────────────────────────────────────────────
+
+export interface PostoInternoRow {
+  id_raz:         number | null;
+  numdoc:         string | number | null;
+  data:           string | null;
+  qtdade:         number | null;
+  valor:          number | null;
+  tipo:           "SAIDA" | "ENTRADA";
+  saldo_anterior: number | null;
+  saldo_atual:    number | null;
+  produto:        string | number | null;
+  vl_unit:        number | null;
+  codfornec:      string | number | null;
+  fornecedor:     string | null;
+  veiculo:        string | number | null;
+  tipo_nf:        string | null;   // TIPONF — tipo da movimentação (ex.: "INV" = inventário)
+}
+
+export interface PostoInternoResponse {
+  data:                PostoInternoRow[];
+  saldo_atual_litros:  number | null;
+}
+
 // ─── Tipos: COMPRAS ───────────────────────────────────────────────────────────
 
 export interface ComprasRow {
@@ -345,35 +408,6 @@ export interface ComprasResponse {
   data: ComprasRow[];
 }
 
-// ─── Tipos: ABASTECIMENTO ─────────────────────────────────────────────────────
-
-export interface AbastecimentoRow {
-  codaba: string | number | null;
-  motorista: string | null;
-  posto: string | null;
-  estado: string | null;
-  vlrtot: number | null;
-  quanti: number | null;
-  datref: string | null;
-  numdoc: string | number | null;
-  veiculo: string | null;
-  marca: string | null;
-  modelo: string | null;
-  linha: string | number | null;
-  media: number | null;
-  ultkmt: number | null;
-  atukmt: number | null;
-  medfab: number | null;
-  odohor: string | null;
-  frota: string | null;
-  codigo_combustivel: string | number | null;
-  tipo_combustivel: string | null;
-  nota_fiscal: string | number | null;
-}
-
-export interface AbastecimentoResponse {
-  data: AbastecimentoRow[];
-}
 
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
@@ -385,7 +419,12 @@ async function callEdge<T>(
     "Content-Type": "application/json",
   };
 
-  if (!IS_LOCAL) {
+  if (IS_LOCAL) {
+    const apiKey = (
+      import.meta as { env?: { VITE_DW_API_SECRET?: string } }
+    ).env?.VITE_DW_API_SECRET;
+    if (apiKey) headers["x-api-key"] = apiKey;
+  } else {
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
     headers["apikey"] = SUPABASE_ANON_KEY;
   }
@@ -516,6 +555,16 @@ export async function fetchManutencao(params?: {
   return cached(key, () => callEdge<ManutencaoResponse>(ENDPOINT_MANUTENCAO, params ?? {}), TTL_FROTA);
 }
 
+// ─── Exports públicos: POSTO INTERNO ─────────────────────────────────────────
+
+export async function fetchPostoInterno(params?: {
+  dataInicio?: string;
+  dataFim?: string;
+}): Promise<PostoInternoResponse> {
+  const key = `posto-interno:${JSON.stringify(params ?? {})}`;
+  return cached(key, () => callEdge<PostoInternoResponse>(ENDPOINT_POSTO_INTERNO, params ?? {}), TTL_FROTA);
+}
+
 // ─── Exports públicos: COMPRAS ────────────────────────────────────────────────
 
 export async function fetchCompras(params?: {
@@ -616,5 +665,154 @@ export async function fetchFinanciamentoFrota(params?: {
   return cached(key, () =>
     callEdge<FinanciamentoFrotaResponse>(ENDPOINT_FINANCIAMENTO_FROTA, params ?? {}),
     TTL_FROTA,
+  );
+}
+
+// ─── Exports públicos: BANCOS ───────────────────────────────────────────────
+
+export async function fetchBankAccounts(params?: {
+  filial?:      string | null;
+  empresa?:     string | null;
+  dataInicio?:  string | null;
+  dataFim?:     string | null;
+}): Promise<BankAccountsResponse> {
+  const key = `bancos:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<BankAccountsResponse>(ENDPOINT_BANCOS, params ?? {}),
+    60 * 2, // 2 min cache
+  );
+}
+
+// ─── Tipos: CONSULTA NFE (conferência fiscal SEFAZ × sistema) ─────────────────
+
+export interface ConsultaNfeRow {
+  FILIAL:           string | number | null;
+  CHAVE:            string | null;
+  CNPJ:             string | null;
+  RAZAO_SOCIAL:     string | null;
+  DATA_EMISSAO:     string | null;
+  VALOR_NOTA:       number | null;
+  DATA_RECEBIMENTO: string | null;
+  NUMERO_NOTA:      string | null;
+  SERIE_NOTA:       string | null;
+  TPNF:             string | number | null;   // 0 = entrada, 1 = saída
+  DESCONSIDERADO:   number;                    // 1 = fornecedor desconsiderado (Minerva etc.)
+  CLASSIFICACAO_FORNECEDOR: string | null;     // classificação do fornecedor (RODCMO.DESCRI)
+  DESCONHECIMENTO:  number;                    // 1 = desconhecimento da operação (DESC_OPERACAO=1)
+  USUARIO_LANCAMENTO: string | null;           // quem lançou (última atualização no VR)
+  DATA_LANCAMENTO:  string | null;             // quando lançou
+  DIAS_PARADA:      number | null;             // dias desde o recebimento da nota
+  VALOR_LANCADO:    number | null;
+  ORIGEM:           "COMPRA" | "CONTAS_PAGAR" | null;
+  SITUACAO:         "OK" | "DIVERGENTE" | "NAO_LANCADA";
+}
+
+export interface ConsultaNfeResumo {
+  total:         number;
+  ok:            number;
+  nao_lancadas:  number;
+  divergentes:   number;
+  por_origem:    { compra: number; contas_pagar: number };
+}
+
+export interface ConsultaNfeResponse {
+  resumo: ConsultaNfeResumo;
+  data:   ConsultaNfeRow[];
+}
+
+const ENDPOINT_CONSULTA_NFE = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-consulta-nfe`
+  : `${SUPABASE_URL}/functions/v1/dw-consulta-nfe`;
+
+/**
+ * Conferência fiscal: cruza as NF-e emitidas contra o CNPJ (NFEIDIST/SEFAZ)
+ * com o que foi lançado (ESTENT por chave + PAGDOCI por CNPJ+número).
+ */
+export async function fetchConsultaNfe(params?: {
+  dataInicio?: string | null;
+  dataFim?:    string | null;
+  filial?:     string | null;
+  modo?:       "todas" | "nao_lancadas" | "divergentes";
+  limite?:     number;
+}): Promise<ConsultaNfeResponse> {
+  const key = `consulta-nfe:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<ConsultaNfeResponse>(ENDPOINT_CONSULTA_NFE, params ?? {}),
+    TTL_FINANCEIRO,
+  );
+}
+
+// ── Tendência mensal (gráfico) ───────────────────────────────────────────────
+export interface TendenciaNfeRow {
+  mes:          string;   // "yyyy-MM"
+  total:        number;
+  lancadas:     number;
+  nao_lancadas: number;
+}
+
+const ENDPOINT_CONSULTA_NFE_TENDENCIA = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-consulta-nfe-tendencia`
+  : `${SUPABASE_URL}/functions/v1/dw-consulta-nfe-tendencia`;
+
+/** Série mensal de notas (universo "pra lançar") pros últimos N meses. */
+export async function fetchConsultaNfeTendencia(params?: {
+  meses?: number;
+}): Promise<{ data: TendenciaNfeRow[] }> {
+  const key = `consulta-nfe-tend:${JSON.stringify(params ?? {})}`;
+  return cached(key, () =>
+    callEdge<{ data: TendenciaNfeRow[] }>(ENDPOINT_CONSULTA_NFE_TENDENCIA, params ?? {}),
+    TTL_FINANCEIRO,
+  );
+}
+
+// ─── DANFE em PDF pela chave (MeuDanfe via servidor DW) ───────────────────────
+const ENDPOINT_NFE_DANFE = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/nfe-danfe`
+  : `${SUPABASE_URL}/functions/v1/nfe-danfe`;
+
+export interface DanfeResponse {
+  ok: boolean;
+  name: string;
+  pdf_base64: string;
+}
+
+/** Gera o DANFE (PDF) de uma nota pela chave. Consulta PAGA — sem cache. */
+export async function fetchDanfe(chave: string): Promise<DanfeResponse> {
+  const limpa = String(chave ?? "").replace(/\D/g, "");
+  return callEdge<DanfeResponse>(ENDPOINT_NFE_DANFE, { chave: limpa });
+}
+
+// ── Extrato bancário por conta (/dw-bancos-extrato) ──────────────────────────
+const ENDPOINT_BANCOS_EXTRATO = LOCAL_API_URL
+  ? `${LOCAL_API_URL}/dw-bancos-extrato`
+  : `${SUPABASE_URL}/functions/v1/dw-bancos-extrato`;
+
+export interface BancoExtratoRow {
+  COD_CONTA:         string;
+  FILIAL:            number;
+  DOCUMENTO:         string | null;
+  TIPO_DOCUMENTO:    string | null;
+  DEBCRE:            'C' | 'D';
+  VLRDOC:            number;
+  DATA_LANCAMENTO:   string | null;
+  DATA_COMPENSACAO:  string | null;
+  HISTORICO:         string;
+  CENTRO_CUSTO:      string;
+  ANALITICA:         string;
+  ORIGEM:            'LB_C' | 'LB_D';
+  SITUACAO:          string;
+}
+
+export async function fetchBancoExtrato(params: {
+  codcta:      string;
+  codfil?:     number | null;
+  filial?:     string | null;
+  empresa?:    string | null;
+  dataInicio?: string | null;
+  dataFim?:    string | null;
+}): Promise<{ data: BancoExtratoRow[]; total: number }> {
+  // sem cache — carrega sempre que conta/período mudar
+  return callEdge<{ data: BancoExtratoRow[]; total: number }>(
+    ENDPOINT_BANCOS_EXTRATO, params
   );
 }

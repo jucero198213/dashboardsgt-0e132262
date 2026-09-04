@@ -1,4 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
+import { criarNotificacao } from "./notificacoesApi";
+import { criarMensagemSistema } from "./ticketMensagensApi";
+import { logActivity } from "./activityLogApi";
+
 
 export type TicketPrioridade = "baixa" | "media" | "alta" | "urgente";
 export type TicketStatus = "aberto" | "em_andamento" | "pendente" | "concluido" | "cancelado";
@@ -14,6 +18,7 @@ export interface Ticket {
   prioridade: TicketPrioridade;
   status: TicketStatus;
   observacoes: string | null;
+  categoria_id: string | null;
   created_by: string | null;
   aberto_por: string | null;
   created_at: string;
@@ -51,7 +56,49 @@ export async function createTicket(payload: TicketInput): Promise<Ticket> {
     .select()
     .single();
   if (error) throw error;
-  return data as Ticket;
+  const ticket = data as Ticket;
+
+  logActivity("ticket_created", `Criou chamado: ${ticket.titulo}`, { ticket_id: ticket.id }).catch(() => {});
+
+  notifyTITeam(ticket, userData.user?.email ?? "Usuário").catch((err) => console.error("notifyTITeam falhou:", err));
+
+  return ticket;
+}
+
+
+async function notifyTITeam(ticket: Ticket, remetenteEmail: string) {
+  const { data: tiProfiles } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("departamento", "ti");
+  if (!tiProfiles?.length) return;
+
+  const tiIds = tiProfiles.map((p) => p.id);
+
+  const notifs = tiIds.map((id) =>
+    criarNotificacao(
+      id,
+      "novo_chamado",
+      `Novo chamado: ${ticket.titulo}`,
+      `Aberto por ${remetenteEmail}`,
+      ticket.id,
+    ),
+  );
+  const results = await Promise.allSettled(notifs);
+  const rejected = results.filter((r) => r.status === "rejected");
+  if (rejected.length) console.error("Falha ao criar notificações:", rejected);
+
+  const { error } = await supabase.functions.invoke("notify-ticket-email", {
+    body: {
+      type: "novo_chamado",
+      ticket_id: ticket.id,
+      ticket_titulo: ticket.titulo,
+      destinatarios_ids: tiIds,
+      remetente_nome: remetenteEmail,
+      conteudo: ticket.descricao,
+    },
+  });
+  if (error) console.error("notify-ticket-email falhou:", error);
 }
 
 export async function fetchMyTickets(): Promise<Ticket[]> {
@@ -68,6 +115,12 @@ export async function fetchMyTickets(): Promise<Ticket[]> {
 }
 
 export async function updateTicket(id: string, payload: Partial<TicketInput>): Promise<Ticket> {
+  let statusAnterior: TicketStatus | null = null;
+  if (payload.status) {
+    const { data: atual } = await supabase.from("tickets").select("status").eq("id", id).maybeSingle();
+    statusAnterior = ((atual as { status: TicketStatus } | null)?.status) ?? null;
+  }
+
   const { data, error } = await supabase
     .from("tickets")
     .update(payload)
@@ -75,13 +128,38 @@ export async function updateTicket(id: string, payload: Partial<TicketInput>): P
     .select()
     .single();
   if (error) throw error;
-  return data as Ticket;
+  const ticket = data as Ticket;
+
+  logActivity("ticket_updated", `Atualizou chamado: ${ticket.titulo}`, { ticket_id: ticket.id }).catch(() => {});
+
+
+
+  if (payload.status && statusAnterior && statusAnterior !== ticket.status) {
+    criarMensagemSistema(
+      ticket.id,
+      `Status alterado de ${STATUS_LABEL[statusAnterior]} para ${STATUS_LABEL[ticket.status]}`,
+    ).catch((err) => console.error("Log de status falhou:", err));
+  }
+
+  if (payload.status && ticket.aberto_por) {
+    criarNotificacao(
+      ticket.aberto_por,
+      "status_chamado",
+      `Chamado atualizado: ${ticket.titulo}`,
+      `Status alterado para ${STATUS_LABEL[ticket.status]}`,
+      ticket.id,
+    ).catch(() => {});
+  }
+
+  return ticket;
 }
 
 export async function deleteTicket(id: string): Promise<void> {
   const { error } = await supabase.from("tickets").delete().eq("id", id);
   if (error) throw error;
+  logActivity("ticket_deleted", "Excluiu chamado", { ticket_id: id }).catch(() => {});
 }
+
 
 export const PRIORIDADE_LABEL: Record<TicketPrioridade, string> = {
   baixa: "Baixa",

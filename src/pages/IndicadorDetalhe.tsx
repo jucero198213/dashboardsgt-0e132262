@@ -37,7 +37,9 @@ const SUBTITLES: Record<string, string> = {
   "Imposto":         "Tributos, impostos e contribuições fiscais do período",
   "Pedágio":         "Custos com pedágios nas rotas operacionais",
   "Administrativo":  "Despesas administrativas gerais e de escritório",
+  "ADM Frota":       "Despesas administrativas ligadas à operação da frota",
   "Manutenção":      "Manutenção preventiva e corretiva de veículos e equipamentos",
+  "Investimento Frota": "Investimentos em renovação e ampliação da frota",
 };
 
 // ─── Design system executivo — sem azul de template ─────────────────────────
@@ -217,6 +219,28 @@ const HEADER_CFG: Record<string, HeaderCfg> = {
     codcus: "C. Custo 04 · 05 · 06 · 07 · 25",
     badgeClass: "border-amber-400/20 bg-amber-400/10 text-amber-300",
     badgeText: "Indicador Estratégico",
+  },
+  "ADM Frota": {
+    veilRgba: "rgba(125,211,252,0.13)",
+    stripe: "from-sky-400/60 to-sky-700/20",
+    border: "border-sky-400/[0.12]",
+    dotColor: "bg-sky-400", infoLabel: "ADMINISTRATIVO DE FROTA",
+    infoValue: "Gestão Operacional", infoValueColor: "text-sky-300",
+    extras: [{ text: "Licenciamento, documentação e taxas", color: "text-slate-400" }, { text: "Aguardando integração com o DW", color: "text-slate-500" }],
+    codcus: "C. Custo —",
+    badgeClass: "border-sky-400/20 bg-sky-400/10 text-sky-300",
+    badgeText: "Indicador Estratégico",
+  },
+  "Investimento Frota": {
+    veilRgba: "rgba(45,212,191,0.13)",
+    stripe: "from-teal-400/60 to-teal-700/20",
+    border: "border-teal-400/[0.12]",
+    dotColor: "bg-teal-400", infoLabel: "INVESTIMENTO EM FROTA",
+    infoValue: "Renovação e Ampliação", infoValueColor: "text-teal-300",
+    extras: [{ text: "Aquisição de veículos e implementos", color: "text-slate-400" }, { text: "Aguardando integração com o DW", color: "text-slate-500" }],
+    codcus: "C. Custo —",
+    badgeClass: "border-teal-400/20 bg-teal-400/10 text-teal-300",
+    badgeText: "Investimento Estratégico",
   },
 };
 
@@ -419,17 +443,20 @@ export default function IndicadorDetalhe() {
       <div className="relative w-full px-2 py-3 sm:px-4 sm:py-5 lg:px-8 lg:py-8 space-y-2 sm:space-y-4 lg:space-y-6">
 
           {/* ── Breadcrumb ── */}
-          <div className="flex items-center justify-between">
-            <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
-              <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200">Indicadores</button>
-              <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
-              <span className="truncate text-slate-300">{indicador.nome}</span>
-            </nav>
+          <div className="flex items-center justify-between gap-2">
+            {/* Mobile: ≡ + breadcrumb | Desktop: só breadcrumb */}
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <MobileNav />
+              <nav className="flex min-w-0 items-center gap-2 text-xs text-slate-500">
+                <button onClick={() => navigate("/indicadores")} className="transition-colors hover:text-slate-200 shrink-0">Indicadores</button>
+                <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
+                <span className="truncate text-slate-300">{indicador.nome}</span>
+              </nav>
+            </div>
             <div className="hidden sm:flex items-center gap-2">
               <HomeButton />
               <UserMenu />
             </div>
-            <MobileNav />
           </div>
 
           {/* ── Header — Diesel: A+C+D / demais: padrão ── */}
@@ -478,13 +505,13 @@ export default function IndicadorDetalhe() {
                         stroke="#c9a227" strokeWidth="2.5" strokeLinecap="round"/>
                       <circle cx={mo.x} cy={mo.y} r="3" fill="#c9a227"/>
                       <text x={ml.x} y={ml.y - 2} textAnchor="middle"
-                        fill="#c9a227" fontSize="7" fontFamily="sans-serif">{pMeta}%</text>
+                        fill="#c9a227" fontSize="7" fontFamily="var(--sgt-font-body)">{pMeta}%</text>
                       <text x={cx} y={cy - 4} textAnchor="middle"
-                        fill="white" fontSize="12" fontWeight="700" fontFamily="sans-serif">{pReal.toFixed(1)}%</text>
+                        fill="white" fontSize="12" fontWeight="700" fontFamily="var(--sgt-font-body)">{pReal.toFixed(1)}%</text>
                       <text x={cx} y={cy + 6} textAnchor="middle"
-                        fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="sans-serif">meta {pMeta}%</text>
-                      <text x={cx-r-3} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">E</text>
-                      <text x={cx+r-4} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="sans-serif">F</text>
+                        fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="var(--sgt-font-body)">meta {pMeta}%</text>
+                      <text x={cx-r-3} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="var(--sgt-font-body)">E</text>
+                      <text x={cx+r-4} y={cy+14} fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="var(--sgt-font-body)">F</text>
                     </svg>
                   );
                 })()}
@@ -592,8 +619,8 @@ export default function IndicadorDetalhe() {
                     <LineChart data={evolucaoDiaria} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
                       <defs>
                         <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#22d3ee" />
-                          <stop offset="100%" stopColor="#06b6d4" />
+                          <stop offset="0%" stopColor="#fbbf24" />
+                          <stop offset="100%" stopColor="#f59e0b" />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="2 6" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -602,7 +629,7 @@ export default function IndicadorDetalhe() {
                         tickFormatter={(v) => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : v >= 1e3 ? `${(v/1e3).toFixed(0)}k` : String(v)} />
                       <Tooltip content={<CustomTooltip />} />
                       <Line type="monotone" dataKey="mesAnterior" name="Mês Anterior" stroke="rgba(100,116,139,0.45)" strokeWidth={1.5} strokeDasharray="5 4" dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: "rgba(100,116,139,0.6)" }} />
-                      <Line type="monotone" dataKey="mesAtual"    name="Mês Atual"    stroke="url(#lineGradient)"     strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 2, stroke: "#0e7490", fill: "#22d3ee" }} />
+                      <Line type="monotone" dataKey="mesAtual"    name="Mês Atual"    stroke="url(#lineGradient)"     strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 2, stroke: "#d97706", fill: "#fbbf24" }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

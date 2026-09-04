@@ -1,16 +1,18 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ShoppingCart, FileText, Users, Package,
   Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
   ReceiptText, AlertCircle, TrendingUp, AlertTriangle,
   Clock, CheckCircle, DollarSign, TrendingDown,
+  LayoutGrid, Table2, BarChart3,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCompras, type ComprasRow } from "@/lib/dwApi";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { DatePickerInput } from "@/components/shared/DatePickerInput";
@@ -20,6 +22,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -56,6 +59,8 @@ export default function Compras() {
   const [page, setPage] = useState(1);
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
+  // View da tabela de compras — padrão Bancos (Cards / Tabela / Analytics)
+  const [comprasView, setComprasView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Fetch dados usando filtros do contexto ─────────────────────────────────
   const { data: comprasResp, isLoading } = useQuery({
@@ -81,46 +86,10 @@ export default function Compras() {
     const produtos = new Set(compras.map(c => c.produto)).size;
 
     return [
-      {
-        label: "Total Comprado", value: fmtK(total),
-        sub: "No período", icon: ShoppingCart, color: "cyan", rgb: "6,182,212",
-        stripe: "from-cyan-400/60 to-cyan-700/20",
-        border: "border-cyan-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-        iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-        iconTxt: "text-cyan-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Notas Fiscais", value: fmtNum(notas),
-        sub: "NFs distintas", icon: FileText, color: "emerald", rgb: "16,185,129",
-        stripe: "from-emerald-400/60 to-emerald-700/20",
-        border: "border-emerald-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-        iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
-        iconTxt: "text-emerald-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Fornecedores", value: fmtNum(fornecedores),
-        sub: "Fornecedores ativos", icon: Users, color: "amber", rgb: "251,191,36",
-        stripe: "from-amber-400/60 to-amber-700/20",
-        border: "border-amber-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
-        iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-        iconTxt: "text-amber-300",
-        sub2: "text-slate-500",
-      },
-      {
-        label: "Produtos", value: fmtNum(produtos),
-        sub: "SKUs distintos", icon: Package, color: "violet", rgb: "139,92,246",
-        stripe: "from-violet-400/60 to-violet-700/20",
-        border: "border-violet-400/[0.12]",
-        glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
-        iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
-        iconTxt: "text-violet-300",
-        sub2: "text-slate-500",
-      },
+      { label: "Total Comprado",  value: fmtK(total),          subtitle: "No período",          icon: ShoppingCart, tone: "cyan"    as const },
+      { label: "Notas Fiscais",   value: fmtNum(notas),        subtitle: "NFs distintas",        icon: FileText,     tone: "emerald" as const },
+      { label: "Fornecedores",    value: fmtNum(fornecedores), subtitle: "Fornecedores ativos",  icon: Users,        tone: "amber"   as const },
+      { label: "Produtos",        value: fmtNum(produtos),     subtitle: "SKUs distintos",       icon: Package,      tone: "violet"  as const },
     ];
   }, [compras]);
 
@@ -329,6 +298,33 @@ export default function Compras() {
   const inicio = (page - 1) * PAGE_SIZE;
   const paginados = comprasFiltradas.slice(inicio, inicio + PAGE_SIZE);
 
+  // ── Analytics da tabela (deriva de comprasFiltradas → respeita grupo + busca) ──
+  const comprasAnalytics = useMemo(() => {
+    const base = comprasFiltradas;
+    const n = base.length;
+    const tot = (c: ComprasRow) => (c.quantidade ?? 0) * (c.valor_un ?? 0);
+
+    const grpMap = new Map<string, number>();
+    base.forEach(c => { const k = c.grupo ?? "Sem grupo"; grpMap.set(k, (grpMap.get(k) ?? 0) + tot(c)); });
+    const porGrupo = [...grpMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const fornMap = new Map<string, number>();
+    base.forEach(c => { const k = c.fornecedor ?? "—"; fornMap.set(k, (fornMap.get(k) ?? 0) + tot(c)); });
+    const topFornecedores = [...fornMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const prodMap = new Map<string, number>();
+    base.forEach(c => { const k = c.produto ?? "—"; prodMap.set(k, (prodMap.get(k) ?? 0) + tot(c)); });
+    const topProdutos = [...prodMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const ccMap = new Map<string, number>();
+    base.forEach(c => { const k = c.centro_custo ?? "—"; ccMap.set(k, (ccMap.get(k) ?? 0) + tot(c)); });
+    const porCentroCusto = [...ccMap.entries()].filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const valorTotal = base.reduce((s, c) => s + tot(c), 0);
+
+    return { n, porGrupo, topFornecedores, topProdutos, porCentroCusto, valorTotal };
+  }, [comprasFiltradas]);
+
   function toggleSort(col: string) {
     if (sortCol === col) setSortAsc(!sortAsc);
     else { setSortCol(col); setSortAsc(true); }
@@ -370,21 +366,12 @@ export default function Compras() {
           {/* ════════ HEADER DESKTOP ════════ */}
           <div className="hidden sm:flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-3">
-              <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
-              <div className="h-6 w-px bg-[var(--sgt-border-medium)]" />
               <div className="flex flex-col leading-none">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                 <span className="text-[17px] font-black tracking-[-0.03em] text-white">Compras</span>
               </div>
             </div>
 
-            <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
-            </div>
 
             <div className="h-6 w-px shrink-0 bg-[var(--sgt-divider)]" />
 
@@ -443,47 +430,29 @@ export default function Compras() {
           </div>
 
           {/* ════════ HEADER MOBILE ════════ */}
-          <div className="flex sm:hidden items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
-              <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
+          <div className="flex sm:hidden items-center gap-2">
+            <MobileNav />
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="flex flex-col leading-none min-w-0">
                 <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
                 <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Compras</span>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <UpdateButton 
-                onClick={fetchFromDW} 
-                isFetching={isFetchingDw} 
-                loadingPhase={loadingPhase} 
-                progress={progress}
-                compact
-              />
-              <HomeButton />
-              <MobileNav />
-            </div>
+            <HomeButton />
+          </div>
+
+          {/* Mobile: datas + atualizar */}
+          <div className="flex sm:hidden items-center gap-2">
+            <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
+            <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+            <UpdateButton onClick={fetchFromDW} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
           </div>
 
           {/* ════════ KPIs ════════ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {kpis.map((k, i) => (
               <AnimatedCard key={k.label} delay={i * 60}>
-                <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
-                  <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
-                  <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
-                    style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
-                  <div className="relative flex h-full flex-col">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 leading-tight">{k.label}</p>
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
-                        <k.icon className="h-3.5 w-3.5" />
-                      </div>
-                    </div>
-                    <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
-                    <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
-                  </div>
-                </div>
+                <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isLoading} />
               </AnimatedCard>
             ))}
           </div>
@@ -506,18 +475,12 @@ export default function Compras() {
           </div>
 
           {/* ════════ FILTROS ════════ */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Buscar por produto, fornecedor ou NF..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-9 w-full rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[13px] text-white placeholder-slate-500 transition-all focus:border-[var(--sgt-border-medium)] focus:bg-[var(--sgt-input-hover)] focus:outline-none"
-              />
-            </div>
-
+          <div className="flex flex-wrap items-center gap-2">
+            <GooeyInput
+              placeholder="Buscar por produto, fornecedor ou NF..."
+              value={search}
+              onValueChange={(v) => setSearch(v)}
+            />
             <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
               <SelectTrigger className="h-9 w-full sm:w-[200px] rounded-lg text-[12px]">
                 <SelectValue placeholder="Grupo" />
@@ -527,6 +490,24 @@ export default function Compras() {
                 {grupos.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
               </SelectContent>
             </Select>
+
+            {/* Toggle de visualização — padrão tela Bancos */}
+            <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5 self-start sm:self-auto">
+              {([
+                { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+              ]).map(t => {
+                const Icon = t.icon;
+                const active = comprasView === t.id;
+                return (
+                  <button key={t.id} onClick={() => setComprasView(t.id)}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
+                    <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* ════════ GRÁFICOS ════════ */}
@@ -587,13 +568,13 @@ export default function Compras() {
                           <line key={f} x1={48} y1={16+(260-16-28)*(1-f)} x2={472} y2={16+(260-16-28)*(1-f)} stroke="var(--sgt-border-subtle)" strokeWidth={0.5} strokeDasharray="4,4"/>
                         ))}
                         {[0.25,0.5,0.75,1].map(f => (
-                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="system-ui">{fmtY(maxVal*f)}</text>
+                          <text key={f} x={44} y={16+(260-16-28)*(1-f)+4} textAnchor="end" fontSize={8} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{fmtY(maxVal*f)}</text>
                         ))}
                         <path d={`${buildPath(valoresAtual,480,260,48,8,16,28)} L472,232 L48,232 Z`} fill="url(#comprasGrad)"/>
                         <path d={buildPath(valoresAnt,480,260,48,8,16,28)} fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="5,3" opacity={0.6}/>
                         <path d={buildPath(valoresAtual,480,260,48,8,16,28)} fill="none" stroke="#fbbf24" strokeWidth={2.5}/>
                         {months.map((m,i) => (
-                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="system-ui">{m}</text>
+                          <text key={m} x={48+(i/11)*424} y={255} textAnchor="middle" fontSize={8.5} fill="var(--sgt-text-muted)" fontFamily="var(--sgt-font-body)">{m}</text>
                         ))}
                       </svg>
                     )}
@@ -616,15 +597,15 @@ export default function Compras() {
                             <div key={f.nome} className="flex flex-col gap-1">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] font-medium truncate" style={{ color: "var(--sgt-text-secondary)" }}>{f.nome}</span>
-                                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: isMax ? "#22d3ee" : "var(--sgt-text-secondary)" }}>{fmtK(f.valor)}</span>
+                                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: isMax ? "#fbbf24" : "var(--sgt-text-secondary)" }}>{fmtK(f.valor)}</span>
                               </div>
                               <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                                 <div
                                   className="h-full rounded-full transition-all duration-700"
                                   style={{
                                     width: `${Math.max(pct, 2)}%`,
-                                    background: isMax ? "linear-gradient(90deg,#22d3ee,#0891b2)" : "linear-gradient(90deg,rgba(34,211,238,0.6),rgba(8,145,178,0.4))",
-                                    boxShadow: isMax ? "0 0 10px rgba(34,211,238,0.3)" : "none",
+                                    background: isMax ? "linear-gradient(90deg,#fbbf24,#f59e0b)" : "linear-gradient(90deg,rgba(251,191,36,0.6),rgba(245,158,11,0.4))",
+                                    boxShadow: isMax ? "0 0 10px rgba(251,191,36,0.3)" : "none",
                                   }}
                                 />
                               </div>
@@ -652,6 +633,7 @@ export default function Compras() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)]">
+              {comprasView === "tabela" && (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -729,9 +711,176 @@ export default function Compras() {
                   </tbody>
                 </table>
               </div>
+              )}
+
+              {/* ════════ VIEW: CARDS ════════ */}
+              {comprasView === "cards" && (
+                <div className="p-3">
+                  {paginados.length === 0 ? (
+                    <div className="py-10 text-center text-[12px] text-slate-600">Nenhum registro encontrado</div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {paginados.map((compra, i) => {
+                        const total = (compra.quantidade ?? 0) * (compra.valor_un ?? 0);
+                        const nf = (compra as any).nf ?? compra.nota_fiscal ?? "—";
+                        return (
+                          <AnimatedCard key={i} delay={Math.min(i, 12) * 30}>
+                            <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-amber-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                              {/* Header: produto + grupo */}
+                              <div className="flex items-start justify-between gap-2 mb-2.5">
+                                <span className="text-[13px] font-bold text-slate-100 leading-tight line-clamp-2" title={compra.produto ?? ""}>{compra.produto ?? "—"}</span>
+                                {compra.grupo && (
+                                  <span className="shrink-0 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-amber-300 max-w-[80px] truncate" title={compra.grupo}>
+                                    {compra.grupo}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Fornecedor + data/NF */}
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Users className="w-3 h-3 text-slate-600 shrink-0" />
+                                <span className="text-[11px] text-slate-300 truncate" title={compra.fornecedor ?? ""}>{compra.fornecedor ?? "—"}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mb-3 text-[10px] text-slate-500">
+                                <span>{fmtData(compra.data_compra)}</span>
+                                <span className="font-mono text-slate-600">· NF {nf}</span>
+                              </div>
+
+                              {/* Métricas */}
+                              <div className="mt-auto grid grid-cols-3 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Qtd</p>
+                                  <p className="text-[11px] font-bold tabular-nums text-slate-200">{fmtNum(compra.quantidade ?? 0)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Vlr. un.</p>
+                                  <p className="text-[11px] font-bold tabular-nums text-cyan-300">{fmtBRL(compra.valor_un ?? 0)}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-600">Total</p>
+                                  <p className="text-[12px] font-black tabular-nums text-slate-100">{fmtBRL(total)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </AnimatedCard>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ════════ VIEW: ANALYTICS ════════ */}
+              {comprasView === "analytics" && (
+                <div className="p-3">
+                  {comprasAnalytics.n === 0 ? (
+                    <div className="py-10 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                      {/* Por grupo */}
+                      <AnimatedCard>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                            <Package className="w-3.5 h-3.5 text-amber-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Gasto por Grupo</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {comprasAnalytics.porGrupo.map(([grp, val], idx) => {
+                              const max = comprasAnalytics.porGrupo[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={grp}>{grp}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sgt-surface-inset, rgba(255,255,255,0.04))" }}>
+                                    <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-amber-200 w-[68px] text-right shrink-0">{fmtBRL(val)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Top fornecedores */}
+                      <AnimatedCard delay={60}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                            <Users className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Fornecedores</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {comprasAnalytics.topFornecedores.map(([forn, val], idx) => {
+                              const max = comprasAnalytics.topFornecedores[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[130px] truncate shrink-0" title={forn}>{forn}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sgt-surface-inset, rgba(255,255,255,0.04))" }}>
+                                    <div className="h-full rounded-full bg-cyan-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-cyan-200 w-[68px] text-right shrink-0">{fmtBRL(val)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Top produtos */}
+                      <AnimatedCard delay={120}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                            <ShoppingCart className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Produtos</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {comprasAnalytics.topProdutos.map(([prod, val], idx) => {
+                              const max = comprasAnalytics.topProdutos[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={prod}>{prod}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sgt-surface-inset, rgba(255,255,255,0.04))" }}>
+                                    <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-emerald-200 w-[68px] text-right shrink-0">{fmtBRL(val)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Por centro de custo */}
+                      <AnimatedCard delay={180}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                            <DollarSign className="w-3.5 h-3.5 text-violet-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Gasto por Centro de Custo</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {comprasAnalytics.porCentroCusto.map(([cc, val], idx) => {
+                              const max = comprasAnalytics.porCentroCusto[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={cc}>{cc}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--sgt-surface-inset, rgba(255,255,255,0.04))" }}>
+                                    <div className="h-full rounded-full bg-violet-400/70 transition-all duration-500" style={{ width: `${(val / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-violet-200 w-[68px] text-right shrink-0">{fmtBRL(val)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Paginação */}
-              {totalPaginas > 1 && (
+              {comprasView !== "analytics" && totalPaginas > 1 && (
                 <div className="flex items-center justify-between border-t border-[var(--sgt-border-subtle)] px-4 py-3">
                   <div className="text-[11px] text-slate-500">
                     Mostrando {inicio + 1} a {Math.min(inicio + PAGE_SIZE, comprasFiltradas.length)} de {comprasFiltradas.length}

@@ -1,86 +1,167 @@
-import { LucideIcon } from "lucide-react";
+import React, { useRef, useState } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  useSpring,
+} from "framer-motion";
 import { CountUp } from "@/components/shared/CountUp";
+
+export type KpiTone = "emerald" | "amber" | "cyan" | "violet" | "rose" | "orange" | "blue";
 
 interface KpiCardProps {
   label: string;
   value: string;
   rawValue?: number;
   subtitle?: string;
-  icon: LucideIcon;
-  tone: "emerald" | "amber" | "cyan" | "violet" | "rose";
+  icon: React.ElementType;
+  tone: KpiTone;
+  loading?: boolean;
+  onClick?: () => void;
+  compact?: boolean;
 }
 
-const toneMap = {
-  emerald: {
-    stripe:  "from-emerald-400/60 to-emerald-700/20",
-    border:  "border-emerald-400/[0.12]",
-    glow:    "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-    iconBg:  "bg-emerald-400/[0.08] border border-emerald-400/[0.15] text-emerald-300",
-    sub:     "text-emerald-500/80",
-    spot:    "rgba(16,185,129,0.10)",
-  },
-  amber: {
-    stripe:  "from-amber-400/60 to-amber-700/20",
-    border:  "border-amber-400/[0.12]",
-    glow:    "hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",
-    iconBg:  "bg-amber-400/[0.08] border border-amber-400/[0.15] text-amber-300",
-    sub:     "text-amber-500/80",
-    spot:    "rgba(245,158,11,0.10)",
-  },
-  cyan: {
-    stripe:  "from-cyan-400/60 to-cyan-700/20",
-    border:  "border-cyan-400/[0.12]",
-    glow:    "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-    iconBg:  "bg-cyan-400/[0.08] border border-cyan-400/[0.15] text-cyan-300",
-    sub:     "text-cyan-500/80",
-    spot:    "rgba(6,182,212,0.10)",
-  },
-  violet: {
-    stripe:  "from-violet-400/60 to-violet-700/20",
-    border:  "border-violet-400/[0.12]",
-    glow:    "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
-    iconBg:  "bg-violet-400/[0.08] border border-violet-400/[0.15] text-violet-300",
-    sub:     "text-violet-500/80",
-    spot:    "rgba(139,92,246,0.10)",
-  },
-  rose: {
-    stripe:  "from-rose-400/60 to-rose-700/20",
-    border:  "border-rose-400/[0.12]",
-    glow:    "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-    iconBg:  "bg-rose-400/[0.08] border border-rose-400/[0.15] text-rose-300",
-    sub:     "text-rose-500/80",
-    spot:    "rgba(244,63,94,0.10)",
-  },
+const toneColors: Record<KpiTone, { icon: string; sub: string; rgb: string }> = {
+  emerald: { icon: "text-emerald-400", sub: "#059669", rgb: "52,211,153"   },
+  amber:   { icon: "text-amber-400",   sub: "#d97706", rgb: "245,166,35"   },
+  cyan:    { icon: "text-cyan-400",    sub: "#0891b2", rgb: "34,211,238"   },
+  violet:  { icon: "text-violet-400",  sub: "#7c3aed", rgb: "167,139,250"  },
+  rose:    { icon: "text-rose-400",    sub: "#e11d48", rgb: "251,113,133"  },
+  orange:  { icon: "text-orange-400",  sub: "#ea580c", rgb: "251,146,60"   },
+  blue:    { icon: "text-blue-400",    sub: "#2563eb", rgb: "96,165,250"   },
 };
 
-export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: KpiCardProps) {
-  const t = toneMap[tone];
+export function KpiCard({
+  label, value, rawValue, subtitle, icon: Icon, tone, loading, onClick, compact,
+}: KpiCardProps) {
+  const t = toneColors[tone];
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 3D tilt — igual ao OsAndamentoCard
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useTransform(mouseY, [-50, 50], [8, -8]);
+  const rotateY = useTransform(mouseX, [-50, 50], [-8, 8]);
+  const springRX = useSpring(rotateX, { stiffness: 300, damping: 30 });
+  const springRY = useSpring(rotateY, { stiffness: 300, damping: 30 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const r = cardRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - (r.left + r.width  / 2));
+    mouseY.set(e.clientY - (r.top  + r.height / 2));
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setIsHovered(false);
+  };
+
   const isCurrency = value.startsWith("R$");
   const isPercent  = value.endsWith("%");
 
   return (
-    <div className={`group relative flex h-full min-h-[110px] sm:min-h-[130px] md:min-h-[150px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] md:rounded-[20px] border ${t.border} [background:var(--sgt-bg-card)] shadow-[var(--sgt-section-shadow)] transition-all duration-300 hover:-translate-y-[3px] ${t.glow}`}>
+    <motion.div
+      ref={cardRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        position: "relative",
+        minHeight: compact ? 92 : 112,
+        cursor: onClick ? "pointer" : "default",
+        userSelect: "none",
+        background: "var(--sgt-bg-card)",
+        border: "1px solid var(--sgt-border-subtle)",
+        borderRadius: "0.75rem",
+        overflow: "hidden",
+        rotateX: springRX,
+        rotateY: springRY,
+        transformStyle: "preserve-3d",
+        perspective: 1000,
+      }}
+      animate={{
+        borderColor: isHovered
+          ? `rgba(${t.rgb}, 0.25)`
+          : "var(--sgt-border-subtle)",
+      }}
+      transition={{ duration: 0.25 }}
+    >
+      {/* Overlay de hover — radial na cor do tone */}
+      <motion.div
+        style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: `radial-gradient(ellipse at top left, rgba(${t.rgb},0.09), transparent 60%)`,
+        }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.25 }}
+      />
 
-      {/* Stripe de cor no topo */}
-      <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${t.stripe}`} />
+      {/* Barra de acento superior */}
+      <motion.div
+        style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 2, pointerEvents: "none",
+          background: `linear-gradient(to right, rgba(${t.rgb},0.8), transparent)`,
+        }}
+        animate={{ opacity: isHovered ? 1 : 0.3 }}
+        transition={{ duration: 0.3 }}
+      />
 
-      {/* Spot glow no canto inferior direito */}
-      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36"
-        style={{ background: `radial-gradient(circle at 100% 100%, ${t.spot}, transparent 65%)` }} />
+      {/* Grid pattern */}
+      <div style={{ position: "absolute", inset: 0, opacity: 0.03, pointerEvents: "none" }}>
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id={`kpi-grid-${tone}`} width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill={`url(#kpi-grid-${tone})`} />
+        </svg>
+      </div>
 
-      <div className="relative flex h-full flex-col p-3 sm:p-5">
+      {/* Conteúdo */}
+      <div style={{
+        position: "relative", zIndex: 1,
+        display: "flex", flexDirection: "column", height: "100%", padding: compact ? 12 : 16,
+      }}>
         {/* Label + ícone */}
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] dark:text-slate-600 text-slate-500 leading-tight">
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+          <p style={{
+            fontSize: 10, fontWeight: 600, textTransform: "uppercase",
+            letterSpacing: "0.3em", color: "var(--sgt-text-muted)", lineHeight: 1.2, margin: 0,
+          }}>
             {label}
           </p>
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 ${t.iconBg}`}>
-            <Icon className="h-3.5 w-3.5" />
-          </div>
+          <motion.div
+            animate={{
+              filter: isHovered
+                ? `drop-shadow(0 0 6px rgba(${t.rgb},0.7))`
+                : `drop-shadow(0 0 3px rgba(${t.rgb},0.2))`,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <Icon className={`h-3.5 w-3.5 shrink-0 ${t.icon}`} />
+          </motion.div>
         </div>
 
-        {/* Valor — protagonista */}
-        <p className="mt-auto pt-2 sm:pt-3 md:pt-4 text-[16px] sm:text-[20px] md:text-[28px] lg:text-[30px] font-black leading-none tracking-[-0.05em] [color:var(--sgt-text-primary)] break-words">
+        {/* Valor */}
+        <motion.p
+          className={`dark:text-white text-slate-800${loading ? " animate-pulse" : ""}`}
+          style={{
+            marginTop: "auto",
+            paddingTop: compact ? 8 : 12,
+            fontSize: "clamp(1.1rem, 2vw, 1.4rem)",
+            fontWeight: 900,
+            lineHeight: 1.15,
+            letterSpacing: "-0.04em",
+            marginBottom: subtitle ? 6 : 8,
+          }}
+          animate={{ x: isHovered ? 3 : 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        >
           {rawValue !== undefined && isCurrency ? (
             <CountUp value={rawValue} format="brl" />
           ) : rawValue !== undefined && isPercent ? (
@@ -88,15 +169,26 @@ export function KpiCard({ label, value, rawValue, subtitle, icon: Icon, tone }: 
           ) : (
             value
           )}
-        </p>
+        </motion.p>
 
-        {/* Subtítulo */}
+        {/* Subtitle */}
         {subtitle && (
-          <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.15em] ${t.sub}`}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: t.sub, margin: "0 0 8px 0" }}>
             {subtitle}
           </p>
         )}
+
+        {/* Underline animada */}
+        <motion.div
+          style={{
+            height: 1,
+            background: `linear-gradient(to right, rgba(${t.rgb},0.6), rgba(${t.rgb},0.2), transparent)`,
+            transformOrigin: "left",
+          }}
+          animate={{ scaleX: isHovered ? 1 : 0.2 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        />
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -5,118 +5,188 @@
 @layer base {
   :root,
   .dark {
-    --background: 220 30% 5%;
-    --foreground: 210 20% 92%;
-    --card: 220 25% 8%;
-    --card-foreground: 210 20% 92%;
-    --popover: 220 25% 8%;
-    --popover-foreground: 210 20% 92%;
-    --primary: 160 60% 45%;
-    --primary-foreground: 220 30% 5%;
-    --secondary: 220 20% 14%;
-    --secondary-foreground: 210 20% 85%;
-    --muted: 220 20% 14%;
-    --muted-foreground: 215 15% 55%;
-    --accent: 215 70% 55%;
-    --accent-foreground: 210 20% 95%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --warning: 35 92% 50%;
-    --warning-foreground: 220 30% 5%;
-    --success: 160 60% 45%;
-    --success-foreground: 220 30% 5%;
-    --border: 220 15% 16%;
-    --input: 220 15% 16%;
-    --ring: 160 60% 45%;
+    /* SGT Design System v1.0 — shadcn semantic tokens (HSL sem hsl()) */
+    --background: 218 44% 6%;        /* #080C14 */
+    --foreground: 210 30% 95%;       /* #F0F4F8 */
+    --card: 219 38% 13%;             /* #141D2E */
+    --card-foreground: 210 30% 95%;
+    --popover: 219 38% 13%;
+    --popover-foreground: 210 30% 95%;
+    --primary: 36 91% 55%;           /* #F5A623 amber */
+    --primary-foreground: 218 44% 6%;
+    --secondary: 219 35% 9%;         /* #0F1520 */
+    --secondary-foreground: 213 22% 64%;
+    --muted: 219 35% 9%;
+    --muted-foreground: 213 22% 64%; /* #8FA3BB */
+    --accent: 211 100% 64%;          /* #4A9EFF info */
+    --accent-foreground: 218 44% 6%;
+    --destructive: 0 79% 60%;        /* #E94848 */
+    --destructive-foreground: 210 30% 95%;
+    --warning: 35 87% 56%;           /* #F0A730 */
+    --warning-foreground: 218 44% 6%;
+    --success: 150 71% 46%;          /* #22C97A */
+    --success-foreground: 218 44% 6%;
+    --border: 213 22% 18%;
+    --input: 213 22% 18%;
+    --ring: 36 91% 55%;              /* amber focus */
     --radius: 0.75rem;
-    --sidebar-background: 220 25% 6%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 160 60% 45%;
-    --sidebar-primary-foreground: 220 30% 5%;
-    --sidebar-accent: 220 20% 12%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 15% 14%;
-    --sidebar-ring: 160 60% 45%;
-    --card-elevated: 220 22% 10%;
+    --sidebar-background: 219 38% 10%;
+    --sidebar-foreground: 213 22% 64%;
+    --sidebar-primary: 36 91% 55%;
+    --sidebar-primary-foreground: 218 44% 6%;
+    --sidebar-accent: 219 35% 9%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 213 22% 18%;
+    --sidebar-ring: 36 91% 55%;
+    --card-elevated: 219 38% 16%;
 
-    --sgt-bg-base:        #04060f;
-    --sgt-bg-card:        #0d1120;
-    --sgt-bg-section:     rgba(7,10,20,0.96);
-    --sgt-bg-overlay:     rgba(14,20,40,0.98);
-    --sgt-border-subtle:  rgba(255,255,255,0.09);
-    --sgt-border-medium:  rgba(255,255,255,0.16);
-    --sgt-text-primary:   #f1f5f9;
-    --sgt-text-secondary: #94a3b8;
-    --sgt-text-muted:     #64748b;
-    --sgt-text-faint:     #334155;
-    --sgt-input-bg:       rgba(255,255,255,0.06);
-    --sgt-input-border:   rgba(255,255,255,0.12);
-    --sgt-input-hover:    rgba(255,255,255,0.11);
-    --sgt-skeleton-bg:    rgba(255,255,255,0.07);
-    --sgt-divider:        rgba(255,255,255,0.08);
-    --sgt-row-alt:        rgba(255,255,255,0.025);
-    --sgt-row-hover:      rgba(255,255,255,0.05);
-    --sgt-table-head:     rgba(255,255,255,0.04);
-    --sgt-progress-track: rgba(255,255,255,0.12);
-    --sgt-menu-bg:        rgba(10,14,30,0.98);
-    --sgt-scrollbar-track:#0d1120;
-    --sgt-scrollbar-thumb:#1e2a45;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(255,255,255,0.03), transparent 45%);
+    /* SGT — tokens hex (legacy, ainda consumidos por ~25 páginas) */
+    --sgt-bg-base:        #080C14;
+    --sgt-bg-card:        #141D2E;
+    --sgt-bg-surface:     #0F1520;
+    --sgt-bg-section:     #0F1520;
+    --sgt-bg-overlay:     rgba(15,21,32,0.98);
+    --sgt-border-subtle:  rgba(143,163,187,0.10);
+    --sgt-border-medium:  rgba(143,163,187,0.20);
+    --sgt-text-primary:   #F0F4F8;
+    --sgt-text-secondary: #8FA3BB;
+    --sgt-text-muted:     #526272;
+    --sgt-text-faint:     #364555;
+    --sgt-input-bg:       rgba(143,163,187,0.06);
+    --sgt-input-border:   rgba(143,163,187,0.14);
+    --sgt-input-hover:    rgba(143,163,187,0.11);
+    --sgt-skeleton-bg:    rgba(143,163,187,0.08);
+    --sgt-divider:        rgba(143,163,187,0.10);
+    --sgt-row-alt:        rgba(143,163,187,0.03);
+    --sgt-row-hover:      rgba(245,166,35,0.06);
+    --sgt-table-head:     rgba(143,163,187,0.05);
+    --sgt-progress-track: rgba(143,163,187,0.14);
+    --sgt-menu-bg:        #141D2E;
+    --sgt-scrollbar-track:#0F1520;
+    --sgt-scrollbar-thumb:#2A374A;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(245,166,35,0.04), transparent 45%);
     --sgt-section-shadow: 0 30px 80px rgba(0,0,0,0.65);
+
+    /* SGT — semânticos */
+    --sgt-success: #22C97A;
+    --sgt-danger:  #E94848;
+    --sgt-warning: #F0A730;
+    --sgt-info:    #4A9EFF;
+    --sgt-tone-steel: #4A6FB8;
+    --sgt-tone-steel-text: #A8C0E8;
+
+    /* SGT — RAW temático (inline styles via objeto RAW) */
+    --sgt-raw-inset:  #090c14;
+    --sgt-raw-border: rgba(255,255,255,0.07);
+
+    /* SGT — acento de marca (dark = âmbar; igual aos valores da sidebar) */
+    --sgt-accent:        #F5A623;
+    --sgt-accent-hover:  #D4891A;
+    --sgt-accent-soft:   rgba(245,166,35,0.12);
+    --sgt-accent-text:   #F5A623;
+    --sgt-sidebar-hover: rgba(255,255,255,0.03);
+    --sgt-flyout-bg:     #1A2540;
+    --sgt-flyout-border: rgba(255,255,255,0.12);
+
+    /* SGT — tipografia */
+    --sgt-font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --sgt-font-body:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --sgt-font-mono:    'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ── Sidebar (--sb-*): valores FIXOS, sempre escuros ──────────────────────
+     Independente do tema (.light ou .dark), a AppSidebar consome estas
+     variáveis em vez das --sgt-* equivalentes, garantindo que o menu lateral
+     nunca mude de aparência quando o usuário troca para o tema claro. */
+  :root, .dark, .light {
+    --sb-bg-surface:     #0F1520;
+    --sb-border-subtle:  rgba(143,163,187,0.10);
+    --sb-border-medium:  rgba(143,163,187,0.20);
+    --sb-text-primary:   #F0F4F8;
+    --sb-text-secondary: #8FA3BB;
+    --sb-text-muted:     #526272;
+    --sb-text-faint:     #364555;
+    --sb-input-hover:    rgba(143,163,187,0.11);
+    --sb-menu-bg:        #141D2E;
+    --sb-row-hover:      rgba(245,166,35,0.06);
+    --sb-accent:         #F5A623;
+    --sb-accent-hover:   #D4891A;
+    --sb-accent-soft:    rgba(245,166,35,0.12);
+    --sb-accent-text:    #F5A623;
+    --sb-sidebar-hover:  rgba(255,255,255,0.03);
+    --sb-flyout-bg:      #1A2540;
+    --sb-flyout-border:  rgba(255,255,255,0.12);
   }
 
   .light {
-    --background: 36 25% 93%;
-    --foreground: 25 30% 12%;
-    --card: 40 30% 98%;
-    --card-foreground: 25 30% 12%;
-    --popover: 40 30% 98%;
-    --popover-foreground: 25 30% 12%;
-    --primary: 168 55% 34%;
+    /* ── Tema claro SGT — 60/30/10 (branco · tinta · laranja #FE8005) ── */
+    --background: 220 21% 92%;          /* #E5E8EE base (escurecida p/ destacar cards) */
+    --foreground: 213 31% 13%;          /* #16202E tinta (30%) */
+    --card: 0 0% 98.5%;
+    --card-foreground: 213 31% 13%;
+    --popover: 0 0% 98.5%;
+    --popover-foreground: 213 31% 13%;
+    --primary: 30 99% 51%;              /* #FE8005 laranja SGT (10%) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 35 18% 88%;
-    --secondary-foreground: 25 25% 22%;
-    --muted: 35 15% 88%;
-    --muted-foreground: 25 12% 42%;
-    --accent: 168 55% 34%;
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 213 25% 20%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 215 14% 44%;
+    --accent: 30 99% 51%;               /* acento = laranja */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 68% 48%;
+    --destructive: 352 74% 57%;         /* #E0455A */
     --destructive-foreground: 0 0% 100%;
-    --warning: 35 88% 42%;
+    --warning: 30 99% 51%;
     --warning-foreground: 0 0% 100%;
-    --success: 160 55% 34%;
+    --success: 160 84% 34%;             /* #0E9E6E */
     --success-foreground: 0 0% 100%;
-    --border: 30 15% 82%;
-    --input: 30 15% 82%;
-    --ring: 168 55% 34%;
+    --border: 220 16% 87%;
+    --input: 220 16% 87%;
+    --ring: 30 99% 51%;
     --radius: 0.75rem;
-    --card-elevated: 38 25% 96%;
+    --card-elevated: 210 20% 97%;
 
-    /* SGT tokens — warm light */
-    --sgt-bg-base:        #ede5d8;
-    --sgt-bg-card:        #faf8f5;
-    --sgt-bg-section:     #f2ece3;
-    --sgt-bg-overlay:     #f2ece3;
-    --sgt-border-subtle:  rgba(60,45,30,0.10);
-    --sgt-border-medium:  rgba(60,45,30,0.20);
-    --sgt-text-primary:   #1c1510;
-    --sgt-text-secondary: #4a3f35;
-    --sgt-text-muted:     #6b5e52;
-    --sgt-text-faint:     #a69888;
-    --sgt-input-bg:       rgba(60,45,30,0.04);
-    --sgt-input-border:   rgba(60,45,30,0.15);
-    --sgt-input-hover:    rgba(60,45,30,0.08);
-    --sgt-skeleton-bg:    rgba(60,45,30,0.07);
-    --sgt-divider:        rgba(60,45,30,0.10);
-    --sgt-row-alt:        rgba(60,45,30,0.03);
-    --sgt-row-hover:      rgba(168,120,60,0.07);
-    --sgt-table-head:     rgba(60,45,30,0.04);
-    --sgt-progress-track: rgba(60,45,30,0.10);
-    --sgt-menu-bg:        #faf8f5;
-    --sgt-scrollbar-track:#e4ddd2;
-    --sgt-scrollbar-thumb:#b5a898;
-    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(168,120,60,0.05), transparent 45%);
-    --sgt-section-shadow: 0 8px 32px rgba(60,45,30,0.10), 0 1px 0 rgba(60,45,30,0.05);
+    /* SGT tokens — 60/30/10 · hierarquia base<section<card p/ destacar cards */
+    --sgt-bg-base:        #e5e8ee;   /* página (mais escura) */
+    --sgt-bg-card:        #fafbfc;   /* cards (branco suave, destacam sem ofuscar) */
+    --sgt-bg-surface:     #fafbfc;   /* sidebar / workspaces — não usado pela AppSidebar (ver --sb-*) */
+    --sgt-bg-section:     #edeff4;   /* painel atrás dos cards (intermediário) */
+    --sgt-bg-overlay:     #fafbfc;
+    --sgt-border-subtle:  rgba(20,30,45,0.08);
+    --sgt-border-medium:  rgba(20,30,45,0.16);
+    --sgt-text-primary:   #16202e;   /* 30% tinta */
+    --sgt-text-secondary: #5a6675;
+    --sgt-text-muted:     #8a94a3;
+    --sgt-text-faint:     #aeb6c2;
+    --sgt-input-bg:       rgba(20,30,45,0.03);
+    --sgt-input-border:   rgba(20,30,45,0.14);
+    --sgt-input-hover:    rgba(20,30,45,0.06);
+    --sgt-skeleton-bg:    rgba(20,30,45,0.07);
+    --sgt-divider:        rgba(20,30,45,0.08);
+    --sgt-row-alt:        rgba(20,30,45,0.022);
+    --sgt-row-hover:      rgba(254,128,5,0.08);   /* hover laranja (10%) */
+    --sgt-table-head:     rgba(20,30,45,0.035);
+    --sgt-progress-track: rgba(20,30,45,0.10);
+    --sgt-menu-bg:        #fafbfc;
+    --sgt-scrollbar-track:#e8eaee;
+    --sgt-scrollbar-thumb:#c2c8d0;
+    --sgt-card-glow:      radial-gradient(ellipse at top left, rgba(254,128,5,0.05), transparent 45%);
+    --sgt-section-shadow: 0 4px 24px rgba(20,30,45,0.07), 0 1px 0 rgba(20,30,45,0.04);
+
+    /* RAW temático — trilhas/divisórias claras (eram dark cravado) */
+    --sgt-raw-inset:  rgba(20,30,45,0.06);
+    --sgt-raw-border: rgba(20,30,45,0.10);
+
+    /* Acento de marca (laranja SGT) — usar nos ajustes página a página */
+    --sgt-accent:        #fe8005;
+    --sgt-accent-hover:  #e5730a;
+    --sgt-accent-soft:   rgba(254,128,5,0.12);
+    --sgt-accent-text:   #9a4a06;   /* laranja escuro p/ texto sobre fundo claro */
+    --sgt-tone-steel: #3B5998;
+    --sgt-tone-steel-text: #2C4A7C;
+    --sgt-sidebar-hover: rgba(20,30,45,0.05);
+    --sgt-flyout-bg:     #fafbfc;
+    --sgt-flyout-border: rgba(20,30,45,0.12);
   }
 }
 
@@ -125,9 +195,19 @@
 
   body {
     @apply antialiased;
+    font-family: var(--sgt-font-body);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-color: var(--sgt-bg-base);
     color: var(--sgt-text-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--sgt-font-display);
+    letter-spacing: -0.01em;
+  }
+
+  code, kbd, pre, samp, .font-mono {
+    font-family: var(--sgt-font-mono);
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -146,6 +226,11 @@
 /* ── Microinterações globais ── */
 * { -webkit-font-smoothing: antialiased; }
 
+/* ── Touch: app-like feel (sem highlight azul, tap rápido, sem bounce) ── */
+* { -webkit-tap-highlight-color: transparent; }
+button, a, [role="button"], select, input { touch-action: manipulation; }
+html { overscroll-behavior-y: none; }
+
 /* Focus ring acessível */
 button:focus-visible, a:focus-visible {
   outline: 2px solid rgba(34,211,238,0.6);
@@ -161,6 +246,29 @@ button:focus-visible, a:focus-visible {
 
 /* CountUp — sem flash de conteúdo */
 .count-up-value { font-variant-numeric: tabular-nums; }
+
+/* Sidebar — item slide-in lateral */
+@keyframes sidebarItemIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Home hero — floating orbs */
+@keyframes floatOrb1 {
+  0%,100% { transform: translate(0, 0);        }
+  38%     { transform: translate(16px, -18px); }
+  72%     { transform: translate(-12px, 10px); }
+}
+@keyframes floatOrb2 {
+  0%,100% { transform: translate(0, 0);         }
+  42%     { transform: translate(-18px, -10px); }
+  78%     { transform: translate(14px, 16px);   }
+}
+@keyframes floatOrb3 {
+  0%,100% { transform: translate(0, 0);        }
+  50%     { transform: translate(12px, -16px); }
+  82%     { transform: translate(-14px, 12px); }
+}
 
 /* Pulse sutil para badges "Tempo real" */
 @keyframes softPing {
@@ -179,8 +287,8 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── Light: hero dots/lines pattern invisible ── */
-.light circle[fill="rgba(255,255,255,0.12)"] { fill: rgba(60,45,30,0.08); }
-.light path[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(60,45,30,0.04); }
+.light circle[fill="rgba(255,255,255,0.12)"] { fill: rgba(30,40,60,0.08); }
+.light path[stroke="rgba(255,255,255,0.04)"] { stroke: rgba(30,40,60,0.04); }
 
 /* ── Light: chart SVG fills ── */
 .light rect[fill*="rgba(0,0,0"] { fill: transparent !important; }
@@ -190,7 +298,7 @@ button:focus-visible, a:focus-visible {
 /* ── Light: grid lines in charts ── */
 .light line[stroke*="rgba(255,255,255,0.07)"],
 .light line[stroke*="rgba(255,255,255,0.05)"],
-.light line[stroke*="rgba(255,255,255,0.10)"] { stroke: rgba(60,45,30,0.12) !important; }
+.light line[stroke*="rgba(255,255,255,0.10)"] { stroke: rgba(30,40,60,0.12) !important; }
 
 /* ── Light: module card dots background ── */
 .light .sgt-atmosphere { opacity: 0 !important; }
@@ -213,7 +321,32 @@ button:focus-visible, a:focus-visible {
   background: var(--sgt-bg-card) !important;
 }
 .light [class*="bg-black\/"] {
-  background-color: rgba(60,45,30,0.04) !important;
+  background-color: rgba(30,40,60,0.04) !important;
+}
+
+/* ── Light: hover de cards UNIFICADO — sombra neutra (sem glow colorido) ──
+   Pega qualquer card arredondado com hover:shadow-[...] e também o
+   .sgt-hover-lift, forçando a MESMA sombra neutra no hover. Resolve a
+   incongruência (uns acendiam colorido, outros só sombra). Dark fica intacto. */
+.light [class*="hover:shadow-["][class*="rounded-["]:hover,
+.light .sgt-hover-lift:hover {
+  box-shadow: 0 10px 30px -6px rgba(20, 30, 45, 0.16) !important;
+}
+
+/* ── Light: suaviza sombras de repouso pesadas (do dark) ──
+   Catch dos shadow-[...rgba(0,0,0,0.3..0.6)] e troca por uma sombra clara.
+   Exceto dentro do modo TV (.sgt-tv), sempre escuro, que usa as sombras para
+   a profundidade 3D do tanque/bomba. */
+.light [class*="shadow-["][class*="rgba(0,0,0,0.3"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.4"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.5"]:not(.sgt-tv *),
+.light [class*="shadow-["][class*="rgba(0,0,0,0.6"]:not(.sgt-tv *) {
+  box-shadow: 0 6px 18px -6px rgba(20, 30, 45, 0.12) !important;
+}
+
+/* ── Light: overlays bg-white/[0.0x] do dark → tinta sutil (senão somem) ── */
+.light [class*="bg-white/[0.0"] {
+  background-color: rgba(20, 30, 45, 0.04) !important;
 }
 
 /* ── Mobile: safe areas for PWA standalone ── */
@@ -229,21 +362,105 @@ button:focus-visible, a:focus-visible {
   }
 }
 
-/* ── Mobile: better touch targets ── */
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATION SUITE — v1
+   Regras que cascateiam em TODAS as páginas (cabem em 640px)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Sempre: evita scroll horizontal acidental no app inteiro */
+/* NOTA: overflow-x NÃO vai no html — no iOS Safari ele cria um novo
+   containing block para position:fixed, cortando popovers/calendários. */
+html {
+  max-width: 100vw;
+}
+body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 @media (max-width: 640px) {
+  /* ─── Touch targets confortáveis ─── */
   button, a, [role="button"], select, input[type="date"] {
-    min-height: 32px;
+    min-height: 36px;
   }
-  
-  /* Prevent zoom on input focus (iOS) */
+
+  /* iOS: evita zoom no foco de inputs */
   input, select, textarea {
     font-size: 16px !important;
   }
-  
-  /* Smoother scrolling on iOS */
+
+  /* Scroll suave em iOS */
   .overflow-x-auto, .overflow-y-auto {
     -webkit-overflow-scrolling: touch;
   }
+
+  /* ─── Tipografia fluida — encolhe headings gigantes ─── */
+  h1 { font-size: clamp(1.4rem, 6.5vw, 2rem) !important; line-height: 1.15 !important; }
+  h2 { font-size: clamp(1.15rem, 5vw, 1.5rem) !important; line-height: 1.2 !important; }
+  h3 { font-size: clamp(1rem, 4.2vw, 1.25rem) !important; line-height: 1.25 !important; }
+
+  /* Valores monetários e KPIs gigantes não estouram */
+  .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+    font-size: clamp(1.5rem, 7vw, 2.25rem) !important;
+    line-height: 1.1 !important;
+  }
+  .text-2xl { font-size: clamp(1.2rem, 5.5vw, 1.5rem) !important; }
+
+  /* ─── Tabelas — força scroll horizontal e fontes compactas ─── */
+  table {
+    font-size: 11px !important;
+  }
+  table th, table td {
+    padding: 6px 8px !important;
+    white-space: nowrap;
+  }
+
+  /* ─── Paddings: encolhe os exageros mais comuns sem quebrar layout ─── */
+  .p-8 { padding: 1rem !important; }
+  .p-10, .p-12 { padding: 1.25rem !important; }
+  .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .px-10, .px-12 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+  .py-10 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+  .py-12, .py-14, .py-16 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+  .py-20, .py-24 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+
+  /* Gaps grandes em grids — encolhe para respirar sem espremer */
+  .gap-8 { gap: 0.75rem !important; }
+  .gap-10, .gap-12 { gap: 1rem !important; }
+
+  /* Margens verticais excessivas */
+  .mb-10, .mb-12 { margin-bottom: 1.25rem !important; }
+  .mt-10, .mt-12 { margin-top: 1.25rem !important; }
+
+  /* ─── Grids: força quebra em mobile para grids que NÃO declaram responsive ─── */
+  [class~="grid-cols-3"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-4"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-5"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]),
+  [class~="grid-cols-6"]:not([class*="sm:grid-cols"]):not([class*="md:grid-cols"]):not([class*="lg:grid-cols"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* ─── Cards / containers — radius compacto ─── */
+  .rounded-\[14px\], .rounded-\[16px\], .rounded-\[20px\] { border-radius: 12px; }
+
+  /* Min-w 0 em filhos de flex/grid para permitir truncate funcionar */
+  .flex > *, .grid > * { min-width: 0; }
+
+  /* ─── Safe area bottom para PWA standalone ─── */
+  body {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px) !important;
+  }
+
+  /* ─── Recharts: encolhe legendas/eixos no mobile ─── */
+  .recharts-cartesian-axis-tick text { font-size: 9px !important; }
+  .recharts-legend-item-text { font-size: 10px !important; }
+  .recharts-tooltip-wrapper { font-size: 11px !important; }
+}
+
+/* Tablet refinements */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: clamp(1.75rem, 4vw, 2.25rem) !important; }
+  .text-5xl, .text-6xl { font-size: clamp(2rem, 5vw, 2.75rem) !important; }
 }
 
 /* Smooth theme transitions */
@@ -267,16 +484,16 @@ button:focus-visible, a:focus-visible {
 /* ── Light theme: boost contrast on Tailwind slate classes ── */
 .light .text-slate-300,
 .light .text-slate-400 {
-  color: #4a3f35 !important;
+  color: #374151 !important;
 }
 .light .text-slate-500 {
-  color: #6b5e52 !important;
+  color: #6b7280 !important;
 }
 .light .text-slate-600 {
-  color: #4a3f35 !important;
+  color: #374151 !important;
 }
 .light .text-white {
-  color: #1c1510 !important;
+  color: #0f1623 !important;
 }
 
 /* Card inner radial glows — tone down in light */
@@ -286,12 +503,12 @@ button:focus-visible, a:focus-visible {
 
 /* Table header text */
 .light .text-\[10px\].uppercase {
-  color: #4a3f35;
+  color: #6b7280;
 }
 
 /* Progress bar track */
 .light [class*="bg-white\/10"] {
-  background: rgba(60,45,30,0.10) !important;
+  background: rgba(30,40,60,0.10) !important;
 }
 
 /* Inner card section (ação rápida) */
@@ -321,7 +538,7 @@ button:focus-visible, a:focus-visible {
 
 /* Chart area: make SVG text visible */
 .light text {
-  fill: #6b5e52;
+  fill: #6b7280;
 }
 
 /* Gradient title in light mode */
@@ -330,24 +547,26 @@ button:focus-visible, a:focus-visible {
 }
 
 /* ── Light: additional text contrast fixes ── */
-.light .text-slate-300 { color: #4a3f35 !important; }
-.light .text-slate-400 { color: #4a3f35 !important; }
-.light .text-slate-500 { color: #6b5e52 !important; }
-.light .text-slate-600 { color: #4a3f35 !important; }
-.light .text-white     { color: #1c1510 !important; }
+.light .text-slate-100 { color: #16202e !important; }
+.light .text-slate-200 { color: #1f2937 !important; }
+.light .text-slate-300 { color: #374151 !important; }
+.light .text-slate-400 { color: #374151 !important; }
+.light .text-slate-500 { color: #6b7280 !important; }
+.light .text-slate-600 { color: #374151 !important; }
+.light .text-white     { color: #0f1623 !important; }
 
 /* Gradient title override in light — prevent invisible white */
-.light .from-white { --tw-gradient-from: #1c1510 !important; }
-.light .via-white  { --tw-gradient-via: #4a3f35 !important; }
+.light .from-white { --tw-gradient-from: #0f1623 !important; }
+.light .via-white  { --tw-gradient-via: #374151 !important; }
 
 /* SVG text override for chart axes */
-.light svg text { fill: #6b5e52; }
+.light svg text { fill: #6b7280; }
 
 /* Violet/cyan pill text in light */
-.light .text-violet-200 { color: #5b21b6 !important; }
-.light .text-cyan-200   { color: #0e7490 !important; }
-.light .text-emerald-200 { color: #065f46 !important; }
-.light .text-amber-200  { color: #92400e !important; }
+.light .text-violet-200 { color: #6d28d9 !important; }
+.light .text-cyan-200   { color: #0891b2 !important; }
+.light .text-emerald-200 { color: #059669 !important; }
+.light .text-amber-200  { color: #b45309 !important; }
 
 /* Emerald/amber "Ação rápida" label */
 .light .text-emerald-200\/75 { color: #065f46 !important; }
@@ -407,6 +626,14 @@ button:focus-visible, a:focus-visible {
 /* Progress bars track */
 .light [style*="rgba(255,255,255,0.12)"] { background: rgba(60,45,30,0.12) !important; }
 .light [style*="rgba(255,255,255,0.10)"] { background: rgba(60,45,30,0.10) !important; }
+
+/* Item ativo da sidebar (expandido) — garante o fill laranja por cima das
+   regras .light [style*=...] acima (que pegavam o box-shadow da pílula por
+   engano e matavam o gradiente do fundo). Especificidade (0,2,1) > (0,2,0). */
+.light button.sgt-nav-active,
+button.sgt-nav-active {
+  background: linear-gradient(95deg, var(--sgt-accent) 0%, var(--sgt-accent-hover) 100%) !important;
+}
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
@@ -451,6 +678,7 @@ button:focus-visible, a:focus-visible {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
   transform: translateX(-100%) skewX(-12deg);
   pointer-events: none;
@@ -464,9 +692,13 @@ button:focus-visible, a:focus-visible {
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.2s ease;
+  /* mantém o recorte arredondado estável durante o transform (evita cantos
+     quadrados no hover em Chrome/Safari) */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 .sgt-hover-lift:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) translateZ(0);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
@@ -555,4 +787,98 @@ section.sgt-section-card:hover {
 }
 .sgt-tr-hover:hover {
   padding-left: 2px;
+}
+
+/* ── Light: botões com texto claro ficam ilegíveis ── */
+
+/* UpdateButton — amber com texto escuro */
+.light .border-amber-400\/50.bg-amber-500\/20,
+.light [class*="border-amber-400"][class*="bg-amber-500\/20"] {
+  background-color: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.45) !important;
+  color: #92400e !important;
+}
+.light [class*="border-amber-400"][class*="bg-amber-500\/20"]:hover {
+  background-color: rgba(245,158,11,0.20) !important;
+  color: #78350f !important;
+}
+
+/* text-amber-100/200 em light */
+.light .text-amber-100 { color: #92400e !important; }
+.light .text-amber-200 { color: #b45309 !important; }
+
+/* HomeButton — amber gradient com texto escuro */
+.light [class*="border-amber-500\/60"] {
+  background: rgba(245,158,11,0.10) !important;
+  border-color: rgba(245,158,11,0.40) !important;
+  color: #92400e !important;
+}
+.light [class*="border-amber-500\/60"]:hover {
+  background: rgba(245,158,11,0.18) !important;
+  color: #78350f !important;
+}
+
+/* Dropdown items no HomeButton */
+.light [class*="bg-amber-400\/10"] { background-color: rgba(245,158,11,0.08) !important; }
+.light [class*="bg-cyan-400\/10"]   { background-color: rgba(6,182,212,0.08) !important; }
+.light [class*="bg-rose-400\/10"]   { background-color: rgba(244,63,94,0.08) !important; }
+.light [class*="bg-violet-400\/10"] { background-color: rgba(139,92,246,0.08) !important; }
+.light [class*="bg-emerald-400\/10"]{ background-color: rgba(52,211,153,0.08) !important; }
+.light [class*="bg-orange-400\/10"] { background-color: rgba(251,146,60,0.08) !important; }
+
+/* ── Otimizações de performance de renderização ─────────────────────────────── */
+
+/* Elementos decorativos fixos (radiais de fundo) — isolados em sua própria
+   camada compositor. Mudanças neles não reforçam layout/paint do resto da página. */
+.sgt-atmosphere {
+  contain: strict;
+  will-change: auto; /* promovido quando necessário, não fixo */
+}
+
+/* Elementos com parallax (framer-motion will-change-transform) — garante
+   que o repaint fica confinado ao elemento, não vazando pro pai. */
+.will-change-transform {
+  isolation: isolate;
+}
+
+/* Scrollbar customizada — performance melhorada */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* Fontes: força renderização otimizada em toda a app */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* Navbar badge "Tempo real" e outros badges com fundo escuro */
+.light [class*="bg-cyan-500\/\[0.08\]"]   { background-color: rgba(6,182,212,0.10) !important; }
+.light [class*="bg-amber-500\/\[0.08\]"]  { background-color: rgba(245,158,11,0.10) !important; }
+.light [class*="bg-rose-500\/\[0.08\]"]   { background-color: rgba(244,63,94,0.10) !important; }
+.light [class*="bg-violet-500\/\[0.08\]"] { background-color: rgba(139,92,246,0.10) !important; }
+.light [class*="text-cyan-300"]   { color: #0891b2 !important; }
+.light [class*="text-amber-300"]  { color: #b45309 !important; }
+.light [class*="text-rose-300"]   { color: #be123c !important; }
+.light [class*="text-violet-300"] { color: #6d28d9 !important; }
+.light [class*="text-emerald-300"]{ color: #059669 !important; }
+.light [class*="text-orange-300"] { color: #c2410c !important; }
+
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile safe-bottom: evita que o botão flutuante da IA e a
+   BottomNav cubram o último item das páginas. Aplica padding
+   no container interno de scroll padrão das páginas SGT.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Padrão: <section><div class="... overflow-auto"> conteúdo */
+  section > div.overflow-auto {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* Container raiz min-h-[100dvh] sem section também (Indicadores etc.) */
+  .sgt-mobile-safe-bottom {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }

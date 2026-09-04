@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -6,6 +6,7 @@ import {
   ArrowRight,
   RefreshCw,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FluxoBreakdown } from "@/components/fluxo/FluxoBreakdown";
 
 /* ------------------------------------------------------------------ */
 /*  CountUp — animação de número subindo                               */
@@ -332,7 +334,7 @@ const MiniLineChart = ({
                 strokeWidth={frac === 0 ? 0.8 : 0.5}/>
               {frac > 0 && (
                 <text x={padL - 6} y={y + 3} textAnchor="end"
-                  fill="var(--sgt-text-muted)" fontSize={9} fontWeight={500} fontFamily="system-ui,sans-serif">
+                  fill="var(--sgt-text-muted)" fontSize={9} fontWeight={500} fontFamily="var(--sgt-font-body)">
                   {formatY(val)}
                 </text>
               )}
@@ -406,20 +408,20 @@ const MiniLineChart = ({
               <rect x={tx} y={ty} width={150} height={64} rx={6}
                 fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
               <text x={tx+8} y={ty+13} fill="rgba(226,232,240,0.92)"
-                fontSize={9.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                fontSize={9.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                 {months[hoverIndex]}{ano ? ` ${ano}` : ""}
               </text>
               <rect x={tx+8} y={ty+19} width={2.5} height={9} rx={1} fill={primaryColor}/>
-              <text x={tx+15} y={ty+27} fill={primaryColor} fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+              <text x={tx+15} y={ty+27} fill={primaryColor} fontSize={8.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                 Realizado: {formatFull(r)}
               </text>
               <rect x={tx+8} y={ty+33} width={2.5} height={9} rx={1} fill={secondaryColor}/>
-              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.78)" fontSize={8.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+              <text x={tx+15} y={ty+41} fill="rgba(148,163,184,0.78)" fontSize={8.5} fontWeight={600} fontFamily="var(--sgt-font-body)">
                 Previsto: {formatFull(p)}
               </text>
               {diff !== null && (
                 <text x={tx+8} y={ty+55} fill={diff >= 0 ? "#34d399" : "#f87171"}
-                  fontSize={8.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                  fontSize={8.5} fontWeight={700} fontFamily="var(--sgt-font-body)">
                   {diff >= 0 ? "▲" : "▼"} {Math.abs(diff).toFixed(1)}% vs previsto
                 </text>
               )}
@@ -435,7 +437,7 @@ const MiniLineChart = ({
             <text key={`mx-${i}`} x={toX(i)} y={svgH - 6} textAnchor="middle"
               fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.72)"}
               fontSize={9} fontWeight={hoverIndex === i ? 700 : 500}
-              fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+              fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
               {months[i]}
             </text>
           );
@@ -590,14 +592,20 @@ const YearComparisonChart = ({
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
               <linearGradient id="yc-area-cr" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.13"/>
-                <stop offset="55%"  stopColor="#2dd4bf" stopOpacity="0.04"/>
+                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.22"/>
+                <stop offset="45%"  stopColor="#2dd4bf" stopOpacity="0.08"/>
                 <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0"/>
               </linearGradient>
               <linearGradient id="yc-bg-shadow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(0,0,0,0.18)"/>
-                <stop offset="20%" stopColor="rgba(0,0,0,0)"/>
+                <stop offset="0%" stopColor="rgba(0,0,0,0.22)"/>
+                <stop offset="25%" stopColor="rgba(0,0,0,0)"/>
               </linearGradient>
+              <filter id="yc-glow-cr" x="-20%" y="-60%" width="140%" height="220%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+                <feColorMatrix in="blur" type="matrix"
+                  values="0 0 0 0 0.18  0 0 0 0 0.83  0 0 0 0 0.75  0 0 0 0.6 0" result="glow"/>
+                <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
               <clipPath id="yc-clip">
                 <rect x={padL} y={padTop} width={chartW} height={chartH}/>
               </clipPath>
@@ -619,7 +627,7 @@ const YearComparisonChart = ({
                     strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
+                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="var(--sgt-font-body)">
                       {formatY(maxVal * frac)}
                     </text>
                   )}
@@ -627,25 +635,26 @@ const YearComparisonChart = ({
               );
             })}
 
-            {/* Linhas histórico (ano anterior) — fantasma; acendem com toggle/hover */}
-            <path d={buildSmooth(cpP)} fill="none" stroke="rgba(248,113,113,0.28)"
-              strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
-              style={{ transition: "opacity 220ms ease" }}
+            {/* Linhas ano anterior — tracejadas e fantasma */}
+            <path d={buildSmooth(cpP)} fill="none" stroke="rgba(248,113,113,0.35)"
+              strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray="5,4"
               clipPath="url(#yc-clip)"/>
-            <path d={buildSmooth(crP)} fill="none" stroke="rgba(45,212,191,0.28)"
-              strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round"
-              style={{ transition: "opacity 220ms ease" }}
+            <path d={buildSmooth(crP)} fill="none" stroke="rgba(45,212,191,0.35)"
+              strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray="5,4"
               clipPath="url(#yc-clip)"/>
 
-            {/* Área CR atual — gradient suave */}
+            {/* Área CR atual */}
             <path d={buildArea(cr)} fill="url(#yc-area-cr)" clipPath="url(#yc-clip)"/>
 
-            {/* Linhas ano atual — destaque */}
+            {/* Linhas ano atual — destaque com glow no CR */}
             <path d={buildSmooth(cp)} fill="none" stroke="rgba(248,113,113,0.85)"
-              strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
+              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
               clipPath="url(#yc-clip)"/>
             <path d={buildSmooth(cr)} fill="none" stroke="#2dd4bf"
-              strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round"
+              strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"
+              filter="url(#yc-glow-cr)"
               clipPath="url(#yc-clip)"/>
 
             {/* Linha de hover */}
@@ -684,30 +693,30 @@ const YearComparisonChart = ({
               const ty = padTop + 4;
               return (
                 <g>
-                  <rect x={tx} y={ty} width={188} height={104} rx={8}
-                    fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
-                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
-                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                  <rect x={tx} y={ty} width={202} height={112} rx={10}
+                    fill="var(--sgt-bg-overlay)" stroke="rgba(255,255,255,0.10)" strokeWidth={1}/>
+                  <text x={tx+12} y={ty+18} fill="rgba(226,232,240,0.95)"
+                    fontSize={12} fontWeight={700} fontFamily="var(--sgt-font-body)">
                     {months[hoverIndex]}
                   </text>
                   {/* CR */}
-                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
-                  <text x={tx+18} y={ty+33} fill="#2dd4bf" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+12} y={ty+26} width={3.5} height={12} rx={2} fill="#2dd4bf"/>
+                  <text x={tx+22} y={ty+37} fill="#2dd4bf" fontSize={11} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     CR {anoAtual}: {formatFull(crA)}
                   </text>
-                  <text x={tx+18} y={ty+45} fill="rgba(148,163,184,0.5)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+22} y={ty+50} fill="rgba(45,212,191,0.45)" fontSize={9.5} fontFamily="var(--sgt-font-body)">
                     {anoAnterior}: {formatFull(crB)}{crDiff !== null ? `  (${crDiff >= 0 ? "+" : ""}${crDiff.toFixed(1)}%)` : ""}
                   </text>
                   {/* CP */}
-                  <rect x={tx+10} y={ty+56} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.8)"/>
-                  <text x={tx+18} y={ty+65} fill="rgba(248,113,113,0.88)" fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+12} y={ty+60} width={3.5} height={12} rx={2} fill="rgba(248,113,113,0.85)"/>
+                  <text x={tx+22} y={ty+71} fill="rgba(248,113,113,0.95)" fontSize={11} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     CP {anoAtual}: {formatFull(cpA)}
                   </text>
-                  <text x={tx+18} y={ty+77} fill="rgba(248,113,113,0.45)" fontSize={9} fontFamily="system-ui,sans-serif">
+                  <text x={tx+22} y={ty+84} fill="rgba(248,113,113,0.42)" fontSize={9.5} fontFamily="var(--sgt-font-body)">
                     {anoAnterior}: {formatFull(cpB)}{cpDiff !== null ? `  (${cpDiff >= 0 ? "+" : ""}${cpDiff.toFixed(1)}%)` : ""}
                   </text>
-                  <line x1={tx+10} y1={ty+86} x2={tx+178} y2={ty+86} stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
-                  <text x={tx+10} y={ty+98} fill="var(--sgt-text-muted)" fontSize={8.5} fontFamily="system-ui,sans-serif">
+                  <line x1={tx+12} y1={ty+94} x2={tx+190} y2={ty+94} stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
+                  <text x={tx+12} y={ty+106} fill="rgba(148,163,184,0.5)" fontSize={9} fontFamily="var(--sgt-font-body)">
                     variação vs mesmo mês
                   </text>
                 </g>
@@ -719,7 +728,7 @@ const YearComparisonChart = ({
               <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
                 fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
                 fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
-                fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
                 {m}
               </text>
             ))}
@@ -881,17 +890,21 @@ const ComparativeLineChart = ({
           <svg viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none"
             className="h-full w-full" onMouseLeave={() => setHoverIndex(null)}>
             <defs>
-              {/* Área CR — gradient sutil (12% → 0%) */}
               <linearGradient id="cl-area-cr" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.13"/>
-                <stop offset="55%"  stopColor="#2dd4bf" stopOpacity="0.04"/>
+                <stop offset="0%"   stopColor="#2dd4bf" stopOpacity="0.22"/>
+                <stop offset="45%"  stopColor="#2dd4bf" stopOpacity="0.08"/>
                 <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0"/>
               </linearGradient>
-              {/* Inner shadow no fundo */}
               <linearGradient id="cl-bg-shadow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(0,0,0,0.18)"/>
-                <stop offset="20%" stopColor="rgba(0,0,0,0)"/>
+                <stop offset="0%" stopColor="rgba(0,0,0,0.22)"/>
+                <stop offset="25%" stopColor="rgba(0,0,0,0)"/>
               </linearGradient>
+              <filter id="cl-glow-cr" x="-20%" y="-60%" width="140%" height="220%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+                <feColorMatrix in="blur" type="matrix"
+                  values="0 0 0 0 0.18  0 0 0 0 0.83  0 0 0 0 0.75  0 0 0 0.6 0" result="glow"/>
+                <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
               <clipPath id="cl-clip">
                 <rect x={padL} y={padTop} width={chartW} height={chartH}/>
               </clipPath>
@@ -914,7 +927,7 @@ const ComparativeLineChart = ({
                     strokeWidth={frac === 0 ? 1 : 0.6}/>
                   {frac > 0 && (
                     <text x={padL - 8} y={y + 3.5} textAnchor="end"
-                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="system-ui,sans-serif">
+                      fill="var(--sgt-text-muted)" fontSize={9.5} fontWeight={500} fontFamily="var(--sgt-font-body)">
                       {formatY(val)}
                     </text>
                   )}
@@ -938,7 +951,7 @@ const ComparativeLineChart = ({
                     textAnchor="middle"
                     fill="rgba(148,163,184,0.42)"
                     fontSize={8} fontStyle="italic"
-                    fontFamily="system-ui,sans-serif">
+                    fontFamily="var(--sgt-font-body)">
                     sem movimentação relevante
                   </text>
                 )}
@@ -948,16 +961,17 @@ const ComparativeLineChart = ({
             {/* Área CR (principal) — gradient suave */}
             <path d={buildArea(cr)} fill="url(#cl-area-cr)" clipPath="url(#cl-clip)"/>
 
-            {/* Linha CP (secundária) — fina, dessaturada, sólida (sem dash genérico) */}
+            {/* Linha CP (secundária) */}
             <path d={buildSmooth(cp)} fill="none"
-              stroke="rgba(248,113,113,0.55)" strokeWidth={1.5}
+              stroke="rgba(248,113,113,0.7)" strokeWidth={2}
               strokeLinecap="round" strokeLinejoin="round"
               clipPath="url(#cl-clip)"/>
 
-            {/* Linha CR (principal) — espessa, vibrante */}
+            {/* Linha CR (principal) — glow */}
             <path d={buildSmooth(cr)} fill="none"
-              stroke="#2dd4bf" strokeWidth={2.6}
+              stroke="#2dd4bf" strokeWidth={3}
               strokeLinecap="round" strokeLinejoin="round"
+              filter="url(#cl-glow-cr)"
               clipPath="url(#cl-clip)"/>
 
 
@@ -986,27 +1000,27 @@ const ComparativeLineChart = ({
               const ty = padTop + 4;
               return (
                 <g>
-                  <rect x={tx} y={ty} width={178} height={82} rx={8}
-                    fill="var(--sgt-bg-overlay)" stroke="var(--sgt-border-subtle)" strokeWidth={1}/>
-                  <text x={tx+10} y={ty+16} fill="rgba(226,232,240,0.92)"
-                    fontSize={10.5} fontWeight={700} fontFamily="system-ui,sans-serif">
+                  <rect x={tx} y={ty} width={192} height={92} rx={10}
+                    fill="var(--sgt-bg-overlay)" stroke="rgba(255,255,255,0.10)" strokeWidth={1}/>
+                  <text x={tx+12} y={ty+18} fill="rgba(226,232,240,0.95)"
+                    fontSize={12} fontWeight={700} fontFamily="var(--sgt-font-body)">
                     {months[hoverIndex]}{ano ? ` ${ano}` : ""}
                   </text>
-                  <rect x={tx+10} y={ty+24} width={3} height={10} rx={1.5} fill="#2dd4bf"/>
-                  <text x={tx+18} y={ty+33} fill="#2dd4bf"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+12} y={ty+26} width={3.5} height={12} rx={2} fill="#2dd4bf"/>
+                  <text x={tx+22} y={ty+37} fill="#2dd4bf"
+                    fontSize={11} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     Receber: {formatFull(crV)}
                   </text>
-                  <rect x={tx+10} y={ty+40} width={3} height={10} rx={1.5} fill="rgba(248,113,113,0.7)"/>
-                  <text x={tx+18} y={ty+49} fill="rgba(248,113,113,0.85)"
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <rect x={tx+12} y={ty+44} width={3.5} height={12} rx={2} fill="rgba(248,113,113,0.85)"/>
+                  <text x={tx+22} y={ty+55} fill="rgba(248,113,113,0.95)"
+                    fontSize={11} fontWeight={600} fontFamily="var(--sgt-font-body)">
                     Pagar: {formatFull(cpV)}
                   </text>
-                  <line x1={tx+10} y1={ty+58} x2={tx+168} y2={ty+58}
-                    stroke="var(--sgt-border-subtle)" strokeWidth={0.5}/>
-                  <text x={tx+10} y={ty+72}
-                    fill={diff >= 0 ? "rgba(45,212,191,0.85)" : "rgba(248,113,113,0.85)"}
-                    fontSize={9.5} fontWeight={600} fontFamily="system-ui,sans-serif">
+                  <line x1={tx+12} y1={ty+65} x2={tx+180} y2={ty+65}
+                    stroke="rgba(255,255,255,0.08)" strokeWidth={1}/>
+                  <text x={tx+12} y={ty+81}
+                    fill={diff >= 0 ? "#2dd4bf" : "rgba(248,113,113,0.95)"}
+                    fontSize={11} fontWeight={700} fontFamily="var(--sgt-font-body)">
                     Saldo: {diff >= 0 ? "+" : ""}{formatFull(diff)}
                   </text>
                 </g>
@@ -1021,7 +1035,7 @@ const ComparativeLineChart = ({
                 <text key={`m-${i}`} x={toX(i)} y={svgH - 8} textAnchor="middle"
                   fill={hoverIndex === i ? "rgba(226,232,240,0.95)" : "rgba(148,163,184,0.75)"}
                   fontSize={9.5} fontWeight={hoverIndex === i ? 700 : 500}
-                  fontFamily="system-ui,sans-serif" className="transition-all duration-150">
+                  fontFamily="var(--sgt-font-body)" className="transition-all duration-150">
                   {months[i]}
                 </text>
               );
@@ -1070,6 +1084,7 @@ const Index = () => {
     chartReceberFiltro,
     chartPagarFiltro,
     kpiExtra,
+    dwRawData,
   } = useFinancialData();
 
   const navigate = useNavigate();
@@ -1077,6 +1092,7 @@ const Index = () => {
   const { contasReceber, contasPagar } = resumo;
 
   const [presentationMode, setPresentationMode] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadingPhase, setLoadingPhase] = useState<string>("");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -1564,11 +1580,9 @@ const Index = () => {
             {/* Desktop: tudo em uma linha */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex shrink-0 items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
-                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Dashboard</span>
+                  <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Fluxo de Caixa</span>
                 </div>
               </div>
               <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
@@ -1593,45 +1607,46 @@ const Index = () => {
                 </Select>
                 <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} />
               </div>
+              <button
+                type="button"
+                title="Composição por classificação"
+                onClick={() => setShowBreakdown(true)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all hover:-translate-y-0.5"
+                style={{
+                  background: "rgba(45,212,191,0.08)",
+                  borderColor: "rgba(45,212,191,0.25)",
+                  color: "#2dd4bf",
+                }}
+              >
+                <Layers className="h-3.5 w-3.5" />
+              </button>
               <HomeButton />
             </div>
 
             {/* Mobile: layout empilhado bonito */}
             <div className="flex sm:hidden flex-col gap-2 py-1.5">
-              {/* Linha 1: ícone + título com logo SGT + Menu mobile */}
-              <div className="flex items-center justify-between gap-2 min-w-0">
-                <div className="flex items-center gap-2.5 min-w-0">
+              {/* Linha 1: menu + logo + título + home */}
+              <div className="flex items-center gap-2 min-w-0">
+                <MobileNav />
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                   <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                   <div className="flex flex-col leading-none min-w-0">
                     <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Dashboard</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fluxo de Caixa</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <HomeButton />
-                  <MobileNav />
-                </div>
+                <HomeButton />
               </div>
 
-              {/* Linha 2: badge tempo real */}
-              <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
-                </div>
-              </div>
-
-              {/* Linha 2: datas */}
+              {/* Linha 2: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
               </div>
 
-              {/* Linha 3: selects + botão */}
+              {/* Linha 3: selects */}
               <div className="flex items-center gap-2">
                 <Select value={dwFilter.empresa ?? "__all__"} onValueChange={(v) => setDwFilter("empresa", v === "__all__" ? null : v)}>
                   <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Empresa" /></SelectTrigger>
@@ -1641,11 +1656,6 @@ const Index = () => {
                   <SelectTrigger className="h-8 flex-1 rounded-lg text-[12px]"><SelectValue placeholder="Filial" /></SelectTrigger>
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
-              </div>
-
-              {/* Linha 4: botão atualizar */}
-              <div className="flex items-center gap-2">
-                <UpdateButton onClick={handleUpdate} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
               </div>
             </div>
 
@@ -1660,7 +1670,7 @@ const Index = () => {
             {/* Grid principal */}
             <div className={`grid gap-2.5 flex-1 min-h-0 xl:h-0`}>
               {/* Left column — cards, charts, KPIs */}
-              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_1fr_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
+              <div className="grid gap-2.5 min-h-0 sm:grid-cols-2 xl:grid-cols-2 xl:grid-rows-[auto_minmax(200px,1fr)_auto] xl:items-stretch overflow-auto xl:overflow-hidden">
 
                 {/* Top: 2 colunas — RECEBIDO | PAGO com insights integrados */}
                 {isFetchingDw && !isProcessed ? (
@@ -1670,9 +1680,8 @@ const Index = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 xl:col-span-2 items-stretch">
                     {/* RECEBIDO */}
-                    <div onClick={() => navigate("/contas-a-receber")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-emerald-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.10),transparent_55%)]" />
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-400/70 to-emerald-700/20" />
+                    <div onClick={() => navigate("/contas-a-receber")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-emerald-400/70 to-emerald-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
 
                         {/* Topo/Esquerda — valor principal */}
@@ -1741,9 +1750,8 @@ const Index = () => {
                     </div>
 
                     {/* PAGO */}
-                    <div onClick={() => navigate("/contas-a-pagar")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-rose-500/[0.18] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
-                      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(248,113,113,0.10),transparent_55%)]" />
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-400/70 to-rose-700/20" />
+                    <div onClick={() => navigate("/contas-a-pagar")} role="button" tabIndex={0} className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-1 hover:border-rose-400/30 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)] cursor-pointer">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-rose-400/70 to-rose-700/20" />
                       <div className="relative flex flex-col sm:flex-row h-full">
 
                         {/* Topo/Esquerda — valor principal */}
@@ -1883,27 +1891,34 @@ const Index = () => {
                   const inadimplenciaValor = kpiExtra.inadimplencia.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
                   return (
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch h-full">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 xl:col-span-2 items-stretch">
 
                     {/* SALDO LÍQUIDO — destaque cyan */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border-[1.5px] border-cyan-400/35 [background:linear-gradient(135deg,rgba(34,211,238,0.06),var(--sgt-bg-card))] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-cyan-400 to-cyan-300/40" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(34,211,238,0.18), transparent 65%)" }} />
-                      <div className="relative flex h-full flex-col gap-2">
+                    {(() => {
+                      const absS = Math.abs(kpiExtra.saldoLiquido);
+                      const saldoCompacto = absS >= 1e6
+                        ? `${saldoPositivo ? "" : "-"}R$ ${(absS/1e6).toFixed(1).replace(".",",")}M`
+                        : absS >= 1e3
+                        ? `${saldoPositivo ? "" : "-"}R$ ${(absS/1e3).toFixed(0)}k`
+                        : kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+                      return (
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/55 hover:shadow-[0_20px_45px_rgba(34,211,238,0.15)]">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-cyan-400 to-cyan-300/40" />
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-cyan-300">Saldo Líquido</span>
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/20 border border-cyan-400/30 transition-transform duration-300 group-hover:scale-110">
                             {saldoPositivo ? <TrendingUp className="h-3 w-3 text-cyan-300" /> : <TrendingDown className="h-3 w-3 text-red-300" />}
                           </div>
                         </div>
-                        <div className="font-black tracking-[-0.04em] text-white leading-none whitespace-nowrap overflow-hidden text-ellipsis"
-                          style={{ fontSize: kpiFontSize(kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })) }}>
-                          {kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        <div className={`font-black tracking-[-0.04em] leading-none ${saldoPositivo ? "text-cyan-300" : "text-red-300"}`}
+                          style={{ fontSize: kpiFontSize(saldoCompacto) }}>
+                          {saldoCompacto}
                         </div>
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
-                          Recebido − Pago no período
+                          {kpiExtra.saldoLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className="h-full rounded-full bg-cyan-400 transition-all duration-1000 ease-out" style={{ width: saldoPositivo ? "100%" : "20%" }} />
                           </div>
@@ -1914,12 +1929,13 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
+                      );
+                    })()}
 
                     {/* INADIMPLÊNCIA — % em destaque, valor absoluto e docs como subtítulo */}
-                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-red-400/[0.18] [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-red-400/60 to-red-700/20" />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: "radial-gradient(circle at 100% 100%, rgba(248,113,113,0.12), transparent 65%)" }} />
-                      <div className="relative flex h-full flex-col gap-2">
+                    <div className="group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-red-400/35 hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-red-400/60 to-red-700/20" />
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-red-300/85">Inadimplência</span>
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/15 border border-red-500/20 transition-transform duration-300 group-hover:scale-110">
@@ -1933,7 +1949,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           {inadimplenciaValor}
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className="h-full rounded-full bg-red-400 transition-all duration-1000 ease-out" style={{ width: `${Math.min(kpiExtra.inadimplenciaPerc, 100)}%` }} />
                           </div>
@@ -1945,10 +1961,9 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CP — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${cpTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
-                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${cpTone.text} opacity-50`} />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${cpTone.glow}, transparent 65%)` }} />
-                      <div className="relative flex h-full flex-col gap-2">
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 ${cpTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${cpTone.text} opacity-50`} />
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${cpTone.text} opacity-90`}>% Realização CP</span>
                           <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${cpTone.chipBg} border ${cpTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
@@ -1962,7 +1977,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Pago ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className={`h-full rounded-full ${cpTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCP, 100)}%` }} />
                           </div>
@@ -1974,10 +1989,9 @@ const Index = () => {
                     </div>
 
                     {/* % REALIZAÇÃO CR — cor dinâmica */}
-                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border ${crTone.border} [background:var(--sgt-bg-card)] p-3 xl:p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
-                      <div className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-current to-transparent ${crTone.text} opacity-50`} />
-                      <div className="pointer-events-none absolute bottom-0 right-0 h-36 w-36" style={{ background: `radial-gradient(circle at 100% 100%, ${crTone.glow}, transparent 65%)` }} />
-                      <div className="relative flex h-full flex-col gap-2">
+                    <div className={`group relative overflow-hidden rounded-[14px] sm:rounded-[16px] border border-white/[0.07] [background:var(--sgt-bg-card)] p-3 flex flex-col transition-all duration-300 hover:-translate-y-1 ${crTone.hoverBorder} hover:shadow-[0_20px_45px_rgba(0,0,0,0.5)]`}>
+                      <div className={`pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-current to-transparent ${crTone.text} opacity-50`} />
+                      <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
                           <span className={`text-[9px] font-bold uppercase tracking-[0.28em] ${crTone.text} opacity-90`}>% Realização CR</span>
                           <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${crTone.chipBg} border ${crTone.chipBorder} transition-transform duration-300 group-hover:scale-110`}>
@@ -1991,7 +2005,7 @@ const Index = () => {
                         <p className="text-[10px] text-slate-400 uppercase tracking-[0.12em] font-medium">
                           Recebido ÷ Previsto
                         </p>
-                        <div className="mt-auto flex flex-col gap-2 pt-1">
+                        <div className="mt-1.5 flex flex-col gap-1.5">
                           <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
                             <div className={`h-full rounded-full ${crTone.bar} transition-all duration-1000 ease-out`} style={{ width: `${Math.min(kpiExtra.realizacaoCR ?? 0, 100)}%` }} />
                           </div>
@@ -2016,6 +2030,15 @@ const Index = () => {
           </div>
         </section>
       </div>
+
+      {/* Breakdown por classificação */}
+      {showBreakdown && (
+        <FluxoBreakdown
+          rows={dwRawData}
+          onClose={() => setShowBreakdown(false)}
+          periodo={`${dwFilter.dataInicio} → ${dwFilter.dataFim}`}
+        />
+      )}
     </div>
   );
 };

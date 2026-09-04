@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw, AlertCircle } from "lucide-react";
+import { ArrowRight, BarChart3, TrendingUp, DollarSign, Package, Fuel, Users, Receipt, Navigation, Briefcase, Wrench, Circle, RefreshCw, AlertCircle, Truck } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { UpdateButton } from "@/components/shared/UpdateButton";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -19,6 +19,7 @@ const INDICATOR_IDENTITY: Record<string, {
   colorRgb: string;    // rgb para gradientes/glows
   bgColor: string;     // fundo do ícone
   label: string;       // descrição curta
+  displayName?: string; // nome exibido no card (substitui ind.nome se definido)
 }> = {
   "PMT": {
     icon: Package,
@@ -60,7 +61,15 @@ const INDICATOR_IDENTITY: Record<string, {
     color: "#94a3b8",
     colorRgb: "148,163,184",
     bgColor: "rgba(148,163,184,0.10)",
-    label: "Gestão",
+    label: "Corporativo",
+    displayName: "ADM Empresa",
+  },
+  "ADM Frota": {
+    icon: Truck,
+    color: "#7dd3fc",
+    colorRgb: "125,211,252",
+    bgColor: "rgba(125,211,252,0.10)",
+    label: "Frota",
   },
   "Manutenção": {
     icon: Wrench,
@@ -75,6 +84,13 @@ const INDICATOR_IDENTITY: Record<string, {
     colorRgb: "52,211,153",
     bgColor: "rgba(52,211,153,0.10)",
     label: "Borracharia",
+  },
+  "Investimento Frota": {
+    icon: Truck,
+    color: "#2dd4bf",
+    colorRgb: "45,212,191",
+    bgColor: "rgba(45,212,191,0.10)",
+    label: "Frota",
   },
 };
 
@@ -153,24 +169,12 @@ export default function Indicadores() {
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               {/* Logo */}
               <div className="flex shrink-0 items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Indicadores</span>
                 </div>
               </div>
 
-              {/* Badge tempo real */}
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Tempo real</span>
-              </div>
-
-              <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
               {/* Filtros + Atualizar + Voltar */}
               <div className="flex flex-1 flex-wrap items-center gap-1.5 min-w-0">
@@ -196,36 +200,24 @@ export default function Indicadores() {
 
             {/* Mobile: layout empilhado */}
             <div className="flex sm:hidden flex-col gap-2 py-1.5">
-              {/* Linha 1: ícone + título com logo + Menu mobile */}
-              <div className="flex items-center justify-between gap-2 min-w-0">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
-                    <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
-                    <div className="flex flex-col leading-none min-w-0">
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
-                      <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Indicadores</span>
-                    </div>
+              {/* Linha 1: menu + logo + título */}
+              <div className="flex items-center gap-2 min-w-0">
+                <MobileNav />
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
+                  <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
+                  <div className="flex flex-col leading-none min-w-0">
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Workspace</span>
+                    <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Indicadores</span>
                   </div>
                 </div>
-                <MobileNav />
               </div>
 
-              {/* Linha 2: badge tempo real */}
-              <div className="flex items-center">
-                <div className="flex h-6 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-2.5">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-                  </span>
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-amber-300">Tempo real</span>
-                </div>
-              </div>
-
-              {/* Linha 3: datas */}
+              {/* Linha 3: datas + atualizar */}
               <div className="flex items-center gap-2">
                 <DatePickerInput value={dwFilter.dataInicio} onChange={(v) => setDwFilter("dataInicio", v)} placeholder="Data início" />
                 <DatePickerInput value={dwFilter.dataFim} onChange={(v) => setDwFilter("dataFim", v)} placeholder="Data fim" />
+                <UpdateButton onClick={() => void handleUpdate()} isFetching={isFetchingDw} compact />
               </div>
 
               {/* Linha 4: selects */}
@@ -239,13 +231,6 @@ export default function Indicadores() {
                   <SelectContent><SelectItem value="__all__">Todas</SelectItem>{filiaisFiltradas.map((f) => (<SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
-
-              {/* Linha 5: botão atualizar */}
-              <button onClick={() => void handleUpdate()} disabled={isFetchingDw}
-                className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border text-[12px] font-semibold transition-all ${isFetchingDw ? "border-amber-400/40 bg-amber-500/20 text-amber-200 shadow-[0_0_16px_rgba(245,158,11,0.15)]" : "border-amber-400/35 bg-amber-500/15 text-amber-200 hover:border-amber-300/50 hover:bg-amber-400/25"} disabled:cursor-not-allowed`}>
-                <RefreshCw className={`h-3.5 w-3.5 ${isFetchingDw ? "animate-spin" : ""}`} />
-                {isFetchingDw ? (<span className="flex items-center gap-1.5"><span>Atualizando…</span><span className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">{progress}%</span></span>) : ("Atualizar")}
-              </button>
             </div>
 
             <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
@@ -260,11 +245,11 @@ export default function Indicadores() {
             {/* CONTEÚDO */}
             <div className="flex flex-col lg:flex-row flex-1 min-h-0 gap-3">
 
-              {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 4x2 desktop */}
+              {/* COLUNA ESQUERDA — grid 1col mobile, 2col tablet, 5x2 desktop */}
               <div className="flex flex-col flex-1 min-w-0 lg:min-h-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2 gap-2.5 sm:gap-3 flex-1 lg:min-h-0 lg:h-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:grid-rows-2 gap-2.5 sm:gap-3 flex-1 min-h-0 xl:h-full">
                   {(isFetchingDw && !isProcessed
-                    ? Array.from({ length: 8 }).map((_, i) => (
+                    ? Array.from({ length: 10 }).map((_, i) => (
                         <div key={i} className="rounded-[14px] border animate-pulse h-40" style={{ background: "var(--sgt-skeleton-bg)", borderColor: "var(--sgt-border-subtle)" }} />
                       ))
                     : (() => {
@@ -284,6 +269,7 @@ export default function Indicadores() {
                           colorRgb: "148,163,184",
                           bgColor: "rgba(148,163,184,0.10)",
                           label: "",
+                          displayName: undefined as string | undefined,
                         };
                         const Icon = identity.icon;
                         const statusColor = abaixoDaMeta ? "#34d399" : "#f87171";
@@ -311,7 +297,7 @@ export default function Indicadores() {
                                   ? "radial-gradient(ellipse at 50% 30%, rgba(52,211,153,0.05), transparent 60%)"
                                   : "radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.05), transparent 60%)" }} />
 
-                              <div className="relative flex flex-col flex-1 p-4 xl:p-5">
+                              <div className="relative flex flex-col flex-1 p-4 lg:p-3 xl:p-4">
 
                                 {/* TOPO: nome + ícone + badge */}
                                 <div className="flex items-start justify-between gap-2">
@@ -322,7 +308,7 @@ export default function Indicadores() {
                                     </div>
                                     <div className="min-w-0">
                                       <p className="text-[11px] font-bold uppercase tracking-[0.18em] dark:text-slate-300 text-slate-600 truncate">
-                                        {ind.nome}
+                                        {identity.displayName ?? ind.nome}
                                       </p>
                                       <p className="text-[10px] font-medium mt-0.5" style={{ color: `rgba(${identity.colorRgb},0.6)` }}>
                                         {identity.label}
@@ -337,9 +323,9 @@ export default function Indicadores() {
                                 </div>
 
                                 {/* CENTRO: ring grande + percentual dominante */}
-                                <div className="flex flex-1 items-center justify-center py-3">
-                                  <div className="relative h-36 w-36">
-                                    <svg viewBox="0 0 36 36" className="h-36 w-36 -rotate-90" style={{ overflow: "visible" }}>
+                                <div className="flex flex-1 items-center justify-center py-2">
+                                  <div className="relative h-36 w-36 lg:h-24 lg:w-24 xl:h-28 xl:w-28">
+                                    <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90" style={{ overflow: "visible" }}>
                                       <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5" />
                                       <circle cx="18" cy="18" r="14" fill="none"
                                         stroke={`rgba(${identity.colorRgb},0.10)`}
@@ -353,11 +339,8 @@ export default function Indicadores() {
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-                                      <span className="font-extrabold leading-none tabular-nums tracking-[-0.03em]"
-                                        style={{
-                                          color: identity.color,
-                                          fontSize: percFat >= 100 ? "1.4rem" : "1.7rem",
-                                        }}>
+                                      <span className={`font-extrabold leading-none tabular-nums tracking-[-0.03em] ${percFat >= 100 ? "text-[1.4rem] lg:text-[0.95rem] xl:text-[1.1rem]" : "text-[1.7rem] lg:text-[1.1rem] xl:text-[1.3rem]"}`}
+                                        style={{ color: identity.color }}>
                                         {percFat > 999 ? "999+" : `${percFat.toFixed(1)}%`}
                                       </span>
                                       <div className="my-1 h-px w-8 bg-white/10" />
@@ -417,18 +400,19 @@ export default function Indicadores() {
                   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
                 const maxFrete = Math.max(...faturamento.map((r) => r.FRETE_TOTAL ?? 0), 1);
                 const BAR_COLORS = [
-                  "#f59e0b", "#22d3ee", "#a78bfa", "#34d399",
-                  "#fb923c", "#f472b6", "#60a5fa", "#94a3b8",
+                  "#fbbf24", "#60a5fa", "#34d399", "#f472b6",
+                  "#a78bfa", "#22d3ee", "#fb923c", "#f87171",
+                  "#4ade80", "#818cf8", "#38bdf8", "#e879f9",
                 ];
 
                 return (
                   <div
-                    className="w-full lg:w-[360px] xl:w-[420px] shrink-0 rounded-[20px] border flex flex-col p-5 gap-3"
+                    className="w-full lg:w-[360px] xl:w-[420px] shrink-0 rounded-[20px] border flex flex-col p-5 gap-3 h-full min-h-0"
                     style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}
                   >
                     {/* Card Faturamento do Mês */}
                     <div
-                      className="flex flex-col gap-2 rounded-[12px] border p-4"
+                      className="flex flex-col gap-3 rounded-[12px] border p-5"
                       style={{ borderColor: "rgba(251,191,36,0.25)", background: "rgba(251,191,36,0.05)" }}
                     >
                       <div className="flex items-center justify-between">
@@ -443,7 +427,7 @@ export default function Indicadores() {
                       {isFetchingDw && faturamento.length === 0 ? (
                         <div className="h-8 w-4/5 rounded-md animate-pulse" style={{ background: "var(--sgt-skeleton-bg)" }} />
                       ) : (
-                        <p className="text-[22px] font-extrabold tracking-[-0.03em] text-amber-300 tabular-nums leading-none">
+                        <p className="text-[30px] font-extrabold tracking-[-0.03em] text-amber-300 tabular-nums leading-none">
                           {formatBRL(totalFat)}
                         </p>
                       )}
@@ -467,25 +451,24 @@ export default function Indicadores() {
                       ) : faturamento.length === 0 ? (
                         <p className="text-[12px] dark:text-slate-600 text-slate-400 italic">Sem dados no período</p>
                       ) : (
-                        <div className="flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700/50 scrollbar-track-transparent hover:scrollbar-thumb-slate-600/50">
+                        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent hover:scrollbar-thumb-slate-500" style={{ gap: 0 }}>
                           {faturamento.map((row, idx) => {
                             const barW = Math.max((row.FRETE_TOTAL / maxFrete) * 100, 2);
                             const color = BAR_COLORS[idx % BAR_COLORS.length];
                             return (
-                              <div key={idx} className="flex flex-col gap-1.5">
-                                <div className="flex items-center justify-between gap-2">
+                              <div key={idx} className="flex items-center gap-2 py-2.5" style={{ borderBottom: "0.5px solid rgba(255,255,255,0.05)" }}>
+                                <div className="flex flex-col min-w-0 shrink-0" style={{ width: "44%" }}>
                                   <span
                                     className="text-[12px] font-semibold truncate dark:text-slate-300 text-slate-600"
-                                    style={{ maxWidth: "62%" }}
                                     title={row.DESCRI ?? "Sem grupo"}
                                   >
                                     {row.DESCRI ?? "Sem grupo"}
                                   </span>
-                                  <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color }}>
-                                    {(row.PERCENTUAL ?? 0).toFixed(1)}%
+                                  <span className="text-[10px] tabular-nums dark:text-slate-500 text-slate-400 truncate">
+                                    {formatBRL(row.FRETE_TOTAL)}
                                   </span>
                                 </div>
-                                <div className="h-[6px] w-full rounded-full overflow-hidden"
+                                <div className="flex-1 h-[6px] rounded-full overflow-hidden"
                                   style={{ background: "var(--sgt-progress-track)" }}>
                                   <div
                                     className="h-full rounded-full transition-all duration-700"
@@ -496,8 +479,8 @@ export default function Indicadores() {
                                     }}
                                   />
                                 </div>
-                                <span className="text-[11px] tabular-nums dark:text-slate-500 text-slate-400">
-                                  {formatBRL(row.FRETE_TOTAL)}
+                                <span className="text-[11px] font-bold tabular-nums shrink-0" style={{ color, width: "34px", textAlign: "right" }}>
+                                  {(row.PERCENTUAL ?? 0).toFixed(1)}%
                                 </span>
                               </div>
                             );

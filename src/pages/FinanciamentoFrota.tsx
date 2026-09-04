@@ -1,4 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 //  FinanciamentoFrota.tsx  –  Painel de financiamentos de veículos da frota
 //  Dados vindos de /dw-financiamento-frota (cada linha = uma parcela de um contrato)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -8,10 +8,16 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Truck, CreditCard, DollarSign, TrendingDown,
   Search, ChevronUp, ChevronDown, ChevronRight,
-  FileText, Landmark, BarChart3,
+  FileText, Landmark, BarChart3, Download,
+  LayoutGrid, Table2, AlertTriangle,
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, CartesianGrid,
+} from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -86,15 +92,15 @@ const getValorCompromisso = (row: FinanciamentoFrotaRow) => {
 // ─── Cores por banco ──────────────────────────────────────────────────────────
 
 const BANCO_PALETTE: { key: string; color: string; rgb: string }[] = [
-  { key: "SCANIA",     color: "#60a5fa", rgb: "96,165,250"   },
-  { key: "BRADESCO",   color: "#f472b6", rgb: "244,114,182"  },
-  { key: "ITAU",       color: "#fbbf24", rgb: "251,191,36"   },
-  { key: "SANTANDER",  color: "#f87171", rgb: "248,113,113"  },
-  { key: "BB",         color: "#34d399", rgb: "52,211,153"   },
-  { key: "CEF",        color: "#a78bfa", rgb: "167,139,250"  },
-  { key: "SICOOB",     color: "#22d3ee", rgb: "34,211,238"   },
-  { key: "VOLVO",      color: "#fb923c", rgb: "251,146,60"   },
-  { key: "MERCEDES",   color: "#94a3b8", rgb: "148,163,184"  },
+  { key: "SCANIA",    color: "#fbbf24", rgb: "251,191,36"  },
+  { key: "BRADESCO",  color: "#f59e0b", rgb: "245,158,11"  },
+  { key: "ITAU",      color: "#fcd34d", rgb: "252,211,77"  },
+  { key: "SANTANDER", color: "#d97706", rgb: "217,119,6"   },
+  { key: "BB",        color: "#fde68a", rgb: "253,230,138" },
+  { key: "CEF",       color: "#b45309", rgb: "180,83,9"    },
+  { key: "SICOOB",    color: "#fbbf24", rgb: "251,191,36"  },
+  { key: "VOLVO",     color: "#f59e0b", rgb: "245,158,11"  },
+  { key: "MERCEDES",  color: "#94a3b8", rgb: "148,163,184" },
 ];
 
 function getBancoStyle(banco: string | null): { color: string; rgb: string } {
@@ -104,15 +110,15 @@ function getBancoStyle(banco: string | null): { color: string; rgb: string } {
   return match ?? { color: "#94a3b8", rgb: "148,163,184" };
 }
 
-// cores para bancos não mapeados (geradas por índice)
+// cores para bancos não mapeados (geradas por índice) — tons âmbar
 const FALLBACK_COLORS = [
-  { color: "#60a5fa", rgb: "96,165,250" },
-  { color: "#34d399", rgb: "52,211,153" },
-  { color: "#f472b6", rgb: "244,114,182" },
-  { color: "#fbbf24", rgb: "251,191,36" },
-  { color: "#a78bfa", rgb: "167,139,250" },
-  { color: "#22d3ee", rgb: "34,211,238" },
-  { color: "#fb923c", rgb: "251,146,60" },
+  { color: "#fbbf24", rgb: "251,191,36"  },
+  { color: "#f59e0b", rgb: "245,158,11"  },
+  { color: "#fcd34d", rgb: "252,211,77"  },
+  { color: "#d97706", rgb: "217,119,6"   },
+  { color: "#fde68a", rgb: "253,230,138" },
+  { color: "#b45309", rgb: "180,83,9"    },
+  { color: "#92400e", rgb: "146,64,14"   },
 ];
 
 function getBancoColor(banco: string | null, bancoIndex: Map<string, number>): { color: string; rgb: string } {
@@ -167,6 +173,8 @@ export default function FinanciamentoFrota() {
     progress,
   } = useFinancialData();
 
+  type ViewMode = "tabela" | "cards" | "analytics";
+  const [viewMode, setViewMode]         = useState<ViewMode>("tabela");
   const [search, setSearch]             = useState("");
   const [filtroBanco, setFiltroBanco]   = useState("__all__");
   const [filtroFrota, setFiltroFrota]   = useState("__all__");
@@ -174,6 +182,8 @@ export default function FinanciamentoFrota() {
   const [sortCol, setSortCol]           = useState<keyof Contrato>("banco");
   const [sortAsc, setSortAsc]           = useState(true);
   const [expandedRow, setExpandedRow]   = useState<string | null>(null);
+  const [pagina, setPagina]             = useState(1);
+  const POR_PAGINA = 30;
 
   // ── Query ──────────────────────────────────────────────────────────────────
   const { data: resp, isLoading, refetch } = useQuery({
@@ -359,6 +369,68 @@ export default function FinanciamentoFrota() {
   const maxCompromisso = porBanco[0]?.compromisso ?? 1;
   const totalCompromisso = porBanco.reduce((s, b) => s + b.compromisso, 0) || 1;
 
+  // ── Dados analytics ──────────────────────────────────────────────────────────
+  const topEmAberto = useMemo(() =>
+    [...filtered].sort((a, b) => b.valor_em_aberto - a.valor_em_aberto).slice(0, 10),
+  [filtered]);
+
+  const situacaoPie = useMemo(() => {
+    const dev = filtered.filter((c) => c.situacao === "D").length;
+    const liq = filtered.filter((c) => c.situacao !== "D").length;
+    return [
+      { name: "Devedor", value: dev, color: "#f59e0b" },
+      { name: "Liquidado", value: liq, color: "#34d399" },
+    ].filter((x) => x.value > 0);
+  }, [filtered]);
+
+  // reset página quando filtro/busca muda
+  const setFiltroComReset = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setPagina(1); };
+
+  const totalPaginas  = Math.max(1, Math.ceil(filtered.length / POR_PAGINA));
+  const paginaSegura  = Math.min(pagina, totalPaginas);
+  const paginados     = filtered.slice((paginaSegura - 1) * POR_PAGINA, paginaSegura * POR_PAGINA);
+
+  // ── Exportar Excel (CSV com BOM — abre corretamente no Excel PT-BR) ─────────
+  const exportarExcel = () => {
+    const fmtCsv = (v: number | null | undefined) =>
+      v == null ? "" : v.toFixed(2).replace(".", ",");
+    const esc = (v: unknown) => {
+      const s = String(v ?? "").replace(/"/g, '""');
+      return s.includes(";") || s.includes('"') || s.includes("\n") ? `"${s}"` : s;
+    };
+
+    const headers = [
+      "Veículo", "Frota", "Banco", "Nº Contrato",
+      "Aquisição (R$)", "Vlr. Contrato (R$)",
+      "Parcelas Pagas", "Total Parcelas", "Progresso (%)",
+      "Vlr. Parcela (R$)", "Juros (R$)", "Situação",
+    ];
+
+    const linhas = filtered.map((c) => [
+      esc(c.veiculo),
+      esc(c.frota ?? ""),
+      esc(c.banco ?? ""),
+      esc(c.contrato ?? ""),
+      fmtCsv(c.valor_aquisicao),
+      fmtCsv(c.valor_contrato),
+      esc(c.parcelas_pagas),
+      esc(c.total_parcelas ?? ""),
+      esc(c.percentual_pago),
+      fmtCsv(c.valor_parcela),
+      fmtCsv(c.juros_total),
+      esc(getSituacaoLabel(c.situacao)),
+    ].join(";"));
+
+    const csv = "﻿" + [headers.join(";"), ...linhas].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `financiamento_frota_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // ── Sort handler ──────────────────────────────────────────────────────────
   const handleSort = (col: keyof Contrato) => {
     if (sortCol === col) setSortAsc(!sortAsc);
@@ -376,7 +448,7 @@ export default function FinanciamentoFrota() {
 
   return (
     <div
-      className="flex flex-col min-h-[100dvh] overflow-auto px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
+      className="flex flex-col h-[100dvh] overflow-hidden px-1 py-1 sm:px-1.5 sm:py-1.5 md:px-2 md:py-2 xl:px-3 xl:py-2"
       style={{ backgroundColor: "var(--sgt-bg-base)", color: "var(--sgt-text-primary)" }}
     >
       <BackgroundEffects />
@@ -403,21 +475,19 @@ export default function FinanciamentoFrota() {
             {/* ════════ NAVBAR DESKTOP ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Financiamento de Frota</span>
                 </div>
               </div>
 
-              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-500/[0.08] px-3">
+              <div className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-500/[0.08] px-3">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
-                  {contratos.length} contratos
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                  Tempo real
                 </span>
               </div>
 
@@ -471,8 +541,9 @@ export default function FinanciamentoFrota() {
             </div>
 
             {/* ════════ NAVBAR MOBILE ════════ */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
@@ -480,17 +551,14 @@ export default function FinanciamentoFrota() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Fin. Frota</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton
-                  onClick={() => { fetchFromDW(); refetch(); }}
-                  isFetching={anyLoading}
-                  loadingPhase={loadingPhase}
-                  progress={progress}
-                  compact
-                />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <UpdateButton
+                onClick={() => { fetchFromDW(); refetch(); }}
+                isFetching={anyLoading}
+                loadingPhase={loadingPhase}
+                progress={progress}
+                compact
+              />
+              <HomeButton />
             </div>
 
             {/* Divisor */}
@@ -501,80 +569,43 @@ export default function FinanciamentoFrota() {
 
               {/* ── KPI Cards ── */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0">
-                {[
-                  {
-                    label: "Contratos ativos",
-                    value: fmtN(kpis.totalContratos),
-                    sub:   "financiamentos vigentes",
-                    icon:  Truck,
-                    stripe: "from-cyan-500/25 via-cyan-400/10 to-transparent",
-                    border: "border-cyan-400/20",
-                    glow:   "rgba(6,182,212,0.10)",
-                    iconBg: "bg-cyan-400/10 border-cyan-400/25",
-                    iconTxt:"text-cyan-300",
-                    subTxt: "text-cyan-400/70",
-                  },
-                  {
-                    label: "Compromisso mensal",
-                    value: fmt(kpis.compromissoMensal),
-                    sub:   "parcela + juros ou valor pago no periodo",
-                    icon:  CreditCard,
-                    stripe: "from-amber-500/25 via-amber-400/10 to-transparent",
-                    border: "border-amber-400/20",
-                    glow:   "rgba(245,158,11,0.10)",
-                    iconBg: "bg-amber-400/10 border-amber-400/25",
-                    iconTxt:"text-amber-300",
-                    subTxt: "text-amber-400/70",
-                  },
-                  {
-                    label: "Parcelas em aberto",
-                    value: fmt(kpis.parcelasAbertas),
-                    sub:   "valor total em aberto no periodo",
-                    icon:  FileText,
-                    stripe: "from-violet-500/25 via-violet-400/10 to-transparent",
-                    border: "border-violet-400/20",
-                    glow:   "rgba(139,92,246,0.10)",
-                    iconBg: "bg-violet-400/10 border-violet-400/25",
-                    iconTxt:"text-violet-300",
-                    subTxt: "text-violet-400/70",
-                  },
-                  {
-                    label: "Juros acumulados",
-                    value: fmt(kpis.jurosTotal),
-                    sub:   "total de juros no período",
-                    icon:  TrendingDown,
-                    stripe: "from-rose-500/25 via-rose-400/10 to-transparent",
-                    border: "border-rose-400/20",
-                    glow:   "rgba(244,63,94,0.10)",
-                    iconBg: "bg-rose-400/10 border-rose-400/25",
-                    iconTxt:"text-rose-300",
-                    subTxt: "text-rose-400/70",
-                  },
-                ].map((k, i) => (
-                  <AnimatedCard key={k.label} delay={i * 60}>
-                    <div
-                      className={`relative overflow-hidden rounded-2xl border ${k.border} p-4 flex flex-col gap-3`}
-                      style={{ background: "var(--sgt-bg-card)", boxShadow: `0 0 20px ${k.glow}` }}
-                    >
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${k.stripe}`} />
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl border ${k.iconBg} ${k.iconTxt}`}>
-                        <k.icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{k.label}</p>
-                        {isLoading
-                          ? <div className="mt-2 h-6 w-28 animate-pulse rounded-lg bg-white/5" />
-                          : <p className="mt-1 text-[22px] font-black tracking-tight sgt-text leading-tight">{k.value}</p>
-                        }
-                        <p className={`mt-0.5 text-[11px] ${k.subTxt}`}>{k.sub}</p>
-                      </div>
-                    </div>
-                  </AnimatedCard>
-                ))}
+                <AnimatedCard delay={0}>
+                  <KpiCard label="Contratos ativos" value={fmtN(kpis.totalContratos)} subtitle="financiamentos vigentes" icon={Truck} tone="cyan" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={60}>
+                  <KpiCard label="Compromisso mensal" value={fmt(kpis.compromissoMensal)} subtitle="parcela + juros ou valor pago no periodo" icon={CreditCard} tone="amber" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={120}>
+                  <KpiCard label="Parcelas em aberto" value={fmt(kpis.parcelasAbertas)} subtitle="valor total em aberto no periodo" icon={FileText} tone="violet" loading={isLoading} />
+                </AnimatedCard>
+                <AnimatedCard delay={180}>
+                  <KpiCard label="Juros acumulados" value={fmt(kpis.jurosTotal)} subtitle="total de juros no período" icon={TrendingDown} tone="rose" loading={isLoading} />
+                </AnimatedCard>
               </div>
 
-              {/* ── Split: Distribuição por banco + Tabela ── */}
-              <div className="flex flex-col xl:flex-row flex-1 min-h-0 gap-3">
+              {/* ── Toggle de visualização ── */}
+              <div className="flex items-center justify-end shrink-0">
+                <div className="flex items-center gap-0.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5">
+                  {([
+                    { id: "tabela"    as ViewMode, icon: Table2,     label: "Tabela"    },
+                    { id: "cards"     as ViewMode, icon: LayoutGrid,  label: "Cards"     },
+                    { id: "analytics" as ViewMode, icon: BarChart3,   label: "Analytics" },
+                  ]).map(({ id, icon: Icon, label }) => {
+                    const active = viewMode === id;
+                    return (
+                      <button key={id} onClick={() => setViewMode(id)}
+                        className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-[var(--sgt-text-muted)] hover:text-slate-300"}`}>
+                        <Icon className="h-3 w-3" /> {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: TABELA                                          */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "tabela" && <div className="flex flex-col xl:flex-row flex-1 min-h-0 gap-3">
 
                 {/* Painel lateral — Distribuição por banco */}
                 <AnimatedCard delay={300} className="xl:w-[280px] shrink-0">
@@ -646,7 +677,7 @@ export default function FinanciamentoFrota() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--sgt-text-muted)]" />
                         <input
                           value={search}
-                          onChange={(e) => setSearch(e.target.value)}
+                          onChange={(e) => { setSearch(e.target.value); setPagina(1); }}
                           placeholder="Veículo, banco, contrato..."
                           className="h-7 rounded-lg pl-7 pr-3 text-[11px] outline-none border w-[180px]"
                           style={{
@@ -660,7 +691,7 @@ export default function FinanciamentoFrota() {
                       <div className="h-4 w-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
 
                       {/* Banco */}
-                      <Select value={filtroBanco} onValueChange={setFiltroBanco}>
+                      <Select value={filtroBanco} onValueChange={setFiltroComReset(setFiltroBanco)}>
                         <SelectTrigger className="h-7 w-[130px] rounded-lg text-[11px]">
                           <Landmark className="h-3 w-3 mr-1 shrink-0 text-[var(--sgt-text-muted)]" />
                           <SelectValue placeholder="Banco" />
@@ -672,7 +703,7 @@ export default function FinanciamentoFrota() {
                       </Select>
 
                       {/* Frota */}
-                      <Select value={filtroFrota} onValueChange={setFiltroFrota}>
+                      <Select value={filtroFrota} onValueChange={setFiltroComReset(setFiltroFrota)}>
                         <SelectTrigger className="h-7 w-[130px] rounded-lg text-[11px]">
                           <Truck className="h-3 w-3 mr-1 shrink-0 text-[var(--sgt-text-muted)]" />
                           <SelectValue placeholder="Frota" />
@@ -684,7 +715,7 @@ export default function FinanciamentoFrota() {
                       </Select>
 
                       {/* Situação */}
-                      <Select value={filtroSit} onValueChange={setFiltroSit}>
+                      <Select value={filtroSit} onValueChange={setFiltroComReset(setFiltroSit)}>
                         <SelectTrigger className="h-7 w-[110px] rounded-lg text-[11px]">
                           <SelectValue placeholder="Situação" />
                         </SelectTrigger>
@@ -694,15 +725,27 @@ export default function FinanciamentoFrota() {
                         </SelectContent>
                       </Select>
 
-                      <span className="ml-auto text-[10px] text-[var(--sgt-text-muted)] shrink-0">
-                        {filtered.length} contrato{filtered.length !== 1 ? "s" : ""}
-                      </span>
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-[var(--sgt-text-muted)]">
+                          {filtered.length} contrato{filtered.length !== 1 ? "s" : ""}
+                        </span>
+                        <button
+                          onClick={exportarExcel}
+                          disabled={filtered.length === 0 || isLoading}
+                          title="Exportar para Excel"
+                          className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-[11px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400/10 hover:border-emerald-400/40 hover:text-emerald-300"
+                          style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+                        >
+                          <Download className="h-3 w-3" />
+                          Excel
+                        </button>
+                      </div>
                     </div>
 
                     {/* Tabela */}
                     <div className="flex-1 overflow-auto min-h-0">
                       <table className="w-full text-[11px] border-collapse min-w-[960px]">
-                        <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head, var(--sgt-bg-section))" }}>
+                        <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-bg-card)", boxShadow: "0 1px 0 var(--sgt-border-subtle)" }}>
                           <tr>
                             {(
                               [
@@ -742,7 +785,7 @@ export default function FinanciamentoFrota() {
                                   ))}
                                 </tr>
                               ))
-                            : filtered.map((c) => {
+                            : paginados.map((c) => {
                                 const { color, rgb } = getBancoColor(c.banco, bancoIndex);
                                 const pct = c.percentual_pago;
                                 const rowKey = String(c.veiculo);
@@ -808,34 +851,54 @@ export default function FinanciamentoFrota() {
 
                                     {/* ── Linha expandida ── */}
                                     {expanded && (
-                                      <tr
-                                        key={`${rowKey}-detail`}
-                                        className="border-t"
-                                        style={{ borderColor: "var(--sgt-border-subtle)" }}
-                                      >
-                                        <td colSpan={10} className="px-4 py-3">
-                                          <div
-                                            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 rounded-xl border p-3"
-                                            style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}
-                                          >
-                                            {[
-                                              { label: "Contrato",     value: String(c.contrato ?? "—") },
-                                              { label: "Nota fiscal",  value: String(c.nota ?? "—")     },
-                                              { label: "Chassi",       value: c.chassi ?? "—"            },
-                                              { label: "Ano Fab./Mod", value: c.anofab ? `${c.anofab}/${c.anomod ?? "?"}` : "—" },
-                                              { label: "Filial",       value: c.filial ?? "—"            },
-                                              { label: "Vlr. contrato", value: fmt(c.valor_contrato)     },
-                                              { label: "Vlr. líquido",  value: fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0)) },
-                                              { label: "Total pago",    value: fmt(c.valor_pago_total)    },
-                                              { label: "Desconto",      value: fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0)) },
-                                              { label: "Parcelas rest.", value: fmtN(c.parcelas_abertas)  },
-                                              { label: "Valor em aberto", value: fmt(c.valor_em_aberto)   },
-                                            ].map(({ label, value }) => (
-                                              <div key={label} className="flex flex-col gap-0.5">
-                                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--sgt-text-muted)]">{label}</p>
-                                                <p className="text-[12px] font-semibold dark:text-slate-200">{value}</p>
+                                      <tr key={`${rowKey}-detail`} className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                        <td colSpan={10} className="px-3 py-3">
+                                          <div className="rounded-xl border overflow-hidden" style={{ background: "var(--sgt-bg-base)", borderColor: "var(--sgt-border-subtle)" }}>
+
+                                            {/* Header */}
+                                            <div className="flex items-center gap-3 px-4 py-2.5 border-b" style={{ borderColor: "var(--sgt-border-subtle)", background: "var(--sgt-bg-card)" }}>
+                                              <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-400/20 bg-emerald-400/10">
+                                                <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
                                               </div>
-                                            ))}
+                                              <div>
+                                                <p className="text-[12px] font-bold dark:text-white text-slate-800">{c.veiculo} — {c.banco ?? "—"}</p>
+                                                <p className="text-[10px] text-[var(--sgt-text-muted)]">Contrato {c.contrato ?? "—"} · Chassi {c.chassi ?? "—"}</p>
+                                              </div>
+                                              <div className="ml-auto">
+                                                <span className={`text-[9px] font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border ${
+                                                  c.situacao === "QUITADO" ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400" :
+                                                  c.situacao === "ATIVO"   ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-400" :
+                                                  "border-slate-400/30 bg-slate-400/10 text-slate-400"
+                                                }`}>{c.situacao ?? "—"}</span>
+                                              </div>
+                                            </div>
+
+                                            {/* Métricas principais */}
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-y" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                              {[
+                                                { label: "Valor do Contrato",  value: fmt(c.valor_contrato),   accent: "text-emerald-400" },
+                                                { label: "Total Pago",         value: fmt(c.valor_pago_total), accent: "text-cyan-400"    },
+                                                { label: "Valor em Aberto",    value: fmt(c.valor_em_aberto),  accent: c.valor_em_aberto > 0 ? "text-amber-400" : "text-emerald-400" },
+                                                { label: "Parcela Mensal",     value: fmt(c.compromisso),      accent: "text-rose-400"    },
+                                                { label: "Parcelas Restantes", value: fmtN(c.parcelas_abertas),accent: "text-slate-300"   },
+                                                { label: "Ano Fab./Mod.",      value: c.anofab ? `${c.anofab}/${c.anomod ?? "?"}` : "—", accent: "text-slate-300" },
+                                              ].map(({ label, value, accent }) => (
+                                                <div key={label} className="flex flex-col gap-1 p-3" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--sgt-text-muted)]">{label}</p>
+                                                  <p className={`text-[15px] font-black tabular-nums ${accent}`}>{value}</p>
+                                                </div>
+                                              ))}
+                                            </div>
+
+                                            {/* Info secundária */}
+                                            <div className="flex flex-wrap items-center gap-4 px-4 py-2 border-t text-[11px] text-[var(--sgt-text-muted)]" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                              <span>Nota fiscal: <strong className="dark:text-slate-300 text-slate-600">{c.nota ?? "—"}</strong></span>
+                                              <span>Filial: <strong className="dark:text-slate-300 text-slate-600">{c.filial ?? "—"}</strong></span>
+                                              <span>Frota: <strong className="dark:text-slate-300 text-slate-600">{c.frota ?? "—"}</strong></span>
+                                              <span>Desconto total: <strong className="text-emerald-400">{fmt(c.parcelas.reduce((s, p) => s + (p.valor_desconto ?? 0), 0))}</strong></span>
+                                              <span>Vlr. líquido: <strong className="dark:text-slate-300 text-slate-600">{fmt(c.parcelas.reduce((s, p) => s + (p.vlrliq ?? 0), 0))}</strong></span>
+                                            </div>
+
                                           </div>
                                         </td>
                                       </tr>
@@ -854,9 +917,301 @@ export default function FinanciamentoFrota() {
                         </div>
                       )}
                     </div>
+
+                    {/* Paginação */}
+                    {!isLoading && totalPaginas > 1 && (
+                      <div
+                        className="flex items-center justify-between px-3 py-2 shrink-0 border-t text-[11px]"
+                        style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+                      >
+                        <span>
+                          {(paginaSegura - 1) * POR_PAGINA + 1}–{Math.min(paginaSegura * POR_PAGINA, filtered.length)} de {filtered.length}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                            disabled={paginaSegura === 1}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border transition-colors disabled:opacity-30 hover:bg-white/[0.06]"
+                            style={{ borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            <ChevronUp className="h-3 w-3 -rotate-90" />
+                          </button>
+                          <span className="w-16 text-center tabular-nums">
+                            {paginaSegura} / {totalPaginas}
+                          </span>
+                          <button
+                            onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                            disabled={paginaSegura === totalPaginas}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border transition-colors disabled:opacity-30 hover:bg-white/[0.06]"
+                            style={{ borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            <ChevronDown className="h-3 w-3 -rotate-90" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </AnimatedCard>
-              </div>
+              </div>}
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: CARDS                                            */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "cards" && (
+                <div className="flex-1 overflow-auto min-h-0">
+                  {isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pb-2">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-48 rounded-2xl animate-pulse bg-white/5" />
+                      ))}
+                    </div>
+                  ) : filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-[var(--sgt-text-muted)]">
+                      <DollarSign className="h-8 w-8 opacity-20" />
+                      <p className="text-[13px]">Nenhum contrato encontrado</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pb-2">
+                      {filtered.map((c) => {
+                        const { color, rgb } = getBancoColor(c.banco, bancoIndex);
+                        const pct = c.percentual_pago;
+                        return (
+                          <div
+                            key={c.veiculo}
+                            className="relative overflow-hidden rounded-2xl border flex flex-col gap-3 p-4 transition-colors hover:bg-white/[0.02]"
+                            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                          >
+                            {/* Topo colorido por banco */}
+                            <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl" style={{ background: color }} />
+
+                            {/* Header: placa + banco + situação */}
+                            <div className="flex items-start justify-between gap-2 pt-1">
+                              <div>
+                                <p className="text-[18px] font-black font-mono tracking-widest dark:text-white text-slate-800">{c.veiculo}</p>
+                                <p className="text-[10px] text-[var(--sgt-text-muted)] mt-0.5">{c.frota ?? "—"} · {c.chassi ?? "—"}</p>
+                              </div>
+                              <div className="flex flex-col items-end gap-1.5">
+                                <span
+                                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border"
+                                  style={{ color, borderColor: `${color}40`, background: `${color}12` }}
+                                >
+                                  {c.banco ?? "—"}
+                                </span>
+                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold border ${getSituacaoBadgeClass(c.situacao)}`}>
+                                  {getSituacaoLabel(c.situacao)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Progresso */}
+                            <div className="flex flex-col gap-1">
+                              <div className="flex justify-between text-[10px]">
+                                <span className="text-[var(--sgt-text-muted)]">Progresso das parcelas</span>
+                                <span className="font-bold tabular-nums" style={{ color }}>{pct}%</span>
+                              </div>
+                              <div className="h-2 w-full rounded-full overflow-hidden bg-white/[0.06]">
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{ width: `${pct}%`, background: color, boxShadow: `0 0 6px rgba(${rgb},0.4)` }}
+                                />
+                              </div>
+                              <p className="text-[10px] text-[var(--sgt-text-muted)] tabular-nums">
+                                {c.parcelas_pagas} pagas · {c.parcelas_abertas} abertas · {c.total_parcelas ?? "?"} total
+                              </p>
+                            </div>
+
+                            {/* Métricas */}
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { label: "Vlr. Contrato",  value: fmt(c.valor_contrato),  accent: "dark:text-slate-200" },
+                                { label: "Parcela Mensal", value: fmt(c.valor_parcela),   accent: "text-amber-300" },
+                                { label: "Em Aberto",      value: fmt(c.valor_em_aberto), accent: c.valor_em_aberto > 0 ? "text-rose-400" : "text-emerald-400" },
+                                { label: "Juros Acum.",    value: fmt(c.juros_total),     accent: "text-rose-400" },
+                              ].map(({ label, value, accent }) => (
+                                <div key={label} className="rounded-xl p-2.5" style={{ background: "var(--sgt-bg-base)" }}>
+                                  <p className="text-[9px] uppercase tracking-[0.16em] text-[var(--sgt-text-muted)] mb-1">{label}</p>
+                                  <p className={`text-[13px] font-black tabular-nums ${accent}`}>{value}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Rodapé */}
+                            <div className="flex items-center justify-between text-[10px] text-[var(--sgt-text-muted)] border-t pt-2" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                              <span>Contrato: <strong className="dark:text-slate-400">{c.contrato ?? "—"}</strong></span>
+                              <span>{c.anofab ?? "—"}/{c.anomod ?? "?"}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ══════════════════════════════════════════════════════ */}
+              {/* VIEW: ANALYTICS                                        */}
+              {/* ══════════════════════════════════════════════════════ */}
+              {viewMode === "analytics" && (
+                <div className="flex-1 overflow-auto min-h-0 pb-2">
+                  <div className="flex flex-col gap-4">
+
+                    {/* ── Linha 1: Distribuição por banco + Situação ── */}
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+                      {/* Distribuição por banco — barra horizontal */}
+                      <div
+                        className="xl:col-span-2 rounded-2xl border p-4 flex flex-col gap-3"
+                        style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Compromisso mensal por banco</p>
+                        <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                        <ResponsiveContainer width="100%" height={220}>
+                          <BarChart data={porBanco} layout="vertical" margin={{ left: 80, right: 16, top: 4, bottom: 4 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                            <XAxis type="number" tickFormatter={(v) => `R$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: "var(--sgt-text-muted)" }} axisLine={false} tickLine={false} />
+                            <YAxis type="category" dataKey="banco" tick={{ fontSize: 10, fill: "var(--sgt-text-muted)" }} axisLine={false} tickLine={false} width={76} />
+                            <Tooltip
+                              formatter={(v: number) => [fmt(v), "Compromisso"]}
+                              contentStyle={{ background: "var(--sgt-bg-card)", border: "1px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
+                            />
+                            <Bar dataKey="compromisso" radius={[0, 4, 4, 0]}>
+                              {porBanco.map((entry) => {
+                                const { color } = getBancoColor(entry.banco, bancoIndex);
+                                return <Cell key={entry.banco} fill={color} />;
+                              })}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Situação — pizza */}
+                      <div
+                        className="rounded-2xl border p-4 flex flex-col gap-3"
+                        style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Situação dos contratos</p>
+                        <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                        <div className="flex flex-col items-center gap-4 flex-1 justify-center">
+                          <ResponsiveContainer width="100%" height={160}>
+                            <PieChart>
+                              <Pie data={situacaoPie} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3}>
+                                {situacaoPie.map((entry) => (
+                                  <Cell key={entry.name} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(v: number, name: string) => [`${v} contratos`, name]}
+                                contentStyle={{ background: "var(--sgt-bg-card)", border: "1px solid var(--sgt-border-subtle)", borderRadius: 8, fontSize: 11 }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="flex flex-col gap-1.5 w-full">
+                            {situacaoPie.map((entry) => (
+                              <div key={entry.name} className="flex items-center justify-between text-[11px]">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2.5 w-2.5 rounded-full" style={{ background: entry.color }} />
+                                  <span className="text-[var(--sgt-text-muted)]">{entry.name}</span>
+                                </div>
+                                <span className="font-bold tabular-nums dark:text-slate-300">{entry.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Linha 2: Top 10 contratos por valor em aberto ── */}
+                    <div
+                      className="rounded-2xl border p-4 flex flex-col gap-3"
+                      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Top contratos por valor em aberto</p>
+                      <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                      {topEmAberto.length === 0 ? (
+                        <p className="text-[12px] text-[var(--sgt-text-muted)] py-4 text-center">Nenhum contrato com valor em aberto</p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {topEmAberto.map((c, i) => {
+                            const { color, rgb } = getBancoColor(c.banco, bancoIndex);
+                            const max = topEmAberto[0].valor_em_aberto || 1;
+                            const barW = (c.valor_em_aberto / max) * 100;
+                            return (
+                              <div key={c.veiculo} className="flex items-center gap-3">
+                                <span className="text-[10px] text-[var(--sgt-text-muted)] tabular-nums w-4 shrink-0">{i + 1}</span>
+                                <span className="font-mono font-bold text-[12px] dark:text-slate-300 w-20 shrink-0">{c.veiculo}</span>
+                                <div className="flex-1 flex items-center gap-2 min-w-0">
+                                  <div className="flex-1 h-2 rounded-full overflow-hidden bg-white/[0.05]">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{ width: `${barW}%`, background: color, boxShadow: `0 0 6px rgba(${rgb},0.35)` }}
+                                    />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums text-rose-400 shrink-0 w-28 text-right">{fmt(c.valor_em_aberto)}</span>
+                                </div>
+                                <span
+                                  className="text-[9px] font-bold rounded-full px-1.5 py-0.5 border shrink-0"
+                                  style={{ color, borderColor: `${color}40`, background: `${color}12` }}
+                                >
+                                  {c.banco ?? "—"}
+                                </span>
+                                {c.situacao === "D" && <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Linha 3: Resumo por filial ── */}
+                    <div
+                      className="rounded-2xl border p-4 flex flex-col gap-3"
+                      style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+                    >
+                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-400/80">Resumo por filial</p>
+                      <div className="h-px" style={{ background: "var(--sgt-divider)" }} />
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[11px] border-collapse min-w-[600px]">
+                          <thead>
+                            <tr style={{ color: "var(--sgt-text-muted)" }}>
+                              {["Filial", "Contratos", "Valor em Aberto", "Compromisso Mensal", "Juros Acum.", "% Liquidados"].map((h) => (
+                                <th key={h} className="pb-2 text-left font-bold uppercase tracking-[0.16em] text-[9px]">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(() => {
+                              const por = new Map<string, { count: number; emAberto: number; compromisso: number; juros: number; liq: number }>();
+                              for (const c of filtered) {
+                                const f = c.filial ?? "—";
+                                const cur = por.get(f) ?? { count: 0, emAberto: 0, compromisso: 0, juros: 0, liq: 0 };
+                                por.set(f, {
+                                  count: cur.count + 1,
+                                  emAberto: cur.emAberto + c.valor_em_aberto,
+                                  compromisso: cur.compromisso + (c.valor_parcela ?? 0),
+                                  juros: cur.juros + c.juros_total,
+                                  liq: cur.liq + (c.situacao !== "D" ? 1 : 0),
+                                });
+                              }
+                              return [...por.entries()].sort((a, b) => b[1].emAberto - a[1].emAberto).map(([filial, v]) => (
+                                <tr key={filial} className="border-t" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+                                  <td className="py-2 font-semibold dark:text-slate-300">{filial}</td>
+                                  <td className="py-2 tabular-nums text-[var(--sgt-text-muted)]">{v.count}</td>
+                                  <td className="py-2 tabular-nums text-rose-400 font-bold">{fmt(v.emAberto)}</td>
+                                  <td className="py-2 tabular-nums dark:text-slate-300">{fmt(v.compromisso)}</td>
+                                  <td className="py-2 tabular-nums text-rose-400">{fmt(v.juros)}</td>
+                                  <td className="py-2 tabular-nums text-emerald-400">{v.count > 0 ? Math.round((v.liq / v.count) * 100) : 0}%</td>
+                                </tr>
+                              ));
+                            })()}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
             </div>{/* fim conteúdo */}
           </div>
         </section>

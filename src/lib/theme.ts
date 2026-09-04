@@ -11,14 +11,14 @@
 // ─── Valores brutos — use em inline style={{ }} ───────────────────────────────
 export const RAW = {
   // Backgrounds
-  pageBg:          "#060912",   // base da página — quase preto com toque frio
-  surfacePrimary:  "#0b0e1a",   // cards principais
-  surfaceSecondary:"#0c0f1c",   // cards dentro da section card
-  surfaceElevated: "#0e1120",   // selects, inputs, surfaces elevadas
-  surfaceInset:    "#090c14",   // within cards, table headers
+  pageBg:          "var(--sgt-bg-base)",      // base da página
+  surfacePrimary:  "var(--sgt-bg-card)",      // cards principais
+  surfaceSecondary:"var(--sgt-bg-surface)",   // cards dentro da section card
+  surfaceElevated: "var(--sgt-bg-surface)",   // selects, inputs, surfaces elevadas
+  surfaceInset:    "var(--sgt-raw-inset)",    // within cards, table headers, tracks (temático)
 
   // Borders
-  borderDefault:   "rgba(255,255,255,0.07)",
+  borderDefault:   "var(--sgt-raw-border)",   // divisórias / bordas sutis (temático)
   borderHover:     "rgba(255,255,255,0.11)",
   borderStrong:    "rgba(255,255,255,0.15)",
 
@@ -161,16 +161,16 @@ export const TYPE = {
 // (Tailwind precisa ver as classes literais — use aqui como referência/doc)
 export const COMPONENT = {
   // Card padrão
-  card: "rounded-[20px] border border-white/[0.07] bg-[#0b0e1a] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]",
+  card: "rounded-[20px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] shadow-[0_2px_24px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-white/[0.11]",
 
   // Card dentro da section (Index.tsx)
-  cardInner: "rounded-[20px] border border-white/[0.07] bg-[#0c0f1c] shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:border-white/[0.11]",
+  cardInner: "rounded-[20px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-surface)] shadow-[0_2px_20px_rgba(0,0,0,0.35)] transition-all duration-300 hover:border-white/[0.11]",
 
   // Input
   input: "h-8 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-slate-300 [color-scheme:dark] transition-all focus:border-amber-500/30 focus:outline-none",
 
   // Select
-  select: "h-8 rounded-xl border border-white/[0.08] bg-[#0e1120] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none",
+  select: "h-8 rounded-xl border border-white/[0.08] bg-[var(--sgt-bg-surface)] px-3 text-sm text-slate-300 transition-all focus:border-amber-500/30 focus:outline-none",
 
   // Botão Atualizar
   btnUpdate: "inline-flex h-8 items-center gap-1.5 rounded-xl border border-amber-400/20 bg-amber-500/[0.08] px-3.5 text-xs font-semibold text-amber-300 transition-all hover:bg-amber-400/12 hover:border-amber-400/30 hover:shadow-[0_0_18px_rgba(245,158,11,0.18)]",

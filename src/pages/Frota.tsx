@@ -1,13 +1,14 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Truck, RefreshCw, Search, AlertTriangle, TrendingUp, Wrench,
   Calendar, MapPin, ChevronUp, ChevronDown,
   CheckCircle2, AlertCircle, DollarSign, Hash, X,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, LayoutGrid, Table2, BarChart3
 } from "lucide-react";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
@@ -19,6 +20,7 @@ import {
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { type FrotaRow, type ManutencaoRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtBRL = (v: number) =>
@@ -46,16 +48,16 @@ const hexToRgb = (hex: string) => {
 };
 
 const MARCA_COLORS: Record<string, { color: string; rgb: string }> = {
-  SCANIA:          { color: RAW.accent.cyan,    rgb: hexToRgb(RAW.accent.cyan) },
-  VOLVO:           { color: RAW.accent.violet,  rgb: hexToRgb(RAW.accent.violet) },
-  MERCEDES:        { color: "#94a3b8",          rgb: "148,163,184" },
-  "MERCEDES-BENZ": { color: "#94a3b8",          rgb: "148,163,184" },
-  VOLKSWAGEN:      { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
-  VW:              { color: RAW.accent.emerald, rgb: hexToRgb(RAW.accent.emerald) },
-  FORD:            { color: RAW.accent.rose,    rgb: hexToRgb(RAW.accent.rose) },
-  IVECO:           { color: RAW.accent.red,     rgb: hexToRgb(RAW.accent.red) },
-  DAF:             { color: RAW.accent.amber,   rgb: hexToRgb(RAW.accent.amber) },
-  MAN:             { color: "#fb923c",          rgb: "251,146,60" },
+  SCANIA:          { color: "#fbbf24", rgb: "251,191,36"  },
+  VOLVO:           { color: "#f59e0b", rgb: "245,158,11"  },
+  MERCEDES:        { color: "#94a3b8", rgb: "148,163,184" },
+  "MERCEDES-BENZ": { color: "#94a3b8", rgb: "148,163,184" },
+  VOLKSWAGEN:      { color: "#fcd34d", rgb: "252,211,77"  },
+  VW:              { color: "#fcd34d", rgb: "252,211,77"  },
+  FORD:            { color: "#d97706", rgb: "217,119,6"   },
+  IVECO:           { color: "#fde68a", rgb: "253,230,138" },
+  DAF:             { color: "#b45309", rgb: "180,83,9"    },
+  MAN:             { color: "#f59e0b", rgb: "245,158,11"  },
 };
 
 function getMarcaColor(marca: string | null) {
@@ -64,14 +66,14 @@ function getMarcaColor(marca: string | null) {
   return key ? MARCA_COLORS[key] : { color: "#94a3b8", rgb: "148,163,184" };
 }
 
-// ─── Paleta determinística usando tokens do theme ─────────────────────────────
+// ─── Paleta determinística — tons âmbar ──────────────────────────────────────
 const PALETTE = [
-  RAW.accent.cyan,
-  RAW.accent.violet,
-  RAW.accent.amber,
-  RAW.accent.emerald,
-  RAW.accent.rose,
-  RAW.accent.red,
+  "#fbbf24",
+  "#f59e0b",
+  "#fcd34d",
+  "#d97706",
+  "#fde68a",
+  "#b45309",
 ];
 const colorFor = (_key: string, i: number) => PALETTE[i % PALETTE.length];
 
@@ -151,7 +153,7 @@ const Top10Chart = ({ data }: { data: any[] }) => {
   const fmtFull = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         {data.map((d, i) => (
           <linearGradient key={i} id={`bar-g-${i}`} x1="0" y1="0" x2="1" y2="0">
@@ -250,8 +252,8 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <div className="grid grid-cols-[260px_1fr] gap-3 h-full items-center">
-      <svg viewBox="0 0 260 260" className="w-full" onMouseLeave={() => setHover(null)}>
+    <div className="grid grid-cols-1 sm:grid-cols-[240px_1fr] gap-3 h-full items-start sm:items-center">
+      <svg viewBox="0 0 260 260" className="w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
         {slices.map((s, i) => {
           const isHover = hover === i;
           const midAngle = (s.start + s.pct / 2) * 2 * Math.PI - Math.PI / 2;
@@ -279,7 +281,7 @@ const BrandDistributionChart = ({ data }: { data: any[] }) => {
         )}
       </svg>
       
-      <div className="flex flex-col gap-1 max-h-[260px] overflow-auto pr-2">
+      <div className="flex flex-col gap-1 max-h-[200px] sm:max-h-[260px] overflow-auto pr-2">
         {data.slice(0, 10).map((m, i) => (
           <div key={m.nome} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
             className="flex items-center justify-between gap-2 px-1.5 py-0.5 rounded transition-colors hover:bg-white/5 cursor-pointer">
@@ -354,7 +356,7 @@ const MonthlyMaintenanceChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         <linearGradient id="monthly-area" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.18" />
@@ -433,12 +435,12 @@ const AgeCostChart = ({ data }: { data: any[] }) => {
   };
   
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" style={{ fontFamily: "var(--sgt-font-body)" }} onMouseLeave={() => setHover(null)}>
       <defs>
         {data.map((d, i) => (
           <linearGradient key={i} id={`age-g-${i}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.92" />
-            <stop offset="100%" stopColor={colors[d.faixa] || "#a78bfa"} stopOpacity="0.7" />
+            <stop offset="0%" stopColor={colors[d.faixa] || "#fbbf24"} stopOpacity="0.92" />
+            <stop offset="100%" stopColor={colors[d.faixa] || "#fbbf24"} stopOpacity="0.7" />
           </linearGradient>
         ))}
       </defs>
@@ -497,6 +499,8 @@ export default function Frota() {
   const [search, setSearch] = useState("");
   const [sortCol, setSortCol] = useState<keyof VeiculoEnriquecido>("custoManut");
   const [sortAsc, setSortAsc] = useState(false);
+  // View da tabela de veículos — padrão Bancos (Cards / Tabela / Analytics)
+  const [frotaView, setFrotaView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // Paginação tabela
   const PAGE_SIZE = 50;
@@ -723,6 +727,34 @@ export default function Frota() {
     });
   }, [frotaFiltrada, sortCol, sortAsc]);
 
+  // ── Analytics da tabela de veículos (deriva de tabelaOrdenada → respeita filtros + busca) ──
+  const frotaAnalytics = useMemo(() => {
+    const base = tabelaOrdenada;
+    const n = base.length;
+
+    const marcaMap = new Map<string, number>();
+    base.forEach(v => { const k = v.marca ?? "Sem marca"; marcaMap.set(k, (marcaMap.get(k) ?? 0) + 1); });
+    const porMarca = [...marcaMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const muniMap = new Map<string, number>();
+    base.forEach(v => { const k = v.municipio ?? "Não informado"; muniMap.set(k, (muniMap.get(k) ?? 0) + 1); });
+    const topMunicipios = [...muniMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "Até 5 anos", min: 0, max: 5, cor: RAW.accent.emerald },
+      { label: "5–10 anos", min: 6, max: 10, cor: RAW.accent.cyan },
+      { label: "10–15 anos", min: 11, max: 15, cor: RAW.accent.amber },
+      { label: "15+ anos", min: 16, max: 999, cor: RAW.accent.rose },
+    ];
+    const faixasIdade = faixasDef.map(f => ({ ...f, qtd: base.filter(v => v.idade !== null && v.idade >= f.min && v.idade <= f.max).length }));
+
+    const topCusto = [...base].filter(v => v.custoManut > 0).sort((a, b) => b.custoManut - a.custoManut).slice(0, 8);
+    const custoTotal = base.reduce((s, v) => s + (v.custoManut || 0), 0);
+    const comOrdens = base.filter(v => v.qtdOrdens > 0).length;
+
+    return { n, porMarca, topMunicipios, faixasIdade, topCusto, custoTotal, comOrdens };
+  }, [tabelaOrdenada]);
+
   const COLS = [
     { key: "codvei",       label: "Código",        align: "left",   numeric: false, responsive: "" },
     { key: "frota",        label: "Frota",         align: "left",   numeric: false, responsive: "" },
@@ -761,13 +793,11 @@ export default function Frota() {
               style={{ width: `${progress}%`, opacity: isFetchingDw ? 1 : 0 }} />
           </div>
 
-          <div className="relative flex flex-col flex-1 min-h-0 gap-2 sm:gap-2.5 p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+          <div className="relative flex flex-col flex-1 min-h-0 gap-2.5 sm:gap-3 p-2 sm:p-3 lg:p-4 overflow-y-auto w-full">
 
             {/* ════════ NAVBAR ════════ */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               <div className="flex items-center gap-3">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Gestão de Frota</span>
@@ -804,8 +834,9 @@ export default function Frota() {
             </div>
 
             {/* Mobile nav */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
@@ -813,16 +844,11 @@ export default function Frota() {
                   <span className="text-[15px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Gestão de Frota</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <UpdateButton onClick={carregarDados} isFetching={isFetchingDw} loadingPhase={loadingPhase} progress={progress} compact />
+              <HomeButton />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
-
-
 
             {/* ════════ LOADING PHASE ════════ */}
             {isFetchingDw && loadingPhase && (
@@ -838,77 +864,33 @@ export default function Frota() {
             )}
 
             {/* ════════ KPI ROW (4 cards) ════════ */}
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Indicadores</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 shrink-0 sgt-stagger">
-              {[
-                {
-                  label: "Frota Ativa", value: isFetchingDw ? "—" : fmtNum(kpis.ativos),
-                  sub: `${fmtNum(kpis.total)} no recorte`,
-                  icon: Truck, color: "cyan", rgb: "6,182,212",
-                  stripe: "from-cyan-400/60 to-cyan-700/20",
-                  border: "border-cyan-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-                  iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-                  iconTxt: "text-cyan-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Idade Média", value: isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`,
-                  sub: "veículos ativos",
-                  icon: Calendar, color: "violet", rgb: "139,92,246",
-                  stripe: "from-violet-400/60 to-violet-700/20",
-                  border: "border-violet-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(139,92,246,0.18)]",
-                  iconBg: "bg-violet-400/[0.08] border border-violet-400/[0.15]",
-                  iconTxt: "text-violet-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Custo de Manutenção", value: isFetchingDw ? "—" : fmtK(kpis.custoTotal),
-                  sub: `${fmtNum(kpis.totalOrdens)} ordens`,
-                  icon: Wrench, color: "rose", rgb: "244,63,94",
-                  stripe: "from-rose-400/60 to-rose-700/20",
-                  border: "border-rose-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-                  iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
-                  iconTxt: "text-rose-300",
-                  sub2: "text-slate-500",
-                },
-                {
-                  label: "Custo Médio / Veículo", value: isFetchingDw ? "—" : fmtK(kpis.custoMedio),
-                  sub: `${fmtNum(kpis.ordensAbertas)} ordens abertas`,
-                  icon: DollarSign, color: "amber", rgb: "245,158,11",
-                  stripe: "from-amber-400/60 to-amber-700/20",
-                  border: "border-amber-400/[0.12]",
-                  glow: "hover:shadow-[0_4px_40px_rgba(245,158,11,0.18)]",
-                  iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-                  iconTxt: "text-amber-300",
-                  sub2: "text-slate-500",
-                },
-              ].map((k, i) => (
-                <AnimatedCard key={k.label} delay={i * 60}>
-                  <div className={`group relative flex min-h-[100px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-3 xl:p-4`}>
-                    <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
-                    <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
-                      style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
-                    <div className="relative flex h-full flex-col">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
-                          <k.icon className="h-3.5 w-3.5" />
-                        </div>
-                      </div>
-                      <p className="mt-auto pt-2 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1rem,2vw,1.6rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
-                      <p className={`mt-2 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
-                    </div>
-                  </div>
-                </AnimatedCard>
-              ))}
+              <AnimatedCard delay={0}>
+                <KpiCard label="Frota Ativa" value={isFetchingDw ? "—" : fmtNum(kpis.ativos)} subtitle={`${fmtNum(kpis.total)} no recorte`} icon={Truck} tone="cyan" />
+              </AnimatedCard>
+              <AnimatedCard delay={60}>
+                <KpiCard label="Idade Média" value={isFetchingDw ? "—" : `${kpis.idadeMedia.toFixed(1)} anos`} subtitle="veículos ativos" icon={Calendar} tone="violet" />
+              </AnimatedCard>
+              <AnimatedCard delay={120}>
+                <KpiCard label="Custo de Manutenção" value={isFetchingDw ? "—" : fmtK(kpis.custoTotal)} subtitle={`${fmtNum(kpis.totalOrdens)} ordens`} icon={Wrench} tone="rose" />
+              </AnimatedCard>
+              <AnimatedCard delay={180}>
+                <KpiCard label="Custo Médio / Veículo" value={isFetchingDw ? "—" : fmtK(kpis.custoMedio)} subtitle={`${fmtNum(kpis.ordensAbertas)} ordens abertas`} icon={DollarSign} tone="amber" />
+              </AnimatedCard>
             </div>
 
-            {/* ════════ GRÁFICOS - LINHA 1 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[340px]">
+            {/* ════════ GRÁFICOS ════════ */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Análise Gráfica</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Top 10 custo */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -922,7 +904,7 @@ export default function Frota() {
               </div>
 
               {/* Distribuição por marca */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -936,10 +918,9 @@ export default function Frota() {
               </div>
             </div>
 
-            {/* ════════ GRÁFICOS - LINHA 2 ════════ */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-[250px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {/* Custo por mês */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -953,7 +934,7 @@ export default function Frota() {
               </div>
 
               {/* Custo médio por idade */}
-              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] h-full">
+              <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] min-h-[280px]">
                 <div className="flex h-full flex-col p-3">
                   <div className="mb-1.5 flex items-center shrink-0">
                     <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">
@@ -990,20 +971,21 @@ export default function Frota() {
               }}
               periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
               autoGenerate={true}
-        />
+            />
+
+            {/* ════════ FROTA DETALHADA ════════ */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Frota Detalhada</span>
+              <div className="flex-1 h-px" style={{ background: "var(--sgt-divider)" }} />
+            </div>
 
             {/* ════════ FILTROS DA TABELA ════════ */}
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar por código, chassi, modelo, município..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-[12px] text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/40"
-                />
-              </div>
+              <GooeyInput
+                placeholder="Buscar por código, chassi, modelo, município..."
+                value={search}
+                onValueChange={(v) => setSearch(v)}
+              />
 
               <Select value={filtroSituacao} onValueChange={(v) => setFiltroSituacao(v as any)}>
                 <SelectTrigger className="h-9 w-[120px] text-[11px] border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)]">
@@ -1038,10 +1020,29 @@ export default function Frota() {
               <span className="text-[11px] text-slate-500">
                 {fmtNum(tabelaOrdenada.length)} de {fmtNum(frotaEnriquecida.length)} veículos
               </span>
+
+              {/* Toggle de visualização — padrão tela Bancos */}
+              <div className="ml-auto flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5">
+                {([
+                  { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                  { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                  { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                ]).map(t => {
+                  const Icon = t.icon;
+                  const active = frotaView === t.id;
+                  return (
+                    <button key={t.id} onClick={() => setFrotaView(t.id)}
+                      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-amber-400/15 text-amber-200" : "text-slate-500 hover:text-slate-300"}`}>
+                      <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* ════════ TABELA ════════ */}
+            {/* ════════ TABELA / CARDS / ANALYTICS ════════ */}
             <div className="flex-1 min-h-[400px] overflow-auto rounded-lg border border-[var(--sgt-border-subtle)]">
+              {frotaView === "tabela" && (
               <table className="w-full text-[12px]">
                 <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
                   <tr>
@@ -1124,7 +1125,201 @@ export default function Frota() {
                   )}
                 </tbody>
               </table>
-              {!isFetchingDw && tabelaOrdenada.length > 0 && (() => {
+              )}
+
+              {/* ════════ VIEW: CARDS ════════ */}
+              {frotaView === "cards" && (
+                <div className="p-3">
+                  {isFetchingDw ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                          <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                          <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                          <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : tabelaOrdenada.length === 0 ? (
+                    <div className="py-12 text-center text-slate-500">
+                      <Truck className="mx-auto h-8 w-8 mb-2 opacity-40" />
+                      <p>Nenhum veículo encontrado com os filtros aplicados</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((v, i) => {
+                        const sit = SITUACAO_STYLE[v.situacao] ?? SITUACAO_STYLE.INATIVO;
+                        const marcaCor = getMarcaColor(v.marca);
+                        return (
+                          <AnimatedCard key={v.codvei} delay={Math.min(i, 12) * 30}>
+                            <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-amber-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                              {/* Header: código + situação */}
+                              <div className="flex items-start justify-between gap-2 mb-2.5">
+                                <div className="min-w-0">
+                                  <span className="font-mono text-[15px] font-bold text-amber-300">{v.codvei}</span>
+                                  {v.frota && <span className="block text-[9px] text-slate-600">Frota {v.frota}</span>}
+                                </div>
+                                <span className={`shrink-0 inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                  {v.situacao}
+                                </span>
+                              </div>
+
+                              {/* Marca + modelo */}
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="h-2 w-2 rounded-full shrink-0" style={{ background: marcaCor.color }} />
+                                <span className="text-[12px] font-semibold text-slate-200 truncate">{v.marca ?? "—"}</span>
+                                {v.anofab && <span className="text-[10px] text-slate-600 shrink-0">· {v.anofab}</span>}
+                              </div>
+                              <div className="flex items-center gap-1.5 mb-3">
+                                <span className="text-[11px] text-slate-500 truncate" title={v.modelo ?? ""}>{v.modelo ?? "—"}</span>
+                              </div>
+
+                              {/* Métricas */}
+                              <div className="mt-auto grid grid-cols-2 gap-2 pt-2.5 border-t border-white/[0.06]">
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Idade</p>
+                                  <p className={`text-[13px] font-bold tabular-nums ${v.idade !== null && v.idade > 15 ? "text-rose-300" : "text-slate-200"}`}>
+                                    {v.idade !== null ? `${v.idade} anos` : "—"}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Custo manut.</p>
+                                  <p className="text-[13px] font-bold tabular-nums text-rose-200">{v.custoManut > 0 ? fmtBRL(v.custoManut) : "—"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Ordens</p>
+                                  <p className="text-[13px] font-bold tabular-nums text-slate-200">
+                                    {v.qtdOrdens > 0 ? fmtNum(v.qtdOrdens) : "—"}
+                                    {v.ordensAbertas > 0 && <span className="ml-1 text-[8px] px-1 rounded bg-amber-400/20 text-amber-200">{v.ordensAbertas} ab.</span>}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-600">Últ. manut.</p>
+                                  <p className="text-[11px] font-medium text-slate-400">{fmtData(v.ultimaManut)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </AnimatedCard>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ════════ VIEW: ANALYTICS ════════ */}
+              {frotaView === "analytics" && (
+                <div className="p-3">
+                  {frotaAnalytics.n === 0 ? (
+                    <div className="py-12 text-center text-slate-500">Sem dados para análise</div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                      {/* Frota por marca */}
+                      <AnimatedCard>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <Truck className="w-3.5 h-3.5 text-amber-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Frota por Marca</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.porMarca.map(([marca, qtd], idx) => {
+                              const max = frotaAnalytics.porMarca[0]?.[1] ?? 1;
+                              const cor = getMarcaColor(marca).color;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[120px] truncate shrink-0" title={marca}>{marca}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(qtd / max) * 100}%`, background: cor }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Faixa de idade */}
+                      <AnimatedCard delay={60}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Faixa de Idade</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.faixasIdade.map(f => {
+                              const max = Math.max(...frotaAnalytics.faixasIdade.map(x => x.qtd), 1);
+                              return (
+                                <div key={f.label} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[100px] shrink-0">{f.label}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(f.qtd / max) * 100}%`, background: f.cor }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Top municípios */}
+                      <AnimatedCard delay={120}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Municípios</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.topMunicipios.map(([muni, qtd], idx) => {
+                              const max = frotaAnalytics.topMunicipios[0]?.[1] ?? 1;
+                              return (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <span className="text-[11px] text-slate-400 w-[140px] truncate shrink-0" title={muni}>{muni}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${(qtd / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[11px] font-bold tabular-nums text-emerald-300 w-8 text-right shrink-0">{qtd}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                      {/* Maiores custos de manutenção */}
+                      <AnimatedCard delay={180}>
+                        <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                          <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                            <DollarSign className="w-3.5 h-3.5 text-rose-400" />
+                            <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Maiores Custos de Manutenção</span>
+                          </div>
+                          <div className="p-4 space-y-2.5">
+                            {frotaAnalytics.topCusto.length === 0 ? (
+                              <p className="text-[11px] text-slate-600 text-center py-2">Sem custos registrados</p>
+                            ) : frotaAnalytics.topCusto.map((v, idx) => {
+                              const max = frotaAnalytics.topCusto[0]?.custoManut ?? 1;
+                              return (
+                                <div key={v.codvei} className="flex items-center gap-3">
+                                  <span className="text-[11px] font-mono text-slate-400 w-[90px] truncate shrink-0">{v.codvei}</span>
+                                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(v.custoManut / max) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-bold tabular-nums text-rose-200 w-[72px] text-right shrink-0">{fmtBRL(v.custoManut)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </AnimatedCard>
+
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {frotaView !== "analytics" && !isFetchingDw && tabelaOrdenada.length > 0 && (() => {
                 const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
                 const curPage = Math.min(page, totalPages);
                 const from = (curPage - 1) * PAGE_SIZE + 1;

@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       first_access_codes: {
         Row: {
           code: string
@@ -34,6 +91,69 @@ export type Database = {
           created_at?: string
           id?: string
           used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      login_history: {
+        Row: {
+          created_at: string
+          email: string
+          event: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          lida: boolean
+          mensagem: string | null
+          referencia_id: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string | null
+          referencia_id?: string | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string | null
+          referencia_id?: string | null
+          tipo?: string
+          titulo?: string
           user_id?: string
         }
         Relationships: []
@@ -59,56 +179,276 @@ export type Database = {
         }
         Relationships: []
       }
+      processos: {
+        Row: {
+          ativo: boolean
+          categoria: string
+          created_at: string
+          descricao: string
+          galeria: string[]
+          id: string
+          passos: Json
+          tags: string[] | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria: string
+          created_at?: string
+          descricao: string
+          galeria?: string[]
+          id?: string
+          passos?: Json
+          tags?: string[] | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: string
+          created_at?: string
+          descricao?: string
+          galeria?: string[]
+          id?: string
+          passos?: Json
+          tags?: string[] | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          departamento: Database["public"]["Enums"]["departamento"] | null
+          display_name: string
+          id: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
+          display_name: string
+          id: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
+          display_name?: string
+          id?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sofia_conversas: {
+        Row: {
+          conteudo: string
+          criado_em: string
+          id: number
+          role: string
+          telefone: string
+        }
+        Insert: {
+          conteudo: string
+          criado_em?: string
+          id?: never
+          role: string
+          telefone: string
+        }
+        Update: {
+          conteudo?: string
+          criado_em?: string
+          id?: never
+          role?: string
+          telefone?: string
+        }
+        Relationships: []
+      }
+      ticket_anexos: {
+        Row: {
+          arquivo_url: string
+          created_at: string
+          id: string
+          mensagem_id: string | null
+          nome_arquivo: string | null
+          tamanho: number | null
+          ticket_id: string
+          tipo: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          arquivo_url: string
+          created_at?: string
+          id?: string
+          mensagem_id?: string | null
+          nome_arquivo?: string | null
+          tamanho?: number | null
+          ticket_id: string
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          arquivo_url?: string
+          created_at?: string
+          id?: string
+          mensagem_id?: string | null
+          nome_arquivo?: string | null
+          tamanho?: number | null
+          ticket_id?: string
+          tipo?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_anexos_mensagem_id_fkey"
+            columns: ["mensagem_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_mensagens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_anexos_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_categorias: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          id: string
+          nome: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+        }
+        Relationships: []
+      }
+      ticket_mensagens: {
+        Row: {
+          autor_id: string
+          conteudo: string
+          created_at: string
+          id: string
+          ticket_id: string
+          tipo: string
+        }
+        Insert: {
+          autor_id: string
+          conteudo: string
+          created_at?: string
+          id?: string
+          ticket_id: string
+          tipo?: string
+        }
+        Update: {
+          autor_id?: string
+          conteudo?: string
+          created_at?: string
+          id?: string
+          ticket_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_mensagens_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           aberto_por: string | null
+          categoria_id: string | null
           cliente_setor: string | null
           created_at: string
           created_by: string | null
           data_chamado: string
+          departamento: Database["public"]["Enums"]["departamento"] | null
           descricao: string | null
           horario_chamado: string | null
           id: string
           observacoes: string | null
           prioridade: string
           responsavel: string | null
+          responsavel_id: string | null
           status: string
           titulo: string
           updated_at: string
         }
         Insert: {
           aberto_por?: string | null
+          categoria_id?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
           data_chamado: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
           descricao?: string | null
           horario_chamado?: string | null
           id?: string
           observacoes?: string | null
           prioridade?: string
           responsavel?: string | null
+          responsavel_id?: string | null
           status?: string
           titulo: string
           updated_at?: string
         }
         Update: {
           aberto_por?: string | null
+          categoria_id?: string | null
           cliente_setor?: string | null
           created_at?: string
           created_by?: string | null
           data_chamado?: string
+          departamento?: Database["public"]["Enums"]["departamento"] | null
           descricao?: string | null
           horario_chamado?: string | null
           id?: string
           observacoes?: string | null
           prioridade?: string
           responsavel?: string | null
+          responsavel_id?: string | null
           status?: string
           titulo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tickets_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_categorias"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -136,6 +476,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_describe_table: {
+        Args: { _caller: string; _table: string }
+        Returns: {
+          column_default: string
+          column_name: string
+          data_type: string
+          is_foreign_key: boolean
+          is_nullable: string
+          is_primary_key: boolean
+          max_length: number
+        }[]
+      }
+      admin_list_tables: {
+        Args: { _caller: string }
+        Returns: {
+          column_count: number
+          row_count: number
+          table_name: string
+        }[]
+      }
+      admin_read_table: {
+        Args: {
+          _caller: string
+          _page?: number
+          _per_page?: number
+          _table: string
+        }
+        Returns: Json
+      }
       has_page_access: {
         Args: {
           _page: Database["public"]["Enums"]["app_page"]
@@ -152,8 +521,51 @@ export type Database = {
       }
     }
     Enums: {
-      app_page: "dashboard" | "indicadores"
+      app_page:
+        | "dashboard"
+        | "indicadores"
+        | "financeiro"
+        | "gestao"
+        | "operacao"
+        | "compras"
+        | "rh"
+        | "suporte"
+        | "fin-painel"
+        | "fin-pagar"
+        | "fin-receber"
+        | "fin-conciliacao"
+        | "fin-realizado"
+        | "fin-previsto"
+        | "fin-relatorios"
+        | "ext-fiscal"
+        | "fin-fornecedores"
+        | "fin-clientes"
+        | "fin-categorias"
+        | "fin-bancos"
+        | "ext-executivo"
+        | "ext-indicadores"
+        | "ext-faturamento"
+        | "ext-operacional"
+        | "ext-frota"
+        | "ext-fin-frota"
+        | "ext-manutencao"
+        | "ext-abastecimento"
+        | "ext-compras"
+        | "ext-rh"
+        | "ext-chamados"
+        | "portal-receitaflow"
+        | "portal-visual"
+        | "sofia-ai"
+        | "ext-pneus"
       app_role: "admin" | "user"
+      departamento:
+        | "ti"
+        | "financeiro"
+        | "operacao"
+        | "rh"
+        | "diretoria"
+        | "compras"
+        | "comercial"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -281,8 +693,53 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_page: ["dashboard", "indicadores"],
+      app_page: [
+        "dashboard",
+        "indicadores",
+        "financeiro",
+        "gestao",
+        "operacao",
+        "compras",
+        "rh",
+        "suporte",
+        "fin-painel",
+        "fin-pagar",
+        "fin-receber",
+        "fin-conciliacao",
+        "fin-realizado",
+        "fin-previsto",
+        "fin-relatorios",
+        "ext-fiscal",
+        "fin-fornecedores",
+        "fin-clientes",
+        "fin-categorias",
+        "fin-bancos",
+        "ext-executivo",
+        "ext-indicadores",
+        "ext-faturamento",
+        "ext-operacional",
+        "ext-frota",
+        "ext-fin-frota",
+        "ext-manutencao",
+        "ext-abastecimento",
+        "ext-compras",
+        "ext-rh",
+        "ext-chamados",
+        "portal-receitaflow",
+        "portal-visual",
+        "sofia-ai",
+        "ext-pneus",
+      ],
       app_role: ["admin", "user"],
+      departamento: [
+        "ti",
+        "financeiro",
+        "operacao",
+        "rh",
+        "diretoria",
+        "compras",
+        "comercial",
+      ],
     },
   },
 } as const

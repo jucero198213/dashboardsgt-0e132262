@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Plus, Loader2, ClipboardList,
+  ArrowLeft, Plus, Loader2, ClipboardList, CalendarDays,
   AlertCircle, Clock, CheckCircle2, XCircle, Inbox,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { HomeButton } from "@/components/shared/HomeButton";
+import { MobileNav } from "@/components/shared/MobileNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -14,6 +15,8 @@ import {
   PRIORIDADE_LABEL, STATUS_LABEL, PRIORIDADE_COLOR, STATUS_COLOR,
 } from "@/lib/ticketsApi";
 import { TicketModal } from "@/components/admin/tickets/TicketModal";
+import { SlaBadge } from "@/components/admin/tickets/SlaBadge";
+import { TicketCategoria, fetchCategorias, categoriaBadgeStyle } from "@/lib/ticketCategoriasApi";
 
 const fmtDateBR = (iso: string) => {
   const [y, m, d] = iso.split("-");
@@ -27,6 +30,11 @@ export default function Chamados() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const [categorias, setCategorias] = useState<TicketCategoria[]>([]);
+
+  useEffect(() => {
+    fetchCategorias(false).then(setCategorias).catch(() => setCategorias([]));
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -73,31 +81,50 @@ export default function Chamados() {
         >
           <div className="relative flex flex-col flex-1 min-h-0 gap-3 p-2 sm:p-3 lg:p-4 w-full overflow-auto">
 
-            {/* Header */}
-            <div className="flex items-center gap-2 md:gap-3 py-1 flex-wrap">
+            {/* Header — compacto no mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 py-1 flex-wrap">
+              <MobileNav />
               <button
                 onClick={() => navigate("/home")}
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] text-slate-400 hover:text-white"
                 aria-label="Voltar"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/[0.08]">
                 <ClipboardList className="h-4 w-4 text-amber-400" />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Suporte</span>
-                <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">
-                  {isAdmin ? "Chamados (todos)" : "Meus chamados"}
+              <div className="flex flex-col leading-none min-w-0 flex-1 sm:flex-initial">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-400/70">Suporte</span>
+                <span className="text-[14px] sm:text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">
+                  {isAdmin ? "Chamados" : "Meus chamados"}
                 </span>
               </div>
-              <div className="flex-1" />
+              <div className="hidden sm:block flex-1" />
               {isAdmin && (
-                <Button size="sm" variant="outline" onClick={() => navigate("/admin/chamados")} className="border-amber-500/40 text-amber-300">
-                  Ver agenda completa
-                </Button>
+                <>
+                  {/* Mobile: ícone-only */}
+                  <button
+                    onClick={() => navigate("/admin/chamados")}
+                    aria-label="Ver agenda"
+                    className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-500/40 bg-amber-500/[0.08] text-amber-300"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                  </button>
+                  <Button size="sm" variant="outline" onClick={() => navigate("/admin/chamados")} className="hidden sm:inline-flex border-amber-500/40 text-amber-300">
+                    Ver agenda completa
+                  </Button>
+                </>
               )}
-              <Button size="sm" onClick={openNew} className="bg-amber-500 hover:bg-amber-600 text-black">
+              {/* Mobile: ícone-only */}
+              <button
+                onClick={openNew}
+                aria-label="Abrir chamado"
+                className="sm:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-black hover:bg-amber-600"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+              <Button size="sm" onClick={openNew} className="hidden sm:inline-flex bg-amber-500 hover:bg-amber-600 text-black">
                 <Plus className="h-4 w-4 mr-1" /> Abrir chamado
               </Button>
               <UserMenu />
@@ -144,6 +171,7 @@ export default function Chamados() {
                 {tickets.map((t) => {
                   const pc = PRIORIDADE_COLOR[t.prioridade];
                   const sc = STATUS_COLOR[t.status];
+                  const cat = categorias.find((c) => c.id === t.categoria_id) ?? null;
                   return (
                     <button
                       key={t.id}
@@ -160,9 +188,17 @@ export default function Chamados() {
                         <p className="text-[12px] text-[var(--sgt-text-muted)] line-clamp-2">{t.descricao}</p>
                       )}
                       <div className="flex items-center justify-between gap-2 mt-1">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
-                          {PRIORIDADE_LABEL[t.prioridade]}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${pc.border} ${pc.bg} ${pc.text} font-semibold uppercase tracking-wider`}>
+                            {PRIORIDADE_LABEL[t.prioridade]}
+                          </span>
+                          {cat && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-semibold" style={categoriaBadgeStyle(cat.cor)}>
+                              {cat.nome}
+                            </span>
+                          )}
+                          <SlaBadge ticket={t} />
+                        </div>
                         <span className="text-[10px] text-[var(--sgt-text-muted)]">
                           {fmtDateBR(t.data_chamado)}{t.horario_chamado ? ` · ${t.horario_chamado.slice(0,5)}` : ""}
                         </span>

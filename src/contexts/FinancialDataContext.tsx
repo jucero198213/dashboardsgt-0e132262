@@ -55,8 +55,12 @@ const EXPECTED_INDICATORS: Record<string, number> = {
   "Imposto":           5,
   "Pedágio":           5,
   "Administrativo":    5,
+  // Sem regra de CODCUS ainda — fica zerado até o backend ser ligado
+  "ADM Frota":         3,
   "Manutenção":       15,
   "Pneu":              2,
+  // Sem regra de CODCUS ainda — fica zerado até o backend ser ligado
+  "Investimento Frota": 5,
 };
 
 const defaultKpiExtra: KpiExtra = {
@@ -331,29 +335,6 @@ export function FinancialDataProvider({
     []
   );
 
-  // ─── DW: helper para correspondência de indicadores ────────────────────────
-  const matchesIndicadorDw = (indicatorName: string, row: DwRow): boolean => {
-    const text = [
-      row.NOME_PARCEIRO, row.CENTRO_GASTO, row.CENTRO_CUSTO,
-      row.SINTETICA, row.ANALITICA, row.TIPO_DOCUMENTO,
-    ]
-      .map((v) => (v ?? "").toLowerCase())
-      .join(" ");
-
-    const rules: Record<string, string[]> = {
-      "PMT": ["ativo", "invest", "imobil"],
-      "Diesel":     ["diesel", "oleo diesel", "combustivel"],
-      Folha:             ["folha", "pagto", "salarial", "rh"],
-      Imposto:           ["imposto", "tribut", "fiscal", "taxa"],
-      Pedágio:           ["pedagio", "pedágio"],
-      Administrativo:    ["administrativo", "adm"],
-      Manutenção:        ["manut", "oficina", "peca", "peça", "reparo"],
-
-    };
-    const keywords = rules[indicatorName] ?? [indicatorName.toLowerCase()];
-    return keywords.some((k) => text.includes(k));
-  };
-
   // ─── DW: executa a query principal e atualiza o estado ─────────────────────
   const fetchFromDW = useCallback(async (force = false) => {
     // Sempre limpa o cache para garantir dados frescos ao atualizar
@@ -556,18 +537,6 @@ export function FinancialDataProvider({
         dedup(crParcialAberto).reduce((s, r) => s + Math.max(0, safeParVal(r) - safeRecVal(r)), 0)
       );
 
-      // ── Debug (visível no console do browser) ────────────────────────────────
-      console.log("[DW] Rows totais:", data.length,
-        "| allCP:", allCP.length, "| allCR:", allCR.length
-      );
-      console.log("[DW] CP → A PAGAR:", totalPagar,
-        "| PAGO:", valorPago,
-        "| SALDO:", saldoAPagar
-      );
-      console.log("[DW] CR → A RECEBER:", totalAReceber,
-        "| RECEBIDO:", valorRecebido,
-        "| SALDO:", totalReceber
-      );
 
       const resumo: ResumoFinanceiro = {
         contasPagar: {
@@ -623,23 +592,19 @@ export function FinancialDataProvider({
         };
       });
 
-      // ─────────────────────────────────────────────────────────────────────────
-      // INDICADORES — VLR_PARCELA agrupado por CODCUS (código centro de custo)
-      // Base: todos os CP (sem filtro de situação)
-      // ─────────────────────────────────────────────────────────────────────────
+      // ── INDICADORES — VLR_PARCELA agrupado por CODCUS ────────────────────────
       const indicadorRules: Record<string, string[]> = {
-        "Diesel":     ["21"],
-        "Imposto":         ["23"],
-        "Administrativo":  ["3"],
-        "Pedágio":         ["24"],
-        "Manutenção":      ["4", "5", "6", "7", "25"],
-        "PMT": ["26"],
-        "Folha":           ["9"],
-        "Pneu":            ["28"],
+        "Diesel":         ["21"],
+        "Imposto":        ["23"],
+        "Administrativo": ["3"],
+        "Pedágio":        ["24"],
+        "Manutenção":     ["4", "5", "6", "7", "25"],
+        "PMT":            ["26"],
+        "Folha":          ["9"],
+        "Pneu":           ["28"],
       };
 
-      // Base indicadores: CP filtrado por DATA_EMISSAO no período selecionado
-      // (indicadores medem despesas EMITIDAS no período, não vencidas/pagas)
+      // Base: CP filtrado por DATA_EMISSAO no período
       const baseIndicadores = allCP.filter((r) => {
         const em = r.DATA_EMISSAO ? String(r.DATA_EMISSAO).split("T")[0] : null;
         return em ? em >= di && em <= df : false;
@@ -650,31 +615,28 @@ export function FinancialDataProvider({
         ([nome, percentualEsperado], index) => {
           const codcusList = indicadorRules[nome] ?? [];
 
-          // PMT (CODCUS 26): filtra por DATA_VENCIMENTO
-          // Demais indicadores: filtra por DATA_EMISSAO (baseIndicadores já filtrado)
+          // PMT (CODCUS 26): filtra por DATA_VENCIMENTO; demais: DATA_EMISSAO
           const usaVencimento = nome === "PMT";
           const pool = usaVencimento
             ? allCP.filter((r) => {
-                if (r.TIPO_DOCUMENTO === "NFE") return false;  // NFE não entra em PMT
+                if (r.TIPO_DOCUMENTO === "NFE") return false;
                 const ven = r.DATA_VENCIMENTO ? String(r.DATA_VENCIMENTO).split("T")[0] : null;
                 return ven ? ven >= di && ven <= df : false;
               })
             : baseIndicadores;
 
           const matched = codcusList.length > 0
-            ? pool.filter((r) => {
-                const cod = String(r.CODCUS ?? "").trim();
-                return codcusList.includes(cod);
-              })
+            ? pool.filter((r) => codcusList.includes(String(r.CODCUS ?? "").trim()))
             : [];
           const matchedTotal = sumCol(matched, "VLR_PARCELA");
           const percentualReal = totalBaseInd > 0 ? (matchedTotal / totalBaseInd) * 100 : 0;
+
           return {
-            id: String(index + 1),
+            id:                 String(index + 1),
             nome,
-            percentualReal:   Math.round(percentualReal * 10) / 10,
+            percentualReal:     Math.round(percentualReal * 10) / 10,
             percentualEsperado,
-            valorAbsoluto:    Math.round(matchedTotal * 100) / 100,
+            valorAbsoluto:      Math.round(matchedTotal * 100) / 100,
           };
         }
       );

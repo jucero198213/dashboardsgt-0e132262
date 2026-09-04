@@ -2,7 +2,112 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type AppPage = "dashboard" | "indicadores";
+export type AppPage =
+  | "fin-painel"
+  | "fin-pagar"
+  | "fin-receber"
+  | "fin-conciliacao"
+  | "fin-realizado"
+  | "fin-previsto"
+  | "fin-relatorios"
+  | "ext-fiscal"
+  | "fin-fornecedores"
+  | "fin-clientes"
+  | "fin-categorias"
+  | "fin-bancos"
+  | "ext-executivo"
+  | "ext-indicadores"
+  | "ext-faturamento"
+  | "ext-operacional"
+  | "ext-frota"
+  | "ext-fin-frota"
+  | "ext-manutencao"
+  | "ext-abastecimento"
+  | "ext-pneus"
+  | "ext-compras"
+  | "ext-rh"
+  | "ext-chamados"
+  | "portal-receitaflow"
+  | "portal-visual"
+  | "sofia-ai";
+
+export const ALL_PAGES: AppPage[] = [
+  "fin-painel",
+  "fin-pagar",
+  "fin-receber",
+  "fin-conciliacao",
+  "fin-realizado",
+  "fin-previsto",
+  "fin-relatorios",
+  "ext-fiscal",
+  "fin-fornecedores",
+  "fin-clientes",
+  "fin-categorias",
+  "fin-bancos",
+  "ext-executivo",
+  "ext-indicadores",
+  "ext-faturamento",
+  "ext-operacional",
+  "ext-frota",
+  "ext-fin-frota",
+  "ext-manutencao",
+  "ext-abastecimento",
+  "ext-pneus",
+  "ext-compras",
+  "ext-rh",
+  "ext-chamados",
+  "portal-receitaflow",
+  "portal-visual",
+  "sofia-ai",
+];
+
+export const PAGE_GROUPS: { label: string; pages: AppPage[] }[] = [
+  {
+    label: "Financeiro",
+    pages: ["fin-painel", "fin-pagar", "fin-receber", "fin-conciliacao", "fin-realizado", "fin-previsto", "fin-relatorios", "ext-fiscal", "ext-fin-frota"],
+  },
+  {
+    label: "Outras Análises",
+    pages: ["fin-fornecedores", "fin-clientes", "fin-categorias", "fin-bancos"],
+  },
+  {
+    label: "Gestão",
+    pages: ["ext-executivo", "ext-indicadores", "ext-faturamento"],
+  },
+  {
+    label: "Operação",
+    pages: ["ext-operacional"],
+  },
+  {
+    label: "Frota",
+    pages: ["ext-frota", "ext-manutencao", "ext-abastecimento", "ext-pneus"],
+  },
+  {
+    label: "Compras",
+    pages: ["ext-compras"],
+  },
+  {
+    label: "RH",
+    pages: ["ext-rh"],
+  },
+  {
+    label: "Suporte",
+    pages: ["ext-chamados"],
+  },
+  {
+    label: "Portais",
+    pages: ["portal-receitaflow", "portal-visual"],
+  },
+  {
+    label: "IA",
+    pages: ["sofia-ai"],
+  },
+];
+
+/** @deprecated use AppPage */
+export type AppModule = AppPage;
+/** @deprecated use ALL_PAGES */
+export const ALL_MODULES = ALL_PAGES;
 
 interface UsePagePermissionsResult {
   permissions: Set<AppPage>;
@@ -11,13 +116,8 @@ interface UsePagePermissionsResult {
   refresh: () => Promise<void>;
 }
 
-/**
- * Hook que carrega as páginas que o usuário atual pode acessar.
- * - Admins têm acesso a tudo (não precisa de registro).
- * - Usuários comuns: lê de page_permissions onde user_id = auth.uid().
- */
 export function usePagePermissions(): UsePagePermissionsResult {
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, role, isLoading: authLoading } = useAuth();
   const [permissions, setPermissions] = useState<Set<AppPage>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,8 +127,12 @@ export function usePagePermissions(): UsePagePermissionsResult {
       setIsLoading(false);
       return;
     }
+    if (role === null) {
+      setIsLoading(true);
+      return;
+    }
     if (isAdmin) {
-      setPermissions(new Set<AppPage>(["dashboard", "indicadores"]));
+      setPermissions(new Set<AppPage>(ALL_PAGES));
       setIsLoading(false);
       return;
     }
@@ -40,12 +144,17 @@ export function usePagePermissions(): UsePagePermissionsResult {
 
     if (error) {
       console.error("Erro ao buscar permissões:", error);
-      setPermissions(new Set());
+      setPermissions(new Set<AppPage>());
     } else {
-      setPermissions(new Set((data ?? []).map((r) => r.page as AppPage)));
+      const dbPerms = new Set(
+        (data ?? [])
+          .map((r) => r.page as AppPage)
+          .filter((p): p is AppPage => ALL_PAGES.includes(p as AppPage))
+      );
+      setPermissions(dbPerms);
     }
     setIsLoading(false);
-  }, [user, isAdmin]);
+  }, [user, isAdmin, role]);
 
   useEffect(() => {
     if (!authLoading) load();

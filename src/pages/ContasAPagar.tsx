@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign, TrendingDown, Clock, CheckCircle, AlertTriangle,
@@ -8,6 +8,7 @@ import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -16,6 +17,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import sgtLogo from "@/assets/sgt-logo.png";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  HELPERS
@@ -296,48 +298,10 @@ export default function ContasAPagar() {
   }, [contasPagar]);
 
   const kpis = [
-    {
-      label: "Valor Previsto", value: fmtK(resumoPagar.valorAPagar),
-      sub: "Total a pagar", icon: DollarSign, color: "cyan", rgb: "6,182,212",
-      stripe: "from-cyan-400/60 to-cyan-700/20",
-      border: "border-cyan-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(6,182,212,0.18)]",
-      iconBg: "bg-cyan-400/[0.08] border border-cyan-400/[0.15]",
-      iconTxt: "text-cyan-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Valor Pago", value: fmtK(resumoPagar.valorPago),
-      sub: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`,
-      icon: CheckCircle, color: "emerald", rgb: "16,185,129",
-      stripe: "from-emerald-400/60 to-emerald-700/20",
-      border: "border-emerald-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(16,185,129,0.18)]",
-      iconBg: "bg-emerald-400/[0.08] border border-emerald-400/[0.15]",
-      iconTxt: "text-emerald-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Saldo em Aberto", value: fmtK(resumoPagar.saldoAPagar),
-      sub: "Pendente", icon: Clock, color: "amber", rgb: "251,191,36",
-      stripe: "from-amber-400/60 to-amber-700/20",
-      border: "border-amber-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(251,191,36,0.18)]",
-      iconBg: "bg-amber-400/[0.08] border border-amber-400/[0.15]",
-      iconTxt: "text-amber-300",
-      sub2: "text-slate-500",
-    },
-    {
-      label: "Vencidos", value: fmtK(totalVencido),
-      sub: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`,
-      icon: AlertTriangle, color: "rose", rgb: "244,63,94",
-      stripe: "from-rose-400/60 to-rose-700/20",
-      border: "border-rose-400/[0.12]",
-      glow: "hover:shadow-[0_4px_40px_rgba(244,63,94,0.18)]",
-      iconBg: "bg-rose-400/[0.08] border border-rose-400/[0.15]",
-      iconTxt: "text-rose-300",
-      sub2: "text-slate-500",
-    },
+    { label: "Valor Previsto",  value: fmtK(resumoPagar.valorAPagar), subtitle: "Total a pagar",  icon: DollarSign,   tone: "cyan"    as const },
+    { label: "Valor Pago",      value: fmtK(resumoPagar.valorPago),   subtitle: `${resumoPagar.valorAPagar > 0 ? ((resumoPagar.valorPago / resumoPagar.valorAPagar) * 100).toFixed(1) : 0}% pago`, icon: CheckCircle, tone: "emerald" as const },
+    { label: "Saldo em Aberto", value: fmtK(resumoPagar.saldoAPagar), subtitle: "Pendente",       icon: Clock,        tone: "amber"   as const },
+    { label: "Vencidos",        value: fmtK(totalVencido),            subtitle: `${contasPagar.filter(c => c.status === "Vencido").length} documentos`, icon: AlertTriangle, tone: "rose" as const },
   ];
 
   // ── Dados para gráficos ────────────────────────────────────────────────────
@@ -403,8 +367,6 @@ export default function ContasAPagar() {
         {/* ════════ HEADER ════════ */}
         <div className="hidden sm:flex items-center gap-2 md:gap-3">
           <div className="flex items-center gap-3">
-            <img src={sgtLogo} alt="SGT" className="h-8 w-auto" />
-            <div className="h-6 w-px bg-[var(--sgt-border-medium)]" />
             <div className="flex flex-col leading-none">
               <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-400/70">Workspace</span>
               <span className="text-[17px] font-black tracking-[-0.03em] text-white">Contas a Pagar</span>
@@ -451,8 +413,9 @@ export default function ContasAPagar() {
         </div>
 
         {/* Mobile header */}
-        <div className="flex sm:hidden items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex sm:hidden items-center gap-2">
+          <MobileNav />
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <img src={sgtLogo} alt="SGT" className="h-7 w-auto" />
             <div className="h-5 w-px bg-[var(--sgt-border-medium)]" />
             <div className="flex flex-col leading-none min-w-0">
@@ -460,32 +423,15 @@ export default function ContasAPagar() {
               <span className="text-[15px] font-black tracking-[-0.03em] text-white truncate">Contas a Pagar</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
-            <HomeButton />
-            <MobileNav />
-          </div>
+          <UpdateButton onClick={() => {}} isFetching={isFetchingDw} progress={0} compact />
+          <HomeButton />
         </div>
 
         {/* ════════ KPIs ════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {kpis.map((k, i) => (
             <AnimatedCard key={k.label} delay={i * 60}>
-              <div className={`group relative flex min-h-[120px] flex-col overflow-hidden rounded-[14px] sm:rounded-[16px] border ${k.border} bg-[var(--sgt-bg-card)] transition-all duration-300 hover:-translate-y-[3px] ${k.glow} shadow-[0_2px_20px_rgba(0,0,0,0.4)] p-4 xl:p-5`}>
-                <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${k.stripe}`} />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28"
-                  style={{ background: `radial-gradient(circle at 100% 100%, rgba(${k.rgb},0.10), transparent 65%)` }} />
-                <div className="relative flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-slate-600 leading-tight">{k.label}</p>
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${k.iconBg} ${k.iconTxt} transition-transform duration-300 group-hover:scale-110`}>
-                      <k.icon className="h-3.5 w-3.5" />
-                    </div>
-                  </div>
-                  <p className="mt-auto pt-2.5 font-black leading-none tracking-[-0.05em] text-white text-[clamp(1.4rem,2.5vw,1.85rem)] overflow-hidden text-ellipsis whitespace-nowrap sgt-count-up">{k.value}</p>
-                  <p className={`mt-2.5 text-[10px] font-medium tracking-[0.12em] ${k.sub2}`}>{k.sub}</p>
-                </div>
-              </div>
+              <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} />
             </AnimatedCard>
           ))}
         </div>
@@ -580,7 +526,7 @@ export default function ContasAPagar() {
               <div className="relative">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Atenção</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-orange-400/70">Atenção</p>
                     <p className="text-2xl font-black text-white mt-1">{insightsData.titulosProblema} {insightsData.titulosProblema === 1 ? "título" : "títulos"}</p>
                   </div>
                   <AlertTriangle className="h-5 w-5 text-rose-400/60" />
@@ -660,18 +606,12 @@ export default function ContasAPagar() {
         </div>
 
         {/* ════════ FILTROS ════════ */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Buscar por documento ou fornecedor..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] pl-10 pr-4 text-[13px] text-white placeholder-slate-500 transition-all focus:border-[var(--sgt-border-medium)] focus:bg-[var(--sgt-input-hover)] focus:outline-none"
-            />
-          </div>
-
+        <div className="flex flex-wrap items-center gap-2">
+          <GooeyInput
+            placeholder="Buscar por documento ou fornecedor..."
+            value={search}
+            onValueChange={(v) => setSearch(v)}
+          />
           <div className="flex gap-2 overflow-x-auto">
             {["todos", "Em Aberto", "Vencido", "Parcial", "Pago"].map((status) => (
               <button
@@ -701,13 +641,13 @@ export default function ContasAPagar() {
                       {sortCol === "documento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th className="px-3 py-2 text-left hidden sm:table-cell">
                     <button onClick={() => toggleSort("fornecedor")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Fornecedor
                       {sortCol === "fornecedor" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
                     </button>
                   </th>
-                  <th className="px-3 py-2 text-left">
+                  <th className="px-3 py-2 text-left hidden sm:table-cell">
                     <button onClick={() => toggleSort("vencimento")} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 hover:text-slate-300">
                       Vencimento
                       {sortCol === "vencimento" ? (sortAsc ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />) : <ArrowUpDown className="h-3 w-3 opacity-30" />}
@@ -728,13 +668,13 @@ export default function ContasAPagar() {
                 {paginados.map((conta, i) => (
                   <tr key={i} className="border-b border-[var(--sgt-border-subtle)] transition-colors hover:bg-white/[0.02]">
                     <td className="px-3 py-2.5 text-[13px] font-medium text-white">{conta.documento}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-slate-300">{conta.fornecedor}</td>
-                    <td className="px-3 py-2.5 text-[13px] text-slate-400">{fmtData(conta.vencimento)}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-300 hidden sm:table-cell">{conta.fornecedor}</td>
+                    <td className="px-3 py-2.5 text-[13px] text-slate-400 hidden sm:table-cell">{fmtData(conta.vencimento)}</td>
                     <td className="px-3 py-2.5 text-right text-[13px] font-semibold text-white">{fmtBRL(conta.valor)}</td>
                     <td className="px-3 py-2 text-center">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${
                         (conta.status as string) === "Pago" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/20" :
-                        conta.status === "Vencido" ? "bg-rose-500/10 text-rose-300 border border-rose-400/20" :
+                        conta.status === "Vencido" ? "bg-rose-500/10 text-orange-300 border border-orange-400/20" :
                         conta.status === "Parcial" ? "bg-amber-500/10 text-amber-300 border border-amber-400/20" :
                         "bg-cyan-500/10 text-cyan-300 border border-cyan-400/20"
                       }`}>

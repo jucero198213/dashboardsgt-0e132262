@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/lib/activityLogApi";
+import { registrarEventoLogin } from "@/lib/loginHistoryApi";
 
-export type AppRole = "admin" | "user";
+
+
+export type AppRole = "admin" | "user" | "diretoria";
 
 interface AuthContextType {
   session: Session | null;
@@ -20,22 +24,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
 
   const fetchRole = useCallback(async (userId: string) => {
     try {
+      // NÃO usar .maybeSingle(): cadastros antigos podem ter deixado linhas
+      // DUPLICADAS em user_roles (ex.: "user" do signup + "diretoria" adicionada),
+      // e o maybeSingle() dá erro com >1 linha → caía no default "user", fazendo
+      // a diretoria ser tratada como usuário comum. Resolvemos por prioridade.
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .eq("user_id", userId);
 
       if (error) {
         console.error("Erro ao buscar role:", error);
         setRole("user");
         return;
       }
-      setRole((data?.role as AppRole) ?? "user");
+      const roles = (data ?? []).map((r) => r.role as AppRole);
+      if (roles.includes("admin")) setRole("admin");
+      else if (roles.includes("diretoria")) setRole("diretoria");
+      else setRole("user");
     } catch {
       setRole("user");
     }
@@ -66,22 +75,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchRole]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      registrarEventoLogin("login_failed", email, null).catch(() => {});
       const messages: Record<string, string> = {
         "Invalid login credentials": "Email ou senha incorretos.",
         "Email not confirmed": "Confirme seu email antes de fazer login.",
       };
       return { error: messages[error.message] ?? "Erro ao fazer login. Tente novamente." };
     }
+    logActivity("login", "Fez login no sistema").catch(() => {});
+    registrarEventoLogin("login_success", email, data.user?.id ?? null).catch(() => {});
     return { error: null };
   }, []);
 
+
   const signOut = useCallback(async () => {
+    const email = session?.user?.email;
+    const uid = session?.user?.id;
+    if (email) await registrarEventoLogin("logout", email, uid ?? null).catch(() => {});
     await supabase.auth.signOut();
     setSession(null);
     setRole(null);
-  }, []);
+  }, [session]);
+
 
 
   const value: AuthContextType = {

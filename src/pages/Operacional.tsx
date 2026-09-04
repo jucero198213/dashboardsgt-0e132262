@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Radio, Search, AlertTriangle, ChevronUp, ChevronDown,
   X, ChevronLeft, ChevronRight, Filter, FileText,
   Activity, MapPin, Truck, Wrench, Clock, TrendingUp,
   Navigation, Users, BarChart3, Zap, AlertCircle,
-  CheckCircle2, RefreshCw,
+  CheckCircle2, RefreshCw, LayoutGrid, Table2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
+import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
 import { MobileNav } from "@/components/shared/MobileNav";
 import { UpdateButton } from "@/components/shared/UpdateButton";
@@ -23,7 +24,9 @@ import { fetchOperacional, type OperacionalRow } from "@/lib/dwApi";
 import { RAW } from "@/lib/theme";
 import { InsightsSection } from "@/components/shared/InsightsSection";
 import { VeiculosMap } from "@/components/operacional/VeiculosMap";
-import { ViagensDialog } from "@/components/operacional/ViagensDialog";
+import { ViagensExpandedContent } from "@/components/operacional/ViagensExpandedContent";
+import { ExpandableCard } from "@/components/shared/ExpandableCard";
+import { GooeyInput } from "@/components/ui/gooey-input";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const fmtNum = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
@@ -59,8 +62,8 @@ const minPrevisao = (previsao: string | null): number | null => {
 
 // ─── Paleta ───────────────────────────────────────────────────────────────────
 const PALETTE = [
-  RAW.accent.cyan, RAW.accent.emerald, RAW.accent.violet,
-  RAW.accent.amber, RAW.accent.rose, "#fb923c", "#94a3b8",
+  "#fbbf24", "#f59e0b", "#fcd34d",
+  "#d97706", "#fde68a", "#b45309", "#94a3b8",
 ];
 const colorFor = (_: string, i: number) => PALETTE[i % PALETTE.length];
 
@@ -167,6 +170,8 @@ export default function Operacional() {
 
   // Dialog de detalhamento dos KPIs
   const [kpiDialog, setKpiDialog] = useState<null | "andamento" | "rota" | "manutencao" | "atraso">(null);
+  // View da seção "Viagens em Andamento" — padrão Bancos (Cards / Tabela)
+  const [viagensView, setViagensView] = useState<"cards" | "tabela" | "analytics">("cards");
 
   // ── Carregamento ────────────────────────────────────────────────────────────
   const carregarDados = useCallback(async (force = false) => {
@@ -215,14 +220,14 @@ export default function Operacional() {
       const perc = d.percentual_completo ?? 0;
       const totalIt = d.total_itens ?? 0;
       const realIt = d.itens_real ?? 0;
-      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S" || d.em_manutencao === true;
+      const manut = String(d.em_manutencao ?? "").toUpperCase() === "S";
       const semGps = !d.latitude && !d.longitude;
       const orig = d.descricao_origem ?? d.remetente ?? "—";
       const dest = d.descricao_destino ?? d.destinatario ?? "—";
       const origCurta = orig.length > 18 ? orig.slice(0, 18) + "…" : orig;
       const destCurta = dest.length > 18 ? dest.slice(0, 18) + "…" : dest;
       return {
-        id: String(d.id ?? ""),
+        id: String(d.ID ?? ""),
         veiculo: String(d.veiculo ?? "—"),
         veiculo2: d.veiculo2 ? String(d.veiculo2) : null,
         veiculo3: d.veiculo3 ? String(d.veiculo3) : null,
@@ -302,7 +307,12 @@ export default function Operacional() {
     const comAtraso = filtrados.filter(v => v.temAtraso);
     const avgPerc = filtrados.length > 0
       ? filtrados.reduce((s, v) => s + v.percCompleto, 0) / filtrados.length : 0;
-    return { emAndamento: emAndamento.length, emRota: emRota.length, emManutencao: emManutencao.length, comAtraso: comAtraso.length, avgPerc };
+    return {
+      emAndamento: emAndamento.length, emRota: emRota.length,
+      emManutencao: emManutencao.length, comAtraso: comAtraso.length, avgPerc,
+      rowsAndamento: emAndamento, rowsRota: emRota,
+      rowsManutencao: emManutencao, rowsAtraso: comAtraso,
+    };
   }, [filtrados]);
 
   // ── Alertas ───────────────────────────────────────────────────────────────
@@ -467,14 +477,44 @@ export default function Operacional() {
   const totalPages = Math.max(1, Math.ceil(tabelaOrdenada.length / PAGE_SIZE));
   const tabelaPagina = tabelaOrdenada.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // ── TONE_COLORS ─────────────────────────────────────────────────────────────
-  const TC = {
-    cyan: { border: "border-cyan-400/20", icon: "text-cyan-300", bg: "bg-cyan-400/[0.08]", glow: RAW.accent.cyan, sub: "text-cyan-400" },
-    emerald: { border: "border-emerald-400/20", icon: "text-emerald-300", bg: "bg-emerald-400/[0.08]", glow: RAW.accent.emerald, sub: "text-emerald-400" },
-    amber: { border: "border-amber-400/20", icon: "text-amber-300", bg: "bg-amber-400/[0.08]", glow: RAW.accent.amber, sub: "text-amber-400" },
-    rose: { border: "border-rose-400/20", icon: "text-rose-300", bg: "bg-rose-400/[0.08]", glow: RAW.accent.rose, sub: "text-rose-400" },
-    violet: { border: "border-violet-400/20", icon: "text-violet-300", bg: "bg-violet-400/[0.08]", glow: RAW.accent.violet, sub: "text-violet-400" },
-  };
+  // ── Analytics da seção (deriva de tabelaBuscada → respeita a busca) ──────────
+  const viagensAnalytics = useMemo(() => {
+    const base = tabelaBuscada;
+    const n = base.length;
+
+    const sitMap = new Map<string, number>();
+    base.forEach(v => { const k = v.descSituacao ?? "Não informado"; sitMap.set(k, (sitMap.get(k) ?? 0) + 1); });
+    const porSituacao = [...sitMap.entries()].sort((a, b) => b[1] - a[1]);
+
+    const rotaMap = new Map<string, number>();
+    base.forEach(v => { const k = v.rota || "—"; rotaMap.set(k, (rotaMap.get(k) ?? 0) + 1); });
+    const topRotas = [...rotaMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const motMap = new Map<string, number>();
+    base.forEach(v => { const k = v.motorista ?? "Não informado"; motMap.set(k, (motMap.get(k) ?? 0) + 1); });
+    const topMotoristas = [...motMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    const faixasDef = [
+      { label: "Não iniciada", min: 0, max: 0, cor: RAW.accent.rose },
+      { label: "1–39%", min: 1, max: 39, cor: RAW.accent.amber },
+      { label: "40–79%", min: 40, max: 79, cor: RAW.accent.emerald },
+      { label: "80–99%", min: 80, max: 99, cor: RAW.accent.cyan },
+      { label: "Concluída", min: 100, max: 100, cor: RAW.accent.violet },
+    ];
+    const faixas = faixasDef.map(f => ({ ...f, qtd: base.filter(v => v.percCompleto >= f.min && v.percCompleto <= f.max).length }));
+
+    const comSaida = base.filter(v => v.datSaiReal && v.datSaiOriginal);
+    const atrasadas = comSaida.filter(v => v.temAtraso).length;
+    const pontuais = comSaida.length - atrasadas;
+    const pctPontual = comSaida.length > 0 ? (pontuais / comSaida.length) * 100 : 0;
+    const atrasos = comSaida.filter(v => v.temAtraso && v.minAtrasoSaida != null).map(v => v.minAtrasoSaida!);
+    const mediaAtraso = atrasos.length > 0 ? Math.round(atrasos.reduce((s, a) => s + a, 0) / atrasos.length) : 0;
+    const emManut = base.filter(v => v.emManutencao).length;
+
+    return { n, porSituacao, topRotas, topMotoristas, faixas, pontuais, atrasadas, pctPontual, mediaAtraso, emManut };
+  }, [tabelaBuscada]);
+
+  // ── TONE_COLORS → migrado para KPI_STYLE (padrão SGT, nível de módulo) ────────
 
   // ─────────────────────────────────────────────────────────────────────────────
   //  RENDER
@@ -508,8 +548,6 @@ export default function Operacional() {
             <div className="hidden sm:flex items-center gap-2 md:gap-3 py-1">
               {/* Logo + título */}
               <div className="flex items-center gap-3 shrink-0">
-                <img src={sgtLogo} alt="SGT" className="block h-8 w-auto shrink-0 object-contain" />
-                <div className="h-6 w-px" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-400/70">Workspace</span>
                   <span className="text-[17px] font-black tracking-[-0.03em] dark:text-white text-slate-800">Operacional</span>
@@ -585,8 +623,9 @@ export default function Operacional() {
             </div>
 
             {/* Mobile nav */}
-            <div className="flex sm:hidden items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex sm:hidden items-center gap-2 py-1">
+              <MobileNav />
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <img src={sgtLogo} alt="SGT" className="block h-7 w-auto shrink-0 object-contain" />
                 <div className="h-5 w-px shrink-0" style={{ background: "var(--sgt-border-medium)" }} />
                 <div className="flex flex-col leading-none min-w-0">
@@ -594,11 +633,8 @@ export default function Operacional() {
                   <span className="text-[20px] font-black tracking-[-0.03em] dark:text-white text-slate-800 truncate">Operacional</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
-                <HomeButton />
-                <MobileNav />
-              </div>
+              <UpdateButton onClick={() => carregarDados(true)} isFetching={loading} loadingPhase={loadingPhase} progress={progress} compact cooldownOverride={cooldown} />
+              <HomeButton />
             </div>
 
             <div className="h-px shrink-0" style={{ background: "var(--sgt-divider)" }} />
@@ -620,40 +656,75 @@ export default function Operacional() {
 
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {[
-                { label: "Viagens em Andamento", value: loading ? "—" : fmtNum(kpis.emAndamento), sub: "0% < PERC < 100%", Icon: Navigation, tone: "cyan" as const, delay: 80, dialog: "andamento" as const },
-                { label: "Veículos em Rota", value: loading ? "—" : fmtNum(kpis.emRota), sub: "Fora de manutenção", Icon: Truck, tone: "emerald" as const, delay: 120, dialog: "rota" as const },
-                { label: "Em Manutenção", value: loading ? "—" : fmtNum(kpis.emManutencao), sub: "EM_MANUTENCAO = S", Icon: Wrench, tone: "amber" as const, delay: 160, dialog: "manutencao" as const },
-                { label: "Com Atraso na Saída", value: loading ? "—" : fmtNum(kpis.comAtraso), sub: "SAIDA_REAL > ORIGINAL", Icon: AlertCircle, tone: "rose" as const, delay: 200, dialog: "atraso" as const },
-                { label: "Conclusão Média", value: loading ? "—" : fmtPct(kpis.avgPerc), sub: "AVG(PERC_COMPLETO)", Icon: TrendingUp, tone: "violet" as const, delay: 240, dialog: null },
-              ].map(({ label, value, sub, Icon, tone, delay, dialog }) => {
-                const t = TC[tone];
-                const clickable = !!dialog;
-                return (
-                  <AnimatedCard key={label} delay={delay}>
-                    <div
-                      onClick={() => clickable && setKpiDialog(dialog)}
-                      className={`relative overflow-hidden rounded-[14px] sm:rounded-[16px] border p-4 transition-all duration-300 hover:-translate-y-[3px] hover:border-white/[0.11] ${t.border} ${clickable ? "cursor-pointer" : ""}`}
-                      style={{ background: "var(--sgt-bg-card)" }}
-                    >
-                      <div className={`absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[${t.glow}]/50 to-transparent`} />
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500 mb-2">{label}</p>
-                          <p className={`text-[28px] font-black leading-none tracking-tight dark:text-white ${loading ? "animate-pulse" : ""} sgt-count-up`}>{value}</p>
-                          <p className="text-[13px] font-medium mt-2 text-slate-500">{sub}{clickable && " · clique p/ detalhes"}</p>
-                        </div>
-                        <div className={`shrink-0 rounded-xl p-2.5 ${t.bg} border ${t.border}`}>
-                          <Icon className={`w-5 h-5 ${t.icon}`} />
-                        </div>
-                      </div>
-                      <div className="pointer-events-none absolute inset-0 rounded-[14px] sm:rounded-[16px]" style={{ background: `radial-gradient(circle at 100% 100%, ${t.glow}1a, transparent 65%)` }} />
-                    </div>
-                  </AnimatedCard>
-                );
-              })}
-            </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1 lg:[&>*:last-child]:col-span-1">
+                <AnimatedCard delay={80}>
+                  <ExpandableCard
+                    layoutId="kpi-andamento"
+                    expanded={kpiDialog === "andamento"}
+                    onToggle={() => setKpiDialog(kpiDialog === "andamento" ? null : "andamento")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Viagens em Andamento"
+                        subtitle="0% < % concluído < 100% e fora de manutenção"
+                        rows={kpis.rowsAndamento}
+                      />
+                    }
+                  >
+                    <KpiCard label="Viagens em Andamento" value={loading ? "—" : fmtNum(kpis.emAndamento)} subtitle="0% < PERC < 100% · clique p/ detalhes" icon={Navigation} tone="cyan" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={120}>
+                  <ExpandableCard
+                    layoutId="kpi-rota"
+                    expanded={kpiDialog === "rota"}
+                    onToggle={() => setKpiDialog(kpiDialog === "rota" ? null : "rota")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Veículos em Rota"
+                        subtitle="Fora de manutenção e não finalizadas"
+                        rows={kpis.rowsRota}
+                      />
+                    }
+                  >
+                    <KpiCard label="Veículos em Rota" value={loading ? "—" : fmtNum(kpis.emRota)} subtitle="Fora de manutenção · clique p/ detalhes" icon={Truck} tone="emerald" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={160}>
+                  <ExpandableCard
+                    layoutId="kpi-manutencao"
+                    expanded={kpiDialog === "manutencao"}
+                    onToggle={() => setKpiDialog(kpiDialog === "manutencao" ? null : "manutencao")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Veículos em Manutenção"
+                        subtitle="EM_MANUTENCAO = S"
+                        rows={kpis.rowsManutencao}
+                      />
+                    }
+                  >
+                    <KpiCard label="Em Manutenção" value={loading ? "—" : fmtNum(kpis.emManutencao)} subtitle="EM_MANUTENCAO = S · clique p/ detalhes" icon={Wrench} tone="amber" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={200}>
+                  <ExpandableCard
+                    layoutId="kpi-atraso"
+                    expanded={kpiDialog === "atraso"}
+                    onToggle={() => setKpiDialog(kpiDialog === "atraso" ? null : "atraso")}
+                    expandedContent={
+                      <ViagensExpandedContent
+                        title="Saídas com Atraso"
+                        subtitle="SAIDA_REAL > SAIDA_ORIGINAL"
+                        rows={kpis.rowsAtraso}
+                      />
+                    }
+                  >
+                    <KpiCard label="Com Atraso na Saída" value={loading ? "—" : fmtNum(kpis.comAtraso)} subtitle="SAIDA_REAL > ORIGINAL · clique p/ detalhes" icon={AlertCircle} tone="rose" loading={loading} />
+                  </ExpandableCard>
+                </AnimatedCard>
+                <AnimatedCard delay={240}>
+                  <KpiCard label="Conclusão Média" value={loading ? "—" : fmtPct(kpis.avgPerc)} subtitle="AVG(PERC_COMPLETO)" icon={TrendingUp} tone="violet" loading={loading} />
+                </AnimatedCard>
+              </div>
 
 
 
@@ -663,12 +734,12 @@ export default function Operacional() {
               {/* Mapa de posições — ocupa 2/3 */}
               <AnimatedCard delay={300} className="lg:col-span-2">
                 <div className="rounded-[14px] sm:rounded-[16px] border p-4 h-full flex flex-col" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
-                  <div className="flex items-center justify-between mb-3 shrink-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 shrink-0">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Posições em Tempo Real</span>
                     </div>
-                    <div className="flex items-center gap-4 text-[11px]">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-[11px]">
                       {[
                         { label: "Em rota", color: RAW.accent.cyan },
                         { label: "Aguardando", color: RAW.accent.amber },
@@ -906,18 +977,127 @@ export default function Operacional() {
                   <span className="rounded-full border border-cyan-400/20 bg-cyan-500/[0.07] px-2 py-0.5 text-[9px] font-semibold text-cyan-300">
                     {fmtNum(tabelaBuscada.length)} registros
                   </span>
-                  <div className="ml-auto relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={e => { setSearch(e.target.value); setPage(1); }}
+                  <div className="ml-auto flex items-center gap-2">
+                    <GooeyInput
                       placeholder="Buscar veículo, motorista, rota..."
-                      className="h-9 rounded-xl border border-white/[0.08] bg-white/[0.04] pl-7 pr-3 text-[13px] text-slate-300 placeholder-slate-600 focus:border-cyan-500/30 focus:outline-none transition-all w-[210px]"
+                      value={search}
+                      onValueChange={(v) => { setSearch(v); setPage(1); }}
                     />
+                    {/* Toggle de visualização — padrão tela Bancos */}
+                    <div className="flex items-center gap-1 rounded-lg border border-[var(--sgt-border-subtle)] bg-white/[0.04] p-0.5">
+                      {([
+                        { id: "cards" as const, icon: LayoutGrid, label: "Cards" },
+                        { id: "tabela" as const, icon: Table2, label: "Tabela" },
+                        { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+                      ]).map(t => {
+                        const Icon = t.icon;
+                        const active = viagensView === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => setViagensView(t.id)}
+                            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors ${active ? "bg-cyan-400/15 text-cyan-200" : "text-slate-500 hover:text-slate-300"}`}
+                          >
+                            <Icon className="h-3 w-3" /><span className="hidden sm:inline"> {t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
+                {/* ══════════ VIEW: CARDS (padrão Bancos) ══════════ */}
+                {viagensView === "cards" && (
+                  <div className="p-3">
+                    {loading ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="rounded-[14px] border border-white/[0.06] bg-[var(--sgt-bg-card)] p-3.5 h-[150px]">
+                            <div className="h-3 w-1/2 rounded-full bg-white/[0.05] animate-pulse mb-3" />
+                            <div className="h-2 w-3/4 rounded-full bg-white/[0.04] animate-pulse mb-2" />
+                            <div className="h-2 w-2/3 rounded-full bg-white/[0.04] animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : tabelaPagina.length === 0 ? (
+                      <div className="py-8 text-center text-[12px] text-slate-600">Nenhum registro encontrado</div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {tabelaPagina.map((v, i) => {
+                          const sit = getSituacStyle(v.descSituacao);
+                          const atMin = v.minAtrasoSaida;
+                          const progCor = v.emManutencao
+                            ? RAW.accent.violet
+                            : v.percCompleto >= 80 ? RAW.accent.cyan
+                              : v.percCompleto >= 40 ? RAW.accent.emerald
+                                : RAW.accent.amber;
+                          return (
+                            <AnimatedCard key={`${v.id}-${i}`} delay={i * 40}>
+                              <div className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border border-white/[0.07] bg-[var(--sgt-bg-card)] p-3.5 transition-all duration-300 hover:-translate-y-[3px] hover:border-cyan-400/20 shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+                                {/* Header: veículo + situação */}
+                                <div className="flex items-start justify-between gap-2 mb-2.5">
+                                  <div className="min-w-0">
+                                    <span className="font-mono text-[15px] font-bold text-cyan-300">{v.veiculo}</span>
+                                    {v.veiculo2 && <span className="text-[9px] text-slate-600 block">+{v.veiculo2}</span>}
+                                  </div>
+                                  <span className={`shrink-0 inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ring-1 ${sit.bg} ${sit.text} ${sit.ring}`}>
+                                    {v.descSituacao ?? "—"}
+                                  </span>
+                                </div>
+
+                                {/* Motorista + rota */}
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Users className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[12px] text-slate-300 truncate">{v.motorista ?? "—"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 mb-3">
+                                  <MapPin className="w-3 h-3 text-slate-600 shrink-0" />
+                                  <span className="text-[10px] text-slate-500 truncate">{v.rota}</span>
+                                </div>
+
+                                {/* Progresso */}
+                                <div className="mt-auto">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-600">Concluído</span>
+                                    <span className="text-[11px] font-bold" style={{ color: progCor }}>{v.percCompleto}%</span>
+                                  </div>
+                                  <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: RAW.surfaceInset }}>
+                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${v.percCompleto}%`, background: progCor }} />
+                                  </div>
+                                </div>
+
+                                {/* Footer: saída real + manutenção */}
+                                <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/[0.06]">
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="w-3 h-3 text-slate-600" />
+                                    {v.datSaiReal ? (
+                                      <span className={`text-[10px] font-medium ${v.temAtraso ? "text-rose-300" : "text-emerald-300"}`}>
+                                        {fmtHora(v.datSaiReal)}
+                                        {atMin !== null && atMin !== 0 && (
+                                          <span className={`ml-1 text-[8px] font-bold ${atMin > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                                            {atMin > 0 ? `+${atMin}min` : `${atMin}min`}
+                                          </span>
+                                        )}
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-slate-600">Sem saída</span>
+                                    )}
+                                  </div>
+                                  {v.emManutencao && (
+                                    <span className="rounded-full bg-violet-500/10 px-1.5 py-0.5 text-[8px] font-bold text-violet-300 ring-1 ring-violet-500/30">MANUT.</span>
+                                  )}
+                                </div>
+                              </div>
+                            </AnimatedCard>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ══════════ VIEW: TABELA ══════════ */}
+                {viagensView === "tabela" && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -1041,9 +1221,156 @@ export default function Operacional() {
                     </tbody>
                   </table>
                 </div>
+                )}
+
+                {/* ══════════ VIEW: ANALYTICS ══════════ */}
+                {viagensView === "analytics" && (
+                  <div className="p-3">
+                    {viagensAnalytics.n === 0 ? (
+                      <div className="py-8 text-center text-[12px] text-slate-600">Sem dados para análise</div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+
+                        {/* Progresso das viagens */}
+                        <AnimatedCard>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Progresso das Viagens</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.faixas.map(f => {
+                                const max = Math.max(...viagensAnalytics.faixas.map(x => x.qtd), 1);
+                                const pct = (f.qtd / max) * 100;
+                                return (
+                                  <div key={f.label} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[100px] shrink-0">{f.label}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: f.cor }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: f.cor }}>{f.qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Pontualidade na saída */}
+                        <AnimatedCard delay={60}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Pontualidade na Saída</span>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-end justify-between mb-3">
+                                <div>
+                                  <p className="text-[28px] font-black leading-none text-emerald-300 tabular-nums">{viagensAnalytics.pctPontual.toFixed(0)}%</p>
+                                  <p className="text-[10px] text-slate-500 mt-1">saídas no prazo</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[10px] uppercase tracking-[0.15em] text-slate-600">Atraso médio</p>
+                                  <p className="text-[18px] font-bold text-rose-300 tabular-nums">{viagensAnalytics.mediaAtraso} <span className="text-[11px] font-medium text-slate-500">min</span></p>
+                                </div>
+                              </div>
+                              <div className="flex gap-1 h-2.5 rounded-full overflow-hidden mb-2" style={{ background: RAW.surfaceInset }}>
+                                <div className="h-full rounded-full bg-emerald-400/70 transition-all duration-500" style={{ width: `${viagensAnalytics.pctPontual}%` }} />
+                                <div className="h-full rounded-full bg-rose-400/70 transition-all duration-500" style={{ width: `${(viagensAnalytics.pontuais + viagensAnalytics.atrasadas) > 0 ? 100 - viagensAnalytics.pctPontual : 0}%` }} />
+                              </div>
+                              <div className="flex items-center justify-between text-[10px] font-medium">
+                                <span className="text-emerald-300">{viagensAnalytics.pontuais} pontuais</span>
+                                <span className="text-rose-300">{viagensAnalytics.atrasadas} atrasadas</span>
+                              </div>
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top Rotas */}
+                        <AnimatedCard delay={120}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Rotas</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.topRotas.map(([rota, qtd], i) => {
+                                const max = viagensAnalytics.topRotas[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={rota}>{rota}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-amber-400/70 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-amber-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Top Motoristas */}
+                        <AnimatedCard delay={180}>
+                          <div className="rounded-[14px] border h-full" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Users className="w-3.5 h-3.5 text-violet-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Top Motoristas</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.topMotoristas.map(([nome, qtd], i) => {
+                                const max = viagensAnalytics.topMotoristas[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[150px] truncate shrink-0" title={nome}>{nome}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full bg-violet-400/70 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                    </div>
+                                    <span className="text-[11px] font-bold tabular-nums text-violet-300 w-8 text-right shrink-0">{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                        {/* Distribuição por situação — largura total */}
+                        <AnimatedCard delay={240} className="lg:col-span-2">
+                          <div className="rounded-[14px] border" style={{ background: "var(--sgt-bg-card)", borderColor: RAW.borderDefault }}>
+                            <div className="flex items-center gap-2 px-4 pt-3.5 pb-3 border-b" style={{ borderColor: RAW.borderDefault }}>
+                              <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                              <span className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-500">Distribuição por Situação</span>
+                            </div>
+                            <div className="p-4 space-y-2.5">
+                              {viagensAnalytics.porSituacao.map(([sit, qtd], i) => {
+                                const max = viagensAnalytics.porSituacao[0]?.[1] ?? 1;
+                                const pct = (qtd / max) * 100;
+                                const cor = [RAW.accent.cyan, RAW.accent.emerald, RAW.accent.amber, RAW.accent.rose, RAW.accent.violet][i % 5];
+                                const share = viagensAnalytics.n > 0 ? (qtd / viagensAnalytics.n) * 100 : 0;
+                                return (
+                                  <div key={i} className="flex items-center gap-3">
+                                    <span className="text-[11px] text-slate-400 w-[160px] truncate shrink-0" title={sit}>{sit}</span>
+                                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: RAW.surfaceInset }}>
+                                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: cor }} />
+                                    </div>
+                                    <span className="text-[10px] text-slate-600 w-10 text-right shrink-0 tabular-nums">{share.toFixed(0)}%</span>
+                                    <span className="text-[11px] font-bold tabular-nums w-8 text-right shrink-0" style={{ color: cor }}>{qtd}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </AnimatedCard>
+
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Paginação */}
-                {tabelaOrdenada.length > PAGE_SIZE && (
+                {viagensView !== "analytics" && tabelaOrdenada.length > PAGE_SIZE && (
                   <div className="flex items-center justify-between px-3 py-2 border-t" style={{ borderColor: RAW.borderDefault }}>
                     <span className="text-[10px] text-slate-500">
                       {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, tabelaOrdenada.length)} de {fmtNum(tabelaOrdenada.length)}
@@ -1077,29 +1404,6 @@ export default function Operacional() {
         </section>
       </div>
 
-      {/* Dialog de detalhamento dos KPIs */}
-      <ViagensDialog
-        open={kpiDialog !== null}
-        onOpenChange={(o) => !o && setKpiDialog(null)}
-        title={
-          kpiDialog === "andamento" ? "Viagens em Andamento" :
-            kpiDialog === "rota" ? "Veículos em Rota" :
-              kpiDialog === "manutencao" ? "Veículos em Manutenção" :
-                kpiDialog === "atraso" ? "Saídas com Atraso" : ""
-        }
-        subtitle={
-          kpiDialog === "andamento" ? "0% < % concluído < 100% e fora de manutenção" :
-            kpiDialog === "rota" ? "Fora de manutenção e não finalizadas" :
-              kpiDialog === "manutencao" ? "EM_MANUTENCAO = S" :
-                kpiDialog === "atraso" ? "SAIDA_REAL > SAIDA_ORIGINAL" : ""
-        }
-        rows={
-          kpiDialog === "andamento" ? filtrados.filter(v => v.percCompleto > 0 && v.percCompleto < 100 && !v.emManutencao) :
-            kpiDialog === "rota" ? filtrados.filter(v => !v.emManutencao && v.percCompleto < 100) :
-              kpiDialog === "manutencao" ? filtrados.filter(v => v.emManutencao) :
-                kpiDialog === "atraso" ? filtrados.filter(v => v.temAtraso) : []
-        }
-      />
     </div>
   );
 }

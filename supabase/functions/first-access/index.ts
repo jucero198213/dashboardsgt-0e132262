@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "A senha deve ter no mínimo 6 caracteres" }), {
+    if (password.length !== 6) {
+      return new Response(JSON.stringify({ error: "A senha deve ter exatamente 6 caracteres" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -31,28 +31,10 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find user by email
-    const { data: userList, error: listError } = await adminClient.auth.admin.listUsers();
-    if (listError) {
-      return new Response(JSON.stringify({ error: "Erro ao buscar usuário" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const user = userList.users.find((u) => u.email === email);
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Email ou código inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Check access code
+    // Busca o código — sem depender de listUsers (evita problema de paginação)
     const { data: codeData, error: codeError } = await adminClient
       .from("first_access_codes")
-      .select("*")
-      .eq("user_id", user.id)
+      .select("id, user_id")
       .eq("code", code.toUpperCase().trim())
       .eq("used", false)
       .maybeSingle();
@@ -64,7 +46,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update password
+    // Verifica se o email bate com o usuário dono do código
+    const { data: { user }, error: getUserError } = await adminClient.auth.admin.getUserById(codeData.user_id);
+
+    if (getUserError || !user || user.email?.toLowerCase() !== email.toLowerCase().trim()) {
+      return new Response(JSON.stringify({ error: "Email ou código inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Atualiza a senha
     const { error: updateError } = await adminClient.auth.admin.updateUserById(user.id, {
       password,
     });
@@ -76,7 +68,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Mark code as used
+    // Marca o código como usado
     await adminClient
       .from("first_access_codes")
       .update({ used: true })
