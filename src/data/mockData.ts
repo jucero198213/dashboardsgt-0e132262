@@ -5,6 +5,7 @@ export interface ContaReceber {
   documento: string;
   parcela: string | null;
   cliente: string;
+  grupoCliente: string;
   dataEmissao: string;
   vencimento: string;
   dataPagamento: string | null;

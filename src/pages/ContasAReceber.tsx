@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   DollarSign, TrendingDown, Clock, CheckCircle, AlertTriangle,
   Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+  LayoutDashboard, CalendarClock, AlertOctagon, Zap, Percent, Construction,
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
@@ -29,12 +30,44 @@ const fmtData = (d: string | null | undefined) => d ? new Date(d).toLocaleDateSt
 
 const PAGE_SIZE = 50;
 
+// ─── Visões do Contas a Receber ────────────────────────────────────────────
+type ViewMode = "executivo" | "a_vencer" | "vencidos" | "liberado_antecipar";
+
+const VIEWS: { id: ViewMode; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: "executivo",           label: "Executivo",              icon: LayoutDashboard },
+  { id: "a_vencer",            label: "A Vencer",                icon: CalendarClock   },
+  { id: "vencidos",            label: "Vencidos",                icon: AlertOctagon    },
+  { id: "liberado_antecipar",  label: "Liberado p/ Antecipar",   icon: Zap             },
+];
+
+// ─── Agrupamento por mês de emissão (Card 1 e drill-down) ──────────────────
+const MESES_PT = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const monthKey   = (iso: string) => (iso ?? "").slice(0, 7); // "YYYY-MM"
+const monthLabel = (key: string) => {
+  const [y, m] = key.split("-");
+  const idx = parseInt(m, 10) - 1;
+  return `${MESES_PT[idx] ?? "?"}/${(y ?? "").slice(2)}`;
+};
+
+function groupByEmissionMonth(rows: { dataEmissao: string; valor: number }[]) {
+  const map = new Map<string, { value: number; count: number }>();
+  rows.forEach((c) => {
+    const key = monthKey(c.dataEmissao);
+    if (!key) return;
+    const cur = map.get(key) ?? { value: 0, count: 0 };
+    map.set(key, { value: cur.value + c.valor, count: cur.count + 1 });
+  });
+  return [...map.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([key, v]) => ({ label: monthLabel(key), value: v.value, count: v.count, color: "#06b6d4" }));
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  GRÁFICOS PREMIUM
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// ─── Aging de Vencidos (Barras Verticais) ─────────────────────────────────────
-const AgingChart = ({ data }: { data: any[] }) => {
+// ─── Barras Verticais genéricas (aging, composição mensal etc.) ───────────────
+const VerticalBarChart = ({ data }: { data: any[] }) => {
   const [hover, setHover] = useState<number | null>(null);
   
   const svgW = 520; const svgH = 300;
@@ -108,72 +141,203 @@ const AgingChart = ({ data }: { data: any[] }) => {
   );
 };
 
-// ─── Top Clientes (Barras Horizontais) ────────────────────────────────────
-const TopClientesChart = ({ data }: { data: any[] }) => {
-  const [hover, setHover] = useState<number | null>(null);
-  
-  const svgW = 520; const svgH = 300;
-  const padL = 150; const padR = 75; const padTop = 20; const padBot = 20;
-  const chartW = svgW - padL - padR;
-  const chartH = svgH - padTop - padBot;
-  
-  const maxVal = Math.max(...data.map(d => d.valor), 1) * 1.08;
-  const barH = (chartH - (data.length - 1) * 8) / data.length;
-  
+// ─── Lista ranqueada (grupo/cliente) — barra de participação + drill-down ─────
+const RankedList = ({
+  data, color = "#f59e0b", onRowClick, emptyMessage = "Sem dados no período selecionado",
+}: {
+  data: { nome: string; valor: number }[];
+  color?: string;
+  onRowClick?: (nome: string) => void;
+  emptyMessage?: string;
+}) => {
+  const total = data.reduce((s, d) => s + d.valor, 0);
+
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-1 items-center justify-center py-10 text-center text-[12px] text-slate-600">
+        {emptyMessage}
+      </div>
+    );
+  }
+
   return (
-    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
-      <defs>
-        <linearGradient id="forn-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.92" />
-          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.7" />
-        </linearGradient>
-      </defs>
-      
-      {/* Grid */}
-      {[0.5, 1].map(frac => {
-        const x = padL + chartW * frac;
+    <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+      {data.map((r, i) => {
+        const barW = total > 0 ? Math.min((r.valor / total) * 100, 100) : 0;
+        const pct = total > 0 ? (r.valor / total) * 100 : 0;
         return (
-          <g key={frac}>
-            <line x1={x} y1={padTop} x2={x} y2={svgH - padBot} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-            <text x={x} y={svgH - padBot + 12} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="middle">
-              {fmtK(maxVal * frac)}
-            </text>
-          </g>
+          <button
+            key={r.nome}
+            type="button"
+            onClick={onRowClick ? () => onRowClick(r.nome) : undefined}
+            disabled={!onRowClick}
+            className={`grid grid-cols-[minmax(0,1fr)_5.5rem_3rem] gap-3 px-3.5 py-2.5 items-center border-b border-[var(--sgt-divider)] last:border-0 text-left w-full transition-colors ${
+              onRowClick ? "cursor-pointer hover:bg-white/[0.03]" : "cursor-default"
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-[10px] font-bold shrink-0 w-4 text-right tabular-nums text-slate-600">{i + 1}</span>
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <span className="text-[12px] font-semibold truncate text-[var(--sgt-text-primary)]">{r.nome}</span>
+                <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: "var(--sgt-progress-track)" }}>
+                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${barW}%`, background: color }} />
+                </div>
+              </div>
+            </div>
+            <span className="text-[12px] font-bold tabular-nums text-right text-[var(--sgt-text-primary)]">{fmtK(r.valor)}</span>
+            <span className="text-[11px] font-bold tabular-nums text-right text-slate-500">{pct.toFixed(0)}%</span>
+          </button>
         );
       })}
-      
-      {/* Barras */}
-      {data.map((d, i) => {
-        const y = padTop + i * (barH + 8);
-        const w = (d.valor / maxVal) * chartW;
-        const isHover = hover === i;
-        
-        return (
-          <g key={i} onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }}>
-            <text x={padL - 6} y={y + barH / 2 + 3} fill="#cbd5e1" fontSize="9" fontWeight="500" textAnchor="end">
-              {d.nome}
-            </text>
-            
-            <rect x={padL} y={y} width={w} height={barH} rx="3"
-              fill="url(#forn-grad)" opacity={isHover ? 1 : 0.88} />
-            
-            <text x={padL + w + 5} y={y + barH / 2 + 3} fill="#06b6d4" fontSize="9" fontWeight="600">
-              {fmtK(d.valor)}
-            </text>
-            
-            {isHover && (
-              <g>
-                <rect x={padL + w / 2 - 60} y={y - 22} width="120" height="18" rx="4"
-                  fill="rgba(2,6,23,0.96)" stroke="rgba(6,182,212,0.4)" strokeWidth="1" />
-                <text x={padL + w / 2} y={y - 9} fill="#06b6d4" fontSize="9" fontWeight="600" textAnchor="middle">
-                  {fmtBRL(d.valor)}
-                </text>
-              </g>
-            )}
-          </g>
-        );
-      })}
+    </div>
+  );
+};
+
+// ─── Gauge semicircular — Taxa de Inadimplência ────────────────────────────────
+const InadimplenciaGauge = ({ percent }: { percent: number }) => {
+  const p = Math.max(0, Math.min(percent, 100));
+  const cx = 100, cy = 92, r = 72;
+  const pt = (pct: number) => {
+    const a = Math.PI - (pct / 100) * Math.PI;
+    return { x: +(cx + r * Math.cos(a)).toFixed(2), y: +(cy - r * Math.sin(a)).toFixed(2) };
+  };
+  const end = pt(p);
+  const largeArc = p > 50 ? 1 : 0;
+  const color = p >= 15 ? "#f43f5e" : p >= 5 ? "#f59e0b" : "#10b981";
+
+  return (
+    <svg viewBox="0 0 200 112" className="h-full w-full max-w-[240px]">
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`}
+        fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="16" strokeLinecap="round" />
+      {p > 0 && (
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y}`}
+          fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" style={{ transition: "d 0.4s" }} />
+      )}
+      <text x={cx} y={cy - 12} textAnchor="middle" fill="white" fontSize="26" fontWeight="900">{p.toFixed(1)}%</text>
+      <text x={cx} y={cy + 8} textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="700" letterSpacing="0.5">
+        vencido / carteira elegível
+      </text>
+      <text x={cx - r} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">0%</text>
+      <text x={cx + r - 16} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">100%</text>
     </svg>
+  );
+};
+
+// ─── Card 2 — Detalhamento por Cliente e Mês de Emissão (drill-down) ──────────
+const ClienteDrilldownCard = ({ contas }: { contas: { grupoCliente: string; cliente: string; dataEmissao: string; valor: number }[] }) => {
+  const [grupo, setGrupo] = useState<string | null>(null);
+  const [cliente, setCliente] = useState<string | null>(null);
+
+  const porGrupo = useMemo(() => {
+    const map = new Map<string, number>();
+    contas.forEach((c) => map.set(c.grupoCliente, (map.get(c.grupoCliente) ?? 0) + c.valor));
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
+  }, [contas]);
+
+  const porCliente = useMemo(() => {
+    if (!grupo) return [];
+    const map = new Map<string, number>();
+    contas.filter((c) => c.grupoCliente === grupo).forEach((c) => map.set(c.cliente, (map.get(c.cliente) ?? 0) + c.valor));
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
+  }, [contas, grupo]);
+
+  const porMes = useMemo(() => {
+    if (!grupo || !cliente) return [];
+    return groupByEmissionMonth(contas.filter((c) => c.grupoCliente === grupo && c.cliente === cliente));
+  }, [contas, grupo, cliente]);
+
+  const nivel = !grupo ? 0 : !cliente ? 1 : 2;
+
+  return (
+    <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+      <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          Detalhamento por Cliente e Mês de Emissão
+        </p>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 px-4 py-2 shrink-0 border-b border-[var(--sgt-divider)] text-[11px] overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => { setGrupo(null); setCliente(null); }}
+          className={`font-semibold whitespace-nowrap transition-colors ${!grupo ? "text-amber-300" : "text-slate-500 hover:text-white"}`}
+        >
+          Grupos de cliente
+        </button>
+        {grupo && (
+          <>
+            <ChevronRight className="h-3 w-3 shrink-0 text-slate-600" />
+            <button
+              type="button"
+              onClick={() => setCliente(null)}
+              className={`font-semibold whitespace-nowrap truncate max-w-[140px] transition-colors ${!cliente ? "text-amber-300" : "text-slate-500 hover:text-white"}`}
+            >
+              {grupo}
+            </button>
+          </>
+        )}
+        {cliente && (
+          <>
+            <ChevronRight className="h-3 w-3 shrink-0 text-slate-600" />
+            <span className="font-semibold text-amber-300 whitespace-nowrap truncate max-w-[140px]">{cliente}</span>
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-col flex-1 min-h-0">
+        {nivel === 0 && <RankedList data={porGrupo} color="#f59e0b" onRowClick={setGrupo} />}
+        {nivel === 1 && <RankedList data={porCliente} color="#06b6d4" onRowClick={setCliente} />}
+        {nivel === 2 && (
+          <div className="flex-1 min-h-0 p-3">
+            {porMes.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-[12px] text-slate-600">Sem dados no período</div>
+            ) : (
+              <VerticalBarChart data={porMes} />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Placeholder — visões ainda não implementadas ──────────────────────────────
+const PlaceholderView = ({ view }: { view: ViewMode }) => {
+  const meta: Record<Exclude<ViewMode, "executivo">, { titulo: string; desc: string }> = {
+    a_vencer: {
+      titulo: "A Vencer",
+      desc: "Visão dedicada aos títulos ainda não vencidos, com projeção de fluxo de caixa por vencimento.",
+    },
+    vencidos: {
+      titulo: "Vencidos",
+      desc: "Visão dedicada à régua de cobrança e ao detalhamento dos títulos em atraso.",
+    },
+    liberado_antecipar: {
+      titulo: "Liberado p/ Antecipar",
+      desc: "Visão dedicada aos títulos elegíveis para antecipação/factoring.",
+    },
+  };
+  const m = meta[view as Exclude<ViewMode, "executivo">];
+
+  return (
+    <div className="flex flex-1 items-center justify-center py-16">
+      <div className="flex flex-col items-center gap-4 text-center max-w-md px-4">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/[0.06]">
+          <div className="absolute inset-0 rounded-2xl animate-pulse bg-amber-400/[0.04]" />
+          <Construction className="h-7 w-7 text-amber-400/70 relative" />
+        </div>
+        <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/[0.08] px-3 py-1">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">Em desenvolvimento</span>
+        </div>
+        <h2 className="text-[18px] font-black tracking-[-0.02em] dark:text-white text-slate-800">{m.titulo}</h2>
+        <p className="text-[12px] leading-relaxed text-slate-500">{m.desc}</p>
+      </div>
+    </div>
   );
 };
 
@@ -183,9 +347,10 @@ const TopClientesChart = ({ data }: { data: any[] }) => {
 
 export default function ContasAReceber() {
   const navigate = useNavigate();
-  const { contasReceber, resumo, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW, loadingPhase, progress } = useFinancialData();
+  const { contasReceber, resumo, kpiExtra, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW, loadingPhase, progress } = useFinancialData();
   const { contasReceber: resumoReceber } = resumo;
 
+  const [view, setView] = useState<ViewMode>("executivo");
   const [search, setSearch] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [page, setPage] = useState(1);
@@ -242,12 +407,6 @@ export default function ContasAReceber() {
     else { setSortCol(col); setSortAsc(true); }
   }
 
-  // ── KPIs ───────────────────────────────────────────────────────────────────
-  const totalInadimplente = useMemo(() =>
-    contasReceber.filter(c => c.status === "Vencido").reduce((s, c) => s + c.valor, 0),
-    [contasReceber]
-  );
-
   // ── INSIGHTS (cálculos reais) ──────────────────────────────────────────────
   const insightsDataReceber = useMemo(() => {
     // 1. DSO - Prazo médio de recebimento (entre emissão e recebimento)
@@ -298,38 +457,42 @@ export default function ContasAReceber() {
     };
   }, [contasReceber]);
 
-  const kpis = [
-    { label: "Valor Previsto",  value: fmtK(resumoReceber.valorAReceber), subtitle: "Total a receber",  icon: DollarSign,   tone: "cyan"    as const },
-    { label: "Valor Recebido",  value: fmtK(resumoReceber.valorRecebido), subtitle: `${resumoReceber.valorAReceber > 0 ? ((resumoReceber.valorRecebido / resumoReceber.valorAReceber) * 100).toFixed(1) : 0}% recebido`, icon: CheckCircle, tone: "emerald" as const },
-    { label: "Saldo a Receber", value: fmtK(resumoReceber.saldoAReceber), subtitle: "Pendente",          icon: Clock,        tone: "amber"   as const },
-    { label: "Inadimplência",   value: fmtK(totalInadimplente),           subtitle: `${contasReceber.filter(c => c.status === "Vencido").length} documentos`, icon: AlertTriangle, tone: "rose" as const },
+  // ── KPIs Executivo ───────────────────────────────────────────────────────────
+  // KPI 1: Vencimentos no Período — tudo cujo VENCIMENTO cai no filtro, independente da situação
+  //         (já é exatamente o que resumoReceber.valorAReceber representa — ver FinancialDataContext)
+  const vencimentosNoPeriodo = resumoReceber.valorAReceber;
+  // KPI 3: Realizado no Período — recebido cujo vencimento estava no período (resumoReceber.valorRecebido)
+  const realizadoNoPeriodo = resumoReceber.valorRecebido;
+  // KPI 2: % Realização = Realizado / Vencimentos no período
+  const percentualRealizacao = vencimentosNoPeriodo > 0 ? (realizadoNoPeriodo / vencimentosNoPeriodo) * 100 : 0;
+  // KPI 4: Vencido Acumulado — estoque de inadimplência (regra já existente: DATA_VENCIMENTO < hoje e não recebido)
+  const vencidoAcumulado = kpiExtra.inadimplencia;
+
+  const kpisExecutivo = [
+    { label: "Vencimentos no Período", value: fmtK(vencimentosNoPeriodo), subtitle: "Tudo que vence no período (recebido + a vencer + vencido)", icon: CalendarClock, tone: "cyan"    as const },
+    { label: "% Realização",           value: `${percentualRealizacao.toFixed(1)}%`, subtitle: "Realizado ÷ Vencimentos no período", icon: Percent, tone: "emerald" as const },
+    { label: "Realizado no Período",   value: fmtK(realizadoNoPeriodo), subtitle: "Efetivamente recebido no período", icon: CheckCircle, tone: "blue" as const },
+    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${kpiExtra.inadimplenciaDocs} títulos vencidos`, icon: AlertTriangle, tone: "rose" as const },
   ];
 
-  // ── Dados para gráficos ────────────────────────────────────────────────────
-  const aging = useMemo(() => {
-    const today = new Date();
-    const buckets = [
-      { label: "1-30 dias", value: 0, count: 0, color: "#fbbf24" },
-      { label: "31-60 dias", value: 0, count: 0, color: "#fb923c" },
-      { label: "61-90 dias", value: 0, count: 0, color: "#f87171" },
-      { label: "+90 dias", value: 0, count: 0, color: "#ef4444" },
-    ];
-    contasReceber.filter(c => c.status === "Vencido").forEach(c => {
-      const days = Math.floor((today.getTime() - new Date(c.vencimento).getTime()) / 86_400_000);
-      const idx = days <= 30 ? 0 : days <= 60 ? 1 : days <= 90 ? 2 : 3;
-      buckets[idx].value += c.valor;
-      buckets[idx].count += 1;
-    });
-    return buckets;
-  }, [contasReceber]);
+  // ── Dados para gráficos (visão Executivo) ────────────────────────────────────
+  // Mesma população do KPI 1 (vencimento dentro do filtro de período) — usada nos
+  // Cards 1 e 2 para "compor" o Contas a Receber vigente pelo mês de EMISSÃO.
+  const contasNoPeriodo = useMemo(() =>
+    contasReceber.filter(c => c.vencimento >= dwFilter.dataInicio && c.vencimento <= dwFilter.dataFim),
+    [contasReceber, dwFilter.dataInicio, dwFilter.dataFim]
+  );
 
-  const topClientes = useMemo(() => {
+  // Card 1 — Composição por Mês de Emissão
+  const composicaoMesEmissao = useMemo(() => groupByEmissionMonth(contasNoPeriodo), [contasNoPeriodo]);
+
+  // Card 3 — Clientes que Concentram o Vencido (agrupado por grupo de cliente)
+  const vencidoPorGrupo = useMemo(() => {
     const map = new Map<string, number>();
-    contasReceber.forEach(c => map.set(c.cliente, (map.get(c.cliente) ?? 0) + c.valor));
-    return [...map.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([nome, valor]) => ({ nome, valor, fill: "#06b6d4" }));
+    contasReceber.filter(c => c.status === "Vencido").forEach(c =>
+      map.set(c.grupoCliente, (map.get(c.grupoCliente) ?? 0) + c.valor)
+    );
+    return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
   }, [contasReceber]);
 
   return (
@@ -428,9 +591,32 @@ export default function ContasAReceber() {
           <HomeButton />
         </div>
 
+        {/* ════════ SELETOR DE VISÕES ════════ */}
+        <div className="flex items-center shrink-0">
+          <div className="flex items-center gap-0.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5 overflow-x-auto">
+            {VIEWS.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setView(v.id)}
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-semibold uppercase tracking-[0.06em] transition-all whitespace-nowrap ${
+                  view === v.id
+                    ? "border border-amber-400/40 bg-amber-500/15 text-amber-300"
+                    : "border border-transparent text-slate-400 hover:text-white"
+                }`}
+              >
+                <v.icon className="h-3.5 w-3.5" />
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {view === "executivo" && (
+        <>
         {/* ════════ KPIs ════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {kpis.map((k, i) => (
+          {kpisExecutivo.map((k, i) => (
             <AnimatedCard key={k.label} delay={i * 60}>
               <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} />
             </AnimatedCard>
@@ -571,29 +757,56 @@ export default function ContasAReceber() {
 
         </div>
 
-        {/* ════════ GRÁFICOS COMPARATIVOS ════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {/* Aging de Vencidos */}
-          <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
-            <div className="mb-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                Aging · Títulos Vencidos
-              </p>
-            </div>
-            <div className="h-[320px]">
-              <AgingChart data={aging} />
+        {/* ════════ ÁREA ANALÍTICA ════════ */}
+        {/* Linha 1 — Composição por Mês de Emissão | Detalhamento por Cliente e Mês de Emissão */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
+          <div className="h-[380px]">
+            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Composição por Mês de Emissão
+                </p>
+              </div>
+              <div className="flex-1 min-h-0 p-3">
+                {composicaoMesEmissao.length === 0 ? (
+                  <div className="flex h-full items-center justify-center text-[12px] text-slate-600">
+                    Sem dados no período selecionado
+                  </div>
+                ) : (
+                  <VerticalBarChart data={composicaoMesEmissao} />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Top 5 Fornecedores */}
-          <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] p-4">
-            <div className="mb-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                Top 5 · Maiores Clientes
-              </p>
+          <div className="h-[380px]">
+            <ClienteDrilldownCard contas={contasNoPeriodo} />
+          </div>
+        </div>
+
+        {/* Linha 2 — Taxa de Inadimplência | Clientes que Concentram o Vencido */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
+          <div className="h-[300px] lg:col-span-1">
+            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Taxa de Inadimplência
+                </p>
+              </div>
+              <div className="flex flex-1 items-center justify-center p-3">
+                <InadimplenciaGauge percent={kpiExtra.inadimplenciaPerc} />
+              </div>
             </div>
-            <div className="h-[320px]">
-              <TopClientesChart data={topClientes} />
+          </div>
+
+          <div className="h-[300px] lg:col-span-2">
+            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Clientes que Concentram o Vencido
+                </p>
+              </div>
+              <RankedList data={vencidoPorGrupo} color="#f43f5e" emptyMessage="Nenhum título vencido no momento" />
             </div>
           </div>
         </div>
@@ -728,8 +941,13 @@ export default function ContasAReceber() {
             </div>
           )}
           
-          </div> {/* Fecha container com scroll */}
-        </div>
+          </div> {/* Fecha TABELA */}
+        </>
+        )}
+
+        {view !== "executivo" && <PlaceholderView view={view} />}
+
+        </div> {/* Fecha container com scroll */}
         </div>
       </section>
       </div>

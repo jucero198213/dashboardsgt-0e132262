@@ -110,6 +110,8 @@ export interface DwRow {
   DATA_PAGAMENTO: string | null;
   COD_PARCEIRO: string | null;
   NOME_PARCEIRO: string | null;
+  /** Grupo de cliente (RODCLI.CODCGR → RODCGR.DESCRI) — só preenchido em linhas ORIGEM="CR" */
+  GRUPO_CLIENTE: string | null;
   SERIE: string | null;
   DOCUMENTO: string | null;
   PARCELA: string | null;

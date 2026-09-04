@@ -204,7 +204,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v10";
+const CACHE_KEY = "dw_financial_cache_v11";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -580,6 +580,7 @@ export function FinancialDataProvider({
           documento:     r.DOCUMENTO ?? `CR-${i + 1}`,
           parcela:       r.PARCELA ?? null,
           cliente:       r.NOME_PARCEIRO ?? "N/A",
+          grupoCliente:  r.GRUPO_CLIENTE ?? "Sem grupo",
           dataEmissao:   isoDate(r.DATA_EMISSAO),
           vencimento:    isoDate(r.DATA_VENCIMENTO),
           dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,
