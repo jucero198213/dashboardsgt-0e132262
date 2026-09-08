@@ -1,13 +1,12 @@
 ﻿import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  DollarSign, TrendingDown, Clock, CheckCircle, AlertTriangle,
-  Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+  CheckCircle, AlertTriangle,
+  ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
   LayoutDashboard, CalendarClock, AlertOctagon, Zap, Percent, Construction,
 } from "lucide-react";
 import { useFinancialData } from "@/contexts/FinancialDataContext";
 import { BackgroundEffects } from "@/components/shared/BackgroundEffects";
-import { InsightsSection } from "@/components/shared/InsightsSection";
 import { AnimatedCard } from "@/components/shared/AnimatedCard";
 import { KpiCard } from "@/components/indicators/KpiCard";
 import { HomeButton } from "@/components/shared/HomeButton";
@@ -190,6 +189,81 @@ const RankedList = ({
         );
       })}
     </div>
+  );
+};
+
+// ─── Gráfico de linha — % Realização por Mês ──────────────────────────────────
+const LineChartPercent = ({ data }: { data: { label: string; pct: number }[] }) => {
+  const [hover, setHover] = useState<number | null>(null);
+
+  const svgW = 900; const svgH = 300;
+  const padL = 50; const padR = 25; const padTop = 25; const padBot = 38;
+  const chartW = svgW - padL - padR;
+  const chartH = svgH - padTop - padBot;
+
+  const maxVal = Math.max(100, Math.ceil(Math.max(...data.map(d => d.pct), 0) / 10) * 10);
+  const stepX = data.length > 1 ? chartW / (data.length - 1) : 0;
+  const pts = data.map((d, i) => ({
+    x: padL + (data.length > 1 ? i * stepX : chartW / 2),
+    y: padTop + chartH - (Math.max(0, Math.min(d.pct, maxVal)) / maxVal) * chartH,
+  }));
+  const lineD = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaD = pts.length > 0
+    ? `${lineD} L ${pts[pts.length - 1].x} ${padTop + chartH} L ${pts[0].x} ${padTop + chartH} Z`
+    : "";
+
+  return (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-full w-full" onMouseLeave={() => setHover(null)}>
+      <defs>
+        <linearGradient id="linha-realizacao-area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Grid */}
+      {[0, 0.25, 0.5, 0.75, 1].map(frac => {
+        const y = padTop + chartH * (1 - frac);
+        return (
+          <g key={frac}>
+            <line x1={padL} y1={y} x2={svgW - padR} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            <text x={padL - 6} y={y + 3} fill="#64748b" fontSize="9" fontWeight="500" textAnchor="end">
+              {Math.round(maxVal * frac)}%
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Área sob a linha */}
+      {areaD && <path d={areaD} fill="url(#linha-realizacao-area)" />}
+
+      {/* Linha */}
+      {lineD && <path d={lineD} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+
+      {/* Pontos + labels + hover */}
+      {pts.map((p, i) => {
+        const isHover = hover === i;
+        return (
+          <g key={i}>
+            <rect x={p.x - (stepX || chartW) / 2} y={padTop} width={stepX || chartW} height={chartH}
+              fill="transparent" onMouseEnter={() => setHover(i)} style={{ cursor: "pointer" }} />
+            <circle cx={p.x} cy={p.y} r={isHover ? 5 : 3.5} fill="#10b981" stroke="#0a0f1e" strokeWidth="2" />
+            <text x={p.x} y={svgH - padBot + 18} fill="#94a3b8" fontSize="9" fontWeight="600" textAnchor="middle">
+              {data[i].label}
+            </text>
+            {isHover && (
+              <>
+                <rect x={p.x - 26} y={p.y - 30} width="52" height="20" rx="4"
+                  fill="rgba(2,6,23,0.96)" stroke="rgba(16,185,129,0.4)" strokeWidth="1" />
+                <text x={p.x} y={p.y - 16} fill="#10b981" fontSize="10" fontWeight="700" textAnchor="middle">
+                  {data[i].pct.toFixed(1)}%
+                </text>
+              </>
+            )}
+          </g>
+        );
+      })}
+    </svg>
   );
 };
 
@@ -407,56 +481,6 @@ export default function ContasAReceber() {
     else { setSortCol(col); setSortAsc(true); }
   }
 
-  // ── INSIGHTS (cálculos reais) ──────────────────────────────────────────────
-  const insightsDataReceber = useMemo(() => {
-    // 1. DSO - Prazo médio de recebimento (entre emissão e recebimento)
-    const recebidos = contasReceber.filter(c => (c as any).dataRecebimento);
-    let dsoTotal = 0;
-    recebidos.forEach(c => {
-      const emissao = new Date((c as any).emissao);
-      const receb = new Date((c as any).dataRecebimento!);
-      const diffDias = Math.floor((receb.getTime() - emissao.getTime()) / (1000 * 60 * 60 * 24));
-      dsoTotal += diffDias;
-    });
-    const dso = recebidos.length > 0 ? Math.round(dsoTotal / recebidos.length) : 0;
-
-    // 2. Concentração em clientes (top 3 = quanto % do total?)
-    const porCliente: Record<string, number> = {};
-    contasReceber.forEach(c => {
-      porCliente[c.cliente] = (porCliente[c.cliente] || 0) + c.valor;
-    });
-    const top3Clientes = Object.values(porCliente)
-      .sort((a, b) => b - a)
-      .slice(0, 3)
-      .reduce((s, v) => s + v, 0);
-    const totalGeralReceber = contasReceber.reduce((s, c) => s + c.valor, 0);
-    const concentracaoClientes = totalGeralReceber > 0 ? (top3Clientes / totalGeralReceber) * 100 : 0;
-    const numClientesTop3 = Object.entries(porCliente).sort((a, b) => b[1] - a[1]).slice(0, 3).length;
-
-    // 3. Índice de glosa (assumindo 8-10% de diferença entre faturado e pago)
-    const totalRecebido = contasReceber.filter(c => (c.status as string) === "Recebido").reduce((s, c) => s + c.valor, 0);
-    const totalFaturado = contasReceber.reduce((s, c) => s + c.valor, 0);
-    const glosa = totalFaturado > 0 ? ((totalFaturado - totalRecebido) / totalFaturado) * 100 : 0;
-
-    // 4. Clientes inadimplentes recorrentes (vencidos há mais de 30 dias)
-    const hoje = new Date();
-    const inadimplentesRecorrentes = contasReceber.filter(c => {
-      if (c.status !== "Vencido") return false;
-      const venc = new Date(c.vencimento);
-      const diasAtraso = Math.floor((hoje.getTime() - venc.getTime()) / (1000 * 60 * 60 * 24));
-      return diasAtraso > 30;
-    });
-    const clientesInadimplentes = new Set(inadimplentesRecorrentes.map(c => c.cliente)).size;
-
-    return {
-      dso,
-      concentracaoClientes,
-      numClientesTop3,
-      glosa,
-      clientesInadimplentes,
-    };
-  }, [contasReceber]);
-
   // ── KPIs Executivo ───────────────────────────────────────────────────────────
   // KPI 1: Vencimentos no Período — tudo cujo VENCIMENTO cai no filtro, independente da situação
   //         (já é exatamente o que resumoReceber.valorAReceber representa — ver FinancialDataContext)
@@ -494,6 +518,26 @@ export default function ContasAReceber() {
     );
     return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
   }, [contasReceber]);
+
+  // % Realização por Mês — agrupa contasNoPeriodo pelo mês de VENCIMENTO
+  // (mesma base do KPI2: recebido / vencimentos daquele mês)
+  const realizacaoPorMes = useMemo(() => {
+    const map = new Map<string, { vencimento: number; realizado: number }>();
+    contasNoPeriodo.forEach(c => {
+      const key = monthKey(c.vencimento);
+      if (!key) return;
+      const cur = map.get(key) ?? { vencimento: 0, realizado: 0 };
+      cur.vencimento += c.valor;
+      cur.realizado += c.valorRecebido;
+      map.set(key, cur);
+    });
+    return [...map.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, v]) => ({
+        label: monthLabel(key),
+        pct: v.vencimento > 0 ? (v.realizado / v.vencimento) * 100 : 0,
+      }));
+  }, [contasNoPeriodo]);
 
   return (
     <div 
@@ -622,144 +666,9 @@ export default function ContasAReceber() {
             </AnimatedCard>
           ))}
         </div>
-        <InsightsSection
-          setor="contas_a_receber"
-          dados={{
-            totalAReceber: resumoReceber.valorAReceber,
-            totalRecebido: resumoReceber.valorRecebido,
-            totalVencido: (resumoReceber as any).valorVencido ?? 0,
-            totalAberto: (resumoReceber as any).valorAberto ?? 0,
-            qtdTitulos: contasReceber.length,
-            dso: insightsDataReceber.dso,
-            concentracaoTop3Clientes: Math.round(insightsDataReceber.concentracaoClientes),
-            glosaPercentual: parseFloat(insightsDataReceber.glosa.toFixed(1)),
-            clientesInadimplentes: insightsDataReceber.clientesInadimplentes,
-          }}
-          periodo={`${dwFilter.dataInicio} a ${dwFilter.dataFim}`}
-          autoGenerate={true}
-        />
-        {/* REMOVIDO: grid de insights fixos — substituído por IA acima */}
-        <div className="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          
-          {/* Insight 1: DSO - Prazo Médio de Recebimento */}
-          <AnimatedCard delay={300}>
-            <div className="relative overflow-hidden rounded-[14px] border border-cyan-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-cyan-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-400/70">DSO · Prazo Médio</p>
-                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.dso} dias</p>
-                  </div>
-                  <Clock className="h-5 w-5 text-cyan-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Prazo médio de recebimento {insightsDataReceber.dso > 0 ? "" : "(sem dados). "}<span className="text-cyan-400 font-semibold">Revisar política de crédito</span> para clientes com atraso recorrente.
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-          {/* Insight 2: Risco de Concentração */}
-          <AnimatedCard delay={350}>
-            <div className="relative overflow-hidden rounded-[14px] border border-rose-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-rose-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-rose-400/70">Risco</p>
-                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.numClientesTop3} {insightsDataReceber.numClientesTop3 === 1 ? "cliente" : "clientes"}</p>
-                  </div>
-                  <AlertTriangle className="h-5 w-5 text-rose-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Top {insightsDataReceber.numClientesTop3} = <span className="text-rose-400 font-semibold">{insightsDataReceber.concentracaoClientes.toFixed(0)}% do faturamento</span>. Risco de concentração - diversificar carteira.
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-          {/* Insight 3: Índice de Glosa */}
-          <AnimatedCard delay={400}>
-            <div className="relative overflow-hidden rounded-[14px] border border-amber-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-amber-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-amber-400/70">Glosa</p>
-                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.glosa.toFixed(1)}%</p>
-                  </div>
-                  <TrendingDown className="h-5 w-5 text-amber-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Diferença entre faturado e pago. <span className="text-amber-400 font-semibold">Reduzir glosa</span> via integração EDI ou portal do cliente.
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-          {/* Insight 4: Antecipação de Recebíveis */}
-          <AnimatedCard delay={450}>
-            <div className="relative overflow-hidden rounded-[14px] border border-emerald-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-emerald-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-emerald-400/70">Oportunidade</p>
-                    <p className="text-lg font-black text-white mt-1">Factoring?</p>
-                  </div>
-                  <DollarSign className="h-5 w-5 text-emerald-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Avaliar <span className="text-emerald-400 font-semibold">antecipação de recebíveis</span> (factoring/FIDC) considerando custo financeiro vs necessidade de caixa.
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-          {/* Insight 5: Inadimplentes Recorrentes */}
-          <AnimatedCard delay={500}>
-            <div className="relative overflow-hidden rounded-[14px] border border-red-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-red-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-red-400/70">Ação Urgente</p>
-                    <p className="text-2xl font-black text-white mt-1">{insightsDataReceber.clientesInadimplentes} {insightsDataReceber.clientesInadimplentes === 1 ? "cliente" : "clientes"}</p>
-                  </div>
-                  <AlertTriangle className="h-5 w-5 text-red-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Inadimplentes há mais de 30 dias. <span className="text-red-400 font-semibold">Bloquear ou renegociar</span> condições comerciais imediatamente.
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-          {/* Insight 6: Cobrança Digital */}
-          <AnimatedCard delay={550}>
-            <div className="relative overflow-hidden rounded-[14px] border border-blue-500/20 bg-[var(--sgt-bg-card)] p-4 hover:border-blue-400/30 transition-all">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl"></div>
-              <div className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-400/70">Modernização</p>
-                    <p className="text-lg font-black text-white mt-1">Régua Digital</p>
-                  </div>
-                  <CheckCircle className="h-5 w-5 text-blue-400/60" />
-                </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Política de cobrança <span className="text-blue-400 font-semibold">e-mail → telefone → notificação → protesto</span> está madura e digitalizada?
-                </p>
-              </div>
-            </div>
-          </AnimatedCard>
-
-        </div>
-
         {/* ════════ ÁREA ANALÍTICA ════════ */}
-        {/* Linha 1 — Composição por Mês de Emissão | Detalhamento por Cliente e Mês de Emissão */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
+        {/* Linha 1 — três cards do mesmo tamanho: Composição | Detalhamento (drill-down) | Clientes que Concentram o Vencido */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
           <div className="h-[380px]">
             <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
               <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
@@ -782,10 +691,40 @@ export default function ContasAReceber() {
           <div className="h-[380px]">
             <ClienteDrilldownCard contas={contasNoPeriodo} />
           </div>
+
+          <div className="h-[380px]">
+            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Clientes que Concentram o Vencido
+                </p>
+              </div>
+              <RankedList data={vencidoPorGrupo} color="#f43f5e" emptyMessage="Nenhum título vencido no momento" />
+            </div>
+          </div>
         </div>
 
-        {/* Linha 2 — Taxa de Inadimplência | Clientes que Concentram o Vencido */}
+        {/* Linha 2 — % Realização por Mês (mesma largura dos 2 primeiros cards) | Taxa de Inadimplência */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
+          <div className="h-[300px] lg:col-span-2">
+            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
+              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  % Realização por Mês
+                </p>
+              </div>
+              <div className="flex-1 min-h-0 p-3">
+                {realizacaoPorMes.length === 0 ? (
+                  <div className="flex h-full items-center justify-center text-[12px] text-slate-600">
+                    Sem dados no período selecionado
+                  </div>
+                ) : (
+                  <LineChartPercent data={realizacaoPorMes} />
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="h-[300px] lg:col-span-1">
             <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
               <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
@@ -796,17 +735,6 @@ export default function ContasAReceber() {
               <div className="flex flex-1 items-center justify-center p-3">
                 <InadimplenciaGauge percent={kpiExtra.inadimplenciaPerc} />
               </div>
-            </div>
-          </div>
-
-          <div className="h-[300px] lg:col-span-2">
-            <div className="rounded-[14px] border border-[var(--sgt-border-subtle)] bg-[var(--sgt-bg-card)] flex flex-col h-full overflow-hidden">
-              <div className="px-4 py-3 shrink-0 border-b border-[var(--sgt-border-subtle)]" style={{ background: "var(--sgt-table-head)" }}>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                  Clientes que Concentram o Vencido
-                </p>
-              </div>
-              <RankedList data={vencidoPorGrupo} color="#f43f5e" emptyMessage="Nenhum título vencido no momento" />
             </div>
           </div>
         </div>
