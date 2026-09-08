@@ -276,7 +276,11 @@ const InadimplenciaGauge = ({ percent }: { percent: number }) => {
     return { x: +(cx + r * Math.cos(a)).toFixed(2), y: +(cy - r * Math.sin(a)).toFixed(2) };
   };
   const end = pt(p);
-  const largeArc = p > 50 ? 1 : 0;
+  // O arco desenhado é sempre um sub-arco do semicírculo superior (≤180°),
+  // então a flag "large-arc" do SVG deve ser sempre 0 — nunca a alternativa
+  // "grande arco" (que passaria pela metade de baixo do círculo, invisível/
+  // torta). Antes isso alternava com p>50, deformando o gauge acima de 50%.
+  const largeArc = 0;
   const color = p >= 15 ? "#f43f5e" : p >= 5 ? "#f59e0b" : "#10b981";
 
   return (
@@ -289,7 +293,7 @@ const InadimplenciaGauge = ({ percent }: { percent: number }) => {
       )}
       <text x={cx} y={cy - 12} textAnchor="middle" fill="white" fontSize="26" fontWeight="900">{p.toFixed(1)}%</text>
       <text x={cx} y={cy + 8} textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="700" letterSpacing="0.5">
-        vencido / carteira elegível
+        vencido ÷ vencido até a data
       </text>
       <text x={cx - r} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">0%</text>
       <text x={cx + r - 16} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">100%</text>
@@ -421,7 +425,7 @@ const PlaceholderView = ({ view }: { view: ViewMode }) => {
 
 export default function ContasAReceber() {
   const navigate = useNavigate();
-  const { contasReceber, resumo, kpiExtra, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW, loadingPhase, progress } = useFinancialData();
+  const { contasReceber, resumo, dwChartData, chartReceber, isFetchingDw, dwFilter, setDwFilter, filiais, empresas, fetchFromDW, loadingPhase, progress } = useFinancialData();
   const { contasReceber: resumoReceber } = resumo;
 
   const [view, setView] = useState<ViewMode>("executivo");
@@ -489,14 +493,55 @@ export default function ContasAReceber() {
   const realizadoNoPeriodo = resumoReceber.valorRecebido;
   // KPI 2: % Realização = Realizado / Vencimentos no período
   const percentualRealizacao = vencimentosNoPeriodo > 0 ? (realizadoNoPeriodo / vencimentosNoPeriodo) * 100 : 0;
-  // KPI 4: Vencido Acumulado — estoque de inadimplência (regra já existente: DATA_VENCIMENTO < hoje e não recebido)
-  const vencidoAcumulado = kpiExtra.inadimplencia;
+  // KPI 4: Vencido Acumulado + Taxa de Inadimplência (Card 4)
+  // Usa dwChartData (CR do ano do filtro, buscado em background pelo contexto
+  // p/ os gráficos anuais) em vez de contasReceber/kpiExtra: contasReceber só
+  // traz linhas cujo VENCIMENTO OU RECEBIMENTO caem dentro da janela de dias
+  // do filtro principal, então um título vencido há meses (fora dessa janela,
+  // sem recebimento) nunca aparece ali — subestimando o vencido acumulado.
+  // Situação "P" conta o saldo residual (VLR_PARCELA − VLR_PAGO), não o valor
+  // cheio — mesma regra já usada no saldo "Contas a Receber" no contexto.
+  // Taxa de Inadimplência = Vencido Acumulado ÷ tudo com vencimento < hoje
+  // (pago ou não) — "valor com vencimento até a data".
+  const { vencidoAcumulado, vencidoAcumuladoDocs, taxaInadimplencia } = useMemo(() => {
+    const n = (v: number | null | undefined) => v ?? 0;
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    let vencido = 0;
+    let vencidoDocs = 0;
+    let totalVencidoAteData = 0;
+
+    dwChartData.forEach((r: any) => {
+      if (r.ORIGEM !== "CR") return;
+      const sit = String(r.SITUACAO ?? "").trim().toUpperCase();
+      if (!["L", "P", "D"].includes(sit)) return;
+      if (!r.DATA_VENCIMENTO) return;
+      const venc = new Date(r.DATA_VENCIMENTO);
+      if (venc >= hoje) return;
+
+      const valor = n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA);
+      totalVencidoAteData += valor;
+
+      if (sit !== "L") {
+        const recebido = n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
+        const saldo = Math.max(0, valor - recebido);
+        if (saldo > 0) { vencido += saldo; vencidoDocs += 1; }
+      }
+    });
+
+    return {
+      vencidoAcumulado: Math.round(vencido * 100) / 100,
+      vencidoAcumuladoDocs: vencidoDocs,
+      taxaInadimplencia: totalVencidoAteData > 0 ? (vencido / totalVencidoAteData) * 100 : 0,
+    };
+  }, [dwChartData]);
 
   const kpisExecutivo = [
     { label: "Vencimentos no Período", value: fmtK(vencimentosNoPeriodo), subtitle: "Tudo que vence no período (recebido + a vencer + vencido)", icon: CalendarClock, tone: "cyan"    as const },
     { label: "% Realização",           value: `${percentualRealizacao.toFixed(1)}%`, subtitle: "Realizado ÷ Vencimentos no período", icon: Percent, tone: "emerald" as const },
     { label: "Realizado no Período",   value: fmtK(realizadoNoPeriodo), subtitle: "Efetivamente recebido no período", icon: CheckCircle, tone: "blue" as const },
-    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${kpiExtra.inadimplenciaDocs} títulos vencidos`, icon: AlertTriangle, tone: "rose" as const },
+    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${vencidoAcumuladoDocs} títulos vencidos`, icon: AlertTriangle, tone: "rose" as const },
   ];
 
   // ── Dados para gráficos (visão Executivo) ────────────────────────────────────
@@ -507,8 +552,11 @@ export default function ContasAReceber() {
     [contasReceber, dwFilter.dataInicio, dwFilter.dataFim]
   );
 
-  // Card 1 — Composição por Mês de Emissão
-  const composicaoMesEmissao = useMemo(() => groupByEmissionMonth(contasNoPeriodo), [contasNoPeriodo]);
+  // Card 1 — Composição por Mês de Emissão, ordenado por valor decrescente
+  const composicaoMesEmissao = useMemo(
+    () => [...groupByEmissionMonth(contasNoPeriodo)].sort((a, b) => b.value - a.value),
+    [contasNoPeriodo]
+  );
 
   // Card 3 — Clientes que Concentram o Vencido (agrupado por grupo de cliente)
   const vencidoPorGrupo = useMemo(() => {
@@ -519,25 +567,37 @@ export default function ContasAReceber() {
     return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
   }, [contasReceber]);
 
-  // % Realização por Mês — agrupa contasNoPeriodo pelo mês de VENCIMENTO
-  // (mesma base do KPI2: recebido / vencimentos daquele mês)
+  // % Realização por Mês — ano completo (Jan–Dez do ano do filtro), usando
+  // dwChartData (mesma fonte do gráfico anual do dashboard) em vez da janela
+  // de dias do filtro principal.
   const realizacaoPorMes = useMemo(() => {
-    const map = new Map<string, { vencimento: number; realizado: number }>();
-    contasNoPeriodo.forEach(c => {
-      const key = monthKey(c.vencimento);
-      if (!key) return;
-      const cur = map.get(key) ?? { vencimento: 0, realizado: 0 };
-      cur.vencimento += c.valor;
-      cur.realizado += c.valorRecebido;
-      map.set(key, cur);
+    const n = (v: number | null | undefined) => v ?? 0;
+    const buckets = Array.from({ length: 12 }, () => ({ vencimento: 0, realizado: 0 }));
+
+    dwChartData.forEach((r: any) => {
+      if (r.ORIGEM !== "CR") return;
+      const sit = String(r.SITUACAO ?? "").trim().toUpperCase();
+      if (!["L", "P", "D"].includes(sit)) return;
+      if (!r.DATA_VENCIMENTO) return;
+      const mi = parseInt(String(r.DATA_VENCIMENTO).slice(5, 7), 10) - 1;
+      if (mi < 0 || mi > 11) return;
+
+      const valor = n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA);
+      buckets[mi].vencimento += valor;
+
+      const temPag = r.DATA_PAGAMENTO !== null && r.DATA_PAGAMENTO !== undefined && r.DATA_PAGAMENTO !== "";
+      if ((sit === "L" || sit === "P") && temPag) {
+        const recebido = n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
+        buckets[mi].realizado += recebido;
+      }
     });
-    return [...map.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([key, v]) => ({
-        label: monthLabel(key),
-        pct: v.vencimento > 0 ? (v.realizado / v.vencimento) * 100 : 0,
-      }));
-  }, [contasNoPeriodo]);
+
+    const ano = chartReceber.ano || dwFilter.dataInicio.slice(0, 4);
+    return buckets.map((b, i) => ({
+      label: `${MESES_PT[i]}/${ano.slice(2)}`,
+      pct: b.vencimento > 0 ? (b.realizado / b.vencimento) * 100 : 0,
+    }));
+  }, [dwChartData, chartReceber.ano, dwFilter.dataInicio]);
 
   return (
     <div 
@@ -733,7 +793,7 @@ export default function ContasAReceber() {
                 </p>
               </div>
               <div className="flex flex-1 items-center justify-center p-3">
-                <InadimplenciaGauge percent={kpiExtra.inadimplenciaPerc} />
+                <InadimplenciaGauge percent={taxaInadimplencia} />
               </div>
             </div>
           </div>
