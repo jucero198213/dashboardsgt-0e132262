@@ -45,7 +45,7 @@ export const APP_NAV: AppNavItem[] = [
   // ── Financeiro ────────────────────────────────────────────────────────────
   { id: "fin-painel",       label: "Painel Financeiro",icon: LayoutDashboard, financeScreen: "painel",       section: "Financeiro", page: "fin-painel" },
   { id: "fin-pagar",        label: "Contas a Pagar",   icon: ArrowDownCircle, financeScreen: "pagar",        page: "fin-pagar" },
-  { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   financeScreen: "receber",      page: "fin-receber" },
+  { id: "fin-receber",      label: "Contas a Receber", icon: ArrowUpCircle,   to: "/contas-a-receber",       page: "fin-receber" },
   { id: "fin-conciliacao",  label: "Conciliação",      icon: RefreshCcw,      financeScreen: "conciliacao",  page: "fin-conciliacao" },
   { id: "fin-realizado",    label: "Realizado",        icon: Activity,        to: "/dashboard",              page: "fin-realizado" },
   { id: "fin-previsto",     label: "Previsto",         icon: TrendingUp,      financeScreen: "previsto",     page: "fin-previsto" },
