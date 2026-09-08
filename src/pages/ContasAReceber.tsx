@@ -1,7 +1,8 @@
 ﻿import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 import {
-  CheckCircle, AlertTriangle,
+  CheckCircle, AlertTriangle, Download,
   ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
   LayoutDashboard, CalendarClock, AlertOctagon, Zap, Percent, Construction,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { DatePickerInput } from "@/components/shared/DatePickerInput";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import sgtLogo from "@/assets/sgt-logo.png";
 import { GooeyInput } from "@/components/ui/gooey-input";
 
@@ -59,6 +61,32 @@ function groupByEmissionMonth(rows: { dataEmissao: string; valor: number }[]) {
   return [...map.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([key, v]) => ({ label: monthLabel(key), value: v.value, count: v.count, color: "#06b6d4" }));
+}
+
+// ─── Popup de títulos vencidos (KPI 4 e Card "Clientes que Concentram o Vencido") ──
+interface VencidoDoc {
+  documento: string;
+  cliente: string;
+  grupoCliente: string;
+  vencimento: string; // "YYYY-MM-DD"
+  diasAtraso: number;
+  valor: number;
+  valorPago: number;
+  saldo: number;
+}
+
+function exportarVencidosExcel(docs: VencidoDoc[], grupo: string | null) {
+  const header = ["Documento", "Cliente", "Grupo", "Vencimento", "Dias em Atraso", "Valor Original (R$)", "Valor Pago (R$)", "Saldo Vencido (R$)"];
+  const rows = docs.map(d => [
+    d.documento, d.cliente, d.grupoCliente, fmtData(d.vencimento), d.diasAtraso, d.valor, d.valorPago, d.saldo,
+  ]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws["!cols"] = [{ wch: 14 }, { wch: 28 }, { wch: 22 }, { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 }];
+  XLSX.utils.book_append_sheet(wb, ws, "Vencidos");
+  const date = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
+  const suffix = grupo ? `-${grupo.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "_")}` : "";
+  XLSX.writeFile(wb, `titulos-vencidos${suffix}-${date}.xlsx`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -270,7 +298,7 @@ const LineChartPercent = ({ data }: { data: { label: string; pct: number }[] }) 
 // ─── Gauge semicircular — Taxa de Inadimplência ────────────────────────────────
 const InadimplenciaGauge = ({ percent }: { percent: number }) => {
   const p = Math.max(0, Math.min(percent, 100));
-  const cx = 100, cy = 92, r = 72;
+  const cx = 110, cy = 98, r = 80;
   const pt = (pct: number) => {
     const a = Math.PI - (pct / 100) * Math.PI;
     return { x: +(cx + r * Math.cos(a)).toFixed(2), y: +(cy - r * Math.sin(a)).toFixed(2) };
@@ -281,23 +309,40 @@ const InadimplenciaGauge = ({ percent }: { percent: number }) => {
   // "grande arco" (que passaria pela metade de baixo do círculo, invisível/
   // torta). Antes isso alternava com p>50, deformando o gauge acima de 50%.
   const largeArc = 0;
-  const color = p >= 15 ? "#f43f5e" : p >= 5 ? "#f59e0b" : "#10b981";
+  const color = p >= 60 ? "#f43f5e" : p >= 30 ? "#f59e0b" : "#10b981";
+  const label = p >= 60 ? "Crítico" : p >= 30 ? "Atenção" : "Saudável";
+  const gradId = "gauge-inadimplencia-grad";
 
   return (
-    <svg viewBox="0 0 200 112" className="h-full w-full max-w-[240px]">
-      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`}
-        fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="16" strokeLinecap="round" />
-      {p > 0 && (
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y}`}
-          fill="none" stroke={color} strokeWidth="16" strokeLinecap="round" style={{ transition: "d 0.4s" }} />
-      )}
-      <text x={cx} y={cy - 12} textAnchor="middle" fill="white" fontSize="26" fontWeight="900">{p.toFixed(1)}%</text>
-      <text x={cx} y={cy + 8} textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="700" letterSpacing="0.5">
-        vencido ÷ vencido até a data
-      </text>
-      <text x={cx - r} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">0%</text>
-      <text x={cx + r - 16} y={cy + 26} fill="rgba(255,255,255,0.25)" fontSize="9">100%</text>
-    </svg>
+    <div className="flex flex-col items-center justify-center gap-2.5 h-full w-full">
+      <svg viewBox="0 0 220 128" className="w-full h-full max-w-[260px]">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+            <stop offset="100%" stopColor={color} stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 0 ${cx + r} ${cy}`}
+          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="18" strokeLinecap="round" />
+        {p > 0 && (
+          <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y}`}
+            fill="none" stroke={`url(#${gradId})`} strokeWidth="18" strokeLinecap="round"
+            style={{ transition: "d 0.5s ease" }} />
+        )}
+        <text x={cx} y={cy - 18} textAnchor="middle" fill="white" fontSize="34" fontWeight="900">{p.toFixed(1)}%</text>
+        <text x={cx} y={cy + 4} textAnchor="middle" fill="#64748b" fontSize="9" fontWeight="700" letterSpacing="1">
+          NÃO REALIZADO NO PERÍODO
+        </text>
+        <text x={cx - r + 4} y={cy + 22} fill="rgba(255,255,255,0.28)" fontSize="10" textAnchor="start">0%</text>
+        <text x={cx + r - 4} y={cy + 22} fill="rgba(255,255,255,0.28)" fontSize="10" textAnchor="end">100%</text>
+      </svg>
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
+        style={{ background: `${color}1A`, color, border: `1px solid ${color}40` }}
+      >
+        {label}
+      </span>
+    </div>
   );
 };
 
@@ -493,55 +538,79 @@ export default function ContasAReceber() {
   const realizadoNoPeriodo = resumoReceber.valorRecebido;
   // KPI 2: % Realização = Realizado / Vencimentos no período
   const percentualRealizacao = vencimentosNoPeriodo > 0 ? (realizadoNoPeriodo / vencimentosNoPeriodo) * 100 : 0;
-  // KPI 4: Vencido Acumulado + Taxa de Inadimplência (Card 4)
-  // Usa dwChartData (CR do ano do filtro, buscado em background pelo contexto
-  // p/ os gráficos anuais) em vez de contasReceber/kpiExtra: contasReceber só
-  // traz linhas cujo VENCIMENTO OU RECEBIMENTO caem dentro da janela de dias
-  // do filtro principal, então um título vencido há meses (fora dessa janela,
-  // sem recebimento) nunca aparece ali — subestimando o vencido acumulado.
+  // Card 4 (gauge): Taxa de Inadimplência = complemento do % Realização —
+  // "quanto do que venceu no período ainda não foi recebido". Fica sempre
+  // consistente com os 3 KPIs acima (ex.: 14,1 a receber, 2,5 recebido,
+  // 18% de realização ⇒ 82% não realizado), em vez de comparar com uma
+  // base anual que não aparece na tela.
+  const taxaInadimplencia = vencimentosNoPeriodo > 0 ? 100 - percentualRealizacao : 0;
+
+  // KPI 4: Vencido Acumulado — estoque de títulos vencidos e não liquidados
+  // (independente do período do filtro). Usa dwChartData (CR do ano do
+  // filtro, buscado em background pelo contexto p/ os gráficos anuais) em
+  // vez de contasReceber: contasReceber só traz linhas cujo VENCIMENTO OU
+  // RECEBIMENTO caem dentro da janela de dias do filtro principal, então um
+  // título vencido há meses (fora dessa janela, sem recebimento) nunca
+  // aparece ali — subestimando o vencido acumulado.
   // Situação "P" conta o saldo residual (VLR_PARCELA − VLR_PAGO), não o valor
   // cheio — mesma regra já usada no saldo "Contas a Receber" no contexto.
-  // Taxa de Inadimplência = Vencido Acumulado ÷ tudo com vencimento < hoje
-  // (pago ou não) — "valor com vencimento até a data".
-  const { vencidoAcumulado, vencidoAcumuladoDocs, taxaInadimplencia } = useMemo(() => {
+  const vencidoDocsDetalhados = useMemo(() => {
     const n = (v: number | null | undefined) => v ?? 0;
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    let vencido = 0;
-    let vencidoDocs = 0;
-    let totalVencidoAteData = 0;
+    const docs: {
+      documento: string; cliente: string; grupoCliente: string;
+      vencimento: string; diasAtraso: number; valor: number; valorPago: number; saldo: number;
+    }[] = [];
 
     dwChartData.forEach((r: any) => {
       if (r.ORIGEM !== "CR") return;
       const sit = String(r.SITUACAO ?? "").trim().toUpperCase();
-      if (!["L", "P", "D"].includes(sit)) return;
+      if (sit !== "P" && sit !== "D") return; // "L" = liquidado, não é vencido
       if (!r.DATA_VENCIMENTO) return;
       const venc = new Date(r.DATA_VENCIMENTO);
       if (venc >= hoje) return;
 
-      const valor = n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA);
-      totalVencidoAteData += valor;
+      const valor    = n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA);
+      const valorPago = n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
+      const saldo = Math.max(0, valor - valorPago);
+      if (saldo <= 0) return;
 
-      if (sit !== "L") {
-        const recebido = n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
-        const saldo = Math.max(0, valor - recebido);
-        if (saldo > 0) { vencido += saldo; vencidoDocs += 1; }
-      }
+      docs.push({
+        documento: r.DOCUMENTO ?? "—",
+        cliente: r.NOME_PARCEIRO ?? "N/A",
+        grupoCliente: r.GRUPO_CLIENTE ?? "Sem grupo",
+        vencimento: String(r.DATA_VENCIMENTO).split("T")[0],
+        diasAtraso: Math.floor((hoje.getTime() - venc.getTime()) / 86_400_000),
+        valor,
+        valorPago,
+        saldo,
+      });
     });
 
-    return {
-      vencidoAcumulado: Math.round(vencido * 100) / 100,
-      vencidoAcumuladoDocs: vencidoDocs,
-      taxaInadimplencia: totalVencidoAteData > 0 ? (vencido / totalVencidoAteData) * 100 : 0,
-    };
+    return docs.sort((a, b) => b.saldo - a.saldo);
   }, [dwChartData]);
+
+  const vencidoAcumulado = useMemo(
+    () => Math.round(vencidoDocsDetalhados.reduce((s, d) => s + d.saldo, 0) * 100) / 100,
+    [vencidoDocsDetalhados]
+  );
+
+  // ── Popup de títulos vencidos (KPI 4 e Card "Clientes que Concentram o Vencido") ──
+  const [vencidosModalOpen, setVencidosModalOpen] = useState(false);
+  const [vencidosModalGrupo, setVencidosModalGrupo] = useState<string | null>(null);
+  const vencidosModalDocs = useMemo(
+    () => vencidosModalGrupo ? vencidoDocsDetalhados.filter(d => d.grupoCliente === vencidosModalGrupo) : vencidoDocsDetalhados,
+    [vencidoDocsDetalhados, vencidosModalGrupo]
+  );
+  const abrirVencidosModal = (grupo: string | null) => { setVencidosModalGrupo(grupo); setVencidosModalOpen(true); };
 
   const kpisExecutivo = [
     { label: "Vencimentos no Período", value: fmtK(vencimentosNoPeriodo), subtitle: "Tudo que vence no período (recebido + a vencer + vencido)", icon: CalendarClock, tone: "cyan"    as const },
     { label: "% Realização",           value: `${percentualRealizacao.toFixed(1)}%`, subtitle: "Realizado ÷ Vencimentos no período", icon: Percent, tone: "emerald" as const },
     { label: "Realizado no Período",   value: fmtK(realizadoNoPeriodo), subtitle: "Efetivamente recebido no período", icon: CheckCircle, tone: "blue" as const },
-    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${vencidoAcumuladoDocs} títulos vencidos`, icon: AlertTriangle, tone: "rose" as const },
+    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${vencidoDocsDetalhados.length} títulos vencidos · clique para ver a lista`, icon: AlertTriangle, tone: "rose" as const, onClick: () => abrirVencidosModal(null) },
   ];
 
   // ── Dados para gráficos (visão Executivo) ────────────────────────────────────
@@ -559,13 +628,13 @@ export default function ContasAReceber() {
   );
 
   // Card 3 — Clientes que Concentram o Vencido (agrupado por grupo de cliente)
+  // Mesma base do KPI 4 (vencidoDocsDetalhados) — garante que o total batendo
+  // aqui é exatamente o mesmo "Vencido Acumulado" do topo, só quebrado por grupo.
   const vencidoPorGrupo = useMemo(() => {
     const map = new Map<string, number>();
-    contasReceber.filter(c => c.status === "Vencido").forEach(c =>
-      map.set(c.grupoCliente, (map.get(c.grupoCliente) ?? 0) + c.valor)
-    );
+    vencidoDocsDetalhados.forEach(d => map.set(d.grupoCliente, (map.get(d.grupoCliente) ?? 0) + d.saldo));
     return [...map.entries()].sort((a, b) => b[1] - a[1]).map(([nome, valor]) => ({ nome, valor }));
-  }, [contasReceber]);
+  }, [vencidoDocsDetalhados]);
 
   // % Realização por Mês — ano completo (Jan–Dez do ano do filtro), usando
   // dwChartData (mesma fonte do gráfico anual do dashboard) em vez da janela
@@ -722,7 +791,7 @@ export default function ContasAReceber() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {kpisExecutivo.map((k, i) => (
             <AnimatedCard key={k.label} delay={i * 60}>
-              <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} />
+              <KpiCard label={k.label} value={k.value} subtitle={k.subtitle} icon={k.icon} tone={k.tone} loading={isFetchingDw} onClick={(k as any).onClick} />
             </AnimatedCard>
           ))}
         </div>
@@ -759,7 +828,7 @@ export default function ContasAReceber() {
                   Clientes que Concentram o Vencido
                 </p>
               </div>
-              <RankedList data={vencidoPorGrupo} color="#f43f5e" emptyMessage="Nenhum título vencido no momento" />
+              <RankedList data={vencidoPorGrupo} color="#f43f5e" emptyMessage="Nenhum título vencido no momento" onRowClick={abrirVencidosModal} />
             </div>
           </div>
         </div>
@@ -930,6 +999,73 @@ export default function ContasAReceber() {
           )}
           
           </div> {/* Fecha TABELA */}
+
+        {/* ════════ POPUP — Títulos Vencidos ════════ */}
+        <Dialog open={vencidosModalOpen} onOpenChange={setVencidosModalOpen}>
+          <DialogContent
+            className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col"
+            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+          >
+            <DialogHeader>
+              <DialogTitle style={{ color: "var(--sgt-text-primary)" }}>
+                {vencidosModalGrupo ? `Títulos Vencidos — ${vencidosModalGrupo}` : "Todos os Títulos Vencidos"}
+              </DialogTitle>
+              <DialogDescription>
+                {vencidosModalDocs.length} título{vencidosModalDocs.length !== 1 ? "s" : ""} · Saldo vencido total{" "}
+                {fmtBRL(vencidosModalDocs.reduce((s, d) => s + d.saldo, 0))}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex items-center justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => exportarVencidosExcel(vencidosModalDocs, vencidosModalGrupo)}
+                disabled={vencidosModalDocs.length === 0}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400/10 hover:border-emerald-400/40 hover:text-emerald-300"
+                style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
+              >
+                <Download className="h-3.5 w-3.5" />
+                Exportar Excel
+              </button>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-auto rounded-[10px] border" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+              <table className="w-full text-[12px]">
+                <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
+                  <tr>
+                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Documento</th>
+                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Cliente</th>
+                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Grupo</th>
+                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Vencimento</th>
+                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Dias Atraso</th>
+                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Original</th>
+                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Pago</th>
+                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Saldo Vencido</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vencidosModalDocs.map((d, i) => (
+                    <tr key={`${d.documento}-${i}`} className="border-t" style={{ borderColor: "var(--sgt-divider)" }}>
+                      <td className="px-3 py-2 font-medium" style={{ color: "var(--sgt-text-primary)" }}>{d.documento}</td>
+                      <td className="px-3 py-2" style={{ color: "var(--sgt-text-secondary)" }}>{d.cliente}</td>
+                      <td className="px-3 py-2 text-slate-500">{d.grupoCliente}</td>
+                      <td className="px-3 py-2 text-slate-400">{fmtData(d.vencimento)}</td>
+                      <td className="px-3 py-2 text-right font-semibold text-rose-300">{d.diasAtraso}</td>
+                      <td className="px-3 py-2 text-right" style={{ color: "var(--sgt-text-secondary)" }}>{fmtBRL(d.valor)}</td>
+                      <td className="px-3 py-2 text-right text-emerald-300">{fmtBRL(d.valorPago)}</td>
+                      <td className="px-3 py-2 text-right font-bold text-rose-300">{fmtBRL(d.saldo)}</td>
+                    </tr>
+                  ))}
+                  {vencidosModalDocs.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="py-10 text-center text-[12px] text-slate-600">Nenhum título vencido</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </DialogContent>
+        </Dialog>
         </>
         )}
 
