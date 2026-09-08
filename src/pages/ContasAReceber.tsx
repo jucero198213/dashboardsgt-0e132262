@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
@@ -88,6 +88,154 @@ function exportarVencidosExcel(docs: VencidoDoc[], grupo: string | null) {
   const suffix = grupo ? `-${grupo.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "_")}` : "";
   XLSX.writeFile(wb, `titulos-vencidos${suffix}-${date}.xlsx`);
 }
+
+// ─── Modal — Detalhamento de Títulos Vencidos (KPI 4 e Card 3) ────────────────
+// `docs` é sempre a base completa (mesma usada no KPI "Vencido Acumulado") —
+// busca e filtros aqui dentro só recortam a visualização, nunca mudam a
+// população em si, então o total sem filtro bate exatamente com o KPI.
+const VencidosModal = ({
+  open, onOpenChange, docs, initialGrupo,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  docs: VencidoDoc[];
+  initialGrupo: string | null;
+}) => {
+  const [search, setSearch] = useState("");
+  const [grupoFiltro, setGrupoFiltro] = useState<string>("__all__");
+  const [atrasoFiltro, setAtrasoFiltro] = useState<string>("__all__");
+
+  // Reabre sempre com busca limpa e o grupo de origem (se veio de um clique
+  // no Card "Clientes que Concentram o Vencido") pré-selecionado.
+  useEffect(() => {
+    if (open) {
+      setSearch("");
+      setGrupoFiltro(initialGrupo ?? "__all__");
+      setAtrasoFiltro("__all__");
+    }
+  }, [open, initialGrupo]);
+
+  const grupos = useMemo(() => [...new Set(docs.map(d => d.grupoCliente))].sort((a, b) => a.localeCompare(b, "pt-BR")), [docs]);
+
+  const faixaAtraso = (dias: number) => dias <= 30 ? "1-30" : dias <= 60 ? "31-60" : dias <= 90 ? "61-90" : "90+";
+
+  const filtered = useMemo(() => {
+    let list = docs;
+    if (grupoFiltro !== "__all__") list = list.filter(d => d.grupoCliente === grupoFiltro);
+    if (atrasoFiltro !== "__all__") list = list.filter(d => faixaAtraso(d.diasAtraso) === atrasoFiltro);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(d =>
+        d.documento.toLowerCase().includes(q) ||
+        d.cliente.toLowerCase().includes(q) ||
+        d.grupoCliente.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [docs, grupoFiltro, atrasoFiltro, search]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col gap-3"
+        style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
+      >
+        <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-500">Detalhamento</p>
+            <DialogTitle style={{ color: "var(--sgt-text-primary)" }}>Títulos Vencidos</DialogTitle>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[11px] font-medium text-slate-500 tabular-nums whitespace-nowrap">
+              {filtered.length}/{docs.length} título{docs.length !== 1 ? "s" : ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => exportarVencidosExcel(filtered, grupoFiltro !== "__all__" ? grupoFiltro : null)}
+              disabled={filtered.length === 0}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ borderColor: "rgba(16,185,129,0.35)", color: "#10b981", background: "rgba(16,185,129,0.08)" }}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Exportar Excel
+            </button>
+          </div>
+        </DialogHeader>
+        <DialogDescription className="sr-only">
+          Lista de títulos vencidos e ainda não liquidados, com busca e filtros por grupo de cliente e faixa de atraso.
+        </DialogDescription>
+
+        {/* Busca + filtros */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <GooeyInput
+            placeholder="Buscar por documento, cliente ou grupo..."
+            value={search}
+            onValueChange={setSearch}
+          />
+          <Select value={grupoFiltro} onValueChange={setGrupoFiltro}>
+            <SelectTrigger className="h-9 w-full min-w-[140px] max-w-[220px] rounded-lg text-[12px] transition-all">
+              <SelectValue placeholder="Grupo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos os grupos</SelectItem>
+              {grupos.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={atrasoFiltro} onValueChange={setAtrasoFiltro}>
+            <SelectTrigger className="h-9 w-full min-w-[130px] max-w-[170px] rounded-lg text-[12px] transition-all">
+              <SelectValue placeholder="Atraso" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todo atraso</SelectItem>
+              <SelectItem value="1-30">1–30 dias</SelectItem>
+              <SelectItem value="31-60">31–60 dias</SelectItem>
+              <SelectItem value="61-90">61–90 dias</SelectItem>
+              <SelectItem value="90+">90+ dias</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-auto rounded-[10px] border" style={{ borderColor: "var(--sgt-border-subtle)" }}>
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
+              <tr>
+                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Documento</th>
+                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Cliente</th>
+                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Grupo</th>
+                <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Vencimento</th>
+                <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Dias Atraso</th>
+                <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Original</th>
+                <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Pago</th>
+                <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Saldo Vencido</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((d, i) => (
+                <tr key={`${d.documento}-${i}`} className="border-t transition-colors hover:bg-white/[0.02]" style={{ borderColor: "var(--sgt-divider)" }}>
+                  <td className="px-3 py-2 font-medium" style={{ color: "var(--sgt-text-primary)" }}>{d.documento}</td>
+                  <td className="px-3 py-2" style={{ color: "var(--sgt-text-secondary)" }}>{d.cliente}</td>
+                  <td className="px-3 py-2 text-slate-500">{d.grupoCliente}</td>
+                  <td className="px-3 py-2 text-slate-400">{fmtData(d.vencimento)}</td>
+                  <td className="px-3 py-2 text-right font-semibold text-rose-300">{d.diasAtraso}</td>
+                  <td className="px-3 py-2 text-right" style={{ color: "var(--sgt-text-secondary)" }}>{fmtBRL(d.valor)}</td>
+                  <td className="px-3 py-2 text-right text-emerald-300">{fmtBRL(d.valorPago)}</td>
+                  <td className="px-3 py-2 text-right font-bold text-rose-300">{fmtBRL(d.saldo)}</td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-10 text-center text-[12px] text-slate-600">
+                    {docs.length === 0 ? "Nenhum título vencido" : "Nenhum título encontrado com esses filtros"}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  GRÁFICOS PREMIUM
@@ -599,12 +747,8 @@ export default function ContasAReceber() {
 
   // ── Popup de títulos vencidos (KPI 4 e Card "Clientes que Concentram o Vencido") ──
   const [vencidosModalOpen, setVencidosModalOpen] = useState(false);
-  const [vencidosModalGrupo, setVencidosModalGrupo] = useState<string | null>(null);
-  const vencidosModalDocs = useMemo(
-    () => vencidosModalGrupo ? vencidoDocsDetalhados.filter(d => d.grupoCliente === vencidosModalGrupo) : vencidoDocsDetalhados,
-    [vencidoDocsDetalhados, vencidosModalGrupo]
-  );
-  const abrirVencidosModal = (grupo: string | null) => { setVencidosModalGrupo(grupo); setVencidosModalOpen(true); };
+  const [vencidosModalGrupoInicial, setVencidosModalGrupoInicial] = useState<string | null>(null);
+  const abrirVencidosModal = (grupo: string | null) => { setVencidosModalGrupoInicial(grupo); setVencidosModalOpen(true); };
 
   const kpisExecutivo = [
     { label: "Vencimentos no Período", value: fmtK(vencimentosNoPeriodo), subtitle: "Tudo que vence no período (recebido + a vencer + vencido)", icon: CalendarClock, tone: "cyan"    as const },
@@ -1001,71 +1145,12 @@ export default function ContasAReceber() {
           </div> {/* Fecha TABELA */}
 
         {/* ════════ POPUP — Títulos Vencidos ════════ */}
-        <Dialog open={vencidosModalOpen} onOpenChange={setVencidosModalOpen}>
-          <DialogContent
-            className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col"
-            style={{ background: "var(--sgt-bg-card)", borderColor: "var(--sgt-border-subtle)" }}
-          >
-            <DialogHeader>
-              <DialogTitle style={{ color: "var(--sgt-text-primary)" }}>
-                {vencidosModalGrupo ? `Títulos Vencidos — ${vencidosModalGrupo}` : "Todos os Títulos Vencidos"}
-              </DialogTitle>
-              <DialogDescription>
-                {vencidosModalDocs.length} título{vencidosModalDocs.length !== 1 ? "s" : ""} · Saldo vencido total{" "}
-                {fmtBRL(vencidosModalDocs.reduce((s, d) => s + d.saldo, 0))}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex items-center justify-end shrink-0">
-              <button
-                type="button"
-                onClick={() => exportarVencidosExcel(vencidosModalDocs, vencidosModalGrupo)}
-                disabled={vencidosModalDocs.length === 0}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-400/10 hover:border-emerald-400/40 hover:text-emerald-300"
-                style={{ borderColor: "var(--sgt-border-subtle)", color: "var(--sgt-text-muted)" }}
-              >
-                <Download className="h-3.5 w-3.5" />
-                Exportar Excel
-              </button>
-            </div>
-
-            <div className="flex-1 min-h-0 overflow-auto rounded-[10px] border" style={{ borderColor: "var(--sgt-border-subtle)" }}>
-              <table className="w-full text-[12px]">
-                <thead className="sticky top-0 z-10" style={{ background: "var(--sgt-table-head)" }}>
-                  <tr>
-                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Documento</th>
-                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Cliente</th>
-                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Grupo</th>
-                    <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Vencimento</th>
-                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Dias Atraso</th>
-                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Original</th>
-                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Valor Pago</th>
-                    <th className="px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500">Saldo Vencido</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vencidosModalDocs.map((d, i) => (
-                    <tr key={`${d.documento}-${i}`} className="border-t" style={{ borderColor: "var(--sgt-divider)" }}>
-                      <td className="px-3 py-2 font-medium" style={{ color: "var(--sgt-text-primary)" }}>{d.documento}</td>
-                      <td className="px-3 py-2" style={{ color: "var(--sgt-text-secondary)" }}>{d.cliente}</td>
-                      <td className="px-3 py-2 text-slate-500">{d.grupoCliente}</td>
-                      <td className="px-3 py-2 text-slate-400">{fmtData(d.vencimento)}</td>
-                      <td className="px-3 py-2 text-right font-semibold text-rose-300">{d.diasAtraso}</td>
-                      <td className="px-3 py-2 text-right" style={{ color: "var(--sgt-text-secondary)" }}>{fmtBRL(d.valor)}</td>
-                      <td className="px-3 py-2 text-right text-emerald-300">{fmtBRL(d.valorPago)}</td>
-                      <td className="px-3 py-2 text-right font-bold text-rose-300">{fmtBRL(d.saldo)}</td>
-                    </tr>
-                  ))}
-                  {vencidosModalDocs.length === 0 && (
-                    <tr>
-                      <td colSpan={8} className="py-10 text-center text-[12px] text-slate-600">Nenhum título vencido</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <VencidosModal
+          open={vencidosModalOpen}
+          onOpenChange={setVencidosModalOpen}
+          docs={vencidoDocsDetalhados}
+          initialGrupo={vencidosModalGrupoInicial}
+        />
         </>
         )}
 
