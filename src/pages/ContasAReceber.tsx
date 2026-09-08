@@ -636,24 +636,24 @@ export default function ContasAReceber() {
         </div>
 
         {/* ════════ SELETOR DE VISÕES ════════ */}
-        <div className="flex items-center shrink-0">
-          <div className="flex items-center gap-0.5 rounded-lg border border-[var(--sgt-border-subtle)] bg-[var(--sgt-input-bg)] p-0.5 overflow-x-auto">
-            {VIEWS.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => setView(v.id)}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-semibold uppercase tracking-[0.06em] transition-all whitespace-nowrap ${
-                  view === v.id
-                    ? "border border-amber-400/40 bg-amber-500/15 text-amber-300"
-                    : "border border-transparent text-slate-400 hover:text-white"
-                }`}
-              >
-                <v.icon className="h-3.5 w-3.5" />
-                {v.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center gap-1 self-start rounded-xl p-0.5 shrink-0 overflow-x-auto"
+          style={{ background: "var(--sgt-skeleton-bg)", border: "1px solid var(--sgt-border-subtle)" }}>
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setView(v.id)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200 whitespace-nowrap"
+              style={
+                view === v.id
+                  ? { background: "#F59E0B", color: "#000", boxShadow: "0 1px 6px rgba(245,158,11,0.35)" }
+                  : { color: "var(--sgt-text-muted)" }
+              }
+            >
+              <v.icon className="h-3 w-3" />
+              {v.label}
+            </button>
+          ))}
         </div>
 
         {view === "executivo" && (
