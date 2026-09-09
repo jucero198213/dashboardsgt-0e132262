@@ -204,7 +204,7 @@ const calculateStatus = (
 };
 
 // ─── Cache sessionStorage ─────────────────────────────────────────────────────
-const CACHE_KEY = "dw_financial_cache_v12";
+const CACHE_KEY = "dw_financial_cache_v13";
 
 interface CachedState {
   resumo: ResumoFinanceiro;
@@ -580,10 +580,10 @@ export function FinancialDataProvider({
           documento:     r.DOCUMENTO ?? `CR-${i + 1}`,
           parcela:       r.PARCELA ?? null,
           cliente:       r.NOME_PARCEIRO ?? "N/A",
-          // Fallback duplo: backend já troca "sem grupo cadastrado" pelo nome do
-          // cliente (RODCLI.CODCGR nulo pra maioria dos clientes no banco); aqui
-          // é só defesa extra caso GRUPO_CLIENTE venha vazio por algum motivo.
-          grupoCliente:  r.GRUPO_CLIENTE ?? r.NOME_PARCEIRO ?? "Sem grupo",
+          // Reflete só RODCGR (via GRUPO_CLIENTE) — nunca cai pro nome do
+          // cliente. Se o join no backend não resolver, mostra "Sem grupo" de
+          // forma honesta em vez de mascarar com um pseudo-grupo por cliente.
+          grupoCliente:  r.GRUPO_CLIENTE ?? "Sem grupo",
           dataEmissao:   isoDate(r.DATA_EMISSAO),
           vencimento:    isoDate(r.DATA_VENCIMENTO),
           dataPagamento: r.DATA_PAGAMENTO ? isoDate(r.DATA_PAGAMENTO) : null,

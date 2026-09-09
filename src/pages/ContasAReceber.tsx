@@ -693,52 +693,48 @@ export default function ContasAReceber() {
   // base anual que não aparece na tela.
   const taxaInadimplencia = vencimentosNoPeriodo > 0 ? 100 - percentualRealizacao : 0;
 
-  // KPI 4: Vencido Acumulado — estoque de títulos vencidos e não liquidados
-  // (independente do período do filtro). Usa dwChartData (CR do ano do
-  // filtro, buscado em background pelo contexto p/ os gráficos anuais) em
-  // vez de contasReceber: contasReceber só traz linhas cujo VENCIMENTO OU
-  // RECEBIMENTO caem dentro da janela de dias do filtro principal, então um
-  // título vencido há meses (fora dessa janela, sem recebimento) nunca
-  // aparece ali — subestimando o vencido acumulado.
-  // Situação "P" conta o saldo residual (VLR_PARCELA − VLR_PAGO), não o valor
-  // cheio — mesma regra já usada no saldo "Contas a Receber" no contexto.
+  // ── Dados para gráficos (visão Executivo) ────────────────────────────────────
+  // Mesma população do KPI 1 (vencimento dentro do filtro de período) — usada nos
+  // Cards 1 e 2 para "compor" o Contas a Receber vigente pelo mês de EMISSÃO, e
+  // no cálculo de vencido abaixo (KPI 4 e Card 3).
+  const contasNoPeriodo = useMemo(() =>
+    contasReceber.filter(c => c.vencimento >= dwFilter.dataInicio && c.vencimento <= dwFilter.dataFim),
+    [contasReceber, dwFilter.dataInicio, dwFilter.dataFim]
+  );
+
+  // KPI 4: Vencido Acumulado — do que vence no período do filtro (mesma
+  // população do KPI 1), quanto já passou do vencimento e ainda não foi
+  // liquidado. Calcula o saldo diretamente (valor − recebido) em vez de usar
+  // o campo "status" pré-calculado: aquele campo trata qualquer valorPago>0
+  // como "Parcial" e nunca como "Vencido", escondendo saldo residual vencido
+  // de títulos pagos parcialmente.
   const vencidoDocsDetalhados = useMemo(() => {
-    const n = (v: number | null | undefined) => v ?? 0;
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    const docs: {
-      documento: string; cliente: string; grupoCliente: string;
-      vencimento: string; diasAtraso: number; valor: number; valorPago: number; saldo: number;
-    }[] = [];
+    const docs: VencidoDoc[] = [];
 
-    dwChartData.forEach((r: any) => {
-      if (r.ORIGEM !== "CR") return;
-      const sit = String(r.SITUACAO ?? "").trim().toUpperCase();
-      if (sit !== "P" && sit !== "D") return; // "L" = liquidado, não é vencido
-      if (!r.DATA_VENCIMENTO) return;
-      const venc = new Date(r.DATA_VENCIMENTO);
+    contasNoPeriodo.forEach((c) => {
+      const venc = new Date(c.vencimento);
       if (venc >= hoje) return;
 
-      const valor    = n(r.VLR_PAR_RAW) > 0 ? n(r.VLR_PAR_RAW) : n(r.VLR_PARCELA);
-      const valorPago = n(r.VLR_REC_RAW) > 0 ? n(r.VLR_REC_RAW) : n(r.VLR_PAGO);
-      const saldo = Math.max(0, valor - valorPago);
+      const saldo = Math.max(0, c.valor - c.valorRecebido);
       if (saldo <= 0) return;
 
       docs.push({
-        documento: r.DOCUMENTO ?? "—",
-        cliente: r.NOME_PARCEIRO ?? "N/A",
-        grupoCliente: r.GRUPO_CLIENTE ?? "Sem grupo",
-        vencimento: String(r.DATA_VENCIMENTO).split("T")[0],
+        documento: c.documento,
+        cliente: c.cliente,
+        grupoCliente: c.grupoCliente,
+        vencimento: c.vencimento,
         diasAtraso: Math.floor((hoje.getTime() - venc.getTime()) / 86_400_000),
-        valor,
-        valorPago,
+        valor: c.valor,
+        valorPago: c.valorRecebido,
         saldo,
       });
     });
 
     return docs.sort((a, b) => b.saldo - a.saldo);
-  }, [dwChartData]);
+  }, [contasNoPeriodo]);
 
   const vencidoAcumulado = useMemo(
     () => Math.round(vencidoDocsDetalhados.reduce((s, d) => s + d.saldo, 0) * 100) / 100,
@@ -754,16 +750,8 @@ export default function ContasAReceber() {
     { label: "Vencimentos no Período", value: fmtK(vencimentosNoPeriodo), subtitle: "Tudo que vence no período (recebido + a vencer + vencido)", icon: CalendarClock, tone: "cyan"    as const },
     { label: "% Realização",           value: `${percentualRealizacao.toFixed(1)}%`, subtitle: "Realizado ÷ Vencimentos no período", icon: Percent, tone: "emerald" as const },
     { label: "Realizado no Período",   value: fmtK(realizadoNoPeriodo), subtitle: "Efetivamente recebido no período", icon: CheckCircle, tone: "blue" as const },
-    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${vencidoDocsDetalhados.length} títulos vencidos · clique para ver a lista`, icon: AlertTriangle, tone: "rose" as const, onClick: () => abrirVencidosModal(null) },
+    { label: "Vencido Acumulado",      value: fmtK(vencidoAcumulado), subtitle: `${vencidoDocsDetalhados.length} títulos vencidos no período · clique para ver a lista`, icon: AlertTriangle, tone: "rose" as const, onClick: () => abrirVencidosModal(null) },
   ];
-
-  // ── Dados para gráficos (visão Executivo) ────────────────────────────────────
-  // Mesma população do KPI 1 (vencimento dentro do filtro de período) — usada nos
-  // Cards 1 e 2 para "compor" o Contas a Receber vigente pelo mês de EMISSÃO.
-  const contasNoPeriodo = useMemo(() =>
-    contasReceber.filter(c => c.vencimento >= dwFilter.dataInicio && c.vencimento <= dwFilter.dataFim),
-    [contasReceber, dwFilter.dataInicio, dwFilter.dataFim]
-  );
 
   // Card 1 — Composição por Mês de Emissão, ordenado por valor decrescente
   const composicaoMesEmissao = useMemo(
